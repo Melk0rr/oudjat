@@ -1,0 +1,10 @@
+[
+    {
+        "url": "https://www.cert.ssi.gouv.fr/avis/feed/",
+        "parser": "xml",
+        "tag": {
+            "name": "item",
+            "attrs": {}
+        }
+    }
+]
