@@ -23,8 +23,8 @@ class ColorPrint:
     print(self.YELLOW + s + self.END, **kwargs)
 
   @classmethod
-  def light_purple(self, s, **kwargs):
-    print(self.LIGHT_PURPLE + s + self.END, **kwargs)
+  def blue(self, s, **kwargs):
+    print(self.BLUE + s + self.END, **kwargs)
 
   @classmethod
   def purple(self, s, **kwargs):
