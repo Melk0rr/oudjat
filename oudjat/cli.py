@@ -1,6 +1,6 @@
 """
 Usage:
-  oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oS]
+  oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-c CSV]
   oudjat -h
   oudjat (--version | -V)
 
@@ -8,13 +8,14 @@ Options:
   -h --help                       show this help message and exit
   -t --target                     set target (comma separated, no spaces, if multiple)
   -f --file                       set target (reads from file, one domain per line)
+  -c --csv CSV                    save results as csv
   -o --output                     save to filename
   -S --silent                     only output subdomains, one per line
   -v --verbose                    print debug info and full request output
   -V --version                    show version and exit
 Help:
   For help using this tool, please open an issue on the Github repository:
-  https://github.com/JaufreLallement/Oudjat
+  https://github.com/Melk0rr/Oudjat
 """
 import sys
 import time
@@ -22,8 +23,10 @@ import time
 from docopt import docopt
 
 from oudjat.banner import banner
+from wepwawet.utils.convertions import seconds_to_str
 from oudjat.utils.stdouthook import StdOutHook
 from oudjat.utils.color_print import ColorPrint
+import oudjat.commands
 
 from . import __version__ as VERSION
 
@@ -52,6 +55,14 @@ def main():
       return
 
     ColorPrint.blue(banner)
+
+    command = oudjat.commands.Target(options)
+    command.run()
+
+    print("\nWatchers infos search took %s" % seconds_to_str(time.time() - start_time))
+
+    if options["--output"]:
+      sys.stdout.write_out()
 
   except KeyboardInterrupt:
     print("\nQuitting...")

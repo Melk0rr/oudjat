@@ -1,0 +1,23 @@
+ref,title,date_initial,date_last,sources,risks,affected_products,link
+CERTFR-2022-AVI-643,Vulnérabilité dans le noyau Linux de Red Hat,15 juillet 2022,15 juillet 2022,"Bulletin de sécurité Red Hat RHSA-2022:5564 du 13 juillet 2022
+Bulletin de sécurité Red Hat RHSA-2022:5565 du 13 juillet 2022",EOP,"Red Hat Enterprise Linux for x86_64 - Extended Update Support 8.6 x86_64
+Red Hat Enterprise Linux Server - AUS 8.6 x86_64
+Red Hat Enterprise Linux for IBM z Systems 8 s390x
+Red Hat Enterprise Linux for IBM z Systems - Extended Update Support 8.6 s390x
+Red Hat Enterprise Linux for Power, little endian 8 ppc64le
+Red Hat Enterprise Linux for Power, little endian - Extended Update Support 8.6 ppc64le
+Red Hat Virtualization Host 4 for RHEL 8 x86_64
+Red Hat Enterprise Linux for x86_64 8 x86_64
+Red Hat Enterprise Linux Server - TUS 8.6 x86_64
+Red Hat Enterprise Linux for ARM 64 8 aarch64
+Red Hat Enterprise Linux for x86_64 - Update Services for SAP Solutions 8.6 x86_64
+Red Hat CodeReady Linux Builder for x86_64 8 x86_64
+Red Hat CodeReady Linux Builder for Power, little endian 8 ppc64le
+Red Hat CodeReady Linux Builder for ARM 64 8 aarch64
+Red Hat Enterprise Linux for ARM 64 - Extended Update Support 8.6 aarch64
+Red Hat Enterprise Linux Server for Power LE - Update Services for SAP Solutions 8.6 ppc64le
+Red Hat CodeReady Linux Builder for x86_64 - Extended Update Support 8.6 x86_64
+Red Hat CodeReady Linux Builder for Power, little endian - Extended Update Support 8.6 ppc64le
+Red Hat CodeReady Linux Builder for ARM 64 - Extended Update Support 8.6 aarch64
+Red Hat Enterprise Linux for Real Time 8 x86_64
+Red Hat Enterprise Linux for Real Time for NFV 8 x86_64",http://cert.ssi.gouv.fr/avis/CERTFR-2022-AVI-643

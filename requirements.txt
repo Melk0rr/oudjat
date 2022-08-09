@@ -1,6 +1,5 @@
 setuptools
 docopt
-json
 lxml
 beautifulsoup4
-requests==2.27.1
+requests
