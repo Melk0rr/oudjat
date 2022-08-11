@@ -15,6 +15,7 @@ Options:
   -S --silent                     simple output, one per line
   -v --verbose                    print debug info and full request output
   -V --version                    show version and exit
+  
 Help:
   For help using this tool, please open an issue on the Github repository:
   https://github.com/Melk0rr/Oudjat
