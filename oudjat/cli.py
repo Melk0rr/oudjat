@@ -1,6 +1,7 @@
 """
 Usage:
   oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-c CSV]
+  oudjat (-e CVE | -f FILE) [-oSv]
   oudjat -h
   oudjat (--version | -V)
 
@@ -9,6 +10,7 @@ Options:
   -t --target                     set target (comma separated, no spaces, if multiple)
   -f --file                       set target (reads from file, one domain per line)
   -c --csv CSV                    save results as csv
+  -e --cve
   -o --output                     save to filename
   -S --silent                     only output subdomains, one per line
   -v --verbose                    print debug info and full request output
@@ -23,14 +25,16 @@ import time
 from docopt import docopt
 
 from oudjat.banner import banner
-from wepwawet.utils.convertions import seconds_to_str
+from oudjat.utils.convertions import seconds_to_str
 from oudjat.utils.stdouthook import StdOutHook
 from oudjat.utils.color_print import ColorPrint
 import oudjat.commands
 
 from . import __version__ as VERSION
 
+
 def main():
+  """ Main program function """
   try:
     if sys.version_info < (3, 0):
       sys.stdout.write("Sorry, requires Python 3.x\n")
@@ -41,17 +45,17 @@ def main():
     options = docopt(__doc__, version=VERSION)
 
     if options["--output"] or options["--silent"]:
-      sys.stdout = StdOutHook(options["FILENAME"], options["--silent"],
-                              options["--output"])
+      sys.stdout = StdOutHook(
+          options["FILENAME"], options["--silent"], options["--output"])
 
     if not options["--target"] and not options["--file"]:
       ColorPrint.red(
-        "Target required! Run with -h for usage instructions. Either -t target.host or -f file.txt required")
+          "Target required! Run with -h for usage instructions. Either -t target.host or -f file.txt required")
       return
 
     if options["--target"] and options["--file"]:
       ColorPrint.red(
-        "Please only supply one target method - either read by file with -f or as an argument to -t, not both.")
+          "Please only supply one target method - either read by file with -f or as an argument to -t, not both.")
       return
 
     ColorPrint.blue(banner)
@@ -59,7 +63,7 @@ def main():
     command = oudjat.commands.Target(options)
     command.run()
 
-    print("\nWatchers infos search took %s" % seconds_to_str(time.time() - start_time))
+    print("\nWatchers infos search took %s" %seconds_to_str(time.time() - start_time))
 
     if options["--output"]:
       sys.stdout.write_out()
