@@ -1,7 +1,7 @@
 """
 Usage:
   oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-c CSV]
-  oudjat (-e CVE | -f FILE) [-oSv]
+  oudjat (-e CVE | -f FILE) [-oSv] [-c CSV]
   oudjat -h
   oudjat (--version | -V)
 
@@ -10,9 +10,9 @@ Options:
   -t --target                     set target (comma separated, no spaces, if multiple)
   -f --file                       set target (reads from file, one domain per line)
   -c --csv CSV                    save results as csv
-  -e --cve
+  -e --cve                        check for cve informations
   -o --output                     save to filename
-  -S --silent                     only output subdomains, one per line
+  -S --silent                     simple output, one per line
   -v --verbose                    print debug info and full request output
   -V --version                    show version and exit
 Help:
