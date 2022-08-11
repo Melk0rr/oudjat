@@ -15,7 +15,7 @@ Options:
   -S --silent                     simple output, one per line
   -v --verbose                    print debug info and full request output
   -V --version                    show version and exit
-  
+
 Help:
   For help using this tool, please open an issue on the Github repository:
   https://github.com/Melk0rr/Oudjat
@@ -51,12 +51,12 @@ def main():
 
     if not options["--target"] and not options["--file"]:
       ColorPrint.red(
-          "Target required! Run with -h for usage instructions. Either -t target.host or -f file.txt required")
+        "Target required! Run with -h for usage instructions. Either -t target.host or -f file.txt required")
       return
 
     if options["--target"] and options["--file"]:
       ColorPrint.red(
-          "Please only supply one target method - either read by file with -f or as an argument to -t, not both.")
+        "Please only supply one target method - either read by file with -f or as an argument to -t.")
       return
 
     ColorPrint.blue(banner)
