@@ -31,8 +31,8 @@
 Please note that Oudjat is in alpha
 
 ```
-git clone https://github.com/Melk0rr/Wepwawet.git
-cd Wepwawet
+git clone https://github.com/Melk0rr/Oudjat.git
+cd Oudjat
 pip3 install  -r requirements.txt
 pip3 install .
 ```
