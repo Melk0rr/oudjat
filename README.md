@@ -22,3 +22,40 @@
                                                                                     d88P
                                                                                   888P"
 ```
+## Getting Started
+
+### Prerequisites
+
+### Installing
+
+Please note that Oudjat is in alpha
+
+```
+git clone https://github.com/Melk0rr/Wepwawet.git
+cd Wepwawet
+pip3 install  -r requirements.txt
+pip3 install .
+```
+
+## Usage
+
+    Usage:
+      oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-c CSV]
+      oudjat -h
+      oudjat (--version | -V)
+
+    Options:
+      -h --help                       show this help message and exit
+      -t --target                     set target (comma separated, no spaces, if multiple)
+      -f --file                       set target (reads from file, one domain per line)
+      -c --csv CSV                    save results as csv
+      -o --output                     save to filename
+      -S --silent                     only output subdomains, one per line
+      -v --verbose                    print debug info and full request output
+      -V --version                    show version and exit
+      
+    Help:
+      For help using this tool, please open an issue on the Github repository:
+      https://github.com/Melk0rr/Oudjat
+
+## License
