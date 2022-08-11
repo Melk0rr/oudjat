@@ -1,8 +1,92 @@
+""" Several functions that aim to parse a certfr page """
 import requests
 from bs4 import BeautifulSoup
 
-def parse_certfr_page(self, target):
+def extract_table_infos(tab):
+  """ Generates a dictionary out of a <table> element """
+  tab_rows = [ r.find_all("td") for r in tab.find_all("tr") ]
+  return { k.text: v.text for k, v in tab_rows }
 
+
+def extract_list_infos(ul_list):
+  """ Generates a collection out of a <ul> element """
+  return [ li.text for li in ul_list.find_all("li") ]
+
+
+def extract_meta(meta):
+  """ Extracts meta information from a <table> element"""
+  keys = [ "ref", "title", "date_initial", "date_last", "sources" ]
+  tab_items = extract_table_infos(meta.find_all(class_="table-condensed")[0])
+  return { keys[i]: [*tab_items.values()][i] for i in range(len(keys)) }
+
+
+def extract_products(content):
+  """ Generates a list of affected products based on the corresponding <ul> element """
+  return { "products": "\n".join(extract_list_infos(content.find_all("ul")[1])) }
+
+
+def extract_doc_list(ul):
+  """ Extracts data from the certfr documentation list """
+  res = []
+
+  for item in ul.find_all("li"):
+    splitted = item.text.replace("\n", "").split(" http")
+    res.append({ "text": splitted[0], "link": "http" + splitted[1] })
+
+  return res
+
+
+def extract_cve_docs(content):
+  """ Splits the certfr documentation list into a list of the related CVEs and a list of the doc links """
+  doc_list = extract_doc_list(content.find_all("ul")[2])
+
+  doc_data = { "cve": [], "docs": [] }
+  for doc in doc_list:
+    if "CVE" in doc["text"]:
+      doc_data["cve"].append(doc["text"][-13:])
+    else:
+      doc_data["docs"].append(doc["link"])
+
+  return { k: "\n".join(v) for k, v in doc_data.items() }
+
+
+def extract_risks(content):
+  """ Generates a list out of a the <ul> element relative to the risks """
+  risks = {
+    "EOP": "Élévation de privilèges",
+    "RCE": "Exécution de code arbitraire à distance",
+    "DOS": "Déni de service à distance",
+    "SFB": "Contournement de la politique de sécurité",
+    "ID" : "Atteinte à la confidentialité des données",
+    "TMP": "Atteinte à l'intégrité des données"
+  }
+
+  risk_list = extract_list_infos(content.find_all("ul")[0])
+
+  return { "risks": ";".join([ [ *risks.keys() ][[ *risks.values() ].index(risk)] for risk in risk_list ]) }
+
+
+def parse_certfr_avis(sections):
+  """ Parse a certfr avis page """
+  return {
+    **extract_meta(sections[0]),
+    **extract_risks(sections[1]),
+    **extract_products(sections[1]),
+    **extract_cve_docs(sections[1]),
+  }
+
+
+def switch_page(page_type):
+  """ Returns the correct function based on certfr page type """
+  switch = {
+    "avis": parse_certfr_avis
+  }
+
+  return switch.get(page_type, "Invalid type !")
+
+
+def parse_certfr_page(self, target):
+  """ Main function to parse a certfr page """
   try:
     req = requests.get(target)
     soup = BeautifulSoup(req.content, 'html.parser')
@@ -12,81 +96,9 @@ def parse_certfr_page(self, target):
 
   article_sections = soup.article.find_all("section")
 
-  keys = ["ref", "title", "date_initial", "date_last", "sources", "risks", "affected_products", "link"]
-  values = []
+  items = switch_page(target.split("/")[3])(article_sections)
+  self.results.append({ **items, "link": target })
 
-  extract_meta_infos(article_sections[0], values)
-  extract_risks(article_sections[1], values)
-  extract_affected_products(article_sections[1], values)
-
-  values.append(target)
-
-  print(split_doc_list(article_sections[1]))
-
-  # Setup the dictionary
-  items = dict(zip(keys, values))
-  self.results.append(items)
-  
   print(f"\n* {target} *")
   for item in items.items():
-    print("{} : {}".format(*item))
-
-
-def extract_meta_infos(meta, values):
-  tab_items = extract_table_infos(meta.find_all(class_="table-condensed")[0])
-  tab_values = [*tab_items.values()]
-
-  for i in range(len(tab_values) - 1):
-    values.append(tab_values[i])
-
-
-def extract_table_infos(tab):
-  tab_rows = [ r.find_all("td") for r in tab.find_all("tr") ]
-  return dict([ (k.text, v.text) for k, v in tab_rows ])
-
-
-def extract_list_infos(list):
-  return [ li.text for li in list.find_all("li") ]
-
-
-def extract_risks(content, values):
-  risks_labels = [
-    "Élévation de privilèges",
-    "Exécution de code arbitraire à distance",
-    "Déni de service à distance",
-    "Contournement de la politique de sécurité",
-    "Atteinte à la confidentialité des données",
-    "Atteinte à l'intégrité des données"
-  ]
-  risks_tg = [ "EOP", "RCE", "DOS", "SFB", "ID", "TMP" ]
-  risks_flist = [ risks_tg[risks_labels.index(risk)] for risk in extract_list_infos(content.find_all("ul")[0]) ]
-
-  values.append(";".join(risks_flist))
-
-
-def extract_affected_products(content, values):
-  values.append("\n".join(extract_list_infos(content.find_all("ul")[1])))
-
-
-def split_doc_list(content):
-  doc_list = extract_doc_list(content.find_all("ul")[2])
-
-  cve, docs = [], []
-  for el in doc_list:
-    if el["text"].__contains__("CVE"):
-      cve.append(el["text"][-13:])
-    else:
-      docs.append(el["link"])
-
-  return { "cve": cve, "docs": docs }
-
-
-
-def extract_doc_list(list):
-  res = []
-
-  for item in list.find_all("li"):
-    splitted = item.text.replace("\n", "").split(" http")
-    res.append({ "text": splitted[0], "link": "http" + splitted[1] })
-
-  return res
+    print(f"{item[0]}: {item[1]}")
