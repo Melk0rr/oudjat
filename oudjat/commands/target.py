@@ -73,7 +73,6 @@ class Target(Base):
       if self.options["--mode"] == "cve":
         print("User set cve mode")
       else:
-        print("User set default mode")
         self.init_url(i)
 
 

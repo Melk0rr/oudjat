@@ -56,7 +56,7 @@ def extract_risks(content):
     "EOP": "Élévation de privilèges",
     "RCE": "Exécution de code arbitraire à distance",
     "DOS": "Déni de service à distance",
-    "SFB": "Contournement de la politique de sécurité",
+    "SFB": "Contournement de la fonctionnalité de sécurité",
     "ID" : "Atteinte à la confidentialité des données",
     "TMP": "Atteinte à l'intégrité des données"
   }
