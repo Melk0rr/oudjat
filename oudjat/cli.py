@@ -1,7 +1,6 @@
 """
 Usage:
-  oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-c CSV]
-  oudjat (-e CVE | -f FILE) [-oSv] [-c CSV]
+  oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-m MODE] [-e CSV]
   oudjat -h
   oudjat (--version | -V)
 
@@ -9,8 +8,8 @@ Options:
   -h --help                       show this help message and exit
   -t --target                     set target (comma separated, no spaces, if multiple)
   -f --file                       set target (reads from file, one domain per line)
-  -c --csv CSV                    save results as csv
-  -e --cve                        check for cve informations
+  -e --export-csv CSV             save results as csv
+  -m --mode MODE                  define the mode to use
   -o --output                     save to filename
   -S --silent                     simple output, one per line
   -v --verbose                    print debug info and full request output
@@ -64,7 +63,7 @@ def main():
     command = oudjat.commands.Target(options)
     command.run()
 
-    print("\nWatchers infos search took %s" %seconds_to_str(time.time() - start_time))
+    print(f"\nWatchers infos search took {seconds_to_str(time.time() - start_time)}s")
 
     if options["--output"]:
       sys.stdout.write_out()
