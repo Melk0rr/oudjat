@@ -55,7 +55,8 @@ def extract_risks(content):
   risks = {
     "N/A": "Non spécifié par l'éditeur",
     "EOP": "Élévation de privilèges",
-    "RCE": "Exécution de code arbitraire à distance",
+    "RCE": "Exécution de code arbitraire",
+    "RCED": "Exécution de code arbitraire à distance",
     "DOS": "Déni de service à distance",
     "SFB": "Contournement de la fonctionnalité de sécurité",
     "ID" : "Atteinte à la confidentialité des données",
