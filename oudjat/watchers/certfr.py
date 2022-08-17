@@ -55,17 +55,25 @@ def extract_risks(content):
   risks = {
     "N/A": "Non spécifié par l'éditeur",
     "EOP": "Élévation de privilèges",
-    "RCE": "Exécution de code arbitraire",
-    "RCED": "Exécution de code arbitraire à distance",
+    "RCE": "Exécution de code",
     "DOS": "Déni de service à distance",
-    "SFB": "Contournement de la fonctionnalité de sécurité",
+    "SFB": "Contournement",
     "ID" : "Atteinte à la confidentialité des données",
     "TMP": "Atteinte à l'intégrité des données"
   }
 
   risk_list = extract_list_infos(content.find_all("ul")[0])
 
-  return { "risks": ";".join([ [ *risks.keys() ][[ *risks.values() ].index(risk)] for risk in risk_list ]) }
+  return {
+    "risks": ";".join([ [ *risks.keys() ][ get_matching_str([ *risks.values() ], risk) ] for risk in risk_list ])
+  }
+
+
+def get_matching_str(str_list, txt):
+  """"""
+  for s in str_list:
+    if s in txt:
+      return str_list.index(s)
 
 
 def parse_certfr_avis(sections):
