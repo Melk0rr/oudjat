@@ -56,7 +56,7 @@ def extract_risks(content):
     "N/A": "Non spécifié par l'éditeur",
     "EOP": "Élévation de privilèges",
     "RCE": "Exécution de code",
-    "DOS": "Déni de service à distance",
+    "DOS": "Déni de service",
     "SFB": "Contournement",
     "ID" : "Atteinte à la confidentialité des données",
     "TMP": "Atteinte à l'intégrité des données"
