@@ -58,6 +58,7 @@ def extract_risks(content):
     "RCE": "Exécution de code",
     "DOS": "Déni de service",
     "SFB": "Contournement",
+    "IDT": "Usurpation",
     "ID" : "Atteinte à la confidentialité des données",
     "TMP": "Atteinte à l'intégrité des données"
   }
