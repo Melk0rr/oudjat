@@ -53,6 +53,7 @@ def extract_cve_docs(content):
 def extract_risks(content):
   """ Generates a list out of a the <ul> element relative to the risks """
   risks = {
+    "N/A": "Non spécifié par l'éditeur",
     "EOP": "Élévation de privilèges",
     "RCE": "Exécution de code arbitraire à distance",
     "DOS": "Déni de service à distance",
