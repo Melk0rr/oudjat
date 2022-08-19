@@ -22,7 +22,6 @@ class CVE(Target):
 
       if not re.match(cve_reg, cve):
         ColorPrint.red(f"Provided cve {i} is not valid")
-        self.options["TARGET"].remove(i)
       else:
         ColorPrint.green(f"Gathering data for cve {cve}")
         self.unique_cves.add(cve)
@@ -37,4 +36,3 @@ class CVE(Target):
 
     if self.options["--export-csv"]:
       super().res_2_csv()
-      
