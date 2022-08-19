@@ -60,7 +60,11 @@ def main():
 
     ColorPrint.blue(banner)
 
-    command = oudjat.commands.Target(options)
+    if options["--mode"] == "cve":
+      command = oudjat.commands.CVE(options)
+    else:
+      command = oudjat.commands.CERT(options)
+
     command.run()
 
     print(f"\nWatchers infos search took {seconds_to_str(time.time() - start_time)}s")
