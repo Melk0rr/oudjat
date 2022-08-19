@@ -40,8 +40,7 @@ pip3 install .
 ## Usage
 
       Usage:
-        oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-c CSV]
-        oudjat (-e CVE | -f FILE) [-oSv] [-c CSV]
+        oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-m MODE] [-e CSV]
         oudjat -h
         oudjat (--version | -V)
 
@@ -49,13 +48,13 @@ pip3 install .
         -h --help                       show this help message and exit
         -t --target                     set target (comma separated, no spaces, if multiple)
         -f --file                       set target (reads from file, one domain per line)
-        -c --csv CSV                    save results as csv
-        -e --cve                        check for cve informations
+        -e --export-csv CSV             save results as csv
+        -m --mode MODE                  define the mode to use
         -o --output                     save to filename
         -S --silent                     simple output, one per line
         -v --verbose                    print debug info and full request output
         -V --version                    show version and exit
-        
+
       Help:
         For help using this tool, please open an issue on the Github repository:
         https://github.com/Melk0rr/Oudjat
