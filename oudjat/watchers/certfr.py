@@ -1,4 +1,5 @@
 """ Several functions that aim to parse a certfr page """
+import re
 import requests
 from bs4 import BeautifulSoup
 
@@ -36,18 +37,15 @@ def extract_doc_list(ul):
   return res
 
 
-def extract_cve_docs(content):
+def extract_cve(content):
+  """ Extract all CVE refs in content """
+  return { "cve": "\n".join([ *set(re.findall(r'CVE-\d{4}-\d{4,7}', content.text)) ]) }
+
+
+def extract_docs(content):
   """ Splits the certfr documentation list into a list of the related CVEs and a list of the doc links """
   doc_list = extract_doc_list(content.find_all("ul")[2])
-
-  doc_data = { "cve": [], "docs": [] }
-  for doc in doc_list:
-    if "CVE" in doc["text"]:
-      doc_data["cve"].append(doc["text"].split(" CVE ")[-1])
-    else:
-      doc_data["docs"].append(doc["link"])
-
-  return { k: "\n".join(v) for k, v in doc_data.items() }
+  return { "docs": "\n".join([ doc["link"] for doc in doc_list if "Bulletin" in doc["text"] ]) }
 
 
 def extract_risks(content):
@@ -75,14 +73,14 @@ def get_matching_str(risks, txt):
   return next((r[0] for r in risks if r[1] in txt), txt)
 
 
-
 def parse_certfr_avis(sections):
   """ Parse a certfr avis page """
   return {
     **extract_meta(sections[0]),
+    **extract_cve(sections[1]),
     **extract_risks(sections[1]),
     **extract_products(sections[1]),
-    **extract_cve_docs(sections[1]),
+    **extract_docs(sections[1]),
   }
 
 
@@ -101,14 +99,14 @@ def parse_certfr_page(self, target):
     req = requests.get(target)
     soup = BeautifulSoup(req.content, 'html.parser')
 
-  except Exception as e:
+  except ConnectionError as e:
     self.handle_exception(e, f"Error while requesting {target}. Make sure the target is accessible")
 
   article_sections = soup.article.find_all("section")
 
-  items = switch_page(target.split("/")[3])(article_sections)
-  self.results.append({ **items, "link": target })
+  target_infos = switch_page(target.split("/")[3])(article_sections)
+  self.results.append({ **target_infos, "link": target })
 
   print(f"\n* {target} *")
-  for item in items.items():
-    print(f"{item[0]}: {item[1]}")
+  for k, v in target_infos.items():
+    print(f"{k}: {v}")
