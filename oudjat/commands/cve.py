@@ -21,7 +21,7 @@ class CVE(Target):
       cve = self.options["TARGET"][i]
 
       if not re.match(cve_reg, cve):
-        ColorPrint.red(f"Provided cve {i} is not valid")
+        ColorPrint.red(f"Provided cve {i}: {cve} is not valid")
         self.options["TARGET"].remove(i)
       else:
         ColorPrint.green(f"Gathering data for cve {cve}")
