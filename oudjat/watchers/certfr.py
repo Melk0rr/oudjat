@@ -31,7 +31,7 @@ def extract_doc_list(ul):
   res = []
 
   for item in ul.find_all("li"):
-    splitted = item.text.replace("\n", "").split(" http")
+    splitted = item.text.replace("\n", "").split("http")
     res.append({ "text": splitted[0], "link": "http" + splitted[1] })
 
   return res

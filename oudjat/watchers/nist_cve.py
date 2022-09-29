@@ -15,6 +15,12 @@ def extract_description(content):
   return desc_soup[0].text if len(desc_soup) > 0 else ""
 
 
+def extract_publish_date(content):
+  """ Function to extract cve publish date """
+  p_date_soup = content.select("span[data-testid='vuln-published-on']")
+  return p_date_soup[0].text if len(p_date_soup) > 0 else ""
+
+
 def parse_nist_cve(self, target):
   """ Function to parse NIST CVE page in order to retreive CVE data """
   url = f"https://nvd.nist.gov/vuln/detail/{target}"
@@ -29,12 +35,13 @@ def parse_nist_cve(self, target):
   target_infos = {
     "cve": target,
     "cvss": extract_cvss(soup),
+    "publish_date": extract_publish_date(soup),
     "description": extract_description(soup),
     "link": url
   }
 
   self.results.append(target_infos)
 
-  print(f"* {target} *")
+  print(f"\n* {target} *")
   for k, v in target_infos.items():
     print(f"{k}: {v}")
