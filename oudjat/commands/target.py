@@ -3,6 +3,7 @@ import os
 import csv
 
 from oudjat.utils.color_print import ColorPrint
+from oudjat.watchers.nist_cve import parse_nist_cve
 
 from .base import Base
 
@@ -16,6 +17,12 @@ class Target(Base):
       print(e)
     if message:
       ColorPrint.red(message)
+
+
+  def max_cve(self, cves):
+    """ Returns the cve with the highest cvss score """
+    parsed_cves = [ parse_nist_cve(self, cve) for cve in cves ]
+    return max(parsed_cves, key=lambda x:x["cvss"])
 
 
   def res_2_csv(self):

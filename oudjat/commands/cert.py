@@ -4,7 +4,6 @@ from urllib.parse import urlparse
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.watchers.certfr import parse_certfr_page
-from oudjat.watchers.nist_cve import parse_nist_cve
 
 from .target import Target
 
@@ -48,10 +47,9 @@ class CERT(Target):
 
     for i in range(len(self.options["TARGET"])):
       vuln = parse_certfr_page(self, self.options["TARGET"][i])
-      cves = [ parse_nist_cve(self, cve) for cve in vuln["cve"].split("\n") ]
-      cve_high = max(cves, key=lambda x:x["cvss"])
+      cve_high = self.max_cve(vuln["cve"].split("\n"))
 
-      print(f"highest cve: {cve_high['cve']} / {cve_high['cvss']}")
+      print(f"\nHighest cve: {cve_high['cve']} / {cve_high['cvss']}")
       self.results.append({ **vuln, "cve_high": cve_high["cve"], "cvss_high": cve_high["cvss"] })
 
     if self.options["--export-csv"]:
