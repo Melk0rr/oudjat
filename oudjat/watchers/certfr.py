@@ -18,7 +18,7 @@ def extract_meta(meta):
   """ Extracts meta information from a <table> element"""
   keys = [ "ref", "title", "date_initial", "date_last", "sources" ]
   tab_items = extract_table_infos(meta.find_all(class_="table-condensed")[0])
-  return { keys[i]: [*tab_items.values()][i] for i in range(len(keys)) }
+  return { keys[i]: [ *tab_items.values() ][i] for i in range(len(keys)) }
 
 
 def extract_products(content):
@@ -103,10 +103,10 @@ def parse_certfr_page(self, target):
     self.handle_exception(e, f"Error while requesting {target}. Make sure the target is accessible")
 
   article_sections = soup.article.find_all("section")
-
   target_infos = switch_page(target.split("/")[3])(article_sections)
-  self.results.append({ **target_infos, "link": target })
 
   print(f"\n* {target} *")
   for k, v in target_infos.items():
     print(f"{k}: {v}")
+
+  return { **target_infos, "link": target }

@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 def extract_cvss(content):
   """ Function to extract CVSS score """
   cvss_soup = content.find_all(id="Cvss3NistCalculatorAnchor")
-  return float(cvss_soup[0].text.split(" ")[0]) if len(cvss_soup) > 0 else ""
+  return float(cvss_soup[0].text.split(" ")[0]) if len(cvss_soup) > 0 else -1
 
 
 def extract_description(content):
@@ -40,8 +40,8 @@ def parse_nist_cve(self, target):
     "link": url
   }
 
-  self.results.append(target_infos)
-
   print(f"\n* {target} *")
   for k, v in target_infos.items():
     print(f"{k}: {v}")
+
+  return target_infos
