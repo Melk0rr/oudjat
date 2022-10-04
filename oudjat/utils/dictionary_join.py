@@ -1,11 +1,11 @@
-"""
-  Join dictionary items with the provided character
-"""
-def join_dictionary_items(dictionary, char):
-  return char.join("{} : {}".format(k, v) for k, v in dictionary.items())
+""" Dictionary utils """
 
-"""
-  Join dictionary values with the provided character
-"""
+def join_dictionary_items(dictionary, char):
+  """ Join dictionary items with the provided character """
+  return char.join(f"{k}: {v}" for k, v in dictionary.items())
+
+
 def join_dictionary_values(dictionary, char):
-  return char.join("'{}'".format(v) for v in dictionary.values())
+  """ Join dictionary values with the provided character """
+  return char.join(f"{v}" for v in dictionary.values())
+  
