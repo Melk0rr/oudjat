@@ -50,7 +50,7 @@ class CERT(Target):
       cve_high = self.max_cve(vuln["cve"].split("\n"))
 
       print(f"\nHighest cve: {cve_high['cve']} / {cve_high['cvss']}")
-      self.results.append({ **vuln, "cve_high": cve_high["cve"], "cvss_high": cve_high["cvss"] })
+      self.results.append({ **vuln, "cve_max": cve_high["cve"], "cvss_max": cve_high["cvss"] })
 
     if self.options["--export-csv"]:
       super().res_2_csv()
