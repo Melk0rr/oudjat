@@ -3,10 +3,11 @@ import re
 import requests
 from bs4 import BeautifulSoup
 
+
 def extract_table_infos(tab):
   """ Generates a dictionary out of a <table> element """
   tab_rows = [ r.find_all("td") for r in tab.find_all("tr") ]
-  return { k.text: v.text for k, v in tab_rows }
+  return { k.text: set(v.text.split("\n")) for k, v in tab_rows }
 
 
 def extract_list_infos(ul_list):
@@ -16,14 +17,13 @@ def extract_list_infos(ul_list):
 
 def extract_meta(meta):
   """ Extracts meta information from a <table> element"""
-  keys = [ "ref", "title", "date_initial", "date_last", "sources" ]
   tab_items = extract_table_infos(meta.find_all(class_="table-condensed")[0])
-  return { keys[i]: [ *tab_items.values() ][i] for i in range(len(keys)) }
+  return [ *tab_items.values() ]
 
 
 def extract_products(content):
   """ Generates a list of affected products based on the corresponding <ul> element """
-  return { "products": "\n".join(extract_list_infos(content.find_all("ul")[1])) }
+  return extract_list_infos(content.find_all("ul")[1])
 
 
 def extract_doc_list(ul):
@@ -32,6 +32,7 @@ def extract_doc_list(ul):
 
   for item in ul.find_all("li"):
     splitted = item.text.replace("\n", "").split("http")
+    print(splitted)
     res.append({ "text": splitted[0], "link": "http" + splitted[1] })
 
   return res
@@ -39,13 +40,13 @@ def extract_doc_list(ul):
 
 def extract_cve(content):
   """ Extract all CVE refs in content """
-  return { "cve": "\n".join([ *set(re.findall(r'CVE-\d{4}-\d{4,7}', content.text)) ]) }
+  return [ *set(re.findall(r'CVE-\d{4}-\d{4,7}', content.text)) ]
 
 
 def extract_docs(content):
   """ Splits the certfr documentation list into a list of the related CVEs and a list of the doc links """
-  doc_list = extract_doc_list(content.find_all("ul")[2])
-  return { "docs": "\n".join([ doc["link"] for doc in doc_list if "Bulletin" in doc["text"] ]) }
+  doc_list = extract_doc_list(content.find_all("ul")[-1])
+  return [ doc["link"] for doc in doc_list if "Bulletin" in doc["text"] ]
 
 
 def extract_risks(content):
@@ -63,9 +64,7 @@ def extract_risks(content):
 
   risk_list = extract_list_infos(content.find_all("ul")[0])
 
-  return {
-    "risks": ";".join([ get_matching_str([ *risks.items() ], risk) for risk in risk_list ])
-  }
+  return [ get_matching_str([ *risks.items() ], risk) for risk in risk_list ]
 
 
 def get_matching_str(risks, txt):
@@ -75,19 +74,22 @@ def get_matching_str(risks, txt):
 
 def parse_certfr_avis(sections):
   """ Parse a certfr avis page """
+  meta_keys = [ "ref", "title", "date_initial", "date_last", "sources" ]
+
   return {
-    **extract_meta(sections[0]),
-    **extract_cve(sections[1]),
-    **extract_risks(sections[1]),
-    **extract_products(sections[1]),
-    **extract_docs(sections[1]),
+    **dict(zip(meta_keys, extract_meta(sections[0]))),
+    "cve": "\n".join(extract_cve(sections[1])),
+    "risks": "\n".join(extract_risks(sections[1])),
+    "products": "\n".join(extract_products(sections[1])),
+    "docs": "\n".join(extract_docs(sections[1]))
   }
 
 
 def switch_page(page_type):
   """ Returns the correct function based on certfr page type """
   switch = {
-    "avis": parse_certfr_avis
+    "avis": parse_certfr_avis,
+    "alerte": parse_certfr_avis
   }
 
   return switch.get(page_type, "Invalid type !")
@@ -95,6 +97,8 @@ def switch_page(page_type):
 
 def parse_certfr_page(self, target):
   """ Main function to parse a certfr page """
+
+  # Handle possible connection error
   try:
     req = requests.get(target)
     soup = BeautifulSoup(req.content, 'html.parser')
@@ -102,8 +106,27 @@ def parse_certfr_page(self, target):
   except ConnectionError as e:
     self.handle_exception(e, f"Error while requesting {target}. Make sure the target is accessible")
 
-  article_sections = soup.article.find_all("section")
-  target_infos = switch_page(target.split("/")[3])(article_sections)
+  # Default values
+  target_infos = {
+    "ref": target.split("/")[-2],
+    "title": None,
+    "date_initial": None,
+    "date_last": None,
+    "sources": None,
+    "cve": None,
+    "risks": None,
+    "products": None,
+    "docs": None,
+    "link": target
+  }
+
+  # Handle parsing error
+  try:
+    article_sections = soup.article.find_all("section")
+    target_infos = switch_page(target.split("/")[3])(article_sections)
+
+  except Exception as e:
+    self.handle_exception(e, f"A parsing error occured for {target}.")
 
   print(f"\n* {target} *")
   for k, v in target_infos.items():
