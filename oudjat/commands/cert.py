@@ -46,17 +46,7 @@ class CERT(Target):
     self.init()
 
     for i in range(len(self.options["TARGET"])):
-      vuln = parse_certfr_page(self, self.options["TARGET"][i])
-
-      cve_list = vuln["cve"].split("\n") if vuln["cve"] else []
-      cve_high = self.max_cve(cve_list) if len(cve_list) > 0 else { "cve": "", "cvss": None }
-
-      print(f"\nHighest cve: {cve_high['cve']} / {cve_high['cvss']}")
-      self.results.append({
-        **vuln,
-        "cve_high": cve_high["cve"],
-        "cvss_high": cve_high["cvss"]
-      })
+      self.results.append(parse_certfr_page(self, self.options["TARGET"][i]))
 
     if self.options["--export-csv"]:
       super().res_2_csv()

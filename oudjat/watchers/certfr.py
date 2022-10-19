@@ -72,13 +72,17 @@ def get_matching_str(risks, txt):
   return next((r[0] for r in risks if r[1] in txt), txt)
 
 
-def parse_certfr_avis(sections):
+def parse_certfr_avis(self, sections):
   """ Parse a certfr avis page """
   meta_keys = [ "ref", "title", "date_initial", "date_last", "sources" ]
+  cve = extract_cve(sections[1])
+  cve_high = self.max_cve(cve) if len(cve) > 0 else { "cve": "", "cvss": None }
 
   return {
     **dict(zip(meta_keys, extract_meta(sections[0]))),
-    "cve": "\n".join(extract_cve(sections[1])),
+    "cve": "\n".join(cve),
+    "cve_high": cve_high["cve"],
+    "cvss_high": cve_high["cvss"],
     "risks": "\n".join(extract_risks(sections[1])),
     "products": "\n".join(extract_products(sections[1])),
     "docs": "\n".join(extract_docs(sections[1]))
@@ -123,7 +127,7 @@ def parse_certfr_page(self, target):
   # Handle parsing error
   try:
     article_sections = soup.article.find_all("section")
-    target_infos = switch_page(target.split("/")[3])(article_sections)
+    target_infos = switch_page(target.split("/")[3])(self, article_sections)
 
   except Exception as e:
     self.handle_exception(e, f"A parsing error occured for {target}.")
