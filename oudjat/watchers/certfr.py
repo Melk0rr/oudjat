@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 def extract_table_infos(tab):
   """ Generates a dictionary out of a <table> element """
   tab_rows = [ r.find_all("td") for r in tab.find_all("tr") ]
-  return { k.text: set(v.text.split("\n")) for k, v in tab_rows }
+  return { k.text: v.text for k, v in tab_rows }
 
 
 def extract_list_infos(ul_list):
@@ -46,7 +46,7 @@ def extract_cve(content):
 def extract_docs(content):
   """ Splits the certfr documentation list into a list of the related CVEs and a list of the doc links """
   doc_list = extract_doc_list(content.find_all("ul")[-1])
-  return [ doc["link"] for doc in doc_list if "Bulletin" in doc["text"] ]
+  return [ doc["link"] for doc in doc_list if "Référence CVE" not in doc["text"] ]
 
 
 def extract_risks(content):
