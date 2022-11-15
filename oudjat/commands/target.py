@@ -1,11 +1,12 @@
 """ Target module handling targeting operations and data gathering """
-import os
 import csv
+import os
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.watchers.nist_cve import parse_nist_cve
 
 from .base import Base
+
 
 class Target(Base):
   """ Main enumeration module """
