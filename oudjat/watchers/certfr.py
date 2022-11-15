@@ -1,5 +1,6 @@
 """ Several functions that aim to parse a certfr page """
 import re
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -16,8 +17,8 @@ def extract_list_infos(ul_list):
 
 
 def extract_meta(meta):
-  """ Extracts meta information from a <table> element"""
-  tab_items = extract_table_infos(meta.find_all(class_="table-condensed")[0])
+  """ Extracts meta information from a <table> element """
+  tab_items = extract_table_infos(meta.find_all("table")[0])
   return [ *tab_items.values() ]
 
 
@@ -32,7 +33,6 @@ def extract_doc_list(ul):
 
   for item in ul.find_all("li"):
     splitted = item.text.replace("\n", "").split("http")
-    print(splitted)
     res.append({ "text": splitted[0], "link": "http" + splitted[1] })
 
   return res
@@ -75,11 +75,14 @@ def get_matching_str(risks, txt):
 def parse_certfr_avis(self, sections):
   """ Parse a certfr avis page """
   meta_keys = [ "ref", "title", "date_initial", "date_last", "sources" ]
+  meta_props = dict(zip(meta_keys, extract_meta(sections[0])))
+
+  print("Checking for max CVSS...")
   cve = extract_cve(sections[1])
   cve_high = self.max_cve(cve) if len(cve) > 0 else { "cve": "", "cvss": None }
 
   return {
-    **dict(zip(meta_keys, extract_meta(sections[0]))),
+    **meta_props,
     "cve": "\n".join(cve),
     "cve_high": cve_high["cve"],
     "cvss_high": cve_high["cvss"],
@@ -102,6 +105,8 @@ def switch_page(page_type):
 def parse_certfr_page(self, target):
   """ Main function to parse a certfr page """
 
+  print(f"\n* {target} *")
+
   # Handle possible connection error
   try:
     req = requests.get(target)
@@ -110,30 +115,15 @@ def parse_certfr_page(self, target):
   except ConnectionError as e:
     self.handle_exception(e, f"Error while requesting {target}. Make sure the target is accessible")
 
-  # Default values
-  target_infos = {
-    "ref": target.split("/")[-2],
-    "title": None,
-    "date_initial": None,
-    "date_last": None,
-    "sources": None,
-    "cve": None,
-    "risks": None,
-    "products": None,
-    "docs": None,
-    "link": target
-  }
-
   # Handle parsing error
   try:
     article_sections = soup.article.find_all("section")
     target_infos = switch_page(target.split("/")[3])(self, article_sections)
 
+    print(f"Highest CVE: {target_infos['cve_high']} ({target_infos['cvss_high']})")
+
+    res = { **target_infos, "link": target }
+    self.results.append(res)
+
   except Exception as e:
-    self.handle_exception(e, f"A parsing error occured for {target}.")
-
-  print(f"\n* {target} *")
-  for k, v in target_infos.items():
-    print(f"{k}: {v}")
-
-  return { **target_infos, "link": target }
+    self.handle_exception(e, f"A parsing error occured for {target}: {e}\nCheck if the page has the expected format.")
