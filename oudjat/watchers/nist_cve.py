@@ -23,8 +23,9 @@ def extract_publish_date(content):
 
 def parse_nist_cve(self, target):
   """ Function to parse NIST CVE page in order to retreive CVE data """
-  url = f"https://nvd.nist.gov/vuln/detail/{target}"
 
+  url = f"https://nvd.nist.gov/vuln/detail/{target}"
+  
   try:
     req = requests.get(url)
     soup = BeautifulSoup(req.content, 'html.parser')
@@ -40,8 +41,6 @@ def parse_nist_cve(self, target):
     "link": url
   }
 
-  print(f"\n* {target} *")
-  for k, v in target_infos.items():
-    print(f"{k}: {v}")
+  print(f"{target}: {target_infos['cvss']}")
 
   return target_infos
