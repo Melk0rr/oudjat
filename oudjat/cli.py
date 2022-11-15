@@ -1,6 +1,6 @@
 """
 Usage:
-  oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-m MODE] [-e CSV]
+  oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-m MODE] [--export-csv CSV] [(--keywords KEYWORDS | --keywordfile KEYWORDFILE)]
   oudjat -h
   oudjat (--version | -V)
 
@@ -8,12 +8,14 @@ Options:
   -h --help                       show this help message and exit
   -t --target                     set target (comma separated, no spaces, if multiple)
   -f --file                       set target (reads from file, one domain per line)
-  -e --export-csv CSV             save results as csv
   -m --mode MODE                  define the mode to use
   -o --output                     save to filename
   -S --silent                     simple output, one per line
   -v --verbose                    print debug info and full request output
   -V --version                    show version and exit
+  --export-csv CSV                save results as csv
+  --keywords KEYWORDS             set keywords to track (comma separated, no spaces, if multiple)
+  --keywordfile KEYWORDFILE       set keywords to track (reads from file, one keyword per line)
 
 Help:
   For help using this tool, please open an issue on the Github repository:
@@ -24,11 +26,11 @@ import time
 
 from docopt import docopt
 
+import oudjat.commands
 from oudjat.banner import banner
+from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.convertions import seconds_to_str
 from oudjat.utils.stdouthook import StdOutHook
-from oudjat.utils.color_print import ColorPrint
-import oudjat.commands
 
 from . import __version__ as VERSION
 
