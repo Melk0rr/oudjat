@@ -1,9 +1,9 @@
 """ CVE Target class """
-import os
 import re
 from urllib.parse import urlparse
 
 from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.init_option_handle import str_file_option_handle
 from oudjat.watchers.certfr import parse_certfr_page
 
 from .target import Target
@@ -27,14 +27,7 @@ class CERT(Target):
     super().init()
 
     # Handle keywords initialization
-    if self.options["--keywordfile"]:
-      full_path = os.path.join(os.getcwd(), self.options["--keywordfile"])
-
-      with open(full_path, encoding="utf-8") as f:
-        self.options["--keywords"] = list(filter(None, f.read().split('\n')))
-
-    elif self.options["--keywords"]:
-      self.options["--keywords"] = list(filter(None, self.options["--keywords"].split(",")))
+    str_file_option_handle(self, "--keywords", "--keywordfile")
 
     for i in range(len(self.options["TARGET"])):
       url = self.options["TARGET"][i]
@@ -53,6 +46,42 @@ class CERT(Target):
           f"Error connecting to {url}! Make sure you spelled it correctly and it is a resolvable address")
 
 
+  def run_max_cve_check(self):
+    """ Check for the most severe CVE """
+    print(f"\nChecking the highests CVE...")
+
+    for res in self.results:
+      cve_max = self.max_cve(res["cve"]) if len(res["cve"]) > 0 else { "cve": "", "cvss": None }
+      
+      if cve_max["cve"]:
+        if cve_max["cvss"] == -1:
+          msg = f"No CVSS score available for {res['ref']}...\n"
+        else:
+          msg = f"{res['ref']} highest CVE: {cve_max['cve']} ({cve_max['cvss']})\n"
+      else:
+        msg = f"No CVE found for {res['ref']}...\n"
+
+      print(msg)
+
+      res["cve_max"] = cve_max["cve"]
+      res["cvss_max"] = cve_max["cvss"]
+
+
+  def run_keyword_check(self):
+    """ Look for provided keywords in the results """
+    print(f"\n{len(self.options['--keywords'])} keywords provided. Comparing with results...")
+
+    for res in self.results:
+      matched = [ k for k in self.options["--keywords"] if k.lower() in res["title"].lower() ]
+
+      if len(matched) > 0:
+        print(f"{res['ref']} matched for {'-'.join(matched)}")
+      else:
+        print(f"No match for {res['ref']}...")
+
+      res["match"] = "-".join(matched)
+
+
   def run(self):
     """ Main function called from the cli module """
     self.init()
@@ -60,13 +89,13 @@ class CERT(Target):
     for i in range(len(self.options["TARGET"])):
       parse_certfr_page(self, self.options["TARGET"][i])
 
+    # If option is provided: check for the most severe CVE
+    if self.options["--check-max-cve"]:
+      self.run_max_cve_check()
+
     # If keywords are provided in any way: compare them with results
     if self.options["--keywords"]:
-      print(f"\n{len(self.options['--keywords'])} keywords provided. Comparing with results...")
-
-      for res in self.results:
-        matched = [ x for x in self.options["--keywords"] if x.lower() in res["title"].lower() ]
-        res["match"] = "-".join(matched)
+      self.run_keyword_check()
 
     if self.options["--export-csv"]:
       super().res_2_csv()
