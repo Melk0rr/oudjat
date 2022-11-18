@@ -3,6 +3,7 @@ import csv
 import os
 
 from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.init_option_handle import str_file_option_handle
 from oudjat.watchers.nist_cve import parse_nist_cve
 
 from .base import Base
@@ -37,15 +38,7 @@ class Target(Base):
 
   def init(self):
     """ Initialization function """
-    # If user set file option: define target with file content
-    if self.options["FILE"]:
-      full_path = os.path.join(os.getcwd(), self.options["FILE"])
-
-      with open(full_path, encoding="utf-8") as f:
-        self.options["TARGET"] = list(filter(None, f.read().split('\n')))
-
-    # Else: the target is defined by the target option
-    else: self.options["TARGET"] = list(filter(None, self.options["TARGET"].split(",")))
+    str_file_option_handle(self, "TARGET", "FILE")
 
 
   def run(self):
