@@ -1,6 +1,6 @@
 """
 Usage:
-  oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-m MODE] [--export-csv CSV] [(--keywords KEYWORDS | --keywordfile KEYWORDFILE)]
+  oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-m MODE] [--export-csv CSV] [(--keywords KEYWORDS | --keywordfile KEYWORDFILE)] [--check-max-cve]
   oudjat -h
   oudjat (--version | -V)
 
@@ -13,6 +13,7 @@ Options:
   -S --silent                     simple output, one per line
   -v --verbose                    print debug info and full request output
   -V --version                    show version and exit
+  --check-max-cve                 determine which CVE is the most severe based on the CVSS score
   --export-csv CSV                save results as csv
   --keywords KEYWORDS             set keywords to track (comma separated, no spaces, if multiple)
   --keywordfile KEYWORDFILE       set keywords to track (reads from file, one keyword per line)
