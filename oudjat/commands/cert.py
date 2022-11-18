@@ -51,20 +51,18 @@ class CERT(Target):
     print(f"\nChecking the highests CVE...")
 
     for res in self.results:
-      cve_max = self.max_cve(res["cve"]) if len(res["cve"]) > 0 else { "cve": "", "cvss": None }
+      cve_max, cvss_max = self.max_cve(res["cve"]).values()
       
-      if cve_max["cve"]:
-        if cve_max["cvss"] == -1:
+      if cve_max:
+        if cvss_max == -1:
           msg = f"No CVSS score available for {res['ref']}...\n"
         else:
-          msg = f"{res['ref']} highest CVE: {cve_max['cve']} ({cve_max['cvss']})\n"
+          msg = f"{res['ref']} highest CVE: {cve_max} ({cvss_max})\n"
       else:
         msg = f"No CVE found for {res['ref']}...\n"
 
       print(msg)
-
-      res["cve_max"] = cve_max["cve"]
-      res["cvss_max"] = cve_max["cvss"]
+      res["cve_max"], res["cvss_max"] = cve_max, cvss_max
 
 
   def run_keyword_check(self):
@@ -74,11 +72,11 @@ class CERT(Target):
     for res in self.results:
       matched = [ k for k in self.options["--keywords"] if k.lower() in res["title"].lower() ]
 
+      msg = f"No match for {res['ref']}..."
       if len(matched) > 0:
-        print(f"{res['ref']} matched for {'-'.join(matched)}")
-      else:
-        print(f"No match for {res['ref']}...")
+        msg = f"{res['ref']} matched for {'-'.join(matched)}"
 
+      print(msg)
       res["match"] = "-".join(matched)
 
 

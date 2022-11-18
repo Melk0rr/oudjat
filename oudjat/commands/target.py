@@ -23,8 +23,13 @@ class Target(Base):
 
   def max_cve(self, cves):
     """ Returns the cve with the highest cvss score """
-    parsed_cves = [ parse_nist_cve(self, cve) for cve in cves ]
-    return max(parsed_cves, key=lambda x:x["cvss"])
+    res = { "cve": "", "cvss": None }
+
+    if len(cves) > 0:
+      parsed_cves = [ parse_nist_cve(self, cve, mode="min") for cve in cves ]
+      res = max(parsed_cves, key=lambda x:x["cvss"])
+
+    return res
 
 
   def res_2_csv(self):
