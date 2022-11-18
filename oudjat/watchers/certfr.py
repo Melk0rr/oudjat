@@ -5,26 +5,22 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def extract_table_infos(tab):
-  """ Generates a dictionary out of a <table> element """
-  tab_rows = [ r.find_all("td") for r in tab.find_all("tr") ]
-  return { k.text: v.text for k, v in tab_rows }
-
-
-def extract_list_infos(ul_list):
-  """ Generates a collection out of a <ul> element """
-  return [ li.text for li in ul_list.find_all("li") ]
+def handle_multiline(value):
+  """ Split multiline if necessary """
+  return value.split("\n") if "\n" in value else value
 
 
 def extract_meta(meta):
   """ Extracts meta information from a <table> element """
-  tab_items = extract_table_infos(meta.find_all("table")[0])
-  return [ *tab_items.values() ]
+  meta_tab = meta.find_all("table")[0]
+  tab_rows = [ r.find_all("td") for r in meta_tab.find_all("tr") ]
+  return [ handle_multiline(r[1].text) for r in tab_rows ]
 
 
 def extract_products(content):
   """ Generates a list of affected products based on the corresponding <ul> element """
-  return extract_list_infos(content.find_all("ul")[1])
+  product_list = content.find_all("ul")[1]
+  return [ li.text for li in product_list.find_all("li") ]
 
 
 def extract_doc_list(ul):
@@ -39,7 +35,7 @@ def extract_doc_list(ul):
 
 
 def extract_cve(content):
-  """ Extract all CVE refs in content """
+  """ Extract all CVE refs in content and look for the highest CVSS """
   return [ *set(re.findall(r'CVE-\d{4}-\d{4,7}', content.text)) ]
 
 
@@ -58,38 +54,33 @@ def extract_risks(content):
     "DOS": "Déni de service",
     "SFB": "Contournement",
     "IDT": "Usurpation",
-    "ID" : "Atteinte à la confidentialité des données",
-    "TMP": "Atteinte à l'intégrité des données"
+    "ID" : "Atteinte à la confidentialité",
+    "TMP": "Atteinte à l'intégrité",
+    "XSS": "Injection de code"
   }
 
-  risk_list = extract_list_infos(content.find_all("ul")[0])
-
-  return [ get_matching_str([ *risks.items() ], risk) for risk in risk_list ]
-
-
-def get_matching_str(risks, txt):
-  """ Returns the trigram corresponding to the matching risk """
-  return next((r[0] for r in risks if r[1] in txt), txt)
+  risk_list = content.find_all("ul")[0].text
+  return [ r for r, d in risks.items() if d.lower() in risk_list.lower() ]
 
 
-def parse_certfr_avis(self, sections):
+def generic_extract(section):
+  extracts = {
+    "cve": extract_cve,
+    "risks": extract_risks,
+    "products": extract_products,
+    "docs": extract_docs
+  }
+
+  return { k: f(section) for k, f in extracts.items() }
+
+
+def parse_certfr_avis(sections):
   """ Parse a certfr avis page """
   meta_keys = [ "ref", "title", "date_initial", "date_last", "sources" ]
   meta_props = dict(zip(meta_keys, extract_meta(sections[0])))
 
-  print("Checking for max CVSS...")
-  cve = extract_cve(sections[1])
-  cve_high = self.max_cve(cve) if len(cve) > 0 else { "cve": "", "cvss": None }
-
-  return {
-    **meta_props,
-    "cve": "\n".join(cve),
-    "cve_high": cve_high["cve"],
-    "cvss_high": cve_high["cvss"],
-    "risks": "\n".join(extract_risks(sections[1])),
-    "products": "\n".join(extract_products(sections[1])),
-    "docs": "\n".join(extract_docs(sections[1]))
-  }
+  print(f"{meta_props['title']}\nPublished on {meta_props['date_initial']}")
+  return { **meta_props, **generic_extract(sections[1]) }
 
 
 def switch_page(page_type):
@@ -118,9 +109,7 @@ def parse_certfr_page(self, target):
   # Handle parsing error
   try:
     article_sections = soup.article.find_all("section")
-    target_infos = switch_page(target.split("/")[3])(self, article_sections)
-
-    print(f"Highest CVE: {target_infos['cve_high']} ({target_infos['cvss_high']})")
+    target_infos = switch_page(target.split("/")[3])(article_sections)
 
     res = { **target_infos, "link": target }
     self.results.append(res)
