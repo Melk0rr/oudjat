@@ -21,11 +21,12 @@ def extract_publish_date(content):
   return p_date_soup[0].text if len(p_date_soup) > 0 else ""
 
 
-def parse_nist_cve(self, target):
+def parse_nist_cve(self, target, mode="default"):
   """ Function to parse NIST CVE page in order to retreive CVE data """
 
   url = f"https://nvd.nist.gov/vuln/detail/{target}"
   
+  # Handle if the target is unreachable
   try:
     req = requests.get(url)
     soup = BeautifulSoup(req.content, 'html.parser')
@@ -33,13 +34,20 @@ def parse_nist_cve(self, target):
   except ConnectionError as e:
     self.handle_exception(e, f"Error while requesting {url}. Make sure the target is accessible")
 
+  # Minimal information retreived is the CVSS score
   target_infos = {
     "cve": target,
     "cvss": extract_cvss(soup),
-    "publish_date": extract_publish_date(soup),
-    "description": extract_description(soup),
-    "link": url
   }
+
+  # If default mode : more informations are retreived
+  if mode == "default":
+    target_infos = {
+      **target_infos,
+      "publish_date": extract_publish_date(soup),
+      "description": extract_description(soup),
+      "link": url
+    }
 
   print(f"{target}: {target_infos['cvss']}")
 
