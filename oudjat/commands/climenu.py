@@ -7,7 +7,7 @@ class CLIMenu(object):
     self.options = []
 
     for i, option in enumerate(options):
-      if [ *option.keys() ] == ["name", "action"]:
+      if option.keys() == ["name", "action"]:
         self.options.append(option)
       else:
         raise ValueError(f"Invalid option {i}. All options must be provided a name and an action !")

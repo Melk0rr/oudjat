@@ -25,7 +25,7 @@ def parse_nist_cve(self, target, mode="default"):
   """ Function to parse NIST CVE page in order to retreive CVE data """
 
   url = f"https://nvd.nist.gov/vuln/detail/{target}"
-  
+
   # Handle if the target is unreachable
   try:
     req = requests.get(url)

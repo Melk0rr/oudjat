@@ -14,12 +14,16 @@ class CERT(Target):
 
   def is_url(self, url):
     """ Check whether the provided target is a valid URL """
+    check = False
+
     try:
       res = urlparse(url)
-      return all([res.scheme, res.netloc, res.path])
+      check = all([res.scheme, res.netloc, res.path])
+      
     except ValueError as e:
       self.handle_exception(e, f"Invalid url {url}!")
-      return False
+
+    return check
 
 
   def init(self):
@@ -39,11 +43,12 @@ class CERT(Target):
       if self.is_url(url):
         try:
           self.options["TARGET"][i] = url
-          ColorPrint.green(f"Gathering data for {url}")
 
         except ConnectionError as e:
           self.handle_exception(e,
-          f"Error connecting to {url}! Make sure you spelled it correctly and it is a resolvable address")
+          f"Error connecting to {url}! Make sure it is a resolvable address")
+
+        ColorPrint.green(f"Gathering data for {url}")
 
 
   def run_max_cve_check(self):
@@ -52,7 +57,7 @@ class CERT(Target):
 
     for res in self.results:
       cve_max, cvss_max = self.max_cve(res["cve"]).values()
-      
+
       if cve_max:
         if cvss_max == -1:
           msg = f"No CVSS score available for {res['ref']}...\n"

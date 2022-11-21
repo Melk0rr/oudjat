@@ -40,7 +40,7 @@ def extract_cve(content):
 
 
 def extract_docs(content):
-  """ Splits the certfr documentation list into a list of the related CVEs and a list of the doc links """
+  """ Splits the certfr documentation list into a list of the related CVEs the doc links """
   doc_list = extract_doc_list(content.find_all("ul")[-1])
   return [ doc["link"] for doc in doc_list if "Référence CVE" not in doc["text"] ]
 
@@ -64,6 +64,7 @@ def extract_risks(content):
 
 
 def generic_extract(section):
+  """ Generic extract behaviours """
   extracts = {
     "cve": extract_cve,
     "risks": extract_risks,
@@ -111,8 +112,8 @@ def parse_certfr_page(self, target):
     article_sections = soup.article.find_all("section")
     target_infos = switch_page(target.split("/")[3])(article_sections)
 
-    res = { **target_infos, "link": target }
-    self.results.append(res)
-
   except Exception as e:
     self.handle_exception(e, f"A parsing error occured for {target}: {e}\nCheck if the page has the expected format.")
+
+  res = { **target_infos, "link": target }
+  self.results.append(res)

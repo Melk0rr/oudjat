@@ -33,7 +33,7 @@ class CVE(Target):
     """ Run cve target """
     self.init()
 
-    for cve in list(self.unique_cves):
+    for cve in [ *self.unique_cves ]:
       parse_nist_cve(self, cve)
 
     if self.options["--export-csv"]:
