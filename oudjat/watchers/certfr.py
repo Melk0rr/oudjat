@@ -26,9 +26,10 @@ def extract_products(content):
 def extract_doc_list(content):
   """ Extracts data from the certfr documentation list """
   res = []
+  url_reg = r'http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
   for item in content.find_all("li"):
-    if re.match(r'http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item.text):
+    if re.search(url_reg, item.text):
       splitted = item.text.replace("\n", "").split("http")
       res.append({"text": splitted[0], "link": "http" + splitted[1]})
 
