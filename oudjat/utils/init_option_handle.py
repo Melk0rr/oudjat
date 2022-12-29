@@ -1,3 +1,4 @@
+""" Handle list init based on given text file or comma separated strings """
 import os
 
 
@@ -10,4 +11,5 @@ def str_file_option_handle(self, string_option, file_option):
       self.options[string_option] = list(filter(None, f.read().split('\n')))
 
   else:
-    self.options[string_option] = list(filter(None, self.options[string_option].split(",")))
+    self.options[string_option] = list(
+        filter(None, self.options[string_option].split(",")))
