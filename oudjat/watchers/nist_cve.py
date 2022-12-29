@@ -1,12 +1,17 @@
 """ Module to parse NIST CVE page in order to retreive CVE data """
+import re
+
 import requests
 from bs4 import BeautifulSoup
 
 
 def extract_cvss(content):
   """ Function to extract CVSS score """
-  cvss_soup = content.find_all(id="Cvss3NistCalculatorAnchor")
-  return float(cvss_soup[0].text.split(" ")[0]) if len(cvss_soup) > 0 else -1
+  cvss_match = re.findall(
+      r'(?:[1-9].[0-9]) (?:LOW|MEDIUM|HIGH|CRITICAL)', content.text)
+  cvss_list = [float(cvss.split(" ")[0]) for cvss in cvss_match]
+
+  return max(cvss_list) if len(cvss_list) > 0 else -1
 
 
 def extract_description(content):
@@ -32,21 +37,22 @@ def parse_nist_cve(self, target, mode="default"):
     soup = BeautifulSoup(req.content, 'html.parser')
 
   except ConnectionError as e:
-    self.handle_exception(e, f"Error while requesting {url}. Make sure the target is accessible")
+    self.handle_exception(
+        e, f"Error while requesting {url}. Make sure the target is accessible")
 
   # Minimal information retreived is the CVSS score
   target_infos = {
-    "cve": target,
-    "cvss": extract_cvss(soup),
+      "cve": target,
+      "cvss": extract_cvss(soup),
   }
 
   # If default mode : more informations are retreived
   if mode == "default":
     target_infos = {
-      **target_infos,
-      "publish_date": extract_publish_date(soup),
-      "description": extract_description(soup),
-      "link": url
+        **target_infos,
+        "publish_date": extract_publish_date(soup),
+        "description": extract_description(soup),
+        "link": url
     }
 
   print(f"{target}: {target_infos['cvss']}")
