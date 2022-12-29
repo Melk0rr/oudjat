@@ -86,5 +86,7 @@ class CERT(Target):
       if self.options["--keywords"]:
         target_data["match"] = "-".join(self.keyword_check(target_data))
 
+      self.results.append(target_data)
+
     if self.options["--export-csv"]:
       super().res_2_csv()
