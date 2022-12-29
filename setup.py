@@ -1,15 +1,16 @@
-from setuptools import find_packages, setup
+""" Setup module """
 from os.path import abspath, dirname, join
+from setuptools import find_packages, setup
 
 from oudjat import __version__
 
 this_dir = abspath(dirname(__file__))
 
 with open(join(this_dir, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+  long_description = f.read()
 
 with open(join(this_dir, 'requirements.txt'), encoding='utf-8') as f:
-    reqs = f.read().splitlines()
+  reqs = f.read().splitlines()
 
 setup(
     name='oudjat',
