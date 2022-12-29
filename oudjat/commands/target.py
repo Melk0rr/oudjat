@@ -1,6 +1,5 @@
 """ Target module handling targeting operations and data gathering """
 import csv
-import os
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.init_option_handle import str_file_option_handle
@@ -20,17 +19,15 @@ class Target(Base):
     if message:
       ColorPrint.red(message)
 
-
   def max_cve(self, cves):
     """ Returns the cve with the highest cvss score """
-    res = { "cve": "", "cvss": None }
+    res = {"cve": "", "cvss": None}
 
     if len(cves) > 0:
-      parsed_cves = [ parse_nist_cve(self, cve, mode="min") for cve in cves ]
-      res = max(parsed_cves, key=lambda x:x["cvss"])
+      parsed_cves = [parse_nist_cve(self, cve, mode="min") for cve in cves]
+      res = max(parsed_cves, key=lambda x: x["cvss"])
 
     return res
-
 
   def res_2_csv(self):
     """ Write the results into a CSV file """
@@ -40,11 +37,9 @@ class Target(Base):
       writer.writeheader()
       writer.writerows(self.results)
 
-
   def init(self):
     """ Initialization function """
     str_file_option_handle(self, "TARGET", "FILE")
-
 
   def run(self):
     """ Main function called from the cli module """
