@@ -1,7 +1,9 @@
 """ iTop module used to generate iTop tickets """
-import sys
 import json
+import sys
+
 import requests
+
 
 def new_ticket(itop_user, itop_pwd, ticket_data):
   """ Create a new itop ticket """
@@ -12,7 +14,7 @@ def new_ticket(itop_user, itop_pwd, ticket_data):
   else:
     print(str(sys.argv))
     host = sys.argv[1]
-    # service = sys.argv[2]
+    service = sys.argv[2]
     service_status = sys.argv[3]
     service_state_type = sys.argv[4]
 
