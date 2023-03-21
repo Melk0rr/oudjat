@@ -1,8 +1,47 @@
 """ Several functions that aim to parse a certfr page """
+import datetime
 import re
+from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
+
+
+def parse_feed(feed_url, date_str_filter = None):
+  """ Parse a CERTFR Feed page """
+  try:
+    feed_req = requests.get(feed_url)
+    feed_soup = BeautifulSoup(feed_req.content, "xml")
+  except Exception as e:
+    print(
+        e, f"A parsing error occured for {feed_url}: {e}\nCheck if the page has the expected format.")
+
+  feed_items = feed_soup.find_all("item")
+  filtered_feed = feed_items
+  
+  if date_str_filter:
+    valid_date_format = "%Y-%m-%d"
+    try:
+        date_filter = datetime.strptime(date_str_filter, valid_date_format)
+        filtered_feed = []
+
+        for item in feed_items:
+          date_str = item.pubDate.text.strip(" +0000")
+          date = datetime.strptime(date_str, "%a, %d %b %Y %H:%M:%S")
+
+          if date > date_filter:
+            parsed_item = {
+              "title": item.title.text,
+              "link": item.link.text,
+              "date": date.strftime(valid_date_format)
+            }
+
+            filtered_feed.append(parsed_item)
+
+    except ValueError as e:
+      print(f"Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !")
+
+  return filtered_feed
 
 
 def handle_multiline(value):
