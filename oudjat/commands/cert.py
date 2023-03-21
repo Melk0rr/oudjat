@@ -5,7 +5,7 @@ from urllib.parse import urlsplit
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.init_option_handle import str_file_option_handle
-from oudjat.watchers.certfr import parse_certfr_page
+from oudjat.watchers.certfr import parse_certfr_page, parse_feed
 
 from .target import Target
 
@@ -18,7 +18,8 @@ class CERT(Target):
     super().init()
 
     # Handle keywords initialization
-    str_file_option_handle(self, "--keywords", "--keywordfile")
+    if self.options["--keywords"] or self.options["--keywordfile"]:
+      str_file_option_handle(self, "--keywords", "--keywordfile")
 
     for i in range(len(self.options["TARGET"])):
       url = self.options["TARGET"][i]
@@ -38,7 +39,7 @@ class CERT(Target):
                               f"Error connecting to {url}! Make sure it is a resolvable address")
 
       self.options["TARGET"][i] = url
-      ColorPrint.green(f"Gathering data for {url}")
+      ColorPrint.green(f"Gathering data from {url}")
 
   def max_cve_check(self, target):
     """ Check for the most severe CVE """
@@ -70,23 +71,37 @@ class CERT(Target):
     print(msg)
     return matched
 
+
+  def run_default_parsing(self, target):
+    target_data = parse_certfr_page(self, target)
+
+    # If option is provided: check for the most severe CVE
+    if self.options["--check-max-cve"]:
+      target_data["cve_max"], target_data["cvss_max"] = self.max_cve_check(
+          target_data)
+
+    # If keywords are provided in any way: compare them with results
+    if self.options["--keywords"]:
+      target_data["match"] = "-".join(self.keyword_check(target_data))
+    
+    return target_data
+
+
   def run(self):
     """ Main function called from the cli module """
     self.init()
 
     for i in range(len(self.options["TARGET"])):
-      target_data = parse_certfr_page(self, self.options["TARGET"][i])
+      if self.options["--feed"]:
+        alert_items = parse_feed(self.options["TARGET"][i], self.options["--filter"])
+      
+        for item in alert_items:
+          self.results.append(self.run_default_parsing(item["link"]))
+        
+        print(f"\n{len(self.results)} alerts since the {self.options['--filter']}")
 
-      # If option is provided: check for the most severe CVE
-      if self.options["--check-max-cve"]:
-        target_data["cve_max"], target_data["cvss_max"] = self.max_cve_check(
-            target_data)
-
-      # If keywords are provided in any way: compare them with results
-      if self.options["--keywords"]:
-        target_data["match"] = "-".join(self.keyword_check(target_data))
-
-      self.results.append(target_data)
+      else:
+        self.results.append(self.run_default_parsing(self.options["TARGET"][i]))
 
     if self.options["--export-csv"]:
       super().res_2_csv()
