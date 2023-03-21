@@ -1,22 +1,30 @@
 """
 Usage:
-  oudjat (-t TARGET | -f FILE) [-o FILENAME] [-oSv] [-m MODE] [--export-csv CSV] [(--keywords KEYWORDS | --keywordfile KEYWORDFILE)] [--check-max-cve]
-  oudjat -h
-  oudjat (--version | -V)
+  oudjat cert (-t TARGET | -f FILE) [options] [--feed] [--filter=FILTER] [--check-max-cve]
+                                    [--keywords=KEYWORDS | --keywordfile=KEYWORDFILE]
+  oudjat cve (-t TARGET | -f FILE) [options]
+  oudjat -h | --help
+  oudjat -V | --version
 
 Options:
-  -h --help                       show this help message and exit
-  -t --target                     set target (comma separated, no spaces, if multiple)
-  -f --file                       set target (reads from file, one domain per line)
-  -m --mode MODE                  define the mode to use
-  -o --output                     save to filename
-  -S --silent                     simple output, one per line
-  -v --verbose                    print debug info and full request output
-  -V --version                    show version and exit
-  --check-max-cve                 determine which CVE is the most severe based on the CVSS score
-  --export-csv CSV                save results as csv
-  --keywords KEYWORDS             set keywords to track (comma separated, no spaces, if multiple)
-  --keywordfile KEYWORDFILE       set keywords to track (reads from file, one keyword per line)
+  -h --help                         show this help message and exit
+  -t --target                       set target (comma separated, no spaces, if multiple)
+  -f --file                         set target (reads from file, one domain per line)
+  -o --output                       save to filename
+  -S --silent                       simple output, one per line
+  -v --verbose                      print debug info and full request output
+  -V --version                      show version and exit
+  --check-max-cve                   determine which CVE is the most severe based on the CVSS score
+  --export-csv=CSV                  save results as csv
+  --feed                            run cert mode from a feed
+  --filter=FILTER                   date filter to apply with feed option (e.g. 2023-03-10)
+  --keywords=KEYWORDS               set keywords to track (comma separated, no spaces, if multiple)
+  --keywordfile=KEYWORDFILE         set keywords to track (file, one keyword per line)
+
+Exemples:
+  oudjat cert -t https://cert.ssi.gouv.fr/alerte/feed/ --feed --filter "2023-03-13" --check-max-cve
+  oudjat cert -f ./tests/certfr.txt --export-csv ./tests/certfr_20230315.csv --keywordfile ./tests/keywords.txt --check-max-cve
+  oudjat cve -f ./tests/cve.txt --export-csv ./tests/cve_20230313.csv
 
 Help:
   For help using this tool, please open an issue on the Github repository:
@@ -63,7 +71,7 @@ def main():
 
     ColorPrint.blue(banner)
 
-    if options["--mode"] == "cve":
+    if options["cve"]:
       command = oudjat.commands.CVE(options)
     else:
       command = oudjat.commands.CERT(options)
