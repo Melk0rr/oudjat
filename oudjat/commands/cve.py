@@ -6,6 +6,7 @@ from oudjat.watchers.nist_cve import parse_nist_cve
 
 from .target import Target
 
+
 class CVE(Target):
   """ CVE Target """
 
@@ -34,7 +35,7 @@ class CVE(Target):
     self.init()
 
     for cve in [ *self.unique_cves ]:
-      parse_nist_cve(self, cve)
+      self.results.append(parse_nist_cve(self, cve))
 
     if self.options["--export-csv"]:
       super().res_2_csv()
