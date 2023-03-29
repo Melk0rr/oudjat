@@ -95,7 +95,7 @@ def extract_risks(content):
       "DOS": "Déni de service",
       "SFB": "Contournement",
       "IDT": "Usurpation",
-      "ID": "Atteinte à la confidentialité",
+      "ID" : "Atteinte à la confidentialité",
       "TMP": "Atteinte à l'intégrité",
       "XSS": "Injection de code"
   }

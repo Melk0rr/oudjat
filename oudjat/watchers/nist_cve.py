@@ -1,60 +1,43 @@
 """ Module to parse NIST CVE page in order to retreive CVE data """
-import re
+import json
 
 import requests
-from bs4 import BeautifulSoup
 
 
-def extract_cvss(content):
-  """ Function to extract CVSS score """
-  cvss_match = re.findall(
-      r'(?:[1-9].[0-9]) (?:LOW|MEDIUM|HIGH|CRITICAL)', content.text)
-  cvss_list = [float(cvss.split(" ")[0]) for cvss in cvss_match]
-
-  return max(cvss_list) if len(cvss_list) > 0 else -1
-
-
-def extract_description(content):
-  """ Function to extract description """
-  desc_soup = content.select("p[data-testid='vuln-description']")
-  return desc_soup[0].text if len(desc_soup) > 0 else ""
-
-
-def extract_publish_date(content):
-  """ Function to extract cve publish date """
-  p_date_soup = content.select("span[data-testid='vuln-published-on']")
-  return p_date_soup[0].text if len(p_date_soup) > 0 else ""
-
-
-def parse_nist_cve(self, target, mode="default"):
+def parse_nist_cve(target, mode="default"):
   """ Function to parse NIST CVE page in order to retreive CVE data """
 
   url = f"https://nvd.nist.gov/vuln/detail/{target}"
+  api_url = f"https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={target}/"
+
+  print(api_url)
 
   # Handle if the target is unreachable
   try:
-    req = requests.get(url)
-    soup = BeautifulSoup(req.content, 'html.parser')
+    response = requests.get(api_url)
+    print(response)
 
   except ConnectionError as e:
-    self.handle_exception(
-        e, f"Error while requesting {url}. Make sure the target is accessible")
+    print(
+        e, f"Error while retreiving {target} data. Make sure it is a valid CVE")
 
-  # Minimal information retreived is the CVSS score
-  target_infos = {
-      "cve": target,
-      "cvss": extract_cvss(soup),
-  }
+  # # Minimal information retreived is the CVSS score
+  # target_infos = {
+  #     "cve": target,
+  #     "cvss": req.v31score,
+  #     "severity": req.v31severity
+  # }
 
-  # If default mode : more informations are retreived
-  if mode == "default":
-    target_infos = {
-        **target_infos,
-        "publish_date": extract_publish_date(soup),
-        "description": extract_description(soup),
-        "link": url
-    }
+  # # If default mode : more informations are retreived
+  # if mode == "default":
+  #   target_infos = {
+  #       **target_infos,
+  #       "publish_date": req.published,
+  #       "description": req.descriptions[0].value,
+  #       "link": url
+  #   }
 
-  print(f"{target}: {target_infos['cvss']}")
+  # print(f"{target}: {target_infos['cvss']}")
+  # return target_infos
 
-  return target_infos
+parse_nist_cve("CVE-2022-2880")

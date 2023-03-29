@@ -41,6 +41,7 @@ class CERT(Target):
       self.options["TARGET"][i] = url
       ColorPrint.green(f"Gathering data from {url}")
 
+
   def max_cve_check(self, target):
     """ Check for the most severe CVE """
     print(f"\nChecking {target['ref']} highest CVE...")
