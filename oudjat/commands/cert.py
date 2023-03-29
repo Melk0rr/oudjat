@@ -78,6 +78,7 @@ class CERT(Target):
 
     # If option is provided: check for the most severe CVE
     if self.options["--check-max-cve"]:
+
       target_data["cve_max"], target_data["cvss_max"] = self.max_cve_check(
           target_data)
 
@@ -93,6 +94,7 @@ class CERT(Target):
     self.init()
 
     for i in range(len(self.options["TARGET"])):
+      # If option is provided: retreive alerts from rss feed
       if self.options["--feed"]:
         alert_items = parse_feed(self.options["TARGET"][i], self.options["--filter"])
       
