@@ -1,7 +1,6 @@
 """
 Usage:
-  oudjat cert (-t TARGET | -f FILE) [options] [--feed] [--filter=FILTER] [--check-max-cve]
-                                    [--keywords=KEYWORDS | --keywordfile=KEYWORDFILE]
+  oudjat cert (-t TARGET | -f FILE) [options] [--keywords=KEYWORDS | --keywordfile=KEYWORDFILE]
   oudjat cve (-t TARGET | -f FILE) [options]
   oudjat -h | --help
   oudjat -V | --version
@@ -61,24 +60,25 @@ def main():
 
     if not options["--target"] and not options["--file"]:
       ColorPrint.red(
-        "Target required! Run with -h for usage instructions. Either -t target.host or -f file.txt required")
+          "Target required! Run with -h for usage instructions. Either -t target.host or -f file.txt required")
       return
 
     if options["--target"] and options["--file"]:
       ColorPrint.red(
-        "Please only supply one target method - either read by file with -f or as an argument to -t.")
+          "Please only supply one target method - either read by file with -f or as an argument to -t.")
       return
 
     ColorPrint.blue(banner)
 
     if options["cve"]:
-      command = oudjat.commands.CVE(options)
+      command = oudjat.commands.Vuln(options)
     else:
       command = oudjat.commands.CERT(options)
 
     command.run()
 
-    print(f"\nWatchers infos search took {seconds_to_str(time.time() - start_time)}s")
+    print(
+        f"\nWatchers infos search took {seconds_to_str(time.time() - start_time)}s")
 
     if options["--output"]:
       sys.stdout.write_out()

@@ -7,7 +7,7 @@ from oudjat.watchers.nist_cve import parse_nist_cve
 from .target import Target
 
 
-class CVE(Target):
+class Vuln(Target):
   """ CVE Target """
 
   unique_cves = set()
