@@ -1,13 +1,13 @@
 """ Several functions that aim to parse a certfr page """
 import re
-import requests
-
-from bs4 import BeautifulSoup
 from datetime import datetime
 from enum import Enum
 
+import requests
+from bs4 import BeautifulSoup
+
 from oudjat.utils.color_print import ColorPrint
-from oudjat.watchers.cve import CVE_REGEX, CVE
+from oudjat.watchers.cve import CVE, CVE_REGEX
 
 URL_REGEX = r'http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 CERTFR_REF_REGEX = r'CERTFR-\d{4}-(?:ALE|AVI|CTI|IOC|DUR)-\d{3,4}'
@@ -66,6 +66,10 @@ class CERTFR:
   # ****************************************************************
   # Getters & Setters
 
+  def get_ref(self):
+    """ Getter for the reference """
+    return self.ref
+
   def get_risks(self, short=True):
     """ Get the list of risks """
     return [r.name if short else r.value for r in self.risks]
@@ -76,10 +80,15 @@ class CERTFR:
 
   def get_max_cve(self):
     """ Returns the highest cve """
+    print(f"\nResolving most critical CVE for {self.ref}")
     if not self.CVE_RESOLVED:
       self.resolve_cve_data()
 
     return max(self.cve_list, key=lambda cve: cve.get_cvss())
+
+  def get_title(self):
+    """ Getter for the title """
+    return self.title
 
   def get_link(self):
     """ Getter for the link """
@@ -100,7 +109,7 @@ class CERTFR:
       self.ref = ref
 
     else:
-      raise(f"Invalid CERTFR ref provided : {ref}")
+      raise (f"Invalid CERTFR ref provided : {ref}")
 
   def set_link(self, link):
     """ Setter for CERTFR link """
@@ -276,25 +285,22 @@ class CERTFR:
 
     if date_str_filter:
       valid_date_format = "%Y-%m-%d"
+
       try:
         date_filter = datetime.strptime(date_str_filter, valid_date_format)
         filtered_feed = []
 
         for item in feed_items:
-          date_str = item.pubDate.text.strip(" +0000")
+          date_str = item.pubDate.text.split(" +0000")[0]
           date = datetime.strptime(date_str, "%a, %d %b %Y %H:%M:%S")
 
           if date > date_filter:
             certfr_page = CERTFR(
-                ref=CERTFR.get_ref_from_link(), title=item.title.text)
+                ref=CERTFR.get_ref_from_link(item.link.text))
             filtered_feed.append(certfr_page)
 
       except ValueError as e:
-        print(f"Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !")
+        ColorPrint.red(
+            f"Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !")
 
     return filtered_feed
-
-
-test_certfr = CERTFR(ref="CERTFR-2023-AVI-0292")
-test_certfr.parse()
-print(test_certfr.to_dictionary())
