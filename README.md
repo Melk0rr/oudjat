@@ -40,26 +40,29 @@ pip3 install .
 ## Usage
 
       Usage:
-        oudjat cert (-t TARGET | -f FILE) [options] [--feed] [--filter=FILTER] [--check-max-cve]
-                                          [--keywords=KEYWORDS | --keywordfile=KEYWORDFILE]
+        oudjat cert (-t TARGET | -f FILE) [options] [--keywords=KEYWORDS | --keywordfile=KEYWORDFILE]
         oudjat cve (-t TARGET | -f FILE) [options]
         oudjat -h | --help
         oudjat -V | --version
 
+      Commands
+        cert                            parse data from cert page
+        cve                             parse CVE data from Nist page
+
       Options:
-        -h --help                         show this help message and exit
-        -t --target                       set target (comma separated, no spaces, if multiple)
-        -f --file                         set target (reads from file, one domain per line)
-        -o --output                       save to filename
-        -S --silent                       simple output, one per line
-        -v --verbose                      print debug info and full request output
-        -V --version                      show version and exit
-        --check-max-cve                   determine which CVE is the most severe based on the CVSS score
-        --export-csv=CSV                  save results as csv
-        --feed                            run cert mode from a feed
-        --filter=FILTER                   date filter to apply with feed option (e.g. 2023-03-10)
-        --keywords=KEYWORDS               set keywords to track (comma separated, no spaces, if multiple)
-        --keywordfile=KEYWORDFILE         set keywords to track (reads from file, one keyword per line)
+        -h --help                       show this help message and exit
+        -t --target                     set target (comma separated, no spaces, if multiple)
+        -f --file                       set target (reads from file, one domain per line)
+        -o --output                     save to filename
+        -S --silent                     simple output, one per line
+        -v --verbose                    print debug info and full request output
+        -V --version                    show version and exit
+        --check-max-cve                 determine which CVE is the most severe based on the CVSS score
+        --export-csv=CSV                save results as csv
+        --feed                          run cert mode from a feed
+        --filter=FILTER                 date filter to apply with feed option (e.g. 2023-03-10)
+        --keywords=KEYWORDS             set keywords to track (comma separated, no spaces, if multiple)
+        --keywordfile=KEYWORDFILE       set keywords to track (file, one keyword per line)
 
       Exemples:
         oudjat cert -t https://cert.ssi.gouv.fr/alerte/feed/ --feed --filter "2023-03-13" --check-max-cve

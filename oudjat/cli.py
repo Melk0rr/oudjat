@@ -5,6 +5,10 @@ Usage:
   oudjat -h | --help
   oudjat -V | --version
 
+Commands
+  cert                            parse data from cert page
+  cve                             parse CVE data from Nist page
+
 Options:
   -h --help                       show this help message and exit
   -t --target                     set target (comma separated, no spaces, if multiple)
