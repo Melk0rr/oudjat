@@ -1,10 +1,9 @@
 """ CVE module addressing common vulnerability behavior """
 import re
-import requests
-
-from bs4 import BeautifulSoup
-from datetime import datetime
 from enum import Enum
+
+import requests
+from bs4 import BeautifulSoup
 
 from oudjat.utils.color_print import ColorPrint
 

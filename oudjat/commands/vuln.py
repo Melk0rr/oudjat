@@ -2,7 +2,7 @@
 import re
 
 from oudjat.utils.color_print import ColorPrint
-from oudjat.watchers.nist_cve import parse_nist_cve
+from oudjat.watchers.cve import CVE
 
 from .target import Target
 
@@ -12,30 +12,26 @@ class Vuln(Target):
 
   unique_cves = set()
 
-  def init(self):
-    """ Clean cve target """
-    super().init()
+  def __init__(self):
+    """ Constructor """
+    super().__init__()
 
-    cve_reg = r'CVE-\d{4}-\d{4,7}'
+    target_cves = set(self.options["TARGET"])
 
-    for i in range(len(self.options["TARGET"])):
-      cve = self.options["TARGET"][i]
-
-      if not re.match(cve_reg, cve):
-        ColorPrint.red(f"Provided cve {i}: {cve} is not valid")
-        self.options["TARGET"].remove(i)
-
-      else:
-        ColorPrint.green(f"Gathering data for cve {cve}")
+    for ref in target_cves:
+      try:
+        cve = CVE(ref)
         self.unique_cves.add(cve)
 
+      except ValueError:
+        ColorPrint.red(f"Invalid CVE reference provided {ref}")
 
   def run(self):
     """ Run cve target """
-    self.init()
 
-    for cve in [ *self.unique_cves ]:
-      self.results.append(parse_nist_cve(self, cve))
+    for cve in self.unique_cves:
+      cve.parse_nist()
+      self.results.append(cve.to_dictionary())
 
     if self.options["--export-csv"]:
       super().res_2_csv()
