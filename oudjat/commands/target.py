@@ -12,13 +12,17 @@ class Target(Base):
   """ Main enumeration module """
   results = []
 
+  def __init__(self, options):
+    """ Initialization function """
+    super().__init__(options)
+    str_file_option_handle(self, "TARGET", "FILE")
+
   def handle_exception(self, e, message=""):
     """ Function handling exception for the current class """
     if self.options["--verbose"]:
       print(e)
     if message:
       ColorPrint.red(message)
-
 
   def max_cve(self, cves):
     """ Returns the cve with the highest cvss score """
@@ -30,7 +34,6 @@ class Target(Base):
 
     return res
 
-
   def res_2_csv(self):
     """ Write the results into a CSV file """
     print("\nExporting results to csv...")
@@ -38,12 +41,6 @@ class Target(Base):
       writer = csv.DictWriter(f, fieldnames=self.results[0].keys())
       writer.writeheader()
       writer.writerows(self.results)
-
-
-  def init(self):
-    """ Initialization function """
-    str_file_option_handle(self, "TARGET", "FILE")
-
 
   def run(self):
     """ Main function called from the cli module """
