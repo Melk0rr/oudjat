@@ -10,7 +10,7 @@ from oudjat.watchers.certfr import CERTFR
 from .target import Target
 
 
-class CERT(Target):
+class Watch(Target):
   """ CVE Target """
 
   def __init__(self, options):
