@@ -1,6 +1,4 @@
 """ CVE Target class """
-import re
-
 from oudjat.utils.color_print import ColorPrint
 from oudjat.watchers.cve import CVE
 

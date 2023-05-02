@@ -1,13 +1,14 @@
 """
 Usage:
-  oudjat cert (-t TARGET | -f FILE) [options] [--keywords=KEYWORDS | --keywordfile=KEYWORDFILE]
-  oudjat cve (-t TARGET | -f FILE) [options]
+  oudjat watch (-t TARGET | -f FILE) [options]  [--check-max-cve] [--feed] [--filter=FILTER]
+                                                [--keywords=KEYWORDS | --keywordfile=FILE]   
+  oudjat vuln (-t TARGET | -f FILE) [options]
   oudjat -h | --help
   oudjat -V | --version
 
 Commands
   cert                            parse data from cert page
-  cve                             parse CVE data from Nist page
+  vuln                             parse CVE data from Nist page
 
 Options:
   -h --help                       show this help message and exit
@@ -17,8 +18,10 @@ Options:
   -S --silent                     simple output, one per line
   -v --verbose                    print debug info and full request output
   -V --version                    show version and exit
-  --check-max-cve                 determine which CVE is the most severe based on the CVSS score
   --export-csv=CSV                save results as csv
+
+CERT-options:
+  --check-max-cve                 determine which CVE is the most severe based on the CVSS score
   --feed                          run cert mode from a feed
   --filter=FILTER                 date filter to apply with feed option (e.g. 2023-03-10)
   --keywords=KEYWORDS             set keywords to track (comma separated, no spaces, if multiple)
@@ -27,7 +30,7 @@ Options:
 Exemples:
   oudjat cert -t https://cert.ssi.gouv.fr/alerte/feed/ --feed --filter "2023-03-13" --check-max-cve
   oudjat cert -f ./tests/certfr.txt --export-csv ./tests/certfr_20230315.csv --keywordfile ./tests/keywords.txt --check-max-cve
-  oudjat cve -f ./tests/cve.txt --export-csv ./tests/cve_20230313.csv
+  oudjat vuln -f ./tests/cve.txt --export-csv ./tests/cve_20230313.csv
 
 Help:
   For help using this tool, please open an issue on the Github repository:
@@ -46,9 +49,23 @@ from oudjat.utils.stdouthook import StdOutHook
 
 from . import __version__ as VERSION
 
+COMMAND_OPTIONS = ["vuln", "watch"]
+
+def command_switch(options):
+  """ Script command switch case """
+  
+  switch = {
+    "vuln": oudjat.commands.Vuln,
+    "watch": oudjat.commands.Watch,
+  }
+
+  command_name = next(command for command in COMMAND_OPTIONS if options[command])
+  print(command_name)
+  return switch[command_name](options)
 
 def main():
   """ Main program function """
+
   try:
     if sys.version_info < (3, 0):
       sys.stdout.write("Sorry, requires Python 3.x\n")
@@ -74,11 +91,7 @@ def main():
 
     ColorPrint.blue(banner)
 
-    if options["cve"]:
-      command = oudjat.commands.Vuln(options)
-    else:
-      command = oudjat.commands.CERT(options)
-
+    command = command_switch(options)
     command.run()
 
     print(
