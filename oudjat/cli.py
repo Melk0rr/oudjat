@@ -2,12 +2,12 @@
 Usage:
   oudjat watch (-t TARGET | -f FILE) [options]  [--check-max-cve] [--feed] [--filter=FILTER]
                                                 [--keywords=KEYWORDS | --keywordfile=FILE]   
-  oudjat vuln (-t TARGET | -f FILE) [options]
+  oudjat vuln (-t TARGET | -f FILE) [options] [--cve-list=CVE_LIST]
   oudjat -h | --help
   oudjat -V | --version
 
 Commands
-  cert                            parse data from cert page
+  watch                            parse data from cert page
   vuln                             parse CVE data from Nist page
 
 Options:
@@ -20,12 +20,15 @@ Options:
   -V --version                    show version and exit
   --export-csv=CSV                save results as csv
 
-CERT-options:
+Watch-options:
   --check-max-cve                 determine which CVE is the most severe based on the CVSS score
   --feed                          run cert mode from a feed
   --filter=FILTER                 date filter to apply with feed option (e.g. 2023-03-10)
   --keywords=KEYWORDS             set keywords to track (comma separated, no spaces, if multiple)
   --keywordfile=KEYWORDFILE       set keywords to track (file, one keyword per line)
+
+Vuln-options:
+  --cve-list=CVE_LIST             provide a list of cve to be used as a database and reduce the amount of requests
 
 Exemples:
   oudjat cert -t https://cert.ssi.gouv.fr/alerte/feed/ --feed --filter "2023-03-13" --check-max-cve
