@@ -1,8 +1,7 @@
 """ Target module handling targeting operations and data gathering """
-import csv
-
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.init_option_handle import str_file_option_handle
+from oudjat.utils.file import export_2_csv
 
 from .base import Base
 
@@ -26,10 +25,7 @@ class Target(Base):
   def res_2_csv(self):
     """ Write the results into a CSV file """
     print("\nExporting results to csv...")
-    with open(self.options["--export-csv"], "w", encoding="utf-8", newline="") as f:
-      writer = csv.DictWriter(f, fieldnames=self.results[0].keys())
-      writer.writeheader()
-      writer.writerows(self.results)
+    export_2_csv(self.results, self.options["--export-csv"], '|')
 
   def run(self):
     """ Main function called from the cli module """

@@ -33,3 +33,4 @@ class Vuln(Target):
 
     if self.options["--export-csv"]:
       super().res_2_csv()
+      

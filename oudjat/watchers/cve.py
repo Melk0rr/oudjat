@@ -6,6 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.file import import_csv
 
 CVE_REGEX = r'CVE-\d{4}-\d{4,7}'
 NIST_URL_BASE = "https://nvd.nist.gov/vuln/detail/"
@@ -56,7 +57,7 @@ class CVE:
 
   def set_ref(self, cve_ref):
     """ Setter for the CVE id """
-    if self.check_id(cve_ref):
+    if self.check_ref(cve_ref):
       self.ref = cve_ref
 
     else:
@@ -74,10 +75,6 @@ class CVE:
 
   # ****************************************************************
   # Resolvers
-
-  def check_id(self, cve_ref):
-    """ Checks whether the given cve id is valid """
-    return re.match(CVE_REGEX, cve_ref)
 
   def check_cvss(self, cvss_score):
     """ Checks if the provided cvss score is valid """
@@ -160,3 +157,18 @@ class CVE:
       cve_dict.update(more_data)
 
     return cve_dict
+  
+  # ****************************************************************
+  # Static methods
+
+  @staticmethod
+  def check_ref(cve_ref):
+    """ Checks whether the given cve id is valid """
+    return re.match(CVE_REGEX, cve_ref)
+
+  @staticmethod
+  def find_cve_by_ref(cve_list, ref):
+    if not CVE.check_ref(ref):
+      raise ValueError(f"Invalid CVE reference provided: {ref}")
+    
+    return [ cve for cve in cve_list if cve.get_ref() == ref ][0]
