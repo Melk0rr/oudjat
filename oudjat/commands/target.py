@@ -1,7 +1,8 @@
 """ Target module handling targeting operations and data gathering """
 from oudjat.utils.color_print import ColorPrint
+from oudjat.watchers.cve import CVE
 from oudjat.utils.init_option_handle import str_file_option_handle
-from oudjat.utils.file import export_2_csv
+from oudjat.utils.file import import_csv, export_2_csv
 
 from .base import Base
 
@@ -14,6 +15,21 @@ class Target(Base):
     """ Initialization function """
     super().__init__(options)
     str_file_option_handle(self, "TARGET", "FILE")
+
+    # If a csv of cve is provided, populate CVE instances
+    if self.options["--cve-list"]:
+      print("Importing cve data...")
+      
+      def cve_import_callback(reader):
+        cve_instances = []
+        for row in reader:
+          cve_dict = { k: v for k, v in row.items() }
+          cve_instances.append(CVE.create_from_dict(cve_dict))
+
+        return cve_instances
+      
+      cve_import = import_csv(self.options["--cve-list"], cve_import_callback)
+      self.options["--cve-list"] = cve_import
 
   def handle_exception(self, e, message=""):
     """ Function handling exception for the current class """
