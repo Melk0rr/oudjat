@@ -10,11 +10,12 @@ def export_2_csv(data, file_path, delimiter=','):
     writer.writeheader()
     writer.writerows(data)
 
-def import_csv(file_path, callback):
+def import_csv(file_path, callback, delimiter=','):
   """ Helper function to import CSV content into a list of dictionaries """
   full_path = os.path.join(os.getcwd(), file_path)
 
   with open(full_path, "r", encoding="utf-8", newline="") as f:
-    data = callback(f)
+    reader = csv.DictReader(f, delimiter=delimiter)
+    data = callback(reader)
 
   return data
