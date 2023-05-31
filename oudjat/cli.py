@@ -19,6 +19,7 @@ Options:
   -v --verbose                    print debug info and full request output
   -V --version                    show version and exit
   --export-csv=CSV                save results as csv
+  --cve-list=CVE_LIST             provide a list of cve to be used as a database and reduce the amount of requests
 
 Watch-options:
   --check-max-cve                 determine which CVE is the most severe based on the CVSS score
@@ -26,9 +27,6 @@ Watch-options:
   --filter=FILTER                 date filter to apply with feed option (e.g. 2023-03-10)
   --keywords=KEYWORDS             set keywords to track (comma separated, no spaces, if multiple)
   --keywordfile=KEYWORDFILE       set keywords to track (file, one keyword per line)
-
-Vuln-options:
-  --cve-list=CVE_LIST             provide a list of cve to be used as a database and reduce the amount of requests
 
 Exemples:
   oudjat cert -t https://cert.ssi.gouv.fr/alerte/feed/ --feed --filter "2023-03-13" --check-max-cve
