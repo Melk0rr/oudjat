@@ -78,11 +78,11 @@ class CERTFR:
     """ Returns the refs of all the related cves """
     return [cve.get_ref() for cve in self.cve_list]
 
-  def get_max_cve(self):
+  def get_max_cve(self, cve_data=None):
     """ Returns the highest cve """
     print(f"\nResolving most critical CVE for {self.ref}")
     if not self.CVE_RESOLVED:
-      self.resolve_cve_data()
+      self.resolve_cve_data(cve_data)
 
     return max(self.cve_list, key=lambda cve: cve.get_cvss())
 
@@ -141,11 +141,22 @@ class CERTFR:
 
     self.link = f"{CERTFR_LINK_BASE}/{self.page_type}/{self.ref}/"
 
-  def resolve_cve_data(self):
+  def resolve_cve_data(self, cve_data=None):
     """ Resolves CVE data for all related CVE """
     print(f"\nResolving CVE data for {self.ref}...")
     for cve in self.cve_list:
-      cve.parse_nist()
+      # Checks if the current CVE can be found in the provided cve list. If not : parse Nist page
+      cve_imported = False
+      if cve_data:
+        cve_search = CVE.find_cve_by_ref(cve.get_ref(), cve_data)
+        
+        if cve_search:
+          print(f"Found {cve.get_ref()} in CVE list ! Copying data...")
+          cve.copy(cve_search)
+          cve_imported = True
+
+      if not cve_imported:
+        cve.parse_nist()
 
     self.CVE_RESOLVED = True
 
