@@ -32,6 +32,7 @@ class CVE:
   severity = Severity.NONE
   publish_date = ""
   description = ""
+  link = ""
 
   def __init__(self, ref, cvss=0, date="", description=""):
     """ Constructor """
@@ -59,6 +60,7 @@ class CVE:
     """ Setter for the CVE id """
     if self.check_ref(cve_ref):
       self.ref = cve_ref
+      self.link = f"{NIST_URL_BASE}{self.ref}"
 
     else:
       raise ValueError(f"{cve_ref} is not a valid CVE id")
@@ -73,12 +75,18 @@ class CVE:
       ColorPrint.red(
           f"{cvss_score} is not a valid CVSS score. You must provide a value between 0 and 10")
 
+  def set_from_dict(self, cve_dict):
+    """ Set CVE informations from dictionary """
+    self.cvss = cve_dict.get("cvss")
+    self.publish_date = cve_dict.get("publish_date", "")
+    self.description = cve_dict.get("description", "")
+
+  def copy(self, cve):
+    """ Copy the given cve informations """
+    self.set_from_dict(cve.to_dictionary(minimal=False))
+
   # ****************************************************************
   # Resolvers
-
-  def check_cvss(self, cvss_score):
-    """ Checks if the provided cvss score is valid """
-    return 0 <= cvss_score <= 10
 
   def resolve_severity(self):
     """ Resolves the severity based on the CVSS score """
@@ -115,7 +123,7 @@ class CVE:
 
     # Handle if the target is unreachable
     try:
-      req = requests.get(f"{NIST_URL_BASE}{self.get_ref()}")
+      req = requests.get(self.link)
       soup = BeautifulSoup(req.content, 'html.parser')
 
     except ConnectionError as e:
@@ -151,7 +159,7 @@ class CVE:
           "severity": self.severity,
           "publish_date": self.publish_date,
           "description": self.description,
-          "link": f"{NIST_URL_BASE}{self.get_ref()}"
+          "link": self.link
       }
 
       cve_dict.update(more_data)
@@ -165,9 +173,23 @@ class CVE:
   def check_ref(cve_ref):
     """ Checks whether the given cve id is valid """
     return re.match(CVE_REGEX, cve_ref)
+  
+  @staticmethod
+  def check_cvss(cvss_score):
+    """ Checks whether the given cvss score is valid """
+    return 0 <= cvss_score <= 10
+  
+  @staticmethod
+  def create_from_dict(cve_dict):
+    """ Creates a CVE instance from a dictionary """
+    cve = CVE(cve_dict.get("ref"), cve_dict.get("cvss"), cve_dict.get("publish_date", ""), cve_dict.get("description", ""))
+    
+    return cve
+    
 
   @staticmethod
   def find_cve_by_ref(cve_list, ref):
+    """ Find a CVE instance by ref in a list of CVEs """
     if not CVE.check_ref(ref):
       raise ValueError(f"Invalid CVE reference provided: {ref}")
     
