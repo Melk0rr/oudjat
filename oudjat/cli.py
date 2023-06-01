@@ -2,7 +2,7 @@
 Usage:
   oudjat watch (-t TARGET | -f FILE) [options]  [--check-max-cve] [--feed] [--filter=FILTER]
                                                 [--keywords=KEYWORDS | --keywordfile=FILE]   
-  oudjat vuln (-t TARGET | -f FILE) [options] [--cve-list=CVE_LIST]
+  oudjat vuln (-t TARGET | -f FILE) [options]
   oudjat -h | --help
   oudjat -V | --version
 
@@ -61,7 +61,6 @@ def command_switch(options):
   }
 
   command_name = next(command for command in COMMAND_OPTIONS if options[command])
-  print(command_name)
   return switch[command_name](options)
 
 def main():
