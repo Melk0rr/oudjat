@@ -76,6 +76,7 @@ def main():
 
     if options["cve"]:
       command = oudjat.commands.Vuln(options)
+
     else:
       command = oudjat.commands.CERT(options)
 
