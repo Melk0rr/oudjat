@@ -30,6 +30,9 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Output folder
+output/
+
 # Tests folder
 tests/
 

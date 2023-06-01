@@ -10,7 +10,7 @@ from oudjat.watchers.certfr import CERTFR
 from .target import Target
 
 
-class CERT(Target):
+class Watch(Target):
   """ CVE Target """
 
   def __init__(self, options):
@@ -61,7 +61,7 @@ class CERT(Target):
 
     # If option is provided: check for the most severe CVE
     if self.options["--check-max-cve"]:
-      max_cve = target.get_max_cve()
+      max_cve = target.get_max_cve(cve_data=self.options["--cve-list"])
       max_cve_dict = max_cve.to_dictionary()
       target_data["cve_max"], target_data["cvss_max"] = max_cve_dict.values()
 
