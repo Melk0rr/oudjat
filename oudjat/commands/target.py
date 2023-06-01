@@ -23,8 +23,7 @@ class Target(Base):
       def cve_import_callback(reader):
         cve_instances = []
         for row in reader:
-          cve_dict = { k: v for k, v in row.items() }
-          cve_instances.append(CVE.create_from_dict(cve_dict))
+          cve_instances.append(CVE.create_from_dict(row))
 
         return cve_instances
       
