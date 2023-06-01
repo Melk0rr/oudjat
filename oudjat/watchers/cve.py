@@ -37,7 +37,7 @@ class CVE:
   def __init__(self, ref, cvss=0, date="", description=""):
     """ Constructor """
     self.set_ref(ref)
-    self.set_cvss(cvss)
+    self.set_cvss(float(cvss))
     self.publish_date = date
     self.description = description
 
@@ -84,6 +84,7 @@ class CVE:
   def copy(self, cve):
     """ Copy the given cve informations """
     self.set_from_dict(cve.to_dictionary(minimal=False))
+    print(self.to_string())
 
   # ****************************************************************
   # Resolvers
@@ -111,7 +112,7 @@ class CVE:
   def parse_description(self, content):
     """ Function to extract description """
     desc_soup = content.select("p[data-testid='vuln-description']")
-    self.description = desc_soup[0].text if len(desc_soup) > 0 else ""
+    self.description = desc_soup[0].text.replace("\n", " ") if len(desc_soup) > 0 else ""
 
   def parse_publishdate(self, content):
     """ Function to extract cve publish date """
@@ -188,9 +189,15 @@ class CVE:
     
 
   @staticmethod
-  def find_cve_by_ref(cve_list, ref):
+  def find_cve_by_ref(ref, cve_list):
     """ Find a CVE instance by ref in a list of CVEs """
     if not CVE.check_ref(ref):
       raise ValueError(f"Invalid CVE reference provided: {ref}")
     
-    return [ cve for cve in cve_list if cve.get_ref() == ref ][0]
+    res = None
+
+    for cve in cve_list:
+      if cve.get_ref() == ref:
+        res = cve
+    
+    return res
