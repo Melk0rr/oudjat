@@ -40,14 +40,15 @@ pip3 install .
 ## Usage
 
       Usage:
-        oudjat cert (-t TARGET | -f FILE) [options] [--keywords=KEYWORDS | --keywordfile=KEYWORDFILE]
-        oudjat cve (-t TARGET | -f FILE) [options]
+        oudjat watch (-t TARGET | -f FILE) [options]  [--check-max-cve] [--feed] [--filter=FILTER]
+                                                      [--keywords=KEYWORDS | --keywordfile=FILE]   
+        oudjat vuln (-t TARGET | -f FILE) [options]
         oudjat -h | --help
         oudjat -V | --version
 
       Commands
-        cert                            parse data from cert page
-        cve                             parse CVE data from Nist page
+        watch                            parse data from cert page
+        vuln                             parse CVE data from Nist page
 
       Options:
         -h --help                       show this help message and exit
@@ -57,8 +58,11 @@ pip3 install .
         -S --silent                     simple output, one per line
         -v --verbose                    print debug info and full request output
         -V --version                    show version and exit
-        --check-max-cve                 determine which CVE is the most severe based on the CVSS score
         --export-csv=CSV                save results as csv
+        --cve-list=CVE_LIST             provide a list of cve to be used as a database and reduce the amount of requests
+
+      Watch-options:
+        --check-max-cve                 determine which CVE is the most severe based on the CVSS score
         --feed                          run cert mode from a feed
         --filter=FILTER                 date filter to apply with feed option (e.g. 2023-03-10)
         --keywords=KEYWORDS             set keywords to track (comma separated, no spaces, if multiple)
@@ -67,7 +71,7 @@ pip3 install .
       Exemples:
         oudjat cert -t https://cert.ssi.gouv.fr/alerte/feed/ --feed --filter "2023-03-13" --check-max-cve
         oudjat cert -f ./tests/certfr.txt --export-csv ./tests/certfr_20230315.csv --keywordfile ./tests/keywords.txt --check-max-cve
-        oudjat cve -f ./tests/cve.txt --export-csv ./tests/cve_20230313.csv
+        oudjat vuln -f ./tests/cve.txt --export-csv ./tests/cve_20230313.csv
 
       Help:
         For help using this tool, please open an issue on the Github repository:
