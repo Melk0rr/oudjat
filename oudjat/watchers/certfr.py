@@ -37,31 +37,71 @@ class CERTFRPageTypes(Enum):
   DUR = "dur"
 
 
+def parse_feed(feed_url, date_str_filter=None):
+  """ Parse a CERTFR Feed page """
+  try:
+    feed_req = requests.get(feed_url)
+    feed_soup = BeautifulSoup(feed_req.content, "xml")
+
+  except Exception as e:
+    print(
+        e, f"A parsing error occured for {feed_url}: {e}\nCheck if the page has the expected format.")
+
+  feed_items = feed_soup.find_all("item")
+  filtered_feed = []
+
+  for item in feed_items:
+    certfr_ref = CERTFR.get_ref_from_link(item.link.text)
+
+    if date_str_filter:
+      try:
+        valid_date_format = "%Y-%m-%d"
+        date_filter = datetime.strptime(date_str_filter, valid_date_format)          
+
+        date_str = item.pubDate.text.split(" +0000")[0]
+        date = datetime.strptime(date_str, "%a, %d %b %Y %H:%M:%S")
+
+        if date > date_filter:
+          filtered_feed.append(certfr_ref)
+
+      except ValueError as e:
+        ColorPrint.red(
+            f"Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !")
+        
+    else:
+      filtered_feed.append(certfr_ref)
+
+  return filtered_feed
+
+
 class CERTFR:
   """ CERTFR class addressing certfr page behavior """
 
   # ****************************************************************
   # Attributes & Constructors
 
-  ref = ""
-  title = ""
-  date_initial = ""
-  date_last = ""
-  sources = []
-  cve_list = set()
-  risks = set()
-  affected_products = []
-  documentations = []
-  link = ""
-  page_type = ""
-  CVE_RESOLVED = False
-
   def __init__(self, ref, title=""):
     """ Constructor """
-    self.set_ref(ref)
-    self.resolve_type_from_ref()
-    self.resolve_link()
+
+    if not CERTFR.is_valid_ref(ref) and not CERTFR.is_valid_link(ref):
+      raise ValueError(f"Invalid CERTFR ref provided : {ref}")
+    
+    self.ref = ref if CERTFR.is_valid_ref(ref) else CERTFR.get_ref_from_link(ref)
     self.title = title
+    self.link = f"{CERTFR_LINK_BASE}/{self.page_type}/{self.ref}/"
+    self.date_initial = ""
+    self.date_last = ""
+    self.sources = []
+    self.cve_list = set()
+    self.risks = set()
+    self.affected_products = []
+    self.documentations = []
+    self.CVE_RESOLVED = False
+
+    # Set page type
+    split_type = self.ref.split("-")[-2]
+    certfr_types = {e.name: e.value for e in CERTFRPageTypes}
+    self.page_type = certfr_types[split_type]
 
   # ****************************************************************
   # Getters & Setters
@@ -84,7 +124,10 @@ class CERTFR:
     if not self.CVE_RESOLVED:
       self.resolve_cve_data(cve_data)
 
-    return max(self.cve_list, key=lambda cve: cve.get_cvss())
+    max_cve = max(self.cve_list, key=lambda cve: cve.get_cvss())
+    print(f"\n{self.ref} max CVE is {max_cve.get_ref()}({max_cve.get_cvss()})")
+
+    return max_cve
 
   def get_title(self):
     """ Getter for the title """
@@ -103,14 +146,6 @@ class CERTFR:
 
     return docs
 
-  def set_ref(self, ref):
-    """ Setter for CERTFR ref """
-    if CERTFR.is_valid_ref(ref):
-      self.ref = ref
-
-    else:
-      raise (f"Invalid CERTFR ref provided : {ref}")
-
   def set_link(self, link):
     """ Setter for CERTFR link """
     if CERTFR.is_valid_link(link):
@@ -126,24 +161,10 @@ class CERTFR:
   # ****************************************************************
   # Resolvers
 
-  def resolve_type_from_ref(self):
-    """ Resolves CERTFR page type from ref """
-    split_type = self.ref.split("-")[-2]
-    certfr_types = {e.name: e.value for e in CERTFRPageTypes}
-    self.page_type = certfr_types[split_type]
-
-  def resolve_link(self):
-    """ Resolves CERTFR page link based on CERTFR page type and ref """
-    if self.page_type == "":
-      ColorPrint.red(
-          "You need to resolve CERTFR page type before trying to resolve link")
-      return
-
-    self.link = f"{CERTFR_LINK_BASE}/{self.page_type}/{self.ref}/"
-
   def resolve_cve_data(self, cve_data=None):
     """ Resolves CVE data for all related CVE """
-    print(f"\nResolving CVE data for {self.ref}...")
+    print(f"\nResolving {len(self.cve_list)} CVE data for {self.ref}...")
+
     for cve in self.cve_list:
       # Checks if the current CVE can be found in the provided cve list. If not : parse Nist page
       cve_imported = False
@@ -165,9 +186,12 @@ class CERTFR:
 
   def parse_cve(self, content):
     """ Extract all CVE refs in content and look for the highest CVSS """
+    print(f"Test: {len(self.cve_list)}")
     cve_refs = set(re.findall(CVE_REGEX, content.text))
     for ref in cve_refs:
       self.cve_list.add(CVE(ref))
+
+    print(f"{len(self.cve_list)} CVEs related to {self.ref}")
 
   def parse_products(self, content):
     """ Generates a list of affected products based on the corresponding <ul> element """
@@ -279,39 +303,3 @@ class CERTFR:
       return
 
     return re.findall(CERTFR_REF_REGEX, link)[0]
-
-  @staticmethod
-  def parse_feed(feed_url, date_str_filter=None):
-    """ Parse a CERTFR Feed page """
-    try:
-      feed_req = requests.get(feed_url)
-      feed_soup = BeautifulSoup(feed_req.content, "xml")
-
-    except Exception as e:
-      print(
-          e, f"A parsing error occured for {feed_url}: {e}\nCheck if the page has the expected format.")
-
-    feed_items = feed_soup.find_all("item")
-    filtered_feed = feed_items
-
-    if date_str_filter:
-      valid_date_format = "%Y-%m-%d"
-
-      try:
-        date_filter = datetime.strptime(date_str_filter, valid_date_format)
-        filtered_feed = []
-
-        for item in feed_items:
-          date_str = item.pubDate.text.split(" +0000")[0]
-          date = datetime.strptime(date_str, "%a, %d %b %Y %H:%M:%S")
-
-          if date > date_filter:
-            certfr_page = CERTFR(
-                ref=CERTFR.get_ref_from_link(item.link.text))
-            filtered_feed.append(certfr_page)
-
-      except ValueError as e:
-        ColorPrint.red(
-            f"Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !")
-
-    return filtered_feed

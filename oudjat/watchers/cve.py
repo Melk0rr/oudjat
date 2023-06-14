@@ -27,16 +27,15 @@ class CVE:
   # ****************************************************************
   # Attributes & Constructors
 
-  ref = ""
-  cvss = 0
-  severity = Severity.NONE
-  publish_date = ""
-  description = ""
-  link = ""
-
   def __init__(self, ref, cvss=0, date="", description=""):
     """ Constructor """
-    self.set_ref(ref)
+    if not self.check_ref(ref):
+      raise ValueError(f"{ref} is not a valid CVE id")
+
+    self.ref = ref
+    self.link = f"{NIST_URL_BASE}{self.ref}"
+    self.cvss = 0
+    self.severity = Severity.NONE    
     self.set_cvss(float(cvss))
     self.publish_date = date
     self.description = description
@@ -55,15 +54,6 @@ class CVE:
   def get_severity(self):
     """ Getter for the severity """
     return self.severity.name
-
-  def set_ref(self, cve_ref):
-    """ Setter for the CVE id """
-    if self.check_ref(cve_ref):
-      self.ref = cve_ref
-      self.link = f"{NIST_URL_BASE}{self.ref}"
-
-    else:
-      raise ValueError(f"{cve_ref} is not a valid CVE id")
 
   def set_cvss(self, cvss_score):
     """ Setter for the vulnerability CVSS score """
@@ -157,7 +147,7 @@ class CVE:
     # If user specifies it : provide more data in the dictionary
     if not minimal:
       more_data = {
-          "severity": self.severity,
+          "severity": self.severity.name,
           "publish_date": self.publish_date,
           "description": self.description,
           "link": self.link

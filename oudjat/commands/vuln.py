@@ -8,12 +8,11 @@ from .target import Target
 class Vuln(Target):
   """ CVE Target """
 
-  unique_cves = set()
-
   def __init__(self, options):
     """ Constructor """
     super().__init__(options)
 
+    self.unique_cves = set()
     target_cves = set(self.options["TARGET"])
 
     print(f"{len(target_cves)} CVEs to investigate...\n")
