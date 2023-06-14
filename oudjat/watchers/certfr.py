@@ -88,7 +88,6 @@ class CERTFR:
     
     self.ref = ref if CERTFR.is_valid_ref(ref) else CERTFR.get_ref_from_link(ref)
     self.title = title
-    self.link = f"{CERTFR_LINK_BASE}/{self.page_type}/{self.ref}/"
     self.date_initial = ""
     self.date_last = ""
     self.sources = []
@@ -102,6 +101,8 @@ class CERTFR:
     split_type = self.ref.split("-")[-2]
     certfr_types = {e.name: e.value for e in CERTFRPageTypes}
     self.page_type = certfr_types[split_type]
+
+    self.link = f"{CERTFR_LINK_BASE}/{self.page_type}/{self.ref}/"
 
   # ****************************************************************
   # Getters & Setters
@@ -120,7 +121,12 @@ class CERTFR:
 
   def get_max_cve(self, cve_data=None):
     """ Returns the highest cve """
+    if len(self.cve_list) <= 0:
+      print("No comparison possible: no CVE related")
+      return None
+    
     print(f"\nResolving most critical CVE for {self.ref}")
+
     if not self.CVE_RESOLVED:
       self.resolve_cve_data(cve_data)
 

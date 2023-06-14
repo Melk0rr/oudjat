@@ -60,7 +60,7 @@ class Watch(Target):
       # If option is provided: check for the most severe CVE
       if self.options["--check-max-cve"]:
         max_cve = cert_page.get_max_cve(cve_data=self.options["--cve-list"])
-        max_cve_dict = max_cve.to_dictionary()
+        max_cve_dict = max_cve.to_dictionary() if max_cve else { "ref": "", "cvss": None }
         cert_data["cve_max"], cert_data["cvss_max"] = max_cve_dict.values()
 
       # If keywords are provided in any way: compare them with results
