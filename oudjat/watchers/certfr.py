@@ -186,7 +186,6 @@ class CERTFR:
 
   def parse_cve(self, content):
     """ Extract all CVE refs in content and look for the highest CVSS """
-    print(f"Test: {len(self.cve_list)}")
     cve_refs = set(re.findall(CVE_REGEX, content.text))
     for ref in cve_refs:
       self.cve_list.add(CVE(ref))
