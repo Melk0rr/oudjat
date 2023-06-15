@@ -1,8 +1,8 @@
 """ Target module handling targeting operations and data gathering """
 from oudjat.utils.color_print import ColorPrint
-from oudjat.watchers.cve import CVE
+from oudjat.utils.file import export_2_csv, import_csv
 from oudjat.utils.init_option_handle import str_file_option_handle
-from oudjat.utils.file import import_csv, export_2_csv
+from oudjat.watchers.cve import CVE
 
 from .base import Base
 
