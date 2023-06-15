@@ -9,11 +9,12 @@ from .base import Base
 
 class Target(Base):
   """ Main enumeration module """
-  results = []
 
   def __init__(self, options):
     """ Initialization function """
     super().__init__(options)
+    self.results = []
+
     str_file_option_handle(self, "TARGET", "FILE")
 
     # If a csv of cve is provided, populate CVE instances
