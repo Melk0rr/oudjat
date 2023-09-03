@@ -6,7 +6,7 @@ from oudjat.watchers.certfr import CERTFR, parse_feed
 from .target import Target
 
 
-class Watch(Target):
+class CERT(Target):
   """ CVE Target """
 
   def __init__(self, options):
