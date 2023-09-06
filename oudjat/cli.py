@@ -1,13 +1,13 @@
 """
 Usage:
-  oudjat watch (-t TARGET | -f FILE) [options]  [--check-max-cve] [--feed] [--filter=FILTER]
+  oudjat cert (-t TARGET | -f FILE) [options]  [--check-max-cve] [--feed] [--filter=FILTER]
                                                 [--keywords=KEYWORDS | --keywordfile=FILE]   
   oudjat vuln (-t TARGET | -f FILE) [options]
   oudjat -h | --help
   oudjat -V | --version
 
 Commands
-  watch                            parse data from cert page
+  cert                            parse data from cert page
   vuln                             parse CVE data from Nist page
 
 Options:
@@ -21,7 +21,7 @@ Options:
   --export-csv=CSV                save results as csv
   --cve-list=CVE_LIST             provide a list of cve to be used as a database and reduce the amount of requests
 
-Watch-options:
+Cert-options:
   --check-max-cve                 determine which CVE is the most severe based on the CVSS score
   --feed                          run cert mode from a feed
   --filter=FILTER                 date filter to apply with feed option (e.g. 2023-03-10)
@@ -57,7 +57,7 @@ def command_switch(options):
   
   switch = {
     "vuln": oudjat.commands.Vuln,
-    "watch": oudjat.commands.Watch,
+    "cert": oudjat.commands.Cert,
   }
 
   command_name = next(command for command in COMMAND_OPTIONS if options[command])
