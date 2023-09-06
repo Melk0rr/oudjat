@@ -183,7 +183,7 @@ class CERTFR:
           cve_imported = True
 
       if not cve_imported:
-        cve.parse_nist()
+        cve.parse_nist(verbose=False)
 
     self.CVE_RESOLVED = True
 

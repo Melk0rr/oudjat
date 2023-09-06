@@ -109,7 +109,7 @@ class CVE:
     p_date_soup = content.select("span[data-testid='vuln-published-on']")
     self.publish_date = p_date_soup[0].text if len(p_date_soup) > 0 else ""
 
-  def parse_nist(self):
+  def parse_nist(self, verbose=True):
     """ Function to parse NIST CVE page in order to retreive CVE data """
 
     # Handle if the target is unreachable
@@ -126,7 +126,8 @@ class CVE:
     self.parse_description(soup)
     self.parse_publishdate(soup)
 
-    print(self.to_string())
+    if verbose:
+      print(self.to_string())
 
   # ****************************************************************
   # Converters
