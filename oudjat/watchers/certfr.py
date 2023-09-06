@@ -167,7 +167,7 @@ class CERTFR:
   # ****************************************************************
   # Resolvers
 
-  def resolve_cve_data(self, cve_data=None):
+  def resolve_cve_data(self, cve_data):
     """ Resolves CVE data for all related CVE """
     print(f"\nResolving {len(self.cve_list)} CVE data for {self.ref}...")
 
