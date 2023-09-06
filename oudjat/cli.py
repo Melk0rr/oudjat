@@ -8,7 +8,7 @@ Usage:
 
 Commands
   cert                            parse data from cert page
-  vuln                             parse CVE data from Nist page
+  vuln                            parse CVE data from Nist page
 
 Options:
   -h --help                       show this help message and exit
@@ -50,7 +50,7 @@ from oudjat.utils.stdouthook import StdOutHook
 
 from . import __version__ as VERSION
 
-COMMAND_OPTIONS = ["vuln", "watch"]
+COMMAND_OPTIONS = ["vuln", "cert"]
 
 def command_switch(options):
   """ Script command switch case """
