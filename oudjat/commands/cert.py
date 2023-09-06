@@ -1,4 +1,6 @@
 """ CVE Target class """
+from multiprocessing import Pool
+
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.init_option_handle import str_file_option_handle
 from oudjat.watchers.certfr import CERTFR, parse_feed
@@ -6,7 +8,7 @@ from oudjat.watchers.certfr import CERTFR, parse_feed
 from .target import Target
 
 
-class CERT(Target):
+class Cert(Target):
   """ CVE Target """
 
   def __init__(self, options):
@@ -48,26 +50,30 @@ class CERT(Target):
     print(msg)
     return matched
 
+  def cert_process(self, target):
+    """ CERT process method to deal with cert data """
+    cert_page = CERTFR(ref=target)
+    cert_page.parse()
+    cert_data = cert_page.to_dictionary()
+
+    # If option is provided: check for the most severe CVE
+    if self.options["--check-max-cve"]:
+      max_cve = cert_page.get_max_cve(cve_data=self.options["--cve-list"])
+      max_cve_dict = max_cve.to_dictionary() if max_cve else { "ref": "", "cvss": None }
+      cert_data["cve_max"], cert_data["cvss_max"] = max_cve_dict.values()
+
+    # If keywords are provided in any way: compare them with results
+    if self.options["--keywords"]:
+      cert_data["match"] = "-".join(self.keyword_check(cert_page))
+
+    return cert_data
+
   def run(self):
-    """ Main function called from the cli module """
-    for target in list(self.unique_targets):
-      cert_page = CERTFR(ref=target)
-
-      """ Define parsing instructions to run over all final targets """
-      cert_page.parse()
-      cert_data = cert_page.to_dictionary()
-
-      # If option is provided: check for the most severe CVE
-      if self.options["--check-max-cve"]:
-        max_cve = cert_page.get_max_cve(cve_data=self.options["--cve-list"])
-        max_cve_dict = max_cve.to_dictionary() if max_cve else { "ref": "", "cvss": None }
-        cert_data["cve_max"], cert_data["cvss_max"] = max_cve_dict.values()
-
-      # If keywords are provided in any way: compare them with results
-      if self.options["--keywords"]:
-        cert_data["match"] = "-".join(self.keyword_check(cert_page))
-
-      self.results.append(cert_data)
+    """ Main method called from the cli module """
+    with Pool(processes=5) as pool:
+      for cert_data in pool.imap_unordered(self.cert_process, self.unique_targets):
+        self.results.append(cert_data)
+      
 
     if self.options["--export-csv"]:
       super().res_2_csv()
