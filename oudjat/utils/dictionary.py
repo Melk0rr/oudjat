@@ -1,6 +1,4 @@
 """ Dictionary utils """
-from enum import Enum
-
 
 def join_dictionary_items(dictionary, char):
   """ Join dictionary items with the provided character """
