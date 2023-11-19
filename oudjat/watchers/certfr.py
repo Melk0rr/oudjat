@@ -167,7 +167,7 @@ class CERTFR:
   # ****************************************************************
   # Resolvers
 
-  def resolve_cve_data(self, cve_data=None):
+  def resolve_cve_data(self, cve_data):
     """ Resolves CVE data for all related CVE """
     print(f"\nResolving {len(self.cve_list)} CVE data for {self.ref}...")
 
@@ -183,7 +183,7 @@ class CERTFR:
           cve_imported = True
 
       if not cve_imported:
-        cve.parse_nist()
+        cve.parse_nist(verbose=False)
 
     self.CVE_RESOLVED = True
 

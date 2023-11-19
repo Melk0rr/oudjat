@@ -1,26 +1,24 @@
 # Oudjat
 
 ```
- .                           :-=++**######*+=-:
-  -++-.              .:=+*%@@%#*+=--:::::--=+*%@@#+-
-     -+##%###*###%%@@%#+=-:                     .-+#@%+-.
-           ..:::..            .:-=+**###**+=-.       -*@@@%*+=-
- :                      :-+*##*=-:-@@@@@@@@@@*##*=:     .-+#%@%+
-  =**=-::.....::-=+*#%%#*=:       #@@@@@@@@@@:  .-+##+-
-     .-=+**###%%%@@@@#+-.         -@@@@@@@@@*        :+%%*=-.
-                    .:-+#@#*=:.     -+***+-.  .-=+*%%#**++**#%.
-                          .-=*#%@%###***##%%@@@@@%-
-        .:-:.                     ...::.-%@@-@@@#      .d88888b.                888  d8b          888
-     .*@%*=+*@#:                      .*@@+  %@@+     d88P" "Y88b               888  Y8P          888
-    .@@*      @@                    :*@@+    %@@@+    888     888               888               888
-    :@@=  .#*#@=                 .=%@%=      @@@@@@-  888     888 888  888  .d88888 8888  8888b.  888888
-     *@@-   ..                :+%@%+:       .@@@#=:   888     888 888  888 d88" 888 "888     "88b 888
-      -#@@*-.           .:=*%@@#=.          +@*.      888     888 888  888 888  888  888 .d888888 888
-        .=*%@@%##**##%%@@%*+-.              @=        Y88b. .d88P Y88b 888 Y88b 888  888 888  888 Y88b.
-             ..:----::.                    =+          "Y88888P"   "Y88888  "Y88888  888 "Y888888  "Y888
-                                                                                     888
-                                                                                    d88P
-                                                                                  888P"
+   .-=*#%@@%%%%%%%%#*+-:                
+ *#*+=:.           ..-=*%%*=-.          
+                          .-=*#****+++==
+     .=*#%%@@%%##*=-:                   
+   .*%=-@@@@@@@@@ .:=*#*=:.             
+ .+#-   #@@@@@@@*  .:+%#**************#=
+-##++*#**%@@@@%#+++=:.                  
+     :@@@=+%@@=.                        
+     +@@@   .=#@#=.                =-=--
+     #@@#       :+#%*-.            =-= *
+      %@*           :=*#*=:.         .=-
+      -@=                :-+*+++=====:  
+
+    ____          __  _      __ 
+   / __ \__ _____/ / (_)__ _/ /_
+  / /_/ / // / _  / / / _ `/ __/
+  \____/\_,_/\_,_/_/ /\_,_/\__/ 
+                |___/           
 ```
 ## Getting Started
 
@@ -40,14 +38,14 @@ pip3 install .
 ## Usage
 
       Usage:
-        oudjat watch (-t TARGET | -f FILE) [options]  [--check-max-cve] [--feed] [--filter=FILTER]
+        oudjat cert (-t TARGET | -f FILE) [options]  [--check-max-cve] [--feed] [--filter=FILTER]
                                                       [--keywords=KEYWORDS | --keywordfile=FILE]   
         oudjat vuln (-t TARGET | -f FILE) [options]
         oudjat -h | --help
         oudjat -V | --version
 
       Commands
-        watch                            parse data from cert page
+        cert                            parse data from cert page
         vuln                             parse CVE data from Nist page
 
       Options:
@@ -61,7 +59,7 @@ pip3 install .
         --export-csv=CSV                save results as csv
         --cve-list=CVE_LIST             provide a list of cve to be used as a database and reduce the amount of requests
 
-      Watch-options:
+      Cert-options:
         --check-max-cve                 determine which CVE is the most severe based on the CVSS score
         --feed                          run cert mode from a feed
         --filter=FILTER                 date filter to apply with feed option (e.g. 2023-03-10)
