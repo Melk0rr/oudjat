@@ -41,23 +41,29 @@ pip3 install .
         oudjat cert (-t TARGET | -f FILE) [options]  [--check-max-cve] [--feed] [--filter=FILTER]
                                                       [--keywords=KEYWORDS | --keywordfile=FILE]   
         oudjat vuln (-t TARGET | -f FILE) [options]
+        oudjat sc (-t TARGET | -f FILE) (--sc-url=SC_URL) [--sc-mode=SC_MODE]
         oudjat -h | --help
         oudjat -V | --version
 
       Commands
         cert                            parse data from cert page
-        vuln                             parse CVE data from Nist page
-
+        kpi                             generates kpi
+        vuln                            parse CVE data from Nist page
+        
       Options:
-        -h --help                       show this help message and exit
-        -t --target                     set target (comma separated, no spaces, if multiple)
+        -c --config=CONFIG              specify config file
+        -d --directory                  set target (reads from file, one domain per line)
         -f --file                       set target (reads from file, one domain per line)
-        -o --output                     save to filename
+        -g --gap=GAP                    gap between elements
+        -h --help                       show this help message and exit
+        -H --history=HIST               check kpis for last n element
+        -l --cve-list=CVE_LIST          provide a list of cve to be used as a database and reduce the amount of requests
+        -o --output=FILENAME            save to filename
         -S --silent                     simple output, one per line
+        -t --target                     set target (comma separated, no spaces, if multiple)
         -v --verbose                    print debug info and full request output
         -V --version                    show version and exit
-        --export-csv=CSV                save results as csv
-        --cve-list=CVE_LIST             provide a list of cve to be used as a database and reduce the amount of requests
+        -x --export-csv=CSV             save results as csv
 
       Cert-options:
         --check-max-cve                 determine which CVE is the most severe based on the CVSS score
