@@ -28,6 +28,7 @@ class Vuln(Target):
         ColorPrint.red(f"Invalid CVE reference provided {ref}")
 
   def cve_process(self, cve):
+    """ Process to be run on each cve """
     cve.parse_nist()
     return cve.to_dictionary(minimal=False)
 
