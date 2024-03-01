@@ -7,16 +7,16 @@ class ColorPrint:
   END = '\033[0m'
 
   @classmethod
+  def white(self, s, **kwargs):
+    print(s, **kwargs)
+
+  @classmethod
   def red(self, s, **kwargs):
     print(self.RED + s + self.END, **kwargs)
 
   @classmethod
   def green(self, s, **kwargs):
     print(self.GREEN + s + self.END, **kwargs)
-
-  @classmethod
-  def blue(self, s, **kwargs):
-    print(self.BLUE + s + self.END, **kwargs)
 
   @classmethod
   def yellow(self, s, **kwargs):
@@ -29,3 +29,4 @@ class ColorPrint:
   @classmethod
   def purple(self, s, **kwargs):
     print(self.PURPLE + s + self.END, **kwargs)
+
