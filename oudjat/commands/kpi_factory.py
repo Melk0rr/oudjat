@@ -4,13 +4,13 @@ import json
 from time import sleep
 from multiprocessing import Pool
 
-from kpicalculator.utils.color_print import ColorPrint
-from kpicalculator.utils.file import import_csv, export_csv
+from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.file import import_csv, export_csv
 
 from .base import Base
-from kpicalculator.kpi.kpi import KPI
+from oudjat.control.kpi import KPIGroup
 
-class KPICalculator(Base):
+class KPIFactory(Base):
   """Main enumeration module"""
   
   def __init__(self, options):
@@ -25,11 +25,10 @@ class KPICalculator(Base):
     config_ds = self.config["data_sources"]
 
     for k in config_ds.keys():
-      source_path = f"{self.options['FOLDER']}\{config_ds[k]}.csv"
+      source_path = f"{self.options['DIRECTORY']}\{config_ds[k]}.csv"
       self.data_sources[k] = import_csv(source_path, delimiter='|')
 
-    self.kpis = [ KPI(kpi, data_source=self.data_sources[kpi["perimeter"]]) for kpi in self.config["kpis"] ]
-
+    self.kpis = [ KPIGroup(kpi, data_source=self.data_sources[kpi["perimeter"]]) for kpi in self.config["kpis"] ]
     self.results = []
 
   def handle_exception(self, e, message=""):
