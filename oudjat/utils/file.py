@@ -2,9 +2,7 @@ import os
 import re
 import csv
 
-from oudjat.utils.color_print import ColorPrint
-
-def export_2_csv(data, file_path, delimiter=','):
+def export_csv(data, file_path, delimiter=','):
   """ Helper function to export data into a CSV file """
   full_path = os.path.join(os.getcwd(), file_path)
 
@@ -13,7 +11,7 @@ def export_2_csv(data, file_path, delimiter=','):
     writer.writeheader()
     writer.writerows(data)
 
-def import_csv(file_path, callback, delimiter=None):
+def import_csv(file_path, callback=None, delimiter=None):
   """ Helper function to import CSV content into a list of dictionaries """
   full_path = os.path.join(os.getcwd(), file_path)
 
@@ -24,9 +22,14 @@ def import_csv(file_path, callback, delimiter=None):
       f.seek(0)
       delimiter = re.findall(r'\W', first_line)[0]
 
-      ColorPrint.yellow(f"\nNo delimiter specified, guessed '{delimiter}' as a delimiter")
+      print(f"\nNo delimiter specified, guessed '{delimiter}' as a delimiter")
 
     reader = csv.DictReader(f, delimiter=delimiter, skipinitialspace=True)
-    data = callback(list(reader))
+    
+    if callback:
+      data = callback(list(reader))
+
+    else:
+      data = [row for row in list(reader)]
 
   return data
