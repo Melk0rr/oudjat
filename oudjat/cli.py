@@ -3,6 +3,7 @@ Usage:
   oudjat cert (-t TARGET | -f FILE) [options]  [--check-max-cve] [--feed] [--filter=FILTER]
                                                 [--keywords=KEYWORDS | --keywordfile=FILE]   
   oudjat vuln (-t TARGET | -f FILE) [options]
+  oudjat kpi (-d DIRECTORY) [options] [--config=CONFIG] [--history=HIST] [--gap=GAP]
   oudjat sc (-t TARGET | -f FILE) (--sc-url=SC_URL) [--sc-mode=SC_MODE]
   oudjat -h | --help
   oudjat -V | --version
@@ -56,7 +57,7 @@ from oudjat.utils.stdouthook import StdOutHook
 
 from . import __version__ as VERSION
 
-COMMAND_OPTIONS = ["vuln", "cert", "sc"]
+COMMAND_OPTIONS = ["vuln", "cert", "sc", "kpi"]
 
 def command_switch(options):
   """ Script command switch case """
@@ -65,6 +66,7 @@ def command_switch(options):
     "vuln": oudjat.commands.Vuln,
     "cert": oudjat.commands.Cert,
     "sc"  : oudjat.commands.SC,
+    "kpi" : oudjat.commands.KPIFactory
   }
 
   command_name = next(command for command in COMMAND_OPTIONS if options[command])
@@ -86,7 +88,7 @@ def main():
       sys.stdout = StdOutHook(
           options["FILENAME"], options["--silent"], options["--output"])
 
-    if not options["--target"] and not options["--file"]:
+    if not options["--target"] and not options["--file"] and not options["--directory"]:
       ColorPrint.red(
           "Target required! Run with -h for usage instructions. Either -t target.host or -f file.txt required")
       return
