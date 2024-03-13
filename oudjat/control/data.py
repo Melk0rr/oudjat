@@ -73,7 +73,7 @@ class DataScope:
     self,
     name: str,
     perimeter: str,
-    data: List[Dict] | DataScope,
+    data: List[Dict] | DataScope = None,
     filters: List[Dict] | List[DataFilter] = [],
     description: str = ""
   ):
@@ -94,9 +94,19 @@ class DataScope:
     """ Getter for perimeter name """
     return self.name
 
-  def get_initial_data(self):
+  def get_input_data(self):
     """ Getter for input data """
     return self.data_in
+
+  def get_perimeter(self):
+    """ Getter for perimeter """
+    return self.perimeter
+
+  def set_input_data(self, data: List[Dict] | DataScope):
+    """ Setter for input data """
+    self.data_in = data.get_data() if isinstance(data, DataScope) else data
+    self.initial_scope = data.get_name()
+    self.data = None
 
   def set_filters(self, filters: List[Dict] | List[DataFilter] = []):
     """ Setter for filters """
@@ -112,6 +122,9 @@ class DataScope:
 
   def get_data(self):
     """ Getter for perimeter data """
+    if self.data_in is None:
+      raise ValueError(f"{__class__}: no input data defined for current scope {self.name}")
+
     if self.data is None:
       self.filter_data()
 
@@ -130,4 +143,6 @@ class DataScope:
       merge_data.extend(s.get_data())
 
     merge = DataScope(name=name, perimeter=perimeters[0], data=merge_data, filters=[])
+    merge.filter_data()
+
     return merge
