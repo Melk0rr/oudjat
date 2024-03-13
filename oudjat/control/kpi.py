@@ -34,7 +34,7 @@ class KPIGroup:
 
     self.kpis = []
     for k in kpi_dictionnaries:
-      kpi = KPI(name=k["name"], perimeter=self.perimeter, data=self.data, filters=self.group_filters, description=k.get("description", ""))
+      kpi = KPI(name=k["name"], perimeter=self.perimeter, data=k["data"], filters=self.group_filters, description=k.get("description", ""))
       self.kpis.append(kpi)
   
   def get_name(self):

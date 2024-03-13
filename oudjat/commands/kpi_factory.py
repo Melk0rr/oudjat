@@ -8,6 +8,7 @@ from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.file import import_csv, export_csv
 
 from .base import Base
+from oudjat.control.data import DataFilter, DataScope
 from oudjat.control.kpi import KPIGroup
 
 class KPIFactory(Base):
@@ -28,7 +29,13 @@ class KPIFactory(Base):
       source_path = f"{self.options['DIRECTORY']}\{config_ds[k]}.csv"
       self.data_sources[k] = import_csv(source_path, delimiter='|')
 
-    self.kpis = [ KPIGroup(kpi, data_source=self.data_sources[kpi["perimeter"]]) for kpi in self.config["kpis"] ]
+    self.filters = { k: DataFilter(fieldname=f["field"], value=f["value"]) for k, f in self.config["filters"].items() }
+    self.scopes = {}
+    for k, s in self.config["scopes"].items():
+      s_filters = [ self.filters[f] for f in s["filters"] ]
+      self.scopes[k] = DataScope(name=s["name"], perimeter=s["perimeter"], data=self.data_sources[kpi["perimeter"]], filters=s_filters)
+
+    self.kpis = [ KPIGroup(kpi, data_source=self.data_sources[kpi["perimeter"]]) for kpi in self.config["kpi_groups"] ]
     self.results = []
 
   def handle_exception(self, e, message=""):
