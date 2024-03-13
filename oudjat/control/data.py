@@ -94,6 +94,14 @@ class DataScope:
     """ Getter for perimeter name """
     return self.name
 
+  def get_initial_data(self):
+    """ Getter for input data """
+    return self.data_in
+
+  def set_filters(self, filters: List[Dict] | List[DataFilter] = []):
+    """ Setter for filters """
+    self.filters = DataFilter.get_valid_filters_list(filters)
+
   def filter_data(self):
     """ Apply filters to kpi data to get perimeter specific data """
 
@@ -108,3 +116,18 @@ class DataScope:
       self.filter_data()
 
     return self.data
+
+  @staticmethod
+  def merge_scopes(name: str, scopes: List[DataScope]):
+    """ Merges given scopes into one """
+    # Check if all scopes are on the same perimeter
+    perimeters = set([ s["perimeter"] for s in scopes ])
+    if len(perimeters) > 1:
+      raise ValueError(f"{__class__}: Error merging scopes. Please provide scopes with the same perimeter")
+
+    merge_data = []
+    for s in scopes:
+      merge_data.extend(s.get_data())
+
+    merge = DataScope(name=name, perimeter=perimeters[0], data=merge_data, filters=[])
+    return merge
