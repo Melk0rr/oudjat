@@ -31,19 +31,15 @@ class KPI(DataScope):
   ):
     """ Constructor """
     super().__init__(name=name, data=data, filters=filters, description=description)
-    self.conformity_level = None
 
     if date is None:
       date = datetime.today()
 
     self.date = date
 
-  def get_conformity_level(self):
+  def get_conformity_level(self, value: float = self.get_kpi_value()):
     """ Establish the conformity level """
-    k_value = self.get_kpi_value()
-    self.conformity_level = next(filter(lambda lvl: lvl.value["min"] <= k_value <= lvl.value["max"], list(ConformityLevel)))
-
-    return self.conformity_level
+    return next(filter(lambda lvl: lvl.value["min"] <= value <= lvl.value["max"], list(ConformityLevel)))
 
   def get_kpi_value(self):
     """ Returns the percentage of conform data based on kpi control """
@@ -57,11 +53,12 @@ class KPI(DataScope):
     scope_str = self.to_string()
 
     print(f"{prefix}{scope_str[0]}", end=" = ")
-    self.print_colors[self.conformity_level.name](f"{scope_str[1]}%")
+    self.print_colors[self.get_conformity_level().name](f"{scope_str[1]}%")
 
   def to_dictionary(self):
     """ Converts the current instance into a dictionary """
     k_value = self.get_kpi_value()
+    conformity = self.get_conformity_level(k_value)
 
     return {
       "name": self.name,
@@ -70,6 +67,7 @@ class KPI(DataScope):
       "scope_size": len(self.data_in),
       "conform_elements": len(self.data),
       "value": k_value,
+      "conformity": conformity,
       "date": self.date.strftime('%Y-%m-%d')
     }
 
