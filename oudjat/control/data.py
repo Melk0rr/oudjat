@@ -3,12 +3,20 @@ from typing import List, Dict
 from enum import Enum
 
 
+def ope_contains(v, t):
+  """ Checks whether or not the value (v) to check is 'in' the target value """
+  return v.contains(t)
+    
+def ope_in(v, t):
+  """ Checks whether or not the value (v) to check is 'in' the target value """
+  return v in t
+
 class DataFilter:
   """ DataFilter class : handling data filtering """
 
   operations = {
-    "contains": DataFilter.ope_contains,
-    "in": DataFilter.ope_in
+    "contains": ope_contains,
+    "in": ope_in
   }
 
   def __init__(self, fieldname: str, value: List[str | int | float], operator: str = "in"):
@@ -22,7 +30,7 @@ class DataFilter:
     return self.operations[self.operator](element[self.fieldname], self.value)
 
   @staticmethod
-  def get_valid_filters_list(filters_list: List[Dict] | List[DataFilter]):
+  def get_valid_filters_list(filters_list: List[Dict] | List["DataFilter"]):
     """ Check filters type and format them into DataFilter instances if needed """
     filters_valid = all(isinstance(x, DataFilter) for x in filters_list)
     if not filters_valid:
@@ -36,21 +44,11 @@ class DataFilter:
     return filters_list
 
   @staticmethod
-  def ope_contains(v, t):
-    """ Checks whether or not the value (v) to check is 'in' the target value """
-    return v.contains(t)
-    
-  @staticmethod
-  def ope_in(v, t):
-    """ Checks whether or not the value (v) to check is 'in' the target value """
-    return v in t
-
-  @staticmethod
   def gen_from_dict(filters: List[Dict]):
     """ Generates DataFitler instances based on dictionnaries """
     filter_instances = []
     for f in filters:
-      i = DataFilter(fieldname=f["name"], operator=f.get("operator", "in"), value=f["value"])
+      i = DataFilter(fieldname=f["field"], operator=f.get("operator", "in"), value=f["value"])
       filter_instances.append(i)
 
     return filter_instances
@@ -73,7 +71,7 @@ class DataScope:
     self,
     name: str,
     perimeter: str,
-    data: List[Dict] | DataScope = None,
+    data: List[Dict] | "DataScope" = None,
     filters: List[Dict] | List[DataFilter] = [],
     description: str = ""
   ):
@@ -102,7 +100,7 @@ class DataScope:
     """ Getter for perimeter """
     return self.perimeter
 
-  def set_input_data(self, data: List[Dict] | DataScope):
+  def set_input_data(self, data: List[Dict] | "DataScope"):
     """ Setter for input data """
     self.data_in = data.get_data() if isinstance(data, DataScope) else data
     self.initial_scope = data.get_name()
@@ -131,10 +129,10 @@ class DataScope:
     return self.data
 
   @staticmethod
-  def merge_scopes(name: str, scopes: List[DataScope]):
+  def merge_scopes(name: str, scopes: List["DataScope"]):
     """ Merges given scopes into one """
     # Check if all scopes are on the same perimeter
-    perimeters = set([ s["perimeter"] for s in scopes ])
+    perimeters = set([ s.get_perimeter() for s in scopes ])
     if len(perimeters) > 1:
       raise ValueError(f"{__class__}: Error merging scopes. Please provide scopes with the same perimeter")
 
@@ -142,7 +140,7 @@ class DataScope:
     for s in scopes:
       merge_data.extend(s.get_data())
 
-    merge = DataScope(name=name, perimeter=perimeters[0], data=merge_data, filters=[])
+    merge = DataScope(name=name, perimeter=list(perimeters)[0], data=merge_data, filters=[])
     merge.filter_data()
 
     return merge

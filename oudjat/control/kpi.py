@@ -24,21 +24,23 @@ class KPI(DataScope):
     self,
     name: str,
     perimeter: str,
-    data: List[Dict] | DataScope,
+    data: List[Dict] | DataScope = None,
     filters: List[Dict] | List[DataFilter] = [],
     description: str = "",
     date: datetime = None
   ):
     """ Constructor """
-    super().__init__(name=name, data=data, filters=filters, description=description)
+    super().__init__(name=name, perimeter=perimeter, data=data, filters=filters, description=description)
 
     if date is None:
       date = datetime.today()
 
     self.date = date
 
-  def get_conformity_level(self, value: float = self.get_kpi_value()):
+  def get_conformity_level(self, value: float = None):
     """ Establish the conformity level """
+    if value is None:
+      value = self.get_kpi_value()
     return next(filter(lambda lvl: lvl.value["min"] <= value <= lvl.value["max"], list(ConformityLevel)))
 
   def get_kpi_value(self):

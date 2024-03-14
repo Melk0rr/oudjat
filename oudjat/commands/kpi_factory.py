@@ -34,7 +34,7 @@ class KPIFactory(Base):
     self.scopes = {}
     for k, s in self.config["scopes"].items():
       s_filters = [ self.filters[f] for f in s["filters"] ]
-      self.scopes[k] = DataScope(name=s["name"], perimeter=s["perimeter"], data=self.data_sources[kpi["perimeter"]], filters=s_filters)
+      self.scopes[k] = DataScope(name=s["name"], perimeter=s["perimeter"], data=self.data_sources[s["perimeter"]], filters=s_filters)
 
     self.kpi_list = self.config["kpis"]
 
@@ -54,13 +54,13 @@ class KPIFactory(Base):
     kpi_controls = DataFilter.gen_from_dict(kpi["controls"])
     kpi_i = KPI(name=kpi["name"], perimeter=kpi["perimeter"], filters=kpi_controls)
 
-    print(f"{kpi_i.get_name()}")
+    print(f"\n{kpi_i.get_name()}")
 
     kpi_data = []
 
     for s in kpi["scopes"]:
       # Build the scope to pass to the kpi
-      sd = DataScope.merge_scopes([ self.scopes[b] for b in s["build"] ])
+      sd = DataScope.merge_scopes(f"Build - {s['name']}", [ self.scopes[b] for b in s["build"] ])
       scope_i = DataScope(name=s["name"], perimeter=kpi_i.get_perimeter(), data=sd)
 
       # Pass the scope to the kpi and get conformity data
