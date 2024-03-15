@@ -3,8 +3,9 @@ import os
 import csv
 import json
 import glob
-from time import sleep
+from datetime import datetime
 from multiprocessing import Pool
+from typing import List, Dict
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.file import import_csv, export_csv
@@ -15,7 +16,7 @@ from oudjat.control.kpi import KPI
 
 class KPIFactory(Base):
   """Main enumeration module"""
-  
+   
   def __init__(self, options):
     """ Constructor """
     super().__init__(options)
@@ -23,22 +24,21 @@ class KPIFactory(Base):
     config_file = open(self.options["--config"])
     self.config = json.load(config_file)
 
-    print("Importing sources...")
     self.data_sources = {}
-    self.set_data_sources(self.config["data_sources"])
-
-    self.filters = { k: DataFilter(fieldname=f["field"], value=f["value"]) for k, f in self.config["filters"].items() }
-
+    self.filters = {}
     self.scopes = {}
-    for k, s in self.config["scopes"].items():
-      s_filters = [ self.filters[f] for f in s["filters"] ]
-      self.scopes[k] = DataScope(name=s["name"], perimeter=s["perimeter"], data=self.data_sources[s["perimeter"]], filters=s_filters)
+
+    if not self.options["--history"]:
+      self.set_data_sources(self.config["data_sources"])
+      self.set_filters(self.config["filters"])
+      self.set_scopes(self.config["scopes"])
 
     self.kpi_list = self.config["kpis"]
     self.results = {}
   
   def set_data_sources(self, sources: Dict):
     """ Setter for data sources """
+    print(f"Importing {', '.join(sources.keys())} sources...")
     formated_sources = {}
 
     for k in sources.keys():
@@ -46,6 +46,45 @@ class KPIFactory(Base):
       formated_sources[k] = import_csv(source_path, delimiter='|')
 
     self.data_sources = formated_sources
+
+  def set_filters(self, filters: Dict):
+    """ Setter for filters """
+    self.filters = { k: DataFilter(fieldname=f["field"], value=f["value"]) for k, f in filters.items() }
+
+  def set_scopes(self, scopes: Dict):
+    """ Setter for scopes """
+    for k, s in scopes.items():
+      s_filters = [ self.filters[f] for f in s["filters"] ]
+      self.scopes[k] = DataScope(name=s["name"], perimeter=s["perimeter"], data=self.data_sources[s["perimeter"]], filters=s_filters)
+
+  def build_file_history(self, match: str):
+    """ List files based on history, gap and provided directory """
+    history_format = "%Y-%m-%d"
+
+    # List files in provided directory, retreive their creation date and sort them from newer to older
+    files = glob.glob(f"{self.options['DIRECTORY']}/{match}*.csv")
+    files = [ { "path": f, "date": datetime.fromtimestamp(os.path.getctime(f)).strftime(history_format) } for f in files ]
+    files = sorted(files, key=lambda d: d["date"], reverse=True)
+
+    if len(files) == 0:
+      ColorPrint.red(f"No files matching {match} in {self.options['DIRECTORY']}")
+      return []
+
+    # Narrow file list based on history and gap parameters
+    history_files = [ files[0] ]
+    for f in files:
+      if len(history_files) >= self.options["--history"]:
+        break
+      
+      # Get difference between last added element date and current file date
+      previous_date = datetime.strptime(history_files[-1]["date"], history_format)
+      date = datetime.strptime(f["date"], history_format)
+      diff = date - previous_date
+
+      if abs(diff.days) >= self.options["--gap"]:
+        history_files.append(f)
+
+    return history_files
 
   def handle_exception(self, e, message=""):
     """ Function handling exception for the current class """
@@ -86,10 +125,19 @@ class KPIFactory(Base):
   def run(self):
     """ Run command method """
     if self.options["--history"]:
-      print("")
+      self.options["--history"] = int(self.options["--history"])
+
+      if self.options["--gap"]:
+        self.options["--gap"] = int(self.options["--gap"])
+
+      else:
+        self.options["--gap"] = 1
+
+      history_files = { k: self.build_file_history(self.config["data_sources"][k]) for k in self.config["data_sources"].keys() }
+      print(history_files)
 
     else:
       self.kpi_thread_loop()
 
-    if self.options["--export-csv"]:
+    if self.options["--export-csv"] and len(self.results) > 0:
       export_csv(self.results, self.options["--export-csv"], delimiter='|')
