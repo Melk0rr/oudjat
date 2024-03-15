@@ -1,6 +1,8 @@
 """ Target module handling targeting operations and data gathering """
+import os
 import csv
 import json
+import glob
 from time import sleep
 from multiprocessing import Pool
 
@@ -23,11 +25,7 @@ class KPIFactory(Base):
 
     print("Importing sources...")
     self.data_sources = {}
-    config_ds = self.config["data_sources"]
-
-    for k in config_ds.keys():
-      source_path = f"{self.options['DIRECTORY']}\{config_ds[k]}.csv"
-      self.data_sources[k] = import_csv(source_path, delimiter='|')
+    self.set_data_sources(self.config["data_sources"])
 
     self.filters = { k: DataFilter(fieldname=f["field"], value=f["value"]) for k, f in self.config["filters"].items() }
 
@@ -37,26 +35,34 @@ class KPIFactory(Base):
       self.scopes[k] = DataScope(name=s["name"], perimeter=s["perimeter"], data=self.data_sources[s["perimeter"]], filters=s_filters)
 
     self.kpi_list = self.config["kpis"]
+    self.results = {}
+  
+  def set_data_sources(self, sources: Dict):
+    """ Setter for data sources """
+    formated_sources = {}
 
-    # self.kpis = [ KPIGroup(kpi, data_source=self.data_sources[kpi["perimeter"]]) for kpi in self.config["kpi_groups"] ]
-    self.results = []
+    for k in sources.keys():
+      source_path = f"{self.options['DIRECTORY']}\{sources[k]}.csv"
+      formated_sources[k] = import_csv(source_path, delimiter='|')
+
+    self.data_sources = formated_sources
 
   def handle_exception(self, e, message=""):
     """ Function handling exception for the current class """
     if self.options["--verbose"]:
       print(e)
-      
+
     if message:
       ColorPrint.red(message)
 
   def kpi_process(self, kpi):
     """ Target process to deal with url data """
+    kpi_data = {}
+
     kpi_controls = DataFilter.gen_from_dict(kpi["controls"])
     kpi_i = KPI(name=kpi["name"], perimeter=kpi["perimeter"], filters=kpi_controls)
 
     print(f"\n{kpi_i.get_name()}")
-
-    kpi_data = []
 
     for s in kpi["scopes"]:
       # Build the scope to pass to the kpi
@@ -65,21 +71,23 @@ class KPIFactory(Base):
 
       # Pass the scope to the kpi and get conformity data
       kpi_i.set_input_data(scope_i)
-      kpi_data.append(kpi_i.to_dictionary())
+      kpi_data[s["name"]] = kpi_i.to_dictionary()
       kpi_i.print_value(prefix=f"=> {scope_i.get_name()}: ")
 
-    return kpi_data
+    return (kpi["name"], kpi_data)
 
   def kpi_thread_loop(self):
     """ Run kpi thread loop """
+    print("Generating KPIs...")
     with Pool(processes=5) as pool:
       for kpi_res in pool.imap_unordered(self.kpi_process, self.kpi_list):
-        self.results.extend(kpi_res)
+        self.results[kpi_res[0]] = kpi_res[1]
 
   def run(self):
     """ Run command method """
     if self.options["--history"]:
       print("")
+
     else:
       self.kpi_thread_loop()
 

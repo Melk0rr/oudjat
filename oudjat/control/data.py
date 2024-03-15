@@ -1,6 +1,5 @@
 """ Data module handling various data manipulation aspects """
 from typing import List, Dict
-from enum import Enum
 
 
 def ope_contains(v, t):
