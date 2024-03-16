@@ -12,7 +12,7 @@ from oudjat.utils.file import import_csv, export_csv
 
 from .base import Base
 from oudjat.control.data import DataFilter, DataScope
-from oudjat.control.kpi import KPI
+from oudjat.control.kpi import KPI, KPIHistory
 
 class KPIFactory(Base):
   """Main enumeration module"""
@@ -34,16 +34,20 @@ class KPIFactory(Base):
       self.set_scopes(self.config["scopes"])
 
     self.kpi_list = self.config["kpis"]
-    self.results = {}
+    self.kpi_hist = {}
+    self.results = []
   
-  def set_data_sources(self, sources: Dict):
+  def set_data_sources(self, sources: Dict, rawPath: bool = False):
     """ Setter for data sources """
     print(f"Importing {', '.join(sources.keys())} sources...")
     formated_sources = {}
 
     for k in sources.keys():
-      source_path = f"{self.options['DIRECTORY']}\{sources[k]}.csv"
-      formated_sources[k] = import_csv(source_path, delimiter='|')
+      source_path = sources[k]
+      if not rawPath:
+        source_path = glob.glob(f"{self.options['DIRECTORY']}\{sources[k]}*.csv")[0]
+
+      formated_sources[k] = { "data": import_csv(source_path, delimiter='|'), "date": self.get_file_date(source_path) }
 
     self.data_sources = formated_sources
 
@@ -55,15 +59,19 @@ class KPIFactory(Base):
     """ Setter for scopes """
     for k, s in scopes.items():
       s_filters = [ self.filters[f] for f in s["filters"] ]
-      self.scopes[k] = DataScope(name=s["name"], perimeter=s["perimeter"], data=self.data_sources[s["perimeter"]], filters=s_filters)
+      data_source = self.data_sources[s["perimeter"]]["data"]
+      self.scopes[k] = DataScope(name=s["name"], perimeter=s["perimeter"], data=data_source, filters=s_filters)
+
+  def get_file_date(self, path: str):
+    """ Retreive file creation date """
+    return datetime.fromtimestamp(os.path.getctime(path))
 
   def build_file_history(self, match: str):
     """ List files based on history, gap and provided directory """
-    history_format = "%Y-%m-%d"
 
     # List files in provided directory, retreive their creation date and sort them from newer to older
     files = glob.glob(f"{self.options['DIRECTORY']}/{match}*.csv")
-    files = [ { "path": f, "date": datetime.fromtimestamp(os.path.getctime(f)).strftime(history_format) } for f in files ]
+    files = [ { "path": f, "date": sefl.get_file_date(f) } for f in files ]
     files = sorted(files, key=lambda d: d["date"], reverse=True)
 
     if len(files) == 0:
@@ -77,8 +85,8 @@ class KPIFactory(Base):
         break
       
       # Get difference between last added element date and current file date
-      previous_date = datetime.strptime(history_files[-1]["date"], history_format)
-      date = datetime.strptime(f["date"], history_format)
+      previous_date = history_files[-1]["date"]
+      date = f["date"]
       diff = date - previous_date
 
       if abs(diff.days) >= self.options["--gap"]:
@@ -96,10 +104,11 @@ class KPIFactory(Base):
 
   def kpi_process(self, kpi):
     """ Target process to deal with url data """
-    kpi_data = {}
+    kpi_data = []
 
     kpi_controls = DataFilter.gen_from_dict(kpi["controls"])
-    kpi_i = KPI(name=kpi["name"], perimeter=kpi["perimeter"], filters=kpi_controls)
+    kpi_source = self.data_sources[kpi["perimeter"]]
+    kpi_i = KPI(name=kpi["name"], perimeter=kpi["perimeter"], filters=kpi_controls, date=kpi_source["date"])
 
     print(f"\n{kpi_i.get_name()}")
 
@@ -110,17 +119,20 @@ class KPIFactory(Base):
 
       # Pass the scope to the kpi and get conformity data
       kpi_i.set_input_data(scope_i)
-      kpi_data[s["name"]] = kpi_i.to_dictionary()
+      kpi_data.append(kpi_i.to_dictionary())
       kpi_i.print_value(prefix=f"=> {scope_i.get_name()}: ")
 
-    return (kpi["name"], kpi_data)
+    if self.options["--history"]:
+      self.kpi_hist[kpi_i.get_name()].add_kpi(kpi_i)
+
+    return kpi_data
 
   def kpi_thread_loop(self):
     """ Run kpi thread loop """
     print("Generating KPIs...")
     with Pool(processes=5) as pool:
       for kpi_res in pool.imap_unordered(self.kpi_process, self.kpi_list):
-        self.results[kpi_res[0]] = kpi_res[1]
+        self.results.append(kpi_res)
 
   def run(self):
     """ Run command method """
@@ -135,6 +147,19 @@ class KPIFactory(Base):
 
       history_files = { k: self.build_file_history(self.config["data_sources"][k]) for k in self.config["data_sources"].keys() }
       print(history_files)
+
+      self.kpi_hist = { k["name"]: KPIHistory(name=k["name"]) for k in self.kpi_list }
+
+      for i in range(self.options["--history"]):
+        sources_i = { k: history_files[k][i] for k in history_files.keys() }
+        self.set_data_sources(sources_i, rawPath=True)
+        self.set_filters(self.config["fitlers"])
+        self.set_scopes(self.config["scopes"])
+
+        self.kpi_thread_loop()
+      
+      for h in self.kpi_hist.values():
+        h.print_history()
 
     else:
       self.kpi_thread_loop()
