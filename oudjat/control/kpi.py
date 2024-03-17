@@ -131,14 +131,13 @@ class KPIComparator:
     """ Get kpis different values and set changes """
     self.values = (self.kpis[0].get_kpi_value(), self.kpis[1].get_kpi_value())
 
-
   def get_tendency_key(self, v_a: int | float, v_b: int | float) -> str:
     """ Substract given values and define tendency """
     return "+" if v_b > v_a else "-" if v_b < v_a else "="
 
   def compare(self) -> None:
     """ Compare values and set tendency """
-    if len(self.values.keys()) == 0:
+    if len(self.values) == 0:
       self.fetch_values()
 
     t_key = self.get_tendency_key(self.values[0], self.values[1])
@@ -161,11 +160,14 @@ class KPIHistory:
     """ Constructor """
     self.name = name
     self.kpis = []
-    self.set_kpis(kpis)
 
     self.comparators = []
 
-  def set_kpis(self, kpis: List[KPI]) -> None:
+  def get_kpis(self):
+    """ Getter for kpi list """
+    return self.kpis
+
+  def set_kpis(self, kpis: List[KPI] = []) -> None:
     """ Setter for kpi list """
     for k in kpis:
       self.add_kpi(k)

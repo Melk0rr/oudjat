@@ -34,6 +34,7 @@ class KPIFactory(Base):
       self.set_scopes(self.config["scopes"])
 
     self.kpi_list = self.config["kpis"]
+    self.dates = []
     self.kpi_hist = {}
     self.results = []
   
@@ -43,10 +44,10 @@ class KPIFactory(Base):
     formated_sources = {}
 
     for k in sources.keys():
-      source_path = sources[k]
+      source_path = sources[k]["path"]
       if not rawPath:
-        source_path = glob.glob(f"{self.options['DIRECTORY']}\{sources[k]}*.csv")[0]
-
+        source_path = glob.glob(f"{self.options['DIRECTORY']}\{source_path}*.csv")[0]
+      
       formated_sources[k] = { "data": import_csv(source_path, delimiter='|'), "date": self.get_file_date(source_path) }
 
     self.data_sources = formated_sources
@@ -71,7 +72,7 @@ class KPIFactory(Base):
 
     # List files in provided directory, retreive their creation date and sort them from newer to older
     files = glob.glob(f"{self.options['DIRECTORY']}/{match}*.csv")
-    files = [ { "path": f, "date": sefl.get_file_date(f) } for f in files ]
+    files = [ { "path": f, "date": self.get_file_date(f) } for f in files ]
     files = sorted(files, key=lambda d: d["date"], reverse=True)
 
     if len(files) == 0:
@@ -79,6 +80,7 @@ class KPIFactory(Base):
       return []
 
     # Narrow file list based on history and gap parameters
+    self.dates.append(files[0]["date"])
     history_files = [ files[0] ]
     for f in files:
       if len(history_files) >= self.options["--history"]:
@@ -91,6 +93,7 @@ class KPIFactory(Base):
 
       if abs(diff.days) >= self.options["--gap"]:
         history_files.append(f)
+        self.dates.append(f["date"])
 
     return history_files
 
@@ -122,17 +125,18 @@ class KPIFactory(Base):
       kpi_data.append(kpi_i.to_dictionary())
       kpi_i.print_value(prefix=f"=> {scope_i.get_name()}: ")
 
-    if self.options["--history"]:
-      self.kpi_hist[kpi_i.get_name()].add_kpi(kpi_i)
-
-    return kpi_data
+    return (kpi_i, kpi_data)
 
   def kpi_thread_loop(self):
     """ Run kpi thread loop """
     print("Generating KPIs...")
     with Pool(processes=5) as pool:
       for kpi_res in pool.imap_unordered(self.kpi_process, self.kpi_list):
-        self.results.append(kpi_res)
+        if self.options["--history"]:
+          h = self.kpi_hist[kpi_res[0].get_name()]
+          h.add_kpi(kpi=kpi_res[0])
+
+        self.results.extend(kpi_res[1])
 
   def run(self):
     """ Run command method """
@@ -145,19 +149,24 @@ class KPIFactory(Base):
       else:
         self.options["--gap"] = 1
 
+      print(f"Building KPI history for the last {self.options['--history']} period(s) of {self.options['--gap']} day(s)")
+
       history_files = { k: self.build_file_history(self.config["data_sources"][k]) for k in self.config["data_sources"].keys() }
-      print(history_files)
 
       self.kpi_hist = { k["name"]: KPIHistory(name=k["name"]) for k in self.kpi_list }
 
       for i in range(self.options["--history"]):
+
         sources_i = { k: history_files[k][i] for k in history_files.keys() }
+        ColorPrint.blue(f"\n {self.dates[i].strftime('%Y-%m-%d')} ")
+
         self.set_data_sources(sources_i, rawPath=True)
-        self.set_filters(self.config["fitlers"])
+        self.set_filters(self.config["filters"])
         self.set_scopes(self.config["scopes"])
 
         self.kpi_thread_loop()
       
+      print(f"\nPrinting histories...")
       for h in self.kpi_hist.values():
         h.print_history()
 
