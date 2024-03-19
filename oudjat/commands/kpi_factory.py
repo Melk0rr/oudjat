@@ -91,7 +91,7 @@ class KPIFactory(Base):
       date = f["date"]
       diff = date - previous_date
 
-      if abs(diff.days) >= self.options["--gap"]:
+      if abs(diff.days) >= self.options["--history-gap"]:
         history_files.append(f)
         self.dates.append(f["date"])
 
@@ -143,13 +143,13 @@ class KPIFactory(Base):
     if self.options["--history"]:
       self.options["--history"] = int(self.options["--history"])
 
-      if self.options["--gap"]:
-        self.options["--gap"] = int(self.options["--gap"])
+      if self.options["--history-gap"]:
+        self.options["--history-gap"] = int(self.options["--history-gap"])
 
       else:
-        self.options["--gap"] = 1
+        self.options["--history-gap"] = 1
 
-      print(f"Building KPI history for the last {self.options['--history']} period(s) of {self.options['--gap']} day(s)")
+      print(f"Building KPI history for the last {self.options['--history']} period(s) of {self.options['--history-gap']} day(s)")
 
       history_files = { k: self.build_file_history(self.config["data_sources"][k]) for k in self.config["data_sources"].keys() }
 

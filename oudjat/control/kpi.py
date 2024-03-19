@@ -38,6 +38,10 @@ class KPI(DataScope):
 
     self.date = date
 
+  def get_date(self):
+    """ Getter for kpi date """
+    return self.date
+
   def get_conformity_level(self, value: float = None) -> ConformityLevel:
     """ Establish the conformity level """
     if value is None:
@@ -96,15 +100,15 @@ class KPIComparator:
 
   tendencies = {
     "+": {
-      "icon": "󰁜",
+      "icon": "",
       "print": ColorPrint.green
     },
     "-": {
-      "icon": "󰁃",
+      "icon": "",
       "print": ColorPrint.red
     },
     "=": {
-      "icon": "󰁔",
+      "icon": "",
       "print": ColorPrint.yellow
     }
   }
@@ -146,7 +150,7 @@ class KPIComparator:
   def print_tendency(self, print_first_value: bool = True, sfx: str = "\n") -> None:
     """ Print tendency """
     if print_first_value:
-      self.kpis[0].get_print_function()(f"{self.values[0]}%", end="")
+      self.kpis[0].get_print_function()(f"  {self.values[0]}%", end="")
 
     print(" -- ", end="")
     t_icon = self.tendency["icon"]
@@ -182,8 +186,9 @@ class KPIHistory:
   def build_history(self) -> None:
     """ Builds the KPI history """
     comp_list = []
+    sorted_kpis = sorted(self.kpis, key=lambda k: k.get_date())
     for i in range(len(self.kpis) - 1):
-      comparator = KPIComparator(self.kpis[i], self.kpis[i + 1])
+      comparator = KPIComparator(sorted_kpis[i], sorted_kpis[i + 1])
       comparator.compare()
 
       comp_list.append(comparator)
@@ -195,7 +200,7 @@ class KPIHistory:
     if len(self.comparators) == 0:
       self.build_history()
 
-    print(f"\n {self.name} History")
+    ColorPrint.blue(f"\n {self.name} History")
     for i in range(len(self.comparators)):
       c = self.comparators[i]
 
