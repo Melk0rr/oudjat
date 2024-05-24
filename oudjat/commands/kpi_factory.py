@@ -29,7 +29,8 @@ class KPIFactory(Base):
     self.scopes = {}
 
     if not self.options["--history"]:
-      self.set_data_sources(self.config["data_sources"])
+      sources = { k: { "path": p } for k, p in self.config["data_sources"].items() }
+      self.set_data_sources(sources)
       self.set_filters(self.config["filters"])
       self.set_scopes(self.config["scopes"])
 
@@ -47,8 +48,9 @@ class KPIFactory(Base):
       source_path = sources[k]["path"]
       if not rawPath:
         source_path = glob.glob(f"{self.options['DIRECTORY']}\{source_path}*.csv")[0]
-      
-      formated_sources[k] = { "data": import_csv(source_path, delimiter='|'), "date": self.get_file_date(source_path) }
+
+      base_data = import_csv(source_path, delimiter='|')
+      formated_sources[k] = { "data": base_data, "date": self.get_file_date(source_path) }
 
     self.data_sources = formated_sources
 
