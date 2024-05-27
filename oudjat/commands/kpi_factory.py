@@ -1,13 +1,11 @@
 """ Target module handling targeting operations and data gathering """
 import os
-import csv
 import json
 import glob
 from datetime import datetime
 from multiprocessing import Pool
 from typing import List, Dict
 
-from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.file import import_csv, export_csv
 
 from .base import Base
