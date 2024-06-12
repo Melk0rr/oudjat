@@ -2,11 +2,12 @@ import os
 import re
 import csv
 
-def export_csv(data, file_path, delimiter=','):
+def export_csv(data, file_path, delimiter=',', append=False):
   """ Helper function to export data into a CSV file """
   full_path = os.path.join(os.getcwd(), file_path)
 
-  with open(full_path, "w", encoding="utf-8", newline="") as f:
+  mode = "a" if append else "w"
+  with open(full_path, mode, encoding="utf-8", newline="") as f:
     writer = csv.DictWriter(f, fieldnames=data[0].keys(), delimiter=delimiter)
     writer.writeheader()
     writer.writerows(data)

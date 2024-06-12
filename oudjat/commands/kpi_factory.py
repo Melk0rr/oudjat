@@ -24,7 +24,9 @@ class KPIFactory(Base):
     self.config = json.load(config_file)
 
     self.options["--sources"] = list(filter(None, self.options["--sources"].split(",")))
-    self.options["--history"] = list(filter(None, self.options["--history"].split(",")))
+
+    if self.options["--history"]:
+      self.options["--history"] = list(filter(None, self.options["--history"].split(",")))
     
     self.iteration_count = 1
     if self.options["--history"]:
@@ -46,6 +48,9 @@ class KPIFactory(Base):
   def assign_sources(self):
     """ Assigns data sources filenames to matching kpi types """
     sources = {}
+
+    # Test auto detect
+    files = glob.glob(f"{self.options['DIRECTORY']}/kpi_acc_computers*.csv")
 
     for k, ds in self.config.get("data_sources", {}).items():
       sources[k] = [ src for src in self.options["--sources"] if ds in src ]
