@@ -1,7 +1,19 @@
 import os
 import re
 import csv
+import json
 
+# JSON file functions
+def import_json(file_path):
+  """ Helper function to import json data """
+  full_path = os.path.join(os.getcwd(), file_path)
+
+  with open(full_path) as json_file:
+    json_data = json.load(json_file)
+    
+  return json_data
+
+# CSV file functions
 def export_csv(data, file_path, delimiter=',', append=False):
   """ Helper function to export data into a CSV file """
   full_path = os.path.join(os.getcwd(), file_path)
