@@ -1,0 +1,19 @@
+{
+  "user": [
+    "accountExpires",
+    "cn",
+    "description",
+    "employeeID",
+    "givenName",
+    "lastLogon",
+    "mail",
+    "pwdLastSet",
+    "sn",
+    "sAMAccountName",
+    "title",
+    "userAccountControl",
+    "whenChanged",
+    "whenCreated"
+  ],
+  "computer": []
+}

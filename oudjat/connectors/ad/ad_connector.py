@@ -1,7 +1,11 @@
+import json
+import pkgutil
 from typing import List, Dict
 from ldap3 import Server, Connection, ALL, SUBTREE, NTLM
 
-class AD:
+from oudjat.utils.file import import_json
+
+class ADConnector:
   """ AD helper with functions to query domain using LDAP filters """
   ldap_flags = {
     "ACCOUNT_DISABLE": 2,
@@ -27,6 +31,8 @@ class AD:
     "PARTIAL_SECRETS_ACCOUNT": 67108864
   }
 
+  attributes = import_json("oudjat/connectors/ad/config/attributes.json")
+
   def __init__(self, server: str, ad_user: str, ad_password: str, use_tls: bool = False):
     """ Constructor """
     server_split = server.split('.')
@@ -39,6 +45,10 @@ class AD:
     port = 636 if use_tls else 389
     self.server = Server(server, get_info=ALL, port=port, use_ssl=use_tls, allowed_referral_hosts=[('*', True)])
     self.connection = Connection(self.server, user=ad_user, password=ad_password, auto_bind=True, auto_referrals=False, authentication=NTLM)
+
+  def get_properties(self):
+    """ Getter for AD properties """
+    return self.properties
 
   def get_domain(self):
     """ Getter for AD domain """
@@ -66,15 +76,16 @@ class AD:
     
     return raw_search
 
-  def get_ad_users(self, search_filter: str = None, search_base: str = None):
+  def get_ad_users(self, search_filter: str = None, search_base: str = None, attributes: List[str] = []):
     """ Retreive users from the domain """
     user_filter = "(&(objectClass=user)(!(objectClass=computer)))"
     if search_filter:
       user_filter = f"(&{user_filter}{search_filter})"
 
-    user_attributes = ["accountExpires", "cn", "description", "employeeID", "givenName", "lastLogon", "mail", "pwdLastSet", "sn", "sAMAccountName", "title", "userAccountControl", "whenChanged", "whenCreated"]
+    if len(attributes) == 0:
+      attributes = self.attributes["user"]
 
-    user_search = self.base_search(search_filter=user_filter, attributes=user_attributes, search_base=search_base)
+    user_search = self.base_search(search_filter=user_filter, attributes=attributes, search_base=search_base)
     users = [ { "dn": u.get("dn", ""), **u.get("attributes", {}) } for u in user_search if u["type"] == "searchResEntry" ]
 
     return users
