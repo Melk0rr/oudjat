@@ -20,7 +20,7 @@ setup(
     long_description_content_type="text/markdown",
     url='https://github.com/Melk0rr/Oudjat',
     author='Jaufré Lallement',
-    author_email='lallement.j.pro@outlook.fr',
+    author_email='lallement.j.pro@proton.me',
     classifiers=['Intended Audience :: Developers',
                  'Topic :: Utilities',
                  'License :: Public Domain',
@@ -29,5 +29,6 @@ setup(
     keywords='cli',
     packages=find_packages(exclude=['docs', 'tests*']),
     install_requires=[reqs],
+    include_package_data=True,
     entry_points={'console_scripts': ['oudjat=oudjat.cli:main', ], },
 )
