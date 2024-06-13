@@ -3,6 +3,29 @@ from ldap3 import Server, Connection, ALL, SUBTREE, NTLM
 
 class AD:
   """ AD helper with functions to query domain using LDAP filters """
+  ldap_flags = {
+    "ACCOUNT_DISABLE": 2,
+    "HOMEDIR_REQUIRED": 8,
+    "LOCKOUT": 16,
+    "PASSWD_NOTREQD": 32,
+    "PASSWD_CANT_CHANGE": 64,
+    "ENCRYPTED_TEXT_PASSWORD_ALLOWED": 128,
+    "NORMAL_ACCOUNT": 512,
+    "INTERDOMAIN_TRUST_ACCOUNT": 2048,
+    "WORKSTATION_TRUST_ACCOUNT": 4096,
+    "SERVER_TRUST_ACCOUNT": 8192,
+    "DONT_EXPIRE_PASSWD": 65536,
+    "MNS_LOGON_ACCOUNT": 131072,
+    "SMARTCARD_REQUIRED": 262144,
+    "TRUSTED_FOR_DELEGATION": 524288,
+    "NOT_DELEGATED": 1048576,
+    "USE_DES_KEY_ONLY": 2097152,
+    "DONT_REQUIRE_PREAUTH": 4194304,
+    "PASSWORD_EXPIRED": 8388608,
+    "TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION": 16777216,
+    "NO_AUTH_DATA_REQUIRED": 33554432,
+    "PARTIAL_SECRETS_ACCOUNT": 67108864
+  }
 
   def __init__(self, server: str, ad_user: str, ad_password: str, use_tls: bool = False):
     """ Constructor """
@@ -49,11 +72,9 @@ class AD:
     if search_filter:
       user_filter = f"(&{user_filter}{search_filter})"
 
-    print(f"Final filter: {user_filter}")
+    user_attributes = ["accountExpires", "cn", "description", "employeeID", "givenName", "lastLogon", "mail", "pwdLastSet", "sn", "sAMAccountName", "title", "userAccountControl", "whenChanged", "whenCreated"]
 
-    user_attributes = ["cn", "givenName", "sn", "sAMAccountName"]
-
-    user_search = self.base_search(search_filter=user_filter, attributes="*", search_base=search_base)
+    user_search = self.base_search(search_filter=user_filter, attributes=user_attributes, search_base=search_base)
     users = [ { "dn": u.get("dn", ""), **u.get("attributes", {}) } for u in user_search if u["type"] == "searchResEntry" ]
 
     return users
