@@ -8,30 +8,25 @@ from oudjat.control.data import DataFilter, DataScope
 
 class ConformityLevel(Enum):
   """ Defines the levels of conformity for a KPI or any other related element """
-  CONFORM = { "min": 95, "max": 100.01 }
-  PARTIALLYCONFORM = { "min": 70, "max": 95 }
-  NOTCONFORM = { "min": 0, "max": 70 }
+  CONFORM = { "min": 95, "max": 100.01, "color": ColorPrint.green }
+  PARTIALLYCONFORM = { "min": 70, "max": 95, "color": ColorPrint.yellow }
+  NOTCONFORM = { "min": 0, "max": 70, "color": ColorPrint.red }
       
 
 class KPI(DataScope):
   """ KPI class """
-  print_colors = {
-    "CONFORM": ColorPrint.green,
-    "PARTIALLYCONFORM": ColorPrint.yellow,
-    "NOTCONFORM": ColorPrint.red,
-  }
 
   def __init__(
     self,
     name: str,
     perimeter: str,
-    data: List[Dict] | DataScope = None,
+    scope: List[Dict] | DataScope = None,
     filters: List[Dict] | List[DataFilter] = [],
     description: str = "",
     date: datetime = None
   ):
     """ Constructor """
-    super().__init__(name=name, perimeter=perimeter, data=data, filters=filters, description=description)
+    super().__init__(name=name, perimeter=perimeter, scope=scope, filters=filters, description=description)
 
     if date is None:
       date = datetime.today()
@@ -50,14 +45,11 @@ class KPI(DataScope):
 
   def get_kpi_value(self) -> float:
     """ Returns the percentage of conform data based on kpi control """
-    if self.data is None:
-      self.filter_data()
-
-    return round(len(self.data) / len(self.data_in) * 100, 2)
+    return round(len(self.get_data()) / len(self.get_input_data()) * 100, 2)
 
   def get_print_function(self):
     """ Defines print function """
-    return self.print_colors[self.get_conformity_level().name]
+    return self.get_conformity_level().value["color"]
 
   def print_value(self, prefix: str = "", suffix: str = "%\n", print_details: bool = True) -> None:
     """ Print value with color based on kpi level """
@@ -81,9 +73,9 @@ class KPI(DataScope):
     return {
       "name": self.name,
       "perimeter": self.perimeter,
-      "scope": self.initial_scope,
-      "scope_size": len(self.data_in),
-      "conform_elements": len(self.data),
+      "scope": self.get_initial_scope_name(),
+      "scope_size": len(self.get_input_data()),
+      "conform_elements": len(self.get_data()),
       "value": k_value,
       "conformity": conformity.name,
       "date": self.get_date_str()
@@ -92,7 +84,7 @@ class KPI(DataScope):
   def to_string(self) -> (str,str):
     """ Converts the current instance into a string """
     k_value = self.get_kpi_value()
-    return (f"{len(self.data)} / {len(self.data_in)}", f"{k_value}")
+    return (f"{len(self.get_data())} / {len(self.get_input_data())}", f"{k_value}")
 
 
 class KPIComparator:
@@ -157,9 +149,10 @@ class KPIComparator:
     self.kpis[1].get_print_function()(f"{self.values[1]}%", end="")
     self.tendency["print"](t_icon, end=sfx)
 
-
+# 
 class KPIHistory:
   """ KPIEvolution class to handle """
+
   def __init__(self, name: str, kpis: List[KPI] = []):
     """ Constructor """
     self.name = name

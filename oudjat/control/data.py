@@ -70,7 +70,7 @@ class DataScope:
     self,
     name: str,
     perimeter: str,
-    data: List[Dict] | "DataScope" = None,
+    scope: List[Dict] | "DataScope" = None,
     filters: List[Dict] | List[DataFilter] = [],
     description: str = ""
   ):
@@ -79,53 +79,49 @@ class DataScope:
     self.description = description
     self.perimeter = perimeter
 
-    self.initial_scope = ""
-    if isinstance(data, DataScope):
-      self.initial_scope = data.get_name()
+    self.initial_scope = scope
 
-    self.data_in = data.get_data() if isinstance(data, DataScope) else data
     self.filters = DataFilter.get_valid_filters_list(filters)
-    self.data = None
 
   def get_name(self):
     """ Getter for perimeter name """
     return self.name
 
+  def get_initial_scope(self):
+    """ Getter for parent scope """
+    return self.initial_scope
+  
+  def get_initial_scope_name(self):
+    """ Getter for initial scope name """
+    return self.initial_scope.get_name() if isinstance(self.initial_scope, DataScope) else ""
+
   def get_input_data(self):
     """ Getter for input data """
-    return self.data_in
+    return self.initial_scope.get_data() if isinstance(self.initial_scope, DataScope) else self.initial_scope
 
   def get_perimeter(self):
     """ Getter for perimeter """
     return self.perimeter
 
-  def set_input_data(self, data: List[Dict] | "DataScope"):
+  def set_initial_scope(self, scope: List[Dict] | "DataScope"):
     """ Setter for input data """
-    self.data_in = data.get_data() if isinstance(data, DataScope) else data
-    self.initial_scope = data.get_name()
-    self.data = None
+    self.initial_scope = scope 
 
   def set_filters(self, filters: List[Dict] | List[DataFilter] = []):
     """ Setter for filters """
     self.filters = DataFilter.get_valid_filters_list(filters)
 
-  def filter_data(self):
-    """ Apply filters to kpi data to get perimeter specific data """
-
-    self.data = self.data_in
-
-    if len(self.filters) > 0:
-      self.data = DataFilter.filter_data(self.data_in, self.filters)
-
   def get_data(self):
     """ Getter for perimeter data """
-    if self.data_in is None:
-      raise ValueError(f"{__class__}: no input data defined for current scope {self.name}")
+    if self.initial_scope is None:
+      raise ValueError(f"{__class__}: no parent scope defined for the current scope {self.name}")
 
-    if self.data is None:
-      self.filter_data()
+    data = self.get_input_data()
 
-    return self.data
+    if len(self.filters) > 0:
+      data = DataFilter.filter_data(data, self.filters)
+
+    return data
 
   @staticmethod
   def merge_scopes(name: str, scopes: List["DataScope"]):
@@ -139,7 +135,6 @@ class DataScope:
     for s in scopes:
       merge_data.extend(s.get_data())
 
-    merge = DataScope(name=name, perimeter=list(perimeters)[0], data=merge_data, filters=[])
-    merge.filter_data()
+    merge = DataScope(name=name, perimeter=list(perimeters)[0], scope=merge_data, filters=[])
 
     return merge
