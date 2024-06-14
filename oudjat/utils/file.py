@@ -16,6 +16,10 @@ def import_json(file_path):
 # CSV file functions
 def export_csv(data, file_path, delimiter=',', append=False):
   """ Helper function to export data into a CSV file """
+  if len(data) == 0:
+    print("No data to export !")
+    return
+
   full_path = os.path.join(os.getcwd(), file_path)
 
   mode = "a" if append else "w"
