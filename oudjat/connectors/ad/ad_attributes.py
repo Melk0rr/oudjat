@@ -21,8 +21,14 @@ class ADAttributes(Enum):
   ]
 
   computer = [
-    "description"
+    "cn",
+    "description",
+    "lastLogon",
     "objectSid",
+    "operatingSystem",
+    "operatingSystemVersion",
+    "pwdLastSet",
+    "userAccountControl",
     "whenChanged",
     "whenCreated"
   ]
