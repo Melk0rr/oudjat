@@ -1,5 +1,8 @@
-attributes = {
-  "user": [
+from enum import Enum
+
+class ADAttributes(Enum):
+  """ AD Attributes by object type """
+  user = [
     "accountExpires",
     "cn",
     "description",
@@ -15,12 +18,11 @@ attributes = {
     "userAccountControl",
     "whenChanged",
     "whenCreated"
-  ],
-  "computer": [
-    "description"
   ]
-}
 
-def get_ad_attributes(ad_type: str = "user"):
-  """ Helper function to return AD attributes based on type """
-  return attributes[ad_type]
+  computer = [
+    "description"
+    "objectSid",
+    "whenChanged",
+    "whenCreated"
+  ]
