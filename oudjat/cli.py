@@ -14,6 +14,7 @@ Commands
   vuln                            parse CVE data from Nist page
   
 Options:
+  -a --append                     append to the output file
   -c --config=CONFIG              specify config file
   -d --directory                  set target (reads from file, one domain per line)
   -f --file                       set target (reads from file, one domain per line)

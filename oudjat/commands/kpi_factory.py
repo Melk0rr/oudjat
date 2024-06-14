@@ -137,4 +137,5 @@ class KPIFactory(Base):
       self.kpi_thread_loop()
 
     if self.options["--export-csv"] and len(self.results) > 0:
-      export_csv(self.results, self.options["--export-csv"], delimiter='|')
+      append = True if self.options["--append"] else False
+      export_csv(self.results, self.options["--export-csv"], delimiter='|', append=append)
