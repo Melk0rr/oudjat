@@ -4,6 +4,7 @@ from typing import List, Dict
 from ldap3 import Server, Connection, ALL, SUBTREE, NTLM
 
 from oudjat.utils.file import import_json
+from oudjat.connectors.ad.ad_attributes import get_ad_attributes
 
 class ADConnector:
   """ AD helper with functions to query domain using LDAP filters """
@@ -30,8 +31,11 @@ class ADConnector:
     "NO_AUTH_DATA_REQUIRED": 33554432,
     "PARTIAL_SECRETS_ACCOUNT": 67108864
   }
-
-  attributes = import_json("oudjat/connectors/ad/config/attributes.json")
+  
+  object_filters = {
+    "user": "(&(objectClass=user)(!(objectClass=computer)))",
+    "computer": "(&(objectClass=computer)(!(objectClass=user)))"
+  }
 
   def __init__(self, server: str, ad_user: str, ad_password: str, use_tls: bool = False):
     """ Constructor """
@@ -58,34 +62,49 @@ class ADConnector:
     """ Getter for the default search base """
     return self.default_search_base
 
-  def base_search(self, search_filter: str, attributes: List[str], search_base: str = None):
+  def base_search(self, attributes: List[str] = [], search_filter: str = None, search_type: str = "user", search_base: str = None):
     """ Base search function """
     if self.connection is None:
       raise ValueError(f"Error while searching {self.server_hostname}: connection was not setup")
+    
+    # If a filter is provided : combine with the object filter
+    final_filter = self.object_filters[search_type]
+    if search_filter:
+      final_filter = f"(&{final_filter}{search_filter})"
 
+    # Default search base is domain root
     if search_base is None:
       search_base = self.default_search_base
 
+    if len(attributes) == 0:
+      attributes = get_ad_attributes(search_type)
+
     raw_search = self.connection.extend.standard.paged_search(
       search_base=search_base,
-      search_filter=search_filter,
+      search_filter=final_filter,
       attributes=attributes,
       search_scope=SUBTREE,
       generator=False
     )
     
     return raw_search
+  
+  def clean_results(self, search_result: List[Dict]):
+    """ Filter results to keep only searchResEntry and remove useless attributes """
+    return [ { "dn": e.get("dn", ""), **e.get("attributes", {}) } for e in search_result if e["type"] == "searchResEntry" ]
 
   def get_ad_users(self, search_filter: str = None, search_base: str = None, attributes: List[str] = []):
-    """ Retreive users from the domain """
-    user_filter = "(&(objectClass=user)(!(objectClass=computer)))"
-    if search_filter:
-      user_filter = f"(&{user_filter}{search_filter})"
+    """ Retreive user objects from the domain """
 
-    if len(attributes) == 0:
-      attributes = self.attributes["user"]
-
-    user_search = self.base_search(search_filter=user_filter, attributes=attributes, search_base=search_base)
-    users = [ { "dn": u.get("dn", ""), **u.get("attributes", {}) } for u in user_search if u["type"] == "searchResEntry" ]
+    user_search = self.base_search(search_filter=search_filter, attributes=attributes, search_base=search_base, search_type="user")
+    users = self.clean_results(user_search)
 
     return users
+
+  def get_ad_computers(self, search_filter: str = None, search_base: str = None, attributes: List[str] = []):
+    """ Retreive computer objects from the domain """
+      
+    computer_search = self.base_search(search_filter=search_filter, attributes=attributes, search_base=search_base, search_type="computer")
+    computers = self.clean_results(computer_search)
+    
+    return computers
