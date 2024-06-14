@@ -1,4 +1,4 @@
-{
+attributes = {
   "user": [
     "accountExpires",
     "cn",
@@ -7,6 +7,7 @@
     "givenName",
     "lastLogon",
     "mail",
+    "objectSid",
     "pwdLastSet",
     "sn",
     "sAMAccountName",
@@ -15,5 +16,11 @@
     "whenChanged",
     "whenCreated"
   ],
-  "computer": []
+  "computer": [
+    "description"
+  ]
 }
+
+def get_ad_attributes(ad_type: str = "user"):
+  """ Helper function to return AD attributes based on type """
+  return attributes[ad_type]
