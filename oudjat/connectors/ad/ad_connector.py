@@ -1,7 +1,7 @@
 import json
 import pkgutil
 from typing import List, Dict
-from ldap3 import Server, Connection, ALL, SUBTREE, NTLM
+from ldap3 import Server, Connection, ALL, NTLM
 
 from oudjat.connectors.ad.ad_attributes import ADAttributes
 from oudjat.connectors.ad.ad_filters import ADSearchFilters

@@ -1,3 +1,6 @@
+from ldap3 import SUBTREE
+from typing import List, Dict
+
 from oudjat.connectors.ad.ad_filters import ADSearchFilters
 from oudjat.connectors.ad.ad_attributes import ADAttributes
 
