@@ -50,6 +50,7 @@ import sys
 import time
 
 from docopt import docopt
+from typing import Any
 
 import oudjat.commands
 from oudjat.banner import banner
@@ -61,7 +62,7 @@ from . import __version__ as VERSION
 
 COMMAND_OPTIONS = ["vuln", "cert", "sc", "kpi"]
 
-def command_switch(options):
+def command_switch(options) -> Any:
   """ Script command switch case """
   
   switch = {
@@ -74,7 +75,7 @@ def command_switch(options):
   command_name = next(command for command in COMMAND_OPTIONS if options[command])
   return switch[command_name](options)
 
-def main():
+def main() -> None:
   """ Main program function """
 
   try:

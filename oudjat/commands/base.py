@@ -9,7 +9,7 @@ class Base(object):
     self.args = args
     self.kwargs = kwargs
 
-  def run(self):
+  def run(self) -> None:
     """ Base run method to be implemented by subclasses """
     raise NotImplementedError(
         "run() method must be implemented by the overloading class")

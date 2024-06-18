@@ -1,4 +1,5 @@
 """ CVE Target class """
+from typing import List, Dict
 from multiprocessing import Pool
 
 from oudjat.utils.color_print import ColorPrint
@@ -11,7 +12,7 @@ from .target import Target
 class Cert(Target):
   """ CVE Target """
 
-  def __init__(self, options):
+  def __init__(self, options: Dict):
     """ Constructor """
     super().__init__(options)
 
@@ -38,7 +39,7 @@ class Cert(Target):
       else:
         ColorPrint.red(f"Error connecting to {target}! Make sure it is a resolvable address")      
 
-  def keyword_check(self, target):
+  def keyword_check(self, target: "CERTFR") -> List[str]:
     """ Look for provided keywords in the results """
     matched = [k for k in self.options["--keywords"]
                if k.lower() in target.get_title().lower()]
@@ -50,7 +51,7 @@ class Cert(Target):
     print(msg)
     return matched
 
-  def cert_process(self, target):
+  def cert_process(self, target) -> Dict:
     """ CERT process method to deal with cert data """
     cert_page = CERTFR(ref=target)
     cert_page.parse()
@@ -68,7 +69,7 @@ class Cert(Target):
 
     return cert_data
 
-  def run(self):
+  def run(self) -> None:
     """ Main method called from the cli module """
     with Pool(processes=5) as pool:
       for cert_data in pool.imap_unordered(self.cert_process, self.unique_targets):

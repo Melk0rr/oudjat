@@ -4,7 +4,7 @@ import json
 import glob
 from datetime import datetime
 from multiprocessing import Pool
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.file import import_csv, export_csv
@@ -16,7 +16,7 @@ from oudjat.control.kpi import KPI, KPIHistory
 class KPIFactory(Base):
   """Main enumeration module"""
    
-  def __init__(self, options):
+  def __init__(self, options: Dict):
     """ Constructor """
     super().__init__(options)
 
@@ -45,7 +45,7 @@ class KPIFactory(Base):
     self.results = []
 
 
-  def assign_sources(self):
+  def assign_sources(self) -> Dict:
     """ Assigns data sources filenames to matching kpi types """
     sources = {}
 
@@ -58,7 +58,7 @@ class KPIFactory(Base):
     return sources
 
 
-  def handle_exception(self, e, message: str = ""):
+  def handle_exception(self, e: Exception, message: str = "") -> None:
     """ Function handling exception for the current class """
     if self.options["--verbose"]:
       print(e)
@@ -67,7 +67,7 @@ class KPIFactory(Base):
       ColorPrint.red(message)
 
 
-  def import_kpi_sources(self, index: int = 0):
+  def import_kpi_sources(self, index: int = 0) -> Dict:
     """ Import specified index of kpi sources """
     print(f"Importing {', '.join([ s[0] for s in self.data_sources.values() ])}...")
 
@@ -83,7 +83,7 @@ class KPIFactory(Base):
     return current_data
   
 
-  def build_source_environment(self, index: int = 0):
+  def build_source_environment(self, index: int = 0) -> None:
     """ Imports data sources and build scopes based on these sources """
     self.current_sources = self.import_kpi_sources(index)
     
@@ -99,7 +99,7 @@ class KPIFactory(Base):
     self.scopes = current_scopes
     
 
-  def kpi_process(self, kpi: Dict):
+  def kpi_process(self, kpi: Dict) -> Tuple[int, List[Dict]]:
     """ Target process to deal with url data """
     kpi_data = []
 
@@ -122,7 +122,7 @@ class KPIFactory(Base):
     return (kpi_i, kpi_data)
 
 
-  def kpi_thread_loop(self):
+  def kpi_thread_loop(self) -> None:
     """ Run kpi thread loop """
     print("Generating KPIs...")
     with Pool(processes=5) as pool:
@@ -130,7 +130,7 @@ class KPIFactory(Base):
         self.results.extend(kpi_res[1])
 
 
-  def run(self):
+  def run(self) -> None:
     """ Run command method """
     for i in range(self.iteration_count):
       self.build_source_environment(i)

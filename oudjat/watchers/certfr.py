@@ -1,9 +1,10 @@
 """ Several functions that aim to parse a certfr page """
 import re
-from datetime import datetime
-from enum import Enum
-
 import requests
+
+from enum import Enum
+from typing import List, Dict
+from datetime import datetime
 from bs4 import BeautifulSoup
 
 from oudjat.utils.color_print import ColorPrint
@@ -80,7 +81,7 @@ class CERTFR:
   # ****************************************************************
   # Attributes & Constructors
 
-  def __init__(self, ref, title=""):
+  def __init__(self, ref: str, title: str = ""):
     """ Constructor """
 
     if not CERTFR.is_valid_ref(ref) and not CERTFR.is_valid_link(ref):
@@ -107,19 +108,19 @@ class CERTFR:
   # ****************************************************************
   # Getters & Setters
 
-  def get_ref(self):
+  def get_ref(self) -> str:
     """ Getter for the reference """
     return self.ref
 
-  def get_risks(self, short=True):
+  def get_risks(self, short: bool = True) -> List[str]:
     """ Get the list of risks """
-    return [r.name if short else r.value for r in self.risks]
+    return [ r.name if short else r.value for r in self.risks ]
 
-  def get_cve_refs(self):
+  def get_cve_refs(self) -> List[str]:
     """ Returns the refs of all the related cves """
-    return [cve.get_ref() for cve in self.cve_list]
+    return [ cve.get_ref() for cve in self.cve_list ]
 
-  def get_max_cve(self, cve_data=None):
+  def get_max_cve(self, cve_data = None) -> "CVE":
     """ Returns the highest cve """
     if len(self.cve_list) <= 0:
       print("No comparison possible: no CVE related")
@@ -135,24 +136,24 @@ class CERTFR:
 
     return max_cve
 
-  def get_title(self):
+  def get_title(self) -> str:
     """ Getter for the title """
     return self.title
 
-  def get_link(self):
+  def get_link(self) -> str:
     """ Getter for the link """
     return self.link
 
-  def get_documentations(self, filter=None):
+  def get_documentations(self, filter: str = None) -> List[str]:
     """ Getter for the documentations """
     docs = self.documentations
 
     if filter is not None and filter != "":
-      docs = [d for d in self.documentations if filter not in d]
+      docs = [ d for d in self.documentations if filter not in d ]
 
     return docs
 
-  def set_link(self, link):
+  def set_link(self, link: str) -> None:
     """ Setter for CERTFR link """
     if CERTFR.is_valid_link(link):
       self.link = link
@@ -160,14 +161,14 @@ class CERTFR:
     else:
       ColorPrint.red(f"Invalid CERTFR link provided: {link}")
 
-  def append_source(self, source):
+  def append_source(self, source: str) -> None:
     """ Appends a source to the list of sources """
     self.sources.append(source)
 
   # ****************************************************************
   # Resolvers
 
-  def resolve_cve_data(self, cve_data):
+  def resolve_cve_data(self, cve_data: List["CVE"]) -> None:
     """ Resolves CVE data for all related CVE """
     print(f"\nResolving {len(self.cve_list)} CVE data for {self.ref}...")
 
@@ -190,7 +191,7 @@ class CERTFR:
   # ****************************************************************
   # Parsers
 
-  def parse_cve(self, content):
+  def parse_cve(self, content) -> None:
     """ Extract all CVE refs in content and look for the highest CVSS """
     cve_refs = set(re.findall(CVE_REGEX, content.text))
     for ref in cve_refs:
@@ -198,23 +199,23 @@ class CERTFR:
 
     print(f"{len(self.cve_list)} CVEs related to {self.ref}")
 
-  def parse_products(self, content):
+  def parse_products(self, content) -> None:
     """ Generates a list of affected products based on the corresponding <ul> element """
     product_list = content.find_all("ul")[1]
     self.affected_products = [li.text for li in product_list.find_all("li")]
 
-  def parse_documentations(self, content):
+  def parse_documentations(self, content) -> None:
     """ Extracts data from the certfr documentation list """
     self.documentations = re.findall(URL_REGEX, content.text)
 
-  def parse_risks(self, content):
+  def parse_risks(self, content) -> None:
     """ Generates a list out of a the <ul> element relative to the risks """
 
     for risk in list(RiskValues):
       if risk.value.lower() in content.text.lower():
         self.risks.add(risk)
 
-  def parse_meta(self, meta_section):
+  def parse_meta(self, meta_section) -> None:
     """ Parse meta section """
     meta_tab = meta_section.find_all("table")[0]
     tab_cells = []
@@ -230,14 +231,14 @@ class CERTFR:
     self.date_last = tab_cells[3]
     self.sources = tab_cells[-2].split("\n")
 
-  def parse_content(self, section):
+  def parse_content(self, section) -> None:
     """ Parse content section """
     self.parse_cve(section)
     self.parse_risks(section)
     self.parse_products(section)
     self.parse_documentations(section)
 
-  def parse(self):
+  def parse(self) -> None:
     """ Main function to parse a certfr page """
 
     print(f"\n* Parsing {self.ref} *")
@@ -264,11 +265,11 @@ class CERTFR:
   # ****************************************************************
   # Converters
 
-  def to_string(self):
+  def to_string(self) -> str:
     """ Converts current instance into a string """
     return f"{self.ref}: {self.title}"
 
-  def to_dictionary(self):
+  def to_dictionary(self) -> Dict:
     """ Converts current instance into a dictionary """
     return {
         "ref": self.ref,
@@ -287,21 +288,21 @@ class CERTFR:
   # Static methods
 
   @staticmethod
-  def is_valid_ref(ref):
+  def is_valid_ref(ref: str) -> bool:
     """ Returns whether the ref is valid or not """
     return re.match(CERTFR_REF_REGEX, ref)
 
   @staticmethod
-  def is_valid_link(link):
+  def is_valid_link(link: str) -> bool:
     """ Returns whether the link is valid or not """
     return re.match(CERTFR_LINK_REGEX, link)
 
   @staticmethod
-  def clean_str(str):
+  def clean_str(str: str) -> str:
     return str.replace("\r", "")
 
   @staticmethod
-  def get_ref_from_link(link):
+  def get_ref_from_link(link: str) -> str:
     """ Returns a CERTFR ref based on a link """
     if not re.match(CERTFR_LINK_REGEX, link):
       ColorPrint.red(f"Invalid CERTFR link provided: {link}")

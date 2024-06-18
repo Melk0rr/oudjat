@@ -1,8 +1,9 @@
 """ CVE module addressing common vulnerability behavior """
 import re
-from enum import Enum
-
 import requests
+
+from enum import Enum
+from typing import List
 from bs4 import BeautifulSoup
 
 from oudjat.utils.color_print import ColorPrint
@@ -180,7 +181,7 @@ class CVE:
     
 
   @staticmethod
-  def find_cve_by_ref(ref, cve_list):
+  def find_cve_by_ref(ref, cve_list: List["CVE"]) -> "CVE":
     """ Find a CVE instance by ref in a list of CVEs """
     if not CVE.check_ref(ref):
       raise ValueError(f"Invalid CVE reference provided: {ref}")
