@@ -31,7 +31,7 @@ class KPI(DataScope):
     if date is None:
       date = datetime.today()
 
-    self.date = date
+    self.date: datetime = date
 
   def get_date(self):
     """ Getter for kpi date """
