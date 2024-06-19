@@ -163,6 +163,13 @@ class LDAPConnector:
     attributes: Union[str, List[str]] = []
   ) -> List["LDAPEntry"]:
     """ Runs an Active directory search based on the provided parameters """
+    
+    if self.ldap_connection is None:
+      raise ConnectionError(f"You must initiate connection to {self.target} before running search !")
+      return
+
+    if search_base is None:
+      search_base = self.default_search_base 
 
     formated_filter = LDAPSearchTypes[search_type].value["filter"]
     if search_filter:
