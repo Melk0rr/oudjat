@@ -154,6 +154,7 @@ class LDAPConnector:
     self.domain = self.ldap_server.info.other["ldapServiceName"][0].split("@")[-1]
 
     print(f"Default search base is {self.default_search_base}")
+    print(f"Domain is {self.domain}")
 
   def search(
     self,
