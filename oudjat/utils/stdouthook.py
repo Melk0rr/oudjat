@@ -4,17 +4,17 @@ class StdOutHook:
   lines = []
   filename = ""
 
-  def __init__(self, filename, silent, output):
+  def __init__(self, filename: str, silent: bool = True, output: bool = False):
     self.filename = filename
     self.silent = silent
     self.output = output
 
-  def write(self, text, override=False, **kwargs):
+  def write(self, text: str, override: bool = False, **kwargs) -> None:
     if not self.silent or override:
       sys.__stdout__.write(text)
     self.lines.append(text)
 
-  def write_out(self):
+  def write_out(self) -> None:
     if self.output:
       with open(self.filename, "w") as file:
         for line in self.lines:
@@ -28,5 +28,5 @@ class StdOutHook:
           file.write(line)
 
   def flush(self):
-    # python3 compatability, does nothing
+    # python3 compatibility, does nothing
     pass

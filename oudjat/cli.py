@@ -46,11 +46,12 @@ Help:
   For help using this tool, please open an issue on the Github repository:
   https://github.com/Melk0rr/Oudjat
 """
+
 import sys
 import time
 
 from docopt import docopt
-from typing import Any
+from typing import Dict, Any
 
 import oudjat.commands
 from oudjat.banner import banner
@@ -62,14 +63,14 @@ from . import __version__ as VERSION
 
 COMMAND_OPTIONS = ["vuln", "cert", "sc", "kpi"]
 
-def command_switch(options) -> Any:
+def command_switch(options: Dict) -> Any:
   """ Script command switch case """
   
   switch = {
     "vuln": oudjat.commands.Vuln,
     "cert": oudjat.commands.Cert,
-    "sc"  : oudjat.commands.SC,
     "kpi" : oudjat.commands.KPIFactory
+    # "sc"  : oudjat.commands.SC,
   }
 
   command_name = next(command for command in COMMAND_OPTIONS if options[command])

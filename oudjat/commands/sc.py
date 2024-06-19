@@ -12,7 +12,7 @@ class SC(Target):
   sc_commands = {
   }
 
-  def __init__(self, options):
+  def __init__(self, options: Dict):
     """ Constructor """
     super().__init__(options)
 
@@ -25,11 +25,11 @@ class SC(Target):
     except ValueError:
       raise ValueError("Unable to import SC API keys")
 
-  def sc_process(self):
+  def sc_process(self) -> None:
     """ Tenable.sc default process """
 
 
-  def run(self):
+  def run(self) -> None:
     """ Run sc process on targets """
 
     # with Pool(processes=5) as pool:

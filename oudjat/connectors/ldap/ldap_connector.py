@@ -2,13 +2,13 @@ import ssl
 import json
 import ldap3
 import socket
-from typing import List, Union
+from typing import List, Union, Any
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.ldap.ldap_search_types import LDAPSearchTypes
 
 class LDAPEntry(dict):
-  def get(self, key):
+  def get(self, key: str) -> Any:
     if key not in self.__getitem__("attributes").keys():
       return None
     item = self.__getitem__("attributes").__getitem__(key)
@@ -18,10 +18,10 @@ class LDAPEntry(dict):
 
     return item
 
-  def set(self, key, value):
+  def set(self, key: str, value: Any) -> Any:
     return self.__getitem__("attributes").__setitem__(key, value)
 
-  def get_raw(self, key):
+  def get_raw(self, key: str) -> Any:
     if key not in self.__getitem__("raw_attributes").keys():
       return None
     return self.__getitem__("raw_attributes").__getitem__(key)
@@ -56,11 +56,11 @@ class LDAPConnector:
     """ Getter for the server connection """
     return self.connection
 
-  def get_default_search_base(self):
+  def get_default_search_base(self) -> str:
     """ Getter for the default search base """
     return self.default_search_base
 
-  def set_tls_usage(self, use_tls: bool = True):
+  def set_tls_usage(self, use_tls: bool = True) -> None:
     """ Setter for connector tls usage """
     self.use_tls = use_tls
     if use_tls:
@@ -161,7 +161,7 @@ class LDAPConnector:
     search_base: str = None,
     search_filter: str = None,
     attributes: Union[str, List[str]] = []
-  ):
+  ) -> List["LDAPEntry"]:
     """ Runs an Active directory search based on the provided parameters """
 
     formated_filter = LDAPSearchTypes[search_type].value["filter"]
@@ -179,14 +179,12 @@ class LDAPConnector:
       generator=False
     )
 
-    entries = list(
-      map(
-        lambda entry: LDAPEntry(**entry),
-        filter(
-          lambda entry: entry["type"] == "searchResEntry",
-          results,
-        ),
-      )
+    entries = map(
+      lambda entry: LDAPEntry(**entry),
+      filter(
+        lambda entry: entry["type"] == "searchResEntry",
+        results,
+      ),
     )
 
     return entries
@@ -195,8 +193,8 @@ class LDAPConnector:
     self,
     search_base: str = None,
     search_filter: str = None,
-    attributes: List[str] = []
-  ):
+    attributes: Union[str, List[str]] = []
+  ) -> List["LDAPEntry"]:
     """ Retreive users from current domain """
     return self.search("user", search_base, search_filter, attributes)
   
@@ -204,8 +202,8 @@ class LDAPConnector:
     self,
     search_base: str = None,
     search_filter: str = None,
-    attributes: List[str] = []
-  ):
+    attributes: Union[str, List[str]] = []
+  ) -> List["LDAPEntry"]:
     """ Retreive computers from current domain """
     return self.search("computer", search_base, search_filter, attributes)
   
@@ -213,7 +211,7 @@ class LDAPConnector:
     self,
     search_base: str = None,
     search_filter: str = None,
-    attributes: List[str] = []
-  ):
+    attributes: Union[str, List[str]] = []
+  ) -> List["LDAPEntry"]:
     """ Retreive persons from current domain """
     return self.search("person", search_base, search_filter, attributes)

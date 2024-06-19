@@ -1,6 +1,6 @@
 """ KPI module handling operations related to indicators """
 from datetime import datetime
-from typing import List, Dict
+from typing import List, Dict, Tuple, Union
 from enum import Enum
 
 from oudjat.utils.color_print import ColorPrint
@@ -22,7 +22,7 @@ class KPI(DataScope):
     perimeter: str,
     scope: List[Dict] | DataScope = None,
     filters: List[Dict] | List[DataFilter] = [],
-    description: str = "",
+    description: str = None,
     date: datetime = None
   ):
     """ Constructor """
@@ -33,11 +33,11 @@ class KPI(DataScope):
 
     self.date: datetime = date
 
-  def get_date(self):
+  def get_date(self) -> datetime:
     """ Getter for kpi date """
     return self.date
 
-  def get_conformity_level(self, value: float = None) -> ConformityLevel:
+  def get_conformity_level(self, value: float = None) -> "ConformityLevel":
     """ Establish the conformity level """
     if value is None:
       value = self.get_kpi_value()
@@ -47,11 +47,16 @@ class KPI(DataScope):
     """ Returns the percentage of conform data based on kpi control """
     return round(len(self.get_data()) / len(self.get_input_data()) * 100, 2)
 
-  def get_print_function(self):
+  def get_print_function(self) -> object:
     """ Defines print function """
     return self.get_conformity_level().value["color"]
 
-  def print_value(self, prefix: str = "", suffix: str = "%\n", print_details: bool = True) -> None:
+  def print_value(
+    self,
+    prefix: str = None,
+    suffix: str = "%\n",
+    print_details: bool = True
+  ) -> None:
     """ Print value with color based on kpi level """
     scope_str = self.to_string()
 
@@ -81,7 +86,7 @@ class KPI(DataScope):
       "date": self.get_date_str()
     }
 
-  def to_string(self) -> (str,str):
+  def to_string(self) -> Tuple[str, str]:
     """ Converts the current instance into a string """
     k_value = self.get_kpi_value()
     return (f"{len(self.get_data())} / {len(self.get_input_data())}", f"{k_value}")
@@ -115,7 +120,7 @@ class KPIComparator:
     self.values = ()
     self.tendency = None
 
-  def get_kpis(self) -> (float,float):
+  def get_kpis(self) -> Tuple[float,float]:
     """ Getter for kpis """
     return self.kpis
 
@@ -127,7 +132,7 @@ class KPIComparator:
     """ Get kpis different values and set changes """
     self.values = (self.kpis[0].get_kpi_value(), self.kpis[1].get_kpi_value())
 
-  def get_tendency_key(self, v_a: int | float, v_b: int | float) -> str:
+  def get_tendency_key(self, v_a: Union[int, float], v_b: Union[int, float]) -> str:
     """ Substract given values and define tendency """
     return "+" if v_b > v_a else "-" if v_b < v_a else "="
 
@@ -149,11 +154,11 @@ class KPIComparator:
     self.kpis[1].get_print_function()(f"{self.values[1]}%", end="")
     self.tendency["print"](t_icon, end=sfx)
 
-# 
+
 class KPIHistory:
   """ KPIEvolution class to handle """
 
-  def __init__(self, name: str, kpis: List[KPI] = []):
+  def __init__(self, name: str, kpis: List["KPI"] = []):
     """ Constructor """
     self.name = name
     self.kpis = []
@@ -164,12 +169,12 @@ class KPIHistory:
     """ Getter for kpi list """
     return self.kpis
 
-  def set_kpis(self, kpis: List[KPI] = []) -> None:
+  def set_kpis(self, kpis: List["KPI"] = []) -> None:
     """ Setter for kpi list """
     for k in kpis:
       self.add_kpi(k)
 
-  def add_kpi(self, kpi: KPI) -> None:
+  def add_kpi(self, kpi: "KPI") -> None:
     """ Add a kpi to the kpi list """
     if self.name != kpi.get_name():
       raise ValueError(f"{__class__} error while adding new kpi. KPI name and KPIHistory name must match !")
@@ -180,6 +185,7 @@ class KPIHistory:
     """ Builds the KPI history """
     comp_list = []
     sorted_kpis = sorted(self.kpis, key=lambda k: k.get_date())
+
     for i in range(len(self.kpis) - 1):
       comparator = KPIComparator(sorted_kpis[i], sorted_kpis[i + 1])
       comparator.compare()

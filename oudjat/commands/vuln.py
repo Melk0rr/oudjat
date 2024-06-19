@@ -1,4 +1,5 @@
 """ CVE Target class """
+from typing import List, Dict
 from multiprocessing import Pool
 
 from oudjat.utils.color_print import ColorPrint
@@ -6,11 +7,10 @@ from oudjat.watchers.cve import CVE
 
 from .target import Target
 
-
 class Vuln(Target):
   """ CVE Target """
 
-  def __init__(self, options):
+  def __init__(self, options: Dict):
     """ Constructor """
     super().__init__(options)
 
@@ -27,12 +27,12 @@ class Vuln(Target):
       except ValueError:
         ColorPrint.red(f"Invalid CVE reference provided {ref}")
 
-  def cve_process(self, cve):
+  def cve_process(self, cve: "CVE") -> Dict:
     """ Process to be run on each cve """
     cve.parse_nist()
     return cve.to_dictionary(minimal=False)
 
-  def run(self):
+  def run(self) -> None:
     """ Run cve target """
 
     with Pool(processes=5) as pool:

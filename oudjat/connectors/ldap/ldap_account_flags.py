@@ -23,6 +23,6 @@ class LDAPAccountFlags(Enum):
 	NO_AUTH_DATA_REQUIRED = 33554432
 	PARTIAL_SECRETS_ACCOUNT = 67108864
 
-def check_flag(account_control: int, flag: LDAPAccountFlags):
+def check_flag(account_control: int, flag: "LDAPAccountFlags") -> int:
 	""" Compare given account control to the chosen LDAP flag """
 	return account_control & flag.value

@@ -1,13 +1,14 @@
 """ iTop module used to generate iTop tickets """
 import json
 import sys
-
 import requests
+
+from typing import Dict
 
 from oudjat.utils.dictionary_join import join_dictionary_items
 
 
-def new_ticket(itop_user, itop_pwd, ticket_data):
+def new_ticket(itop_user: str, itop_pwd: str, ticket_data: Dict) -> None:
   """ Create a new itop ticket """
   if len(ticket_data.keys()) != 5:
     print(f"Those keys must be provided: host, service, service_status, service_state_type\n")

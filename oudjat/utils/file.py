@@ -3,8 +3,10 @@ import re
 import csv
 import json
 
+from typing import List, Dict, Any
+
 # JSON file functions
-def import_json(file_path):
+def import_json(file_path: str) -> str:
   """ Helper function to import json data """
   full_path = os.path.join(os.getcwd(), file_path)
 
@@ -14,7 +16,12 @@ def import_json(file_path):
   return json_data
 
 # CSV file functions
-def export_csv(data, file_path, delimiter=',', append=False):
+def export_csv(
+  data: List[Dict],
+  file_path: str,
+  delimiter: str = ',',
+  append: bool = False
+) -> None:
   """ Helper function to export data into a CSV file """
   if len(data) == 0:
     print("No data to export !")
@@ -28,7 +35,11 @@ def export_csv(data, file_path, delimiter=',', append=False):
     writer.writeheader()
     writer.writerows(data)
 
-def import_csv(file_path, callback=None, delimiter=None):
+def import_csv(
+  file_path: str,
+  callback: object = None,
+  delimiter: str = None
+) -> List[Any]:
   """ Helper function to import CSV content into a list of dictionaries """
   full_path = os.path.join(os.getcwd(), file_path)
 
@@ -47,6 +58,6 @@ def import_csv(file_path, callback=None, delimiter=None):
       data = callback(list(reader))
 
     else:
-      data = [row for row in list(reader)]
+      data = [ row for row in list(reader) ]
 
   return data

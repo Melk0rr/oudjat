@@ -1,8 +1,7 @@
 """ Handle list init based on given text file or comma separated strings """
 import os
 
-
-def str_file_option_handle(self, string_option, file_option):
+def str_file_option_handle(self, string_option: str, file_option: str) -> None:
   """ Initialize a list option based either on a comma separated string or a file """
   if self.options[file_option]:
     full_path = os.path.join(os.getcwd(), self.options[file_option])
