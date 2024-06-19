@@ -100,7 +100,7 @@ class CVE:
   # ****************************************************************
   # Parsers
 
-  def parse_cvss(self, content: "BeautifulSoup") -> None:
+  def parse_cvss(self, content: BeautifulSoup) -> None:
     """ Function to extract CVSS score """
     cvss_match = re.findall(
         r'(?:[1-9].[0-9]) (?:LOW|MEDIUM|HIGH|CRITICAL)', content.text)
@@ -113,12 +113,12 @@ class CVE:
     else:
       ColorPrint.yellow(f"Could not find CVSS score for {self.ref}")
 
-  def parse_description(self, content: "BeautifulSoup") -> None:
+  def parse_description(self, content: BeautifulSoup) -> None:
     """ Function to extract description """
     desc_soup = content.select("p[data-testid='vuln-description']")
     self.description = desc_soup[0].text.replace("\n", " ") if len(desc_soup) > 0 else ""
 
-  def parse_publishdate(self, content: "BeautifulSoup") -> None:
+  def parse_publishdate(self, content: BeautifulSoup) -> None:
     """ Function to extract cve publish date """
     p_date_soup = content.select("span[data-testid='vuln-published-on']")
     self.publish_date = p_date_soup[0].text if len(p_date_soup) > 0 else ""

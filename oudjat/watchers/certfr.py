@@ -5,7 +5,7 @@ import requests
 from enum import Enum
 from typing import List, Dict
 from datetime import datetime
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, element
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.watchers.cve import CVE, CVE_REGEX
@@ -192,7 +192,7 @@ class CERTFR:
   # ****************************************************************
   # Parsers
 
-  def parse_cve(self, content: "BeautifulSoup") -> None:
+  def parse_cve(self, content: BeautifulSoup) -> None:
     """ Extract all CVE refs in content and look for the highest CVSS """
     cve_refs = set(re.findall(CVE_REGEX, content.text))
     for ref in cve_refs:
@@ -200,23 +200,23 @@ class CERTFR:
 
     print(f"{len(self.cve_list)} CVEs related to {self.ref}")
 
-  def parse_products(self, content: "BeautifulSoup") -> None:
+  def parse_products(self, content: BeautifulSoup) -> None:
     """ Generates a list of affected products based on the corresponding <ul> element """
     product_list = content.find_all("ul")[1]
     self.affected_products = [li.text for li in product_list.find_all("li")]
 
-  def parse_documentations(self, content: "BeautifulSoup") -> None:
+  def parse_documentations(self, content: BeautifulSoup) -> None:
     """ Extracts data from the certfr documentation list """
     self.documentations = re.findall(URL_REGEX, content.text)
 
-  def parse_risks(self, content: "BeautifulSoup") -> None:
+  def parse_risks(self, content: BeautifulSoup) -> None:
     """ Generates a list out of a the <ul> element relative to the risks """
 
     for risk in list(RiskValues):
       if risk.value.lower() in content.text.lower():
         self.risks.add(risk)
 
-  def parse_meta(self, meta_section: "bs4.element.Tag") -> None:
+  def parse_meta(self, meta_section: element.Tag) -> None:
     """ Parse meta section """
     meta_tab = meta_section.find_all("table")[0]
     tab_cells = {}
@@ -232,7 +232,7 @@ class CERTFR:
     self.date_last = tab_cells["Date de la dernière version"]
     self.sources = tab_cells["Source(s)"].split("\n")
 
-  def parse_content(self, section: "bs4.element.Tag") -> None:
+  def parse_content(self, section: element.Tag) -> None:
     """ Parse content section """
     self.parse_cve(section)
     self.parse_risks(section)
