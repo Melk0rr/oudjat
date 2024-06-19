@@ -32,8 +32,8 @@ class LDAPConnector:
   def __init__(
     self,
     server: str,
-    ad_user: str,
-    ad_password: str,
+    ldap_user: str,
+    ldap_password: str,
     use_tls: bool = False
   ):
     """ Constructor """
@@ -42,6 +42,8 @@ class LDAPConnector:
     self.port = 389
     if use_tls:
       self.port = 636
+
+    self.ldap_credentials = { "user": ldap_user, "password": ldap_password }
 
     self.default_search_base: str = None
     self.ldap_server: Server = None
@@ -96,15 +98,15 @@ class LDAPConnector:
     ldap_server = ldap3.Server(
       target_ip,
       get_info=ldap3.ALL,
-      port=port,
+      port=self.port,
       use_ssl=self.use_tls,
       **tls_option
     )
     
     ldap_connection = ldap3.Connection(
       ldap_server,
-      user=ad_user,
-      password=ad_password,
+      user=self.ldap_credentials["user"],
+      password=self.ldap_credentials["password"],
       auto_bind=True,
       auto_referrals=False,
       authentication=ldap3.NTLM
@@ -153,15 +155,12 @@ class LDAPConnector:
     self.default_search_base = self.ldap_server.info.other["defaultNamingContext"][0]
     self.domain = self.ldap_server.info.other["ldapServiceName"][0].split("@")[-1]
 
-    print(f"Default search base is {self.default_search_base}")
-    print(f"Domain is {self.domain}")
-
   def search(
     self,
     search_type: str = "user",
     search_base: str = None,
     search_filter: str = None,
-    attributes: Union[str, List[str]] = []
+    attributes: Union[str, List[str]] = None
   ) -> List["LDAPEntry"]:
     """ Runs an Active directory search based on the provided parameters """
     
@@ -176,23 +175,25 @@ class LDAPConnector:
     if search_filter:
       formated_filter = f"(&{formated_filter}{search_filter})"
 
-    if len(attributes) == 0:
+    if attributes is None:
       attributes = LDAPSearchTypes[search_type].value["attributes"]
 
     results = self.ldap_connection.extend.standard.paged_search(
-      search_base=self.search_base,
-      search_filter=self.search_filter,
-      attributes=self.attributes,
-      search_scope=SUBTREE,
+      search_base=search_base,
+      search_filter=formated_filter,
+      attributes=attributes,
+      search_scope=ldap3.SUBTREE,
       generator=False
     )
 
-    entries = map(
-      lambda entry: LDAPEntry(**entry),
-      filter(
-        lambda entry: entry["type"] == "searchResEntry",
-        results,
-      ),
+    entries = list(
+      map(
+        lambda entry: LDAPEntry(**entry),
+        filter(
+          lambda entry: entry["type"] == "searchResEntry",
+          results,
+        ),
+      )
     )
 
     return entries
