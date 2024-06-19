@@ -38,7 +38,7 @@ class CERTFRPageTypes(Enum):
   DUR = "dur"
 
 
-def parse_feed(feed_url, date_str_filter=None):
+def parse_feed(feed_url: str, date_str_filter: str = None) -> List[str]:
   """ Parse a CERTFR Feed page """
   try:
     feed_req = requests.get(feed_url)
@@ -81,7 +81,7 @@ class CERTFR:
   # ****************************************************************
   # Attributes & Constructors
 
-  def __init__(self, ref: str, title: str = ""):
+  def __init__(self, ref: str, title: str = None):
     """ Constructor """
 
     if not CERTFR.is_valid_ref(ref) and not CERTFR.is_valid_link(ref):
@@ -89,8 +89,8 @@ class CERTFR:
     
     self.ref = ref if CERTFR.is_valid_ref(ref) else CERTFR.get_ref_from_link(ref)
     self.title = title
-    self.date_initial = ""
-    self.date_last = ""
+    self.date_initial = None
+    self.date_last = None
     self.sources = []
     self.cve_list = set()
     self.risks = set()
@@ -120,7 +120,7 @@ class CERTFR:
     """ Returns the refs of all the related cves """
     return [ cve.get_ref() for cve in self.cve_list ]
 
-  def get_max_cve(self, cve_data = None) -> "CVE":
+  def get_max_cve(self, cve_data: List["CVE"] = None) -> "CVE":
     """ Returns the highest cve """
     if len(self.cve_list) <= 0:
       print("No comparison possible: no CVE related")
@@ -132,6 +132,7 @@ class CERTFR:
       self.resolve_cve_data(cve_data)
 
     max_cve = max(self.cve_list, key=lambda cve: cve.get_cvss())
+    self.documentations.append(max_cve.get_link())
     print(f"\n{self.ref} max CVE is {max_cve.get_ref()}({max_cve.get_cvss()})")
 
     return max_cve
@@ -191,7 +192,7 @@ class CERTFR:
   # ****************************************************************
   # Parsers
 
-  def parse_cve(self, content) -> None:
+  def parse_cve(self, content: "BeautifulSoup") -> None:
     """ Extract all CVE refs in content and look for the highest CVSS """
     cve_refs = set(re.findall(CVE_REGEX, content.text))
     for ref in cve_refs:
@@ -199,39 +200,39 @@ class CERTFR:
 
     print(f"{len(self.cve_list)} CVEs related to {self.ref}")
 
-  def parse_products(self, content) -> None:
+  def parse_products(self, content: "BeautifulSoup") -> None:
     """ Generates a list of affected products based on the corresponding <ul> element """
     product_list = content.find_all("ul")[1]
     self.affected_products = [li.text for li in product_list.find_all("li")]
 
-  def parse_documentations(self, content) -> None:
+  def parse_documentations(self, content: "BeautifulSoup") -> None:
     """ Extracts data from the certfr documentation list """
     self.documentations = re.findall(URL_REGEX, content.text)
 
-  def parse_risks(self, content) -> None:
+  def parse_risks(self, content: "BeautifulSoup") -> None:
     """ Generates a list out of a the <ul> element relative to the risks """
 
     for risk in list(RiskValues):
       if risk.value.lower() in content.text.lower():
         self.risks.add(risk)
 
-  def parse_meta(self, meta_section) -> None:
+  def parse_meta(self, meta_section: "bs4.element.Tag") -> None:
     """ Parse meta section """
     meta_tab = meta_section.find_all("table")[0]
-    tab_cells = []
+    tab_cells = {}
 
     for row in meta_tab.find_all("tr"):
-      cell_txt = row.find_all("td")[-1].text
-      tab_cells.append(self.clean_str(cell_txt))
+      cells = row.find_all("td")
+      tab_cells[self.clean_str(cells[0].text)] = self.clean_str(cells[-1].text)
 
-    if self.title == "":
-      self.title = tab_cells[1]
+    if not self.title:
+      self.title = tab_cells["Titre"]
 
-    self.date_initial = tab_cells[2]
-    self.date_last = tab_cells[3]
-    self.sources = tab_cells[-2].split("\n")
+    self.date_initial = tab_cells["Date de la première version"]
+    self.date_last = tab_cells["Date de la dernière version"]
+    self.sources = tab_cells["Source(s)"].split("\n")
 
-  def parse_content(self, section) -> None:
+  def parse_content(self, section: "bs4.element.Tag") -> None:
     """ Parse content section """
     self.parse_cve(section)
     self.parse_risks(section)
@@ -240,7 +241,6 @@ class CERTFR:
 
   def parse(self) -> None:
     """ Main function to parse a certfr page """
-
     print(f"\n* Parsing {self.ref} *")
 
     # Handle possible connection error
@@ -299,7 +299,7 @@ class CERTFR:
 
   @staticmethod
   def clean_str(str: str) -> str:
-    return str.replace("\r", "")
+    return str.replace("\r", "").replace("\n", "").strip()
 
   @staticmethod
   def get_ref_from_link(link: str) -> str:
