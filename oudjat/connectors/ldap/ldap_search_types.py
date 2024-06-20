@@ -7,6 +7,7 @@ class LDAPSearchTypes(Enum):
       "accountExpires",
       "cn",
       "description",
+      "distinguishedName",
       "employeeID",
       "givenName",
       "lastLogon",
@@ -28,6 +29,7 @@ class LDAPSearchTypes(Enum):
       "accountExpires",
       "cn",
       "description",
+      "distinguishedName",
       "employeeID",
       "givenName",
       "lastLogon",
@@ -48,6 +50,7 @@ class LDAPSearchTypes(Enum):
     "attributes": [
       "cn",
       "description",
+      "distinguishedName",
       "lastLogon",
       "objectSid",
       "operatingSystem",
