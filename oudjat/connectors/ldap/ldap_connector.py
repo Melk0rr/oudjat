@@ -9,6 +9,7 @@ from oudjat.connectors.ldap.ldap_search_types import LDAPSearchTypes
 
 class LDAPEntry(dict):
   def get(self, key: str) -> Any:
+    """ Retreive the value of the given attribute """
     if key not in self.__getitem__("attributes").keys():
       return None
     item = self.__getitem__("attributes").__getitem__(key)
@@ -19,12 +20,18 @@ class LDAPEntry(dict):
     return item
 
   def set(self, key: str, value: Any) -> Any:
+    """ Set the given value of the provided attribute """
     return self.__getitem__("attributes").__setitem__(key, value)
 
   def get_raw(self, key: str) -> Any:
+    """ Retreive the value of the given raw attribute """
     if key not in self.__getitem__("raw_attributes").keys():
       return None
     return self.__getitem__("raw_attributes").__getitem__(key)
+
+  def attr(self):
+    """ Retreive ldap attributes """
+    return self.__getitem__("attributes")
 
 class LDAPConnector:
   """ AD helper with functions to query domain using LDAP filters """
@@ -160,7 +167,8 @@ class LDAPConnector:
     search_type: str = "user",
     search_base: str = None,
     search_filter: str = None,
-    attributes: Union[str, List[str]] = None
+    attributes: Union[str, List[str]] = None,
+    **kwargs
   ) -> List["LDAPEntry"]:
     """ Runs an Active directory search based on the provided parameters """
     
@@ -182,8 +190,8 @@ class LDAPConnector:
       search_base=search_base,
       search_filter=formated_filter,
       attributes=attributes,
-      search_scope=ldap3.SUBTREE,
-      generator=False
+      generator=False,
+      **kwargs
     )
 
     entries = list(
@@ -191,36 +199,9 @@ class LDAPConnector:
         lambda entry: LDAPEntry(**entry),
         filter(
           lambda entry: entry["type"] == "searchResEntry",
-          results,
-        ),
+          results
+        )
       )
     )
 
     return entries
-
-  def get_users(
-    self,
-    search_base: str = None,
-    search_filter: str = None,
-    attributes: Union[str, List[str]] = []
-  ) -> List["LDAPEntry"]:
-    """ Retreive users from current domain """
-    return self.search("user", search_base, search_filter, attributes)
-  
-  def get_computers(
-    self,
-    search_base: str = None,
-    search_filter: str = None,
-    attributes: Union[str, List[str]] = []
-  ) -> List["LDAPEntry"]:
-    """ Retreive computers from current domain """
-    return self.search("computer", search_base, search_filter, attributes)
-  
-  def get_persons(
-    self,
-    search_base: str = None,
-    search_filter: str = None,
-    attributes: Union[str, List[str]] = []
-  ) -> List["LDAPEntry"]:
-    """ Retreive persons from current domain """
-    return self.search("person", search_base, search_filter, attributes)
