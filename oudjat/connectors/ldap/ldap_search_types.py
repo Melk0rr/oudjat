@@ -58,13 +58,37 @@ class LDAPSearchTypes(Enum):
       "whenCreated"
     ]
   }
+  
+  gpo = {
+    "filter": "(objectClass=groupPolicyContainer)",
+    "attributes": [
+      "displayName",
+      "whenChanged",
+      "whenCreated"
+    ]
+  }
 
   group = {
     "filter": "(objectClass=group)",
-    "attributes": []
+    "attributes": [
+      "cn",
+      "description",
+      "member",
+      "memberOf"
+    ]
   }
 
   ou = {
     "filter": "(objectClass=organizationalUnit)",
-    "attributes": []
+    "attributes": [
+      "description"
+    ]
+  }
+
+  device = {
+    "filter": "(objectClass=device)",
+    "attributes": [
+      "cn",
+      "serialNumber"
+    ]
   }
