@@ -26,3 +26,11 @@ class LDAPAccountFlags(Enum):
 def check_flag(account_control: int, flag: "LDAPAccountFlags") -> int:
 	""" Compare given account control to the chosen LDAP flag """
 	return account_control & flag.value
+
+def is_disabled(account_control: int) -> bool:
+	""" Checks if an account is disabled based on its account control """
+	return check_flag(account_control, LDAPAccountFlags.ACCOUNT_DISABLE) > 0
+
+def pwd_expires(account_control: int) -> bool:
+	""" Checks if the account's password expires """
+	return check_flag(account_control, LDAPAccountFlags.PASSWD_DONT_EXPIRE) == 0
