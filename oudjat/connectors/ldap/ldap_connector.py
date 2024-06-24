@@ -2,6 +2,7 @@ import ssl
 import json
 import ldap3
 import socket
+
 from typing import List, Union, Any
 
 from oudjat.utils.color_print import ColorPrint
@@ -77,7 +78,7 @@ class LDAPConnector:
     
     else:
       self.port = 389
-
+    
   def connect(self, version: ssl._SSLMethod = None) -> None:
     """ Initiate connection to target server """
 
@@ -87,7 +88,7 @@ class LDAPConnector:
         
       except ldap3.core.exceptions.LDAPSocketOpenError as e:
         if not self.use_tls:
-          ColorPrint.yellow(f"Got error while trying to connecto to LDAP: {e}")
+          ColorPrint.yellow(f"Got error while trying to connect to LDAP: {e}")
 
         self.connect(version=ssl.PROTOCOL_TLSv1)
 
@@ -98,7 +99,7 @@ class LDAPConnector:
     if not target_ip:
       raise Exception(f"The target {self.target} is unreachable")
 
-    tls_option = {}
+    tls_option = { "use_ssl": self.use_tls }
     if self.use_tls:
       tls_option["tls"] = ldap3.Tls(validate=ssl.CERT_NONE, version=version, ciphers='ALL:@SECLEVEL=0')
 
@@ -106,24 +107,24 @@ class LDAPConnector:
       target_ip,
       get_info=ldap3.ALL,
       port=self.port,
-      use_ssl=self.use_tls,
       **tls_option
     )
-    
+
     ldap_connection = ldap3.Connection(
       ldap_server,
       user=self.ldap_credentials["user"],
       password=self.ldap_credentials["password"],
-      auto_bind=True,
       auto_referrals=False,
       authentication=ldap3.NTLM
     )
 
     if not ldap_connection.bound:
+      
       bind_result = ldap_connection.bind()
 
       if not bind_result:
         result = ldap_connection.result
+
         if result["result"] == RESULT_STRONGER_AUTH_REQUIRED and self.use_tls:
           logging.warning(
               "LDAP Authentication is refused because LDAP signing is enabled. "
@@ -164,7 +165,7 @@ class LDAPConnector:
 
   def search(
     self,
-    search_type: str = "user",
+    search_type: str = "USER",
     search_base: str = None,
     search_filter: str = None,
     attributes: Union[str, List[str]] = None,
@@ -178,6 +179,8 @@ class LDAPConnector:
 
     if search_base is None:
       search_base = self.default_search_base 
+
+    search_type = search_type.upper()
 
     formated_filter = LDAPSearchTypes[search_type].value["filter"]
     if search_filter:
