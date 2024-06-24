@@ -1,7 +1,7 @@
 from enum import Enum
 
 class LDAPSearchTypes(Enum):
-  user = {
+  USER = {
     "filter": "(&(objectClass=user)(!(objectClass=computer)))",
     "attributes": [
       "accountExpires",
@@ -23,7 +23,7 @@ class LDAPSearchTypes(Enum):
     ]
   }
 
-  person = {
+  PERSON = {
     "filter": "(&(objectClass=person)(!(objectClass=computer)))",
     "attributes": [
       "accountExpires",
@@ -45,7 +45,7 @@ class LDAPSearchTypes(Enum):
     ]
   }
 
-  computer = {
+  COMPUTER = {
     "filter": "(objectClass=computer)",
     "attributes": [
       "cn",
@@ -62,7 +62,7 @@ class LDAPSearchTypes(Enum):
     ]
   }
   
-  gpo = {
+  GPO = {
     "filter": "(objectClass=groupPolicyContainer)",
     "attributes": [
       "displayName",
@@ -71,27 +71,21 @@ class LDAPSearchTypes(Enum):
     ]
   }
 
-  group = {
+  GROUP = {
     "filter": "(objectClass=group)",
     "attributes": [
       "cn",
       "description",
+      "groupType",
       "member",
-      "memberOf"
+      "memberOf",
+      "objectSid"
     ]
   }
 
-  ou = {
+  OU = {
     "filter": "(objectClass=organizationalUnit)",
     "attributes": [
       "description"
-    ]
-  }
-
-  device = {
-    "filter": "(objectClass=device)",
-    "attributes": [
-      "cn",
-      "serialNumber"
     ]
   }
