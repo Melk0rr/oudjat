@@ -9,10 +9,13 @@ from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.ldap.ldap_search_types import LDAPSearchTypes
 
 class LDAPEntry(dict):
+  """ LDAP entry dict """
+
   def get(self, key: str) -> Any:
     """ Retreive the value of the given attribute """
     if key not in self.__getitem__("attributes").keys():
       return None
+
     item = self.__getitem__("attributes").__getitem__(key)
 
     if isinstance(item, list) and len(item) == 0:
@@ -28,6 +31,7 @@ class LDAPEntry(dict):
     """ Retreive the value of the given raw attribute """
     if key not in self.__getitem__("raw_attributes").keys():
       return None
+
     return self.__getitem__("raw_attributes").__getitem__(key)
 
   def attr(self):
@@ -35,7 +39,7 @@ class LDAPEntry(dict):
     return self.__getitem__("attributes")
 
 class LDAPConnector:
-  """ AD helper with functions to query domain using LDAP filters """
+  """ LDAP connector to interact and query LDAP servers """
 
   def __init__(
     self,
@@ -175,7 +179,6 @@ class LDAPConnector:
     
     if self.ldap_connection is None:
       raise ConnectionError(f"You must initiate connection to {self.target} before running search !")
-      return
 
     if search_base is None:
       search_base = self.default_search_base 
