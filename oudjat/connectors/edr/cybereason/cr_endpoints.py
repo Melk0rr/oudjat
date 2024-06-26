@@ -7,23 +7,25 @@ class CybereasonEndpoints(Enum):
     "method": "POST",
     "limit": 30000,
     "attributes": [
-      "fqdn",
-      "machineName",
-      "internalIpAddress",
-      "externalIpAddress",
-      "ransomwareStatus",
-      "preventionStatus",
-      "isolated",
-      "status",
-      "osVersionType",
-      "version",
       "amStatus",
-      "avDbVersion",
       "avDbLastUpdateTime",
+      "avDbVersion",
       "disconnectionTime",
-      "policyName",
+      "externalIpAddress",
+      "fqdn",
       "groupName",
-      "upTime"
+      "internalIpAddress",
+      "isolated",
+      "machineName",
+      "osVersionType",
+      "policyName",
+      "preventionStatus",
+      "ransomwareStatus",
+      "sensorId",
+      "serialNumber",
+      "status",
+      "upTime",
+      "version"
     ]
   }
 
