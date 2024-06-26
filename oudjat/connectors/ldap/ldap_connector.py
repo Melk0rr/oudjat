@@ -180,10 +180,13 @@ class LDAPConnector:
     if self.ldap_connection is None:
       raise ConnectionError(f"You must initiate connection to {self.target} before running search !")
 
+    search_type = search_type.upper()
+    if search_type not in LDAPSearchTypes.__members__:
+      raise(f"Invalid search type proviced: {search_type}")
+
     if search_base is None:
       search_base = self.default_search_base 
 
-    search_type = search_type.upper()
 
     formated_filter = LDAPSearchTypes[search_type].value["filter"]
     if search_filter:
