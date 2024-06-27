@@ -146,7 +146,7 @@ class CybereasonConnector:
     search_filter: List[Dict] = None,
     limit: int = None,
     **kwargs
-  ) -> List[Dict]:
+  ) -> List["CybereasonEntry"]:
     """ Runs search in API """
 
     if self.session is None:
