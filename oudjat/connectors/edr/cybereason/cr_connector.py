@@ -110,14 +110,17 @@ class CybereasonConnector:
     if search_filter is not None:
       filter_opt["filters"] = search_filter
 
-    query = json.dumps({
+    query_content = {
       "limit": limit,
       "offset": offset,
       **filter_opt,
       **kwargs
-    })
+    }
+    print(query_content)
+    query = json.dumps(query_content)
 
     endpoint_url = f"{self.base_url}{endpoint.value.get('endpoint')}"
+    print(endpoint_url)
     
     api_headers = {'Content-Type':'application/json'}
     api_resp = self.session.request(
@@ -127,16 +130,21 @@ class CybereasonConnector:
       headers=api_headers
     )
     
+    print(api_resp.content)
     res = []
     if api_resp.content:
       res = json.loads(api_resp.content)
       
       # Handling CR nonesense
-      if res.get("data") is not None:
-        res = res.get("data")
+      if not isinstance(res, list):
+        if "data" in res:
+          if res.get("data") is None:
+            return None
 
-      if res.get(endpoint.name.lower()) is not None:
-        res = res.get(endpoint.name.lower())
+          res = res.get("data")
+  
+        if res.get(endpoint.name.lower()) is not None:
+          res = res.get(endpoint.name.lower())
     
     return res
 
@@ -177,7 +185,8 @@ class CybereasonConnector:
         **kwargs
       )
       
-      res.extend(search_i)
+      if search_i is not None:
+        res.extend(search_i)
 
     print(f"{len(res)} {endpoint_attr.name.lower()} found")
 
