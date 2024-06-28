@@ -182,11 +182,10 @@ class LDAPConnector:
 
     search_type = search_type.upper()
     if search_type not in LDAPSearchTypes.__members__:
-      raise(f"Invalid search type proviced: {search_type}")
+      raise ValueError(f"Invalid search type proviced: {search_type}")
 
     if search_base is None:
       search_base = self.default_search_base 
-
 
     formated_filter = LDAPSearchTypes[search_type].value["filter"]
     if search_filter:
