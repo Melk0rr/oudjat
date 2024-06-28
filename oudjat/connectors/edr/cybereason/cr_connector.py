@@ -116,11 +116,9 @@ class CybereasonConnector:
       **filter_opt,
       **kwargs
     }
-    print(query_content)
     query = json.dumps(query_content)
 
     endpoint_url = f"{self.base_url}{endpoint.value.get('endpoint')}"
-    print(endpoint_url)
     
     api_headers = {'Content-Type':'application/json'}
     api_resp = self.session.request(
@@ -130,7 +128,6 @@ class CybereasonConnector:
       headers=api_headers
     )
     
-    print(api_resp.content)
     res = []
     if api_resp.content:
       res = json.loads(api_resp.content)
