@@ -36,7 +36,7 @@ class FileConnector:
   def data(self, callback: object) -> List[Any]:
     """ Returns the file data """
     raise NotImplementedError(
-        "run() method must be implemented by the overloading class")
+      "data() method must be implemented by the overloading class")
     
 
 class CSVConnector(FileConnector):
