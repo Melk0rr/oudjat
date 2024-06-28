@@ -38,11 +38,10 @@ class FileConnector:
     raise NotImplementedError(
       "data() method must be implemented by the overloading class")
     
-
 class CSVConnector(FileConnector):
   """ Specific file connector for CSV files """
   
-  def __init__(self, path: str, source: str, delimiter: str):
+  def __init__(self, path: str, source: str, delimiter: str = '|'):
     """ Constructor """
     if len(delimiter) > 0:
       raise(f"Invalid delimiter provided. Please provide a single character")
