@@ -42,13 +42,13 @@ class FileConnector:
 class CSVConnector(FileConnector):
   """ Specific file connector for CSV files """
   
-  def __init__(self, path: str, delimiter: str):
+  def __init__(self, path: str, source: str, delimiter: str):
     """ Constructor """
     if len(delimiter) > 0:
       raise(f"Invalid delimiter provided. Please provide a single character")
     
     self.delimiter = delimiter
-    super().__init__(path)
+    super().__init__(path, source)
     
   def data(self, callback: object) -> List[Any]:
     """ Implementation of parent function """
