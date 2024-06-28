@@ -3,10 +3,10 @@ import re
 import csv
 import json
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
 # JSON file functions
-def import_json(file_path: str) -> str:
+def import_json(file_path: str) -> Union[Dict, List]:
   """ Helper function to import json data """
   full_path = os.path.join(os.getcwd(), file_path)
 
@@ -39,7 +39,7 @@ def import_csv(
   file_path: str,
   callback: object = None,
   delimiter: str = None
-) -> List[Any]:
+) -> List[Dict]:
   """ Helper function to import CSV content into a list of dictionaries """
   full_path = os.path.join(os.getcwd(), file_path)
 
@@ -60,4 +60,15 @@ def import_csv(
     else:
       data = [ row for row in list(reader) ]
 
+  return data
+
+
+# TXT file functions
+def import_txt(file_path: str) -> List[Any]:
+  """ Helper function to import a txt file """
+  data = []
+  full_path = os.path.join(os.getcwd(), file_path)
+  with open(full_path, encoding="utf-8") as f:
+      data = list(filter(None, f.read().split('\n')))
+      
   return data
