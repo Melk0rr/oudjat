@@ -161,7 +161,7 @@ class CybereasonConnector:
 
     endpoint = endpoint.upper()
     if endpoint not in CybereasonEndpoints.__members__:
-      raise(f"Invalid Cybereason endpoint provided: {endpoint}")
+      raise ValueError(f"Invalid Cybereason endpoint provided: {endpoint}")
 
     endpoint_attr = CybereasonEndpoints[endpoint]
     endpoint_search_limit = endpoint_attr.value.get("limit")
