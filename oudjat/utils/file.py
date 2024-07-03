@@ -32,7 +32,11 @@ def export_csv(
   mode = "a" if append else "w"
   with open(full_path, mode, encoding="utf-8", newline="") as f:
     writer = csv.DictWriter(f, fieldnames=data[0].keys(), delimiter=delimiter)
-    writer.writeheader()
+    
+    # Write csv headers if not in append mode
+    if mode != "a":
+      writer.writeheader()
+
     writer.writerows(data)
 
 def import_csv(
