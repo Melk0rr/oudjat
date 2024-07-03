@@ -33,7 +33,7 @@ class CVE:
     self,
     ref: str,
     cvss: float = 0,
-    date: Union[str, datetime] = None,
+    date: Union[str, datetime.datetime] = None,
     description: str = None
   ):
     """ Constructor """
