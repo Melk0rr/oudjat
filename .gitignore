@@ -30,6 +30,9 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# VSCode
+.vscode/
+
 # Output folder
 output/
 
