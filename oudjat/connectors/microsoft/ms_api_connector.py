@@ -51,15 +51,24 @@ class MSAPIConnector:
 
     self.documents = {}
 
+  def get_cvrf_doc(self, cvrf_id: str = None) -> "CVRFDocument":
+    """ Retreives an existing document instance or create new one """
+    cvrf = self.documents.get(cvrf_id, None)
+    if cvrf is None:
+      cvrf = doc=CVRFDocument(cvrf_id)
+
+    self.add_document(cvrf)
+    return self.documents[cvrf_id]
+  
+  def add_document(self, doc: "CVRFDocument") -> None:
+    """ Adds a CVRF document to the list """
+    if doc.get_doc_id() not in self.documents.keys():
+      self.documents[doc.get_doc_id()] = doc
+
   def get_cve_knowledge_base(self, cve: str) -> List[Dict]:
     """ Retreives CVE informations like KB, affected products, etc """
     cvrf_id = get_cvrf_id_from_cve(cve)
-
-    cvrf = self.documents.get(cvrf_id, None)
-    if cvrf is None:
-      self.documents[cvrf_id] = CVRFDocument(cvrf_id)
-      cvrf = self.documents[cvrf_id]
-
+    cvrf = self.get_cvrf_doc(cvrf_id)
     cvrf.parse_vulnerabilities()
 
     cve = cvrf.vulns[cve]
@@ -91,6 +100,10 @@ class CVRFDocument:
     self.products = {}
     self.vulns = {}
     self.kbs = {}
+
+  def get_doc_id(self) -> str:
+    """ Getter for document id """
+    return self.id
 
   def get_products(self) -> Dict[str, "MSProduct"]:
     """ Returns MS products mentionned in the document """
@@ -158,6 +171,7 @@ class CVRFDocument:
         vuln.add_kb(kb_num=kb_num, kb=mskb)
         
       self.add_vuln(vuln)
+      
     
 ################################################################################
 # MS API Vuln class
