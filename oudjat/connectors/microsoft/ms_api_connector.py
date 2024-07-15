@@ -149,7 +149,7 @@ class CVRFDocument:
 
       for p in b["Items"]:
         pid = p["ProductID"]
-        prod = MSProduct(id=pid, name=p["Value"], type=b["Name"])
+        prod = MSProduct(pid=pid, name=p["Value"], product_type=b["Name"])
         self.add_product(prod)
 
   def parse_vulnerabilities(self) -> None:
@@ -206,7 +206,7 @@ class MSVuln:
 
   def add_kb(self, kb_num: int, kb: "MSRemed") -> None:
     """ Adds a KB to vuln KB list """
-    if not re.match(KB_NUM_REGEX, kb_num):
+    if not (re.match(KB_NUM_REGEX, kb_num) or re.match(r'(\w+)$', kb_num)):
       ColorPrint.yellow(f"Invalid KB number provided for {self.cve}:\n{kb_num}")
       return
 
@@ -231,21 +231,60 @@ class MSVuln:
       "kbs": self.kbs.keys(),
       "products": [ p.to_string() for p in self.products.values() ]
     }
-  
+
+
+################################################################################
+# MS Remed class
+class MSRemed:
+  """ Class to manipulate MS KBs """
+
+  def __init__(self, num: int):
+    """ Constructor """
+    self.number = num
+
+    self.type = "KB"
+    if not re.match(KB_NUM_REGEX, self.number):
+      self.type = "Patch"
+      
+    self.products = {}
+    
+  def set_products(self, products: List["MSProduct"]) -> None:
+    """ Setter for kb products """
+    self.products = { 
+      p.get_id(): p
+      for p in products if p.get_id() not in self.products.keys()
+    }
+
+  def get_number(self) -> int:
+    """ Getter for kb number """
+    return self.number
+
+  def get_flat_dict(self) -> List[Dict]:
+    """ Converts patched products into dictionaries """
+    return [ { **p.to_dict(), "remed": self.number, "remed_type": self.type } for p in self.products.values() ]
+
+  def to_dict(self) -> Dict[str, Any]:
+    """ Converts the current kb into a dict """
+    return {
+      "number": self.number,
+      "patched_products": [ p.to_string() for p in self.products.values() ]
+    }
+
+
 ################################################################################
 # MS Product class
 class MSProduct:
   """ Class to manipulate MS product """
 
-  def __init__(self, id: str, name: str, type: str):
+  def __init__(self, pid: str, name: str, product_type: str):
     """ Constructor """
     
-    if not re.match(MS_PRODUCT_REGEX, id):
-      raise ValueError(f"Invalid MS product ID: {id}")
+    if not re.match(MS_PRODUCT_REGEX, pid):
+      raise ValueError(f"Invalid MS product ID: {pid}")
 
-    self.pid = id
+    self.pid = pid
     self.name = name
-    self.type = type
+    self.type = product_type
     self.subType = None
     
     if self.type == "ESU" or self.type == "Windows":
@@ -268,37 +307,4 @@ class MSProduct:
       "product_id": self.pid,
       "product_name": self.name,
       "product_type": self.type
-    }
-
-
-################################################################################
-# MS Remed class
-class MSRemed:
-  """ Class to manipulate MS KBs """
-
-  def __init__(self, num: int):
-    """ Constructor """
-    self.number = num
-    self.products = {}
-    
-  def set_products(self, products: List["MSProduct"]) -> None:
-    """ Setter for kb products """
-    self.products = { 
-      p.get_id(): p
-      for p in products if p.get_id() not in self.products.keys()
-    }
-
-  def get_number(self) -> int:
-    """ Getter for kb number """
-    return self.number
-
-  def get_flat_dict(self) -> List[Dict]:
-    """ Converts patched products into dictionaries """
-    return [ { **p.to_dict(), "kb": self.number } for p in self.products.values() ]
-
-  def to_dict(self) -> Dict[str, Any]:
-    """ Converts the current kb into a dict """
-    return {
-      "number": self.number,
-      "patched_products": [ p.to_string() for p in self.products.values() ]
     }
