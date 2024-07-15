@@ -56,8 +56,8 @@ class MSAPIConnector:
     cvrf = self.documents.get(cvrf_id, None)
     if cvrf is None:
       cvrf = doc=CVRFDocument(cvrf_id)
+      self.add_document(cvrf)
 
-    self.add_document(cvrf)
     return self.documents[cvrf_id]
   
   def add_document(self, doc: "CVRFDocument") -> None:
@@ -73,7 +73,7 @@ class MSAPIConnector:
 
     cve = cvrf.vulns[cve]
 
-    return cve.get_cve_kb_dict()
+    return cve.get_flat_dict()
   
 
 ################################################################################
@@ -119,7 +119,7 @@ class CVRFDocument:
       
     return self.vulns
     
-  def get_kbs(self) -> Dict[str, "MSKB"]:
+  def get_kbs(self) -> Dict[str, "MSRemed"]:
     """ Returns MS KBs mentionned in the document """
     if not self.kbs:
       self.parse_vulnerabilities()
@@ -136,7 +136,7 @@ class CVRFDocument:
     if vuln.get_cve() not in self.vulns.keys():
       self.vulns[vuln.get_cve()] = vuln
 
-  def add_kb(self, kb: "MSKB") -> None:
+  def add_kb(self, kb: "MSRemed") -> None:
     """ Adds a kb to the list of the kb mentionned in the document """
     if kb.get_number() not in self.kbs.keys():
       self.kbs[kb.get_number()] = kb
@@ -164,7 +164,7 @@ class CVRFDocument:
       for kb in v["Remediations"]:
         kb_num = kb["Description"]["Value"]
         
-        mskb = MSKB(num=kb_num)
+        mskb = MSRemed(num=kb_num)
         mskb.set_products([ self.products[id] for id in kb.get("ProductID", []) ])
 
         self.add_kb(mskb)
@@ -188,11 +188,11 @@ class MSVuln:
     self.kbs = {}
     self.products = {}
 
-  def get_cve(sefl) -> str:
+  def get_cve(self) -> str:
     """ Getter for CVE """
     return self.cve
   
-  def get_remediations(self) -> Dict[str, "MSKB"]:
+  def get_remediations(self) -> Dict[str, "MSRemed"]:
     """ Getter for KB list """
     return self.kbs
   
@@ -204,7 +204,7 @@ class MSVuln:
     """ Getter for impacted product list """
     return self.products
 
-  def add_kb(self, kb_num: int, kb: "MSKB") -> None:
+  def add_kb(self, kb_num: int, kb: "MSRemed") -> None:
     """ Adds a KB to vuln KB list """
     if not re.match(KB_NUM_REGEX, kb_num):
       ColorPrint.yellow(f"Invalid KB number provided for {self.cve}:\n{kb_num}")
@@ -213,11 +213,15 @@ class MSVuln:
     ColorPrint.green(f"New kb added for {self.cve}: {kb_num}")
     self.kbs[kb_num] = kb
 
-  def get_cve_kb_dict(self) -> List[Dict]:
+  def get_flat_dict(self) -> List[Dict]:
     """ Converts kbs into dictionaries """
+    kb_flat_dicts = []
+    for k in self.kbs.values():
+      kb_flat_dicts.extend(k.get_flat_dict())
+
     return [
-      { **k.get_kb_product_dict(), "cve": self.cve }
-      for k in self.kbs.values()
+      { **kb_dict, "cve": self.cve }
+      for kb_dict in kb_flat_dicts
     ]
 
   def to_dict(self) -> Dict[str, Any]:
@@ -261,15 +265,15 @@ class MSProduct:
   def to_dict(self) -> Dict[str, str]:
     """ Converts instance to dict """
     return {
-      "id": self.pid,
-      "name": self.name,
-      "type": self.type
+      "product_id": self.pid,
+      "product_name": self.name,
+      "product_type": self.type
     }
 
 
 ################################################################################
-# MS KB class
-class MSKB:
+# MS Remed class
+class MSRemed:
   """ Class to manipulate MS KBs """
 
   def __init__(self, num: int):
@@ -288,7 +292,7 @@ class MSKB:
     """ Getter for kb number """
     return self.number
 
-  def get_kb_product_dict(self) -> List[Dict]:
+  def get_flat_dict(self) -> List[Dict]:
     """ Converts patched products into dictionaries """
     return [ { **p.to_dict(), "kb": self.number } for p in self.products.values() ]
 
