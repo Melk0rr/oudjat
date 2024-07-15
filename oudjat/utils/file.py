@@ -68,11 +68,15 @@ def import_csv(
 
 
 # TXT file functions
-def import_txt(file_path: str) -> List[Any]:
+def import_txt(file_path: str, delete_duplicates: bool = False) -> List[Any]:
   """ Helper function to import a txt file """
   data = []
   full_path = os.path.join(os.getcwd(), file_path)
+
   with open(full_path, encoding="utf-8") as f:
-      data = list(filter(None, f.read().split('\n')))
+    data = list(filter(None, f.read().split('\n')))
+  
+  if delete_duplicates:
+    data = list(set(data))
       
   return data
