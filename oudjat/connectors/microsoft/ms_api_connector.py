@@ -65,15 +65,22 @@ class MSAPIConnector:
     if doc.get_doc_id() not in self.documents.keys():
       self.documents[doc.get_doc_id()] = doc
 
-  def get_cve_knowledge_base(self, cve: str) -> List[Dict]:
+  def get_cve_knowledge_base(self, cves: Union[str, List[str]]) -> List[Dict]:
     """ Retreives CVE informations like KB, affected products, etc """
-    cvrf_id = get_cvrf_id_from_cve(cve)
-    cvrf = self.get_cvrf_doc(cvrf_id)
-    cvrf.parse_vulnerabilities()
+    res = []
 
-    cve = cvrf.vulns[cve]
+    if not isinstance(cves, list):
+      cves = list(cves)
 
-    return cve.get_flat_dict()
+    for cve in cves:
+      cvrf_id = get_cvrf_id_from_cve(cve)
+      cvrf = self.get_cvrf_doc(cvrf_id)
+      cvrf.parse_vulnerabilities()
+
+      cve = cvrf.vulns[cve]
+      res.extend(cve.get_flat_dict())
+
+    return res
   
 
 ################################################################################
@@ -285,13 +292,13 @@ class MSProduct:
     self.pid = pid
     self.name = name
     self.type = product_type
-    self.subType = None
+    self.sub_type = None
     
     if self.type == "ESU" or self.type == "Windows":
-      self.subType = "Workstation"
+      self.sub_type = "Workstation"
 
       if "Server" in self.name:
-        self.cptType = "Server"
+        self.sub_type = "Server"
 
   def get_id(self) -> str:
     """ Getter for product id """
@@ -306,5 +313,6 @@ class MSProduct:
     return {
       "product_id": self.pid,
       "product_name": self.name,
-      "product_type": self.type
+      "product_type": self.type,
+      "product_subtype": self.sub_type
     }
