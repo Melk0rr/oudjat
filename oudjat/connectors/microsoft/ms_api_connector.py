@@ -51,16 +51,16 @@ class MSAPIConnector:
 
     self.documents = {}
 
-  def get_cvrf_doc(self, cvrf_id: str = None) -> "CVRFDocument":
+  def get_cvrf_doc(self, cvrf_id: str = None) -> "MSCVRFDocument":
     """ Retreives an existing document instance or create new one """
     cvrf = self.documents.get(cvrf_id, None)
     if cvrf is None:
-      cvrf = doc=CVRFDocument(cvrf_id)
+      cvrf = doc=MSCVRFDocument(cvrf_id)
       self.add_document(cvrf)
 
     return self.documents[cvrf_id]
   
-  def add_document(self, doc: "CVRFDocument") -> None:
+  def add_document(self, doc: "MSCVRFDocument") -> None:
     """ Adds a CVRF document to the list """
     if doc.get_doc_id() not in self.documents.keys():
       self.documents[doc.get_doc_id()] = doc
@@ -85,7 +85,7 @@ class MSAPIConnector:
 
 ################################################################################
 # CVRF Document class
-class CVRFDocument:
+class MSCVRFDocument:
   """ Class to manipulate MS CVRF documents """
 
   def __init__(self, id: str):
@@ -233,8 +233,7 @@ class MSVuln:
     """ Converts current vuln into a dict """
     return {
       "cve": self.cve,
-      "kbs": self.kbs.keys(),
-      "products": [ p.to_string() for p in self.products.values() ]
+      "kbs": [ kb.to_dict() for kb in self.kbs.values() ],
     }
 
 
@@ -271,8 +270,8 @@ class MSRemed:
   def to_dict(self) -> Dict[str, Any]:
     """ Converts the current kb into a dict """
     return {
-      "number": self.number,
-      "patched_products": [ p.to_string() for p in self.products.values() ]
+      "remed": self.number,
+      "patched_products": [ p.to_dict() for p in self.products.values() ]
     }
 
 
@@ -301,6 +300,10 @@ class MSProduct:
   def get_id(self) -> str:
     """ Getter for product id """
     return self.pid
+
+  def get_name(self) -> str:
+    """ Getter for product name """
+    return self.name
         
   def to_string(self) -> str:
     """ Converts instance to string """
