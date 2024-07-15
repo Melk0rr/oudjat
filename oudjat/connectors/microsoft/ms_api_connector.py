@@ -227,7 +227,7 @@ class MSVuln:
       kb_flat_dicts.extend(k.get_flat_dict())
 
     return [
-      { **kb_dict, "cve": self.cve }
+      { "cve": self.cve, **kb_dict }
       for kb_dict in kb_flat_dicts
     ]
 
@@ -268,7 +268,7 @@ class MSRemed:
 
   def get_flat_dict(self) -> List[Dict]:
     """ Converts patched products into dictionaries """
-    return [ { **p.to_dict(), "remed": self.number, "remed_type": self.type } for p in self.products.values() ]
+    return [ { "remed": self.number, "remed_type": self.type, **p.to_dict() } for p in self.products.values() ]
 
   def to_dict(self) -> Dict[str, Any]:
     """ Converts the current kb into a dict """
@@ -292,7 +292,7 @@ class MSProduct:
     self.pid = pid
     self.name = name
     self.type = product_type
-    self.sub_type = None
+    self.sub_type = self.type
     
     if self.type == "ESU" or self.type == "Windows":
       self.sub_type = "Workstation"
