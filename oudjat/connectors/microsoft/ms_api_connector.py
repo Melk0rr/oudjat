@@ -78,7 +78,7 @@ class MSAPIConnector:
       cvrf.parse_vulnerabilities()
 
       cve = cvrf.get_vulnerabilities()[cve]
-      res.extend(cve.get_flat_dict())
+      res.append(cve)
 
     return res
   
