@@ -77,7 +77,7 @@ class MSAPIConnector:
       cvrf = self.get_cvrf_doc(cvrf_id)
       cvrf.parse_vulnerabilities()
 
-      cve = cvrf.vulns[cve]
+      cve = cvrf.get_vulnerabilities()[cve]
       res.extend(cve.get_flat_dict())
 
     return res
@@ -214,10 +214,8 @@ class MSVuln:
   def add_kb(self, kb_num: int, kb: "MSRemed") -> None:
     """ Adds a KB to vuln KB list """
     if not (re.match(KB_NUM_REGEX, kb_num) or re.match(r'(\w+)$', kb_num)):
-      ColorPrint.yellow(f"Invalid KB number provided for {self.cve}:\n{kb_num}")
       return
 
-    ColorPrint.green(f"New kb added for {self.cve}: {kb_num}")
     self.kbs[kb_num] = kb
 
   def get_flat_dict(self) -> List[Dict]:
