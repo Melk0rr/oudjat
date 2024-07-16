@@ -7,7 +7,7 @@ def save_credentials(service: str, username: str, password: str) -> None:
     keyring.set_password(service, username, password)
 
   except keyring.errors.PasswordSetError as e:
-    raise(f"Error while saving credentials for {service}:{username}: {e}")
+    raise(f"Error while saving credentials for {service}:{username}\n{e}")
 
 def get_credentials(service: str) -> keyring.credentials.SimpleCredential:
   """ Returns user credentials for given service """    
@@ -15,7 +15,7 @@ def get_credentials(service: str) -> keyring.credentials.SimpleCredential:
     cred = keyring.get_credential(service, "")
 
     if cred is None:
-      print(f"No stored credentials for service {service}. Please enter your credentials:")
+      print(f"\nNo stored credentials for {service}. Please enter your credentials:")
       
       # Ask user's credentials
       username = input("Username: ")
@@ -26,7 +26,7 @@ def get_credentials(service: str) -> keyring.credentials.SimpleCredential:
       cred = keyring.credentials.SimpleCredential(username, password)
       
   except keyring.errors.KeyringError as e:
-    raise(f"An error occured while retreiving user's credentials: {e}")
+    raise(f"\nAn error occured while retreiving user's credentials for {service}\n{e}")
   
   return cred
 
@@ -36,4 +36,4 @@ def del_credentials(service: str, username: str) -> None:
     keyring.delete_password(service, username)
     
   except keyring.errors.PasswordDeleteError as e:
-    raise(f"Error while deleting password for {service}:{username}: {e}")
+    raise(f"Error while deleting password for {service}:{username}\n{e}")
