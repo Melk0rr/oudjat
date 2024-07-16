@@ -9,6 +9,7 @@ class Connector:
     self.target = target
     self.service_name = service_name
 
+    # Retreive credentials for the service
     self.credentials = None
     if service_name is not None:
       self.credentials = get_credentials(self.service_name)
