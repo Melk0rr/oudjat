@@ -5,13 +5,13 @@ from oudjat.utils.file import import_csv, import_json, import_txt
 class FileTypes(Enum):
   """ Enumeration of file types to be used by file connector """
   CSV = {
-    "import_function": import_csv
+    "import": import_csv
   }
 
   JSON = {
-    "import_function": import_json
+    "import": import_json
   }
 
   TXT = {
-    "import_function": import_txt
+    "import": import_txt
   }
