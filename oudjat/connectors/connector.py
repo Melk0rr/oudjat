@@ -13,6 +13,11 @@ class Connector:
     if service_name is not None:
       self.credentials = get_credentials(self.service_name)
 
+  def set_service_name(self, new_service_name: str) -> None:
+    """ Setter for service name """
+    self.service_name = new_service_name
+    self.credentials = get_credentials(self.service_name)
+
   def connect(self) -> None:
     """ Connects to the target """
     raise NotImplementedError(
