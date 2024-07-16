@@ -27,16 +27,19 @@ class FileConnector:
     self.source = source
     self.filetype = FileTypes[file_ext.upper()]
     self.import_function = self.filetype.value.get("import_function")
+
+    self.data = None
     
   def set_path(self, new_path: str) -> None:
     """ Setter for connector path """
     check_path(new_path)
     self.path = new_path
     
-  def data(self, callback: object) -> List[Any]:
-    """ Returns the file data """
+  def connect(self) -> None:
+    """ 'Connects' to the file and uses the """
     raise NotImplementedError(
       "data() method must be implemented by the overloading class")
+    
     
 class CSVConnector(FileConnector):
   """ Specific file connector for CSV files """
@@ -49,6 +52,6 @@ class CSVConnector(FileConnector):
     self.delimiter = delimiter
     super().__init__(path, source)
     
-  def data(self, callback: object) -> List[Any]:
+  def connect(self, callback: object) -> List[Any]:
     """ Implementation of parent function """
-    return self.import_function(file_path=self.path, delimiter=self.delimiter, callback=callback)
+    self.data = self.import_function(file_path=self.path, delimiter=self.delimiter, callback=callback)
