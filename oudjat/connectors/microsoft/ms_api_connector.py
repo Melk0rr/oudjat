@@ -218,11 +218,11 @@ class MSVuln:
 
     self.kbs[kb_num] = kb
 
-  def get_flat_dict(self) -> List[Dict]:
+  def to_flat_dict(self) -> List[Dict]:
     """ Converts kbs into dictionaries """
     kb_flat_dicts = []
     for k in self.kbs.values():
-      kb_flat_dicts.extend(k.get_flat_dict())
+      kb_flat_dicts.extend(k.to_flat_dict())
 
     return [
       { "cve": self.cve, **kb_dict }
@@ -263,7 +263,7 @@ class MSRemed:
     """ Getter for kb number """
     return self.number
 
-  def get_flat_dict(self) -> List[Dict]:
+  def to_flat_dict(self) -> List[Dict]:
     """ Converts patched products into dictionaries """
     return [ { "remed": self.number, "remed_type": self.type, **p.to_dict() } for p in self.products.values() ]
 
