@@ -4,6 +4,7 @@ import json
 
 from typing import List, Dict, Any
 
+from oudjat.connectors.connector import Connector
 from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.file.file_types import FileTypes
 
@@ -16,7 +17,7 @@ def check_path(path: str) -> None:
   if file_ext.upper() not in FileTypes.__members__:
     raise ValueError(f"Invalid filetype provided: {file_ext}")
 
-class FileConnector:
+class FileConnector(Connector):
   """ File connector to interact with different file types """
   
   def __init__(self, path: str, source: str):
