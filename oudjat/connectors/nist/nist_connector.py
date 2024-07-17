@@ -1,3 +1,4 @@
+import re
 import json
 import requests
 
@@ -45,6 +46,9 @@ class NistConnector(Connector):
       attributes = [ attributes ]
       
     for cve in search_filter:
+      if not re.match(r'CVE-\d{4}-\d{4,7}', cve):
+        continue
+
       cve_target = f"{self.target}?cveId={cve}"
       self.connect(cve_target)
 
