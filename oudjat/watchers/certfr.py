@@ -8,7 +8,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup, element
 
 from oudjat.utils.color_print import ColorPrint
-from oudjat.watchers.cve import CVE, CVE_REGEX
+from oudjat.model.cve import CVE, CVE_REGEX
 
 URL_REGEX = r'http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 CERTFR_REF_REGEX = r'CERTFR-\d{4}-(?:ALE|AVI|CTI|IOC|DUR)-\d{3,4}'
