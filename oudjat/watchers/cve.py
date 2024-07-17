@@ -7,8 +7,9 @@ from enum import Enum
 from typing import List, Dict, Union
 from bs4 import BeautifulSoup
 
-from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.file import import_csv
+from oudjat.utils.color_print import ColorPrint
+from oudjat.connectors.nist.nist_connector import NistConnector
 
 CVE_REGEX = r'CVE-\d{4}-\d{4,7}'
 NIST_URL_BASE = "https://nvd.nist.gov/vuln/detail/"
@@ -29,6 +30,8 @@ class CVE:
   # ****************************************************************
   # Attributes & Constructors
 
+  NIST_ATTR = ["published", "lastModified", "vulnStatus", "descriptions", "metrics", "references"]
+
   def __init__(
     self,
     ref: str,
@@ -41,12 +44,17 @@ class CVE:
       raise ValueError(f"{ref} is not a valid CVE id")
 
     self.ref = ref
-    self.link = f"{NIST_URL_BASE}{self.ref}"
+    
     self.cvss = 0
-    self.severity = Severity.NONE    
     self.set_cvss(float(cvss))
+    self.severity = Severity.NONE
+
+    self.link = f"{NIST_URL_BASE}{self.ref}"
+
+    self.status = None
     self.publish_date = date
     self.description = description
+    self.references = []
 
   # ****************************************************************
   # Getters and Setters
@@ -100,45 +108,22 @@ class CVE:
   # ****************************************************************
   # Parsers
 
-  def parse_cvss(self, content: BeautifulSoup) -> None:
-    """ Function to extract CVSS score """
-    cvss_match = re.findall(
-        r'(?:[1-9].[0-9]) (?:LOW|MEDIUM|HIGH|CRITICAL)', content.text)
-
-    if len(cvss_match) > 0:
-      cvss_score = float(cvss_match[0].split(" ")[0])
-      self.set_cvss(cvss_score)
-      ColorPrint.green(f"Found CVSS score for {self.ref}: {cvss_score}")
-
-    else:
-      ColorPrint.yellow(f"Could not find CVSS score for {self.ref}")
-
-  def parse_description(self, content: BeautifulSoup) -> None:
-    """ Function to extract description """
-    desc_soup = content.select("p[data-testid='vuln-description']")
-    self.description = desc_soup[0].text.replace("\n", " ") if len(desc_soup) > 0 else ""
-
-  def parse_publishdate(self, content: BeautifulSoup) -> None:
-    """ Function to extract cve publish date """
-    p_date_soup = content.select("span[data-testid='vuln-published-on']")
-    self.publish_date = p_date_soup[0].text if len(p_date_soup) > 0 else ""
-
   def parse_nist(self, verbose: bool = True) -> None:
     """ Function to parse NIST CVE page in order to retreive CVE data """
+    nist = NistConnector()
+    nist_data = nist.search(search_filter=self.ref, attributes=self.NIST_ATTR)
+    
+    self.status = nist_data["vulnStatus"]
+    self.publish_date = nist_data["published"]
+    self.description = nist_data["description"][0]["value"]
+    
+    metrics = nist_data["metrics"]
+    metric_data = metric[metric.keys()[0]]
+    cvss_data = metric_data["cvssData"]
+    
+    self.set_cvss(cvss_data["baseScore"])
 
-    # Handle if the target is unreachable
-    try:
-      req = requests.get(self.link)
-      soup = BeautifulSoup(req.content, 'html.parser')
-
-    except ConnectionError as e:
-      ColorPrint.red(
-          f"Error while requesting {self.get_ref()}. Make sure the target is accessible")
-
-    # Minimal information retreived is the CVSS score
-    self.parse_cvss(soup)
-    self.parse_description(soup)
-    self.parse_publishdate(soup)
+    self.references = [ r["url"] for r in nist_data["references"] ]
 
     if verbose:
       print(self.to_string())
@@ -157,20 +142,15 @@ class CVE:
 
   def to_dictionary(self, minimal: bool = True) -> Dict:
     """ Converts the current instance to a dictionary """
-    cve_dict = {"ref": self.ref, "cvss": self.cvss}
-
-    # If user specifies it : provide more data in the dictionary
-    if not minimal:
-      more_data = {
-          "severity": self.severity.name,
-          "publish_date": self.publish_date,
-          "description": self.description,
-          "link": self.link
-      }
-
-      cve_dict.update(more_data)
-
-    return cve_dict
+    return {
+      "cve": self.ref,
+      "cvss": self.cvss,
+      "published": self.publish_date,
+      "status": self.status,
+      "description": self.description,
+      "link": self.link,
+      "references": self.references
+    }
   
   # ****************************************************************
   # Static methods
