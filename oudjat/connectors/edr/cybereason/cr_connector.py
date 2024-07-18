@@ -78,7 +78,6 @@ class CybereasonConnector:
   def connect(self) -> None:
     """ Connects to API using connector parameters """
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
     session = requests.session()
     
     try:
