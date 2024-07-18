@@ -77,7 +77,7 @@ class CVE:
 
   def set_cvss(self, cvss_score: float) -> None:
     """ Setter for the vulnerability CVSS score """
-    if self.check_cvss(cvss_score):
+    if CVE.check_cvss(cvss_score):
       self.cvss = cvss_score
       self.resolve_severity()
 
