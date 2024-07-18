@@ -4,7 +4,7 @@ from multiprocessing import Pool
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.init_option_handle import str_file_option_handle
-from oudjat.watchers.certfr import CERTFR
+from oudjat.connectors.cert.certfr.certfr_connector import CERTFRConnector
 
 from .target import Target
 
@@ -53,7 +53,7 @@ class Cert(Target):
 
   def cert_process(self, target) -> Dict:
     """ CERT process method to deal with cert data """
-    cert_page = CERTFR(ref=target)
+    cert_page = CERTFRConnector(ref=target)
     cert_page.parse()
     cert_data = cert_page.to_dictionary()
 
