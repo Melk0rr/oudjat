@@ -2,7 +2,7 @@
 from multiprocessing import Pool
 
 from oudjat.utils.color_print import ColorPrint
-from oudjat.watchers.tenablesc import MySecurityCenter
+from oudjat.connectors.tenable.sc.tenablesc_connector import TenabeSCConnector
 
 from .target import Target
 
@@ -18,7 +18,7 @@ class SC(Target):
 
     try:
       from oudjat.API import TSC_ACCESS_KEY, TSC_SECRET_KEY
-      self.my_sc = MySecurityCenter('scanvuln.ramsaysante.fr', TSC_ACCESS_KEY, TSC_SECRET_KEY)
+      self.my_sc = TenabeSCConnector('scanvuln.ramsaysante.fr', TSC_ACCESS_KEY, TSC_SECRET_KEY)
 
       print(my_sc.vulns)
 

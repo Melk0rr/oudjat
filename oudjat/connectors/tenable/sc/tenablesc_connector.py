@@ -3,7 +3,7 @@ import json
 from typing import Dict
 from tenable import sc
 
-class MySecurityCenter:
+class TenabeSCConnector:
   # ****************************************************************
   # Attributes & Constructors
 
