@@ -4,7 +4,7 @@ from multiprocessing import Pool
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.init_option_handle import str_file_option_handle
-from oudjat.watchers.certfr import CERTFR, parse_feed
+from oudjat.watchers.certfr import CERTFR
 
 from .target import Target
 
@@ -26,7 +26,7 @@ class Cert(Target):
     if self.options["--feed"]:
       print("Parsing CERT pages from feed...")
       
-      feed_items = parse_feed(self.options["TARGET"][0], self.options["--filter"])
+      feed_items = CERTFR.parse_feed(self.options["TARGET"][0], self.options["--filter"])
       self.options["TARGET"] = feed_items
 
       print(f"\n{len(feed_items)} alerts since the {self.options['--filter']}")

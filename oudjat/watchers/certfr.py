@@ -38,43 +38,6 @@ class CERTFRPageTypes(Enum):
   DUR = "dur"
 
 
-def parse_feed(feed_url: str, date_str_filter: str = None) -> List[str]:
-  """ Parse a CERTFR Feed page """
-  try:
-    feed_req = requests.get(feed_url)
-    feed_soup = BeautifulSoup(feed_req.content, "xml")
-
-  except Exception as e:
-    print(
-        e, f"A parsing error occured for {feed_url}: {e}\nCheck if the page has the expected format.")
-
-  feed_items = feed_soup.find_all("item")
-  filtered_feed = []
-
-  for item in feed_items:
-    certfr_ref = CERTFR.get_ref_from_link(item.link.text)
-
-    if date_str_filter:
-      try:
-        valid_date_format = "%Y-%m-%d"
-        date_filter = datetime.strptime(date_str_filter, valid_date_format)          
-
-        date_str = item.pubDate.text.split(" +0000")[0]
-        date = datetime.strptime(date_str, "%a, %d %b %Y %H:%M:%S")
-
-        if date > date_filter:
-          filtered_feed.append(certfr_ref)
-
-      except ValueError as e:
-        ColorPrint.red(
-            f"Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !")
-        
-    else:
-      filtered_feed.append(certfr_ref)
-
-  return filtered_feed
-
-
 class CERTFR:
   """ CERTFR class addressing certfr page behavior """
 
@@ -309,3 +272,40 @@ class CERTFR:
       return
 
     return re.findall(CERTFR_REF_REGEX, link)[0]
+
+  @staticmethod
+  def parse_feed(feed_url: str, date_str_filter: str = None) -> List[str]:
+    """ Parse a CERTFR Feed page """
+    try:
+      feed_req = requests.get(feed_url)
+      feed_soup = BeautifulSoup(feed_req.content, "xml")
+
+    except Exception as e:
+      print(
+          e, f"A parsing error occured for {feed_url}: {e}\nCheck if the page has the expected format.")
+
+    feed_items = feed_soup.find_all("item")
+    filtered_feed = []
+
+    for item in feed_items:
+      certfr_ref = CERTFR.get_ref_from_link(item.link.text)
+
+      if date_str_filter:
+        try:
+          valid_date_format = "%Y-%m-%d"
+          date_filter = datetime.strptime(date_str_filter, valid_date_format)          
+
+          date_str = item.pubDate.text.split(" +0000")[0]
+          date = datetime.strptime(date_str, "%a, %d %b %Y %H:%M:%S")
+
+          if date > date_filter:
+            filtered_feed.append(certfr_ref)
+
+        except ValueError as e:
+          ColorPrint.red(
+              f"Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !")
+          
+      else:
+        filtered_feed.append(certfr_ref)
+
+    return filtered_feed
