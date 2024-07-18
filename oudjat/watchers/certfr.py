@@ -18,15 +18,15 @@ CERTFR_LINK_REGEX = r'https:\/\/www\.cert\.ssi\.gouv\.fr\/(?:alerte|avis|cti|ioc
 
 class RiskValues(Enum):
   """ Enumeration describing possible risk values """
-  N_A = "Non spécifié par l'éditeur"
-  EOP = "Élévation de privilèges"
-  RCE = "Exécution de code"
-  DOS = "Déni de service"
-  SFB = "Contournement"
-  IDT = "Usurpation"
-  ID = "Atteinte à la confidentialité"
-  TMP = "Atteinte à l'intégrité"
-  XSS = "Injection de code"
+  N_A = "Not specified"
+  EOP = "Elevation Of Privilege"
+  RCE = "Remote Code Execution"
+  DOS = "Denial of Service"
+  SFB = "Security Bypass"
+  IDT = "Identity Theft"
+  ID = "Information Disclosure"
+  TMP = "Integrity Violation"
+  XSS = "Code Injection"
 
 
 class CERTFRPageTypes(Enum):
