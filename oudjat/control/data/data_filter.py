@@ -68,6 +68,21 @@ class DataFilter:
     return filter_instances
 
   @staticmethod
+  def get_conditions(element: Any, filters: Union[List["DataFilter"], List[Dict]]) -> bool:
+    """ Checks given filters on provided element """
+    checks = []
+
+    for f in filters:
+      if isinstance(f, DataFilter):
+        checks.append(f.check_filter(element))
+      
+      else:
+        operation = DataFilterOperations[f["operator"]]
+        checks.append(operation(element[f["fieldname"]], f["value"]))
+      
+    return all(checks)
+
+  @staticmethod
   def filter_data(data_to_filter: List[Dict], filters: List["DataFilter"]) -> List[Dict]:
     """ Filters data based on given filters """
     filtered_data = []
