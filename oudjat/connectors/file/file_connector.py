@@ -31,6 +31,7 @@ class FileConnector(Connector):
     self.import_function = self.filetype.value.get("import")
 
     self.data = None
+    super().__init__(self.path, service_name=None, use_credentials=False)
     
   def set_path(self, new_path: str) -> None:
     """ Setter for connector path """
