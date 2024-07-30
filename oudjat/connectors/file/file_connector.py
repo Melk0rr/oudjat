@@ -56,7 +56,7 @@ class CSVConnector(FileConnector):
   
   def __init__(self, path: str, source: str, delimiter: str = '|'):
     """ Constructor """
-    if len(delimiter) > 0:
+    if len(delimiter) > 1:
       raise(f"Invalid delimiter provided. Please provide a single character")
     
     self.delimiter = delimiter
