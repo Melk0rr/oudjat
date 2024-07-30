@@ -57,7 +57,12 @@ class CSVConnector(FileConnector):
     
   def connect(self, callback: object) -> List[Any]:
     """ Implementation of parent function """
-    self.data = self.import_function(file_path=self.path, delimiter=self.delimiter, callback=callback)
+    try:
+      self.data = self.import_function(file_path=self.path, delimiter=self.delimiter, callback=callback)
+
+    except Exception as e:
+      raise(f"CSVConnector::Error connecting to file {self.path}\n{e}")
+    
 
   def search(
     self,
