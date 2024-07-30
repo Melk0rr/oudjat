@@ -30,8 +30,16 @@ class FileConnector(Connector):
     self.filetype = FileTypes[file_ext.upper()]
     self.import_function = self.filetype.value.get("import")
 
+    self.connection = False
     self.data = None
     super().__init__(self.path, service_name=None, use_credentials=False)
+
+  def get_data(self) -> List[Any]:
+    """ Getter for file data """
+    if not self.connection:
+      self.connect()
+    
+    return self.data
     
   def set_path(self, new_path: str) -> None:
     """ Setter for connector path """
@@ -59,11 +67,11 @@ class CSVConnector(FileConnector):
     """ Implementation of parent function """
     try:
       self.data = self.import_function(file_path=self.path, delimiter=self.delimiter, callback=callback)
+      self.connection = True
 
     except Exception as e:
       raise(f"CSVConnector::Error connecting to file {self.path}\n{e}")
     
-
   def search(
     self,
     search_filter: List[Dict],
