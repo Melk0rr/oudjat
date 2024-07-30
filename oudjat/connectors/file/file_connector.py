@@ -25,14 +25,13 @@ class FileConnector(Connector):
     """ Constructor """
     check_path(path)
     
-    self.path = path
     self.source = source
     self.filetype = FileTypes[file_ext.upper()]
     self.import_function = self.filetype.value.get("import")
 
     self.connection = False
     self.data = None
-    super().__init__(self.path, service_name=None, use_credentials=False)
+    super().__init__(path, service_name=None, use_credentials=False)
 
   def get_data(self) -> List[Any]:
     """ Getter for file data """
@@ -44,7 +43,7 @@ class FileConnector(Connector):
   def set_path(self, new_path: str) -> None:
     """ Setter for connector path """
     check_path(new_path)
-    self.path = new_path
+    self.target = new_path
     
   def connect(self) -> None:
     """ 'Connects' to the file and uses the """
@@ -66,11 +65,11 @@ class CSVConnector(FileConnector):
   def connect(self, callback: object) -> List[Any]:
     """ Implementation of parent function """
     try:
-      self.data = self.import_function(file_path=self.path, delimiter=self.delimiter, callback=callback)
+      self.data = self.import_function(file_path=self.target, delimiter=self.delimiter, callback=callback)
       self.connection = True
 
     except Exception as e:
-      raise(f"CSVConnector::Error connecting to file {self.path}\n{e}")
+      raise(f"CSVConnector::Error connecting to file {self.target}\n{e}")
     
   def search(
     self,
