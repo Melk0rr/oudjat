@@ -13,6 +13,8 @@ class Connector:
     self.credentials = None
     if use_credentials:
       self.credentials = get_credentials(self.service_name)
+      
+    self.connection = None
 
   def set_service_name(self, new_service_name: str) -> None:
     """ Setter for service name """
