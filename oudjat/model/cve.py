@@ -111,17 +111,25 @@ class CVE:
   def parse_nist(self, verbose: bool = True) -> None:
     """ Function to parse NIST CVE page in order to retreive CVE data """
     nist = NistConnector()
-    nist_data = nist.search(search_filter=self.ref, attributes=self.NIST_ATTR)[0]
+    nist_search = nist.search(search_filter=self.ref, attributes=self.NIST_ATTR)
+
+    nist_data = None
+    if len(nist_search) == 0:
+      return
+      
+    nist_data = nist_search[0]
     
     self.status = nist_data["vulnStatus"]
     self.publish_date = nist_data["published"]
     self.description = nist_data["descriptions"][0]["value"]
     
     metrics = nist_data["metrics"]
-    metric_data = metrics[list(metrics)[0]][0]
-    cvss_data = metric_data["cvssData"]
     
-    self.set_cvss(cvss_data["baseScore"])
+    if len(list(metrics)) > 0:
+      metric_data = metrics[list(metrics)[0]][0]
+      cvss_data = metric_data["cvssData"]
+    
+      self.set_cvss(cvss_data["baseScore"])
 
     self.references = [ r["url"] for r in nist_data["references"] ]
 

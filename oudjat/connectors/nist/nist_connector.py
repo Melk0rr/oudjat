@@ -4,6 +4,7 @@ import requests
 
 from typing import List, Dict, Union
 
+from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.connector import Connector
 
 class NistConnector(Connector):
@@ -53,7 +54,14 @@ class NistConnector(Connector):
       self.connect(cve_target)
 
       if self.connection is not None:
-        vuln = self.connection.get("vulnerabilities", [])[0].get("cve", {})
+        vuln = self.connection.get("vulnerabilities", [])
+        
+        if len(vuln) > 0:
+          vuln = vuln[0].get("cve", {})
+        
+        else:
+          ColorPrint.yellow(f"No data for vulnerability {cve}")
+          continue
 
         if attributes is not None:
           vuln = { k: v for k,v in vuln.items() if k in attributes }
