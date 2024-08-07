@@ -7,6 +7,7 @@ from typing import List, Dict, Union, Any
 
 from oudjat.utils.file import export_csv
 from oudjat.utils.color_print import ColorPrint
+from oudjat.connectors.connector import Connector
 
 ################################################################################
 # Useful content
@@ -40,7 +41,7 @@ def get_cvrf_id_from_cve(cve: str) -> str:
 
 ################################################################################
 # MS API Connector class
-class MSAPIConnector:
+class MSAPIConnector(Connector):
   """ Connector to interact with Microsoft API """
 
   def __init__(self):
@@ -50,6 +51,7 @@ class MSAPIConnector:
     self.api_version = str(self.date.year)
 
     self.documents = {}
+    super().__init__(target=API_BASE_URL, service_name="OudjatMSAPI", use_credentials=False)
 
   def get_cvrf_doc(self, cvrf_id: str = None) -> "MSCVRFDocument":
     """ Retreives an existing document instance or create new one """
