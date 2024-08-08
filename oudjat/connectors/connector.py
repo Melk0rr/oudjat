@@ -16,6 +16,10 @@ class Connector:
       
     self.connection = None
 
+  def set_target(self, target: Any) -> None:
+    """ Setter for connector target """
+    self.target = target
+
   def set_service_name(self, new_service_name: str) -> None:
     """ Setter for service name """
     self.service_name = new_service_name
