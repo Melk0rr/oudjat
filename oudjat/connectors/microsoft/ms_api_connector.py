@@ -51,14 +51,18 @@ class MSAPIConnector(Connector):
     self.api_version = str(self.date.year)
 
     super().__init__(target={}, service_name="OudjatMSAPI", use_credentials=False)
+    self.connection = False
 
   def connect(self, cvrf_id: str) -> "MSCVRFDocument":
     """ Retreives an existing document instance or create new one """
+    self.connection = False
+    
     cvrf = self.target.get(cvrf_id, None)
     if cvrf is None:
       try:
         cvrf = MSCVRFDocument(cvrf_id)
         self.add_target(cvrf)
+        self.connection = True
 
       except ConnectionError as e:
         ColorPrint.red(e)
