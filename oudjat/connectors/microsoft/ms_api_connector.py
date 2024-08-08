@@ -50,33 +50,39 @@ class MSAPIConnector(Connector):
     self.date = datetime.now()
     self.api_version = str(self.date.year)
 
-    self.documents = {}
-    super().__init__(target=API_BASE_URL, service_name="OudjatMSAPI", use_credentials=False)
+    super().__init__(target={}, service_name="OudjatMSAPI", use_credentials=False)
 
-  def get_cvrf_doc(self, cvrf_id: str = None) -> "MSCVRFDocument":
+  def connect(self, cvrf_id: str) -> "MSCVRFDocument":
     """ Retreives an existing document instance or create new one """
-    cvrf = self.documents.get(cvrf_id, None)
+    cvrf = self.target.get(cvrf_id, None)
     if cvrf is None:
-      cvrf = doc=MSCVRFDocument(cvrf_id)
-      self.add_document(cvrf)
+      try:
+        cvrf = MSCVRFDocument(cvrf_id)
+        self.add_target(cvrf)
 
-    return self.documents[cvrf_id]
+      except ConnectionError as e:
+        ColorPrint.red(e)
+
+    return self.target[cvrf_id]
   
-  def add_document(self, doc: "MSCVRFDocument") -> None:
+  def add_target(self, doc: "MSCVRFDocument") -> None:
     """ Adds a CVRF document to the list """
-    if doc.get_doc_id() not in self.documents.keys():
-      self.documents[doc.get_doc_id()] = doc
+    if doc.get_doc_id() not in self.target.keys():
+      self.target[doc.get_doc_id()] = doc
 
-  def get_cve_knowledge_base(self, cves: Union[str, List[str]]) -> List[Dict]:
+  def search(
+    self,
+    search_filter: Union[str, List[str]],
+  ) -> List[Dict]:
     """ Retreives CVE informations like KB, affected products, etc """
     res = []
 
-    if not isinstance(cves, list):
-      cves = list(cves)
+    if not isinstance(search_filter, list):
+      search_filter = [ search_filter ]
 
-    for cve in cves:
+    for cve in search_filter:
       cvrf_id = get_cvrf_id_from_cve(cve)
-      cvrf = self.get_cvrf_doc(cvrf_id)
+      cvrf = self.connect(cvrf_id)
       cvrf.parse_vulnerabilities()
 
       cve = cvrf.get_vulnerabilities()[cve]
