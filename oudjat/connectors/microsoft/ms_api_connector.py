@@ -13,26 +13,6 @@ from oudjat.connectors.microsoft.ms_api_vars import API_BASE_URL, CVE_REGEX, API
 from oudjat.connectors.microsoft.ms_cvrf_document import MSCVRFDocument
 
 
-def get_cvrf_id_from_cve(cve: str) -> str:
-  """ Returns a CVRF ID based on a CVE ref """
-  if not re.match(CVE_REGEX, cve):
-    raise(f"Invalid CVE provided: {cve}")
-
-  # API URL to retreive CVRF id from CVE
-  id_url = f"{API_BASE_URL}Updates('{cve}')"
-
-  cvrf_id = None
-
-  # Retreive CVRF ID
-  id_resp = requests.get(id_url, headers=API_REQ_HEADERS)
-  if id_resp.status_code != 200:
-    raise ConnectionError(f"Could not connect to {self.id_url}")
-
-  data = json.loads(id_resp.content)
-  cvrf_id = data["value"][0]["ID"]
-
-  return cvrf_id
-
 ################################################################################
 # MS API Connector class
 class MSAPIConnector(Connector):
@@ -47,6 +27,26 @@ class MSAPIConnector(Connector):
     super().__init__(target={}, service_name="OudjatMSAPI", use_credentials=False)
     self.connection = False
 
+  def get_cvrf_id_from_cve(self, cve: str) -> str:
+    """ Returns a CVRF ID based on a CVE ref """
+    if not re.match(CVE_REGEX, cve):
+      raise(f"Invalid CVE provided: {cve}")
+
+    # API URL to retreive CVRF id from CVE
+    id_url = f"{API_BASE_URL}Updates('{cve}')"
+
+    cvrf_id = None
+
+    # Retreive CVRF ID
+    id_resp = requests.get(id_url, headers=API_REQ_HEADERS)
+    if id_resp.status_code != 200:
+      raise ConnectionError(f"Could not connect to {self.id_url}")
+
+    data = json.loads(id_resp.content)
+    cvrf_id = data["value"][0]["ID"]
+
+    return cvrf_id
+
   def connect(self, cvrf_id: str) -> "MSCVRFDocument":
     """ Retreives an existing document instance or create new one """
     self.connection = False
@@ -60,6 +60,9 @@ class MSAPIConnector(Connector):
 
       except ConnectionError as e:
         ColorPrint.red(e)
+    
+    else:
+      self.connection = True
 
     return self.target[cvrf_id]
   
@@ -79,11 +82,13 @@ class MSAPIConnector(Connector):
       search_filter = [ search_filter ]
 
     for cve in search_filter:
-      cvrf_id = get_cvrf_id_from_cve(cve)
+      cvrf_id = self.get_cvrf_id_from_cve(cve)
       cvrf = self.connect(cvrf_id)
-      cvrf.parse_vulnerabilities()
+      
+      if self.connection:
+        cvrf.parse_vulnerabilities()
 
-      cve = cvrf.get_vulnerabilities()[cve]
-      res.append(cve)
+        cve = cvrf.get_vulnerabilities()[cve]
+        res.append(cve)
 
     return res
