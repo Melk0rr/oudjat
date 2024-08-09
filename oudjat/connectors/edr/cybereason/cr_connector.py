@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 from oudjat.utils.file import export_csv
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.convertions import unixtime_to_str
+
+from oudjat.connectors.connector import Connector
 from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoints
 
 class CybereasonEntry(dict):
@@ -46,7 +48,7 @@ class CybereasonEntry(dict):
 
     dict.__init__(self, **cleaned_kwargs)
 
-class CybereasonConnector:
+class CybereasonConnector(Connector):
   """ Cybereason connector to interact and query Cybereason API """
 
   def __init__(
@@ -67,13 +69,10 @@ class CybereasonConnector:
     if not re.match(r'http(s?):', target):
       target = f"{scheme}://{target}"
 
-    self.target = urlparse(target)
+    super().__init__(urlparse(target), "OudjatCybereasonAPI", use_credentials=True)
+
     self.base_url = f"{self.target.scheme}://{self.target.netloc}:{port}"
     self.login_url = f"{self.base_url}/login.html"
-
-    self.credentials = { "username": user, "password": password }
-    
-    self.session = None
     
   def connect(self) -> None:
     """ Connects to API using connector parameters """
@@ -89,11 +88,11 @@ class CybereasonConnector:
       )
     
     ColorPrint.green(f"Connected to {self.target.netloc}:{self.port}")
-    self.session = session
+    self.connection = session
 
   def disconnect(self) -> None:
     """ Close session with target """
-    self.session.close()
+    self.connection.close()
 
   def endpoint_search(
     self,
@@ -120,7 +119,7 @@ class CybereasonConnector:
     endpoint_url = f"{self.base_url}{endpoint.value.get('endpoint')}"
     
     api_headers = {'Content-Type':'application/json'}
-    api_resp = self.session.request(
+    api_resp = self.connection.request(
       method=endpoint.value.get("method"),
       url=endpoint_url,
       data=query,
@@ -153,7 +152,7 @@ class CybereasonConnector:
   ) -> List["CybereasonEntry"]:
     """ Runs search in API """
 
-    if self.session is None:
+    if self.connection is None:
       raise ConnectionError(
         f"You must initiate connection to {self.target.netloc} before running search !"
       )
