@@ -7,18 +7,11 @@ from typing import List, Dict, Union, Any
 
 from oudjat.utils.file import export_csv
 from oudjat.utils.color_print import ColorPrint
+
 from oudjat.connectors.connector import Connector
+from oudjat.connectors.microsoft.ms_api_vars import API_BASE_URL, CVE_REGEX, API_REQ_HEADERS
 from oudjat.connectors.microsoft.ms_cvrf_document import MSCVRFDocument
 
-################################################################################
-# Useful content
-CVE_REGEX = r'CVE-\d{4}-\d{4,7}'
-CVRF_ID_REGEX = r'\d{4}-[a-zA-Z]{3}'
-KB_NUM_REGEX = r'\d{7}'
-MS_PRODUCT_REGEX = r'\d{4,5}(?:-\d{4,5})?'
-
-API_REQ_HEADERS = { 'Accept': 'application/json' }
-API_BASE_URL = "https://api.msrc.microsoft.com/"
 
 def get_cvrf_id_from_cve(cve: str) -> str:
   """ Returns a CVRF ID based on a CVE ref """

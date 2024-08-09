@@ -1,12 +1,15 @@
+import re
+import json
+import requests
+
 from typing import List, Dict
 
 from oudjat.utils.color_print import ColorPrint
 
-import oudjat.connectors.microsoft as msco
-from msco.ms_vuln import MSVuln
-from msco.ms_remed import MSRemed
-from msco.ms_product import MSProduct
-from msco.ms_api_connector import API_BASE_URL, API_REQ_HEADERS
+from oudjat.connectors.microsoft.ms_vuln import MSVuln
+from oudjat.connectors.microsoft.ms_remed import MSRemed
+from oudjat.connectors.microsoft.ms_product import MSProduct
+from oudjat.connectors.microsoft.ms_api_vars import API_BASE_URL, API_REQ_HEADERS, CVRF_ID_REGEX
 
 class MSCVRFDocument:
   """ Class to manipulate MS CVRF documents """

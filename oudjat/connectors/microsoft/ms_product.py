@@ -1,6 +1,8 @@
+import re
+
 from typing import List, Dict
 
-from oudjat.connectors.microsoft.ms_api_connector import MS_PRODUCT_REGEX
+from oudjat.connectors.microsoft.ms_api_vars import MS_PRODUCT_REGEX
 
 class MSProduct:
   """ Class to manipulate MS product """
