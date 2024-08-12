@@ -49,6 +49,27 @@ class FileConnector(Connector):
     """ 'Connects' to the file and uses the """
     raise NotImplementedError(
       "data() method must be implemented by the overloading class")
+
+  def disconnect(self) -> None:
+    """ 'Disconnects' from the targeted file """
+    self.data = None
+    self.connection = False
+    
+  def search(
+    self,
+    search_filter: List[Dict],
+    attributes: Union[str, List[str]] = None
+  ) -> List[Any]:
+    """ Searches into the imported data """
+    res = []
+    
+    for el in self.data:
+      conditions = DataFilter.get_conditions(el, filters=search_filter)
+      
+      if conditions:
+        res.append({ k: v } for k,v in el if k in attributes)
+        
+    return res
     
     
 class CSVConnector(FileConnector):
@@ -71,18 +92,3 @@ class CSVConnector(FileConnector):
     except Exception as e:
       raise(f"CSVConnector::Error connecting to file {self.target}\n{e}")
     
-  def search(
-    self,
-    search_filter: List[Dict],
-    attributes: Union[str, List[str]] = None
-  ) -> List[Any]:
-    """ Searches into the imported data """
-    res = []
-    
-    for el in self.data:
-      conditions = DataFilter.get_conditions(el, filters=search_filter)
-      
-      if conditions:
-        res.append({ k: v } for k,v in el if k in attributes)
-        
-    return res
