@@ -6,6 +6,7 @@ import socket
 from typing import List, Union, Any
 
 from oudjat.utils.color_print import ColorPrint
+from oudjat.connectors.connector import Connector
 from oudjat.connectors.ldap.ldap_search_types import LDAPSearchTypes
 
 class LDAPEntry(dict):
@@ -38,28 +39,26 @@ class LDAPEntry(dict):
     """ Retreive ldap attributes """
     return self.__getitem__("attributes")
 
-class LDAPConnector:
+class LDAPConnector(Connector):
   """ LDAP connector to interact and query LDAP servers """
 
   def __init__(
     self,
     server: str,
-    ldap_user: str,
-    ldap_password: str,
+    service_name: str = "OudjatLDAPConnection",
     use_tls: bool = False
   ):
     """ Constructor """
-    self.target = server
     self.use_tls = use_tls
     self.port = 389
     if use_tls:
       self.port = 636
 
-    self.ldap_credentials = { "user": ldap_user, "password": ldap_password }
+    super().__init__(target=server, service_name=service_name, use_credentials=True)
 
     self.default_search_base: str = None
     self.ldap_server: Server = None
-    self.ldap_connection: ldap3.Connection = None
+    self.connection: ldap3.Connection = None
     self.domain: str = None
 
   def get_domain(self) -> str:
@@ -116,8 +115,8 @@ class LDAPConnector:
 
     ldap_connection = ldap3.Connection(
       ldap_server,
-      user=self.ldap_credentials["user"],
-      password=self.ldap_credentials["password"],
+      user=self.credentials["username"],
+      password=self.credentials["password"],
       auto_referrals=False,
       authentication=ldap3.NTLM
     )
@@ -162,7 +161,7 @@ class LDAPConnector:
     ColorPrint.green(f"Bound to {ldap_server}")
 
     self.ldap_server = ldap_server
-    self.ldap_connection = ldap_connection
+    self.connection = ldap_connection
 
     self.default_search_base = self.ldap_server.info.other["defaultNamingContext"][0]
     self.domain = self.ldap_server.info.other["ldapServiceName"][0].split("@")[-1]
@@ -177,7 +176,7 @@ class LDAPConnector:
   ) -> List["LDAPEntry"]:
     """ Runs an Active directory search based on the provided parameters """
     
-    if self.ldap_connection is None:
+    if self.connection is None:
       raise ConnectionError(f"You must initiate connection to {self.target} before running search !")
 
     search_type = search_type.upper()
@@ -194,7 +193,7 @@ class LDAPConnector:
     if attributes is None:
       attributes = LDAPSearchTypes[search_type].value["attributes"]
 
-    results = self.ldap_connection.extend.standard.paged_search(
+    results = self.connection.extend.standard.paged_search(
       search_base=search_base,
       search_filter=formated_filter,
       attributes=attributes,
