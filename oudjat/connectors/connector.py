@@ -4,7 +4,12 @@ from oudjat.utils.credentials import get_credentials
 
 class Connector:
   """ Base connector """
-  def __init__(self, target: Any, service_name: str = None, use_credentials: bool = False):
+  def __init__(
+    self,
+    target: Any,
+    service_name: str = None,
+    use_credentials: bool = False
+  ):
     """ Constructor """
     self.target = target
     self.service_name = service_name
