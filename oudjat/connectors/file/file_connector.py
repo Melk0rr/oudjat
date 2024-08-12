@@ -61,6 +61,10 @@ class FileConnector(Connector):
     attributes: Union[str, List[str]] = None
   ) -> List[Any]:
     """ Searches into the imported data """
+    
+    if not self.connection:
+      self.connect()
+      
     res = []
     
     for el in self.data:
