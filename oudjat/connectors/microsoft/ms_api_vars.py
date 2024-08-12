@@ -1,5 +1,5 @@
-################################################################################
-# Useful content
+""" MS API useful variables """
+
 CVE_REGEX = r'CVE-\d{4}-\d{4,7}'
 
 CVRF_ID_REGEX = r'\d{4}-[a-zA-Z]{3}'
