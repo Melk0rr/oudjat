@@ -54,8 +54,7 @@ class CybereasonConnector(Connector):
   def __init__(
     self,
     target: str,
-    user: str,
-    password: str,
+    service_name: str = "OudjatCybereasonAPI",
     port: int = 443
   ):
     """ Constructor """
@@ -69,10 +68,9 @@ class CybereasonConnector(Connector):
     if not re.match(r'http(s?):', target):
       target = f"{scheme}://{target}"
 
-    super().__init__(urlparse(target), "OudjatCybereasonAPI", use_credentials=True)
+    super().__init__(target=urlparse(target), service_name=service_name, use_credentials=True)
 
-    self.base_url = f"{self.target.scheme}://{self.target.netloc}:{port}"
-    self.login_url = f"{self.base_url}/login.html"
+    self.target = f"{self.target.scheme}://{self.target.netloc}:{port}"
     
   def connect(self) -> None:
     """ Connects to API using connector parameters """
@@ -80,7 +78,7 @@ class CybereasonConnector(Connector):
     session = requests.session()
     
     try:
-      response = session.post(self.login_url, data=self.credentials, headers=headers, verify=True)
+      response = session.post(f"{self.target}/login.html", data=self.credentials, headers=headers, verify=True)
       
     except ConnectionError as e:
       raise(
@@ -116,7 +114,7 @@ class CybereasonConnector(Connector):
     }
     query = json.dumps(query_content)
 
-    endpoint_url = f"{self.base_url}{endpoint.value.get('endpoint')}"
+    endpoint_url = f"{self.target}{endpoint.value.get('endpoint')}"
     
     api_headers = {'Content-Type':'application/json'}
     api_resp = self.connection.request(
