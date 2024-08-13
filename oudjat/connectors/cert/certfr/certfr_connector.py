@@ -43,6 +43,8 @@ class CERTFRConnector(Connector):
   def search(self, search_filter: Union[str, List[str]]) -> List["CERTFRPage"]:
     """ Search for page or ref in CERTFR website """
 
+    res = []
+
     if not self.connection:
       self.connect()
     
@@ -55,6 +57,9 @@ class CERTFRConnector(Connector):
       page = CERTFRPage(ref)
       page.connect()
       
+      res.append(page)
+    
+    return res      
 
   # ****************************************************************
   # Static methods
