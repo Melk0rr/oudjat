@@ -175,7 +175,7 @@ class CERTFRPage:
     """ Parse a list located next to given title """
     title = self.content.find_all(h_level, string=title)[0]
     ul = title.find_next("ul")
-    return [ e.text for e in ul.find_all("li") ]
+    return [ li.text for li in ul.find_all("li") ]
 
   def parse_text_from_title(self, title: str, h_level: str = "h1") -> Union[str, List[str]]:
     """ Parse a paragraph located next to given title """
@@ -200,6 +200,8 @@ class CERTFRPage:
     
     # Documentations
     content["documentations"] = re.findall(URL_REGEX, self.content.text)
+    
+    self.content = content
 
   def parse(self) -> None:
     """ Parse page content """
