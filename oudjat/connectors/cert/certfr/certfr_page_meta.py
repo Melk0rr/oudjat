@@ -19,6 +19,9 @@ class CERTFRPageMeta:
     self.date_last: str = None
     self.sources: List[str] = []
 
+  # ****************************************************************
+  # Methods
+
   def parse(self) -> None:
     """ Parse meta table """
     meta = {}
@@ -64,6 +67,9 @@ class CERTFRPageMeta:
 
   def to_dictionary(self):
     """ Converts current instance into a dictionary """
+
+  # ****************************************************************
+  # Static methods
 
   @staticmethod
   def clean_str(str: str) -> str:
