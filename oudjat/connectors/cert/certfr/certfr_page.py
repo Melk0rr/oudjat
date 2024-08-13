@@ -94,6 +94,14 @@ class CERTFRPage:
 
   def get_risks(self, short: bool = True) -> List[str]:
     """ Get the list of risks """
+    if self.content is None:
+      return None
+    
+    if len(self.risks) == 0:
+      for risk in list(RiskTypes):
+        if risk.value.lower() in [ r.lower() for r in self.content["risks"] ]:
+          self.risks.add(risk)
+
     return [ r.name if short else r.value for r in self.risks ]
 
   def get_cve_refs(self) -> List[str]:
