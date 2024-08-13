@@ -18,7 +18,7 @@ class CERTFRConnector(Connector):
   # ****************************************************************
   # Attributes & Constructors
 
-  def __init__(self, ref: str, title: str = None):
+  def __init__(self):
     """ Constructor """
     
     super().__init__(
