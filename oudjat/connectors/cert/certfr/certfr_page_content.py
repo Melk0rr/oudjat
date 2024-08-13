@@ -85,7 +85,7 @@ class CERTFRPageContent:
     titles = self.content.find_all("h2")
 
     for t in titles:
-      next_el = t.next_sibling
+      next_el = t.find_next_sibling()
 
       if next_el.name == "ul":
         data[t.text] = [ li.text for li in next_el.find_all("li") ]
@@ -96,7 +96,6 @@ class CERTFRPageContent:
     data["CVEs"] = set(re.findall(CVE_REGEX, self.content.text))
     data["Documentation"] = re.findall(URL_REGEX, self.content.text)
 
-    print(data)
     self.data = data
 
   def to_dictionary(self):
