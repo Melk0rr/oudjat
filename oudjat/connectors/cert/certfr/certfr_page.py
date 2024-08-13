@@ -8,6 +8,8 @@ from oudjat.utils.color_print import ColorPrint
 from oudjat.model.cve import CVE, CVE_REGEX
 from oudjat.connectors.cert.risk_types import RiskTypes
 from oudjat.connectors.cert.certfr.certfr_page_types import CERTFRPageTypes
+from oudjat.connectors.cert.certfr.certfr_page_meta import CERTFRPageMeta
+from oudjat.connectors.cert.certfr.certfr_page_content import CERTFRPageContent
 
 REF_TYPES = '|'.join([ pt.name for pt in CERTFRPageTypes ])
 LINK_TYPES = '|'.join([ pt.value for pt in CERTFRPageTypes ])
@@ -16,6 +18,7 @@ CERTFR_LINK_REGEX = rf"https:\/\/www\.cert\.ssi\.gouv\.fr\/(?:{LINK_TYPES})\/{CE
 URL_REGEX = r'http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
 class CERTFRPage:
+  """ Describes a CERTFR page """
 
   # ****************************************************************
   # Attributes & Constructors
@@ -31,21 +34,10 @@ class CERTFRPage:
     self.ref = ref if self.is_valid_ref(ref) else self.get_ref_from_link(ref)
 
     self.raw_content = None
-
-    # Meta
-    self.meta = None
     self.title: str = None
-    self.date_initial: str = None
-    self.date_last: str = None
-    self.sources: List[str] = []
-    
-    # Content
+
+    self.meta = None
     self.content = None
-    self.description = None
-    self.risks: Set[str] = set()
-    self.cves: Dict["CVE"] = {}
-    self.documentations: List[str] = []
-    self.affected_products: List[str] = []
 
     # Set page type
     ref_type = re.search(rf"(?:{REF_TYPES})", self.ref).group(0)
@@ -60,90 +52,9 @@ class CERTFRPage:
     """ Getter for the reference """
     return self.ref
 
-  def get_date_initial(self) -> str:
-    """ Getter / parser for initial page date """
-    if self.meta is None:
-      return None
-    
-    if self.date_initial is None:
-      self.date_initial = self.meta.get("Date de la première version", None)
-
-    return self.date_initial
-
-  def get_date_last(self) -> str:
-    """ Getter / parser for page last change date """
-    if self.meta is None:
-      return None
-    
-    if self.date_last is None:
-      self.date_last = self.meta.get("Date de la dernière version", None)
-
-    return self.date_last
-
-  def get_sources(self) -> List[str]:
-    """ Getter / parser for page sources """
-
-    if self.meta is None:
-      return []
-    
-    if len(self.sources) == 0:
-      clean_sources = self.meta.get("Source(s)", "").split("\n")
-      clean_sources = [
-        re.sub(r'\s+', ' ', line).strip()
-        for line in clean_sources if re.sub(r'\s+', '', line).strip()
-      ]
-
-      self.sources = clean_sources
-
-    return self.sources
-
-  def get_risks(self, short: bool = True) -> Set["RiskTypes"]:
-    """ Getter / parser for the list of risks """
-    if self.content is None:
-      return set()
-    
-    if len(self.risks) == 0:
-      for risk in list(RiskTypes):
-        if risk.value.lower() in [ r.lower() for r in self.content["risks"] ]:
-          self.risks.add(risk)
-
-    return self.risks
-
-  def get_products(self) -> List[str]:
-    """ Getter / parser for affected products """
-    if self.content is None:
-      return []
-
-    if len(self.affected_products) == 0:
-      self.affected_products = self.content["products"]
-
-    return self.affected_products
-  
-  def get_description(self) -> str:
-    """ Getter / parser for description """
-    if self.content is None:
-      return None
-    
-    if self.description is None:
-      self.description = self.content["description"]
-      
-    return self.description
-
-  def get_cves(self) -> List[str]:
-    """ Returns the refs of all the related cves """
-    if self.content is None:
-      return {}
-    
-    if len(self.cves.keys()) == 0:
-      for cve in self.content["cve"]:
-        if cve not in self.cves.keys():
-          self.cves[cve] = CVE(ref=cve)
-        
-    return self.cves
-
-  def get_max_cve(self, cve_data: List["CVE"] = None) -> "CVE":
+  def get_max_cve(self, cve_data: List["CVE"] = None) -> Union["CVE", List["CVE"]]:
     """ Returns the highest cve """
-    if len(self.cves) <= 0:
+    if len(self.content.get_cves()) == 0:
       print("No comparison possible: no CVE related")
       return None
     
@@ -157,21 +68,6 @@ class CERTFRPage:
     print(f"\n{self.ref} max CVE is {max_cve.get_ref()}({max_cve.get_cvss()})")
 
     return max_cve
-
-  def get_documentations(self, filter: str = None) -> List[str]:
-    """ Getter for the documentations """
-    if self.content is None:
-      return []
-    
-    if len(self.documentations) == 0:
-      self.documentations = self.content["documentations"]
-
-    docs = self.documentations
-
-    if filter is not None and filter != "":
-      docs = [ d for d in self.documentations if filter not in d ]
-
-    return docs
 
   def connect(self) -> None:
     """ Connects to a CERTFR page based on given ref """
@@ -187,70 +83,13 @@ class CERTFRPage:
 
     except ConnectionError:
       ColorPrint.red(
-        f"Error while requesting {self.ref}. Make sure it is accessible")
+        f"CERTFRPage::Error while requesting {self.ref}. Make sure it is accessible")
 
   def disconnect(self) -> None:
     """ Resets parsing """
     self.raw_content = None
     self.meta = None
     self.content = None
-
-    self.title: str = None
-    self.date_initial: str = None
-    self.date_last: str = None
-    self.cves: Dict["CVE"] = {set()}
-    self.risks: Set[str] = set()
-    self.sources: List[str] = []
-    self.documentations: List[str] = []
-    self.affected_products: List[str] = []
-
-  def parse_meta(self) -> None:
-    """ Parse meta table """
-    self.sections["meta"].find_all("table")[0]
-    meta = {}
-
-    for row in meta_tab.find_all("tr"):
-      cells = row.find_all("td")
-      c_name = cells[0].text.strip()
-      c_value = cells[-1].text.strip()
-
-      meta[self.clean_str(c_name)] = self.clean_str(c_value)
-      
-    self.meta = meta
-
-  def parse_list_from_title(self, title: str, h_level: str = "h1") -> Union[str, List[str]]:
-    """ Parse a list located next to given title """
-    title = self.content.find_all(h_level, string=title)[0]
-    ul = title.find_next("ul")
-    return [ li.text for li in ul.find_all("li") ]
-
-  def parse_text_from_title(self, title: str, h_level: str = "h1") -> Union[str, List[str]]:
-    """ Parse a paragraph located next to given title """
-    title = self.content.find_all(h_level, string=title)
-    return title.find_next("p").text
-
-  def parse_content(self) -> None:
-    """ Parse content section """
-    content = {}
-    
-    # Risks
-    content["risks"] = self.parse_list_from_title("Risques", h_level="h2")
-    
-    # Products
-    content["products"] = self.parse_list_from_title(title="Systèmes affectés", h_level="h2")
-
-    content["cve"] = set(re.findall(CVE_REGEX, self.content.text))
-    
-    # Description
-    content["description"] = self.parse_text_from_title(title="Résumé", h_level="h2")
-    
-    # Solutions
-    content["solutions"] = self.parse_text_from_title(title="Solutions", h_level="h2")
-    
-    # Documentations
-    content["documentations"] = re.findall(URL_REGEX, self.content.text)
-    
-    self.content = content
 
   def parse(self) -> None:
     """ Parse page content """
@@ -262,26 +101,16 @@ class CERTFRPage:
       sections = self.raw_content.article.find_all("section")
 
       # Meta parsing
-      self.meta = sections[0].find_all("table")[0]
-      self.parse_meta()
-
-      self.get_date_initial()
-      self.get_date_last()
-      self.get_sources()
+      self.meta = CERTFRPageMeta(meta_section=sections[0], page=self)
+      self.meta.parse()
 
       # Content parsing
-      self.content = sections[1]
-      self.parse_content()
-
-      self.get_risks()
-      self.get_products()
-      self.get_cves()
-      self.get_description()
-      self.get_documentations(filter="cve.org")
+      self.content = CERTFRPageContent(content_section=sections[1], page=self)
+      self.content.parse()
 
     except Exception as e:
       ColorPrint.red(
-          f"A parsing error occured for {self.ref}: {e}\nCheck if the page has the expected format.")
+          f"CERTFRPage::A parsing error occured for {self.ref}\n{e}")
 
   def to_string(self) -> str:
     """ Converts current instance into a string """
