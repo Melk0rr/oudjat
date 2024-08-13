@@ -165,10 +165,6 @@ class CERTFRPage:
     return re.match(CERTFR_LINK_REGEX, link)
 
   @staticmethod
-  def clean_str(str: str) -> str:
-    return str.replace("\r", "").strip()
-
-  @staticmethod
   def get_ref_from_link(link: str) -> str:
     """ Returns a CERTFR ref based on a link """
     if not re.match(CERTFR_LINK_REGEX, link):

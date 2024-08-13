@@ -64,3 +64,7 @@ class CERTFRPageMeta:
 
   def to_dictionary(self):
     """ Converts current instance into a dictionary """
+
+  @staticmethod
+  def clean_str(str: str) -> str:
+    return str.replace("\r", "").strip()
