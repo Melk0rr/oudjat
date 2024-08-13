@@ -21,6 +21,9 @@ class CERTFRPageContent:
     self.documentations: List[str] = []
     self.affected_products: List[str] = []
 
+  # ****************************************************************
+  # Methods
+
   def get_risks(self, short: bool = True) -> Set["RiskTypes"]:
     """ Getter / parser for the list of risks """
     
