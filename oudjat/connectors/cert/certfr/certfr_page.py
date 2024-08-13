@@ -5,6 +5,7 @@ from typing import List, Dict, Set, Union
 from bs4 import BeautifulSoup, element
 
 from oudjat.utils.color_print import ColorPrint
+from oudjat.model.cve import CVE, CVE_REGEX
 from oudjat.connectors.cert.risk_types import RiskTypes
 from oudjat.connectors.cert.certfr.certfr_page_types import CERTFRPageTypes
 
@@ -30,15 +31,19 @@ class CERTFRPage:
     self.ref = ref if self.is_valid_ref(ref) else self.get_ref_from_link(ref)
 
     self.raw_content = None
-    self.meta = None
-    self.content = None
 
+    # Meta
+    self.meta = None
     self.title: str = None
     self.date_initial: str = None
     self.date_last: str = None
-    self.cve_list: Set["CVE"] = set()
-    self.risks: Set[str] = set()
     self.sources: List[str] = []
+    
+    # Content
+    self.content = None
+    self.description = None
+    self.risks: Set[str] = set()
+    self.cves: Dict["CVE"] = {}
     self.documentations: List[str] = []
     self.affected_products: List[str] = []
 
@@ -92,25 +97,53 @@ class CERTFRPage:
 
     return self.sources
 
-  def get_risks(self, short: bool = True) -> List[str]:
-    """ Get the list of risks """
+  def get_risks(self, short: bool = True) -> Set["RiskTypes"]:
+    """ Getter / parser for the list of risks """
     if self.content is None:
-      return None
+      return set()
     
     if len(self.risks) == 0:
       for risk in list(RiskTypes):
         if risk.value.lower() in [ r.lower() for r in self.content["risks"] ]:
           self.risks.add(risk)
 
-    return [ r.name if short else r.value for r in self.risks ]
+    return self.risks
 
-  def get_cve_refs(self) -> List[str]:
+  def get_products(self) -> List[str]:
+    """ Getter / parser for affected products """
+    if self.content is None:
+      return []
+
+    if len(self.affected_products) == 0:
+      self.affected_products = self.content["products"]
+
+    return self.affected_products
+  
+  def get_description(self) -> str:
+    """ Getter / parser for description """
+    if self.content is None:
+      return None
+    
+    if self.description is None:
+      self.description = self.content["description"]
+      
+    return self.description
+
+  def get_cves(self) -> List[str]:
     """ Returns the refs of all the related cves """
-    return [ cve.get_ref() for cve in self.cve_list ]
+    if self.content is None:
+      return {}
+    
+    if len(self.cves.keys()) == 0:
+      for cve in self.content["cve"]:
+        if cve not in self.cves.keys():
+          self.cves[cve] = CVE(ref=cve)
+        
+    return self.cves
 
   def get_max_cve(self, cve_data: List["CVE"] = None) -> "CVE":
     """ Returns the highest cve """
-    if len(self.cve_list) <= 0:
+    if len(self.cves) <= 0:
       print("No comparison possible: no CVE related")
       return None
     
@@ -119,7 +152,7 @@ class CERTFRPage:
     if not self.CVE_RESOLVED:
       self.resolve_cve_data(cve_data)
 
-    max_cve = max(self.cve_list, key=lambda cve: cve.get_cvss())
+    max_cve = max(self.cves, key=lambda cve: cve.get_cvss())
     self.documentations.append(max_cve.get_link())
     print(f"\n{self.ref} max CVE is {max_cve.get_ref()}({max_cve.get_cvss()})")
 
@@ -127,6 +160,12 @@ class CERTFRPage:
 
   def get_documentations(self, filter: str = None) -> List[str]:
     """ Getter for the documentations """
+    if self.content is None:
+      return []
+    
+    if len(self.documentations) == 0:
+      self.documentations = self.content["documentations"]
+
     docs = self.documentations
 
     if filter is not None and filter != "":
@@ -159,7 +198,7 @@ class CERTFRPage:
     self.title: str = None
     self.date_initial: str = None
     self.date_last: str = None
-    self.cve_list: Set["CVE"] = set()
+    self.cves: Dict["CVE"] = {set()}
     self.risks: Set[str] = set()
     self.sources: List[str] = []
     self.documentations: List[str] = []
@@ -199,6 +238,8 @@ class CERTFRPage:
     
     # Products
     content["products"] = self.parse_list_from_title(title="Systèmes affectés", h_level="h2")
+
+    content["cve"] = set(re.findall(CVE_REGEX, self.content.text))
     
     # Description
     content["description"] = self.parse_text_from_title(title="Résumé", h_level="h2")
@@ -232,6 +273,12 @@ class CERTFRPage:
       self.content = sections[1]
       self.parse_content()
 
+      self.get_risks()
+      self.get_products()
+      self.get_cves()
+      self.get_description()
+      self.get_documentations(filter="cve.org")
+
     except Exception as e:
       ColorPrint.red(
           f"A parsing error occured for {self.ref}: {e}\nCheck if the page has the expected format.")
@@ -257,9 +304,9 @@ class CERTFRPage:
 
   def resolve_cve_data(self, cve_data: List["CVE"]) -> None:
     """ Resolves CVE data for all related CVE """
-    print(f"\nResolving {len(self.cve_list)} CVE data for {self.ref}...")
+    print(f"\nResolving {len(self.cves)} CVE data for {self.ref}...")
 
-    for cve in self.cve_list:
+    for cve in self.cves:
       # Checks if the current CVE can be found in the provided cve list. If not : parse Nist page
       cve_imported = False
       if cve_data:
