@@ -3,6 +3,11 @@ import re
 from bs4 import BeautifulSoup, element
 from typing import List, Dict, Set, Union
 
+from oudjat.model.cve import CVE, CVE_REGEX
+from oudjat.connectors.cert.risk_types import RiskTypes
+
+URL_REGEX = r'http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+
 class CERTFRPageContent:
   """ Handles content section from CERTFR page """
   

@@ -5,8 +5,6 @@ from typing import List, Dict, Set, Union
 from bs4 import BeautifulSoup, element
 
 from oudjat.utils.color_print import ColorPrint
-from oudjat.model.cve import CVE, CVE_REGEX
-from oudjat.connectors.cert.risk_types import RiskTypes
 from oudjat.connectors.cert.certfr.certfr_page_types import CERTFRPageTypes
 from oudjat.connectors.cert.certfr.certfr_page_meta import CERTFRPageMeta
 from oudjat.connectors.cert.certfr.certfr_page_content import CERTFRPageContent
@@ -15,7 +13,6 @@ REF_TYPES = '|'.join([ pt.name for pt in CERTFRPageTypes ])
 LINK_TYPES = '|'.join([ pt.value for pt in CERTFRPageTypes ])
 CERTFR_REF_REGEX = rf"CERTFR-\d{{4}}-(?:{REF_TYPES})-\d{{3,4}}"
 CERTFR_LINK_REGEX = rf"https:\/\/www\.cert\.ssi\.gouv\.fr\/(?:{LINK_TYPES})\/{CERTFR_REF_REGEX}"
-URL_REGEX = r'http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
 class CERTFRPage:
   """ Describes a CERTFR page """
