@@ -54,8 +54,10 @@ class CERTFRConnector(Connector):
     search_filter = set(search_filter)
       
     for ref in search_filter:
+      print(ref)
       page = CERTFRPage(ref)
       page.connect()
+      page.parse()
       
       res.append(page)
     
