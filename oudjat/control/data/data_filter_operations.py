@@ -1,5 +1,3 @@
-from enum import Enum
-
 from typing import Union, List, Any
 
 def ope_equals(a: Any, b: Any) -> bool:

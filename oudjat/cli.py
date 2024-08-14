@@ -66,9 +66,9 @@ def command_switch(options: Dict) -> Any:
   """ Script command switch case """
   
   switch = {
-    "vuln": oudjat.commands.Vuln,
-    "cert": oudjat.commands.Cert,
-    "kpi" : oudjat.commands.KPIFactory
+    "vuln": oudjat.commands.vuln.Vuln,
+    "cert": oudjat.commands.cert.Cert,
+    "kpi" : oudjat.commands.kpi_factory.KPIFactory
     # "sc"  : oudjat.commands.SC,
   }
 

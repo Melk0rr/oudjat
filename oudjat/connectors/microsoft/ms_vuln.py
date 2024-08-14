@@ -3,6 +3,8 @@ import re
 from typing import List, Dict, Any
 
 from oudjat.connectors.microsoft.ms_api_vars import CVE_REGEX, KB_NUM_REGEX
+from oudjat.connectors.microsoft.ms_remed import MSRemed
+from oudjat.connectors.microsoft.ms_product import MSProduct
 
 class MSVuln:
   """ Class to manipulate CVE data related to MS products """
@@ -21,7 +23,7 @@ class MSVuln:
     """ Getter for CVE """
     return self.cve
   
-  def get_remediations(self) -> Dict[str, "MSRemed"]:
+  def get_remediations(self) -> Dict[str, MSRemed]:
     """ Getter for KB list """
     return self.kbs
   
@@ -29,11 +31,11 @@ class MSVuln:
     """ Returns kb numbers """
     return [ kb_number for kb_number in self.kbs.keys() ]
 
-  def get_impacted_products(self) -> Dict[str, "MSProduct"]:
+  def get_impacted_products(self) -> Dict[str, MSProduct]:
     """ Getter for impacted product list """
     return self.products
 
-  def add_kb(self, kb_num: int, kb: "MSRemed") -> None:
+  def add_kb(self, kb_num: int, kb: MSRemed) -> None:
     """ Adds a KB to vuln KB list """
     if not (re.match(KB_NUM_REGEX, kb_num) or re.match(r'(\w+)$', kb_num)):
       return

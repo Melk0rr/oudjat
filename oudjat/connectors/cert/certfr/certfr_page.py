@@ -1,7 +1,7 @@
 import re
 import requests
 
-from typing import List, Dict, Set, Union
+from typing import List, Dict
 from bs4 import BeautifulSoup, element
 
 from oudjat.utils.color_print import ColorPrint
@@ -68,7 +68,7 @@ class CERTFRPage:
       req = requests.get(self.link)
       
       if req.status_code != 200:
-        raise ConnectionError(f"Error while trying to connect to self.target")
+        raise ConnectionError(f"Error while trying to connect to {self.ref}")
       
       self.raw_content = BeautifulSoup(req.content, 'html.parser')
       self.title = self.raw_content.title.text

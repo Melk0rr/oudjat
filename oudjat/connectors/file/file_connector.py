@@ -1,10 +1,7 @@
 import os
-import csv
-import json
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
-from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
 from oudjat.connectors.file.file_types import FileTypes
@@ -24,6 +21,7 @@ class FileConnector(Connector):
   def __init__(self, path: str, source: str):
     """ Constructor """
     check_path(path)
+    file_ext = path.split('.')[-1]
     
     self.source = source
     self.filetype = FileTypes[file_ext.upper()]
@@ -82,7 +80,7 @@ class CSVConnector(FileConnector):
   def __init__(self, path: str, source: str, delimiter: str = '|'):
     """ Constructor """
     if len(delimiter) > 1:
-      raise(f"Invalid delimiter provided. Please provide a single character")
+      raise("Invalid delimiter provided. Please provide a single character")
     
     self.delimiter = delimiter
     super().__init__(path, source)

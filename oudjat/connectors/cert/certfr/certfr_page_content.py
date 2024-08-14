@@ -1,7 +1,7 @@
 import re
 
-from bs4 import BeautifulSoup, element
-from typing import List, Dict, Set, Union
+from bs4 import element
+from typing import List, Dict, Set
 
 from oudjat.model.security.cve import CVE, CVE_REGEX
 from oudjat.connectors.cert.risk_types import RiskTypes

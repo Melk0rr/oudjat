@@ -1,4 +1,4 @@
-from oudjat.connectors.ldap.ldap_account_flags import LDAPAccountFlags, is_disabled, pwd_expires
+from oudjat.connectors.ldap.ldap_account_flags import is_disabled, pwd_expires
 from oudjat.connectors.ldap.ldap_connector import LDAPEntry
 
 class LDAPAccount:

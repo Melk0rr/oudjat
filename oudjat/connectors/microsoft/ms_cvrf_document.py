@@ -2,7 +2,7 @@ import re
 import json
 import requests
 
-from typing import List, Dict
+from typing import Dict
 
 from oudjat.utils.color_print import ColorPrint
 
@@ -17,7 +17,7 @@ class MSCVRFDocument:
   def __init__(self, id: str):
     """ Constructor """
     if not re.match(CVRF_ID_REGEX, id):
-      raise ValueError(f"CVRF ID must follow the 'YYYY-MMM' format !")
+      raise ValueError("CVRF ID must follow the 'YYYY-MMM' format !")
 
     self.id = id
     self.url = f"{API_BASE_URL}cvrf/{self.id}"
@@ -78,7 +78,6 @@ class MSCVRFDocument:
     """ Retreives the products mentionned in the document """
     prod_tree = self.content["ProductTree"]["Branch"][0]["Items"]
     for b in prod_tree:
-      product_type = b["Name"]
 
       for p in b["Items"]:
         pid = p["ProductID"]

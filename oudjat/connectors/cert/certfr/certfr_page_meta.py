@@ -1,6 +1,6 @@
 import re
 
-from bs4 import BeautifulSoup, element
+from bs4 import element
 from typing import List, Dict
 
 class CERTFRPageMeta:

@@ -1,13 +1,10 @@
 """ CVE module addressing common vulnerability behavior """
 import re
 import datetime
-import requests
 
 from enum import Enum
 from typing import List, Dict, Union
-from bs4 import BeautifulSoup
 
-from oudjat.utils.file import import_csv
 from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.nist.nist_connector import NistConnector
 

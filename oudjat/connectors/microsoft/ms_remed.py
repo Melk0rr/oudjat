@@ -3,6 +3,7 @@ import re
 from typing import List, Dict, Any
 
 from oudjat.connectors.microsoft.ms_api_vars import KB_NUM_REGEX
+from oudjat.connectors.microsoft.ms_product import MSProduct
 
 class MSRemed:
   """ Class to manipulate MS KBs """
@@ -17,7 +18,7 @@ class MSRemed:
       
     self.products = {}
     
-  def set_products(self, products: List["MSProduct"]) -> None:
+  def set_products(self, products: List[MSProduct]) -> None:
     """ Setter for kb products """
     self.products = { 
       p.get_id(): p

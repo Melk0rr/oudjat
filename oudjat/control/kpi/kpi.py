@@ -1,6 +1,6 @@
 """ KPI module handling operations related to indicators """
 from datetime import datetime
-from typing import List, Dict, Tuple, Union
+from typing import List, Dict, Tuple 
 from enum import Enum
 
 from oudjat.utils.color_print import ColorPrint

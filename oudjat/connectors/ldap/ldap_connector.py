@@ -1,5 +1,4 @@
 import ssl
-import json
 import ldap3
 import socket
 
@@ -57,7 +56,7 @@ class LDAPConnector(Connector):
     super().__init__(target=server, service_name=service_name, use_credentials=True)
 
     self.default_search_base: str = None
-    self.ldap_server: Server = None
+    self.ldap_server: ldap3.Server = None
     self.connection: ldap3.Connection = None
     self.domain: str = None
 
@@ -128,12 +127,7 @@ class LDAPConnector(Connector):
       if not bind_result:
         result = ldap_connection.result
 
-        if result["result"] == RESULT_STRONGER_AUTH_REQUIRED and self.use_tls:
-          logging.warning(
-              "LDAP Authentication is refused because LDAP signing is enabled. "
-              "Trying to connect over LDAPS instead..."
-          )
-
+        if result["result"] == "RESULT_STRONGER_AUTH_REQUIRED" and self.use_tls:
           self.set_tls_usage(use_tls=True)
           return self.connect()
         

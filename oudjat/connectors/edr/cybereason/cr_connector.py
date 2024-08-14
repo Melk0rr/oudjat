@@ -1,14 +1,11 @@
 import re
 import json
 import math
-import urllib
 import requests
 
 from urllib.parse import urlparse
-from typing import List, Dict, Any
-from datetime import datetime, timedelta
+from typing import List, Dict
 
-from oudjat.utils.file import export_csv
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.convertions import unixtime_to_str
 
@@ -78,7 +75,7 @@ class CybereasonConnector(Connector):
     session = requests.session()
     
     try:
-      response = session.post(f"{self.target}/login.html", data=self.credentials, headers=headers, verify=True)
+      session.post(f"{self.target}/login.html", data=self.credentials, headers=headers, verify=True)
       
     except ConnectionError as e:
       raise(

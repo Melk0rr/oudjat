@@ -1,5 +1,5 @@
 """ CVE Target class """
-from typing import List, Dict
+from typing import Dict
 from multiprocessing import Pool
 
 from oudjat.utils.color_print import ColorPrint

@@ -1,7 +1,6 @@
 """ Data module handling various data manipulation aspects """
-from typing import List, Dict, Union, Any
+from typing import List, Dict, Union
 
-from oudjat.utils.color_print import ColorPrint
 from oudjat.control.data.data_filter import DataFilter
 
 class DataScope:

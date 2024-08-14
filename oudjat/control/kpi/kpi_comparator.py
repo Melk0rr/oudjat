@@ -1,6 +1,7 @@
 from typing import Dict, Union, Tuple
 
 from oudjat.utils.color_print import ColorPrint
+from oudjat.control.kpi.kpi import KPI
 
 class KPIComparator:
   """ KPIComparator class to compare two KPIs """
@@ -20,7 +21,7 @@ class KPIComparator:
     }
   }
 
-  def __init__(self, kpi_a: "KPI", kpi_b: "KPI"):
+  def __init__(self, kpi_a: KPI, kpi_b: KPI):
     """ Constructor """
     if kpi_a.get_perimeter() != kpi_b.get_perimeter():
       raise ValueError(f"{__class__} error : provided KPI do not share the same perimeter !")

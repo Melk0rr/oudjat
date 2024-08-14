@@ -1,6 +1,6 @@
 import re
 
-from typing import List, Dict
+from typing import Dict
 
 from oudjat.connectors.microsoft.ms_api_vars import MS_PRODUCT_REGEX
 

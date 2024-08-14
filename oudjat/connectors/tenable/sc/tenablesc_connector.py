@@ -1,5 +1,3 @@
-import json
-
 from typing import Dict
 from tenable import sc
 

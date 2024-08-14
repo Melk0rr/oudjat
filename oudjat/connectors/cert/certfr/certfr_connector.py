@@ -1,11 +1,9 @@
 """ Several functions that aim to parse a certfr page """
-import re
 import requests
 
-from enum import Enum
-from typing import List, Dict, Union
+from typing import List, Union
 from datetime import datetime
-from bs4 import BeautifulSoup, element
+from bs4 import BeautifulSoup
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.connector import Connector
@@ -95,9 +93,9 @@ class CERTFRConnector(Connector):
           if date > date_filter:
             filtered_feed.append(certfr_ref)
 
-        except ValueError as e:
+        except ValueError:
           ColorPrint.red(
-              f"Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !")
+              "Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !")
           
       else:
         filtered_feed.append(certfr_ref)

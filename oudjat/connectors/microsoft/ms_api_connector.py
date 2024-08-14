@@ -3,9 +3,8 @@ import json
 import requests
 
 from datetime import datetime
-from typing import List, Dict, Union, Any
+from typing import List, Dict, Union
 
-from oudjat.utils.file import export_csv
 from oudjat.utils.color_print import ColorPrint
 
 from oudjat.connectors.connector import Connector

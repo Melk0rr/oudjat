@@ -56,7 +56,7 @@ class DataFilter:
       if isinstance(f, dict):
         filter_i = DataFilter.datafilter_from_dict(f)
       
-      filters.append(f)
+      filters.append(filter_i)
 
     return filters
 

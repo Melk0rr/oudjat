@@ -1,11 +1,13 @@
 from typing import List
 
+from oudjat.utils.color_print import ColorPrint
+from oudjat.control.kpi.kpi import KPI
 from oudjat.control.kpi.kpi_comparator import KPIComparator
 
 class KPIHistory:
   """ KPIEvolution class to handle """
 
-  def __init__(self, name: str, kpis: List["KPI"] = []):
+  def __init__(self, name: str, kpis: List[KPI] = []):
     """ Constructor """
     self.name = name
     self.kpis = []
@@ -16,7 +18,7 @@ class KPIHistory:
     """ Getter for kpi list """
     return self.kpis
 
-  def set_kpis(self, kpis: List["KPI"] = []) -> None:
+  def set_kpis(self, kpis: List[KPI] = []) -> None:
     """ Setter for kpi list """
     for k in kpis:
       self.add_kpi(k)

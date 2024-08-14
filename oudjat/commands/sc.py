@@ -1,8 +1,7 @@
-""" Tenable SC module """
-from multiprocessing import Pool
+# TODO: rewrite TenableSCConnector and implement it
+from typing import Dict
 
-from oudjat.utils.color_print import ColorPrint
-from oudjat.connectors.tenable.sc.tenablesc_connector import TenabeSCConnector
+# from oudjat.connectors.tenable.sc.tenablesc_connector import TenabeSCConnector
 
 from .target import Target
 
@@ -16,14 +15,16 @@ class SC(Target):
     """ Constructor """
     super().__init__(options)
 
-    try:
-      from oudjat.API import TSC_ACCESS_KEY, TSC_SECRET_KEY
-      self.my_sc = TenabeSCConnector('scanvuln.ramsaysante.fr', TSC_ACCESS_KEY, TSC_SECRET_KEY)
+    self.my_sc = None
 
-      print(my_sc.vulns)
+    # try:
+    #   from oudjat.API import TSC_ACCESS_KEY, TSC_SECRET_KEY
+    #   self.my_sc = TenabeSCConnector('scanvuln.ramsaysante.fr', TSC_ACCESS_KEY, TSC_SECRET_KEY)
 
-    except ValueError:
-      raise ValueError("Unable to import SC API keys")
+    #   print(self.my_sc.vulns)
+
+    # except ValueError:
+    #   raise ValueError("Unable to import SC API keys")
 
   def sc_process(self) -> None:
     """ Tenable.sc default process """

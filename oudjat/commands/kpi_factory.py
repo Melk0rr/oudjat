@@ -1,8 +1,5 @@
 """ Target module handling targeting operations and data gathering """
-import os
 import json
-import glob
-from datetime import datetime
 from multiprocessing import Pool
 from typing import List, Dict, Tuple
 
@@ -13,7 +10,6 @@ from .base import Base
 from oudjat.control.data.data_scope import DataScope
 from oudjat.control.data.data_filter import DataFilter
 from oudjat.control.kpi.kpi import KPI
-from oudjat.control.kpi.kpi_history import KPIHistory
 
 class KPIFactory(Base):
   """Main enumeration module"""
@@ -52,7 +48,7 @@ class KPIFactory(Base):
     sources = {}
 
     # Test auto detect
-    files = glob.glob(f"{self.options['DIRECTORY']}/kpi_acc_computers*.csv")
+    # files = glob.glob(f"{self.options['DIRECTORY']}/kpi_acc_computers*.csv")
 
     for k, ds in self.config.get("data_sources", {}).items():
       sources[k] = [ src for src in self.options["--sources"] if ds in src ]
@@ -80,7 +76,7 @@ class KPIFactory(Base):
       current_data[k] = []
 
       if self.data_sources[k][index] is not None:
-        current_data[k] = import_csv(f"{self.options['DIRECTORY']}\{self.data_sources[k][index]}.csv", delimiter="|")
+        current_data[k] = import_csv(f"{self.options['DIRECTORY']}/{self.data_sources[k][index]}.csv", delimiter="|")
       
     return current_data
   
@@ -106,7 +102,7 @@ class KPIFactory(Base):
     kpi_data = []
 
     kpi_controls = DataFilter.gen_from_dict(kpi.get("controls", []))
-    kpi_source = self.current_sources[kpi["perimeter"]]
+    # kpi_source = self.current_sources[kpi["perimeter"]]
     kpi_i = KPI(name=kpi["name"], perimeter=kpi["perimeter"], filters=kpi_controls)
 
     print(f"\n{kpi_i.get_name()}")
