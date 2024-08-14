@@ -2,6 +2,7 @@
 from typing import List, Dict, Union, Any
 
 from oudjat.utils.color_print import ColorPrint
+from oudjat.control.data.data_filter import DataFilter
 
 class DataScope:
   """ DataScope class : handling data unfiltered and filtered state """
@@ -47,7 +48,7 @@ class DataScope:
     """ Setter for input data """
     self.initial_scope = scope 
 
-  def set_filters(self, filters: Union[List[Dict], List[DataFilter]] = []) -> None:
+  def set_filters(self, filters: Union[List[Dict], List["DataFilter"]] = []) -> None:
     """ Setter for filters """
     self.filters = DataFilter.get_valid_filters_list(filters)
 
