@@ -141,7 +141,7 @@ class CVE:
 
   def to_string(self, showSeverity: bool = False) -> str:
     """ Converts the current instance to a string """
-    base = f"{self.ref}: {self.cvss}"
+    base = f"{self.ref} ({self.cvss})"
 
     if showSeverity:
       base += f"({self.severity.name})"
@@ -198,7 +198,7 @@ class CVE:
     return res
 
   @staticmethod
-  def resolve_cve_data(cves: List["CVE"], cve_data: List["CVE"]) -> None:
+  def resolve_cve_data(cves: List["CVE"], cve_data: List["CVE"] = None) -> None:
     """ Resolves CVE data for all related CVE """
 
     print(f"\nResolving {len(cves)} CVEs data...")
@@ -206,7 +206,7 @@ class CVE:
     for cve in cves:
       # Checks if the current CVE can be found in the provided cve list. If not : parse Nist page
       cve_imported = False
-      if cve_data:
+      if cve_data is not None:
         cve_search = CVE.find_cve_by_ref(ref=cve.get_ref(), cve_list=cve_data)
         
         if cve_search:
@@ -232,6 +232,6 @@ class CVE:
 
     print("\nMax CVEs are:")
     for cve in max_cve:
-      print(f"{max_cve.get_ref()}({max_cve.get_cvss()})")
+      print(f"{cve.to_string()})")
       
     return max_cve
