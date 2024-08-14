@@ -21,10 +21,10 @@ class CERTFRPageContent:
     self.data = None
 
     self.description = None
-    self.risks: Set[str] = set()
-    self.cves: Dict["CVE"] = {}
-    self.documentations: List[str] = []
-    self.affected_products: List[str] = []
+    self.risks: Set[str] = None
+    self.cves: Dict["CVE"] = None
+    self.documentations: List[str] = None
+    self.affected_products: List[str] = None
 
   # ****************************************************************
   # Methods
@@ -32,44 +32,52 @@ class CERTFRPageContent:
   def get_risks(self, short: bool = True) -> Set["RiskTypes"]:
     """ Getter / parser for the list of risks """
     
-    if len(self.risks) == 0:
+    if self.data is not None and self.risks is None:
+      risk_set = set()
+
       for risk in list(RiskTypes):
-        if risk.value.lower() in [ r.lower() for r in self.content["risks"] ]:
-          self.risks.add(risk)
+        if risk.value["fr"].lower() in [ r.lower() for r in self.data.get("Risques", []) ]:
+          risk_set.add(risk)
+
+      self.risks = risk_set
 
     return self.risks
 
   def get_products(self) -> List[str]:
     """ Getter / parser for affected products """
 
-    if len(self.affected_products) == 0:
-      self.affected_products = self.content["products"]
+    if self.data is not None and self.affected_products is None:
+      self.affected_products = self.data.get("Systèmes affectés", [])
 
     return self.affected_products
   
   def get_description(self) -> str:
     """ Getter / parser for description """
     
-    if self.description is None:
-      self.description = self.content["description"]
+    if self.data is not None and self.description is None:
+      self.description = self.data.get("Résumé", None)
       
     return self.description
 
   def get_cves(self) -> List[str]:
     """ Returns the refs of all the related cves """
 
-    if len(self.cves.keys()) == 0:
-      for cve in self.content["cve"]:
-        if cve not in self.cves.keys():
-          self.cves[cve] = CVE(ref=cve)
+    if self.data is not None and self.cves is None:
+      cves = {}
+
+      for cve in self.data.get("CVEs", []):
+        if cve not in cves.keys():
+          cves[cve] = CVE(ref=cve)
+
+      self.cves = cves
         
     return self.cves
 
   def get_documentations(self, filter: str = None) -> List[str]:
     """ Getter for the documentations """
     
-    if len(self.documentations) == 0:
-      self.documentations = self.content["documentations"]
+    if self.data is not None and self.documentations is None:
+      self.documentations = self.data.get("Documentation", [])
 
     docs = self.documentations
 
@@ -100,3 +108,16 @@ class CERTFRPageContent:
 
   def to_dictionary(self):
     """ Converts current instance into a dictionary """
+    content_dict = {}
+
+    if self.data is not None:
+      content_dict = {
+        "risks": self.get_risks(),
+        "products": self.get_products(),
+        "description": self.get_description(),
+        "cves": self.get_cves(),
+        "solutions": self.get_solutions(),
+        "documentations": self.get_documentations()
+      }
+
+    return content_dict
