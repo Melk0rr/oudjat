@@ -3,7 +3,7 @@ from typing import List, Dict
 from multiprocessing import Pool
 
 from oudjat.utils.color_print import ColorPrint
-from oudjat.model.cve import CVE
+from oudjat.model.security.cve import CVE
 
 from .target import Target
 
