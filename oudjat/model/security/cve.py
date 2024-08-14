@@ -228,10 +228,12 @@ class CVE:
     print(f"\nResolving most critical CVEs among {len(cves)} provided")
 
     max_cve = max(cves, key=lambda cve: cve.get_cvss())
-    max_cve = [ cve for cve in cves if cve.get_cvss() == max_cve.get_cvss() ]
+
+    if max_cve is not None:
+      max_cve = [ cve for cve in cves if cve.get_cvss() == max_cve.get_cvss() ]
 
     print("\nMax CVEs are:")
     for cve in max_cve:
-      print(f"{cve.to_string()})")
+      print(f"{cve.to_string()}")
       
     return max_cve
