@@ -196,3 +196,42 @@ class CVE:
         res = cve
     
     return res
+
+  @staticmethod
+  def resolve_cve_data(cves: List["CVE"], cve_data: List["CVE"]) -> None:
+    """ Resolves CVE data for all related CVE """
+
+    print(f"\nResolving {len(cves)} CVEs data...")
+
+    for cve in cves:
+      # Checks if the current CVE can be found in the provided cve list. If not : parse Nist page
+      cve_imported = False
+      if cve_data:
+        cve_search = CVE.find_cve_by_ref(ref=cve.get_ref(), cve_list=cve_data)
+        
+        if cve_search:
+          print(f"Found {cve.get_ref()} in CVE list ! Copying data...")
+          cve.copy(cve_search)
+          cve_imported = True
+
+      if not cve_imported:
+        cve.parse_nist(verbose=False)
+
+  @staticmethod
+  def max_cve(cves: List["CVE"]) -> List["CVE"]:
+    """ Returns the highest cve """
+
+    if len(cves) == 0 or cves is None:
+      print("No comparison possible: no CVE related")
+      return None
+    
+    print(f"\nResolving most critical CVEs among {len(cves)} provided")
+
+    max_cve = max(cves, key=lambda cve: cve.get_cvss())
+    max_cve = [ cve for cve in cves if cve.get_cvss() == max_cve.get_cvss() ]
+
+    print("\nMax CVEs are:")
+    for cve in max_cve:
+      print(f"{max_cve.get_ref()}({max_cve.get_cvss()})")
+      
+    return max_cve

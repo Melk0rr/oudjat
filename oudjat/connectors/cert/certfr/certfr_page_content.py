@@ -121,12 +121,12 @@ class CERTFRPageContent:
 
     if self.data is not None:
       content_dict = {
-        "risks": self.get_risks(),
+        "risks": [ r.name for r in self.get_risks() ],
         "products": self.get_products(),
         "description": self.get_description(),
-        "cves": self.get_cves(),
+        "cves": [ cve.get_ref() for cve in self.get_cves().values() ],
         "solutions": self.get_solutions(),
-        "documentations": self.get_documentations()
+        "documentations": self.get_documentations(filter="cve.org")
       }
 
     return content_dict

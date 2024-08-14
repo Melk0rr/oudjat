@@ -52,27 +52,6 @@ class CERTFRPage:
     """ Getter for the reference """
     return self.ref
 
-  def get_max_cve(self, cve_data: List["CVE"] = None) -> Union["CVE", List["CVE"]]:
-    """ Returns the highest cve """
-    content_cves = self.content.get_cves()
-    if len(content_cves) == 0 or content_cves is None:
-      print("No comparison possible: no CVE related")
-      return None
-    
-    print(f"\nResolving most critical CVE for {self.ref}")
-
-    if not self.CVE_RESOLVED:
-      self.resolve_cve_data(cve_data)
-
-    max_cve = max(content_cves, key=lambda cve: cve.get_cvss())
-    max_cve = [ cve for cve in content_cves if cve.get_cvss() == max_cve.get_cvss() ]
-
-    for cve in max_cve:
-      print(f"\n{self.ref} max CVE is {max_cve.get_ref()}({max_cve.get_cvss()})")
-      self.documentations.append(cve.get_link())
-      
-    return max_cve
-
   def connect(self) -> None:
     """ Connects to a CERTFR page based on given ref """
      # Handle possible connection error
@@ -130,30 +109,9 @@ class CERTFRPage:
         "title": self.title,
         **self.meta.to_dictionary(),
         **self.content.to_dictionary(),
-        "max_cve": self.get_max_cve()
       }
 
     return page_dict
-
-  def resolve_cve_data(self, cve_data: List["CVE"]) -> None:
-    """ Resolves CVE data for all related CVE """
-    print(f"\nResolving {len(self.cves)} CVE data for {self.ref}...")
-
-    for cve in self.cves:
-      # Checks if the current CVE can be found in the provided cve list. If not : parse Nist page
-      cve_imported = False
-      if cve_data:
-        cve_search = CVE.find_cve_by_ref(ref=cve.get_ref(), cve_list=cve_data)
-        
-        if cve_search:
-          print(f"Found {cve.get_ref()} in CVE list ! Copying data...")
-          cve.copy(cve_search)
-          cve_imported = True
-
-      if not cve_imported:
-        cve.parse_nist(verbose=False)
-
-    self.CVE_RESOLVED = True
 
   # ****************************************************************
   # Static methods
