@@ -5,7 +5,7 @@ from typing import List, Dict, Set, Union
 from bs4 import BeautifulSoup, element
 
 from oudjat.utils.color_print import ColorPrint
-from oudjat.model.cve import CVE
+from oudjat.model.security.cve import CVE
 from oudjat.connectors.cert.certfr.certfr_page_types import CERTFRPageTypes
 from oudjat.connectors.cert.certfr.certfr_page_meta import CERTFRPageMeta
 from oudjat.connectors.cert.certfr.certfr_page_content import CERTFRPageContent
@@ -73,6 +73,8 @@ class CERTFRPage:
       self.raw_content = BeautifulSoup(req.content, 'html.parser')
       self.title = self.raw_content.title.text
 
+      print(self.title)
+
     except ConnectionError:
       ColorPrint.red(
         f"CERTFRPage::Error while requesting {self.ref}. Make sure it is accessible")
@@ -93,11 +95,11 @@ class CERTFRPage:
       sections = self.raw_content.article.find_all("section")
 
       # Meta parsing
-      self.meta = CERTFRPageMeta(meta_section=sections[0], page=self)
+      self.meta = CERTFRPageMeta(meta_section=sections[0])
       self.meta.parse()
 
       # Content parsing
-      self.content = CERTFRPageContent(content_section=sections[1], page=self)
+      self.content = CERTFRPageContent(content_section=sections[1])
       self.content.parse()
 
     except Exception as e:

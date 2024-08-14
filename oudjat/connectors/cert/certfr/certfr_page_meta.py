@@ -9,9 +9,8 @@ class CERTFRPageMeta:
   # ****************************************************************
   # Attributes & Constructors
 
-  def __init__(self, meta_section: element, page: "CERTFRPage"):
+  def __init__(self, meta_section: element):
     """ Constructor """
-    self.page = page
     self.meta_table = meta_section.find_all("table")[0]
     self.data = None
 
