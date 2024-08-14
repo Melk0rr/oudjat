@@ -1,7 +1,7 @@
 import re
 
 from bs4 import BeautifulSoup, element
-from typing import List, Dict, Set, Union
+from typing import List, Dict
 
 class CERTFRPageMeta:
   """ Handles meta table from CERTFR page """
@@ -65,7 +65,7 @@ class CERTFRPageMeta:
 
     return self.sources
 
-  def to_dictionary(self):
+  def to_dictionary(self) -> Dict:
     """ Converts current instance into a dictionary """
     meta_dict = {}
 
