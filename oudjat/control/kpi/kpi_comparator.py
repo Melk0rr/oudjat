@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import Dict, Union, Tuple
 
 from oudjat.utils.color_print import ColorPrint
 
@@ -27,8 +27,8 @@ class KPIComparator:
 
     self.kpis = (kpi_a, kpi_b)
 
-    self.values = ()
-    self.tendency = None
+    self.values: Tuple[float, float] = ()
+    self.tendency: Dict = None
 
   def get_kpis(self) -> Tuple[float,float]:
     """ Getter for kpis """

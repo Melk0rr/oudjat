@@ -4,7 +4,8 @@ from typing import List, Dict, Tuple, Union
 from enum import Enum
 
 from oudjat.utils.color_print import ColorPrint
-from oudjat.control.data import DataFilter, DataScope
+from oudjat.control.data.data_scope import DataScope
+from oudjat.control.data.data_filter import DataFilter
 
 class ConformityLevel(Enum):
   """ Defines the levels of conformity for a KPI or any other related element """

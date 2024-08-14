@@ -10,8 +10,10 @@ from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.file import import_csv, export_csv
 
 from .base import Base
-from oudjat.control.data import DataFilter, DataScope
-from oudjat.control.kpi import KPI, KPIHistory
+from oudjat.control.data.data_scope import DataScope
+from oudjat.control.data.data_filter import DataFilter
+from oudjat.control.kpi.kpi import KPI
+from oudjat.control.kpi.kpi_history import KPIHistory
 
 class KPIFactory(Base):
   """Main enumeration module"""
