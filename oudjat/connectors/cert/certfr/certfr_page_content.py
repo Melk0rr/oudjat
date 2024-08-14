@@ -20,6 +20,7 @@ class CERTFRPageContent:
     self.content = content_section
     self.data = None
 
+    self.solutions = None
     self.description = None
     self.risks: Set[str] = None
     self.cves: Dict["CVE"] = None
@@ -58,6 +59,14 @@ class CERTFRPageContent:
       self.description = self.data.get("Résumé", None)
       
     return self.description
+
+  def get_solutions(self) -> str:
+    """ Getter / parser for solutions """
+    
+    if self.data is not None and self.solutions is None:
+      self.solutions = self.data.get("Solutions", None)
+
+    return self.solutions
 
   def get_cves(self) -> List[str]:
     """ Returns the refs of all the related cves """
