@@ -1,6 +1,6 @@
 """
 Usage:
-  oudjat cert (-t TARGET | -f FILE) [options]  [--check-max-cve] [--feed] [--filter=FILTER]
+  oudjat cert (-t TARGET | -f FILE) [options]   [--feed] [--filter=FILTER]
                                                 [--keywords=KEYWORDS | --keywordfile=FILE]   
   oudjat vuln (-t TARGET | -f FILE) [options]
   oudjat kpi (-d DIRECTORY) (-s SOURCES) [options] [--config=CONFIG] [--history=HIST] [--history-gap=GAP]
@@ -31,15 +31,14 @@ Options:
   --history-dates=DATES           gap between elements
 
 Cert-options:
-  --check-max-cve                 determine which CVE is the most severe based on the CVSS score
   --feed                          run cert mode from a feed
   --filter=FILTER                 date filter to apply with feed option (e.g. 2023-03-10)
   --keywords=KEYWORDS             set keywords to track (comma separated, no spaces, if multiple)
   --keywordfile=KEYWORDFILE       set keywords to track (file, one keyword per line)
 
 Exemples:
-  oudjat cert -t https://cert.ssi.gouv.fr/alerte/feed/ --feed --filter "2023-03-13" --check-max-cve
-  oudjat cert -f ./tests/certfr.txt --export-csv ./tests/certfr_20230315.csv --keywordfile ./tests/keywords.txt --check-max-cve
+  oudjat cert -t https://cert.ssi.gouv.fr/alerte/feed/ --feed --filter "2023-03-13"
+  oudjat cert -f ./tests/certfr.txt --export-csv ./tests/certfr_20230315.csv --keywordfile ./tests/keywords.txt
   oudjat vuln -f ./tests/cve.txt --export-csv ./tests/cve_20230313.csv
 
 Help:
