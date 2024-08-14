@@ -115,7 +115,7 @@ class CERTFRPageContent:
 
     self.data = data
 
-  def to_dictionary(self):
+  def to_dictionary(self) -> Dict:
     """ Converts current instance into a dictionary """
     content_dict = {}
 
