@@ -31,11 +31,11 @@ class CERTFRPage:
     
     self.ref = ref if self.is_valid_ref(ref) else self.get_ref_from_link(ref)
 
-    self.raw_content = None
+    self.raw_content: element = None
     self.title: str = None
 
-    self.meta = None
-    self.content = None
+    self.meta: CERTFRPageMeta = None
+    self.content: CERTFRPageContent = None
 
     self.CVE_RESOLVED = False
 
@@ -51,6 +51,15 @@ class CERTFRPage:
   def get_ref(self) -> str:
     """ Getter for the reference """
     return self.ref
+
+  def get_cves(self) -> List["CVE"]:
+    """ Getter to retreive page cves """
+    cves = self.content.get_cves()
+    
+    if cves is not None:
+      cves = cves.values()
+
+    return cves
 
   def connect(self) -> None:
     """ Connects to a CERTFR page based on given ref """
