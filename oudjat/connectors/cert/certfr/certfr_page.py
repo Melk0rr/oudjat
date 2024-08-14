@@ -5,6 +5,7 @@ from typing import List, Dict, Set, Union
 from bs4 import BeautifulSoup, element
 
 from oudjat.utils.color_print import ColorPrint
+from oudjat.model.cve import CVE
 from oudjat.connectors.cert.certfr.certfr_page_types import CERTFRPageTypes
 from oudjat.connectors.cert.certfr.certfr_page_meta import CERTFRPageMeta
 from oudjat.connectors.cert.certfr.certfr_page_content import CERTFRPageContent
@@ -36,6 +37,8 @@ class CERTFRPage:
     self.meta = None
     self.content = None
 
+    self.CVE_RESOLVED = False
+
     # Set page type
     ref_type = re.search(rf"(?:{REF_TYPES})", self.ref).group(0)
     self.page_type = CERTFRPageTypes[ref_type].value
@@ -51,7 +54,8 @@ class CERTFRPage:
 
   def get_max_cve(self, cve_data: List["CVE"] = None) -> Union["CVE", List["CVE"]]:
     """ Returns the highest cve """
-    if len(self.content.get_cves()) == 0:
+    content_cves = self.content.get_cves()
+    if len(content_cves) == 0 or content_cves is None:
       print("No comparison possible: no CVE related")
       return None
     
@@ -60,10 +64,13 @@ class CERTFRPage:
     if not self.CVE_RESOLVED:
       self.resolve_cve_data(cve_data)
 
-    max_cve = max(self.cves, key=lambda cve: cve.get_cvss())
-    self.documentations.append(max_cve.get_link())
-    print(f"\n{self.ref} max CVE is {max_cve.get_ref()}({max_cve.get_cvss()})")
+    max_cve = max(content_cves, key=lambda cve: cve.get_cvss())
+    max_cve = [ cve for cve in content_cves if cve.get_cvss() == max_cve.get_cvss() ]
 
+    for cve in max_cve:
+      print(f"\n{self.ref} max CVE is {max_cve.get_ref()}({max_cve.get_cvss()})")
+      self.documentations.append(cve.get_link())
+      
     return max_cve
 
   def connect(self) -> None:
@@ -115,18 +122,18 @@ class CERTFRPage:
 
   def to_dictionary(self) -> Dict:
     """ Converts current instance into a dictionary """
-    return {
-      "ref": self.ref,
-      "title": self.title,
-      "date_initial": self.date_initial,
-      "date_last": self.date_last,
-      "sources": self.sources,
-      "cve": self.get_cve_refs(),
-      "risks": self.get_risks(),
-      "products": self.affected_products,
-      "docs": self.get_documentations(filter="cve.org"),
-      "link": self.target
-    }
+    page_dict = {}
+    
+    if self.meta is not None:
+      page_dict= {
+        "ref": self.ref,
+        "title": self.title,
+        **self.meta.to_dictionary(),
+        **self.content.to_dictionary(),
+        "max_cve": self.get_max_cve()
+      }
+
+    return page_dict
 
   def resolve_cve_data(self, cve_data: List["CVE"]) -> None:
     """ Resolves CVE data for all related CVE """
