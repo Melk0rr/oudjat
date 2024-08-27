@@ -33,8 +33,9 @@ class Risk:
       raise ValueError("Risk::You need to set risk likelihood and impact to get its score !")
     
     self.score_value = self.likelihood.value * self.impact.value
-    self.score = RiskMeasure(score_value / 4 + 1)
-    return self.score_value
+    self.score = RiskMeasure(int(score_value / 4) + 1)
+    return self.score
     
-    
-  
+  def to_string(self) -> str:
+    """ Converts the current instance into a string """
+    return f"{self.name}: {self.get_score().name}"
