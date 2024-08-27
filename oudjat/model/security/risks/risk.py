@@ -25,7 +25,16 @@ class Risk:
     self.impact = impact
 
     self.score = None
+    self.score_value = None
     
-  
+  def get_score(self) -> int:
+    """ Getter for the risk score """
+    if self.likelihood is None or self.impact is None
+      raise ValueError("Risk::You need to set risk likelihood and impact to get its score !")
+    
+    self.score_value = self.likelihood.value * self.impact.value
+    self.score = RiskMeasure(score_value / 4 + 1)
+    return self.score_value
+    
     
   
