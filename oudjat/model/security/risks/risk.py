@@ -51,7 +51,9 @@ class Risk:
     
     self.value = self.likelihood.value * self.impact.value
     
-    self.severity = self.risk_table[self.impact.value][self.likelihood.value]
+    base_severity = self.risk_table[self.impact.value - 1][self.likelihood.value - 1]
+    self.severity = RiskMeasure(base_severity)
+    
     return self.severity
 
   def set_likelihood(self, likelihood: Union[RiskMeasure, int]) -> None:
