@@ -1,4 +1,4 @@
-from typing import List
+from typing import Union
 
 from oudjat.model.security.risks.risk_measure import RiskMeasure
 
@@ -20,8 +20,8 @@ class Risk:
     id: str,
     name: str,
     description: str,
-    likelihood: RiskMeasure = None,
-    impact: RiskMeasure = None
+    likelihood: Union[RiskMeasure, int] = None,
+    impact: Union[RiskMeasure, int] = None
   ):
     """ Constructor """
 
@@ -29,6 +29,15 @@ class Risk:
     self.name = name
     self.description = description
 
+    # Handle risk parameters type
+    if isinstance(likelihood, int):
+      likelihood = min(max(1, likelihood), 4)
+      likelihood = RiskMeasure(likelihood)
+      
+    if isinstance(impact, int):
+      impact = min(max(1, impact), 4)
+      impact = RiskMeasure(impact)
+    
     self.likelihood = likelihood
     self.impact = impact
 
@@ -44,7 +53,25 @@ class Risk:
     
     self.severity = self.risk_table[self.impact.value][self.likelihood.value]
     return self.severity
+
+  def set_likelihood(self, likelihood: Union[RiskMeasure, int]) -> None:
+    """ Setter for risk impact """
+
+    if isinstance(likelihood, int):
+      likelihood = min(max(1, likelihood), 4)
+      likelihood = RiskMeasure(likelihood)
+
+    self.likelihood = likelihood
+
+  def set_impact(self, impact: Union[RiskMeasure, int]) -> None:
+    """ Setter for risk impact """
+
+    if isinstance(impact, int):
+      impact = min(max(1, impact), 4)
+      impact = RiskMeasure(impact)
+
+    self.impact = impact
     
   def to_string(self) -> str:
     """ Converts the current instance into a string """
-    return f"{self.name}: {self.get_severity().name}"
+    return f"{self.name} => {self.get_severity().name} : {self.value}"
