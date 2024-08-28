@@ -24,18 +24,18 @@ class Risk:
     self.likelihood = likelihood
     self.impact = impact
 
-    self.score = None
-    self.score_value = None
+    self.severity = None
+    self.value = None
     
-  def get_score(self) -> int:
+  def get_severity(self) -> int:
     """ Getter for the risk score """
     if self.likelihood is None or self.impact is None
       raise ValueError("Risk::You need to set risk likelihood and impact to get its score !")
     
-    self.score_value = self.likelihood.value * self.impact.value
-    self.score = RiskMeasure(int(score_value / 4) + 1)
-    return self.score
+    self.value = self.likelihood.value * self.impact.value
+    self.severity = RiskMeasure(int(self.value / 4) + 1)
+    return self.severity
     
   def to_string(self) -> str:
     """ Converts the current instance into a string """
-    return f"{self.name}: {self.get_score().name}"
+    return f"{self.name}: {self.get_severity().name}"
