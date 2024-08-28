@@ -46,7 +46,7 @@ class Risk:
     
   def get_severity(self) -> int:
     """ Getter for the risk score """
-    if self.likelihood is None or self.impact is None
+    if self.likelihood is None or self.impact is None:
       raise ValueError("Risk::You need to set risk likelihood and impact to get its score !")
     
     self.value = self.likelihood.value * self.impact.value
