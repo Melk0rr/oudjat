@@ -9,10 +9,10 @@ class Risk:
   # Attributes & Constructors
 
   risk_table = [
-    [ 3, 3, 4, 4 ],
-    [ 2, 2, 3, 4 ],
-    [ 1, 2, 2, 3 ],
     [ 1, 1, 1, 2 ],
+    [ 1, 2, 2, 3 ],
+    [ 2, 2, 3, 4 ],
+    [ 3, 3, 4, 4 ],
   ]
 
   def __init__(
