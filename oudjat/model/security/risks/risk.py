@@ -7,6 +7,14 @@ class Risk:
 
   # ****************************************************************
   # Attributes & Constructors
+
+  risk_table = [
+    [ 3, 3, 4, 4 ],
+    [ 2, 2, 3, 4 ],
+    [ 1, 2, 2, 3 ],
+    [ 1, 1, 1, 2 ],
+  ]
+
   def __init__(
     self,
     id: str,
@@ -33,7 +41,8 @@ class Risk:
       raise ValueError("Risk::You need to set risk likelihood and impact to get its score !")
     
     self.value = self.likelihood.value * self.impact.value
-    self.severity = RiskMeasure(int(self.value / 4) + 1)
+    
+    self.severity = self.risk_table[self.impact.value][self.likelihood.value]
     return self.severity
     
   def to_string(self) -> str:
