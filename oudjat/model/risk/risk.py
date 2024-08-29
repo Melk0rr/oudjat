@@ -8,6 +8,7 @@ class Risk:
   # ****************************************************************
   # Attributes & Constructors
 
+  # Risk 2D table
   risk_table = [
     [ 1, 1, 1, 2 ],
     [ 1, 2, 2, 3 ],
@@ -43,6 +44,9 @@ class Risk:
 
     self.severity = None
     self.value = None
+
+  # ****************************************************************
+  # Methods
     
   def get_severity(self) -> int:
     """ Getter for the risk score """
@@ -77,3 +81,6 @@ class Risk:
   def to_string(self) -> str:
     """ Converts the current instance into a string """
     return f"{self.name} => {self.get_severity().name} : {self.value}"
+
+  # ****************************************************************
+  # Static methods
