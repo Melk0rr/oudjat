@@ -1,6 +1,6 @@
 from typing import Union
 
-from oudjat.model.risk.risk_measure import RiskMeasure
+from oudjat.control.risk.risk_measure import RiskMeasure
 
 class Risk:
   """ A class to modelise security risks """
