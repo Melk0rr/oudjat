@@ -5,7 +5,7 @@ from typing import List, Dict, Set
 from bs4 import BeautifulSoup, element
 
 from oudjat.utils.color_print import ColorPrint
-from oudjat.model.security.cve import CVE, CVE_REGEX
+from oudjat.model.vulnerability.cve import CVE, CVE_REGEX
 from oudjat.connectors.cert.risk_types import RiskTypes
 from oudjat.connectors.cert.certfr.certfr_page_types import CERTFRPageTypes
 

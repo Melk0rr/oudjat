@@ -4,7 +4,7 @@ from multiprocessing import Pool
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.init_option_handle import str_file_option_handle
-from oudjat.model.security.cve import CVE
+from oudjat.model.vulnerability.cve import CVE
 from oudjat.connectors.cert.certfr.certfr_page import CERTFRPage
 from oudjat.connectors.cert.certfr.certfr_connector import CERTFRConnector
 

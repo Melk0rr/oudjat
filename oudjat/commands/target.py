@@ -3,7 +3,7 @@ from typing import List, Dict
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.file import export_csv, import_csv
 from oudjat.utils.init_option_handle import str_file_option_handle
-from oudjat.model.security.cve import CVE
+from oudjat.model.vulnerability.cve import CVE
 
 from .base import Base
 
