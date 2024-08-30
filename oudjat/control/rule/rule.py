@@ -13,10 +13,15 @@ class Rule:
     id: str,
     name: str,
     description: str,
-    associatedRisks: List[Risk],
-    filters: Union[List[DataFilter], List[Dict]]
+    associatedRisks: List[Risk] = None,
+    filters: Union[List[DataFilter], List[Dict]] = None
   ):
     """ Constructor """
+    self.id = id
+    self.name = name
+    seld.description = description
+
+    
 
   # ****************************************************************
   # Methods
