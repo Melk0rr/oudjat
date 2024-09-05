@@ -167,7 +167,7 @@ class LDAPConnector(Connector):
     search_filter: str = None,
     attributes: Union[str, List[str]] = None,
     **kwargs
-  ) -> List["LDAPEntry"]:
+  ) -> List[LDAPEntry]:
     """ Runs an Active directory search based on the provided parameters """
     
     if self.connection is None:
@@ -206,3 +206,18 @@ class LDAPConnector(Connector):
     )
 
     return entries
+
+  def get_gpo(
+    self,
+    displayName: str = "*",
+    name: str = "*"
+  ) -> List[LDAPEntry]:
+    """ Specific GPO retreiving method """
+    gpo_entries = self.search(
+      search_type="GPO",
+      search_base=None,
+      search_filter=f"(displayName={displayName})(name={name})"
+    )
+    
+    return gpo_entries
+    
