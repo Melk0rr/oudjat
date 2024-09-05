@@ -66,8 +66,11 @@ class LDAPSearchTypes(Enum):
     "filter": "(objectClass=groupPolicyContainer)",
     "attributes": [
       "displayName",
+      "gPCFileSysPath",
+      "name",
+      "versionNumber",
       "whenChanged",
-      "whenCreated"
+      "whenCreated",
     ]
   }
 
