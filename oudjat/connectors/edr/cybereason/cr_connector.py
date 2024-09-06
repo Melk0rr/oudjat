@@ -75,7 +75,8 @@ class CybereasonConnector(Connector):
     session = requests.session()
     
     try:
-      session.post(f"{self.target}/login.html", data=self.credentials, headers=headers, verify=True)
+      creds = { "username": self.credentials.username, "password": self.credentials.password }
+      session.post(f"{self.target}/login.html", data=creds, headers=headers, verify=True)
       
     except ConnectionError as e:
       raise(
