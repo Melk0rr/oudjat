@@ -1,6 +1,7 @@
 setuptools
 docopt
 lxml
+ldap3
 beautifulsoup4
 requests
 keyring
