@@ -1,4 +1,4 @@
-from oudjat.connectors.ldap.ldap_connector import LDAPEntry
+from oudjat.connectors.ldap.ldap_connector import LDAPEntry, LDAPConnector
 from oudjat.connectors.ldap.objects.gpo.ms_pref import MS_GPPREF
 
 class LDAPGPO:
@@ -6,8 +6,15 @@ class LDAPGPO:
   
   # ****************************************************************
   # Attributes & Constructors
-  def __init__(self):
+  def __init__(self, entry: LDAPEntry):
     """ Constructor """
+    
 
   # ****************************************************************
   # Methods
+  
+  def get_linked_objects(self, connector: LDAPConnector, ou: str = "*"):
+    """ Gets the gpo linked objects """
+    search_filter = f"(&(gPLink={self.name})(name={ou}))"
+    
+    
