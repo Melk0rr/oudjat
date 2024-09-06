@@ -114,8 +114,8 @@ class LDAPConnector(Connector):
 
     ldap_connection = ldap3.Connection(
       ldap_server,
-      user=self.credentials["username"],
-      password=self.credentials["password"],
+      user=self.credentials.username,
+      password=self.credentials.password,
       auto_referrals=False,
       authentication=ldap3.NTLM
     )
