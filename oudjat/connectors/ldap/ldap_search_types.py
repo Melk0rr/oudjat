@@ -67,6 +67,8 @@ class LDAPSearchTypes(Enum):
     "attributes": [
       "displayName",
       "gPCFileSysPath",
+      "gPCUserExtensionNames",
+      "gPCMachineExtensionNames",
       "name",
       "versionNumber",
       "whenChanged",
