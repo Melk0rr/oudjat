@@ -1,6 +1,14 @@
 from enum import Enum
 
 class LDAPSearchTypes(Enum):
+  DEFAULT = {
+    "attributes": [
+      "distinguishedName",
+      "name",
+      "gpLink",
+    ]
+  }
+
   USER = {
     "filter": "(&(objectClass=user)(!(objectClass=computer)))",
     "attributes": [
@@ -10,6 +18,7 @@ class LDAPSearchTypes(Enum):
       "distinguishedName",
       "employeeID",
       "givenName",
+      "gpLink",
       "lastLogon",
       "mail",
       "objectSid",
@@ -32,6 +41,7 @@ class LDAPSearchTypes(Enum):
       "distinguishedName",
       "employeeID",
       "givenName",
+      "gpLink",
       "lastLogon",
       "mail",
       "objectSid",
@@ -51,6 +61,7 @@ class LDAPSearchTypes(Enum):
       "cn",
       "description",
       "distinguishedName",
+      "gpLink",
       "lastLogon",
       "objectSid",
       "operatingSystem",
@@ -82,6 +93,7 @@ class LDAPSearchTypes(Enum):
       "cn",
       "description",
       "groupType",
+      "gpLink",
       "member",
       "memberOf",
       "objectSid"
@@ -91,6 +103,7 @@ class LDAPSearchTypes(Enum):
   OU = {
     "filter": "(objectClass=organizationalUnit)",
     "attributes": [
-      "description"
+      "description",
+      "gpLink"
     ]
   }
