@@ -17,4 +17,7 @@ class LDAPGPO:
     """ Gets the gpo linked objects """
     search_filter = f"(&(gPLink={self.name})(name={ou}))"
     
-    
+    linked_entries = connector.search(
+      search_type="DEFAULT",
+      search_filter=search_filter
+    ) 
