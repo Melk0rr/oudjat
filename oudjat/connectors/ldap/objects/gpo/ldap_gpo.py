@@ -1,7 +1,7 @@
 from typing import List
 
 from oudjat.connectors.ldap.ldap_connector import LDAPEntry, LDAPConnector
-from oudjat.connectors.ldap.objects.gpo.ms_pref import MS_GPPREF
+from oudjat.connectors.ldap.objects.gpo.ms_gppref import MS_GPPREF
 
 class LDAPGPO:
   """ A class to manipulate Group Policy Objects """
@@ -15,6 +15,8 @@ class LDAPGPO:
 
     self.name = entry.attr()["name"]
     self.displayName = entry.attr()["displayName"]
+    
+    
     
 
   # ****************************************************************
