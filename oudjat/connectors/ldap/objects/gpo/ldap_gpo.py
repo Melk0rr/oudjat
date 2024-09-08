@@ -16,9 +16,22 @@ class LDAPGPO:
     self.name = entry.attr()["name"]
     self.displayName = entry.attr()["displayName"]
     
+    self.scope = None
+    self.scope_property = None
     
-    
+    try:
+      if len(entry.attr().get("gPCUserExtensionNames", [])) > 0:
+        self.scope = "user"
+        self.scope_property = "gPCUserExtensionNames"
 
+      else:
+        self.scope = "machine"
+        self.scope_property = "gPMachineExtensionNames"
+
+    except Exception as e:
+      raise(f"LDAPGPO::Error while trying to get group policy scope\n{e}")
+    
+    
   # ****************************************************************
   # Methods
   
