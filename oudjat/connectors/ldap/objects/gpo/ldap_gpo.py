@@ -10,6 +10,11 @@ class LDAPGPO:
   # Attributes & Constructors
   def __init__(self, entry: LDAPEntry):
     """ Constructor """
+    if "groupPolicyContainer" not in entry.attr().get("objectClass"):
+      raise ValueError("Invalid LDAPEntry provided. Please provide a groupPolicyContainer type entry")
+
+    self.name = entry.attr()["name"]
+    self.displayName = entry.attr()["displayName"]
     
 
   # ****************************************************************
