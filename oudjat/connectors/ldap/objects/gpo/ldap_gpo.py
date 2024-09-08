@@ -30,7 +30,9 @@ class LDAPGPO:
 
     except Exception as e:
       raise(f"LDAPGPO::Error while trying to get group policy scope\n{e}")
-    
+
+    self.guids = entry.attr()[self.scope_property]
+    self.infos = [ MS_GPPREF[guid] for guid in self.guids ]
     
   # ****************************************************************
   # Methods
