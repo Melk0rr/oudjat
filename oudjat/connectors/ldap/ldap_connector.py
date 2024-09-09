@@ -7,7 +7,6 @@ from typing import List, Union, Any
 from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.connector import Connector
 from oudjat.connectors.ldap.objects import LDAPEntry
-from oudjat.connectors.ldap.ldap_mapper import LDAPMapper
 from oudjat.connectors.ldap.ldap_search_types import LDAPSearchTypes
 
 class LDAPConnector(Connector):
@@ -187,17 +186,4 @@ class LDAPConnector(Connector):
 
     return entries
 
-  def get_gpo(
-    self,
-    displayName: str = "*",
-    name: str = "*"
-  ) -> List[LDAPEntry]:
-    """ Specific GPO retreiving method """
-    gpo_entries = self.search(
-      search_type="GPO",
-      search_base=None,
-      search_filter=f"(displayName={displayName})(name={name})"
-    )
-    
-    return LDAPMapper.map(gpo_entries, "gpo")
     
