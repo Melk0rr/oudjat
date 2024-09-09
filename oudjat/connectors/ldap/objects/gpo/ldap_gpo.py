@@ -1,7 +1,7 @@
 from typing import List
 
 import oudjat.connectors.ldap.ldap_connector as ldapcon
-from . import MS_GPPREF
+from oudjat.connectors.ldap.objects.gpo import MS_GPPREF
 
 class LDAPGroupPolicyObject:
   """ A class to manipulate Group Policy Objects """
