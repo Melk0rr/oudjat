@@ -7,6 +7,7 @@ from typing import List, Union, Any
 from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.connector import Connector
 from oudjat.connectors.ldap.ldap_search_types import LDAPSearchTypes
+from oudjat.connectors.ldap.objects.gpo.ldap_gpo import LDAPGPO
 
 class LDAPEntry(dict):
   """ LDAP entry dict """
@@ -222,5 +223,10 @@ class LDAPConnector(Connector):
       search_filter=f"(displayName={displayName})(name={name})"
     )
     
-    return gpo_entries
+    gpos = map(
+      lambda entry: LDAPGPO(ldap_entry=entry),
+      gpo_entries
+    )
+    
+    return gpos
     
