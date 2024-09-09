@@ -9,7 +9,7 @@ class LDAPGroupPolicyObject:
   
   # ****************************************************************
   # Attributes & Constructors
-  def __init__(self, ldap_entry: ldapcon.LDAPEntry):
+  def __init__(self, ldap_entry: LDAPEntry):
     """ Constructor """
     if "groupPolicyContainer" not in entry.attr().get("objectClass"):
       raise ValueError("Invalid LDAPEntry provided. Please provide a groupPolicyContainer type entry")
