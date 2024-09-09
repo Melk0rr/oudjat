@@ -8,7 +8,7 @@ from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.connector import Connector
 from oudjat.connectors.ldap.ldap_entry import LDAPEntry
 from oudjat.connectors.ldap.ldap_search_types import LDAPSearchTypes
-from oudjat.connectors.ldap.objects.gpo.ldap_gpo import LDAPGPO
+from .objects.gpo import LDAPGroupPolicyObject
 
 class LDAPConnector(Connector):
   """ LDAP connector to interact and query LDAP servers """
