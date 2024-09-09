@@ -1,6 +1,7 @@
 from typing import List
 
-import oudjat.connectors.ldap.ldap_connector as ldapcon
+import oudjat.connectors.ldap
+from oudjat.connectors.ldap.objects import LDAPEntry
 from oudjat.connectors.ldap.objects.gpo import MS_GPPREF
 
 class LDAPGroupPolicyObject:
@@ -45,7 +46,11 @@ class LDAPGroupPolicyObject:
     """ Getter for policy infos """
     return self.infos
   
-  def get_linked_objects(self, ldap_connector: ldapcon.LDAPConnector, ou: str = "*") -> List[LDAPEntry]:
+  def get_linked_objects(
+    self,
+    ldap_connector: oudjat.connectors.ldap.LDAPConnector,
+    ou: str = "*"
+  ) -> List[LDAPEntry]:
     """ Gets the gpo linked objects """
     search_filter = f"(&(gPLink={self.name})(name={ou}))"
     
