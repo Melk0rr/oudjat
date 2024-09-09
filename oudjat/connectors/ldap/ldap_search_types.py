@@ -74,7 +74,6 @@ class LDAPSearchTypes(Enum):
   }
   
   GPO = {
-    "object": LDAPGroupPolicyObject,
     "filter": "(objectClass=groupPolicyContainer)",
     "attributes": [
       "displayName",
