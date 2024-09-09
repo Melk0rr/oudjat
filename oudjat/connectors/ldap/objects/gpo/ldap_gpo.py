@@ -1,9 +1,9 @@
 from typing import List
 
-from oudjat.connectors.ldap import LDAPEntry, LDAPConnector
+from .. import LDAPEntry, LDAPConnector
 from . import MS_GPPREF
 
-class LDAPGPO:
+class LDAPGroupPolicyObject:
   """ A class to manipulate Group Policy Objects """
   
   # ****************************************************************

@@ -1,1 +1,1 @@
-from . import LDAPEntry, LDAPConnector
+from . import LDAPEntry, LDAPConnector, LDAPSearchTypes
