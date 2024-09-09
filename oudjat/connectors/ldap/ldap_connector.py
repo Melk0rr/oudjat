@@ -8,7 +8,36 @@ from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.connector import Connector
 from oudjat.connectors.ldap.ldap_entry import LDAPEntry
 from oudjat.connectors.ldap.ldap_search_types import LDAPSearchTypes
-from .objects.gpo import LDAPGroupPolicyObject
+
+class LDAPEntry(dict):
+  """ LDAP entry dict """
+
+  def get(self, key: str) -> Any:
+    """ Retreive the value of the given attribute """
+    if key not in self.__getitem__("attributes").keys():
+      return None
+
+    item = self.__getitem__("attributes").__getitem__(key)
+
+    if isinstance(item, list) and len(item) == 0:
+      return None
+
+    return item
+
+  def set(self, key: str, value: Any) -> Any:
+    """ Set the given value of the provided attribute """
+    return self.__getitem__("attributes").__setitem__(key, value)
+
+  def get_raw(self, key: str) -> Any:
+    """ Retreive the value of the given raw attribute """
+    if key not in self.__getitem__("raw_attributes").keys():
+      return None
+
+    return self.__getitem__("raw_attributes").__getitem__(key)
+
+  def attr(self):
+    """ Retreive ldap attributes """
+    return self.__getitem__("attributes")
 
 class LDAPConnector(Connector):
   """ LDAP connector to interact and query LDAP servers """
@@ -195,7 +224,7 @@ class LDAPConnector(Connector):
     )
     
     gpos = map(
-      lambda entry: LDAPGroupPolicyObject(ldap_entry=entry),
+      lambda entry: LDAPSearchTypes.GPO.value["object"](ldap_entry=entry),
       gpo_entries
     )
     

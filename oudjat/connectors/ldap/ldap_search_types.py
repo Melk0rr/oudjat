@@ -1,5 +1,7 @@
 from enum import Enum
 
+from .objects.gpo import LDAPGroupPolicyObject
+
 class LDAPSearchTypes(Enum):
   DEFAULT = {
     "attributes": [
@@ -74,6 +76,7 @@ class LDAPSearchTypes(Enum):
   }
   
   GPO = {
+    "object": LDAPGroupPolicyObject,
     "filter": "(objectClass=groupPolicyContainer)",
     "attributes": [
       "displayName",
