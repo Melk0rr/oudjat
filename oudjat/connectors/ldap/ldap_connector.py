@@ -6,9 +6,8 @@ from typing import List, Union, Any
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.connector import Connector
-from oudjat.connectors.ldap.ldap_entry import LDAPEntry
+from oudjat.connectors.ldap.ldap_mapper import LDAPMapper
 from oudjat.connectors.ldap.ldap_search_types import LDAPSearchTypes
-import oudjat.connectors.ldap.objects as ldapobj
 
 class LDAPEntry(dict):
   """ LDAP entry dict """
@@ -43,6 +42,8 @@ class LDAPEntry(dict):
 class LDAPConnector(Connector):
   """ LDAP connector to interact and query LDAP servers """
 
+  # ****************************************************************
+  # Attributes & Constructors
   def __init__(
     self,
     server: str,
@@ -61,6 +62,9 @@ class LDAPConnector(Connector):
     self.ldap_server: ldap3.Server = None
     self.connection: ldap3.Connection = None
     self.domain: str = None
+
+  # ****************************************************************
+  # Methods
 
   def get_domain(self) -> str:
     """ Getter for AD domain """
@@ -224,10 +228,5 @@ class LDAPConnector(Connector):
       search_filter=f"(displayName={displayName})(name={name})"
     )
     
-    gpos = map(
-      lambda entry: ldapobj.gpo.LDAPGroupPolicyObject(ldap_entry=entry),
-      gpo_entries
-    )
-    
-    return gpos
+    return LDAPMapper.map(gpo_entries, "gpo")
     
