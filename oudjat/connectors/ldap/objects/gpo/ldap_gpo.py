@@ -8,7 +8,7 @@ class LDAPGPO:
   
   # ****************************************************************
   # Attributes & Constructors
-  def __init__(self, entry: LDAPEntry):
+  def __init__(self, ldap_entry: LDAPEntry):
     """ Constructor """
     if "groupPolicyContainer" not in entry.attr().get("objectClass"):
       raise ValueError("Invalid LDAPEntry provided. Please provide a groupPolicyContainer type entry")
@@ -36,6 +36,14 @@ class LDAPGPO:
     
   # ****************************************************************
   # Methods
+  
+  def get_guids(self) -> List[str]:
+    """ Getter for policy GUIDs """
+    return self.guids
+
+  def get_infos(self) -> List[str]:
+    """ Getter for policy infos """
+    return self.infos
   
   def get_linked_objects(self, connector: LDAPConnector, ou: str = "*") -> List[LDAPEntry]:
     """ Gets the gpo linked objects """
