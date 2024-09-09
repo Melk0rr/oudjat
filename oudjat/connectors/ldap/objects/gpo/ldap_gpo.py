@@ -1,6 +1,7 @@
 from typing import List
 
-from .. import LDAPEntry, LDAPConnector
+from oudjat.connectors.ldap.ldap_entry import LDAPEntry
+from oudjat.connectors.ldap.ldap_connector import LDAPConnector
 from . import MS_GPPREF
 
 class LDAPGroupPolicyObject:
