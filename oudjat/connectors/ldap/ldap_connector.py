@@ -8,6 +8,7 @@ from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors.connector import Connector
 from oudjat.connectors.ldap.ldap_entry import LDAPEntry
 from oudjat.connectors.ldap.ldap_search_types import LDAPSearchTypes
+import oudjat.connectors.ldap.objects as ldapobj
 
 class LDAPEntry(dict):
   """ LDAP entry dict """
@@ -224,7 +225,7 @@ class LDAPConnector(Connector):
     )
     
     gpos = map(
-      lambda entry: LDAPSearchTypes.GPO.value["object"](ldap_entry=entry),
+      lambda entry: ldapobj.gpo.LDAPGroupPolicyObject(ldap_entry=entry),
       gpo_entries
     )
     

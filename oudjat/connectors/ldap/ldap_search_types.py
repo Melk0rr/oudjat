@@ -1,7 +1,5 @@
 from enum import Enum
 
-from .objects.gpo import LDAPGroupPolicyObject
-
 class LDAPSearchTypes(Enum):
   DEFAULT = {
     "attributes": [

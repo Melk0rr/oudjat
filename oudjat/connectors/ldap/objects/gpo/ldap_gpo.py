@@ -1,7 +1,6 @@
 from typing import List
 
-from oudjat.connectors.ldap.ldap_entry import LDAPEntry
-from oudjat.connectors.ldap.ldap_connector import LDAPConnector
+import oudjat.connectors.ldap.ldap_connector as ldapcon
 from . import MS_GPPREF
 
 class LDAPGroupPolicyObject:
@@ -9,7 +8,7 @@ class LDAPGroupPolicyObject:
   
   # ****************************************************************
   # Attributes & Constructors
-  def __init__(self, ldap_entry: LDAPEntry):
+  def __init__(self, ldap_entry: ldapcon.LDAPEntry):
     """ Constructor """
     if "groupPolicyContainer" not in entry.attr().get("objectClass"):
       raise ValueError("Invalid LDAPEntry provided. Please provide a groupPolicyContainer type entry")
@@ -46,7 +45,7 @@ class LDAPGroupPolicyObject:
     """ Getter for policy infos """
     return self.infos
   
-  def get_linked_objects(self, ldap_connector: LDAPConnector, ou: str = "*") -> List[LDAPEntry]:
+  def get_linked_objects(self, ldap_connector: ldapcon.LDAPConnector, ou: str = "*") -> List[LDAPEntry]:
     """ Gets the gpo linked objects """
     search_filter = f"(&(gPLink={self.name})(name={ou}))"
     
