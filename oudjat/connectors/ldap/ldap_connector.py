@@ -190,13 +190,15 @@ class LDAPConnector(Connector):
   def get_gpo(
     self,
     displayName: str = "*",
-    name: str = "*"
+    name: str = "*",
+    attributes: Union[str, List[str]] = None
   ) -> List[LDAPGroupPolicyObject]:
     """ Specific GPO retreiving method """
     gpo_entries = self.search(
       search_type="GPO",
       search_base=None,
-      search_filter=f"(displayName={displayName})(name={name})"
+      search_filter=f"(displayName={displayName})(name={name})",
+      attributes=attributes
     )
 
     gpos = list(
