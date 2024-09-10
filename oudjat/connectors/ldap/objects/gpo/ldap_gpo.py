@@ -1,5 +1,7 @@
 from typing import List
 
+from __future__ import annotations
+
 import oudjat.connectors.ldap
 from oudjat.connectors.ldap.objects import LDAPEntry
 from oudjat.connectors.ldap.objects.gpo import MS_GPPREF
@@ -60,24 +62,3 @@ class LDAPGroupPolicyObject:
     )
 
     return linked_entries
-
-  # ****************************************************************
-  # Static methods
-  @staticmethod
-  def get_gpo(
-    displayName: str = "*",
-    name: str = "*"
-  ) -> List[LDAPEntry]:
-    """ Specific GPO retreiving method """
-    gpo_entries = self.search(
-      search_type="GPO",
-      search_base=None,
-      search_filter=f"(displayName={displayName})(name={name})"
-    )
-
-    gpos = map(
-      lambda entry: LDAPGroupPolicyObject(ldap_entry=entry),
-      gpo_entries
-    )
-    
-    return gpos
