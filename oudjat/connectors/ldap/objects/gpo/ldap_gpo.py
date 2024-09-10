@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import re
 from typing import List
 
 import oudjat.connectors.ldap
 from oudjat.connectors.ldap.objects import LDAPEntry
 from oudjat.connectors.ldap.objects.gpo import MS_GPPREF
+
+UUID_REG = r'(?:\{{0,1}(?:[0-9a-fA-F]){8}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){12}\}{0,1})'
 
 class LDAPGroupPolicyObject:
   """ A class to manipulate Group Policy Objects """
@@ -34,7 +37,7 @@ class LDAPGroupPolicyObject:
     except Exception as e:
       raise(f"LDAPGPO::Error while trying to get group policy scope\n{e}")
 
-    self.guids = ldap_entry.attr()[self.scope_property]
+    self.guids = re.findall(UUID_REG, ldap_entry.attr()[self.scope_property])
     self.infos = [ MS_GPPREF[guid] for guid in self.guids ]
     
   # ****************************************************************
