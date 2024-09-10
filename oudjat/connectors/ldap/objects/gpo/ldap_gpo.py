@@ -32,7 +32,7 @@ class LDAPGroupPolicyObject:
 
       else:
         self.scope = "machine"
-        self.scope_property = "gPMachineExtensionNames"
+        self.scope_property = "gPCMachineExtensionNames"
 
     except Exception as e:
       raise(f"LDAPGPO::Error while trying to get group policy scope\n{e}")
