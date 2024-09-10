@@ -145,7 +145,7 @@ class LDAPConnector(Connector):
     attributes: Union[str, List[str]] = None,
     **kwargs
   ) -> List[LDAPEntry]:
-    """ Runs an Active directory search based on the provided parameters """
+    """ Runs an LDAP search based on the provided parameters """
     
     if self.connection is None:
       raise ConnectionError(f"You must initiate connection to {self.target} before running search !")
