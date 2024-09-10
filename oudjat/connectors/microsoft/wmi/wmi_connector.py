@@ -1,5 +1,7 @@
 import winrm
 
+from typing import List
+
 from oudjat.connectors import Connector
 
 class WMIConnector(Connector):
