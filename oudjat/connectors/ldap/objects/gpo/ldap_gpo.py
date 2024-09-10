@@ -62,7 +62,7 @@ class LDAPGroupPolicyObject:
     ou: str = "*"
   ) -> List[LDAPEntry]:
     """ Gets the gpo linked objects """
-    search_filter = f"(gPLink={f"*{self.name}*gs"})(name={ou})"
+    search_filter = f"(gPLink={f"*{self.name}*"})(name={ou})"
     
     linked_entries = ldap_connector.search(
       search_type="DEFAULT",
