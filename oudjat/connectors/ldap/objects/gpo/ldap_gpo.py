@@ -13,17 +13,17 @@ class LDAPGroupPolicyObject:
   # Attributes & Constructors
   def __init__(self, ldap_entry: LDAPEntry):
     """ Constructor """
-    if "groupPolicyContainer" not in entry.attr().get("objectClass"):
+    if "groupPolicyContainer" not in ldap_entry.attr().get("objectClass"):
       raise ValueError("Invalid LDAPEntry provided. Please provide a groupPolicyContainer type entry")
 
-    self.name = entry.attr()["name"]
-    self.displayName = entry.attr()["displayName"]
+    self.name = ldap_entry.attr()["name"]
+    self.displayName = ldap_entry.attr()["displayName"]
     
     self.scope = None
     self.scope_property = None
     
     try:
-      if len(entry.attr().get("gPCUserExtensionNames", [])) > 0:
+      if len(ldap_entry.attr().get("gPCUserExtensionNames", [])) > 0:
         self.scope = "user"
         self.scope_property = "gPCUserExtensionNames"
 
@@ -34,7 +34,7 @@ class LDAPGroupPolicyObject:
     except Exception as e:
       raise(f"LDAPGPO::Error while trying to get group policy scope\n{e}")
 
-    self.guids = entry.attr()[self.scope_property]
+    self.guids = ldap_entry.attr()[self.scope_property]
     self.infos = [ MS_GPPREF[guid] for guid in self.guids ]
     
   # ****************************************************************
