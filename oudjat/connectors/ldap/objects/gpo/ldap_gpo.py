@@ -47,6 +47,10 @@ class LDAPGroupPolicyObject:
   def get_entry(self) -> Dict:
     """ Getter for entry attributes """
     return self.entry
+
+  def get_dn(self) -> str:
+    """ Getter for gpo dn """
+    return self.entry.get("distinguishedName")
   
   def get_guids(self) -> List[str]:
     """ Getter for policy GUIDs """
