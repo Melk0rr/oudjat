@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import List
+from typing import List, Dict
 
 import oudjat.connectors.ldap
 from oudjat.connectors.ldap.objects import LDAPEntry
@@ -16,17 +16,18 @@ class LDAPGroupPolicyObject:
   # Attributes & Constructors
   def __init__(self, ldap_entry: LDAPEntry):
     """ Constructor """
-    if "groupPolicyContainer" not in ldap_entry.attr().get("objectClass"):
+    self.entry = ldap_entry.attr()
+    if "groupPolicyContainer" not in self.entry.get("objectClass"):
       raise ValueError("Invalid LDAPEntry provided. Please provide a groupPolicyContainer type entry")
 
-    self.name = ldap_entry.attr()["name"]
-    self.displayName = ldap_entry.attr()["displayName"]
+    self.name = self.entry["name"]
+    self.displayName = self.entry["displayName"]
     
     self.scope = None
     self.scope_property = None
     
     try:
-      if len(ldap_entry.attr().get("gPCUserExtensionNames", [])) > 0:
+      if len(self.entry.get("gPCUserExtensionNames", [])) > 0:
         self.scope = "user"
         self.scope_property = "gPCUserExtensionNames"
 
@@ -37,11 +38,15 @@ class LDAPGroupPolicyObject:
     except Exception as e:
       raise(f"LDAPGPO::Error while trying to get group policy scope\n{e}")
 
-    self.guids = re.findall(UUID_REG, ldap_entry.attr()[self.scope_property])
+    self.guids = re.findall(UUID_REG, self.entry[self.scope_property])
     self.infos = [ MS_GPPREF[guid] for guid in self.guids ]
     
   # ****************************************************************
   # Methods
+
+  def get_entry(self) -> Dict:
+    """ Getter for entry attributes """
+    return self.entry
   
   def get_guids(self) -> List[str]:
     """ Getter for policy GUIDs """
