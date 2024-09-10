@@ -4,7 +4,6 @@ class LDAPSearchTypes(Enum):
   DEFAULT = {
     "attributes": [
       "distinguishedName",
-      "gpLink",
       "name",
       "objectClass"
     ]
@@ -19,7 +18,6 @@ class LDAPSearchTypes(Enum):
       "distinguishedName",
       "employeeID",
       "givenName",
-      "gpLink",
       "lastLogon",
       "mail",
       "objectClass",
@@ -43,7 +41,6 @@ class LDAPSearchTypes(Enum):
       "distinguishedName",
       "employeeID",
       "givenName",
-      "gpLink",
       "lastLogon",
       "mail",
       "objectClass",
@@ -64,7 +61,6 @@ class LDAPSearchTypes(Enum):
       "cn",
       "description",
       "distinguishedName",
-      "gpLink",
       "lastLogon",
       "objectClass",
       "objectSid",
@@ -98,7 +94,6 @@ class LDAPSearchTypes(Enum):
       "cn",
       "description",
       "groupType",
-      "gpLink",
       "member",
       "memberOf",
       "objectClass",
