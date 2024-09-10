@@ -199,9 +199,11 @@ class LDAPConnector(Connector):
       search_filter=f"(displayName={displayName})(name={name})"
     )
 
-    gpos = map(
-      lambda entry: LDAPGroupPolicyObject(ldap_entry=entry),
-      gpo_entries
+    gpos = list(
+      map(
+        lambda entry: LDAPGroupPolicyObject(ldap_entry=entry),
+        gpo_entries
+      )
     )
     
     return gpos
