@@ -1,6 +1,6 @@
-from typing import List
-
 from __future__ import annotations
+
+from typing import List
 
 import oudjat.connectors.ldap
 from oudjat.connectors.ldap.objects import LDAPEntry
