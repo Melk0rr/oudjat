@@ -160,12 +160,12 @@ class LDAPConnector(Connector):
     if search_base is None:
       search_base = self.default_search_base 
 
-    formated_filter = LDAPSearchTypes[search_type].value["filter"]
+    formated_filter = LDAPSearchTypes[search_type].value.get("filter", "")
     if search_filter:
       formated_filter = f"(&{formated_filter}{search_filter})"
 
     if attributes is None:
-      attributes = LDAPSearchTypes[search_type].value["attributes"]
+      attributes = LDAPSearchTypes[search_type].value.get("attributes", "*")
 
     results = self.connection.extend.standard.paged_search(
       search_base=search_base,
