@@ -41,7 +41,7 @@ class WMIConnector(Connector):
     """ Retreives the names of WMI filters of a given gpo """
     
     try:
-      gpo_obj = wmi["GPMC_GPO"].Win32Path(gpo_dn)
+      gpo_obj = self.wmi["GPMC_GPO"].Win32Path(gpo_dn)
       
       if not gpo_obj.IsDeleted():
         print(gpo_obj)
