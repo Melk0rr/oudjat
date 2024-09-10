@@ -9,7 +9,7 @@ from typing import List, Dict
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.convertions import unixtime_to_str
 
-from oudjat.connectors.connector import Connector
+from oudjat.connectors import Connector
 from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoints
 
 class CybereasonEntry(dict):

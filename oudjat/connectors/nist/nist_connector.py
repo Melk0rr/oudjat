@@ -5,7 +5,7 @@ import requests
 from typing import List, Dict, Union
 
 from oudjat.utils.color_print import ColorPrint
-from oudjat.connectors.connector import Connector
+from oudjat.connectors import Connector
 
 class NistConnector(Connector):
   """ NIST API Connector class """

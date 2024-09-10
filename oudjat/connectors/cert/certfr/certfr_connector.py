@@ -6,8 +6,8 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 
 from oudjat.utils.color_print import ColorPrint
-from oudjat.connectors.connector import Connector
-from oudjat.connectors.cert.certfr.certfr_page import CERTFRPage
+from oudjat.connectors import Connector
+from oudjat.connectors.cert.certfr import CERTFRPage
 
 
 class CERTFRConnector(Connector):
