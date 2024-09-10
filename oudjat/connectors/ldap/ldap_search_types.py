@@ -4,8 +4,9 @@ class LDAPSearchTypes(Enum):
   DEFAULT = {
     "attributes": [
       "distinguishedName",
-      "name",
       "gpLink",
+      "name",
+      "objectClass"
     ]
   }
 
