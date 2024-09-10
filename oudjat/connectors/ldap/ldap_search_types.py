@@ -21,6 +21,7 @@ class LDAPSearchTypes(Enum):
       "gpLink",
       "lastLogon",
       "mail",
+      "objectClass",
       "objectSid",
       "pwdLastSet",
       "sn",
@@ -44,6 +45,7 @@ class LDAPSearchTypes(Enum):
       "gpLink",
       "lastLogon",
       "mail",
+      "objectClass",
       "objectSid",
       "pwdLastSet",
       "sn",
@@ -63,6 +65,7 @@ class LDAPSearchTypes(Enum):
       "distinguishedName",
       "gpLink",
       "lastLogon",
+      "objectClass",
       "objectSid",
       "operatingSystem",
       "operatingSystemVersion",
@@ -81,6 +84,7 @@ class LDAPSearchTypes(Enum):
       "gPCUserExtensionNames",
       "gPCMachineExtensionNames",
       "name",
+      "objectClass",
       "versionNumber",
       "whenChanged",
       "whenCreated",
@@ -96,6 +100,7 @@ class LDAPSearchTypes(Enum):
       "gpLink",
       "member",
       "memberOf",
+      "objectClass",
       "objectSid"
     ]
   }
@@ -104,6 +109,7 @@ class LDAPSearchTypes(Enum):
     "filter": "(objectClass=organizationalUnit)",
     "attributes": [
       "description",
-      "gpLink"
+      "gpLink",
+      "objectClass",
     ]
   }
