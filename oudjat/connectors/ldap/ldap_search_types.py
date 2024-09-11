@@ -5,7 +5,8 @@ class LDAPSearchTypes(Enum):
     "attributes": [
       "distinguishedName",
       "name",
-      "objectClass"
+      "objectClass",
+      "objectGUID"
     ]
   }
 
@@ -21,6 +22,7 @@ class LDAPSearchTypes(Enum):
       "lastLogon",
       "mail",
       "objectClass",
+      "objectGUID",
       "objectSid",
       "pwdLastSet",
       "sn",
@@ -44,6 +46,7 @@ class LDAPSearchTypes(Enum):
       "lastLogon",
       "mail",
       "objectClass",
+      "objectGUID",
       "objectSid",
       "pwdLastSet",
       "sn",
@@ -63,6 +66,7 @@ class LDAPSearchTypes(Enum):
       "distinguishedName",
       "lastLogon",
       "objectClass",
+      "objectGUID",
       "objectSid",
       "operatingSystem",
       "operatingSystemVersion",
@@ -83,6 +87,7 @@ class LDAPSearchTypes(Enum):
       "gPCWQLFilter",
       "name",
       "objectClass",
+      "objectGUID",
       "versionNumber",
       "whenChanged",
       "whenCreated",
@@ -98,6 +103,7 @@ class LDAPSearchTypes(Enum):
       "member",
       "memberOf",
       "objectClass",
+      "objectGUID",
       "objectSid"
     ]
   }
@@ -107,6 +113,10 @@ class LDAPSearchTypes(Enum):
     "attributes": [
       "description",
       "gpLink",
+      "name",
       "objectClass",
+      "objectGUID",
+      "whenChanged",
+      "whenCreated",
     ]
   }
