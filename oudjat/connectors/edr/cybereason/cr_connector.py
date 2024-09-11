@@ -55,10 +55,9 @@ class CybereasonConnector(Connector):
     port: int = 443
   ):
     """ Constructor """
-    self.port = port
     
     scheme = "http"
-    if self.port == 443:
+    if port == 443:
       scheme += "s"
       
     # Inject protocol if not found
@@ -67,7 +66,8 @@ class CybereasonConnector(Connector):
 
     super().__init__(target=urlparse(target), service_name=service_name, use_credentials=True)
 
-    self.target = f"{self.target.scheme}://{self.target.netloc}:{port}"
+    self.target = urlparse(f"{self.target.scheme}://{self.target.netloc}:{port}")
+
     
   def connect(self) -> None:
     """ Connects to API using connector parameters """
@@ -76,14 +76,14 @@ class CybereasonConnector(Connector):
     
     try:
       creds = { "username": self.credentials.username, "password": self.credentials.password }
-      session.post(f"{self.target}/login.html", data=creds, headers=headers, verify=True)
+      session.post(f"{self.target.geturl()}/login.html", data=creds, headers=headers, verify=True)
       
     except ConnectionError as e:
       raise(
         f"An error occured while trying to connect to Cybereason API at {self.target}: {e}"
       )
     
-    ColorPrint.green(f"Connected to {self.target.netloc}:{self.port}")
+    ColorPrint.green(f"Connected to {self.target.netloc}")
     self.connection = session
 
   def disconnect(self) -> None:
@@ -112,7 +112,7 @@ class CybereasonConnector(Connector):
     }
     query = json.dumps(query_content)
 
-    endpoint_url = f"{self.target}{endpoint.value.get('endpoint')}"
+    endpoint_url = f"{self.target.geturl()}{endpoint.value.get("endpoint")}"
     
     api_headers = {'Content-Type':'application/json'}
     api_resp = self.connection.request(
