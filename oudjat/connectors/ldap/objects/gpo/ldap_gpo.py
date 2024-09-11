@@ -28,7 +28,11 @@ class LDAPGroupPolicyObject:
     self.scope = None
     self.scope_property = None
 
-    self.state = LDAPGroupPolicyState(self.entry.get("gPCWQLFilter", None))
+    self.state = None
+    wql = self.entry.get("gPCWQLFilter", None)
+
+    if wql is not None:
+      self.state = LDAPGroupPolicyState(wql.split(';')[-1])
     
     try:
       if len(self.entry.get("gPCUserExtensionNames", [])) > 0:
