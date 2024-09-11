@@ -80,6 +80,7 @@ class LDAPSearchTypes(Enum):
       "gPCFileSysPath",
       "gPCUserExtensionNames",
       "gPCMachineExtensionNames",
+      "gPCWQLFilter",
       "name",
       "objectClass",
       "versionNumber",
