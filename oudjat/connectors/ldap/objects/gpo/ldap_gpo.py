@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import List, Dict
+from typing import List, Dict, Union
 
 import oudjat.connectors.ldap
 from oudjat.connectors.ldap.objects import LDAPEntry
@@ -71,6 +71,7 @@ class LDAPGroupPolicyObject:
   def get_linked_objects(
     self,
     ldap_connector: oudjat.connectors.ldap.LDAPConnector,
+    attributes: Union[str, List[str]] = None,
     ou: str = "*"
   ) -> List[LDAPEntry]:
     """ Gets the gpo linked objects """
@@ -78,11 +79,11 @@ class LDAPGroupPolicyObject:
     
     linked_entries = ldap_connector.search(
       search_type="OU",
-      search_filter=search_filter
+      search_filter=search_filter,
+      attributes=attributes
     )
 
     return linked_entries
-
 
   # ****************************************************************
   # Static methods
