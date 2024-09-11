@@ -5,7 +5,9 @@ from typing import List, Dict
 
 import oudjat.connectors.ldap
 from oudjat.connectors.ldap.objects import LDAPEntry
-from oudjat.connectors.ldap.objects.gpo import MS_GPPREF
+
+from . import MS_GPPREF
+from . import LDAPGroupPolicyState
 
 UUID_REG = r'(?:\{{0,1}(?:[0-9a-fA-F]){8}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){12}\}{0,1})'
 
@@ -25,6 +27,8 @@ class LDAPGroupPolicyObject:
     
     self.scope = None
     self.scope_property = None
+
+    self.state = LDAPGroupPolicyState(self.entry.get("gPCWQLFilter", None))
     
     try:
       if len(self.entry.get("gPCUserExtensionNames", [])) > 0:
