@@ -77,7 +77,7 @@ class LDAPGroupPolicyObject:
     search_filter = f"(gPLink={f"*{self.name}*"})(name={ou})"
     
     linked_entries = ldap_connector.search(
-      search_type="DEFAULT",
+      search_type="OU",
       search_filter=search_filter
     )
 
