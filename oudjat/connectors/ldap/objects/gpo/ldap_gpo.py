@@ -23,7 +23,7 @@ class LDAPGroupPolicyObject:
       raise ValueError("Invalid LDAPEntry provided. Please provide a groupPolicyContainer type entry")
 
     self.name = self.entry["name"]
-    self.displayName = self.entry["displayName"]
+    self.display_name = self.entry["displayName"]
     
     self.scope = None
     self.scope_property = None
