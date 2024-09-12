@@ -1,6 +1,6 @@
 from enum import Enum
 
-class LDAPSearchTypes(Enum):
+class LDAPObjectType(Enum):
   """ These are the default LDAP search parameters per object type """
   DEFAULT = {
     "attributes": [
