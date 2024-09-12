@@ -1,6 +1,6 @@
 from enum import Enum
 
-class CybereasonEndpoints(Enum):
+class CybereasonEndpoint(Enum):
   """ Cybereason API endpoint attributes """
   SENSORS = {
     "endpoint": "/rest/sensors/query",

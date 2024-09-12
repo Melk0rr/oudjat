@@ -7,7 +7,7 @@ from typing import List, Union, Any
 from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors import Connector
 from oudjat.connectors.ldap.objects import LDAPEntry
-from oudjat.connectors.ldap.ldap_search_types import LDAPSearchTypes
+from oudjat.connectors.ldap.ldap_search_types import LDAPObjectType
 from oudjat.connectors.ldap.objects import LDAPGroupPolicyObject
 
 class LDAPConnector(Connector):
@@ -154,18 +154,18 @@ class LDAPConnector(Connector):
       raise ValueError("You have to provide a search filter when using 'default' search type")
 
     search_type = search_type.upper()
-    if search_type not in LDAPSearchTypes.__members__:
+    if search_type not in LDAPObjectType.__members__:
       raise ValueError(f"Invalid search type proviced: {search_type}")
 
     if search_base is None:
       search_base = self.default_search_base 
 
-    formated_filter = LDAPSearchTypes[search_type].value.get("filter", "")
+    formated_filter = LDAPObjectType[search_type].value.get("filter", "")
     if search_filter:
       formated_filter = f"(&{formated_filter}{search_filter})"
 
     if attributes is None:
-      attributes = LDAPSearchTypes[search_type].value.get("attributes", "*")
+      attributes = LDAPObjectType[search_type].value.get("attributes", "*")
 
     results = self.connection.extend.standard.paged_search(
       search_base=search_base,

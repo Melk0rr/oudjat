@@ -1,6 +1,6 @@
 from enum import Enum
 
-class CERTFRPageTypes(Enum):
+class CERTFRPageType(Enum):
   """ Enumeration describing possible CERTFR page types """
   ALE = "alerte"
   AVI = "avis"

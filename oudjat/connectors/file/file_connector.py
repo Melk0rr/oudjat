@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Union
 
 from oudjat.connectors import Connector
 from oudjat.control.data.data_filter import DataFilter
-from oudjat.connectors.file.file_types import FileTypes
+from oudjat.connectors.file.file_types import FileType
 
 def check_path(path: str) -> None:
   """ Check if the provided path is valid """
@@ -12,7 +12,7 @@ def check_path(path: str) -> None:
     raise(f"Invalid file path provided: {path}")
     
   file_ext = path.split('.')[-1]
-  if file_ext.upper() not in FileTypes.__members__:
+  if file_ext.upper() not in FileType.__members__:
     raise ValueError(f"Invalid filetype provided: {file_ext}")
 
 class FileConnector(Connector):
@@ -24,7 +24,7 @@ class FileConnector(Connector):
     file_ext = path.split('.')[-1]
     
     self.source = source
-    self.filetype = FileTypes[file_ext.upper()]
+    self.filetype = FileType[file_ext.upper()]
     self.import_function = self.filetype.value.get("import")
 
     self.connection = False

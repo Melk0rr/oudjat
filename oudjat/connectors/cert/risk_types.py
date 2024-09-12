@@ -1,6 +1,6 @@
 from enum import Enum
 
-class RiskTypes(Enum):
+class RiskType(Enum):
   """ Enumeration describing possible risk values """
   N_A = { "en": "Not specified", "fr": "Non spécifié" }
   EOP = { "en": "Elevation Of Privilege", "fr": "Élévation de privilèges" }

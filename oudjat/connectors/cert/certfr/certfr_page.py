@@ -6,11 +6,11 @@ from bs4 import BeautifulSoup, element
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.model.vulnerability.cve import CVE, CVE_REGEX
-from oudjat.connectors.cert.risk_types import RiskTypes
-from oudjat.connectors.cert.certfr.certfr_page_types import CERTFRPageTypes
+from oudjat.connectors.cert.risk_types import RiskType
+from oudjat.connectors.cert.certfr.certfr_page_types import CERTFRPageType
 
-REF_TYPES = '|'.join([ pt.name for pt in CERTFRPageTypes ])
-LINK_TYPES = '|'.join([ pt.value for pt in CERTFRPageTypes ])
+REF_TYPES = '|'.join([ pt.name for pt in CERTFRPageType ])
+LINK_TYPES = '|'.join([ pt.value for pt in CERTFRPageType ])
 CERTFR_REF_REGEX = rf"CERTFR-\d{{4}}-(?:{REF_TYPES})-\d{{3,4}}"
 CERTFR_LINK_REGEX = rf"https:\/\/www\.cert\.ssi\.gouv\.fr\/(?:{LINK_TYPES})\/{CERTFR_REF_REGEX}"
 URL_REGEX = r'http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
@@ -41,7 +41,7 @@ class CERTFRPage:
 
     # Set page type
     ref_type = re.search(rf"(?:{REF_TYPES})", self.ref).group(0)
-    self.page_type = CERTFRPageTypes[ref_type].value
+    self.page_type = CERTFRPageType[ref_type].value
     
     self.link = f"{self.BASE_LINK}/{self.page_type}/{self.ref}/"
 
@@ -250,13 +250,13 @@ class CERTFRPageContent:
   # ****************************************************************
   # Methods
 
-  def get_risks(self, short: bool = True) -> Set["RiskTypes"]:
+  def get_risks(self, short: bool = True) -> Set["RiskType"]:
     """ Getter / parser for the list of risks """
     
     if self.data is not None and self.risks is None:
       risk_set = set()
 
-      for risk in list(RiskTypes):
+      for risk in list(RiskType):
         if risk.value["fr"].lower() in [ r.lower() for r in self.data.get("Risques", []) ]:
           risk_set.add(risk)
 

@@ -2,7 +2,7 @@ from enum import Enum
 
 from oudjat.utils.file import import_csv, import_json, import_txt
 
-class FileTypes(Enum):
+class FileType(Enum):
   """ Enumeration of file types to be used by file connector """
   CSV = {
     "import": import_csv

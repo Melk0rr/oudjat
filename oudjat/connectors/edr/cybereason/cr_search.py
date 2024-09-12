@@ -1,6 +1,6 @@
 from enum import Enum
 
-class CybereasonSearchFilters(Enum):
+class CybereasonSearchFilter(Enum):
   """ Samples of Cybereason search filters """
   MALWARE_KNOWN = [
     {
@@ -10,7 +10,7 @@ class CybereasonSearchFilters(Enum):
     }
   ]
 
-class CybereasonSearchSorts(Enum):
+class CybereasonSearchSort(Enum):
   """ Samples of possible Cybereason search """
   NEWEST_TO_OLDEST = {
     "sortingFieldName": "timestamp",

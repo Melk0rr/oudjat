@@ -1,6 +1,6 @@
 from enum import Enum
 
-class LDAPGroupTypes(Enum):
+class LDAPGroupType(Enum):
   """ LDAP group type values """
   GLOBAL_DISTRIB = 2
   DOMAIN_DISTRIB = 4

@@ -10,12 +10,12 @@ from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.convertions import unixtime_to_str
 
 from oudjat.connectors import Connector
-from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoints
+from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoint
 
 class CybereasonEntry(dict):
   """ Cybereason entry dict """
 
-  def __init__(self, entry_type: "CybereasonEndpoints", **kwargs):
+  def __init__(self, entry_type: "CybereasonEndpoint", **kwargs):
     """ Constructor """
 
     self.type = entry_type
@@ -92,7 +92,7 @@ class CybereasonConnector(Connector):
 
   def endpoint_search(
     self,
-    endpoint: "CybereasonEndpoints",
+    endpoint: "CybereasonEndpoint",
     limit: int,
     offset: int = 0,
     search_filter: List[Dict] = None,
@@ -154,10 +154,10 @@ class CybereasonConnector(Connector):
       )
 
     endpoint = endpoint.upper()
-    if endpoint not in CybereasonEndpoints.__members__:
+    if endpoint not in CybereasonEndpoint.__members__:
       raise ValueError(f"Invalid Cybereason endpoint provided: {endpoint}")
 
-    endpoint_attr = CybereasonEndpoints[endpoint]
+    endpoint_attr = CybereasonEndpoint[endpoint]
     endpoint_search_limit = endpoint_attr.value.get("limit")
 
     # Set search limit
