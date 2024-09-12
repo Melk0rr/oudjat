@@ -4,21 +4,22 @@ import re
 from typing import List, Dict, Union
 
 import oudjat.connectors.ldap
-from oudjat.connectors.ldap.objects import LDAPEntry
+from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject
 
 from . import MS_GPPREF
 from . import LDAPGroupPolicyState
 
 UUID_REG = r'(?:\{{0,1}(?:[0-9a-fA-F]){8}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){12}\}{0,1})'
 
-class LDAPGroupPolicyObject:
+class LDAPGroupPolicyObject(LDAPObject):
   """ A class to manipulate Group Policy Objects """
   
   # ****************************************************************
   # Attributes & Constructors
   def __init__(self, ldap_entry: LDAPEntry):
     """ Constructor """
-    self.entry = ldap_entry.attr()
+    super().__init__(ldap_entry=ldap_entry)
+
     if "groupPolicyContainer" not in self.entry.get("objectClass"):
       raise ValueError("Invalid LDAPEntry provided. Please provide a groupPolicyContainer type entry")
 
