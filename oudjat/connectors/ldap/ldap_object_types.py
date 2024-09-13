@@ -12,6 +12,7 @@ class LDAPObjectType(Enum):
   }
 
   USER = {
+    "objectClass": "user",
     "filter": "(&(objectClass=user)(!(objectClass=computer)))",
     "attributes": [
       "accountExpires",
@@ -36,6 +37,7 @@ class LDAPObjectType(Enum):
   }
 
   PERSON = {
+    "objectClass": "person",
     "filter": "(&(objectClass=person)(!(objectClass=computer)))",
     "attributes": [
       "accountExpires",
@@ -60,6 +62,7 @@ class LDAPObjectType(Enum):
   }
 
   COMPUTER = {
+    "objectClass": "computer",
     "filter": "(objectClass=computer)",
     "attributes": [
       "cn",
@@ -79,6 +82,7 @@ class LDAPObjectType(Enum):
   }
   
   GPO = {
+    "objectClass": "groupPolicyContainer",
     "filter": "(objectClass=groupPolicyContainer)",
     "attributes": [
       "displayName",
@@ -96,6 +100,7 @@ class LDAPObjectType(Enum):
   }
 
   GROUP = {
+    "objectClass": "group",
     "filter": "(objectClass=group)",
     "attributes": [
       "cn",
@@ -110,6 +115,7 @@ class LDAPObjectType(Enum):
   }
 
   OU = {
+    "objectClass": "organizationalUnit",
     "filter": "(objectClass=organizationalUnit)",
     "attributes": [
       "description",
