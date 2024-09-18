@@ -150,9 +150,6 @@ class LDAPConnector(Connector):
     if self.connection is None:
       raise ConnectionError(f"You must initiate connection to {self.target} before running search !")
 
-    if search_type.lower() == "default" and search_filter is None:
-      raise ValueError("You have to provide a search filter when using 'default' search type")
-
     search_type = search_type.upper()
     if search_type not in LDAPObjectType.__members__:
       raise ValueError(f"Invalid search type proviced: {search_type}")
@@ -161,8 +158,12 @@ class LDAPConnector(Connector):
       search_base = self.default_search_base 
 
     formated_filter = LDAPObjectType[search_type].value.get("filter", "")
-    if search_filter:
-      formated_filter = f"(&{formated_filter}{search_filter})"
+    if search_type.lower() == "default" and search_filter is not None:
+      formated_filter = search_filter
+
+    else:
+      if search_filter:
+        formated_filter = f"(&{formated_filter}{search_filter})"
 
     if attributes is None:
       attributes = LDAPObjectType[search_type].value.get("attributes", "*")
