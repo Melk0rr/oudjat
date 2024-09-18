@@ -80,7 +80,7 @@ class CERTFRConnector(Connector):
     filtered_feed = []
 
     for item in feed_items:
-      certfr_ref = CERTFRConnector.get_ref_from_link(item.link.text)
+      certfr_ref = CERTFRPage.get_ref_from_link(item.link.text)
 
       if date_str_filter:
         try:
