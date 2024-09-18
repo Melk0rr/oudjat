@@ -3,58 +3,9 @@ from enum import Enum
 class LDAPObjectType(Enum):
   """ These are the default LDAP search parameters per object type """
   DEFAULT = {
-    "filter": "*",
+    "objectClass": "*",
+    "filter": "(objectClass=*)",
     "attributes": "*"
-  }
-
-  USER = {
-    "objectClass": "user",
-    "filter": "(&(objectClass=user)(!(objectClass=computer)))",
-    "attributes": [
-      "accountExpires",
-      "cn",
-      "description",
-      "distinguishedName",
-      "employeeID",
-      "givenName",
-      "lastLogon",
-      "mail",
-      "objectClass",
-      "objectGUID",
-      "objectSid",
-      "pwdLastSet",
-      "sn",
-      "sAMAccountName",
-      "title",
-      "userAccountControl",
-      "whenChanged",
-      "whenCreated"
-    ]
-  }
-
-  PERSON = {
-    "objectClass": "person",
-    "filter": "(&(objectClass=person)(!(objectClass=computer)))",
-    "attributes": [
-      "accountExpires",
-      "cn",
-      "description",
-      "distinguishedName",
-      "employeeID",
-      "givenName",
-      "lastLogon",
-      "mail",
-      "objectClass",
-      "objectGUID",
-      "objectSid",
-      "pwdLastSet",
-      "sn",
-      "sAMAccountName",
-      "title",
-      "userAccountControl",
-      "whenChanged",
-      "whenCreated"
-    ]
   }
 
   COMPUTER = {
@@ -121,5 +72,69 @@ class LDAPObjectType(Enum):
       "objectGUID",
       "whenChanged",
       "whenCreated",
+    ]
+  }
+
+  PERSON = {
+    "objectClass": "person",
+    "filter": "(&(objectClass=person)(!(objectClass=computer)))",
+    "attributes": [
+      "accountExpires",
+      "cn",
+      "description",
+      "distinguishedName",
+      "employeeID",
+      "givenName",
+      "lastLogon",
+      "mail",
+      "objectClass",
+      "objectGUID",
+      "objectSid",
+      "pwdLastSet",
+      "sn",
+      "sAMAccountName",
+      "title",
+      "userAccountControl",
+      "whenChanged",
+      "whenCreated"
+    ]
+  }
+
+  SUBNET = {
+    "objectClass": "subnet",
+    "filter": "(objectClass=subnet)",
+    "attributes": [
+      "cn",
+      "description",
+      "distinguishedName",
+      "location",
+      "objectGUID",
+      "whenChanged",
+      "whenCreated"
+    ]
+  }
+
+  USER = {
+    "objectClass": "user",
+    "filter": "(&(objectClass=user)(!(objectClass=computer)))",
+    "attributes": [
+      "accountExpires",
+      "cn",
+      "description",
+      "distinguishedName",
+      "employeeID",
+      "givenName",
+      "lastLogon",
+      "mail",
+      "objectClass",
+      "objectGUID",
+      "objectSid",
+      "pwdLastSet",
+      "sn",
+      "sAMAccountName",
+      "title",
+      "userAccountControl",
+      "whenChanged",
+      "whenCreated"
     ]
   }
