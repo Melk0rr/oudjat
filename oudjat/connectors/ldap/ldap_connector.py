@@ -139,7 +139,7 @@ class LDAPConnector(Connector):
 
   def search(
     self,
-    search_type: str = "USER",
+    search_type: str = "DEFAULT",
     search_base: str = None,
     search_filter: str = None,
     attributes: Union[str, List[str]] = None,
