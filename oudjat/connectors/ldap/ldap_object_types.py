@@ -3,12 +3,7 @@ from enum import Enum
 class LDAPObjectType(Enum):
   """ These are the default LDAP search parameters per object type """
   DEFAULT = {
-    "attributes": [
-      "distinguishedName",
-      "name",
-      "objectClass",
-      "objectGUID"
-    ]
+    "attributes": "*"
   }
 
   USER = {
