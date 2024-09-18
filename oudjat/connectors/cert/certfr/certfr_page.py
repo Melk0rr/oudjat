@@ -52,6 +52,10 @@ class CERTFRPage:
     """ Getter for the reference """
     return self.ref
 
+  def get_title(self) -> str:
+    """ Getter for the page title """
+    return self.title
+
   def get_cves(self) -> List["CVE"]:
     """ Getter to retreive page cves """
     cves = self.content.get_cves()
