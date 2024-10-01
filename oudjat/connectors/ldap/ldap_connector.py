@@ -165,6 +165,8 @@ class LDAPConnector(Connector):
       if search_filter:
         formated_filter = f"(&{formated_filter}{search_filter})"
 
+    print(formated_filter)
+
     if attributes is None:
       attributes = LDAPObjectType[search_type].value.get("attributes", "*")
 
@@ -210,3 +212,15 @@ class LDAPConnector(Connector):
     )
     
     return gpos
+
+  def get_subnet(
+    self,
+    attributes: Union[str, List[str]] = None
+  ) -> List:
+
+    print(self.domain)
+
+    # subnet_entries = self.search(
+    #   search_type="SUBNET",
+    #   search_base="CN=Subnets,CN=Sites,CN=Configuration,"
+    # )
