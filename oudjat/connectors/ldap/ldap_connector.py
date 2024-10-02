@@ -215,12 +215,19 @@ class LDAPConnector(Connector):
 
   def get_subnet(
     self,
+    search_filter: str = None,
     attributes: Union[str, List[str]] = None
   ) -> List:
 
-    print(self.domain)
-
-    # subnet_entries = self.search(
-    #   search_type="SUBNET",
-    #   search_base="CN=Subnets,CN=Sites,CN=Configuration,"
-    # )
+    sb_dc = ','.join([ f"DC={dc.lower()}" for dc in self.domain.split('.') ])
+    
+    subnet_entries = self.search(
+      search_type="SUBNET",
+      search_base=f"CN=Subnets,CN=Sites,CN=Configuration,{sd_bc}",
+      search_filter=search_filter
+      attributes=attributes
+    )
+    
+    
+    
+    return subnets
