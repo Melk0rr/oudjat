@@ -10,4 +10,4 @@ class LDAPObject:
   def __init__(self, ldap_entry: LDAPEntry):
     """ Constructor """
     
-    self.entry = ldap_entry.attr() 
+    self.entry = ldap_entry.attr()
