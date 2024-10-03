@@ -2,11 +2,11 @@
 from typing import List, Dict
 from multiprocessing import Pool
 
-from oudjat.utils.color_print import ColorPrint
-from oudjat.utils.init_option_handle import str_file_option_handle
+from oudjat.utils import ColorPrint
+from oudjat.utils import str_file_option_handle
 from oudjat.model.vulnerability.cve import CVE
-from oudjat.connectors.cert.certfr.certfr_page import CERTFRPage
-from oudjat.connectors.cert.certfr.certfr_connector import CERTFRConnector
+from oudjat.connectors.cert.certfr import CERTFRPage
+from oudjat.connectors.cert.certfr import CERTFRConnector
 
 from .target import Target
 

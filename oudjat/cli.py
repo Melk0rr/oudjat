@@ -54,9 +54,9 @@ from typing import Dict, Any
 
 import oudjat.commands
 from oudjat.banner import banner
-from oudjat.utils.color_print import ColorPrint
-from oudjat.utils.convertions import seconds_to_str
-from oudjat.utils.stdouthook import StdOutHook
+from oudjat.utils import ColorPrint
+from oudjat.utils import seconds_to_str
+from oudjat.utils import StdOutHook
 
 from . import __version__ as VERSION
 

@@ -5,11 +5,11 @@ import requests
 from datetime import datetime
 from typing import List, Dict, Union
 
-from oudjat.utils.color_print import ColorPrint
+from oudjat.utils import ColorPrint
 
 from oudjat.connectors import Connector
-from oudjat.connectors.microsoft.ms_api_vars import API_BASE_URL, CVE_REGEX, API_REQ_HEADERS
-from oudjat.connectors.microsoft.ms_cvrf_document import MSCVRFDocument
+from oudjat.connectors.microsoft import API_BASE_URL, CVE_REGEX, API_REQ_HEADERS
+from oudjat.connectors.microsoft import MSCVRFDocument
 
 
 ################################################################################

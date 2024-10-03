@@ -6,11 +6,11 @@ import requests
 from urllib.parse import urlparse
 from typing import List, Dict
 
-from oudjat.utils.color_print import ColorPrint
-from oudjat.utils.convertions import unixtime_to_str
+from oudjat.utils import ColorPrint
+from oudjat.utils import unixtime_to_str
 
 from oudjat.connectors import Connector
-from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoint
+from oudjat.connectors.edr.cybereason import CybereasonEndpoint
 
 class CybereasonEntry(dict):
   """ Cybereason entry dict """

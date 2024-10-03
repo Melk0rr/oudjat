@@ -3,9 +3,9 @@ from datetime import datetime
 from typing import List, Dict, Tuple 
 from enum import Enum
 
-from oudjat.utils.color_print import ColorPrint
-from oudjat.control.data.data_scope import DataScope
-from oudjat.control.data.data_filter import DataFilter
+from oudjat.utils import ColorPrint
+from oudjat.control.data import DataScope
+from oudjat.control.data import DataFilter
 
 class ConformityLevel(Enum):
   """ Defines the levels of conformity for a KPI or any other related element """

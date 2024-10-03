@@ -4,9 +4,9 @@ import requests
 from typing import List, Dict, Set
 from bs4 import BeautifulSoup, element
 
-from oudjat.utils.color_print import ColorPrint
-from oudjat.model.vulnerability.cve import CVE, CVE_REGEX
-from oudjat.connectors.cert.risk_types import RiskType
+from oudjat.utils import ColorPrint
+from oudjat.model.vulnerability import CVE, CVE_REGEX
+from oudjat.connectors.cert import RiskType
 
 from . import CERTFRPageType
 

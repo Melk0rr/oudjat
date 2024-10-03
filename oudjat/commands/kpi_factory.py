@@ -3,8 +3,8 @@ import json
 from multiprocessing import Pool
 from typing import List, Dict, Tuple
 
-from oudjat.utils.color_print import ColorPrint
-from oudjat.utils.file import import_csv, export_csv
+from oudjat.utils import ColorPrint
+from oudjat.utils import import_csv, export_csv
 
 from .base import Base
 from oudjat.control.data.data_scope import DataScope

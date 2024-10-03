@@ -1,8 +1,8 @@
 """ Target module handling targeting operations and data gathering """
 from typing import List, Dict
-from oudjat.utils.color_print import ColorPrint
-from oudjat.utils.file import export_csv, import_csv
-from oudjat.utils.init_option_handle import str_file_option_handle
+from oudjat.utils import ColorPrint
+from oudjat.utils import export_csv, import_csv
+from oudjat.utils import str_file_option_handle
 from oudjat.model.vulnerability.cve import CVE
 
 from .base import Base

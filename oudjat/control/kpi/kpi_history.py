@@ -1,8 +1,8 @@
 from typing import List
 
-from oudjat.utils.color_print import ColorPrint
-from oudjat.control.kpi.kpi import KPI
-from oudjat.control.kpi.kpi_comparator import KPIComparator
+from oudjat.utils import ColorPrint
+from oudjat.control.kpi import KPI
+from oudjat.control.kpi import KPIComparator
 
 class KPIHistory:
   """ KPIEvolution class to handle """
