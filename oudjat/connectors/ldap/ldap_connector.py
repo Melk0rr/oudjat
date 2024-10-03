@@ -4,10 +4,11 @@ import socket
 
 from typing import List, Union, Any
 
-from oudjat.utils.color_print import ColorPrint
+from oudjat.utils import ColorPrint
+
 from oudjat.connectors import Connector
 from oudjat.connectors.ldap.objects import LDAPEntry
-from oudjat.connectors.ldap.ldap_object_types import LDAPObjectType
+from oudjat.connectors.ldap.objects import LDAPObjectType
 from oudjat.connectors.ldap.objects import LDAPGroupPolicyObject
 
 class LDAPConnector(Connector):
