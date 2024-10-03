@@ -5,7 +5,7 @@ from typing import List, Union
 from datetime import datetime
 from bs4 import BeautifulSoup
 
-from oudjat.utils.color_print import ColorPrint
+from oudjat.utils import ColorPrint
 from oudjat.connectors import Connector
 
 from . import CERTFRPage
