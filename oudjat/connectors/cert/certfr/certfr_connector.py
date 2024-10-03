@@ -7,7 +7,8 @@ from bs4 import BeautifulSoup
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.connectors import Connector
-from oudjat.connectors.cert.certfr import CERTFRPage
+
+from . import CERTFRPage
 
 
 class CERTFRConnector(Connector):

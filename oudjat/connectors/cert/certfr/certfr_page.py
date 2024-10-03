@@ -7,7 +7,8 @@ from bs4 import BeautifulSoup, element
 from oudjat.utils.color_print import ColorPrint
 from oudjat.model.vulnerability.cve import CVE, CVE_REGEX
 from oudjat.connectors.cert.risk_types import RiskType
-from oudjat.connectors.cert.certfr.certfr_page_types import CERTFRPageType
+
+from . import CERTFRPageType
 
 REF_TYPES = '|'.join([ pt.name for pt in CERTFRPageType ])
 LINK_TYPES = '|'.join([ pt.value for pt in CERTFRPageType ])
