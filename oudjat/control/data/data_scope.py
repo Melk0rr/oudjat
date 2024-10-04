@@ -1,7 +1,7 @@
 """ Data module handling various data manipulation aspects """
 from typing import List, Dict, Union
 
-from oudjat.control.data.data_filter import DataFilter
+from oudjat.control.data import DataFilter
 
 class DataScope:
   """ DataScope class : handling data unfiltered and filtered state """

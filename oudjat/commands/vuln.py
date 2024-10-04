@@ -5,7 +5,7 @@ from multiprocessing import Pool
 from oudjat.utils import ColorPrint
 from oudjat.model.vulnerability import CVE
 
-from .target import Target
+from . import Target
 
 class Vuln(Target):
   """ CVE Target """

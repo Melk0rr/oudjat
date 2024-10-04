@@ -8,8 +8,8 @@ from typing import List, Dict, Union
 from oudjat.utils import ColorPrint
 
 from oudjat.connectors import Connector
-from oudjat.connectors.microsoft import API_BASE_URL, CVE_REGEX, API_REQ_HEADERS
-from oudjat.connectors.microsoft import MSCVRFDocument
+from oudjat.connectors.microsoft.cvrf import API_BASE_URL, CVE_REGEX, API_REQ_HEADERS
+from oudjat.connectors.microsoft.cvrf import MSCVRFDocument
 
 
 ################################################################################

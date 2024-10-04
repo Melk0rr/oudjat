@@ -6,10 +6,10 @@ from typing import List, Dict, Tuple
 from oudjat.utils import ColorPrint
 from oudjat.utils import import_csv, export_csv
 
-from .base import Base
-from oudjat.control.data.data_scope import DataScope
-from oudjat.control.data.data_filter import DataFilter
-from oudjat.control.kpi.kpi import KPI
+from . import Base
+from oudjat.control.data import DataScope
+from oudjat.control.data import DataFilter
+from oudjat.control.kpi import KPI
 
 class KPIFactory(Base):
   """Main enumeration module"""

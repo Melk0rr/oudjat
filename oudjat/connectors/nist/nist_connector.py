@@ -4,7 +4,7 @@ import requests
 
 from typing import List, Dict, Union
 
-from oudjat.utils.color_print import ColorPrint
+from oudjat.utils import ColorPrint
 from oudjat.connectors import Connector
 
 class NistConnector(Connector):

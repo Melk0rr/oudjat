@@ -1,7 +1,7 @@
 from typing import List, Dict, Union
 
-from oudjat.control.data.data_filter import DataFilter
-from oudjat.control.risk.risk import Risk
+from oudjat.control.data import DataFilter
+from oudjat.control.risk import Risk
 
 class Rule:
   """ A class to describes rules """

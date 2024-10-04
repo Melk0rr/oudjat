@@ -1,6 +1,6 @@
 from typing import List, Any
 
-from oudjat.utils.credentials import get_credentials
+from oudjat.utils import get_credentials
 
 class Connector:
   """ Base connector """
