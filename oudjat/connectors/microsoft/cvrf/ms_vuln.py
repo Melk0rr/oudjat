@@ -2,9 +2,9 @@ import re
 
 from typing import List, Dict, Any
 
-from oudjat.connectors.microsoft.ms_api_vars import CVE_REGEX, KB_NUM_REGEX
-from oudjat.connectors.microsoft.ms_remed import MSRemed
-from oudjat.connectors.microsoft.ms_product import MSProduct
+from . import CVE_REGEX, KB_NUM_REGEX
+from . import MSRemed
+from . import MSProduct
 
 class MSVuln:
   """ Class to manipulate CVE data related to MS products """

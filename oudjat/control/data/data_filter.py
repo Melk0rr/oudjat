@@ -1,7 +1,8 @@
 from typing import List, Dict, Union, Any
 
 from oudjat.utils import ColorPrint
-from oudjat.control.data import DataFilterOperations
+
+from . import DataFilterOperations
 
 class DataFilter:
   """ DataFilter class : handling data filtering """

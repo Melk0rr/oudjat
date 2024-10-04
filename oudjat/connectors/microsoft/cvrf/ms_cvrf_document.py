@@ -6,10 +6,10 @@ from typing import Dict
 
 from oudjat.utils import ColorPrint
 
-from oudjat.connectors.microsoft import MSVuln
-from oudjat.connectors.microsoft import MSRemed
-from oudjat.connectors.microsoft import MSProduct
-from oudjat.connectors.microsoft import API_BASE_URL, API_REQ_HEADERS, CVRF_ID_REGEX
+from . import API_BASE_URL, API_REQ_HEADERS, CVRF_ID_REGEX
+from . import MSProduct
+from . import MSRemed
+from . import MSVuln
 
 class MSCVRFDocument:
   """ Class to manipulate MS CVRF documents """

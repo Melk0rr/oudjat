@@ -10,7 +10,6 @@ from oudjat.connectors import Connector
 
 from . import CERTFRPage
 
-
 class CERTFRConnector(Connector):
   """ CERTFR class addressing certfr page behavior """
 

@@ -1,7 +1,8 @@
 from typing import Dict, Union, Tuple
 
 from oudjat.utils import ColorPrint
-from oudjat.control.kpi import KPI
+
+from . import KPI
 
 class KPIComparator:
   """ KPIComparator class to compare two KPIs """

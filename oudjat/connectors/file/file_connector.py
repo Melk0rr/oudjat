@@ -4,7 +4,8 @@ from typing import List, Dict, Any, Union
 
 from oudjat.connectors import Connector
 from oudjat.control.data import DataFilter
-from oudjat.connectors.file import FileType
+
+from . import FileType
 
 def check_path(path: str) -> None:
   """ Check if the provided path is valid """

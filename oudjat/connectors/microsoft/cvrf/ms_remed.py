@@ -2,8 +2,8 @@ import re
 
 from typing import List, Dict, Any
 
-from oudjat.connectors.microsoft.cvrf import KB_NUM_REGEX
-from oudjat.connectors.microsoft.cvrf import MSProduct
+from . import KB_NUM_REGEX
+from . import MSProduct
 
 class MSRemed:
   """ Class to manipulate MS KBs """

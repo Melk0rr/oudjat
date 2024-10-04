@@ -2,7 +2,7 @@ import re
 
 from typing import Dict
 
-from oudjat.connectors.microsoft.cvrf import MS_PRODUCT_REGEX
+from . import MS_PRODUCT_REGEX
 
 class MSProduct:
   """ Class to manipulate MS product """
