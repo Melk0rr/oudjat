@@ -161,7 +161,7 @@ class CybereasonConnector(Connector):
     endpoint_search_limit = endpoint_attr.value.get("limit")
 
     # Set search limit
-    if limit is None or limit > endpoint_search_limit:
+    if limit is None:
       limit = endpoint_search_limit
 
     offset_mult = math.ceil(limit / endpoint_search_limit)
