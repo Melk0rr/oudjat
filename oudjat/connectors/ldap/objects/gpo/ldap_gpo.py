@@ -1,15 +1,25 @@
 from __future__ import annotations
 
 import re
+from enum import Enum
 from typing import List, Dict, Union
 
 import oudjat.connectors.ldap
 from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject
 
 from . import MS_GPPREF
-from . import LDAPGroupPolicyState
 
 UUID_REG = r'(?:\{{0,1}(?:[0-9a-fA-F]){8}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){12}\}{0,1})'
+
+class LDAPGPOScope(Enum):
+  """ GPO scope """
+  USER = "gPCUserExtensionNames"
+  MACHINE = "gPCMachineExtensionNames"
+
+class LDAPGPOState(Enum):
+  ENABLED = 0
+  DISABLED = 1
+  ENFORCED = 2
 
 class LDAPGroupPolicyObject(LDAPObject):
   """ A class to manipulate Group Policy Objects """
@@ -33,21 +43,19 @@ class LDAPGroupPolicyObject(LDAPObject):
     wql = self.entry.get("gPCWQLFilter", None)
 
     if wql is not None:
-      self.state = LDAPGroupPolicyState(int(wql.split(';')[-1][0]))
+      self.state = LDAPGPOState(int(wql.split(';')[-1][0]))
     
     try:
       if len(self.entry.get("gPCUserExtensionNames", [])) > 0:
-        self.scope = "user"
-        self.scope_property = "gPCUserExtensionNames"
+        self.scope = LDAPGPOScope.USER
 
       else:
-        self.scope = "machine"
-        self.scope_property = "gPCMachineExtensionNames"
+        self.scope = LDAPGPOScope.MACHINE
 
     except Exception as e:
       raise(f"LDAPGPO::Error while trying to get group policy scope\n{e}")
 
-    self.guids = re.findall(UUID_REG, self.entry[self.scope_property])
+    self.guids = re.findall(UUID_REG, self.entry[self.scope.value])
     self.infos = [ MS_GPPREF[guid] for guid in self.guids ]
     
   # ****************************************************************
