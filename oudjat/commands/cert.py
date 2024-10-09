@@ -5,8 +5,8 @@ from multiprocessing import Pool
 from oudjat.utils import ColorPrint
 from oudjat.utils import str_file_option_handle
 from oudjat.model.vulnerability import CVE
-from oudjat.connectors.cert import CERTFRPage
-from oudjat.connectors.cert import CERTFRConnector
+from oudjat.connectors.cert.certfr import CERTFRPage
+from oudjat.connectors.cert.certfr import CERTFRConnector
 
 from . import Target
 
