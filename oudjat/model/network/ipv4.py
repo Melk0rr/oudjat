@@ -1,9 +1,12 @@
 """ IPv4 module """
-from typing import List
+from typing import List, Union
 
 from . import Port
 
 class IPv4Base:
+
+  # ****************************************************************
+  # Attributes & Constructors
 
   def __init__(self, addr: str):
     """ Constructor """
@@ -14,6 +17,9 @@ class IPv4Base:
 
     self.address: str = addr  
     self.bytes: List[bytes] = [ (int(x)).to_bytes(1, byteorder="little") for x in addr_split ]
+
+  # ****************************************************************
+  # Methods
 
   def get_address(self) -> str:
     """ Getter for ip string address """
@@ -43,6 +49,9 @@ class IPv4Base:
 class IPv4Mask(IPv4Base):
   """ Simple Class providing tools to manipulate IPv4 mask """
 
+  # ****************************************************************
+  # Attributes & Constructors
+
   def __init__(self, mask: int | str):
     """ Constructor """
 
@@ -61,6 +70,9 @@ class IPv4Mask(IPv4Base):
       raise ValueError(f"Invalid mask provided : {mask}. You must provide a string or an integer !")
 
     self.cidr = cidr
+
+  # ****************************************************************
+  # Methods
 
   def get_cidr(self) -> int:
     """ Getter for mask CIDR """
@@ -102,6 +114,9 @@ class IPv4Mask(IPv4Base):
 class IPv4(IPv4Base):
   """ Simple Class providing tools to manipulate IPv4 addresses """
 
+  # ****************************************************************
+  # Attributes & Constructors
+
   def __init__(self, address: str, mask: str = None):
     """ Constructor """
     
@@ -116,6 +131,9 @@ class IPv4(IPv4Base):
 
     self.ports = []
 
+  # ****************************************************************
+  # Methods
+
   def get_mask(self) -> IPv4Mask:
     """ Getter for ip mask instance """
     return self.mask
@@ -128,7 +146,7 @@ class IPv4(IPv4Base):
     """ Getter for the Port strings """
     return [p.to_string() for p in self.ports]
 
-  def set_mask(self, mask: int | str):
+  def set_mask(self, mask: Union[int, str]):
     """ Setter for ip mask """
     self.mask = IPv4Mask(mask)
 
@@ -140,7 +158,7 @@ class IPv4(IPv4Base):
     for p in ports:
       self.append_open_port(p)
 
-  def is_port_in_list(self, port: int | Port) -> bool:
+  def is_port_in_list(self, port: Union[int, Port]) -> bool:
     """ Check if the given port is in the list of ports """
     port_number = port
 
@@ -149,7 +167,7 @@ class IPv4(IPv4Base):
 
     return port_number in self.get_port_numbers()
 
-  def append_open_port(self, port: int | Port):
+  def append_open_port(self, port: Union[int, Port]):
     """ Append the port to the list of open ports """
     is_port = isinstance(port, Port)
     is_number = isinstance(port, int)
@@ -173,7 +191,7 @@ class IPv4(IPv4Base):
 
     del self.ports[index]
 
-  def is_in_subnet(self, net_addr: str) -> bool:
+  def is_in_subnet(self, net_addr: Union[str, IPv4]) -> bool:
     """ Checks if the current ip is in the provided subnet """
     if "/" not in net_addr:
       raise ValueError(f"Invalid net address provided: {net_addr} ! Please include a net mask as CIDR notation")
