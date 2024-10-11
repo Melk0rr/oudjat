@@ -3,6 +3,24 @@ from typing import List, Union
 
 from . import Port
 
+def b_not(b: bytes) -> bytes:
+  """ Byte negation """
+  return int.to_bytes(~int.from_bytes(b, 'big') & 0xff)
+
+
+def ipstr_2_bytes(ip_str: str) -> List[bytes]:
+  """ Converts an ip string into a byte array """
+  
+  addr_split = ip_str.split('.')
+  if len(addr_split) != 4:
+    raise ValueError(f"Invalid IP address provided: {ip_str}")
+
+  return [ (int(x)).to_bytes(1, byteorder="little") for x in addr_split ]
+
+def bytes_2_ipstr(b_array: List[bytes]) -> str:
+  """ Converts a byte array into an ip string  """
+  return '.'.join(f"{int.from_bytes(b, 'big')}" for b in b_array)
+
 class IPv4Base:
 
   # ****************************************************************
@@ -11,12 +29,8 @@ class IPv4Base:
   def __init__(self, addr: str):
     """ Constructor """
 
-    addr_split = addr.split('.')
-    if len(addr_split) != 4:
-      raise ValueError(f"Invalid IP address provided: {addr}")
-
-    self.address: str = addr  
-    self.bytes: List[bytes] = [ (int(x)).to_bytes(1, byteorder="little") for x in addr_split ]
+    self.bytes: List[bytes] = ipstr_2_bytes(addr)
+    self.address: str = addr
 
   # ****************************************************************
   # Methods
@@ -39,7 +53,7 @@ class IPv4Base:
 
   def to_binary_array(self) -> List[bin]:
     """ Returns the current ip as a binary table """
-    return [ bin(int(x, base=16))[2:] for x in self.to_hex_array() ]
+    return [ bin(int(x, base=16))[2:].zfill(8) for x in self.to_hex_array() ]
 
   def to_int(self) -> int:
     """ Returns the current ip as an integer """
@@ -81,6 +95,10 @@ class IPv4Mask(IPv4Base):
   def to_int(self) -> int:
     """ Returns the current mask as an integer """
     return (0xffffffff << (32 - self.cidr)) & 0xffffffff
+
+  def get_wildcard(self) -> IPv4Base:
+    """ Returns mask wildcard """
+    return IPv4Base(bytes_2_ipstr([ b_not(b) for b in self.bytes ]))
 
   @staticmethod
   def get_netcidr(mask: str) -> int:
@@ -191,7 +209,7 @@ class IPv4(IPv4Base):
 
     del self.ports[index]
 
-  def is_in_subnet(self, net_addr: Union[str, IPv4]) -> bool:
+  def is_in_subnet(self, net_addr: str) -> bool:
     """ Checks if the current ip is in the provided subnet """
     if "/" not in net_addr:
       raise ValueError(f"Invalid net address provided: {net_addr} ! Please include a net mask as CIDR notation")
