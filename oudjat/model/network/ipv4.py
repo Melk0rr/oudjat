@@ -1,25 +1,9 @@
 """ IPv4 module """
 from typing import List, Union
 
+from oudjat.utils import b_and, b_not, bytes_2_ipstr, ipstr_2_bytes, byte_2_bin
+
 from . import Port
-
-def b_not(b: bytes) -> bytes:
-  """ Byte negation """
-  return int.to_bytes(~int.from_bytes(b, 'big') & 0xff)
-
-
-def ipstr_2_bytes(ip_str: str) -> List[bytes]:
-  """ Converts an ip string into a byte array """
-  
-  addr_split = ip_str.split('.')
-  if len(addr_split) != 4:
-    raise ValueError(f"Invalid IP address provided: {ip_str}")
-
-  return [ (int(x)).to_bytes(1, byteorder="little") for x in addr_split ]
-
-def bytes_2_ipstr(b_array: List[bytes]) -> str:
-  """ Converts a byte array into an ip string  """
-  return '.'.join(f"{int.from_bytes(b, 'big')}" for b in b_array)
 
 class IPv4Base:
 
@@ -53,7 +37,7 @@ class IPv4Base:
 
   def to_binary_array(self) -> List[bin]:
     """ Returns the current ip as a binary table """
-    return [ bin(int(x, base=16))[2:].zfill(8) for x in self.to_hex_array() ]
+    return [ byte_2_bin(b) for b in self.bytes ]
 
   def to_int(self) -> int:
     """ Returns the current ip as an integer """
@@ -66,9 +50,9 @@ class IPv4Mask(IPv4Base):
   # ****************************************************************
   # Attributes & Constructors
 
-  def __init__(self, mask: int | str):
+  def __init__(self, mask: Union[int, str]):
     """ Constructor """
-
+    
     if type(mask) is str:
       super().__init__(mask)
       cidr = ''.join(self.to_binary_array()).count('1')
@@ -135,17 +119,23 @@ class IPv4(IPv4Base):
   # ****************************************************************
   # Attributes & Constructors
 
-  def __init__(self, address: str, mask: str = None):
+  def __init__(self, address: str, mask: Union[int, str, IPv4Mask] = None):
     """ Constructor """
     
-    net = mask
     if "/" in address:
       address, net = address.split("/")
+      net = int(net)
 
     super().__init__(address)
 
-    if net:
-      self.mask = IPv4Mask(int(net))
+    if net is not None and mask is None:
+      mask = net
+
+    if mask is not None:
+      if not isinstance(mask, IPv4Mask):
+        mask = IPv4Mask(mask)
+
+    self.mask = mask
 
     self.ports = []
 
@@ -164,9 +154,12 @@ class IPv4(IPv4Base):
     """ Getter for the Port strings """
     return [p.to_string() for p in self.ports]
 
-  def set_mask(self, mask: Union[int, str]):
+  def set_mask(self, mask: Union[int, str, IPv4Mask]):
     """ Setter for ip mask """
-    self.mask = IPv4Mask(mask)
+    if not isinstance(mask, IPv4Mask):
+      mask = IPv4Mask(mask)
+
+    self.mask = mask
 
   def set_open_ports(self, ports: List[int] | List[Port]):
     """ Set the open ports """
@@ -175,6 +168,13 @@ class IPv4(IPv4Base):
 
     for p in ports:
       self.append_open_port(p)
+
+  def get_net_addr(self) -> "IPv4":
+    """ Returns network address for given IP """
+    return IPv4(
+      bytes_2_ipstr([ b_and(self.bytes[i], self.mask.bytes[i]) for i, x in enumerate(self.bytes) ]) + 
+      f"/{self.mask.cidr}"
+    )
 
   def is_port_in_list(self, port: Union[int, Port]) -> bool:
     """ Check if the given port is in the list of ports """
