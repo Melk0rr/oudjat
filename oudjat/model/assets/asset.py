@@ -10,6 +10,7 @@ class Asset:
     self,
     id: str,
     name: str,
+    label: str,
     type: AssetType,
     desctiption: str = None
   ):
