@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Dict
+from ldap3.utils.dn import parse_dn
 
 from oudjat.connectors.ldap.objects import LDAPEntry
 
@@ -11,3 +12,13 @@ class LDAPObject:
     """ Constructor """
     
     self.entry = ldap_entry.attr()
+    self.dn = self.entry.get("distinguishedName")
+    self.name = self.entry.get("name")
+    self.description = self.entry.get("description", "")
+
+    self.object_classes = self.entry.get("objectClass", [])
+    
+    self.dn_pices = parse_dn(self.dn, escape=True)
+
+  # ****************************************************************
+  # Methods
