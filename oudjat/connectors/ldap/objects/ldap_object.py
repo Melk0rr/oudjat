@@ -22,3 +22,7 @@ class LDAPObject:
 
   # ****************************************************************
   # Methods
+
+  def is_of_object_class(self, obj_cl: str) -> bool:
+    """ Checks if the current object is of given class """
+    return obj_cl.lower() in self.object_classes
