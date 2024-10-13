@@ -4,6 +4,9 @@ from oudjat.connectors.ldap.objects.account import is_disabled, pwd_expires
 class LDAPAccount(LDAPObject):
   def __init__(self, entry: LDAPEntry):
     """ Construcotr """
+
+    # ****************************************************************
+    # Attributes & Constructors
     
     super().__init__(ldap_entry=entry)
     self.account_control = entry.get("userAccountControl")    
@@ -15,3 +18,7 @@ class LDAPAccount(LDAPObject):
       
     if not pwd_expires(self.account_control):
       self.pwd_expires = False
+
+  # ****************************************************************
+  # Methods
+  
