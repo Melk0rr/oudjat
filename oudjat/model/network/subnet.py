@@ -45,8 +45,8 @@ class Subnet:
         
         if (
           (ip.is_in_subnet(self.addr.get_address())) and
-          (ip.address != self.addr.address) and
-          (ip.address != self.broadcast.address)
+          (ip.get_address() != self.addr.get_address()) and
+          (ip.get_address() != self.broadcast.get_address())
         ):
           self.hosts[ip.address] = ip
         
@@ -63,3 +63,16 @@ class Subnet:
       addresses.append(f"{('.'.join(f"{o}" for o in int_2_bytes(i)))}/{self.addr.get_mask().get_cidr()}")
       
     return addresses
+
+  def add_host(self, host: Union[str, IPv4]) -> None:
+    """ Adds a new host to the subnet """
+    
+    if not isinstance(host, IPv4):
+      host = IPv4(host)
+      
+    if (
+      (host.is_in_subnet(self.addr.get_address())) and
+      (host.get_address() != self.addr.get_address()) and
+      (host.get_address() != self.broadcast.get_address())
+    ):
+      self.hosts[host.get_address()] = host
