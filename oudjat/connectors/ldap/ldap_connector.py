@@ -7,9 +7,8 @@ from typing import List, Union, Any
 from oudjat.utils import ColorPrint
 
 from oudjat.connectors import Connector
-from oudjat.connectors.ldap.objects import LDAPEntry
-from oudjat.connectors.ldap.objects import LDAPObjectType
-from oudjat.connectors.ldap.objects import LDAPGroupPolicyObject
+from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObjectType, LDAPGroupPolicyObject
+from oudjat.connectors.ldap.objects.subnet import LDAPSubnet
 
 class LDAPConnector(Connector):
   """ LDAP connector to interact and query LDAP servers """
@@ -228,5 +227,12 @@ class LDAPConnector(Connector):
       search_filter=search_filter,
       attributes=attributes
     )
+
+    subnet = list(
+      map(
+        lambda entry: LDAPSubnet(ldap_entry=entry),
+        subnet_entries
+      )
+    )
     
-    return subnet_entries
+    return subnet
