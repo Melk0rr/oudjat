@@ -21,7 +21,7 @@ class Subnet:
     
     if not isinstance(addr, IPv4):
       addr = IPv4(addr)
-      
+
     if addr.get_mask() is None:
       raise ValueError(f"Subnet::Provided net address has no mask set: {addr.get_address()}")
 
