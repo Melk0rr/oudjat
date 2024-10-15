@@ -16,7 +16,7 @@ class LDAPSubnet(LDAPObject, Subnet):
       self,
       addr=ldap_entry.get("name"),
       name=ldap_entry.get("location"),
-      description=ldap_entry.get("description")
+      description=' '.join(ldap_entry.get("description"))
     )
 
   # ****************************************************************
