@@ -7,10 +7,10 @@ class LDAPEntry(dict):
     """ Retreive entry dn """
     return self.__getitem__("dn")
 
-  def get(self, key: str) -> Any:
+  def get(self, key: str, default_value: Any = None) -> Any:
     """ Retreive the value of the given attribute """
     if key not in self.__getitem__("attributes").keys():
-      return None
+      return default_value
 
     item = self.__getitem__("attributes").__getitem__(key)
 
