@@ -33,8 +33,8 @@ class LDAPGroupPolicyObject(LDAPObject):
     if "groupPolicyContainer" not in self.entry.get("objectClass"):
       raise ValueError("Invalid LDAPEntry provided. Please provide a groupPolicyContainer type entry")
 
-    self.name = self.entry["name"]
-    self.display_name = self.entry["displayName"]
+    self.name = self.entry.get("name")
+    self.display_name = self.entry.get("displayName")
     
     self.scope = None
     self.scope_property = None
