@@ -11,7 +11,7 @@ class LDAPObject:
   def __init__(self, ldap_entry: LDAPEntry):
     """ Constructor """
     
-    self.entry = ldap_entry.attr()
+    self.entry = ldap_entry
     self.dn = self.entry.get_dn()
     self.name = self.entry.get("name")
     self.description = self.entry.get("description", "")
