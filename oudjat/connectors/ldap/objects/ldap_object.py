@@ -33,6 +33,7 @@ class LDAPObject:
     self.object_classes = self.entry.get("objectClass", [])
     
     self.dn_pieces = parse_dn(self.dn)
+    self.domain = '.'.join(self.dn_pieces.get("DC"))
 
   # ****************************************************************
   # Methods
@@ -44,6 +45,14 @@ class LDAPObject:
   def get_entry(self) -> Dict:
     """ Getter for entry attributes """
     return self.entry
+  
+  def get_dn_pieces(self) -> Dict:
+    """ Getter for object dn pieces """
+    return self.dn_pieces
+  
+  def get_domain(self) -> str:
+    """ Getter for object domain """
+    return self.domain
 
   def is_of_object_class(self, obj_cl: str) -> bool:
     """ Checks if the current object is of given class """
