@@ -1,7 +1,21 @@
 from typing import List, Dict
-from ldap3.utils.dn import parse_dn
 
 from oudjat.connectors.ldap.objects import LDAPEntry
+
+def parse_dn(dn: str) -> Dict:
+  """ Parses a DN into pieces """
+  split = dn.split(',')
+  pieces = {}
+  
+  for p in split:
+    p_split = p.split('=')
+    
+    if p_split[0] not in pieces.keys():
+      pieces[p_split[0]] = []
+      
+    pieces[p_split[0]].append(p_split[1])
+    
+  return pieces
 
 class LDAPObject:
   """ Generic LDAP object """
@@ -18,7 +32,7 @@ class LDAPObject:
 
     self.object_classes = self.entry.get("objectClass", [])
     
-    self.dn_pieces = parse_dn(self.dn, escape=True)
+    self.dn_pieces = parse_dn(self.dn)
 
   # ****************************************************************
   # Methods
