@@ -12,7 +12,11 @@ class LDAPSubnet(LDAPObject, Subnet):
   def __init__(self, ldap_entry: LDAPEntry):
     """ Constructor """
     super().__init__(ldap_entry=ldap_entry)
-    Subnet.__init__(addr=ldap_entry.get("name"))
+    Subnet.__init__(
+      addr=ldap_entry.get("name"),
+      name=ldap_entry.get("location"),
+      description=ldap_entry.get("description")
+    )
 
   # ****************************************************************
   # Methods
