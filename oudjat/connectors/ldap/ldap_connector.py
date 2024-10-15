@@ -224,7 +224,7 @@ class LDAPConnector(Connector):
     
     subnet_entries = self.search(
       search_type="SUBNET",
-      search_base=f"CN=Subnets,CN=Sites,CN=Configuration,{sd_bc}",
+      search_base=f"CN=Subnets,CN=Sites,CN=Configuration,{sb_dc}",
       search_filter=search_filter,
       attributes=attributes
     )
