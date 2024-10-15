@@ -4,7 +4,7 @@ import re
 from enum import Enum
 from typing import List, Dict, Union
 
-from oudjat.connectors.ldap import LDAPConnector
+import oudjat.connectors.ldap
 from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject, LDAPObjectType
 
 from . import MS_GPPREF
@@ -57,7 +57,7 @@ class LDAPGroupPolicyObject(LDAPObject):
 
     self.guids = re.findall(UUID_REG, self.entry.get(self.scope.value))
     self.infos = [ MS_GPPREF[guid] for guid in self.guids ]
-    
+
   # ****************************************************************
   # Methods
   
@@ -71,7 +71,7 @@ class LDAPGroupPolicyObject(LDAPObject):
   
   def get_linked_objects(
     self,
-    ldap_connector: LDAPConnector,
+    ldap_connector: oudjat.connectors.ldap.LDAPConnector,
     attributes: Union[str, List[str]] = None,
     ou: str = "*"
   ) -> List[LDAPEntry]:
