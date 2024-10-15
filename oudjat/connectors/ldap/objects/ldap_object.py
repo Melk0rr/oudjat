@@ -18,7 +18,7 @@ class LDAPObject:
 
     self.object_classes = self.entry.get("objectClass", [])
     
-    self.dn_pices = parse_dn(self.dn, escape=True)
+    self.dn_pieces = parse_dn(self.dn, escape=True)
 
   # ****************************************************************
   # Methods
