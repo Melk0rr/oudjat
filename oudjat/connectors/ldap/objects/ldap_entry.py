@@ -3,6 +3,10 @@ from typing import Any
 class LDAPEntry(dict):
   """ LDAP entry dict """
 
+  def get_dn(self) -> str:
+    """ Retreive entry dn """
+    return self.__getitem__("dn")
+
   def get(self, key: str) -> Any:
     """ Retreive the value of the given attribute """
     if key not in self.__getitem__("attributes").keys():
