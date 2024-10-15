@@ -33,7 +33,7 @@ class LDAPObject:
     self.object_classes = self.entry.get("objectClass", [])
     
     self.dn_pieces = parse_dn(self.dn)
-    self.domain = '.'.join(self.dn_pieces.get("DC"))
+    self.domain = '.'.join(self.dn_pieces.get("DC")).lower()
 
   # ****************************************************************
   # Methods
