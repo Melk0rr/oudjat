@@ -4,8 +4,8 @@ import re
 from enum import Enum
 from typing import List, Dict, Union
 
-import oudjat.connectors.ldap
-from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject
+from oudjat.connectors.ldap import LDAPConnector
+from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject, LDAPObjectType
 
 from . import MS_GPPREF
 
@@ -30,7 +30,7 @@ class LDAPGroupPolicyObject(LDAPObject):
     """ Constructor """
     super().__init__(ldap_entry=ldap_entry)
 
-    if "groupPolicyContainer" not in self.entry.get("objectClass"):
+    if LDAPObjectType.GPO.get("objectClass") not in self.entry.get("objectClass"):
       raise ValueError("Invalid LDAPEntry provided. Please provide a groupPolicyContainer type entry")
 
     self.name = self.entry.get("name")
@@ -46,7 +46,7 @@ class LDAPGroupPolicyObject(LDAPObject):
       self.state = LDAPGPOState(int(wql.split(';')[-1][0]))
     
     try:
-      if len(self.entry.get("gPCUserExtensionNames", [])) > 0:
+      if self.entry.get(LDAPGPOScope.USER.value) is not None:
         self.scope = LDAPGPOScope.USER
 
       else:
@@ -71,7 +71,7 @@ class LDAPGroupPolicyObject(LDAPObject):
   
   def get_linked_objects(
     self,
-    ldap_connector: oudjat.connectors.ldap.LDAPConnector,
+    ldap_connector: LDAPConnector,
     attributes: Union[str, List[str]] = None,
     ou: str = "*"
   ) -> List[LDAPEntry]:
