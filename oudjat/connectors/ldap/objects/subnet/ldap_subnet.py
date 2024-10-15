@@ -13,6 +13,7 @@ class LDAPSubnet(LDAPObject, Subnet):
     """ Constructor """
     super().__init__(ldap_entry=ldap_entry)
     Subnet.__init__(
+      self,
       addr=ldap_entry.get("name"),
       name=ldap_entry.get("location"),
       description=ldap_entry.get("description")
