@@ -53,6 +53,10 @@ class Subnet:
   # ****************************************************************
   # Methods
 
+  def get_address(self) -> str:
+    """ Getter for subnet address """
+    return self.addr
+
   def list_addresses(self) -> List[str]:
     """ Lists all possible hosts in subnet """
     start = self.addr.to_int() + 1
