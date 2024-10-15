@@ -81,6 +81,11 @@ class Subnet:
     ):
       self.hosts[host.get_address()] = host
 
-  def to_string(self) -> str:
+  def to_string(self, showDescription: bool = False) -> str:
     """ Returns a string based on current instance """
-    return f"{self.name}: {self.addr.get_address()}/{self.addr.get_mask().get_cidr()}"
+    sub_str = f"{self.name}: {self.addr.get_address()}/{self.addr.get_mask().get_cidr()}"
+
+    if showDescription:
+      sub_str += f" ({self.description})"
+
+    return sub_str
