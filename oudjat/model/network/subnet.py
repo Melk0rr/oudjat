@@ -83,4 +83,4 @@ class Subnet:
 
   def to_string(self) -> str:
     """ Returns a string based on current instance """
-    return f"{self.name}: {self.addr.get_address()}/{self.addr.get_cidr()}"
+    return f"{self.name}: {self.addr.get_address()}/{self.addr.get_mask().get_cidr()}"
