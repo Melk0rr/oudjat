@@ -3,7 +3,7 @@ from typing import List
 from oudjat.model.network import Subnet
 from oudjat.connectors.ldap.objects import LDAPObject, LDAPEntry
 
-class LDAPSubnet(Subnet, LDAPObject):
+class LDAPSubnet(LDAPObject, Subnet):
   """ A class to describe LDAP subnet objects """
 
   # ****************************************************************
@@ -11,7 +11,8 @@ class LDAPSubnet(Subnet, LDAPObject):
 
   def __init__(self, ldap_entry: LDAPEntry):
     """ Constructor """
-    super().__init__(ldap_entry=ldap_entry, addr=ldap_entry.get("name"))
+    super(LDAPObject, self).__init__(ldap_entry=ldap_entry)
+    super(Subnet, self).__init__(addr=ldap_entry.get("name"))
 
   # ****************************************************************
   # Methods
