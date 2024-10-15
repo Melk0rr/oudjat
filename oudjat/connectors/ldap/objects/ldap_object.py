@@ -12,7 +12,7 @@ class LDAPObject:
     """ Constructor """
     
     self.entry = ldap_entry.attr()
-    self.dn = self.entry.get("distinguishedName", ldap_entry.get("dn"))
+    self.dn = self.entry.get_dn()
     self.name = self.entry.get("name")
     self.description = self.entry.get("description", "")
 
