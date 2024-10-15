@@ -23,6 +23,14 @@ class LDAPObject:
   # ****************************************************************
   # Methods
 
+  def get_dn(self) -> str:
+    """ Getter for ldap object dn """
+    return self.dn
+
+  def get_entry(self) -> Dict:
+    """ Getter for entry attributes """
+    return self.entry
+
   def is_of_object_class(self, obj_cl: str) -> bool:
     """ Checks if the current object is of given class """
     return obj_cl.lower() in self.object_classes
