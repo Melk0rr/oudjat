@@ -55,20 +55,20 @@ class LDAPGroupPolicyObject(LDAPObject):
     except Exception as e:
       raise(f"LDAPGPO::Error while trying to get group policy scope\n{e}")
 
-    self.guids = re.findall(UUID_REG, self.entry.get(self.scope.value))
-    self.infos = [ MS_GPPREF[guid] for guid in self.guids ]
+    guids = re.findall(UUID_REG, self.entry.get(self.scope.value))
+    self.guids = { guid: MS_GPPREF[guid] for guid in guids }
 
   # ****************************************************************
   # Methods
   
+  def get_display_name(self) -> str:
+    """ Getter for GPO display name """
+    return self.display_name
+
   def get_guids(self) -> List[str]:
     """ Getter for policy GUIDs """
     return self.guids
 
-  def get_infos(self) -> List[str]:
-    """ Getter for policy infos """
-    return self.infos
-  
   def get_linked_objects(
     self,
     ldap_connector: oudjat.connectors.ldap.LDAPConnector,
