@@ -229,6 +229,4 @@ class LDAPConnector(Connector):
       attributes=attributes
     )
     
-    
-    
-    return subnets
+    return subnet_entries
