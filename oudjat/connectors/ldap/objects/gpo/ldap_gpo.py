@@ -56,7 +56,7 @@ class LDAPGroupPolicyObject(LDAPObject):
       raise(f"LDAPGPO::Error while trying to get group policy scope\n{e}")
 
     guids = re.findall(UUID_REG, self.entry.get(self.scope.value))
-    self.guids = { guid: MS_GPPREF[guid] for guid in guids }
+    self.infos = { guid: MS_GPPREF[guid] for guid in guids }
 
   # ****************************************************************
   # Methods
@@ -65,9 +65,9 @@ class LDAPGroupPolicyObject(LDAPObject):
     """ Getter for GPO display name """
     return self.display_name
 
-  def get_guids(self) -> List[str]:
+  def get_infos(self) -> List[str]:
     """ Getter for policy GUIDs """
-    return self.guids
+    return self.infos
 
   def get_linked_objects(
     self,
