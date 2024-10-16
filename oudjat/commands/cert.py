@@ -98,7 +98,5 @@ class Cert(Target):
       for cert_data in pool.imap_unordered(self.cert_process, self.unique_targets):
         self.results.append(cert_data)
 
-    print(self.results)
-
     if self.options["--export-csv"]:
       super().res_2_csv()
