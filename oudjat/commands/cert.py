@@ -8,7 +8,7 @@ from oudjat.model.vulnerability import CVE
 from oudjat.connectors.cert.certfr import CERTFRPage
 from oudjat.connectors.cert.certfr import CERTFRConnector
 
-from . import Target
+from .target import Target
 
 
 class Cert(Target):

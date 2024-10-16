@@ -5,7 +5,7 @@ from oudjat.utils import export_csv, import_csv
 from oudjat.utils import str_file_option_handle
 from oudjat.model.vulnerability import CVE
 
-from . import Base
+from .base import Base
 
 
 class Target(Base):
