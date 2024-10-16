@@ -64,10 +64,13 @@ class Cert(Target):
       cert_page = self.connector.search(search_filter=target)[0]
       cert_data = cert_page.to_dictionary()
 
+      # Resolve CVE data
       CVE.resolve_cve_data(cves=cert_page.get_cves(), cve_data=self.options["--cve-list"])
       max_cves = CVE.max_cve(cert_page.get_cves())
+      
+      cert_data["cvss"] = 0
 
-      if len(max_cves) > 0:
+      if max_cves is not None and len(max_cves) > 0:
         cert_data["cves"] = [ cve.get_ref() for cve in max_cves ]
         cert_data["cvss"] = max_cves[0].get_cvss()
         cert_data["documentations"].extend([ cve.get_link() for cve in max_cves ])
@@ -78,10 +81,8 @@ class Cert(Target):
             if isinstance(v, list):
               cert_data[k] = ','.join(v)
       
-      else:
-        cert_data["cvss"] = 0
-
       # If keywords are provided in any way: compare them with results
+      cert_data["match"] = ''
       if self.options["--keywords"]:
         cert_data["match"] = '-'.join(self.keyword_check(cert_page))
     
@@ -96,7 +97,8 @@ class Cert(Target):
     with Pool(processes=5) as pool:
       for cert_data in pool.imap_unordered(self.cert_process, self.unique_targets):
         self.results.append(cert_data)
-      
+
+    print(self.results)
 
     if self.options["--export-csv"]:
       super().res_2_csv()
