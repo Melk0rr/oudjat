@@ -38,7 +38,7 @@ class CERTFRConnector(Connector):
     except ConnectionError as e:
       raise(f"Could not connect to {CERTFRPage.BASE_LINK}\n{e}")
 
-  def search(self, search_filter: Union[str, List[str]]) -> List["CERTFRPage"]:
+  def search(self, search_filter: Union[str, List[str]]) -> List[CERTFRPage]:
     """ Search for page or ref in CERTFR website """
 
     res = []
