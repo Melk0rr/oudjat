@@ -17,13 +17,13 @@ class NistConnector(Connector):
 
     super().__init__(target=self.target)
     
-  def connect(self, target: str) -> None:
+  def connect(self) -> None:
     """ Test connection to NIST API """
     self.connection = None
 
     try:
       headers = { 'Accept': 'application/json' }
-      req = requests.get(target, headers=headers)
+      req = requests.get(self.target, headers=headers)
       
       if req.status_code == 200:
         self.connection = json.loads(req.content.decode("utf-8"))
