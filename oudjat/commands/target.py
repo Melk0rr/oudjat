@@ -1,5 +1,7 @@
 """ Target module handling targeting operations and data gathering """
 from typing import List, Dict
+from multiprocessing import Pool
+
 from oudjat.utils import ColorPrint
 from oudjat.utils import export_csv, import_csv
 from oudjat.utils import str_file_option_handle
@@ -24,8 +26,10 @@ class Target(Base):
       
       def cve_import_callback(reader):
         cve_instances = []
-        for row in reader:
-          cve_instances.append(CVE.create_from_dict(row))
+
+        with Pool(processes=5) as pool:
+          for cve in pool.imap_unordered(CVE.create_from_dict, reader):
+            cve_instances.append(cve)
 
         return cve_instances
       
