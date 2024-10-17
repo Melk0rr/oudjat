@@ -28,7 +28,7 @@ class LDAPObject:
     self.entry = ldap_entry
     self.dn = self.entry.get_dn()
     self.name = self.entry.get("name")
-    self.description = ' '.join(self.entry.get("description"))
+    self.description = ' '.join(self.entry.get("description", []))
 
     self.object_classes = self.entry.get("objectClass", [])
     
