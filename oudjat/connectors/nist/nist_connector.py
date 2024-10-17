@@ -17,7 +17,7 @@ class NistConnector(Connector):
 
     super().__init__(target=self.target)
     
-  def connect(self) -> None:
+  def connect(self, target: str) -> None:
     """ Test connection to NIST API """
     self.connection = None
 
