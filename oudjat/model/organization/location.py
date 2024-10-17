@@ -1,5 +1,7 @@
 from typing import Dict, Union, List
 
+from oudjat.model.assets import AssetType
+
 class Location:
   """ A class to describe generic location with subnets, assets, users """
 
@@ -27,3 +29,4 @@ class Location:
     
   def addAsset(asset: Asset, type: AssetType) -> None:
     """ Adds a new asset to the current location """
+    
