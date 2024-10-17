@@ -28,12 +28,15 @@ class LDAPObject:
     self.entry = ldap_entry
     self.dn = self.entry.get_dn()
     self.name = self.entry.get("name")
-    self.description = self.entry.get("description")
+    self.description = ' '.join(self.entry.get("description"))
 
     self.object_classes = self.entry.get("objectClass", [])
     
     self.dn_pieces = parse_dn(self.dn)
     self.domain = '.'.join(self.dn_pieces.get("DC")).lower()
+
+    self.creation_date = self.entry.get("whenCreated")
+    self.change_date = self.entry.get("whenChanged")
 
   # ****************************************************************
   # Methods
@@ -41,6 +44,10 @@ class LDAPObject:
   def get_dn(self) -> str:
     """ Getter for ldap object dn """
     return self.dn
+  
+  def get_name(self) -> str:
+    """ Getter for ldap object name """
+    return self.name
 
   def get_entry(self) -> Dict:
     """ Getter for entry attributes """
@@ -50,9 +57,21 @@ class LDAPObject:
     """ Getter for object dn pieces """
     return self.dn_pieces
   
+  def get_description(self) -> str:
+    """ Getter for ldap object description """
+    return self.description
+
   def get_domain(self) -> str:
     """ Getter for object domain """
     return self.domain
+  
+  def get_creation_date(self) -> str:
+    """ Getter for ldap object creation date"""
+    return self.creation_date
+
+  def get_change_date(self) -> str:
+    """ Getter for ldap object change date"""
+    return self.change_date
 
   def is_of_object_class(self, obj_cl: str) -> bool:
     """ Checks if the current object is of given class """
