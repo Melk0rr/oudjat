@@ -1,5 +1,6 @@
 from typing import List, Dict
 
+from oudjat.utils import date_format_from_flag, DATE_TIME_FLAGS
 from oudjat.connectors.ldap.objects import LDAPEntry
 
 def parse_dn(dn: str) -> Dict:
@@ -76,3 +77,14 @@ class LDAPObject:
   def is_of_object_class(self, obj_cl: str) -> bool:
     """ Checks if the current object is of given class """
     return obj_cl.lower() in self.object_classes
+
+  def to_dict(self) -> Dict:
+    """ Converts the current instance into a dict """
+    return {
+      "dn": self.dn,
+      "name": self.name,
+      "description": self.description,
+      "domain": self.domain,
+      "creation_date": self.creation_date.strftime(date_format_from_flag(DATE_TIME_FLAGS)),
+      "change_date": self.change_date.strftime(date_format_from_flag(DATE_TIME_FLAGS))
+    }
