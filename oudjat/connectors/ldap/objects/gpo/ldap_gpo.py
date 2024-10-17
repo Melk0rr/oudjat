@@ -37,9 +37,8 @@ class LDAPGroupPolicyObject(LDAPObject):
     self.display_name = self.entry.get("displayName")
     
     self.scope = None
-    self.scope_property = None
-
     self.state = None
+    
     wql = self.entry.get("gPCWQLFilter", None)
 
     if wql is not None:
@@ -85,6 +84,17 @@ class LDAPGroupPolicyObject(LDAPObject):
     )
 
     return linked_entries
+
+  def to_dict(self) -> Dict:
+    """ Converts the current instance into a dict """
+    base_dict = super().to_dict()
+    
+    return {
+      **base_dict,
+      "displayName": self.display_name,
+      "scope": self.scope.name,
+      "state": self.state.name
+    }
 
   # ****************************************************************
   # Static methods
