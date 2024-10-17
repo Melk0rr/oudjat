@@ -1,6 +1,6 @@
 from enum import Flag, auto
 
-class DateStrFlag(Enum):
+class DateStrFlag(Flag):
   """ Bit flag to handle date string format """
   YEAR  = auto()
   MONTH = auto()
