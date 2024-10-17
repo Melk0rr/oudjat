@@ -1,13 +1,13 @@
-from enum import Enum
+from enum import Flag, auto
 
 class DateStrFlag(Enum):
   """ Bit flag to handle date string format """
-  YEAR  = 1 << 0
-  MONTH = 1 << 1
-  DAY   = 1 << 2
-  HOUR  = 1 << 3
-  MIN   = 1 << 4
-  SEC   = 1 << 5
+  YEAR  = auto()
+  MONTH = auto()
+  DAY   = auto()
+  HOUR  = auto()
+  MIN   = auto()
+  SEC   = auto()
   
 
 DATE_FLAGS = DateStrFlag.YEAR | DateStrFlag.MONTH | DateStrFlag.DAY
@@ -24,22 +24,22 @@ def date_format_from_flag(
   date_list = []
   time_list = []
   
-  if flags & DateStrFlag.YEAR:
+  if DateStrFlag.YEAR in flags:
     date_list.append("%Y")
     
-  if flags & DateStrFlag.MONTH:
+  if DateStrFlag.MONTH in flags:
     date_list.append("%m")
   
-  if flags & DateStrFlag.DAY:
+  if DateStrFlag.DAY in flags:
     date_list.append("%d")
     
-  if flags & DateStrFlag.HOUR:
+  if DateStrFlag.HOUR in flags:
     time_list.append("%H")
     
-  if flags & DateStrFlag.MIN:
+  if DateStrFlag.MIN in flags:
     time_list.append("%M")
     
-  if flags & DateStrFlag.SEC:
+  if DateStrFlag.SEC in flags:
     time_list.append("%S")
     
   date_str = date_sep.join(date_list)
