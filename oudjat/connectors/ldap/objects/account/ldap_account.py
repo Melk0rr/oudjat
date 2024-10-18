@@ -5,6 +5,8 @@ from oudjat.utils import date_format_from_flag, DATE_TIME_FLAGS
 from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject
 from oudjat.connectors.ldap.objects.account import LDAPAccountFlag, check_account_flag, is_disabled, pwd_expires, pwd_expired
 
+MS_ACCOUNT_CTL_PROPERTY = "msDS-User-Account-Control-Computed"
+
 def days_diff(date: datetime) -> int:
   """ Returns difference between today and a past date """
   diff = -1
@@ -40,10 +42,14 @@ class LDAPAccount(LDAPObject):
       self.pwd_expires = True
 
     self.pwd_expired = False
-    if pwd_expired(self.account_control):
+    if pwd_expired(self.account_control) or pwd_expired(self.entry.get(MS_ACCOUNT_CTL_PROPERTY)):
       self.pwd_expired = True
 
-    self.account_flags = [ f.name for f in LDAPAccountFlag if check_account_flag(self.account_control, f) ]
+    self.account_flags = [
+      f.name for f in LDAPAccountFlag 
+      if check_account_flag(self.account_control, f) or 
+        check_account_flag(self.entry.get(MS_ACCOUNT_CTL_PROPERTY), f)
+    ]
 
   # ****************************************************************
   # Methods
