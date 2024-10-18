@@ -20,11 +20,13 @@ def acc_date_str(date: datetime) -> str:
   return date.strftime(date_format_from_flag(DATE_TIME_FLAGS))
 
 class LDAPAccount(LDAPObject):
+  """ A class to describe generic LDAP account objects """
+
+  # ****************************************************************
+    # Attributes & Constructors
+
   def __init__(self, ldap_entry: LDAPEntry):
     """ Construcotr """
-
-    # ****************************************************************
-    # Attributes & Constructors
     
     super().__init__(ldap_entry=ldap_entry)
     self.san = self.entry.get("sAMAccountName")
