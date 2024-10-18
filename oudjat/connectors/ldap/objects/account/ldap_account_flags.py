@@ -30,8 +30,12 @@ def check_account_flag(account_control: int, flag: LDAPAccountFlag) -> int:
 
 def is_disabled(account_control: int) -> bool:
 	""" Checks if an account is disabled based on its account control """
-	return check_account_flag(account_control, LDAPAccountFlag.ACCOUNT_DISABLE) > 0
+	return check_account_flag(account_control, LDAPAccountFlag.ACCOUNT_DISABLE)
 
 def pwd_expires(account_control: int) -> bool:
 	""" Checks if the account's password expires """
-	return check_account_flag(account_control, LDAPAccountFlag.PASSWD_DONT_EXPIRE) == 0
+	return not check_account_flag(account_control, LDAPAccountFlag.PASSWD_DONT_EXPIRE)
+
+def pwd_expired(account_control: int) -> bool:
+	""" Checks if the account's password is expired """
+	return check_account_flag(account_control, LDAPAccountFlag.PASSWORD_EXPIRED)
