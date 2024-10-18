@@ -2,6 +2,7 @@ from enum import Enum
 
 class LDAPAccountFlag(Enum):
 	""" Flags to exploit user account control """
+	SCRIPT = 1
 	ACCOUNT_DISABLE = 2
 	HOMEDIR_REQUIRED = 8
 	LOCKOUT = 16
