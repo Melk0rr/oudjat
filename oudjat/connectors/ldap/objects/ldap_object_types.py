@@ -75,6 +75,7 @@ class LDAPObjectType(Enum):
       "name",
       "objectClass",
       "objectGUID",
+      "objectSid",
       "whenChanged",
       "whenCreated",
     ]
