@@ -12,10 +12,9 @@ class NistConnector(Connector):
   
   def __init__(self):
     """ Constructor """
-    self.target = "https://services.nvd.nist.gov/rest/json/cves/2.0"
-    self.connection = None
 
-    super().__init__(target=self.target)
+    super().__init__(target="https://services.nvd.nist.gov/rest/json/cves/2.0")
+    self.connection = None
     
   def connect(self, target: str) -> None:
     """ Test connection to NIST API """
