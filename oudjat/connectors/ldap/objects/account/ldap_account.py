@@ -42,7 +42,7 @@ class LDAPAccount(LDAPObject):
     if pwd_expired(self.account_control):
       self.pwd_expires = True
 
-    self.account_flags = [ f for f in LDAPAccountFlag if check_account_flag(self.account_control, f) ]
+    self.account_flags = [ f.name for f in LDAPAccountFlag if check_account_flag(self.account_control, f) ]
 
   # ****************************************************************
   # Methods
