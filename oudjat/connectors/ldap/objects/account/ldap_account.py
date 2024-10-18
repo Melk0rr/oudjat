@@ -22,7 +22,7 @@ class LDAPAccount(LDAPObject):
     super().__init__(ldap_entry=ldap_entry)
     self.san = self.entry.get("sAMAccountName")
 
-    self.last_logon = self.entry.get("lastLogon")
+    self.last_logon = self.entry.get("lastLogonTimeStamp")
     self.last_logon_days = days_diff(self.last_logon)
 
     self.pwd_last_set = self.entry.get("pwdLastSet")
