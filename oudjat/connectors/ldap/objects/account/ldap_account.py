@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from typing import Dict
 
+from oudjat.utils import date_format_from_flag, DATE_TIME_FLAGS
 from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject
 from oudjat.connectors.ldap.objects.account import LDAPAccountFlag, check_account_flag, is_disabled, pwd_expires, pwd_expired
 
@@ -56,9 +57,9 @@ class LDAPAccount(LDAPObject):
       "status": self.status,
       "pwd_expires": self.pwd_expires,
       "pwd_expired": self.pwd_expired,
-      "last_logon": self.last_logon,
+      "last_logon": self.last_logon.strftime(date_format_from_flag(DATE_TIME_FLAGS)),
       "last_logon_days": self.last_logon_days,
-      "pwd_last_set": self.pwd_last_set,
+      "pwd_last_set": self.pwd_last_set.strftime(date_format_from_flag(DATE_TIME_FLAGS)),
       "pwd_last_set_days": self.pwd_last_set_days,
       "account_ctl": self.account_control,
       "account_flags": self.account_flags
