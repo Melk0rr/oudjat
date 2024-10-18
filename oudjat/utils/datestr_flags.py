@@ -1,4 +1,3 @@
-from typing import List, Union
 from enum import Enum, Flag, auto
 
 class DateStrFlag(Enum):
@@ -37,7 +36,7 @@ def date_format_from_flag(
   main_sep: str = ' '
 ) -> str:
   """ Generate a datestring format based on a given flag """
-  
+
   date_str = date_sep.join([ c.value for c in DateFormatChar if check_date_flag(date_flags, DateStrFlag[c.name]) ])
   time_str = time_sep.join([ c.value for c in TimeFormatChar if check_date_flag(date_flags, DateStrFlag[c.name]) ])
   
