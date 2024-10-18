@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict
 
 from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject
@@ -8,9 +8,9 @@ def days_diff(date: datetime) -> int:
   """ Returns difference between today and a past date """
   diff = -1
   if date is not None:
-    diff = datetime.now() - date
+    diff = datetime.now(timezone.utc) - date
     
-  return diff
+  return diff.days
 
 class LDAPAccount(LDAPObject):
   def __init__(self, ldap_entry: LDAPEntry):
