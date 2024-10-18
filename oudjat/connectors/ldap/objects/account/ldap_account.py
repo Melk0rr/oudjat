@@ -40,7 +40,7 @@ class LDAPAccount(LDAPObject):
 
     self.pwd_expired = False
     if pwd_expired(self.account_control):
-      self.pwd_expires = True
+      self.pwd_expired = True
 
     self.account_flags = [ f.name for f in LDAPAccountFlag if check_account_flag(self.account_control, f) ]
 
