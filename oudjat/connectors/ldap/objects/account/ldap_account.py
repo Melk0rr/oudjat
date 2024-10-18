@@ -35,7 +35,7 @@ class LDAPAccount(LDAPObject):
       self.status = "Disabled"
       
     self.pwd_expires = False
-    if not pwd_expires(self.account_control):
+    if pwd_expires(self.account_control):
       self.pwd_expires = True
 
     self.pwd_expired = False
