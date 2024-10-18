@@ -29,6 +29,8 @@ class LDAPObject:
     self.entry = ldap_entry
     self.dn = self.entry.get_dn()
     self.name = self.entry.get("name")
+    self.guid = self.entry.get("guid")
+    self.sid = self.entry.get("sid")
     self.description = ' '.join(self.entry.get("description", []))
 
     self.object_classes = self.entry.get("objectClass", [])
@@ -49,6 +51,10 @@ class LDAPObject:
   def get_name(self) -> str:
     """ Getter for ldap object name """
     return self.name
+  
+  def get_sid(self) -> str:
+    """ Getter for ldap object sid """
+    return self.sid
 
   def get_entry(self) -> Dict:
     """ Getter for entry attributes """
@@ -83,6 +89,8 @@ class LDAPObject:
     return {
       "dn": self.dn,
       "name": self.name,
+      "guid": self.guid,
+      "sid": self.sid,
       "description": self.description,
       "domain": self.domain,
       "creation_date": self.creation_date.strftime(date_format_from_flag(DATE_TIME_FLAGS)),
