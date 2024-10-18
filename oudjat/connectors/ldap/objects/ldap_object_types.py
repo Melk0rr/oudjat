@@ -134,6 +134,7 @@ class LDAPObjectType(Enum):
       "givenName",
       "lastLogon",
       "mail",
+      "msDS-User-Account-Control-Computed",
       "name",
       "objectClass",
       "objectGUID",
