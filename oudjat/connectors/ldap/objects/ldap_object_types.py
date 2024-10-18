@@ -16,6 +16,7 @@ class LDAPObjectType(Enum):
       "description",
       "distinguishedName",
       "lastLogonTimestamp",
+      "msDS-User-Account-Control-Computed",
       "name",
       "objectClass",
       "objectGUID",
@@ -134,6 +135,7 @@ class LDAPObjectType(Enum):
       "givenName",
       "lastLogonTimestamp",
       "mail",
+      "msDS-User-Account-Control-Computed",
       "name",
       "objectClass",
       "objectGUID",
@@ -143,6 +145,7 @@ class LDAPObjectType(Enum):
       "sAMAccountName",
       "title",
       "userAccountControl",
+      "userPrincipalName",
       "whenChanged",
       "whenCreated"
     ]
