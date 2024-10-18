@@ -23,6 +23,7 @@ class LDAPObjectType(Enum):
       "operatingSystem",
       "operatingSystemVersion",
       "pwdLastSet",
+      "sAMAccountName",
       "userAccountControl",
       "whenChanged",
       "whenCreated"
