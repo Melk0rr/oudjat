@@ -24,14 +24,14 @@ class LDAPAccountFlag(Enum):
 	NO_AUTH_DATA_REQUIRED = 33554432
 	PARTIAL_SECRETS_ACCOUNT = 67108864
 
-def check_flag(account_control: int, flag: LDAPAccountFlag) -> int:
+def check_account_flag(account_control: int, flag: LDAPAccountFlag) -> int:
 	""" Compare given account control to the chosen LDAP flag """
 	return account_control & flag.value
 
 def is_disabled(account_control: int) -> bool:
 	""" Checks if an account is disabled based on its account control """
-	return check_flag(account_control, LDAPAccountFlag.ACCOUNT_DISABLE) > 0
+	return check_account_flag(account_control, LDAPAccountFlag.ACCOUNT_DISABLE) > 0
 
 def pwd_expires(account_control: int) -> bool:
 	""" Checks if the account's password expires """
-	return check_flag(account_control, LDAPAccountFlag.PASSWD_DONT_EXPIRE) == 0
+	return check_account_flag(account_control, LDAPAccountFlag.PASSWD_DONT_EXPIRE) == 0
