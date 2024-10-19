@@ -1,3 +1,5 @@
+from typing import Dict, Union
+
 from oudjat.model.asset_type import AssetType
 
 class Asset:
@@ -8,7 +10,7 @@ class Asset:
   
   def __init__(
     self,
-    id: str,
+    id: Union[int, str],
     name: str,
     label: str,
     type: AssetType,
@@ -23,5 +25,33 @@ class Asset:
 
   # ****************************************************************
   # Methods
+
+  def get_id(self) -> Union[int, str]:
+    """ Getter for asset id """
+    return self.id
+
+  def get_name(self) -> str:
+    """ Getter for asset name """
+    return self.name
+
+  def get_label(self) -> str:
+    """ Getter for asset label """
+    return self.label
+
+  def get_description(self) -> str:
+    """ Getter for asset description """
+    return self.desctiption
+
+  def get_type(self) -> AssetType:
+    """ Getter for asset type """
+    return self.type
   
-  
+  def to_dict(self) -> Dict:
+    """ Converts current asset into a dict """
+    return {
+      "id": self.id,
+      "name": self.name,
+      "label": self.label,
+      "description": self.desctiption,
+      "type": self.type.name
+    }
