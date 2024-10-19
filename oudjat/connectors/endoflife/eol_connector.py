@@ -1,5 +1,7 @@
 from oudjat.connectors import Connector
 
+EOL_API_URL = "https://endoflife.date/api/"
+
 class EndOfLifeConnector(Connector):
   """ A class to connect to endoflife.date """
   
@@ -9,14 +11,14 @@ class EndOfLifeConnector(Connector):
   def __init__(self):
     """ Construcotr """
 
-    super().__init__(target="https://endoflife.date/api/")
-    self.connection = None
+    super().__init__(target=EOL_API_URL)
 
   # ****************************************************************
   # Methods
 
   def connect(self) -> None:
     """ Connects to target """
+    
     
   def search(
     self,
