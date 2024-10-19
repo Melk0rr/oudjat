@@ -12,10 +12,16 @@ NIST_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 class NistConnector(Connector):
   """ NIST API Connector class """
   
+  # ****************************************************************
+  # Attributes & Constructors
+
   def __init__(self):
     """ Constructor """
 
     super().__init__(target=NIST_API_URL)
+
+  # ****************************************************************
+  # Methods
     
   def connect(self, target: str) -> None:
     """ Test connection to NIST API """
