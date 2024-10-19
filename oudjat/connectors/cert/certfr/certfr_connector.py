@@ -85,7 +85,7 @@ class CERTFRConnector(Connector):
       if date_str_filter:
         try:
           valid_date_format = "%Y-%m-%d"
-          date_filter = datetime.strptime(date_str_filter, valid_date_format)          
+          date_filter = datetime.strptime(date_str_filter, valid_date_format)
 
           date_str = item.pubDate.text.split(" +0000")[0]
           date = datetime.strptime(date_str, "%a, %d %b %Y %H:%M:%S")
