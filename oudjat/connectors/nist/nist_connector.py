@@ -7,14 +7,15 @@ from typing import List, Dict, Union
 from oudjat.utils import ColorPrint
 from oudjat.connectors import Connector
 
+NIST_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
+
 class NistConnector(Connector):
   """ NIST API Connector class """
   
   def __init__(self):
     """ Constructor """
 
-    super().__init__(target="https://services.nvd.nist.gov/rest/json/cves/2.0")
-    self.connection = None
+    super().__init__(target=NIST_API_URL)
     
   def connect(self, target: str) -> None:
     """ Test connection to NIST API """
