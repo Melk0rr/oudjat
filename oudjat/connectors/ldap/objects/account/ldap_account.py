@@ -1,19 +1,11 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Dict, List
 
-from oudjat.utils import date_format_from_flag, DATE_TIME_FLAGS
+from oudjat.utils import date_format_from_flag, DATE_TIME_FLAGS, days_diff
 from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject
 from oudjat.connectors.ldap.objects.account import LDAPAccountFlag, check_account_flag, is_disabled, pwd_expires, pwd_expired
 
 MS_ACCOUNT_CTL_PROPERTY = "msDS-User-Account-Control-Computed"
-
-def days_diff(date: datetime) -> int:
-  """ Returns difference between today and a past date """
-  diff = -1
-  if date is not None:
-    diff = datetime.now(timezone.utc) - date
-    
-  return diff.days
 
 def acc_date_str(date: datetime) -> str:
   """ Converts an account date into a string """
