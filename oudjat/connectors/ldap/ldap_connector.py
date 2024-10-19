@@ -7,7 +7,8 @@ from typing import List, Union, Any
 from oudjat.utils import ColorPrint
 
 from oudjat.connectors import Connector
-from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObjectType, LDAPGroupPolicyObject
+from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObjectType
+from oudjat.connectors.ldap.objects.gpo import LDAPGroupPolicyObject
 from oudjat.connectors.ldap.objects.subnet import LDAPSubnet
 
 class LDAPConnector(Connector):
