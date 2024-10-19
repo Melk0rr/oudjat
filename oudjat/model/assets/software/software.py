@@ -159,20 +159,27 @@ class SoftwareRelease:
     """ Adds a vulnerability to the current release """
     self.vulnerabilities.add(vuln)
 
-  def to_string(self) -> str:
+  def to_string(self, show_version: bool = False) -> str:
     """ Converts current release to a string """
     name = f"{self.software.get_name()} {self.label}"
     name = f"{name.strip()} {self.edition}"
-    return f"{name.strip()}({self.version})"
+
+    if show_version:
+      name = f"{name.strip()}({self.version})"
+
+    return name.strip()
 
   def to_dict(self) -> Dict:
     """ Converts current release into a dict """
     return {
       "software": self.software.get_name(),
       "label": self.label,
+      "full_name": self.to_string(),
       "version": self.version,
       "edition": self.edition,
       "release": soft_date(self.release_date),
       "support": soft_date(self.support),
-      "eol": soft_date(self.end_of_life)
+      "eol": soft_date(self.end_of_life),
+      "is_supported": self.is_supported(),
+      "support_state": self.support_state()
     }
