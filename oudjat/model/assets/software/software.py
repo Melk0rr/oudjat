@@ -5,7 +5,7 @@ from oudjat.utils import date_format_from_flag, DATE_FLAGS, days_diff
 from oudjat.model.assets import Asset, AssetType
 from oudjat.model.vulnerability import CVE_REGEX
 
-soft_date_str(date: datetime) -> str:
+def soft_date_str(date: datetime) -> str:
   """ Converts a software date into a string """
   soft_date = None
   if date is not None:
