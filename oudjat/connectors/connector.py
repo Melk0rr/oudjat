@@ -25,10 +25,12 @@ class Connector:
     """ Setter for connector target """
     self.target = target
 
-  def set_service_name(self, new_service_name: str) -> None:
+  def set_service_name(self, new_service_name: str, use_credentials: bool) -> None:
     """ Setter for service name """
     self.service_name = new_service_name
-    self.credentials = get_credentials(self.service_name)
+    
+    if use_credentials:
+      self.credentials = get_credentials(self.service_name)
 
   def connect(self) -> None:
     """ Connects to the target """
