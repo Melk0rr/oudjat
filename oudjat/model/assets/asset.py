@@ -1,6 +1,6 @@
 from typing import Dict, Union
 
-from oudjat.model.asset_type import AssetType
+from . import AssetType
 
 class Asset:
   """ Generic asset class to be inherited by all model asset types """
@@ -20,6 +20,7 @@ class Asset:
 
     self.id = id
     self.name = name
+    self.label = label
     self.desctiption = desctiption
     self.type = type
 
