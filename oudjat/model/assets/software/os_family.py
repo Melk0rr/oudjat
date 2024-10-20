@@ -2,9 +2,9 @@ from enum import Enum
 
 class OSFamily(Enum):
   """ OS family enumeration """
-  ANDROID
-  BSD
-  LINUX
-  MAC
-  UNIX
-  WINDOWS
+  ANDROID = "android"
+  BSD = "bsd"
+  LINUX = "linux"
+  MAC = "mac"
+  UNIX = "unix"
+  WINDOWS = "windows"
