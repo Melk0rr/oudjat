@@ -13,7 +13,7 @@ def unixtime_to_str(unix_time: Union[int, str], delta: int = 1) -> str:
 def days_diff(date: datetime, reverse: bool = False) -> int:
   """ Returns difference between today and a past date """
   if date is not None:
-    today = datetime.now(timezone.utc)
+    today = datetime.now()
     if reverse:
     	diff = date - today
 
