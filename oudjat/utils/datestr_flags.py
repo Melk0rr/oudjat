@@ -40,4 +40,4 @@ def date_format_from_flag(
   date_str = date_sep.join([ c.value for c in DateFormatChar if check_date_flag(date_flags, DateStrFlag[c.name]) ])
   time_str = time_sep.join([ c.value for c in TimeFormatChar if check_date_flag(date_flags, DateStrFlag[c.name]) ])
   
-  return main_sep.join([ date_str, time_str ])
+  return main_sep.join([ date_str, time_str ]).strip()
