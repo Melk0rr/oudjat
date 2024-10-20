@@ -13,65 +13,6 @@ def soft_date_str(date: datetime) -> str:
     
   return soft_date
 
-class Software(Asset):
-  """ A class to describe softwares """
-  
-  # ****************************************************************
-  # Attributes & Constructors
-  
-  def __init__(
-    self,
-    id: Union[int, str],
-    name: str,
-    label: str,
-    editor: Union[str, List[str]] = None,
-    description: str = None,
-  ):
-    """ Constructor """
-    super().__init__(id=id, name=name, label=label, type=AssetType.SOFTWARE, desctiption=description)
-    
-    self.editor = editor
-    self.releases: Dict[SoftwareRelease] = {}
-
-  # ****************************************************************
-  # Methods
-  
-  def get_editor(self) -> str:
-    """ Getter for software editor """
-    return self.editor
-  
-  def get_releases(self) -> List[SoftwareRelease]:
-    """ Getter for software releases """
-    return self.releases
-  
-  def set_editor(self, editor: Union[str, List[str]]) -> None:
-    """ Setter for software editor """
-    self.editor = editor
-    
-  def add_release(self, new_release: SoftwareRelease) -> None:
-    """ Adds a release to the list of software releases """
-    self.releases[new_release.get_version()] = new_release
-
-  def retired_releases(self) -> List[SoftwareRelease]:
-    """ Gets a list of retired releases """
-    return [ r for r in self.releases if not r.is_supported() ]
-
-  def supported_releases(self) -> List[SoftwareRelease]:
-    """ Gets a list of retired releases """
-    return [ r for r in self.releases if r.is_supported() ]
-  
-  def to_dict(self) -> Dict:
-    """ Converts the current instance into a dict """
-    base_dict = super().to_dict()
-    return {
-      **base_dict,
-      "editor": self.editor,
-      "releases": ','.join([ r.to_string() for r in self.releases ]),
-      "supported_releases": ','.join([ r.get_version() for r in self.supported_releases() ]),
-      "retired_releases": ','.join([ r.get_version() for r in self.retired_releases() ])
-    }
-
-
 class SoftwareRelease:
   """ A class to describe software releases """
   
@@ -80,7 +21,7 @@ class SoftwareRelease:
   
   def __init__(
     self,
-    software: Software,
+    software: "Software",
     version: Union[int, str],
     release_date: Union[str, datetime],
     release_label: str = None,
@@ -110,7 +51,7 @@ class SoftwareRelease:
         support = datetime.strptime(support, date_format_from_flag(DATE_FLAGS))
 
     except ValueError as e:
-      raise ValueError("Please provide dates with %Y-%m-%d format")
+      raise ValueError(f"Please provide dates with %Y-%m-%d format\n{e}")
 
     self.support = support
     self.release_date = release_date
@@ -123,7 +64,7 @@ class SoftwareRelease:
   # ****************************************************************
   # Methods
 
-  def get_software(self) -> Software:
+  def get_software(self) -> "Software":
     """ Getter for release software """
     return self.software
   
@@ -161,8 +102,8 @@ class SoftwareRelease:
 
   def to_string(self, show_version: bool = False) -> str:
     """ Converts current release to a string """
-    name = f"{self.software.get_name()} {self.label}"
-    name = f"{name.strip()} {self.edition}"
+    name = f"{self.software.get_name()} {self.label or ''}"
+    name = f"{name.strip()} {self.edition or ''}"
 
     if show_version:
       name = f"{name.strip()}({self.version})"
@@ -182,4 +123,74 @@ class SoftwareRelease:
       "eol": soft_date(self.end_of_life),
       "is_supported": self.is_supported(),
       "support_state": self.support_state()
+    }
+
+
+class Software(Asset):
+  """ A class to describe softwares """
+  
+  # ****************************************************************
+  # Attributes & Constructors
+  
+  def __init__(
+    self,
+    id: Union[int, str],
+    name: str,
+    label: str,
+    editor: Union[str, List[str]] = None,
+    description: str = None,
+  ):
+    """ Constructor """
+    super().__init__(id=id, name=name, label=label, type=AssetType.SOFTWARE, desctiption=description)
+    
+    self.editor = editor
+    self.releases: List[SoftwareRelease] = {}
+
+  # ****************************************************************
+  # Methods
+  
+  def get_editor(self) -> str:
+    """ Getter for software editor """
+    return self.editor
+  
+  def get_releases(self) -> Dict[Union[int, str], SoftwareRelease]:
+    """ Getter for software releases """
+    return self.releases
+
+  def get_release_list(self) -> List[SoftwareRelease]:
+    """ Returns releases as a list """
+    merge = []
+    for r in self.releases.values():
+      merge.extend(r)
+      
+    return merge
+
+  def set_editor(self, editor: Union[str, List[str]]) -> None:
+    """ Setter for software editor """
+    self.editor = editor
+    
+  def add_release(self, new_release: SoftwareRelease) -> None:
+    """ Adds a release to the list of software releases """
+    if new_release.get_version() not in self.releases.keys():
+      self.releases[new_release.get_version()] = []
+
+    self.releases[new_release.get_version()].append(new_release)
+
+  def retired_releases(self) -> List[SoftwareRelease]:
+    """ Gets a list of retired releases """
+    return [ r.to_string() for r in self.get_release_list() if not r.is_supported() ]
+
+  def supported_releases(self) -> List[SoftwareRelease]:
+    """ Gets a list of retired releases """
+    return [ r.to_string() for r in self.get_release_list() if r.is_supported() ]
+  
+  def to_dict(self) -> Dict:
+    """ Converts the current instance into a dict """
+    base_dict = super().to_dict()
+    return {
+      **base_dict,
+      "editor": self.editor,
+      "releases": ','.join([ r.to_string() for r in self.get_release_list() ]),
+      "supported_releases": ','.join(self.supported_releases()),
+      "retired_releases": ','.join(self.retired_releases())
     }
