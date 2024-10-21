@@ -1,5 +1,5 @@
-from oudjat.model import Asset
-from oudjat.model import ComputerType
+from oudjat.model.assets import Asset
+from . import ComputerType
 
 class Computer(Asset):
   """ A common class for computers """
