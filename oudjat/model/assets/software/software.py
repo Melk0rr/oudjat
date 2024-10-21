@@ -1,3 +1,4 @@
+from enum import Enum
 from datetime import datetime
 from typing import List, Dict, Union
 
@@ -12,6 +13,11 @@ def soft_date_str(date: datetime) -> str:
     date.strftime(date_format_from_flag(DATE_FLAGS))
     
   return soft_date
+
+class SoftwareType(Enum):
+  """ An enumeration to list software types """
+  OS = 0
+  APPLICATION = 1
 
 class SoftwareRelease:
   """ A class to describe software releases """
@@ -53,7 +59,7 @@ class SoftwareRelease:
     except ValueError as e:
       raise ValueError(f"Please provide dates with %Y-%m-%d format\n{e}")
 
-    self.support = support
+    self.active_support = support
     self.release_date = release_date
     self.end_of_life = end_of_life
     
@@ -82,6 +88,10 @@ class SoftwareRelease:
       return True
     
     return days_diff(self.end_of_life, reverse=True) > 0
+  
+  def support_str(self) -> str:
+    """ Returns a string based on current support status """
+    return "Ongoing" if self.is_supported() else "Retired"
   
   def support_state(self) -> str:
     """ Returns a string based on the supported status """
@@ -119,7 +129,7 @@ class SoftwareRelease:
       "version": self.version,
       "edition": self.edition,
       "release": soft_date(self.release_date),
-      "support": soft_date(self.support),
+      "support": soft_date(self.active_support),
       "eol": soft_date(self.end_of_life),
       "is_supported": self.is_supported(),
       "support_state": self.support_state()
@@ -137,6 +147,7 @@ class Software(Asset):
     id: Union[int, str],
     name: str,
     label: str,
+    software_type: SoftwareType = SoftwareType.APPLICATION,
     editor: Union[str, List[str]] = None,
     description: str = None,
   ):
@@ -144,7 +155,8 @@ class Software(Asset):
     super().__init__(id=id, name=name, label=label, type=AssetType.SOFTWARE, desctiption=description)
     
     self.editor = editor
-    self.releases: List[SoftwareRelease] = {}
+    self.type = software_type
+    self.releases: List[SoftwareRelease] = []
 
   # ****************************************************************
   # Methods
@@ -157,32 +169,33 @@ class Software(Asset):
     """ Getter for software releases """
     return self.releases
 
-  def get_release_list(self) -> List[SoftwareRelease]:
-    """ Returns releases as a list """
-    merge = []
-    for r in self.releases.values():
-      merge.extend(r)
-      
-    return merge
-
   def set_editor(self, editor: Union[str, List[str]]) -> None:
     """ Setter for software editor """
     self.editor = editor
     
   def add_release(self, new_release: SoftwareRelease) -> None:
     """ Adds a release to the list of software releases """
-    if new_release.get_version() not in self.releases.keys():
-      self.releases[new_release.get_version()] = []
-
-    self.releases[new_release.get_version()].append(new_release)
+    self.releases.append(new_release)
 
   def retired_releases(self) -> List[SoftwareRelease]:
     """ Gets a list of retired releases """
-    return [ r.to_string() for r in self.get_release_list() if not r.is_supported() ]
+    return [ r.to_string() for r in self.releases if not r.is_supported() ]
 
   def supported_releases(self) -> List[SoftwareRelease]:
     """ Gets a list of retired releases """
-    return [ r.to_string() for r in self.get_release_list() if r.is_supported() ]
+    return [ r.to_string() for r in self.releases if r.is_supported() ]
+  
+  def map_rel_by_version(self) -> Dict:
+    """ Maps software releases using version numbers """
+    rel_map = {}
+    
+    for r in self.releases:
+      if r.get_version() not in rel_map.keys():
+        rel_map[r.get_version()] = []
+
+      rel_map[r.get_version()].append(r)
+      
+    return rel_map
   
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dict """
@@ -190,7 +203,7 @@ class Software(Asset):
     return {
       **base_dict,
       "editor": self.editor,
-      "releases": ','.join([ r.to_string() for r in self.get_release_list() ]),
+      "releases": ','.join([ r.to_string() for r in self.releases ]),
       "supported_releases": ','.join(self.supported_releases()),
       "retired_releases": ','.join(self.retired_releases())
     }
