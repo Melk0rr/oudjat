@@ -7,4 +7,14 @@ class OSFamily(Enum):
   LINUX = "linux"
   MAC = "mac"
   UNIX = "unix"
-  WINDOWS = "windows"
+  WINDOWS = {
+    "editions": {
+      "E"  : [ "Enterprise", "Education", "IoT" ],
+      "W"  : [ "Home", "Pro", "Pro Education" ],
+      "LTS": "Long Therm Service"
+    },
+
+    "software": ["windows", "windowsserver"]
+  }
+
+  
