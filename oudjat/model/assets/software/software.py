@@ -33,7 +33,7 @@ class SoftwareRelease:
     release_label: str = None,
     support: Union[str, datetime] = None,
     end_of_life: Union[str, datetime] = None,
-    edition: Union[str, List[str]] = "Standard",
+    edition: Union[str, List[str]] = None,
     long_term_support = False
   ):
     """ Constructor """
@@ -89,6 +89,10 @@ class SoftwareRelease:
   def get_edition(self) -> Union[str, List[str]]:
     """ Getter for release edition """
     return self.edition
+  
+  def get_edition_str(self, join_char: str = ',') -> str:
+    """ Returns joined editions """
+    return join_char.join(self.edition or [])
 
   def has_long_term_support(self) -> bool:
     """ Returns wheither the release has long term support or not """
@@ -101,9 +105,9 @@ class SoftwareRelease:
     
     return days_diff(self.end_of_life, reverse=True) > 0
 
-  def compare_edition(self, edition: str) -> bool:
+  def compare_edition(self, edition: str = None) -> bool:
     """ Checks if the given edition(s) match release edition """
-    return edition in self.edition
+    return edition is None or edition in self.edition
   
   def support_str(self) -> str:
     """ Returns a string based on current support status """
@@ -125,6 +129,22 @@ class SoftwareRelease:
   def add_vuln(self, vuln: str) -> None:
     """ Adds a vulnerability to the current release """
     self.vulnerabilities.add(vuln)
+
+  def compare_values(self, version: Union[int, str], edition: Union[str, List[str]], lts: bool) -> bool:
+    """ Compares current release to given values """
+    return (
+      self.version == version and
+      self.compare_edition(edition) and
+      self.lts == lts
+    )
+
+  def __eq__(self, other: SoftwareRelease) -> bool:
+    """ Release comparison """
+    return self.compare_values(
+      version=other.get_version(),
+      edition=other.get_edition(),
+      lts=other.has_long_term_support()
+    )
 
   def to_string(self, show_version: bool = False) -> str:
     """ Converts current release to a string """
@@ -170,20 +190,25 @@ class SoftwareReleaseList(list):
     check = False
     
     for r in self:
-      one_check = True
-      if r.get_version() != version:
-        one_check = False
-        
-      if edition is not None and not r.compare_edition(edition):
-        one_check = False
-        
-      if r.has_long_term_support() != lts:
-        one_check = False
-        
-      if one_check:
+      if r.compare_values(version, edition, lts):
         check = True
 
     return check
+
+  def get(
+    self,
+    version: Union[int, str],
+    edition: str = None,
+    lts: bool = False,
+  ) -> List[SoftwareRelease]:
+    """ Returns releases matching arguments """
+    res = []
+    
+    for r in self:
+      if r.compare_values(version, edition, lts):
+        res.append(r)
+        
+    return res
 
   def append(self, release: SoftwareRelease) -> None:
     if isinstance(release, SoftwareRelease):
@@ -245,7 +270,7 @@ class Software(Asset):
     
     for r in self.releases:
       if r.get_version() not in rel_map.keys():
-        rel_map[r.get_version()] = []
+        rel_map[r.get_version()] = SoftwareReleaseList()
 
       rel_map[r.get_version()].append(r)
       
