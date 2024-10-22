@@ -149,7 +149,7 @@ class SoftwareRelease:
   def to_string(self, show_version: bool = False) -> str:
     """ Converts current release to a string """
     name = f"{self.software.get_name()} {self.label or ''}"
-    name = f"{name.strip()} {self.edition or ''}"
+    name = f"{name.strip()} ({self.get_edition_str()})"
 
     if show_version:
       name = f"{name.strip()}({self.version})"
