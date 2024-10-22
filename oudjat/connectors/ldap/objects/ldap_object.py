@@ -40,6 +40,8 @@ class LDAPObject:
 
     self.creation_date = self.entry.get("whenCreated")
     self.change_date = self.entry.get("whenChanged")
+    
+    self.followup_flags: List[str] = []
 
   # ****************************************************************
   # Methods
