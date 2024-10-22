@@ -1,5 +1,11 @@
 from enum import Enum
 
+class WindowsEdition(Enum):
+  """ Windows edition enum """
+  E   = [ "Enterprise", "Education", "IOT Enterprise" ]
+  W   = [ "Home", "Pro", "Pro Education" ]
+  IOT = [ "IOT" ]
+
 class OSFamily(Enum):
   """ OS family enumeration """
   ANDROID = "android"
@@ -8,12 +14,7 @@ class OSFamily(Enum):
   MAC = "mac"
   UNIX = "unix"
   WINDOWS = {
-    "editions": {
-      "E"  : [ "Enterprise", "Education", "IoT" ],
-      "W"  : [ "Home", "Pro", "Pro Education" ],
-      "LTS": "Long Therm Service"
-    },
-
+    "editions": WindowsEdition,
     "software": ["windows", "windowsserver"]
   }
 
