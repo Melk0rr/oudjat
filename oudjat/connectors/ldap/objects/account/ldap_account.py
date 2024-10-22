@@ -29,22 +29,27 @@ class LDAPAccount(LDAPObject):
     self.account_control = self.entry.get("userAccountControl")
 
     self.status = "Enabled"
-    if is_disabled(self.account_control):
-      self.status = "Disabled"
-      
     self.pwd_expires = False
-    if pwd_expires(self.account_control):
-      self.pwd_expires = True
-
     self.pwd_expired = False
-    if pwd_expired(self.account_control) or pwd_expired(self.entry.get(MS_ACCOUNT_CTL_PROPERTY)):
-      self.pwd_expired = True
 
-    self.account_flags = [
-      f.name for f in LDAPAccountFlag 
-      if check_account_flag(self.account_control, f) or 
-        check_account_flag(self.entry.get(MS_ACCOUNT_CTL_PROPERTY), f)
-    ]
+    if self.account_control is not None:
+      if is_disabled(self.account_control):
+        self.status = "Disabled"
+        
+      if pwd_expires(self.account_control):
+        self.pwd_expires = True
+
+      if pwd_expired(self.account_control) or pwd_expired(self.entry.get(MS_ACCOUNT_CTL_PROPERTY)):
+        self.pwd_expired = True
+
+      self.account_flags = [
+        f.name for f in LDAPAccountFlag 
+        if check_account_flag(self.account_control, f) or 
+          check_account_flag(self.entry.get(MS_ACCOUNT_CTL_PROPERTY), f)
+      ]
+
+    else:
+      self.followup_flags.append("MISSING-USR-ACC-CTL")
 
   # ****************************************************************
   # Methods
