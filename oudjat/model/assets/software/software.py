@@ -33,7 +33,7 @@ class SoftwareRelease:
     release_label: str = None,
     support: Union[str, datetime] = None,
     end_of_life: Union[str, datetime] = None,
-    edition: str = None,
+    edition: Union[str, List[str]] = "Standard",
     long_term_support = False
   ):
     """ Constructor """
@@ -41,6 +41,10 @@ class SoftwareRelease:
     self.software = software
     self.version = version
     self.label = release_label
+
+    if not isinstance(edition, list):
+      edition = [ edition ]
+
     self.edition = edition
 
     if support is not None and end_of_life is None:
@@ -81,6 +85,14 @@ class SoftwareRelease:
   def get_version(self) -> Union[int, str]:
     """ Getter for release version """
     return self.version
+
+  def get_edition(self) -> Union[str, List[str]]:
+    """ Getter for release edition """
+    return self.edition
+
+  def has_long_term_support(self) -> bool:
+    """ Returns wheither the release has long term support or not """
+    return self.lts
   
   def is_supported(self) -> bool:
     """ Checks if current release is supported """
@@ -88,6 +100,10 @@ class SoftwareRelease:
       return True
     
     return days_diff(self.end_of_life, reverse=True) > 0
+
+  def compare_edition(self, edition: str) -> bool:
+    """ Checks if the given edition(s) match release edition """
+    return edition in self.edition
   
   def support_str(self) -> str:
     """ Returns a string based on current support status """
@@ -135,6 +151,44 @@ class SoftwareRelease:
       "support_state": self.support_state()
     }
 
+class SoftwareReleaseList(list):
+  """ A class to manage lists of software releases """
+
+  # ****************************************************************
+  # Attributes & Constructors
+
+
+  # ****************************************************************
+  # Methods
+  def contains(
+    self,
+    version: Union[int, str],
+    edition: str = None,
+    lts: bool = False,
+  ) -> bool:
+    """ Check if list contains element matching provided attributes """
+    check = False
+    
+    for r in self:
+      one_check = True
+      if r.get_version() != version:
+        one_check = False
+        
+      if edition is not None and not r.compare_edition(edition):
+        one_check = False
+        
+      if r.has_long_term_support() != lts:
+        one_check = False
+        
+      if one_check:
+        check = True
+
+    return check
+
+  def append(self, release: SoftwareRelease) -> None:
+    if isinstance(release, SoftwareRelease):
+      super().append(release)
+
 
 class Software(Asset):
   """ A class to describe softwares """
@@ -156,7 +210,7 @@ class Software(Asset):
     
     self.editor = editor
     self.type = software_type
-    self.releases: List[SoftwareRelease] = []
+    self.releases = SoftwareReleaseList()
 
   # ****************************************************************
   # Methods
@@ -165,7 +219,7 @@ class Software(Asset):
     """ Getter for software editor """
     return self.editor
   
-  def get_releases(self) -> Dict[Union[int, str], SoftwareRelease]:
+  def get_releases(self) -> SoftwareReleaseList:
     """ Getter for software releases """
     return self.releases
 
