@@ -10,7 +10,7 @@ def soft_date_str(date: datetime) -> str:
   """ Converts a software date into a string """
   soft_date = None
   if date is not None:
-    date.strftime(date_format_from_flag(DATE_FLAGS))
+    soft_date = date.strftime(date_format_from_flag(DATE_FLAGS))
     
   return soft_date
 
@@ -83,7 +83,7 @@ class SoftwareReleaseSupport:
 
   def status(self) -> str:
     """ Returns a string based on current support status """
-    return "Ongoing" if self.is_supported() else "Retired"
+    return "Ongoing" if self.is_ongoing() else "Retired"
 
   def support_details(self) -> str:
     """ Returns a string based on the supported status """
@@ -120,7 +120,7 @@ class SoftwareReleaseSupport:
   
   def to_string(self) -> str:
     """ Converts the current support instance into a string """
-    return f"{self.get_edition_str()} ({self.status})"
+    return f"{self.get_edition_str()} ({self.status()}){" - LTS" if self.lts else ''}"
   
   def to_dict(self) -> Dict:
     """ Converts the current support instance into a dict """
@@ -132,6 +132,37 @@ class SoftwareReleaseSupport:
       "lts": self.lts,
       "details": self.support_details()
     }
+
+
+class SoftwareReleaseSupportList(list):
+  """ A class to manage lists of software releases """
+
+  # ****************************************************************
+  # Attributes & Constructors
+
+
+  # ****************************************************************
+  # Methods
+  def contains(
+    self,
+    edition: Union[str, List[str]] = None,
+    lts: bool = False,
+  ) -> bool:
+    """ Check if list contains element matching provided attributes """
+    return any([ s.compare_support_scope(edition, lts) for s in self ])
+
+  def get(
+    self,
+    edition: Union[str, List[str]] = None,
+    lts: bool = False,
+  ) -> List[SoftwareReleaseSupport]:
+    """ Returns releases matching arguments """
+    return [ s for s in self if s.compare_support_scope(edition, lts) ]
+
+  def append(self, support: SoftwareReleaseSupport) -> None:
+    """ Appends a new support to the list """
+    if isinstance(support, SoftwareReleaseSupport):
+      super().append(support)
 
 
 class SoftwareRelease:
@@ -161,7 +192,7 @@ class SoftwareRelease:
       raise ValueError(f"Please provide dates with %Y-%m-%d format\n{e}")
 
     self.release_date = release_date
-    self.support = []
+    self.support = SoftwareReleaseSupportList()
     self.vulnerabilities = set()
 
   # ****************************************************************
@@ -185,6 +216,10 @@ class SoftwareRelease:
     """ Checks if the current release has an ongoin support """
     return any([ s.is_ongoing() for s in self.support ])
   
+  def get_support(self) -> SoftwareReleaseSupportList:
+    """ Getter for support list """
+    return self.support
+  
   def get_ongoing_support(self) -> List[SoftwareReleaseSupport]:
     """ Returns ongoing support instances """
     return [ s for s in self.support if s.is_ongoing() ]
@@ -192,7 +227,15 @@ class SoftwareRelease:
   def get_retired_support(self) -> List[SoftwareReleaseSupport]:
     """ Returns retired support instances """
     return [ s for s in self.support if not s.is_ongoing() ]
-
+  
+  def add_support(self, support: SoftwareReleaseSupport) -> None:
+    """ Adds a support instance to the current release """
+    if (
+      isinstance(support, SoftwareReleaseSupport) and 
+      not self.support.contains(edition=support.get_edition(), lts=support.has_long_term_support())
+    ):
+      self.support.append(support)
+      
   def add_vuln(self, vuln: str) -> None:
     """ Adds a vulnerability to the current release """
     self.vulnerabilities.add(vuln)
@@ -200,7 +243,6 @@ class SoftwareRelease:
   def to_string(self, show_version: bool = False) -> str:
     """ Converts current release to a string """
     name = f"{self.software.get_name()} {self.label or ''}"
-    name = f"{name.strip()} ({self.get_edition_str()})"
 
     if show_version:
       name = f"{name.strip()}({self.version})"
@@ -214,40 +256,10 @@ class SoftwareRelease:
       "label": self.label,
       "full_name": self.to_string(),
       "version": self.version,
-      "release_date": soft_date(self.release_date),
+      "release_date": soft_date_str(self.release_date),
       "support": ', '.join([ s.to_string() for s in self.support ]),
       "is_supported": self.is_supported(),
     }
-
-class SoftwareReleaseSupportList(list):
-  """ A class to manage lists of software releases """
-
-  # ****************************************************************
-  # Attributes & Constructors
-
-
-  # ****************************************************************
-  # Methods
-  def contains(
-    self,
-    edition: Union[str, List[str]] = None,
-    lts: bool = False,
-  ) -> bool:
-    """ Check if list contains element matching provided attributes """
-    return any([ s.compare_support_scope(edition, lts) for s in self ])
-
-  def get(
-    self,
-    edition: Union[str, List[str]] = None,
-    lts: bool = False,
-  ) -> List[SoftwareRelease]:
-    """ Returns releases matching arguments """
-    return [ s for s in self if s.compare_support_scope(edition, lts) ]
-
-  def append(self, support: SoftwareReleaseSupport) -> None:
-    """ Appends a new support to the list """
-    if isinstance(release, SoftwareReleaseSupport):
-      super().append(support)
 
 
 class Software(Asset):
@@ -289,7 +301,7 @@ class Software(Asset):
     
   def add_release(self, new_release: SoftwareRelease) -> None:
     """ Adds a release to the list of software releases """
-    if not self.has_release():
+    if not self.has_release(new_release.get_version()):
       self.releases[new_release.get_version()] = new_release
 
   def has_release(self, version: Union[int, str]) -> bool:
@@ -298,11 +310,11 @@ class Software(Asset):
 
   def retired_releases(self) -> List[SoftwareRelease]:
     """ Gets a list of retired releases """
-    return [ r.to_string() for r in self.releases if not r.is_supported() ]
+    return [ r.to_string() for r in self.releases.values() if not r.is_supported() ]
 
   def supported_releases(self) -> List[SoftwareRelease]:
     """ Gets a list of retired releases """
-    return [ r.to_string() for r in self.releases if r.is_supported() ]
+    return [ r.to_string() for r in self.releases.values() if r.is_supported() ]
   
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dict """
