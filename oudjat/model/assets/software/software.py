@@ -18,6 +18,106 @@ class SoftwareType(Enum):
   """ An enumeration to list software types """
   OS = 0
   APPLICATION = 1
+  
+class SoftwareReleaseSupport:
+  """ A class to handle software release support concept """
+  
+  # ****************************************************************
+  # Attributes & Constructors
+  
+  def __init__(
+    self,
+    active_support: Union[str, datetime] = None,
+    end_of_life: Union[str, datetime] = None,
+    edition: List[str] = None,
+    long_term_support: bool = False
+  ):
+    """ Constructor """
+
+    if edition is not None and not isinstance(edition, list):
+      edition = [ edition ]
+
+    self.edition = edition
+
+    # Handling none support values
+    if active_support is not None and end_of_life is None:
+      end_of_life = active_support
+
+    if active_support is None and end_of_life is not None:
+      active_support = end_of_life
+
+    # Datetime convertion
+    try:        
+      if end_of_life is not None and not isinstance(end_of_life, datetime):
+        end_of_life = datetime.strptime(end_of_life, date_format_from_flag(DATE_FLAGS))
+
+      if active_support is not None and not isinstance(active_support, datetime):
+        active_support = datetime.strptime(active_support, date_format_from_flag(DATE_FLAGS))
+
+    except ValueError as e:
+      raise ValueError(f"Please provide dates with %Y-%m-%d format\n{e}")
+
+    self.active_support = active_support
+    self.end_of_life = end_of_life
+
+    self.lts = long_term_support
+
+
+  # ****************************************************************
+  # Methods
+  
+  def get_edition(self) -> List[str]:
+    """ Getter for release edition """
+    return self.edition
+  
+  def get_edition_str(self, join_char: str = ',') -> str:
+    """ Returns joined editions """
+    return join_char.join(self.edition or [])
+  
+  def is_ongoing(self) -> bool:
+    """ Returns wheither or not the current support is ongoing """
+    if self.end_of_life is None:
+      return True
+    
+    return days_diff(self.end_of_life, reverse=True) > 0
+
+  def status(self) -> str:
+    """ Returns a string based on current support status """
+    return "Ongoing" if self.is_supported() else "Retired"
+
+  def support_state(self) -> str:
+    """ Returns a string based on the supported status """
+    support_days = days_diff(self.end_of_life, reverse=True)
+    state = f"{abs(support_days)} days"
+    
+    if support_days > 0:
+      state = f"Ends in {state}"
+      
+    else:
+      state = f"Ended {state} ago"
+      
+    return state
+
+  def has_long_term_support(self) -> bool:
+    """ Returns wheither the release has long term support or not """
+    return self.lts
+
+  def supports_edition(self, edition: str) -> bool:
+    """ Checks if current support concerns the provided edition """
+    return self.edition is None or edition in self.edition
+
+  def compare_support_scope(self, edition: Union[str, List[str]], lts: bool = False) -> bool:
+    """ Compares current support with given values """
+    compare = False
+    
+    if not isinstance(edition, list):
+      edition = [ edition ]
+
+    if all([ self.supports_edition(e) for e in edition ]) and lts == self.lts:
+      compare = True
+      
+    return compare
+
 
 class SoftwareRelease:
   """ A class to describe software releases """
@@ -30,11 +130,7 @@ class SoftwareRelease:
     software: "Software",
     version: Union[int, str],
     release_date: Union[str, datetime],
-    release_label: str = None,
-    support: Union[str, datetime] = None,
-    end_of_life: Union[str, datetime] = None,
-    edition: Union[str, List[str]] = None,
-    long_term_support = False
+    release_label: str = None
   ):
     """ Constructor """
 
@@ -42,33 +138,15 @@ class SoftwareRelease:
     self.version = version
     self.label = release_label
 
-    if not isinstance(edition, list):
-      edition = [ edition ]
-
-    self.edition = edition
-
-    if support is not None and end_of_life is None:
-      end_of_life = support
-
     try:
       if not isinstance(release_date, datetime):
         release_date = datetime.strptime(release_date, date_format_from_flag(DATE_FLAGS))
-        
-      if end_of_life is not None and not isinstance(end_of_life, datetime):
-        end_of_life = datetime.strptime(end_of_life, date_format_from_flag(DATE_FLAGS))
-
-      if support is not None and not isinstance(support, datetime):
-        support = datetime.strptime(support, date_format_from_flag(DATE_FLAGS))
 
     except ValueError as e:
       raise ValueError(f"Please provide dates with %Y-%m-%d format\n{e}")
 
-    self.active_support = support
     self.release_date = release_date
-    self.end_of_life = end_of_life
-    
-    self.lts = long_term_support
-
+    self.support = []
     self.vulnerabilities = set()
 
   # ****************************************************************
@@ -85,66 +163,16 @@ class SoftwareRelease:
   def get_version(self) -> Union[int, str]:
     """ Getter for release version """
     return self.version
-
-  def get_edition(self) -> Union[str, List[str]]:
-    """ Getter for release edition """
-    return self.edition
-  
-  def get_edition_str(self, join_char: str = ',') -> str:
-    """ Returns joined editions """
-    return join_char.join(self.edition or [])
-
-  def has_long_term_support(self) -> bool:
-    """ Returns wheither the release has long term support or not """
-    return self.lts
-  
-  def is_supported(self) -> bool:
-    """ Checks if current release is supported """
-    if self.end_of_life is None:
-      return True
     
     return days_diff(self.end_of_life, reverse=True) > 0
-
-  def compare_edition(self, edition: str = None) -> bool:
-    """ Checks if the given edition(s) match release edition """
-    return edition is None or edition in self.edition
   
-  def support_str(self) -> str:
-    """ Returns a string based on current support status """
-    return "Ongoing" if self.is_supported() else "Retired"
-  
-  def support_state(self) -> str:
-    """ Returns a string based on the supported status """
-    support_days = days_diff(self.end_of_life, reverse=True)
-    state = f"{abs(support_days)} days"
+  def is_supported(self) -> bool:
+    """ Checks if the current release has an ongoin support """
     
-    if support_days > 0:
-      state = f"Ends in {state}"
-      
-    else:
-      state = f"Ended {state} ago"
-      
-    return state
-  
+
   def add_vuln(self, vuln: str) -> None:
     """ Adds a vulnerability to the current release """
     self.vulnerabilities.add(vuln)
-
-  def compare_values(self, version: Union[int, str], edition: Union[str, List[str]], lts: bool) -> bool:
-    """ Compares current release to given values """
-    return (
-      self.version == version and
-      self.compare_edition(edition) and
-      self.lts == lts
-    )
-
-  def __eq__(self, other: SoftwareRelease) -> bool:
-    """ Release comparison """
-    return self.compare_values(
-      version=other.get_version(),
-      edition=other.get_edition(),
-      lts=other.has_long_term_support()
-    )
 
   def to_string(self, show_version: bool = False) -> str:
     """ Converts current release to a string """
@@ -171,7 +199,7 @@ class SoftwareRelease:
       "support_state": self.support_state()
     }
 
-class SoftwareReleaseList(list):
+class SoftwareReleaseSupportList(list):
   """ A class to manage lists of software releases """
 
   # ****************************************************************
@@ -182,37 +210,35 @@ class SoftwareReleaseList(list):
   # Methods
   def contains(
     self,
-    version: Union[int, str],
-    edition: str = None,
+    edition: Union[str, List[str]] = None,
     lts: bool = False,
   ) -> bool:
     """ Check if list contains element matching provided attributes """
     check = False
     
-    for r in self:
-      if r.compare_values(version, edition, lts):
-        check = True
+    for s in self:
+      check = s.compare_support_scope(edition, lts)
 
     return check
 
   def get(
     self,
-    version: Union[int, str],
-    edition: str = None,
+    edition: Union[str, List[str]] = None,
     lts: bool = False,
   ) -> List[SoftwareRelease]:
     """ Returns releases matching arguments """
     res = []
     
-    for r in self:
-      if r.compare_values(version, edition, lts):
-        res.append(r)
+    for s in self:
+      if s.compare_values(edition, lts):
+        res.append(s)
         
     return res
 
-  def append(self, release: SoftwareRelease) -> None:
-    if isinstance(release, SoftwareRelease):
-      super().append(release)
+  def append(self, support: SoftwareReleaseSupport) -> None:
+    """ Appends a new support to the list """
+    if isinstance(release, SoftwareReleaseSupport):
+      super().append(support)
 
 
 class Software(Asset):
@@ -235,7 +261,7 @@ class Software(Asset):
     
     self.editor = editor
     self.type = software_type
-    self.releases = SoftwareReleaseList()
+    self.releases = {}
 
   # ****************************************************************
   # Methods
@@ -244,7 +270,7 @@ class Software(Asset):
     """ Getter for software editor """
     return self.editor
   
-  def get_releases(self) -> SoftwareReleaseList:
+  def get_releases(self) -> Dict[Union[int, str], SoftwareRelease]:
     """ Getter for software releases """
     return self.releases
 
@@ -254,7 +280,12 @@ class Software(Asset):
     
   def add_release(self, new_release: SoftwareRelease) -> None:
     """ Adds a release to the list of software releases """
-    self.releases.append(new_release)
+    if not self.has_release():
+      self.releases[new_release.get_version()] = new_release
+
+  def has_release(self, version: Union[int, str]) -> bool:
+    """ Checks if the current software has a release with the given version """
+    return version in self.releases.keys()
 
   def retired_releases(self) -> List[SoftwareRelease]:
     """ Gets a list of retired releases """
@@ -263,18 +294,6 @@ class Software(Asset):
   def supported_releases(self) -> List[SoftwareRelease]:
     """ Gets a list of retired releases """
     return [ r.to_string() for r in self.releases if r.is_supported() ]
-  
-  def map_rel_by_version(self) -> Dict:
-    """ Maps software releases using version numbers """
-    rel_map = {}
-    
-    for r in self.releases:
-      if r.get_version() not in rel_map.keys():
-        rel_map[r.get_version()] = SoftwareReleaseList()
-
-      rel_map[r.get_version()].append(r)
-      
-    return rel_map
   
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dict """
