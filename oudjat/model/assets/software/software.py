@@ -168,7 +168,7 @@ class SoftwareRelease:
   
   def is_supported(self) -> bool:
     """ Checks if the current release has an ongoin support """
-    
+    return any([ s.is_ongoing() for s in self.support ])
 
   def add_vuln(self, vuln: str) -> None:
     """ Adds a vulnerability to the current release """
@@ -214,12 +214,7 @@ class SoftwareReleaseSupportList(list):
     lts: bool = False,
   ) -> bool:
     """ Check if list contains element matching provided attributes """
-    check = False
-    
-    for s in self:
-      check = s.compare_support_scope(edition, lts)
-
-    return check
+    return any([ s.compare_support_scope(edition, lts) for s in self ])
 
   def get(
     self,
@@ -227,13 +222,7 @@ class SoftwareReleaseSupportList(list):
     lts: bool = False,
   ) -> List[SoftwareRelease]:
     """ Returns releases matching arguments """
-    res = []
-    
-    for s in self:
-      if s.compare_values(edition, lts):
-        res.append(s)
-        
-    return res
+    return [ s for s in self if s.compare_support_scope(edition, lts) ]
 
   def append(self, support: SoftwareReleaseSupport) -> None:
     """ Appends a new support to the list """
