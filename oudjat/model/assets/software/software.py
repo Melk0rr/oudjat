@@ -126,8 +126,8 @@ class SoftwareReleaseSupport:
     """ Converts the current support instance into a dict """
     return {
       "edition": self.get_edition_str(),
-      "active_support": self.active_support,
-      "end_of_life": self.end_of_life,
+      "active_support": soft_date_str(self.active_support),
+      "end_of_life": soft_date_str(self.end_of_life),
       "status": self.status(),
       "lts": self.lts,
       "details": self.support_details()
@@ -214,12 +214,9 @@ class SoftwareRelease:
       "label": self.label,
       "full_name": self.to_string(),
       "version": self.version,
-      "edition": self.edition,
-      "release": soft_date(self.release_date),
-      "support": soft_date(self.active_support),
-      "eol": soft_date(self.end_of_life),
+      "release_date": soft_date(self.release_date),
+      "support": ', '.join([ s.to_string() for s in self.support ]),
       "is_supported": self.is_supported(),
-      "support_state": self.support_state()
     }
 
 class SoftwareReleaseSupportList(list):
