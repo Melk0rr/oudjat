@@ -85,7 +85,7 @@ class SoftwareReleaseSupport:
     """ Returns a string based on current support status """
     return "Ongoing" if self.is_supported() else "Retired"
 
-  def support_state(self) -> str:
+  def support_details(self) -> str:
     """ Returns a string based on the supported status """
     support_days = days_diff(self.end_of_life, reverse=True)
     state = f"{abs(support_days)} days"
@@ -117,6 +117,21 @@ class SoftwareReleaseSupport:
       compare = True
       
     return compare
+  
+  def to_string(self) -> str:
+    """ Converts the current support instance into a string """
+    return f"{self.get_edition_str()} ({self.status})"
+  
+  def to_dict(self) -> Dict:
+    """ Converts the current support instance into a dict """
+    return {
+      "edition": self.get_edition_str(),
+      "active_support": self.active_support,
+      "end_of_life": self.end_of_life,
+      "status": self.status(),
+      "lts": self.lts,
+      "details": self.support_details()
+    }
 
 
 class SoftwareRelease:
@@ -169,6 +184,14 @@ class SoftwareRelease:
   def is_supported(self) -> bool:
     """ Checks if the current release has an ongoin support """
     return any([ s.is_ongoing() for s in self.support ])
+  
+  def get_ongoing_support(self) -> List[SoftwareReleaseSupport]:
+    """ Returns ongoing support instances """
+    return [ s for s in self.support if s.is_ongoing() ]
+  
+  def get_retired_support(self) -> List[SoftwareReleaseSupport]:
+    """ Returns retired support instances """
+    return [ s for s in self.support if not s.is_ongoing() ]
 
   def add_vuln(self, vuln: str) -> None:
     """ Adds a vulnerability to the current release """
