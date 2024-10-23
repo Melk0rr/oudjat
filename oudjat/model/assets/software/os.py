@@ -45,8 +45,17 @@ class OperatingSystem(Software):
       
       else:
         self.computer_type.append(t)
-    
 
+    self.os_family = os_family
+    
   # ****************************************************************
   # Methods
+  
+  def get_computer_type(self) -> List[ComputerType]:
+    """ Getter for the OS computer type """
+    return self.computer_type
+  
+  def get_os_family(self) -> OSFamily:
+    """ Getter for OS family """
+    return self.os_family
   
