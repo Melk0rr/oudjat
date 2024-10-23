@@ -15,7 +15,17 @@ class OSFamily(Enum):
   UNIX = "unix"
   WINDOWS = {
     "editions": WindowsEdition,
-    "software": ["windows", "windowsserver"]
+    "os": [
+      {
+        "id": "windows",
+        "name": "Windows",
+        "label": "ms-windows"
+      },
+      {
+        "id": "windowsserver",
+        "name": "Windows Server",
+        "label": "ms-windows"
+      }
+    ]
   }
 
-  
