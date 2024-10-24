@@ -14,18 +14,19 @@ class OSFamily(Enum):
   MAC = "mac"
   UNIX = "unix"
   WINDOWS = {
-    "editions": WindowsEdition,
-    "os": [
-      {
+    "os": {
+      "windows": {
         "id": "windows",
         "name": "Windows",
-        "label": "ms-windows"
+        "label": "ms-windows",
+        "editions": WindowsEdition,
       },
-      {
-        "id": "windowsserver",
+
+      "windowsserver": {
+        "id": "windows-server",
         "name": "Windows Server",
         "label": "ms-windows"
       }
-    ]
+    }
   }
 
