@@ -532,6 +532,8 @@ releases = {
 
 	# Windows Server releases
 	"windows-server": [
+
+		# Windows Server 23H2
 		{
 			"releaseLabel": "23H2",
 			"releaseDate": "2023-10-24",
@@ -541,6 +543,8 @@ releases = {
 			"lts": false,
 			"support": "2025-04-24"
 		},
+
+		# Windows Server 2022
 		{
 			"releaseLabel": "2022",
 			"releaseDate": "2021-08-18",
@@ -550,6 +554,8 @@ releases = {
 			"link": "https://learn.microsoft.com/windows/release-health/windows-server-release-info",
 			"support": "2026-10-13"
 		},
+
+		# Windows Server 20H2
 		{
 			"releaseLabel": "20H2",
 			"releaseDate": "2020-10-20",
@@ -559,6 +565,8 @@ releases = {
 			"lts": false,
 			"support": "2022-08-09"
 		},
+
+		# Windows Server 2004
 		{
 			"releaseLabel": "2004",
 			"releaseDate": "2020-05-27",
@@ -568,6 +576,8 @@ releases = {
 			"lts": false,
 			"support": "2021-12-14"
 		},
+
+		# Windows Server 1909
 		{
 			"releaseLabel": "1909",
 			"releaseDate": "2019-11-12",
@@ -577,6 +587,8 @@ releases = {
 			"lts": false,
 			"support": "2021-05-11"
 		},
+
+		# Windows Server 1903
 		{
 			"releaseLabel": "1903",
 			"releaseDate": "2019-05-21",
@@ -586,6 +598,8 @@ releases = {
 			"lts": false,
 			"support": "2020-12-08"
 		},
+
+		# Windows Server 1809
 		{
 			"releaseLabel": "1809",
 			"releaseDate": "2018-11-13",
@@ -595,6 +609,8 @@ releases = {
 			"lts": false,
 			"support": "2020-11-10"
 		},
+
+		# Windows Server 2019
 		{
 			"releaseLabel": "2019",
 			"releaseDate": "2018-11-13",
@@ -604,6 +620,8 @@ releases = {
 			"link": "https://learn.microsoft.com/windows/release-health/windows-server-release-info",
 			"support": "2024-01-09"
 		},
+
+		# Windows Server 1803
 		{
 			"releaseLabel": "1803",
 			"releaseDate": "2018-04-30",
@@ -613,6 +631,8 @@ releases = {
 			"lts": false,
 			"support": "2019-11-12"
 		},
+
+		# Windows Server 1709
 		{
 			"releaseLabel": "1709",
 			"releaseDate": "2017-10-17",
@@ -622,6 +642,8 @@ releases = {
 			"lts": false,
 			"support": "2019-04-09"
 		},
+
+		# Windows Server 2016
 		{
 			"releaseLabel": "2016",
 			"releaseDate": "2016-10-15",
@@ -631,6 +653,8 @@ releases = {
 			"link": "https://learn.microsoft.com/windows/release-health/windows-server-release-info",
 			"support": "2022-01-11"
 		},
+
+		# Windows Server 2012
 		{
 			"releaseLabel": "2012-R2",
 			"releaseDate": "2013-11-25",
@@ -649,6 +673,8 @@ releases = {
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-2012",
 			"support": "2018-10-09"
 		},
+
+		# Windows Server 2008
 		{
 			"releaseLabel": "2008-R2-SP1",
 			"releaseDate": "2011-02-22",
@@ -677,6 +703,17 @@ releases = {
 			"support": "2015-01-13"
 		},
 		{
+			"releaseLabel": "2008",
+			"releaseDate": "2008-05-06",
+			"lts": true,
+			"eol": "2011-07-12",
+			"latest": "6.0.6001",
+			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-2008",
+			"support": "2011-07-12"
+		},
+		
+		# Windows Server 2003
+		{
 			"releaseLabel": "2003-SP2",
 			"releaseDate": "2003-04-24",
 			"lts": true,
@@ -685,6 +722,8 @@ releases = {
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-2003-",
 			"support": "2010-07-13"
 		},
+
+		# Windows Server 2000
 		{
 			"releaseLabel": "2000",
 			"releaseDate": "2000-02-17",
