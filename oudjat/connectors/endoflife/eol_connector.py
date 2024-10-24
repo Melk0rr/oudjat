@@ -1,8 +1,10 @@
+import re
 import json
 import requests
 from typing import List, Dict, Union
 
 from oudjat.connectors import Connector
+from oudjat.model.assets.software import OSFamily
 
 EOL_API_URL = "https://endoflife.date/api/"
 
@@ -71,3 +73,25 @@ class EndOfLifeConnector(Connector):
       raise ConnectionError(f"Could not retreive {search_filter} infos:\n{e}")
     
     return res
+
+  def get_windows_rel(self, target: str = "windows") -> List[Dict]:
+    """ Specific method to retreive windows releases """
+    win_eol = self.search(search_filter=target)
+    
+    for rel in win_eol:
+      if target == "windows":
+        win_editions = OSFamily.WINDOWS.value.get("os").get("windows").get("editions")._member_names_
+        r_edition = win_editions[:-1]
+
+        edi_search = re.search(rf"^.+ \(?({'|'.join(win_editions)})\)?$", rel["releaseLabel"].upper())
+        if edi_search:
+          r_edition = [ edi_search.group(1) ]
+          rel["releaseLabel"] = rel["releaseLabel"][:-4]
+
+        rel["edition"] = r_edition
+
+      else:
+        if rel["extendedSupport"]:
+          rel["eol"] = rel["extendedSupport"]
+          
+    return win_eol
