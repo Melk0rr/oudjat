@@ -15,6 +15,11 @@ def import_json(file_path: str) -> Union[Dict, List]:
     
   return json_data
 
+def export_json(data: List[Dict], file_path: str) -> None:
+  """ Exports data to a JSON file """
+  with open(file_path, 'w', encoding="utf-8") as f:
+    json.dump(data, f, ensure_ascii=False, indent=4)
+
 # CSV file functions
 def export_csv(
   data: List[Dict],
