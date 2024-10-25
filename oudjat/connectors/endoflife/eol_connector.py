@@ -4,7 +4,7 @@ import requests
 from typing import List, Dict, Union
 
 from oudjat.connectors import Connector
-from oudjat.model.assets.software import OSFamily
+from oudjat.model.assets.software import WindowsEdition
 
 EOL_API_URL = "https://endoflife.date/api/"
 
@@ -80,7 +80,7 @@ class EndOfLifeConnector(Connector):
     
     for rel in win_eol:
       if target == "windows":
-        win_editions = OSFamily.WINDOWS.value.get("os").get("windows").get("editions")._member_names_
+        win_editions = WindowsEdition._member_names_
         r_edition = win_editions[:-1]
 
         edi_search = re.search(rf"^.+ \(?({'|'.join(win_editions)})\)?$", rel["releaseLabel"].upper())
