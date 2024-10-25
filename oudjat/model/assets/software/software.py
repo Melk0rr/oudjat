@@ -176,7 +176,7 @@ class SoftwareRelease:
     software: "Software",
     version: Union[int, str],
     release_date: Union[str, datetime],
-    release_label: str = None
+    release_label: str
   ):
     """ Constructor """
 
@@ -301,8 +301,8 @@ class Software(Asset):
     
   def add_release(self, new_release: SoftwareRelease) -> None:
     """ Adds a release to the list of software releases """
-    if not self.has_release(new_release.get_version()):
-      self.releases[new_release.get_version()] = new_release
+    if not self.has_release(new_release.get_label()):
+      self.releases[new_release.get_label()] = new_release
 
   def has_release(self, version: Union[int, str]) -> bool:
     """ Checks if the current software has a release with the given version """
