@@ -6,6 +6,9 @@ from . import ComputerType
 class Computer(Asset):
   """ A common class for computers """
 
+  # ****************************************************************
+  # Attributes & Constructor
+
   def __init__(
     self,
     id: str,
@@ -23,5 +26,6 @@ class Computer(Asset):
     self.ip = ip
     self.softwares: List[SoftwareRelease] = []
     
-    
-    
+
+  # ****************************************************************
+  # Methods
