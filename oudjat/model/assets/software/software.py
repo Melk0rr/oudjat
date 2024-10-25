@@ -301,12 +301,16 @@ class Software(Asset):
     
   def add_release(self, new_release: SoftwareRelease) -> None:
     """ Adds a release to the list of software releases """
-    if not self.has_release(new_release.get_label()):
+    if isinstance(new_release, SoftwareRelease) and not self.has_release(new_release.get_label()):
       self.releases[new_release.get_label()] = new_release
 
-  def has_release(self, version: Union[int, str]) -> bool:
+  def find_release(self, label: str) -> SoftwareRelease:
+    """ Finds a release by label """
+    return self.releases.get(label, None)
+
+  def has_release(self, label: str) -> bool:
     """ Checks if the current software has a release with the given version """
-    return version in self.releases.keys()
+    return label in self.releases.keys()
 
   def retired_releases(self) -> List[SoftwareRelease]:
     """ Gets a list of retired releases """
