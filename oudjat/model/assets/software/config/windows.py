@@ -6,7 +6,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2024-10-01",
 			"support": "2029-10-09",
 			"eol": "2034-10-10",
-			"lts": true,
+			"lts": True,
 			"latest": "10.0.26100",
 			"link": "https://learn.microsoft.com/windows/release-health/windows11-release-information#enterprise-and-iot-enterprise-ltsc-editions",
 			"edition": [
@@ -18,7 +18,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2024-10-01",
 			"support": "2029-10-09",
 			"eol": "2029-10-09",
-			"lts": true,
+			"lts": True,
 			"latest": "10.0.26100",
 			"link": "https://learn.microsoft.com/windows/release-health/windows11-release-information#enterprise-and-iot-enterprise-ltsc-editions",
 			"edition": [
@@ -32,7 +32,7 @@ WINDOWS_RELEASES = {
 			"eol": "2027-10-12",
 			"latest": "10.0.26100",
 			"link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E"
 			]
@@ -44,7 +44,7 @@ WINDOWS_RELEASES = {
 			"eol": "2026-10-13",
 			"latest": "10.0.26100",
 			"link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"W"
 			]
@@ -56,7 +56,7 @@ WINDOWS_RELEASES = {
 			"eol": "2026-11-10",
 			"latest": "10.0.22631",
 			"link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E"
 			]
@@ -68,7 +68,7 @@ WINDOWS_RELEASES = {
 			"eol": "2025-11-11",
 			"latest": "10.0.22631",
 			"link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"W"
 			]
@@ -80,7 +80,7 @@ WINDOWS_RELEASES = {
 			"eol": "2025-10-14",
 			"latest": "10.0.19045",
 			"link": "https://learn.microsoft.com/windows/release-health/release-information",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E",
 				"W"
@@ -93,7 +93,7 @@ WINDOWS_RELEASES = {
 			"eol": "2025-10-14",
 			"latest": "10.0.22621",
 			"link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E"
 			]
@@ -105,7 +105,7 @@ WINDOWS_RELEASES = {
 			"eol": "2024-10-08",
 			"latest": "10.0.22621",
 			"link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"W"
 			]
@@ -115,7 +115,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2021-11-16",
 			"support": "2027-01-12",
 			"eol": "2032-01-13",
-			"lts": true,
+			"lts": True,
 			"latest": "10.0.19044",
 			"link": "https://learn.microsoft.com/windows/release-health/release-information#enterprise-and-iot-enterprise-ltsbltsc-editions",
 			"edition": [
@@ -127,7 +127,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2021-11-16",
 			"support": "2027-01-12",
 			"eol": "2027-01-12",
-			"lts": true,
+			"lts": True,
 			"latest": "10.0.19044",
 			"link": "https://learn.microsoft.com/windows/release-health/release-information#enterprise-and-iot-enterprise-ltsbltsc-editions",
 			"edition": [
@@ -141,7 +141,7 @@ WINDOWS_RELEASES = {
 			"eol": "2024-06-11",
 			"latest": "10.0.19044",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-10-enterprise-and-education",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E"
 			]
@@ -153,7 +153,7 @@ WINDOWS_RELEASES = {
 			"eol": "2023-06-13",
 			"latest": "10.0.19044",
 			"link": "https://learn.microsoft.com/windows/release-health/release-information",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"W"
 			]
@@ -165,7 +165,7 @@ WINDOWS_RELEASES = {
 			"eol": "2024-10-08",
 			"latest": "10.0.22000",
 			"link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E"
 			]
@@ -177,7 +177,7 @@ WINDOWS_RELEASES = {
 			"eol": "2023-10-10",
 			"latest": "10.0.22000",
 			"link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"W"
 			]
@@ -189,7 +189,7 @@ WINDOWS_RELEASES = {
 			"eol": "2022-12-13",
 			"latest": "10.0.19043",
 			"link": "https://learn.microsoft.com/windows/release-health/status-windows-10-21h1",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E",
 				"W"
@@ -202,7 +202,7 @@ WINDOWS_RELEASES = {
 			"eol": "2023-05-09",
 			"latest": "10.0.19042",
 			"link": "https://learn.microsoft.com/windows/release-health/status-windows-10-20h2",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E"
 			]
@@ -214,7 +214,7 @@ WINDOWS_RELEASES = {
 			"eol": "2022-05-10",
 			"latest": "10.0.19042",
 			"link": "https://learn.microsoft.com/windows/release-health/status-windows-10-20h2",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"W"
 			]
@@ -226,7 +226,7 @@ WINDOWS_RELEASES = {
 			"eol": "2021-12-14",
 			"latest": "10.0.19041",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-version-2004-end-of-servicing",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E",
 				"W"
@@ -239,7 +239,7 @@ WINDOWS_RELEASES = {
 			"eol": "2022-05-10",
 			"latest": "10.0.18363",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1909-enterprise-education-eos",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E"
 			]
@@ -251,7 +251,7 @@ WINDOWS_RELEASES = {
 			"eol": "2021-05-11",
 			"latest": "10.0.18363",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1909-end-of-servicing",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"W"
 			]
@@ -263,7 +263,7 @@ WINDOWS_RELEASES = {
 			"eol": "2020-12-08",
 			"latest": "10.0.18362",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1903-end-of-servicing",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E",
 				"W"
@@ -273,7 +273,7 @@ WINDOWS_RELEASES = {
 			"releaseLabel": "10 1809",
 			"releaseDate": "2018-11-13",
 			"support": "2024-01-09",
-			"lts": true,
+			"lts": True,
 			"eol": "2029-01-09",
 			"latest": "10.0.17763",
 			"link": "https://learn.microsoft.com/windows/release-health/supported-versions-windows-client#enterprise-and-iot-enterprise-ltsbltsc-editions",
@@ -288,7 +288,7 @@ WINDOWS_RELEASES = {
 			"eol": "2021-05-11",
 			"latest": "10.0.17763",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1803-1809-end-of-servicing",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E"
 			]
@@ -300,7 +300,7 @@ WINDOWS_RELEASES = {
 			"eol": "2020-11-10",
 			"latest": "10.0.17763",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1809-end-of-servicing",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"W"
 			]
@@ -312,7 +312,7 @@ WINDOWS_RELEASES = {
 			"eol": "2021-05-11",
 			"latest": "10.0.17134",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1803-1809-end-of-servicing",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E"
 			]
@@ -324,7 +324,7 @@ WINDOWS_RELEASES = {
 			"eol": "2019-11-12",
 			"latest": "10.0.17134",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1803-end-of-servicing",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"W"
 			]
@@ -336,7 +336,7 @@ WINDOWS_RELEASES = {
 			"eol": "2020-10-13",
 			"latest": "10.0.16299",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1709-end-of-servicing",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E"
 			]
@@ -348,7 +348,7 @@ WINDOWS_RELEASES = {
 			"eol": "2019-04-09",
 			"latest": "10.0.16299",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1709-end-of-servicing",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"W"
 			]
@@ -360,7 +360,7 @@ WINDOWS_RELEASES = {
 			"eol": "2019-10-08",
 			"latest": "10.0.15063",
 			"link": "https://techcommunity.microsoft.com/t5/windows-it-pro-blog/end-of-service-reminders-for-windows-10-versions-1703-and-1803/ba-p/903715",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E"
 			]
@@ -372,7 +372,7 @@ WINDOWS_RELEASES = {
 			"eol": "2018-10-09",
 			"latest": "10.0.15063",
 			"link": "https://techcommunity.microsoft.com/t5/windows-it-pro-blog/end-of-service-reminders-for-windows-10-versions-1703-and-1803/ba-p/903715",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"W"
 			]
@@ -382,7 +382,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2016-08-02",
 			"support": "2021-10-12",
 			"eol": "2026-10-13",
-			"lts": true,
+			"lts": True,
 			"latest": "10.0.14393",
 			"link": "https://learn.microsoft.com/windows/release-health/supported-versions-windows-client#enterprise-and-iot-enterprise-ltsbltsc-editions",
 			"edition": [
@@ -396,7 +396,7 @@ WINDOWS_RELEASES = {
 			"eol": "2019-04-09",
 			"latest": "10.0.14393",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1607-end-of-servicing",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E"
 			]
@@ -407,8 +407,8 @@ WINDOWS_RELEASES = {
 			"support": "2018-04-10",
 			"eol": "2018-04-10",
 			"latest": "10.0.14393",
-			"link": null,
-			"lts": false,
+			"link": None,
+			"lts": False,
 			"edition": [
 				"W"
 			]
@@ -420,7 +420,7 @@ WINDOWS_RELEASES = {
 			"eol": "2017-10-10",
 			"latest": "10.0.10586",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1511-end-of-servicing",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E",
 				"W"
@@ -430,7 +430,7 @@ WINDOWS_RELEASES = {
 			"releaseLabel": "10 1507",
 			"releaseDate": "2015-07-29",
 			"support": "2020-10-13",
-			"lts": true,
+			"lts": True,
 			"eol": "2025-10-14",
 			"latest": "10.0.10240",
 			"link": "https://learn.microsoft.com/windows/release-health/supported-versions-windows-client#enterprise-and-iot-enterprise-ltsbltsc-editions",
@@ -445,7 +445,7 @@ WINDOWS_RELEASES = {
 			"eol": "2017-05-09",
 			"latest": "10.0.10240",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1507-cb-cbb-end-of-servicing",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E",
 				"W"
@@ -455,7 +455,7 @@ WINDOWS_RELEASES = {
 			"releaseLabel": "10 1507",
 			"releaseDate": "2015-04-29",
 			"support": "2020-11-10",
-			"lts": false,
+			"lts": False,
 			"eol": "2020-11-10",
 			"latest": "10.0.10240",
 			"link": "https://learn.microsoft.com/en-us/lifecycle/products/windows-10-iot-core",
@@ -470,7 +470,7 @@ WINDOWS_RELEASES = {
 			"eol": "2023-01-10",
 			"latest": "6.3.9600",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-81",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E",
 				"W"
@@ -483,7 +483,7 @@ WINDOWS_RELEASES = {
 			"eol": "2016-01-12",
 			"latest": "6.2.9200",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-8",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E",
 				"W"
@@ -496,7 +496,7 @@ WINDOWS_RELEASES = {
 			"eol": "2020-01-14",
 			"latest": "6.1.7601",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-7",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E",
 				"W"
@@ -509,7 +509,7 @@ WINDOWS_RELEASES = {
 			"eol": "2017-04-11",
 			"latest": "6.0.6200",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-vista",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E",
 				"W"
@@ -522,7 +522,7 @@ WINDOWS_RELEASES = {
 			"eol": "2014-04-08",
 			"latest": "5.1.2600",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-xp",
-			"lts": false,
+			"lts": False,
 			"edition": [
 				"E",
 				"W"
@@ -541,7 +541,7 @@ WINDOWS_RELEASES = {
 			"eol": "2025-10-24",
 			"latest": "10.0.25398",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-annual-channel",
-			"lts": false,
+			"lts": False,
 		},
 
 		# Windows Server 2022
@@ -551,7 +551,7 @@ WINDOWS_RELEASES = {
 			"support": "2026-10-13",
 			"eol": "2031-10-14",
 			"latest": "10.0.20348",
-			"lts": true,
+			"lts": True,
 			"link": "https://learn.microsoft.com/windows/release-health/windows-server-release-info",
 		},
 
@@ -563,7 +563,7 @@ WINDOWS_RELEASES = {
 			"eol": "2022-08-09",
 			"latest": "10.0.19042",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-server-20h2-retiring",
-			"lts": false,
+			"lts": False,
 		},
 
 		# Windows Server 2004
@@ -574,7 +574,7 @@ WINDOWS_RELEASES = {
 			"eol": "2021-12-14",
 			"latest": "10.0.19041",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-server-version-2004-end-of-servicing",
-			"lts": false,
+			"lts": False,
 		},
 
 		# Windows Server 1909
@@ -585,7 +585,7 @@ WINDOWS_RELEASES = {
 			"eol": "2021-05-11",
 			"latest": "10.0.18363",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-server-1909-end-of-servicing",
-			"lts": false,
+			"lts": False,
 		},
 
 		# Windows Server 1903
@@ -596,7 +596,7 @@ WINDOWS_RELEASES = {
 			"eol": "2020-12-08",
 			"latest": "10.0.18362",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-semiannual-channel",
-			"lts": false,
+			"lts": False,
 		},
 
 		# Windows Server 1809
@@ -607,7 +607,7 @@ WINDOWS_RELEASES = {
 			"eol": "2020-11-10",
 			"latest": "10.0.17763",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-server-1809-end-of-servicing",
-			"lts": false,
+			"lts": False,
 		},
 
 		# Windows Server 2019
@@ -616,7 +616,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2018-11-13",
 			"support": "2024-01-09",
 			"eol": "2029-01-09",
-			"lts": true,
+			"lts": True,
 			"latest": "10.0.17763",
 			"link": "https://learn.microsoft.com/windows/release-health/windows-server-release-info",
 		},
@@ -629,7 +629,7 @@ WINDOWS_RELEASES = {
 			"eol": "2019-11-12",
 			"latest": "10.0.17134",
 			"link": "https://learn.microsoft.com/lifecycle/announcements/windows-server-1803-end-of-servicing",
-			"lts": false,
+			"lts": False,
 		},
 
 		# Windows Server 1709
@@ -640,7 +640,7 @@ WINDOWS_RELEASES = {
 			"eol": "2019-04-09",
 			"latest": "10.0.16299",
 			"link": "https://techcommunity.microsoft.com/t5/windows-server-for-developers/windows-server-version-1709-lifecycle-announcement/m-p/379766",
-			"lts": false,
+			"lts": False,
 		},
 
 		# Windows Server 2016
@@ -649,7 +649,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2016-10-15",
 			"support": "2022-01-11",
 			"eol": "2027-01-12",
-			"lts": true,
+			"lts": True,
 			"latest": "10.0.14393",
 			"link": "https://learn.microsoft.com/windows/release-health/windows-server-release-info",
 		},
@@ -660,7 +660,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2013-11-25",
 			"support": "2018-10-09",
 			"eol": "2026-10-13",
-			"lts": true,
+			"lts": True,
 			"latest": "6.3.9600",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-2012-r2",
 		},
@@ -669,7 +669,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2012-10-30",
 			"support": "2018-10-09",
 			"eol": "2026-10-13",
-			"lts": true,
+			"lts": True,
 			"latest": "6.2.9200",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-2012",
 		},
@@ -680,7 +680,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2011-02-22",
 			"support": "2015-01-13",
 			"eol": "2023-01-10",
-			"lts": true,
+			"lts": True,
 			"latest": "6.1.7601",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-2008-r2",
 		},
@@ -689,7 +689,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2009-10-22",
 			"support": "2013-04-09",
 			"eol": "2013-04-09",
-			"lts": true,
+			"lts": True,
 			"latest": "6.0.7600",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-2008-r2",
 		},
@@ -698,7 +698,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2009-04-29",
 			"support": "2015-01-13",
 			"eol": "2023-01-10",
-			"lts": true,
+			"lts": True,
 			"latest": "6.0.6003",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-2008",
 		},
@@ -707,7 +707,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2008-05-06",
 			"support": "2011-07-12",
 			"eol": "2011-07-12",
-			"lts": true,
+			"lts": True,
 			"latest": "6.0.6001",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-2008",
 		},
@@ -718,7 +718,7 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2003-04-24",
 			"support": "2010-07-13",
 			"eol": "2015-07-14",
-			"lts": true,
+			"lts": True,
 			"latest": "5.2.3790",
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-2003-",
 		},
@@ -729,9 +729,9 @@ WINDOWS_RELEASES = {
 			"releaseDate": "2000-02-17",
 			"support": "2005-06-30",
 			"eol": "2010-07-13",
-			"lts": true,
+			"lts": True,
 			"latest": "5.0.2195",
-			"link": null,
+			"link": None,
 		}
 	]
 }
