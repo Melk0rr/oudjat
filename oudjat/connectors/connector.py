@@ -35,9 +35,9 @@ class Connector:
   def connect(self) -> None:
     """ Connects to the target """
     raise NotImplementedError(
-      "data() method must be implemented by the overloading class")
+      "connect() method must be implemented by the overloading class")
 
   def search(self) -> List[Any]:
     """ Connects to the target """
     raise NotImplementedError(
-      "data() method must be implemented by the overloading class")
+      "search() method must be implemented by the overloading class")
