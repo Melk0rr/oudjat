@@ -1,6 +1,6 @@
 from enum import Enum
 from datetime import datetime
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
 
 from oudjat.utils import date_format_from_flag, DATE_FLAGS, days_diff
 from oudjat.model.assets import Asset, AssetType
@@ -104,6 +104,9 @@ class SoftwareReleaseSupport:
 
   def supports_edition(self, edition: str) -> bool:
     """ Checks if current support concerns the provided edition """
+    if edition is None:
+      return False
+    
     return self.edition is None or edition in self.edition
 
   def compare_support_scope(self, edition: Union[str, List[str]], lts: bool = False) -> bool:
@@ -212,13 +215,20 @@ class SoftwareRelease:
     
     return days_diff(self.end_of_life, reverse=True) > 0
   
-  def is_supported(self) -> bool:
+  def is_supported(self, edition: str = None) -> bool:
     """ Checks if the current release has an ongoin support """
-    return any([ s.is_ongoing() for s in self.support ])
-  
+    return any([ s.is_ongoing() and (edition is None or s.supports_edition(edition)) for s in self.support ])
+
   def get_support(self) -> SoftwareReleaseSupportList:
     """ Getter for support list """
     return self.support
+
+  def get_support_for_edition(self, edition: str = None) -> SoftwareReleaseSupportList:
+    """ Returns support for given edition """
+    if edition is None:
+      return None
+    
+    return [ s.supports_edition(edition) for s in self.support ]
   
   def get_ongoing_support(self) -> List[SoftwareReleaseSupport]:
     """ Returns ongoing support instances """
@@ -235,6 +245,16 @@ class SoftwareRelease:
       not self.support.contains(edition=support.get_edition(), lts=support.has_long_term_support())
     ):
       self.support.append(support)
+      
+  def has_vulnerability(self, vuln: Union[str, List[str]] = None) -> List[str]:
+    """ Check if the release is concerned by any or specific vulnerability """
+    if vuln is None:
+      return list(self.vulnerabilities)
+    
+    if not isinstance(vuln, list):
+      vuln = [ vuln ]
+      
+    return [ v in self.vulnerabilities for v in vuln ]
       
   def add_vuln(self, vuln: str) -> None:
     """ Adds a vulnerability to the current release """
@@ -283,6 +303,7 @@ class Software(Asset):
     self.editor = editor
     self.type = software_type
     self.releases = {}
+    self.editions: List[Dict] = []
 
   # ****************************************************************
   # Methods
@@ -294,6 +315,18 @@ class Software(Asset):
   def get_releases(self) -> Dict[Union[int, str], SoftwareRelease]:
     """ Getter for software releases """
     return self.releases
+
+  def get_software_type(self) -> SoftwareType:
+    """ Getter for software type """
+    return self.type
+
+  def get_editions(self) -> List[Dict]:
+    """ Getter for software editions """
+    return self.editions
+  
+  def get_editions_by_key(self, key_val: Tuple[str, any]) -> List[Dict]:
+    """ Get editions list by given key """
+    return [ e for e in self.editions if e[key_val[0]] == key_val[1] ]
 
   def set_editor(self, editor: Union[str, List[str]]) -> None:
     """ Setter for software editor """
