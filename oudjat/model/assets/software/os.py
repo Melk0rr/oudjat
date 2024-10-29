@@ -16,12 +16,6 @@ class OSFamily(Enum):
   UNIX = "unix"
   WINDOWS = "windows"
 
-class WindowsEdition(Enum):
-  """ Windows edition enum """
-  E   = [ "Enterprise", "Education", "IOT Enterprise" ]
-  W   = [ "Home", "Pro", "Pro Education" ]
-  IOT = [ "IOT" ]
-
 class OperatingSystem(Software):
   """ A class to describe operating systems """
   
@@ -76,6 +70,11 @@ class OperatingSystem(Software):
   def get_os_family(self) -> OSFamily:
     """ Getter for OS family """
     return self.os_family
+
+  def gen_releases(self) -> None:
+    """ Method to generate releases """
+    raise NotImplementedError(
+      "gen_releases() method must be implemented by the overloading class")
   
 
 class MSOSRelease(SoftwareRelease):
@@ -144,6 +143,57 @@ class MicrosoftOperatingSystem(OperatingSystem):
       win_rel.add_support(win_sup)
       self.add_release(win_rel)
 
+class WindowsEdition(Enum):
+  """ Windows edition enum """
+  WINDOWS = [
+    {
+        "label": "Enterprise",
+        "category": "E",
+        "pattern": r'^Ent[er]{2}prise$'
+      },
+      {
+        "label": "Education",
+        "category": "E",
+        "pattern": r'^[EÉeé]ducation$'
+      },
+      {
+        "label": "IoT Enterprise",
+        "category": "E",
+        "pattern": r'^[Ii][Oo][Tt] Ent[er]{2}prise$'
+      },
+      {
+        "label": "Home",
+        "category": "W",
+        "pattern": r'^Home$'
+      },
+      {
+        "label": "Pro",
+        "category": "W",
+        "pattern": r'^Pro(?:fession[n]?[ae]l)?$'
+      },
+      {
+        "label": "Pro Education",
+        "category": "W",
+        "pattern": r'^Pro(?:fession[n]?[ae]l)? [EÉeé]ducation$'
+      },
+      {
+        "label": "IOT",
+        "category": "IOT",
+        "pattern": r'^[Ii][Oo][Tt]$'
+      }
+  ]
+  WINDOWSSERVER = [
+    {
+      "label": "Standard",
+      "category": None
+    },
+    {
+      "label": "Datacenter",
+      "category": None,
+      "pattern": r'^Datacenter$'
+    }
+  ]
+
 class Windows(MicrosoftOperatingSystem):
   """ A child class of operating system to describe Microsoft Windows OS for workstation """
 
@@ -160,6 +210,8 @@ class Windows(MicrosoftOperatingSystem):
       computer_type=ComputerType.WORKSTATION,
       description="Microsoft operating system for workstations"
     )
+
+    self.editions = WindowsEdition.WINDOWS.value
     
   # ****************************************************************
   # Methods
@@ -185,7 +237,9 @@ class WindowsServer(MicrosoftOperatingSystem):
       computer_type=ComputerType.SERVER,
       description="Microsoft operating system for servers"
     )
-    
+
+    self.editions = WindowsEdition.WINDOWSSERVER.value
+
   # ****************************************************************
   # Methods
   
