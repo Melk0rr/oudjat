@@ -1,6 +1,8 @@
+from typing import List
+
 from oudjat.model.assets import Asset
 from oudjat.model.assets.network import IPv4
-from oudjat.model.assets.software import SoftwareRelease, SoftwareType
+from oudjat.model.assets.software import SoftwareRelease, SoftwareType, SoftwareEdition
 from . import ComputerType
 
 class Computer(Asset):
@@ -14,7 +16,7 @@ class Computer(Asset):
     id: str,
     name: str,
     os: SoftwareRelease = None,
-    os_edition: SoftwareReleaseEdition = None,
+    os_edition: SoftwareEdition = None,
     ip: List[IPv4] = None
   ):
     """ Constructor """
