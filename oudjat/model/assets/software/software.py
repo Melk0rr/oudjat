@@ -328,6 +328,23 @@ class SoftwareRelease:
       "is_supported": self.is_supported(),
     }
 
+class SoftwareReleaseDict(dict):
+  """ Software release dictionary """
+
+  def find_rel_matching_label(self, val: str) -> "SoftwareReleaseDict":
+    """ Try to find release with a label matching the given string """
+    return { k: v for k, v in self.items() if k in val }
+  
+  def find_rel(self, rel_ver: str, rel_label: str = None) -> "SoftwareReleaseDict":
+    """ Finds the given release """
+    ver_search = self.get(rel_ver, None)
+    lab_search = None
+    
+    if ver_search is not None and rel_label is not None:
+      lab_search = ver_search.get(rel_label, None)
+      
+    return ver_search if lab_search is None else { lab_search.get_label(): lab_search }
+  
 
 class Software(Asset):
   """ A class to describe softwares """
@@ -349,7 +366,7 @@ class Software(Asset):
     
     self.editor = editor
     self.type = software_type
-    self.releases = {}
+    self.releases = SoftwareReleaseDict()
     self.editions = SoftwareEditionDict()
 
   # ****************************************************************
@@ -375,18 +392,25 @@ class Software(Asset):
     """ Setter for software editor """
     self.editor = editor
     
+  def has_release(self, rel_ver: str, rel_label: str) -> bool:
+    """ Checks if the current software has a release with the given version """
+    return self.releases.find_rel(rel_ver, rel_label) is not None
+
   def add_release(self, new_release: SoftwareRelease) -> None:
     """ Adds a release to the list of software releases """
-    if isinstance(new_release, SoftwareRelease) and not self.has_release(new_release.get_label()):
-      self.releases[new_release.get_label()] = new_release
+    if not isinstance(new_release, SoftwareRelease):
+      return
 
-  def find_release(self, label: str) -> SoftwareRelease:
+    new_rel_ver = new_release.get_version()
+    
+    if new_rel_ver not in self.releases.keys():
+      self.releases[new_rel_ver] = SoftwareReleaseDict()
+
+    self.releases[new_rel_ver][new_release.get_label()] = new_release
+
+  def find_release(self, rel_ver: str, rel_label: str = None) -> SoftwareRelease:
     """ Finds a release by label """
-    return self.releases.get(label, None)
-
-  def has_release(self, label: str) -> bool:
-    """ Checks if the current software has a release with the given version """
-    return label in self.releases.keys()
+    return self.releases.find_rel(rel_ver, rel_label)
 
   def retired_releases(self) -> List[SoftwareRelease]:
     """ Gets a list of retired releases """
