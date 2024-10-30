@@ -1,2 +1,2 @@
-from .software import Software, SoftwareRelease, SoftwareType, SoftwareReleaseSupport
+from .software import Software, SoftwareRelease, SoftwareType, SoftwareReleaseSupport, SoftwareEdition, SoftwareEditionDict
 from .os import OperatingSystem, OSFamily, WindowsEdition, Windows, WindowsServer
