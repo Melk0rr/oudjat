@@ -16,6 +16,7 @@ class LDAPObjectType(Enum):
       "description",
       "distinguishedName",
       "lastLogonTimestamp",
+      "memberOf",
       "msDS-User-Account-Control-Computed",
       "name",
       "objectClass",
@@ -128,6 +129,7 @@ class LDAPObjectType(Enum):
     "filter": "(&(objectClass=user)(!(objectClass=computer)))",
     "attributes": [
       "accountExpires",
+      "adminCount",
       "cn",
       "description",
       "distinguishedName",
@@ -135,6 +137,7 @@ class LDAPObjectType(Enum):
       "givenName",
       "lastLogonTimestamp",
       "mail",
+      "memberOf",
       "msDS-User-Account-Control-Computed",
       "name",
       "objectClass",
