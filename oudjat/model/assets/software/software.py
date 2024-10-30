@@ -1,3 +1,5 @@
+import re
+
 from enum import Enum
 from datetime import datetime
 from typing import List, Dict, Union, Tuple
@@ -19,6 +21,55 @@ class SoftwareType(Enum):
   OS = 0
   APPLICATION = 1
   
+class SoftwareEdition:
+  """ A class to handle software editions """
+  
+  # ****************************************************************
+  # Attributes & Constructors
+  
+  def __init__(
+    self,
+    label: str,
+    category: str = None,
+    pattern: str = None
+  ):
+    """ Constructor """
+    self.label = label
+    self.category = category
+    self.pattern = pattern
+    
+  # ****************************************************************
+  # Methods
+
+  def get_label(self) -> str:
+    """ Getter for edition label """
+    return self.label
+  
+  def get_category(self) -> str:
+    """ Getter for edition category """
+    return self.category
+  
+  def get_pattern(self) -> str:
+    """ Getter for edition pattern """
+    return self.pattern
+  
+
+class SoftwareEditionDict(dict):
+  """ Software edition dictionary """
+
+  def get_matching_editions(self, label: str) -> List[SoftwareEdition]:
+    """ Returns software editions for which the given label match the pattern """
+    return [ e for e in self.values() if e.get_pattern() is None or re.match(e.get_pattern(), label) ]
+  
+  def get_edition_labels(self) -> List[str]:
+    """ Returns a list of edition labels """
+    return [ e.get_label() for e in self.values() ]
+  
+  def get_editions_per_ctg(self, category: str) -> "SoftwareEditionDict":
+    """ Returns a sub software edition dict based on category value """
+    res = { k: v for k, v in self.items() if v.get_category() == category }
+    return SoftwareEditionDict(**res)
+  
 class SoftwareReleaseSupport:
   """ A class to handle software release support concept """
   
@@ -29,13 +80,13 @@ class SoftwareReleaseSupport:
     self,
     active_support: Union[str, datetime] = None,
     end_of_life: Union[str, datetime] = None,
-    edition: List[str] = None,
+    edition: Union[Dict, SoftwareEditionDict] = None,
     long_term_support: bool = False
   ):
     """ Constructor """
 
-    if edition is not None and not isinstance(edition, list):
-      edition = [ edition ]
+    if edition is not None and not isinstance(edition, SoftwareEditionDict):
+      edition = SoftwareEditionDict(**edition)
 
     self.edition = edition
 
@@ -62,17 +113,16 @@ class SoftwareReleaseSupport:
 
     self.lts = long_term_support
 
-
   # ****************************************************************
   # Methods
   
-  def get_edition(self) -> List[str]:
+  def get_edition(self) -> SoftwareEditionDict:
     """ Getter for release edition """
     return self.edition
   
   def get_edition_str(self, join_char: str = ',') -> str:
     """ Returns joined editions """
-    return join_char.join(self.edition or [])
+    return join_char.join(self.edition.get_edition_labels())
   
   def is_ongoing(self) -> bool:
     """ Returns wheither or not the current support is ongoing """
@@ -102,24 +152,21 @@ class SoftwareReleaseSupport:
     """ Returns wheither the release has long term support or not """
     return self.lts
 
-  def supports_edition(self, edition: str) -> bool:
+  def supports_edition(self, edition_label: str) -> bool:
     """ Checks if current support concerns the provided edition """
-    if edition is None:
+    if edition_label is None:
       return False
     
-    return self.edition is None or edition in self.edition
+    return self.edition is None or edition_label in self.edition.get_edition_labels()
 
-  def compare_support_scope(self, edition: Union[str, List[str]], lts: bool = False) -> bool:
+  def compare_support_scope(self, edition_labels: Union[str, List[str]], lts: bool = False) -> bool:
     """ Compares current support with given values """
     compare = False
     
-    if not isinstance(edition, list):
-      edition = [ edition ]
-
-    if all([ self.supports_edition(e) for e in edition ]) and lts == self.lts:
-      compare = True
+    if not isinstance(edition_labels, list):
+      edition_labels = [ edition_labels ]
       
-    return compare
+    return all([ self.supports_edition(e) for e in edition_labels ]) and lts == self.lts
   
   def to_string(self) -> str:
     """ Converts the current support instance into a string """
@@ -303,7 +350,7 @@ class Software(Asset):
     self.editor = editor
     self.type = software_type
     self.releases = {}
-    self.editions: List[Dict] = []
+    self.editions = SoftwareEditionDict()
 
   # ****************************************************************
   # Methods
@@ -320,13 +367,9 @@ class Software(Asset):
     """ Getter for software type """
     return self.type
 
-  def get_editions(self) -> List[Dict]:
+  def get_editions(self) -> SoftwareEditionDict:
     """ Getter for software editions """
     return self.editions
-  
-  def get_editions_by_key(self, key_val: Tuple[str, any]) -> List[Dict]:
-    """ Get editions list by given key """
-    return [ e for e in self.editions if e[key_val[0]] == key_val[1] ]
 
   def set_editor(self, editor: Union[str, List[str]]) -> None:
     """ Setter for software editor """
