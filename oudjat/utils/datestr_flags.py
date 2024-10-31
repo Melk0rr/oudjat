@@ -1,4 +1,4 @@
-from enum import Enum, Flag, auto
+from enum import Enum
 
 class DateStrFlag(Enum):
   """ Bit flag to handle date string format """

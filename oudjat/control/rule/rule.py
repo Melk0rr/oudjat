@@ -19,7 +19,7 @@ class Rule:
     """ Constructor """
     self.id = id
     self.name = name
-    seld.description = description
+    self.description = description
 
     
 

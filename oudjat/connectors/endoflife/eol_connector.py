@@ -61,13 +61,13 @@ class EndOfLifeConnector(Connector):
     
     try:
       headers = { 'Accept': 'application/json' }
-      req = requests.get(f"{self.target}{search_filter}.json")
+      req = requests.get(f"{self.target}{search_filter}.json", headers=headers)
 
       if req.status_code == 200:
         res = json.loads(req.content.decode("utf-8"))
 
         if attributes is not None:
-          res = [ { k: v for k,v in vuln.items() if k in attributes } for e in res ]
+          res = [ { k: v for k,v in e.items() if k in attributes } for e in res ]
         
     except ConnectionError as e:
       raise ConnectionError(f"Could not retreive {search_filter} infos:\n{e}")

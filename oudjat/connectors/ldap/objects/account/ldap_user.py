@@ -1,5 +1,4 @@
-from typing import List
-
+from oudjat.connectors.ldap.objects import LDAPEntry
 from . import LDAPAccount
 
 class LDAPUser(LDAPAccount):

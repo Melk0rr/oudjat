@@ -1,8 +1,8 @@
-from typing import List
-
+from oudjat.model.assets.computer import Computer
+from oudjat.connectors.ldap.objects import LDAPEntry
 from . import LDAPAccount
 
-class LDAPComputer(LDAPAccount):
+class LDAPComputer(LDAPAccount, Computer):
   """ A class to describe LDAP computer objects """
   
   # ****************************************************************

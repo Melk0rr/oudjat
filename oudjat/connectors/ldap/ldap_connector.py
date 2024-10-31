@@ -2,7 +2,7 @@ import ssl
 import ldap3
 import socket
 
-from typing import List, Union, Any
+from typing import List, Union
 
 from oudjat.utils import ColorPrint
 

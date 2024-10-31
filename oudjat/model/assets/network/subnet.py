@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from oudjat.utils import bytes_2_ipstr, b_or, bytes_2_int, int_2_bytes
+from oudjat.utils import bytes_2_ipstr, b_or, int_2_bytes
 
 from . import IPv4
 

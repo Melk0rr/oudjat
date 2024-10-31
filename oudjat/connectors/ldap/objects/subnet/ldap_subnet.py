@@ -1,5 +1,3 @@
-from typing import List
-
 from oudjat.model.network import Subnet
 from oudjat.connectors.ldap.objects import LDAPObject, LDAPEntry
 

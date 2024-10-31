@@ -1,6 +1,7 @@
-from typing import Dict, Union, List
+from typing import Union, List
 
-from oudjat.model.assets import AssetType
+from oudjat.model.assets import AssetType, Asset
+from oudjat.model.assets.network import Subnet
 
 class Location:
   """ A class to describe generic location with subnets, assets, users """
