@@ -27,7 +27,7 @@ class Computer(Asset):
     if os is not None and os.get_software().get_software_type() != SoftwareType.OS:
       raise ValueError(f"Invalid OS provided for computer {self.name}. Please provide an OS release")
     
-    self.os = os
+    self.os_release = os
 
     self.os_edition = None
 
@@ -47,9 +47,9 @@ class Computer(Asset):
     """ Getter for the computer name """
     return self.name
   
-  def get_os(self) -> SoftwareRelease:
+  def get_os_release(self) -> SoftwareRelease:
     """ Getter for the computer operating system """
-    return self.os
+    return self.os_release
   
   def get_software_list(self) -> List[SoftwareRelease]:
     """ Getter for the computer software release list """
@@ -70,5 +70,5 @@ class Computer(Asset):
     if self.os is None:
       return False
     
-    return self.os.is_supported(edition=self.os_edition)
+    return self.os_release.is_supported(edition=self.os_edition)
   
