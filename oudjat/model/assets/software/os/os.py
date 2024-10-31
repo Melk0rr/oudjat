@@ -12,7 +12,10 @@ class OSFamily(Enum):
   LINUX = "linux"
   MAC = "mac"
   UNIX = "unix"
-  WINDOWS = "windows"
+  WINDOWS = {
+    "name": "windows",
+    "pattern": r'[Ww]indows(?: [Ss]erver)?'
+  }
 
 class OperatingSystem(Software):
   """ A class to describe operating systems """
@@ -50,7 +53,7 @@ class OperatingSystem(Software):
         try:
           self.computer_type.append(ComputerType[t.upper()])
 
-        except ValueError as e:
+        except ValueError:
           ColorPrint.red(f"Could not add {t} as computer type")
       
       else:
