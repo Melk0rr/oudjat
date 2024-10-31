@@ -1,10 +1,7 @@
 from enum import Enum
-from datetime import datetime
 from typing import List, Dict, Union
 
-from oudjat.utils import date_format_from_flag, DATE_FLAGS, days_diff
 from oudjat.model.assets import Asset, AssetType
-from oudjat.model.vulnerability import CVE_REGEX
 
 from . import SoftwareRelease, SoftwareReleaseDict, SoftwareEditionDict
 
