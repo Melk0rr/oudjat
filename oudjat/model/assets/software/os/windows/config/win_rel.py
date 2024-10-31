@@ -656,7 +656,7 @@ WINDOWS_RELEASES = {
 
 		# Windows Server 2012
 		{
-			"releaseLabel": "2012-R2",
+			"releaseLabel": "2012 R2",
 			"releaseDate": "2013-11-25",
 			"support": "2018-10-09",
 			"eol": "2026-10-13",
@@ -676,7 +676,7 @@ WINDOWS_RELEASES = {
 
 		# Windows Server 2008
 		{
-			"releaseLabel": "2008-R2-SP1",
+			"releaseLabel": "2008 R2 SP1",
 			"releaseDate": "2011-02-22",
 			"support": "2015-01-13",
 			"eol": "2023-01-10",
@@ -685,7 +685,7 @@ WINDOWS_RELEASES = {
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-2008-r2",
 		},
 		{
-			"releaseLabel": "2008-R2",
+			"releaseLabel": "2008 R2",
 			"releaseDate": "2009-10-22",
 			"support": "2013-04-09",
 			"eol": "2013-04-09",
@@ -694,7 +694,7 @@ WINDOWS_RELEASES = {
 			"link": "https://learn.microsoft.com/lifecycle/products/windows-server-2008-r2",
 		},
 		{
-			"releaseLabel": "2008-SP2",
+			"releaseLabel": "2008 SP2",
 			"releaseDate": "2009-04-29",
 			"support": "2015-01-13",
 			"eol": "2023-01-10",
@@ -714,7 +714,7 @@ WINDOWS_RELEASES = {
 		
 		# Windows Server 2003
 		{
-			"releaseLabel": "2003-SP2",
+			"releaseLabel": "2003 SP2",
 			"releaseDate": "2003-04-24",
 			"support": "2010-07-13",
 			"eol": "2015-07-14",
