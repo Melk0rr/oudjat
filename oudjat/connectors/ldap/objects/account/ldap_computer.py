@@ -17,7 +17,7 @@ class LDAPComputer(LDAPAccount, Computer):
     super().__init__(ldap_entry=ldap_entry)
 
     os_family_infos = get_matching_os_family(self.entry.get("operatingSystem"))
-    os = OSOption[os_family_infos[0].upper].value["class"]()
+    os = OSOption[os_family_infos[0].upper()].value["class"]()
     
     print(os)
 
