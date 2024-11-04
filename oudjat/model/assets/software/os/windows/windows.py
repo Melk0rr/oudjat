@@ -64,13 +64,15 @@ class MicrosoftOperatingSystem(OperatingSystem):
       os_family=OSFamily.WINDOWS
     )
 
+    self.editions = SoftwareEditionDict(**WindowsEdition[self.id.upper()].value)
+
   # ****************************************************************
   # Methods
 
-  def gen_releases(self, os: str = "windows") -> None:
+  def gen_releases(self) -> None:
     """ Generates Windows releases """
 
-    for rel in WINDOWS_RELEASES[os]:
+    for rel in WINDOWS_RELEASES[self.id]:
       win_rel = self.find_release(rel["releaseLabel"])
 
       if win_rel is None:
@@ -94,57 +96,3 @@ class MicrosoftOperatingSystem(OperatingSystem):
       
       win_rel.add_support(win_sup)
       self.add_release(win_rel)
-
-
-class Windows(MicrosoftOperatingSystem):
-  """ A child class of operating system to describe Microsoft Windows OS for workstation """
-
-  # ****************************************************************
-  # Attributes & Constructors
-
-  def __init__(self):
-    """ Constructor """
-    
-    super().__init__(
-      id="windows",
-      name="Windows",
-      label="ms-windows",
-      computer_type=ComputerType.WORKSTATION,
-      description="Microsoft operating system for workstations"
-    )
-
-    self.editions = SoftwareEditionDict(**WindowsEdition.WINDOWS.value)
-    
-  # ****************************************************************
-  # Methods
-  
-  def gen_releases(self) -> None:
-    """ Generates Windows releases """
-    super().gen_releases()
-
-
-class WindowsServer(MicrosoftOperatingSystem):
-  """ A child class of operating system to describe Microsoft Windows OS for workstation """
-  
-  # ****************************************************************
-  # Attributes & Constructors
-
-  def __init__(self):
-    """ Constructor """
-    
-    super().__init__(
-      id="windows-server",
-      name="Windows Server",
-      label="ms-windows-server",
-      computer_type=ComputerType.SERVER,
-      description="Microsoft operating system for servers"
-    )
-
-    self.editions = SoftwareEditionDict(**WindowsEdition.WINDOWSSERVER.value)
-    
-  # ****************************************************************
-  # Methods
-  
-  def gen_releases(self) -> None:
-    """ Generates Windows releases """
-    super().gen_releases("windows-server")
