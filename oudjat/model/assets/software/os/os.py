@@ -1,3 +1,5 @@
+import re
+
 from enum import Enum
 from typing import List, Union
 
@@ -7,15 +9,32 @@ from oudjat.model.assets.software import Software, SoftwareType
 
 class OSFamily(Enum):
   """ OS family enumeration """
-  ANDROID = "android"
-  BSD = "bsd"
-  LINUX = "linux"
-  MAC = "mac"
-  UNIX = "unix"
+  ANDROID = {
+    "name": "android",
+    "pattern": r'[Aa]ndroid|[Aa][Oo][Ss][Pp]|[Gg]raphene[Oo][Ss]|[Ll]ineage[Oo][Ss]|\/e\/[Oo][Ss]|[Cc]alyx[Oo][Ss]'
+  }
+  BSD = {
+    "name": "bsd",
+    "pattern": r'[Bb][Ss][Dd]'
+  }
+  LINUX = {
+    "name": "linux",
+    "pattern": r'[Dd]ebian|[Uu]buntu|[Mm]int|[Nn]ix[Oo][Ss]|[Aa]rch|(?:[Oo]pen)?[Ss][Uu][Ss][Ee]|[Ff]edora|[Rr](?:ed )?[Hh](?:at )?[Ee](?:nterprise )?[Ll](?:inux)?|[Oo]racle(?: Linux)?'
+  }
+  MAC = {
+    "name": "mac",
+    "pattern": r'[Mm][Aa][Cc](?:[Oo][Ss])?'
+  }
   WINDOWS = {
     "name": "windows",
     "pattern": r'[Ww]indows(?: [Ss]erver)?'
   }
+
+def get_matching_os_family(test_str: str) -> OSFamily:
+  """ Returns the OS family which pattern matches the provided string """
+  for f in OSFamily._member_names_:
+    if re.match(OSFamily[f].value.get("pattern"), test_str):
+      return OSFamily[f]
 
 class OperatingSystem(Software):
   """ A class to describe operating systems """
