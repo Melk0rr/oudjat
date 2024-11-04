@@ -64,7 +64,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
       os_family=OSFamily.WINDOWS
     )
 
-    self.editions = SoftwareEditionDict(**WindowsEdition[self.id.upper()].value)
+    self.editions = SoftwareEditionDict(**WindowsEdition[self.id.replace('-', '').upper()].value)
 
   # ****************************************************************
   # Methods
