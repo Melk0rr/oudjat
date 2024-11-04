@@ -1,7 +1,7 @@
 import re
 
 from enum import Enum
-from typing import List, Union
+from typing import List, Union, Tuple
 
 from oudjat.utils import ColorPrint
 from oudjat.model.assets.computer import ComputerType
@@ -30,11 +30,14 @@ class OSFamily(Enum):
     "pattern": r'[Ww]indows(?: [Ss]erver)?'
   }
 
-def get_matching_os_family(test_str: str) -> OSFamily:
+def get_matching_os_family(test_str: str) -> Tuple[str, OSFamily]:
   """ Returns the OS family which pattern matches the provided string """
   for f in OSFamily._member_names_:
     if re.match(OSFamily[f].value.get("pattern"), test_str):
-      return OSFamily[f]
+      return (
+        re.search(OSFamily[f].value.get("pattern"), test_str).group(0),
+        OSFamily[f]
+      )
 
 class OperatingSystem(Software):
   """ A class to describe operating systems """
