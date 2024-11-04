@@ -1,4 +1,4 @@
-from oudjat.model.network import Subnet
+from oudjat.model.assets.network import Subnet
 from oudjat.connectors.ldap.objects import LDAPObject, LDAPEntry
 
 class LDAPSubnet(LDAPObject, Subnet):
