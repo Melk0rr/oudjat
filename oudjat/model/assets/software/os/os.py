@@ -19,7 +19,7 @@ class OSFamily(Enum):
   }
   LINUX = {
     "name": "linux",
-    "pattern": r'[Dd]ebian|[Uu]buntu|[Mm]int|[Nn]ix[Oo][Ss]|[Aa]rch|(?:[Oo]pen)?[Ss][Uu][Ss][Ee]|[Ff]edora|[Rr](?:ed )?[Hh](?:at )?[Ee](?:nterprise )?[Ll](?:inux)?|[Oo]racle(?: Linux)?'
+    "pattern": r'[Dd]ebian|[Uu]buntu|[Mm]int|[Nn]ix[Oo][Ss]|(?:[Oo]pen)?[Ss][Uu][Ss][Ee]|[Ff]edora|[Rr](?:ed )?[Hh](?:at )?[Ee](?:nterprise )?[Ll](?:inux)?|[Oo]racle(?: Linux)?'
   }
   MAC = {
     "name": "mac",
