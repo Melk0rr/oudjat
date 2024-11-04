@@ -82,7 +82,7 @@ class LDAPObject:
     """ Getter for ldap object change date"""
     return self.change_date
 
-  def is_of_object_class(self, obj_cl: str) -> bool:
+  def is_of_class(self, obj_cl: str) -> bool:
     """ Checks if the current object is of given class """
     return obj_cl.lower() in self.object_classes
 
