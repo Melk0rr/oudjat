@@ -1,2 +1,2 @@
 from .config.win_rel import WINDOWS_RELEASES
-from .windows import WindowsEdition, Windows, WindowsServer
+from .windows import WindowsEdition, MicrosoftOperatingSystem
