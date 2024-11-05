@@ -85,6 +85,10 @@ class Software(Asset):
     """ Gets a list of retired releases """
     return [ r.to_string() for r in self.releases.values() if r.is_supported() ]
   
+  def get_matching_editions(self, test_str: str) -> SoftwareEditionDict:
+    """ Returns editions which pattern matches the given string """
+    return self.editions.get_matching_editions(test_str)
+  
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dict """
     base_dict = super().to_dict()
