@@ -21,6 +21,10 @@ class MSOSRelease(SoftwareRelease):
     """ Get the version main release number from release version """
     return '.'.join(self.version.split('.')[:-1])
 
+  def get_name(self) -> str:
+    """ Returns a forged name of the release """
+    return f"{self.get_software().get_name()} {self.label.split(' ')[0]}"
+
 
 class WindowsEdition(Enum):
   """ Windows edition enum """
@@ -28,14 +32,14 @@ class WindowsEdition(Enum):
     "Enterprise": SoftwareEdition(label="Enterprise", category="E", pattern=r'Ent[er]{2}prise'),
     "Education": SoftwareEdition(label="Education", category="E", pattern=r'[EÉeé]ducation'),
     "IoT Enterprise": SoftwareEdition(label="IoT Enterprise", category="E", pattern=r'[Ii][Oo][Tt] Ent[er]{2}prise'),
-    "Home": SoftwareEdition(label="Home", category="W", pattern=r'Home'),
+    "Home": SoftwareEdition(label="Home", category="W", pattern=r'[Hh]ome'),
     "Pro": SoftwareEdition(label="Pro", category="W", pattern=r'Pro(?:fession[n]?[ae]l)?'),
     "Pro Education": SoftwareEdition(label="Pro Education", category="W", pattern=r'Pro(?:fession[n]?[ae]l)? [EÉeé]ducation'),
     "IOT": SoftwareEdition(label="IOT", category="IOT", pattern=r'[Ii][Oo][Tt]'),
   }
   WINDOWSSERVER = {
-    "Standard": SoftwareEdition(label="Standard"),
-    "Datacenter": SoftwareEdition(label="Datacenter", pattern=r'Datacenter')
+    "Standard": SoftwareEdition(label="Standard", pattern=r'[Ss]tandard'),
+    "Datacenter": SoftwareEdition(label="Datacenter", pattern=r'[Dd]atacenter')
   }
 
 
@@ -56,7 +60,8 @@ class MicrosoftOperatingSystem(OperatingSystem):
     """ Constructor """
 
     super().__init__(
-      id=id, name=name,
+      id=id,
+      name=name,
       label=label,
       computer_type=computer_type,
       description=description,
@@ -64,7 +69,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
       os_family=OSFamily.WINDOWS
     )
 
-    self.editions = SoftwareEditionDict(**WindowsEdition[self.id.replace('-', '').upper()].value)
+    self.editions = SoftwareEditionDict(**WindowsEdition[self.name.replace(' ', '').upper()].value)
 
   # ****************************************************************
   # Methods
