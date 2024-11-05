@@ -41,7 +41,7 @@ class Software(Asset):
     """ Getter for software editor """
     return self.editor
   
-  def get_releases(self) -> Dict[Union[int, str], SoftwareRelease]:
+  def get_releases(self) -> SoftwareReleaseDict:
     """ Getter for software releases """
     return self.releases
 
