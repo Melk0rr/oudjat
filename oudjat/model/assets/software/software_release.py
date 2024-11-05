@@ -75,6 +75,15 @@ class SoftwareRelease:
   def get_retired_support(self) -> List[SoftwareReleaseSupport]:
     """ Returns retired support instances """
     return [ s for s in self.support if not s.is_ongoing() ]
+
+  def get_name(self) -> None:
+    """ Method to generate releases """
+    raise NotImplementedError(
+      "get_name() method must be implemented by the overloading class")
+
+  def get_full_name(self) -> None:
+    """ Method to generate releases """
+    return f"{self.get_software().get_name()} {self.label}"
   
   def add_support(self, support: SoftwareReleaseSupport) -> None:
     """ Adds a support instance to the current release """
@@ -100,7 +109,7 @@ class SoftwareRelease:
 
   def to_string(self, show_version: bool = False) -> str:
     """ Converts current release to a string """
-    name = f"{self.software.get_name()} {self.label or ''}"
+    name = self.get_full_name()
 
     if show_version:
       name = f"{name.strip()}({self.version})"
@@ -112,7 +121,7 @@ class SoftwareRelease:
     return {
       "software": self.software.get_name(),
       "label": self.label,
-      "full_name": self.to_string(),
+      "full_name": self.get_full_name(),
       "version": self.version,
       "release_date": soft_date_str(self.release_date),
       "support": ', '.join([ s.to_string() for s in self.support ]),
