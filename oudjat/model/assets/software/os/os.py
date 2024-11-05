@@ -30,14 +30,6 @@ class OSFamily(Enum):
     "pattern": r'[Ww]indows(?: [Ss]erver)?'
   }
 
-def get_matching_os_family(test_str: str) -> Tuple[str, OSFamily]:
-  """ Returns the OS family which pattern matches the provided string """
-  for f in OSFamily._member_names_:
-    if re.match(OSFamily[f].value.get("pattern"), test_str):
-      return (
-        re.search(OSFamily[f].value.get("pattern"), test_str).group(0),
-        OSFamily[f]
-      )
 
 class OperatingSystem(Software):
   """ A class to describe operating systems """
@@ -98,4 +90,14 @@ class OperatingSystem(Software):
     """ Method to generate releases """
     raise NotImplementedError(
       "gen_releases() method must be implemented by the overloading class")
+
+  # ****************************************************************
+  # Static methods
+
+  @staticmethod
+  def get_matching_os_family(test_str: str) -> str:
+    """ Returns the OS family which pattern matches the provided string """
+    for f in OSFamily._member_names_:
+      if re.match(OSFamily[f].value.get("pattern"), test_str):
+        return re.search(OSFamily[f].value.get("pattern"), test_str).group(0)
   
