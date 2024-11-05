@@ -16,18 +16,22 @@ class LDAPComputer(LDAPAccount, Computer):
 
     super().__init__(ldap_entry=ldap_entry)
 
-    os_family_infos = OperatingSystem.get_matching_os_family(self.entry.get("operatingSystem"))
-    
+    raw_os = self.entry.get("operatingSystem")
+    os_family_infos = OperatingSystem.get_matching_os_family(raw_os)
     os = None
+    os_edition = None
     
     if os_family_infos is not None:
       os = OSOption[os_family_infos.replace(' ', '').upper()].value
 
-      if len(os.get_releases()) == 0:
-        os.gen_releases()      
+      if os is not None:
+        if len(os.get_releases()) == 0:
+          os.gen_releases()      
       
-    
-    print(os)
+        os_edition = os.get_matching_editions(raw_os)
+        
+    print(os.get_releases())
+    print(os_edition)
 
   # ****************************************************************
   # Methods
