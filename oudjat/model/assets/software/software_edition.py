@@ -36,10 +36,7 @@ class SoftwareEdition:
   
   def match_str(self, test_str: str) -> bool:
     """ Checks if provided string matches edition pattern """
-    if self.pattern is None:
-      return None
-    
-    return re.search(self.pattern, test_str)
+    return self.pattern is None or re.search(self.pattern, test_str)
   
 
 class SoftwareEditionDict(dict):
