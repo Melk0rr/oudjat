@@ -46,6 +46,15 @@ class CybereasonEndpoint(Enum):
     ]
   }
 
+  FILES = {
+    "endpoint": "/rest/sensors/action/fileSearch",
+    "method": "POST",
+    "limit": 30000,
+    "attributes": [
+      
+    ]
+  }
+
   USERS = {
     "endpoint": "/rest/users",
     "method": "GET",
