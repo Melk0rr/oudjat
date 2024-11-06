@@ -26,7 +26,7 @@ class LDAPAccountFlag(Enum):
 	PARTIAL_SECRETS_ACCOUNT = 67108864
 
 def check_account_flag(account_control: int, flag: LDAPAccountFlag) -> int:
-	""" Compare given account control to the chosen LDAP flag """
+	""" Compare given value to the chosen flag """
 	return account_control & flag.value
 
 def is_disabled(account_control: int) -> bool:
