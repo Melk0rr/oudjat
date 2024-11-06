@@ -189,3 +189,17 @@ class CybereasonConnector(Connector):
     )
 
     return entries
+
+  def search_files(
+    self,
+    file_name: Union[str, List[str]],
+    search_filter: List[Dict] = None,
+    limit: int = None
+  ) -> List["CybereasonEntry"]:
+    """ Searches for specific file(s) """
+
+    if not isinstance(file_name, list):
+      file_name = [ file_name ]
+      
+    file_filters = [{ "fieldName": "fileName", "values": file_name, "operator": "Equals" }]
+    return self.search(endpoint="FILES", search_filter=search_filter, limit=limit, fileFilters=file_filters)
