@@ -98,6 +98,7 @@ class OperatingSystem(Software):
   def get_matching_os_family(test_str: str) -> str:
     """ Returns the OS family which pattern matches the provided string """
     for f in OSFamily._member_names_:
-      if re.match(OSFamily[f].value.get("pattern"), test_str):
-        return re.search(OSFamily[f].value.get("pattern"), test_str).group(0)
+      search = re.search(OSFamily[f].value.get("pattern"), test_str)
+      if search is not None:
+        return search.group(0)
   
