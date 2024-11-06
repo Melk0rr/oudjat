@@ -1,5 +1,6 @@
 
 from oudjat.model.assets.computer import Computer
+from oudjat.model.assets.software import SoftwareEdition
 from oudjat.model.assets.software.os import OperatingSystem, OSOption
 from oudjat.connectors.ldap.objects import LDAPEntry
 
@@ -17,18 +18,18 @@ class LDAPComputer(LDAPAccount, Computer):
     super().__init__(ldap_entry=ldap_entry)
 
     raw_os = self.entry.get("operatingSystem")
-    os_family_infos = OperatingSystem.get_matching_os_family(raw_os)
+    os_family_infos: str = OperatingSystem.get_matching_os_family(raw_os)
     os = None
     os_edition = None
     
     if os_family_infos is not None:
-      os = OSOption[os_family_infos.replace(' ', '').upper()].value
+      os: OperatingSystem = OSOption[os_family_infos.replace(' ', '').upper()].value
 
       if os is not None:
         if len(os.get_releases()) == 0:
           os.gen_releases()      
       
-        os_edition = os.get_matching_editions(raw_os)
+        os_edition: List[SoftwareEdition] = os.get_matching_editions(raw_os)
         
     print(os.get_releases())
     print(os_edition)
