@@ -89,6 +89,19 @@ class CybereasonConnector(Connector):
   def disconnect(self) -> None:
     """ Close session with target """
     self.connection.close()
+    
+  def request(self, method: str, url: str, query: str = None):
+    """ Performs a request to given url using connector established connection """
+    if self.connection is None:
+      raise ConnectionError(f"Please initialize connection to {self.target.geturl()} before attempting request")
+    
+    api_headers = {'Content-Type':'application/json'}
+    return self.connection.request(
+      method=method,
+      url=url,
+      data=query,
+      headers=api_headers
+    )
 
   def endpoint_search(
     self,
@@ -125,14 +138,9 @@ class CybereasonConnector(Connector):
 
     if endpoint_cnx_method is not None:
       cnx_method = endpoint_cnx_method
-    
-    api_headers = {'Content-Type':'application/json'}
-    api_resp = self.connection.request(
-      method=endpoint.value.get("method"),
-      url=endpoint_url,
-      data=query,
-      headers=api_headers
-    )
+
+    api_resp = self.request(method=cnx_method, url=endpoint_url, query=query)
+    print(type(api_resp))
     
     res = []
     try:
