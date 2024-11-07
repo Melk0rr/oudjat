@@ -100,7 +100,9 @@ class CybereasonConnector(Connector):
   ) -> List[Dict]:
     """ Runs search in specific endpoint """
     
-    filter_opt = {}
+    filter_opt = {
+      "filters": []
+    }
     if search_filter is not None:
       filter_opt["filters"] = search_filter
 
@@ -123,20 +125,24 @@ class CybereasonConnector(Connector):
     )
     
     res = []
-    if api_resp.content:
-      res = json.loads(api_resp.content)
-      
-      # Handling CR nonesense
-      if not isinstance(res, list):
-        if "data" in res:
-          if res.get("data") is None:
-            return None
+    try:
+      if api_resp.content:
+        res = json.loads(api_resp.content)
+        
+        # Handling CR nonesense
+        if not isinstance(res, list):
+          if "data" in res:
+            if res.get("data") is None:
+              return None
 
-          res = res.get("data")
-  
-        if res.get(endpoint.name.lower()) is not None:
-          res = res.get(endpoint.name.lower())
+            res = res.get("data")
     
+          if res.get(endpoint.name.lower()) is not None:
+            res = res.get(endpoint.name.lower())
+
+    except Exception as e:
+      ColorPrint.red(f"An error occured while querying {endpoint.value.get('endpoint')}\n{e}")
+
     return res
 
   def search(
@@ -202,4 +208,12 @@ class CybereasonConnector(Connector):
       file_name = [ file_name ]
       
     file_filters = [{ "fieldName": "fileName", "values": file_name, "operator": "Equals" }]
-    return self.search(endpoint="FILES", search_filter=search_filter, limit=limit, fileFilters=file_filters)
+    # return self.search(endpoint="FILES", search_filter=search_filter, limit=limit, fileFilters=file_filters)
+    
+    batch_search = self.endpoint_search(
+      endpoint=CybereasonEndpoint.FILES,
+      limit=limit,
+      search_filter=search_filter
+    )
+
+    print(batch_search)
