@@ -50,9 +50,7 @@ class CybereasonEndpoint(Enum):
     "endpoint": "/rest/sensors/action/fileSearch",
     "method": "POST",
     "limit": 30000,
-    "attributes": [
-      
-    ]
+    "attributes": []
   }
 
   USERS = {

@@ -96,6 +96,8 @@ class CybereasonConnector(Connector):
     limit: int = None,
     offset: int = 0,
     search_filter: List[Dict] = None,
+    endpoint_url_sfx: Union[int,str] = None,
+    endpoint_cnx_method: str = None,
     **kwargs
   ) -> List[Dict]:
     """ Runs search in specific endpoint """
@@ -115,6 +117,14 @@ class CybereasonConnector(Connector):
     query = json.dumps(query_content)
 
     endpoint_url = f"{self.target.geturl()}{endpoint.value.get("endpoint")}"
+
+    if endpoint_url_sfx is not None:
+      endpoint_url += f"/{endpoint_url_sfx}"
+
+    cnx_method = endpoint.value.get("method")
+
+    if endpoint_cnx_method is not None:
+      cnx_method = endpoint_cnx_method
     
     api_headers = {'Content-Type':'application/json'}
     api_resp = self.connection.request(
@@ -220,4 +230,14 @@ class CybereasonConnector(Connector):
       fileFilters=file_filters
     )
 
-    print(batch_search)
+    res = []
+    batch_id = batch_search.get("batchId", None)
+
+    if batch_id is not None:
+      file_search_res = self.endpoint_search(
+        endpoint=CybereasonEndpoint.FILES,
+        endpoint_url_sfx=batch_id,
+        endpoint_cnx_method="GET"
+      )
+      
+      print(file_search_res)
