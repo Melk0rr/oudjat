@@ -140,7 +140,6 @@ class CybereasonConnector(Connector):
       cnx_method = endpoint_cnx_method
 
     api_resp = self.request(method=cnx_method, url=endpoint_url, query=query)
-    print(type(api_resp))
     
     res = []
     try:
