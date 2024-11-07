@@ -242,10 +242,8 @@ class CybereasonConnector(Connector):
     batch_id = batch_search.get("batchId", None)
 
     if batch_id is not None:
-      file_search_res = self.endpoint_search(
-        endpoint=CybereasonEndpoint.FILES,
-        endpoint_url_sfx=batch_id,
-        endpoint_cnx_method="GET"
+      file_search_resp = self.request(
+        method="GET",
+        url=f"{self.target.geturl()}{CybereasonEndpoint.FILES.value.get("endpoint")}/{batch_id}"
       )
-      
-      print(file_search_res)
+      print(file_search_resp)
