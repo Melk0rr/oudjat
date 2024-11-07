@@ -39,7 +39,7 @@ class LDAPAccount(LDAPObject):
       if pwd_expires(self.account_control):
         self.pwd_expires = True
 
-      if pwd_expired(self.account_control) or pwd_expired(self.entry.get(MS_ACCOUNT_CTL_PROPERTY)):
+      if pwd_expired(self.account_control):
         self.pwd_expired = True
 
       self.account_flags = [
