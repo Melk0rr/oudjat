@@ -216,7 +216,8 @@ class CybereasonConnector(Connector):
     batch_search = self.endpoint_search(
       endpoint=CybereasonEndpoint.FILES,
       limit=limit,
-      search_filter=search_filter
+      search_filter=search_filter,
+      fileFilters=file_filters
     )
 
     print(batch_search)
