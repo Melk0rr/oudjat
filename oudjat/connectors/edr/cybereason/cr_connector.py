@@ -90,7 +90,7 @@ class CybereasonConnector(Connector):
     """ Close session with target """
     self.connection.close()
     
-  def request(self, method: str, url: str, query: str = None):
+  def request(self, method: str, url: str, query: str = None) -> requests.models.Response:
     """ Performs a request to given url using connector established connection """
     if self.connection is None:
       raise ConnectionError(f"Please initialize connection to {self.target.geturl()} before attempting request")
@@ -246,4 +246,7 @@ class CybereasonConnector(Connector):
         method="GET",
         url=f"{self.target.geturl()}{CybereasonEndpoint.FILES.value.get("endpoint")}/{batch_id}"
       )
-      print(file_search_resp)
+
+      if file_search_resp.content:
+        res = json.loads(file_search_resp.content)
+        print(res)
