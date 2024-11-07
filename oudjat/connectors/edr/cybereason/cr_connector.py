@@ -249,4 +249,6 @@ class CybereasonConnector(Connector):
 
       if file_search_resp.content:
         res = json.loads(file_search_resp.content)
-        print(res)
+        res = res.get("data")
+        
+    return res
