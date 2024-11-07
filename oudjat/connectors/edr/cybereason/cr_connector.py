@@ -4,7 +4,7 @@ import math
 import requests
 
 from urllib.parse import urlparse
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from oudjat.utils import ColorPrint
 from oudjat.utils import unixtime_to_str
