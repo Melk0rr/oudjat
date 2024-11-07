@@ -93,7 +93,7 @@ class CybereasonConnector(Connector):
   def endpoint_search(
     self,
     endpoint: "CybereasonEndpoint",
-    limit: int,
+    limit: int = None,
     offset: int = 0,
     search_filter: List[Dict] = None,
     **kwargs
@@ -210,6 +210,9 @@ class CybereasonConnector(Connector):
     file_filters = [{ "fieldName": "fileName", "values": file_name, "operator": "Equals" }]
     # return self.search(endpoint="FILES", search_filter=search_filter, limit=limit, fileFilters=file_filters)
     
+    if limit is None:
+      limit = CybereasonEndpoint.FILES.value.get("limit")
+      
     batch_search = self.endpoint_search(
       endpoint=CybereasonEndpoint.FILES,
       limit=limit,
