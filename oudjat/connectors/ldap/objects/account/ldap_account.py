@@ -27,25 +27,20 @@ class LDAPAccount(LDAPObject):
     self.pwd_last_set = self.entry.get("pwdLastSet")
 
     self.account_control = self.entry.get("userAccountControl")
+    ms_acc_ctl = self.entry.get(MS_ACCOUNT_CTL_PROPERTY, None)
 
-    self.status = "Enabled"
     self.pwd_expires = False
     self.pwd_expired = False
 
     if self.account_control is not None:
-      if is_disabled(self.account_control):
-        self.status = "Disabled"
-        
-      if pwd_expires(self.account_control):
-        self.pwd_expires = True
-
-      if pwd_expired(self.account_control):
-        self.pwd_expired = True
+      self.enabled = not is_disabled(self.account_control)
+      self.pwd_expires = pwd_expires(self.account_control)
+      self.pwd_expired = pwd_expired(self.account_control)
 
       self.account_flags = [
         f.name for f in LDAPAccountFlag 
         if check_account_flag(self.account_control, f) or 
-          check_account_flag(self.entry.get(MS_ACCOUNT_CTL_PROPERTY), f)
+          (ms_acc_ctl is not None and check_account_flag(ms_acc_ctl, f))
       ]
 
     else:
@@ -58,9 +53,13 @@ class LDAPAccount(LDAPObject):
     """ Getter for account sAMAccountName """
     return self.san
   
+  def is_enabled(self) -> bool:
+    """ Returns wheither the account is enabled or not """
+    return self.enabled
+
   def get_status(self) -> str:
     """ Getter to retreive account status """
-    return self.status
+    return "Enabled" if self.enabled else "Disabled"
 
   def get_last_logon(self) -> datetime:
     """ Getter for account last logon datetime """
@@ -96,7 +95,7 @@ class LDAPAccount(LDAPObject):
     return {
       **base_dict,
       "san": self.san,
-      "status": self.status,
+      "status": self.get_status(),
       "pwd_expires": self.pwd_expires,
       "pwd_expired": self.pwd_expired,
       "last_logon": acc_date_str(self.last_logon),
