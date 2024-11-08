@@ -19,7 +19,8 @@ class LDAPComputer(LDAPAccount, Computer):
 
     raw_os = self.entry.get("operatingSystem")
     os_family_infos: str = OperatingSystem.get_matching_os_family(raw_os)
-    os, os_edition = None
+    os = None
+    os_edition = None
     
     if os_family_infos is not None:
       os: OperatingSystem = OSOption[os_family_infos.replace(' ', '').upper()].value
