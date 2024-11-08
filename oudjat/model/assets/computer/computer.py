@@ -24,7 +24,7 @@ class Computer(Asset):
     self.id = id
     self.name = name
     
-    if os is not None and os.get_software().get_software_type() != SoftwareType.OS:
+    if not isinstance(os, SoftwareRelease) or os.get_software().get_software_type() != SoftwareType.OS:
       raise ValueError(f"Invalid OS provided for computer {self.name}. Please provide an OS release")
     
     self.os_release = os
