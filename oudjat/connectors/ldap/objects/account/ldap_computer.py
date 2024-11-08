@@ -1,6 +1,6 @@
 
 from oudjat.model.assets.computer import Computer
-from oudjat.model.assets.software import SoftwareEdition
+from oudjat.model.assets.software import SoftwareEdition, SoftwareReleaseDict
 from oudjat.model.assets.software.os import OperatingSystem, OSOption
 from oudjat.connectors.ldap.objects import LDAPEntry
 
@@ -35,18 +35,17 @@ class LDAPComputer(LDAPAccount, Computer):
         os_ver = os.__class__.get_matching_version(raw_os_version)
         print(os_ver)
 
-        rel_search = os.get_releases().find_rel(os_ver)
+        rel_search: SoftwareReleaseDict = os.find_release(os_ver)
         
         if len(rel_search) > 1:
           rel_search = rel_search.find_rel_matching_label(test_os)
-          os_release = next(iter(rel_search.values()))
 
+        os_release = next(iter(rel_search.values()))
         os_edition: List[SoftwareEdition] = os.get_matching_editions(raw_os)
           
         if os_edition is not None and len(os_edition) != 0:
           os_edition = os_edition[0]
       
-    
     Computer.__init__(
       self,
       id=self.uuid,
@@ -55,7 +54,6 @@ class LDAPComputer(LDAPAccount, Computer):
       os_edition=os_edition
     )
 
-    print(os.get_editions())
 
   # ****************************************************************
   # Methods
