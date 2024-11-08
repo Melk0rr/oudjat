@@ -1,3 +1,5 @@
+import re
+
 from enum import Enum
 from typing import List, Union
 
@@ -48,6 +50,8 @@ class MicrosoftOperatingSystem(OperatingSystem):
 
   # ****************************************************************
   # Attributes & Constructors
+
+  VERSION_REG = r'(\d{1,2}\.\d)\W*(\d{4,5})\W*'
   
   def __init__(
     self,
@@ -101,3 +105,16 @@ class MicrosoftOperatingSystem(OperatingSystem):
       
       win_rel.add_support(win_sup)
       self.add_release(win_rel)
+
+  # ****************************************************************
+  # Static methods
+  
+  def get_matching_version(test_str: str) -> str:
+    """ Returns a version matching given string """
+    res = None
+    search = re.search(VERSION_REG, test_str)
+
+    if search is not None:
+      res = '.'.join([search.group(1), search.group(2)])
+      
+    return res
