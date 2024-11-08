@@ -112,7 +112,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
   def get_matching_version(test_str: str) -> str:
     """ Returns a version matching given string """
     res = None
-    search = re.search(self.VERSION_REG, test_str)
+    search = re.search(MicrosoftOperatingSystem.VERSION_REG, test_str)
 
     if search is not None:
       res = '.'.join([search.group(1), search.group(2)])
