@@ -18,31 +18,44 @@ class LDAPComputer(LDAPAccount, Computer):
     super().__init__(ldap_entry=ldap_entry)
 
     raw_os = self.entry.get("operatingSystem")
+    raw_os_version = self.entry.get("operatingSystemVersion")
+
+    # Retreive OS and OS edition informations
     os_family_infos: str = OperatingSystem.get_matching_os_family(raw_os)
-    os = None
+    os_release = None
     os_edition = None
     
-    if os_family_infos is not None:
+    if os_family_infos is not None and raw_os_version is not None:
       os: OperatingSystem = OSOption[os_family_infos.replace(' ', '').upper()].value
 
       if os is not None:
         if len(os.get_releases()) == 0:
           os.gen_releases()      
-      
-        os_edition: List[SoftwareEdition] = os.get_matching_editions(raw_os)
+
+        os_ver = os.get_matching_version(raw_os_version)
+        print(os_ver)
+
+        rel_search = os.get_releases().find_rel(os_ver)
         
-    if os_edition is not None and len(os_edition) != 0:
-      os_edition = os_edition[0]
+        if len(rel_search) > 1:
+          rel_search = rel_search.find_rel_matching_label(test_os)
+          os_release = next(iter(rel_search.values()))
+
+        os_edition: List[SoftwareEdition] = os.get_matching_editions(raw_os)
+          
+        if os_edition is not None and len(os_edition) != 0:
+          os_edition = os_edition[0]
+      
     
     Computer.__init__(
       self,
       id=self.uuid,
       name=self.name,
-      os=os,
+      os=os_release,
       os_edition=os_edition
     )
 
-    print(self.is_os_supported())
+    print(os.get_editions())
 
   # ****************************************************************
   # Methods
