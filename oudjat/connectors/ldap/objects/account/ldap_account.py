@@ -29,8 +29,10 @@ class LDAPAccount(LDAPObject):
     self.account_control = self.entry.get("userAccountControl")
     ms_acc_ctl = self.entry.get(MS_ACCOUNT_CTL_PROPERTY, None)
 
+    self.enabled = True
     self.pwd_expires = False
     self.pwd_expired = False
+    self.account_flags = []
 
     if self.account_control is not None:
       self.enabled = not is_disabled(self.account_control)
