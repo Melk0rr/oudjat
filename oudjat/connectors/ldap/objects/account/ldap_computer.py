@@ -32,7 +32,7 @@ class LDAPComputer(LDAPAccount, Computer):
         if len(os.get_releases()) == 0:
           os.gen_releases()      
 
-        os_ver = os.get_matching_version(raw_os_version)
+        os_ver = os.__class__.get_matching_version(raw_os_version)
         print(os_ver)
 
         rel_search = os.get_releases().find_rel(os_ver)
