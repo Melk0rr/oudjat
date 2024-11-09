@@ -33,8 +33,6 @@ class LDAPComputer(LDAPAccount, Computer):
           os.gen_releases()      
 
         os_ver = os.__class__.get_matching_version(raw_os_version)
-        print(os_ver)
-
         rel_search: SoftwareReleaseDict = os.find_release(os_ver)
         
         if len(rel_search) > 1:
@@ -57,3 +55,8 @@ class LDAPComputer(LDAPAccount, Computer):
 
   # ****************************************************************
   # Methods
+  
+  def to_dict(self) -> Dict:
+    """ Converts the current instance into a dictionary """
+    base_dict = super().to_dict()
+    cpt_dict = super(Computer, self).to_dict()

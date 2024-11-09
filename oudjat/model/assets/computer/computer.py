@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Dict
 
 from oudjat.model.assets import Asset
 from oudjat.model.assets.network import IPv4
 from oudjat.model.assets.software import SoftwareRelease, SoftwareType, SoftwareEdition
+from oudjat.model.assets.software.os import OSRelease
 from . import ComputerType
 
 class Computer(Asset):
@@ -47,6 +48,10 @@ class Computer(Asset):
     """ Getter for the computer name """
     return self.name
   
+  def get_computer_type(self) -> ComputerType:
+    """ Getter for the current computer type """
+    return self.os_release.get_software().get_computer_type()
+  
   def get_os_release(self) -> SoftwareRelease:
     """ Getter for the computer operating system """
     return self.os_release
@@ -71,4 +76,12 @@ class Computer(Asset):
       return False
     
     return self.os_release.is_supported(edition=self.os_edition)
+  
+  def to_dict(self) -> Dict:
+    """ Converts the current instance into a dictionary """
+    
+    return {
+      "id": self.id,
+      "computer_type": self.get_computer_type(),
+    }
   

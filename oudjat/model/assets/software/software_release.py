@@ -128,6 +128,7 @@ class SoftwareRelease:
       "is_supported": self.is_supported(),
     }
 
+
 class SoftwareReleaseDict(dict):
   """ Software release dictionary """
 
