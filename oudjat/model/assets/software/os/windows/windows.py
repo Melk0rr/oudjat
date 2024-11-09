@@ -4,12 +4,12 @@ from enum import Enum
 from typing import List, Union
 
 from oudjat.model.assets.computer import ComputerType
-from oudjat.model.assets.software import SoftwareRelease, SoftwareReleaseSupport, SoftwareEdition, SoftwareEditionDict
-from oudjat.model.assets.software.os import OperatingSystem, OSFamily
+from oudjat.model.assets.software import SoftwareReleaseSupport, SoftwareEdition, SoftwareEditionDict
+from oudjat.model.assets.software.os import OperatingSystem, OSRelease, OSFamily
 
 from . import WINDOWS_RELEASES
 
-class MSOSRelease(SoftwareRelease):
+class MSOSRelease(OSRelease):
   """ A class to handle Microsoft OS releases """
 
   # ****************************************************************
