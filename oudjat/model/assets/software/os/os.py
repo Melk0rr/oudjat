@@ -1,11 +1,11 @@
 import re
 
 from enum import Enum
-from typing import List, Union, Tuple
+from typing import List, Dict, Union, Tuple
 
 from oudjat.utils import ColorPrint
 from oudjat.model.assets.computer import ComputerType
-from oudjat.model.assets.software import Software, SoftwareType
+from oudjat.model.assets.software import Software, SoftwareType, SoftwareRelease
 
 class OSFamily(Enum):
   """ OS family enumeration """
@@ -110,3 +110,21 @@ class OperatingSystem(Software):
     """ Returns a version matching given string """
     raise NotImplementedError(
       "get_matching_version() method must be implemented by the overloading class")
+
+
+class OSRelease(SoftwareRelease):
+  """ Specific software release for OperatingSystem """
+  
+
+  # ****************************************************************
+  # Methods
+  
+  def to_dict(self) -> Dict:
+    """ Converts the current instance into a dictionary"""
+    base_dict = super().to_dict()
+    del base_dict["software"]
+
+    return {
+      "os": self.get_software(),
+      **base_dict
+    }
