@@ -118,6 +118,15 @@ class OSRelease(SoftwareRelease):
 
   # ****************************************************************
   # Methods
+
+  def get_name(self) -> None:
+    """ Method to generate releases """
+    raise NotImplementedError(
+      "get_name() method must be implemented by the overloading class")
+
+  def get_os(self) -> OperatingSystem:
+    """ Getter equivalent to SoftwareRelease get_software for convenience """
+    return self.software
   
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dictionary"""
