@@ -16,7 +16,7 @@ class Computer(Asset):
     self,
     id: str,
     name: str,
-    os: SoftwareRelease = None,
+    os_release: OSRelease = None,
     os_edition: SoftwareEdition = None,
     ip: List[IPv4] = None
   ):
@@ -25,7 +25,7 @@ class Computer(Asset):
     self.id = id
     self.name = name
     
-    if not isinstance(os, SoftwareRelease) or os.get_software().get_software_type() != SoftwareType.OS:
+    if not isinstance(os, OSRelease):
       raise ValueError(f"Invalid OS provided for computer {self.name}. Please provide an OS release")
     
     self.os_release = os
@@ -50,9 +50,9 @@ class Computer(Asset):
   
   def get_computer_type(self) -> ComputerType:
     """ Getter for the current computer type """
-    return self.os_release.get_software().get_computer_type()
+    return self.os_release.get_os().get_computer_type()
   
-  def get_os_release(self) -> SoftwareRelease:
+  def get_os_release(self) -> OSRelease:
     """ Getter for the computer operating system """
     return self.os_release
   
@@ -60,12 +60,12 @@ class Computer(Asset):
     """ Getter for the computer software release list """
     return self.softwares
 
-  def set_os(self, os: SoftwareRelease, edition: str = None) -> None:
+  def set_os(self, os_release: OSRelease, edition: str = None) -> None:
     """ Setter for computer os """
-    if os is not None and os.get_software().get_software_type() != SoftwareType.OS:
+    if not isinstance(os_release, OSRelease):
       raise ValueError(f"Invalid OS provided for computer {self.name}. Please provide an OS release")
     
-    self.os = os
+    self.os_release = os_release
 
     if edition is not None:
       self.os_edition = edition
