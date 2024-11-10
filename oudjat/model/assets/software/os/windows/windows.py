@@ -1,7 +1,7 @@
 import re
 
 from enum import Enum
-from typing import List, Union
+from typing import List, Dict, Union
 
 from oudjat.model.assets.computer import ComputerType
 from oudjat.model.assets.software import SoftwareReleaseSupport, SoftwareEdition, SoftwareEditionDict
@@ -26,6 +26,16 @@ class MSOSRelease(OSRelease):
   def get_name(self) -> str:
     """ Returns a forged name of the release """
     return f"{self.get_software().get_name()} {self.label.split(' ')[0]}"
+
+  def to_dict(self) -> Dict:
+    """ Converts the current instance into a dictionary """
+    base_dict = super().to_dict()
+    return {
+      **base_dict,
+      "name": self.get_name(),
+      "version_number": self.get_version_main(),
+      "build_number": self.get_version_build()
+    }
 
 
 class WindowsEdition(Enum):
