@@ -48,7 +48,7 @@ class LDAPComputer(LDAPAccount, Computer):
       self,
       id=self.uuid,
       name=self.name,
-      os=os_release,
+      os_release=os_release,
       os_edition=os_edition
     )
 
