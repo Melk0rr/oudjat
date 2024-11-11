@@ -83,5 +83,7 @@ class Computer(Asset):
     return {
       "id": self.id,
       "computer_type": self.get_computer_type(),
+      "os": self.get_os_release().get_name(),
+      "os_full": self.get_os_release().get_full_name()
     }
   
