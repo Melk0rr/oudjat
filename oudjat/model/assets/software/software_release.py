@@ -61,7 +61,7 @@ class SoftwareRelease:
     """ Getter for support list """
     return self.support
 
-  def get_support_for_edition(self, edition: str = None) -> SoftwareReleaseSupportList:
+  def get_support_for_edition(self, edition: str) -> SoftwareReleaseSupportList:
     """ Returns support for given edition """
     if edition is None:
       return None
@@ -116,16 +116,23 @@ class SoftwareRelease:
 
     return name.strip()
 
+  def os_info_dict(self) -> Dict:
+    """ Returns a dictionary with os infos """
+    return {
+      "software": self.get_software().get_name(),
+      "name": self.get_name(),
+      "version": self.version,
+      "full_name": self.get_full_name(),
+      "is_supported": self.is_supported()
+    }
+
   def to_dict(self) -> Dict:
     """ Converts current release into a dict """
     return {
-      "software": self.software.get_name(),
       "label": self.label,
-      "full_name": self.get_full_name(),
-      "version": self.version,
       "release_date": soft_date_str(self.release_date),
+      **self.os_info_dict(),
       "support": ', '.join([ s.to_string() for s in self.support ]),
-      "is_supported": self.is_supported(),
     }
 
 
