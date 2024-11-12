@@ -13,28 +13,57 @@ class MSOSRelease(OSRelease):
   """ A class to handle Microsoft OS releases """
 
   # ****************************************************************
+  # Attributes & Constructors
+
+  def __init__(
+    self,
+    software: "Software",
+    version: Union[int, str],
+    release_date: Union[str, datetime],
+    release_label: str
+  ):
+    """ Constructor """
+    super().__init__(
+      software=software,
+      version=version,
+      release_date=release_date,
+      release_label=release_label
+    )
+    
+    version_split = self.version.split('.')
+    self.version_build = self.version.split('.')[-1]
+    self.version_main = '.'.join(self.version.split('.')[:-1])
+
+  # ****************************************************************
   # Methods
   
   def get_version_build(self) -> int:
     """ Get the build number from release version """
-    return self.version.split('.')[-1]
+    return self.version_build
   
   def get_version_main(self) -> str:
     """ Get the version main release number from release version """
-    return '.'.join(self.version.split('.')[:-1])
+    return self.version_main
 
   def get_name(self) -> str:
     """ Returns a forged name of the release """
     return f"{self.get_software().get_name()} {self.label.split(' ')[0]}"
+
+  def os_info_dict(self) -> Dict:
+    """ Returns a dictionary with os infos """
+    return {
+      **super().os_info_dict(),
+      "name": self.get_name(),
+      "version_main": self.version_main,
+      "version_build": self.version_build
+    }
 
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dictionary """
     base_dict = super().to_dict()
     return {
       **base_dict,
-      "name": self.get_name(),
-      "version_number": self.get_version_main(),
-      "build_number": self.get_version_build()
+      **self.os_info_dict()
     }
 
 
