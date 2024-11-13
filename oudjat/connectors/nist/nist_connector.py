@@ -29,7 +29,7 @@ class NistConnector(Connector):
 
     try:
       headers = { 'Accept': 'application/json' }
-      req = requests.get(self.target, headers=headers)
+      req = requests.get(target, headers=headers)
       
       if req.status_code == 200:
         self.connection = json.loads(req.content.decode("utf-8"))
