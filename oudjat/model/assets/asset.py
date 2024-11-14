@@ -12,8 +12,8 @@ class Asset:
     self,
     id: Union[int, str],
     name: str,
-    label: str,
     type: AssetType,
+    label: str = None,
     desctiption: str = None
   ):
     """ Constructor """
