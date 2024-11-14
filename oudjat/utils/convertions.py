@@ -14,7 +14,7 @@ def days_diff(date: datetime, reverse: bool = False) -> int:
   """ Returns difference between today and a past date """
   date = date.replace(tzinfo=timezone.utc)
   if date is not None:
-    today = datetime.now()
+    today = datetime.now(timezone.utc)
     if reverse:
     	diff = date - today
 
