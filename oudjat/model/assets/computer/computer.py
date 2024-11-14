@@ -25,10 +25,10 @@ class Computer(Asset):
     self.id = id
     self.name = name
     
-    if not isinstance(os, OSRelease):
+    if not isinstance(os_release, OSRelease):
       raise ValueError(f"Invalid OS provided for computer {self.name}. Please provide an OS release")
     
-    self.os_release = os
+    self.os_release = os_release
 
     self.os_edition = None
 
@@ -72,7 +72,7 @@ class Computer(Asset):
   
   def is_os_supported(self) -> bool:
     """ Checks if the computer os is supported """
-    if self.os is None:
+    if self.os_release is None:
       return False
     
     return self.os_release.is_supported(edition=self.os_edition)
