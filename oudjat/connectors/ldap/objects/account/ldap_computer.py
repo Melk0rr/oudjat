@@ -31,7 +31,7 @@ class LDAPComputer(LDAPAccount, Computer):
 
       if os is not None:
         if len(os.get_releases()) == 0:
-          os.gen_releases()      
+          os.gen_releases()
 
         os_ver = os.__class__.get_matching_version(raw_os_version)
         rel_search: SoftwareReleaseDict = os.find_release(os_ver)
