@@ -61,3 +61,8 @@ class LDAPComputer(LDAPAccount, Computer):
     """ Converts the current instance into a dictionary """
     base_dict = super().to_dict()
     cpt_dict = super(Computer, self).to_dict()
+
+    return {
+      **base_dict,
+      **cpt_dict
+    }
