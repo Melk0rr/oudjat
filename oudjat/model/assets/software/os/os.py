@@ -131,8 +131,9 @@ class OSRelease(SoftwareRelease):
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dictionary"""
     base_dict = super().to_dict()
+    os_name = base_dict.pop("software")
 
     return {
-      "os": base_dict.pop("software"),
+      "os": os_name,
       **base_dict
     }

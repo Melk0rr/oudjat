@@ -81,7 +81,6 @@ class Computer(Asset):
     """ Converts the current instance into a dictionary """
     asset_dict = super().to_dict()
     release_dict = self.os_release.to_dict()
-    print(release_dict)
     
     return {
       **asset_dict,
