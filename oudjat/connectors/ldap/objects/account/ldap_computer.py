@@ -1,3 +1,4 @@
+from typing import Dict
 
 from oudjat.model.assets.computer import Computer
 from oudjat.model.assets.software import SoftwareEdition, SoftwareReleaseDict
