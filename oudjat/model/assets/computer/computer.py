@@ -81,11 +81,11 @@ class Computer(Asset):
     """ Converts the current instance into a dictionary """
     asset_dict = super().to_dict()
     release_dict = self.os_release.to_dict()
+    print(release_dict)
     
     return {
       **asset_dict,
       "computer_type": self.get_computer_type(),
-      "os": release_dict.pop("os"),
       "os_release": release_dict.pop("name"),
       "os_release_full_name": release_dict.pop("full_name"),
       "os_release_version": release_dict.pop("version"),
