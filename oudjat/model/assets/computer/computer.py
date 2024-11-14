@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from oudjat.model.assets import Asset
+from oudjat.model.assets import Asset, AssetType
 from oudjat.model.assets.network import IPv4
 from oudjat.model.assets.software import SoftwareRelease, SoftwareType, SoftwareEdition
 from oudjat.model.assets.software.os import OSRelease
@@ -16,20 +16,20 @@ class Computer(Asset):
     self,
     id: str,
     name: str,
+    label: str = None,
+    description: str = None,
     os_release: OSRelease = None,
     os_edition: SoftwareEdition = None,
     ip: List[IPv4] = None
   ):
     """ Constructor """
     
-    self.id = id
-    self.name = name
+    super().__init__(id=id, name=name, label=label, desctiption=description, type=AssetType.COMPUTER)
     
     if not isinstance(os_release, OSRelease):
       raise ValueError(f"Invalid OS provided for computer {self.name}. Please provide an OS release")
     
     self.os_release = os_release
-
     self.os_edition = None
 
     self.ip = ip
