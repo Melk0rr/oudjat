@@ -10,7 +10,7 @@ def import_json(file_path: str) -> Union[Dict, List]:
   """ Helper function to import json data """
   full_path = os.path.join(os.getcwd(), file_path)
 
-  with open(full_path) as json_file:
+  with open(full_path, "r", encoding="utf-8") as json_file:
     json_data = json.load(json_file)
     
   return json_data
