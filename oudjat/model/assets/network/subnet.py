@@ -56,6 +56,14 @@ class Subnet:
         
   # ****************************************************************
   # Methods
+  
+  def get_name(self) -> str:
+    """ Getter for the subnet name """
+    return self.name
+  
+  def get_description(self) -> str:
+    """ Getter for the subnet description """
+    return self.description
 
   def get_address(self) -> IPv4:
     """ Getter for subnet address """
