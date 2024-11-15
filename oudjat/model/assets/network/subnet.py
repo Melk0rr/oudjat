@@ -2,7 +2,7 @@ from typing import List, Union
 
 from oudjat.utils import bytes_2_ipstr, b_or, int_2_bytes
 
-from . import IPv4
+from . import IPv4, IPv4Mask
 
 class Subnet:
   """ A class to handle subnets """
@@ -14,6 +14,7 @@ class Subnet:
     self,
     addr: Union[str, IPv4],
     name: str,
+    mask: Union[int, str, IPv4Mask] = None,
     description: str = None,
     hosts: Union[List[IPv4], List[str]] = None
   ):
@@ -23,7 +24,10 @@ class Subnet:
       addr = IPv4(addr)
 
     if addr.get_mask() is None:
-      raise ValueError(f"Subnet::Provided net address has no mask set: {addr.get_address()}")
+      if mask is None:
+        raise ValueError(f"Subnet::Provided net address has no mask set: {addr.get_address()}")
+
+      addr.set_mask(mask)
 
     self.addr = addr.get_net_addr()
 
@@ -53,7 +57,7 @@ class Subnet:
   # ****************************************************************
   # Methods
 
-  def get_address(self) -> str:
+  def get_address(self) -> IPv4:
     """ Getter for subnet address """
     return self.addr
 
