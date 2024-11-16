@@ -29,13 +29,13 @@ class Subnet:
 
       addr.set_mask(mask)
 
-    self.addr = addr.get_net_addr()
+    self.address = address.get_net_addr()
 
     broadcast_bytes = [
-      b_or(self.addr.bytes[i], self.addr.mask.get_wildcard().bytes[i])
-      for i, x in enumerate(self.addr.bytes)
+      b_or(self.addr.bytes[i], self.address.mask.get_wildcard().bytes[i])
+      for i, x in enumerate(self.address)
     ]
-    self.broadcast = IPv4(bytes_2_ipstr(broadcast_bytes) + f"/{self.addr.mask.cidr}")
+    self.broadcast = IPv4(bytes_2_ipstr(broadcast_bytes) + f"/{self.address.get_mask().get_cidr()}")
 
     self.name = name
     self.description = description
@@ -49,7 +49,7 @@ class Subnet:
         
         if (
           (ip.is_in_subnet(self.addr.get_address())) and
-          (ip.get_address() != self.addr.get_address()) and
+          (ip.get_address() != self.address.get_address()) and
           (ip.get_address() != self.broadcast.get_address())
         ):
           self.hosts[ip.address] = ip
@@ -67,16 +67,24 @@ class Subnet:
 
   def get_address(self) -> IPv4:
     """ Getter for subnet address """
-    return self.addr
+    return self.address
+
+  def contains(self, ip: Union[str, IPv4]) -> bool:
+    """ Checks wheither the provided IP is in the current subnet """
+    if not isinstance(ip, IPv4):
+      ip = IPv4(ip)
+
+    mask_address = self.address.get_mask().get_address()
+    return (ip.get_address() & mask_address) == (self.address.get_address() & mask_address)
 
   def list_addresses(self) -> List[str]:
     """ Lists all possible hosts in subnet """
-    start = self.addr.to_int() + 1
+    start = self.address.to_int() + 1
     end = self.broadcast.to_int()
 
     addresses = []
     for i in range(start, end):
-      addresses.append(f"{('.'.join(f"{o}" for o in int_2_bytes(i)))}/{self.addr.get_mask().get_cidr()}")
+      addresses.append(f"{('.'.join(f"{o}" for o in int_2_bytes(i)))}/{self.address.get_mask().get_cidr()}")
       
     return addresses
 
@@ -95,7 +103,7 @@ class Subnet:
 
   def to_string(self, showDescription: bool = False) -> str:
     """ Returns a string based on current instance """
-    sub_str = f"{self.name}: {self.addr.get_address()}/{self.addr.get_mask().get_cidr()}"
+    sub_str = f"{self.name}: {self.address.get_address()}/{self.address.get_mask().get_cidr()}"
 
     if showDescription:
       sub_str += f" ({self.description})"
