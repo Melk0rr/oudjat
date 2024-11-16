@@ -35,14 +35,11 @@ def byte_2_bin(b: bytes) -> bin:
   """ Converts a byte into bin """
   return bin(int(b.hex(), base=16))[2:].zfill(8)
 
-def ipstr_2_bytes(ip_str: str) -> List[bytes]:
-  """ Converts an ip string into a byte array """
+def count_1_bits(val: int) -> int:
+  """ Counts the number of bits with 1 value in an integer """
+  return bin(val).count('1')
   
-  addr_split = ip_str.split('.')
-  if len(addr_split) != 4:
-    raise ValueError(f"Invalid IP address provided: {ip_str}")
-
-  return [ (int(x)).to_bytes(1, byteorder="little") for x in addr_split ]
+  
 
 def bytes_2_ipstr(b_array: List[bytes]) -> str:
   """ Converts a byte array into an ip string  """
