@@ -1,11 +1,25 @@
-""" IPv4 module """
+import re
+
+from enum import Enum
 from typing import List, Union
 
-from oudjat.utils import b_and, b_not, bytes_2_ipstr, ipstr_2_bytes, byte_2_bin
+from oudjat.utils import b_and, b_not, bytes_2_ipstr, count_1_bits
 
 from . import Port
 
-class IPv4Base:
+def ip_str_to_int(ip: str) -> int:
+  """ Converts an ip address string into an int """
+  return int(''.join([bin(int(x)+256)[3:] for x in ip.split('.')]), 2)
+
+class IPVersion(Enum):
+  IPV4 = {
+    "pattern": r'^(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$'
+  }
+  IPV6 = {
+    "pattern": r'^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$'
+  }
+
+class IPBase:
 
   # ****************************************************************
   # Attributes & Constructors
@@ -13,8 +27,16 @@ class IPv4Base:
   def __init__(self, addr: str):
     """ Constructor """
 
-    self.bytes: List[bytes] = ipstr_2_bytes(addr)
-    self.address: str = addr
+    if re.match(IPVersion.IPV4.value["pattern"], addr):
+      self.version = IPVersion.IPV4
+    
+    elif re.match(IPVersion.IPV6.value["pattern"], addr):
+      self.version = IPVersion.IPV6
+    
+    else:
+      raise ValueError(f"Invalid IPv4 address provided: {addr}")
+
+    self.address: int = ip_str_to_int(addr)
 
   # ****************************************************************
   # Methods
@@ -23,28 +45,11 @@ class IPv4Base:
     """ Getter for ip string address """
     return self.address
 
-  def get_bytes(self) -> List[bytes]:
-    """ Getter for ip byte array """
-    return self.bytes
+  def __str__(self) -> str:
+    """ Converts the current ip base into a string """
+    return '.'.join([str((self.address >> i) & 0xff) for i in (24, 16, 8, 0)])
 
-  def to_hex_array(self) -> List[hex]:
-    """ Returns the current ip as hex array """
-    return [ x.hex() for x in self.bytes ]
-
-  def to_hex_str(self) -> str:
-    """ Returns the current ip as hex string """
-    return ''.join(self.to_hex_array())
-
-  def to_binary_array(self) -> List[bin]:
-    """ Returns the current ip as a binary table """
-    return [ byte_2_bin(b) for b in self.bytes ]
-
-  def to_int(self) -> int:
-    """ Returns the current ip as an integer """
-    return int(self.to_hex_str(), 16)
-
-
-class IPv4Mask(IPv4Base):
+class IPv4Mask(IPBase):
   """ Simple Class providing tools to manipulate IPv4 mask """
 
   # ****************************************************************
@@ -55,7 +60,7 @@ class IPv4Mask(IPv4Base):
     
     if type(mask) is str:
       super().__init__(mask)
-      cidr = ''.join(self.to_binary_array()).count('1')
+      cidr = count_1_bits(self.address)
       
     elif type(mask) is int:
       if not 1 < mask < 33:
@@ -76,13 +81,13 @@ class IPv4Mask(IPv4Base):
     """ Getter for mask CIDR """
     return self.cidr
 
-  def to_int(self) -> int:
+  def cidr_to_int(self) -> int:
     """ Returns the current mask as an integer """
     return (0xffffffff << (32 - self.cidr)) & 0xffffffff
 
-  def get_wildcard(self) -> IPv4Base:
+  def get_wildcard(self) -> IPBase:
     """ Returns mask wildcard """
-    return IPv4Base(bytes_2_ipstr([ b_not(b) for b in self.bytes ]))
+    return IPBase(bytes_2_ipstr([ b_not(b) for b in self.bytes ]))
 
   @staticmethod
   def get_netcidr(mask: str) -> int:
@@ -90,7 +95,7 @@ class IPv4Mask(IPv4Base):
     if mask not in IPv4Mask.get_valid_mask():
       raise ValueError(f"Invalid mask provided: {mask}")
 
-    base = IPv4Base(mask)
+    base = IPBase(mask)
     return ''.join(base.to_binary_array()).count('1')
 
   @staticmethod
@@ -113,7 +118,7 @@ class IPv4Mask(IPv4Base):
             str( (0x000000ff & mask)))
 
 
-class IPv4(IPv4Base):
+class IPv4(IPBase):
   """ Simple Class providing tools to manipulate IPv4 addresses """
 
   # ****************************************************************
@@ -135,7 +140,7 @@ class IPv4(IPv4Base):
       if not isinstance(mask, IPv4Mask):
         mask = IPv4Mask(mask)
 
-    self.mask = mask
+    self.mask: IPv4Mask = mask
 
     self.ports = []
 
@@ -218,9 +223,9 @@ class IPv4(IPv4Base):
     mask = net.get_mask().to_int()
     return (self.to_int() & mask) == (net.to_int() & mask)
 
-  def to_string(self, show_mask: bool = True) -> str:
+  def __str__(self, show_mask: bool = True) -> str:
     """ Returns the current instance as a string """
-    ip_str = self.address
+    ip_str = super().__str__()
 
     if self.mask and show_mask:
       ip_str += f"/{self.mask.get_cidr()}"
