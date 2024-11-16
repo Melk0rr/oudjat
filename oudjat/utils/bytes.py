@@ -38,8 +38,6 @@ def byte_2_bin(b: bytes) -> bin:
 def count_1_bits(val: int) -> int:
   """ Counts the number of bits with 1 value in an integer """
   return bin(val).count('1')
-  
-  
 
 def bytes_2_ipstr(b_array: List[bytes]) -> str:
   """ Converts a byte array into an ip string  """

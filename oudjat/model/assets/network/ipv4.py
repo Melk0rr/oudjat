@@ -11,6 +11,10 @@ def ip_str_to_int(ip: str) -> int:
   """ Converts an ip address string into an int """
   return int(''.join([bin(int(x)+256)[3:] for x in ip.split('.')]), 2)
 
+def ip_int_to_str(ip: int) -> str:
+  """ Converts an ip address integer into a string """
+  return '.'.join([str((ip >> i) & 0xff) for i in (24, 16, 8, 0)])
+
 class IPVersion(Enum):
   IPV4 = {
     "pattern": r'^(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$'
@@ -47,7 +51,7 @@ class IPBase:
 
   def __str__(self) -> str:
     """ Converts the current ip base into a string """
-    return '.'.join([str((self.address >> i) & 0xff) for i in (24, 16, 8, 0)])
+    return ip_int_to_str(self.address)
 
 class IPv4Mask(IPBase):
   """ Simple Class providing tools to manipulate IPv4 mask """
@@ -87,7 +91,7 @@ class IPv4Mask(IPBase):
 
   def get_wildcard(self) -> IPBase:
     """ Returns mask wildcard """
-    return IPBase(bytes_2_ipstr([ b_not(b) for b in self.bytes ]))
+    return IPBase(ip_int_to_str(~self.address & 0xffffffff))
 
   @staticmethod
   def get_netcidr(mask: str) -> int:
@@ -127,6 +131,7 @@ class IPv4(IPBase):
   def __init__(self, address: str, mask: Union[int, str, IPv4Mask] = None):
     """ Constructor """
     
+    net = None
     if "/" in address:
       address, net = address.split("/")
       net = int(net)
@@ -176,10 +181,7 @@ class IPv4(IPBase):
 
   def get_net_addr(self) -> "IPv4":
     """ Returns network address for given IP """
-    return IPv4(
-      bytes_2_ipstr([ b_and(self.bytes[i], self.mask.bytes[i]) for i, x in enumerate(self.bytes) ]) + 
-      f"/{self.mask.cidr}"
-    )
+    return IPv4(ip_int_to_str(self.address & self.mask.get_address()))
 
   def is_port_in_list(self, port: Union[int, Port]) -> bool:
     """ Check if the given port is in the list of ports """
