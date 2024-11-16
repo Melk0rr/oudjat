@@ -29,7 +29,7 @@ class Subnet:
 
       addr.set_mask(mask)
 
-    self.address = address.get_net_addr()
+    self.address = addr.get_net_addr()
 
     broadcast_bytes = [
       b_or(self.addr.bytes[i], self.address.mask.get_wildcard().bytes[i])
