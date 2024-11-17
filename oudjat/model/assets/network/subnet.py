@@ -1,5 +1,6 @@
 from typing import List, Union
 
+from oudjat.utils import i_or, i_and
 from . import IPv4, IPv4Mask, ip_int_to_str
 
 class Subnet:
@@ -28,9 +29,7 @@ class Subnet:
       addr.set_mask(mask)
 
     self.address = addr.get_net_addr()
-
-    broadcast_int = self.address.get_mask().get_wildcard().get_address() | self.address.get_address()
-    self.broadcast = IPv4(ip_int_to_str(broadcast_int) + f"/{self.address.get_mask().get_cidr()}")
+    self.broadcast = self.get_broadcast_address()
 
     self.name = name
     self.description = description
@@ -39,15 +38,8 @@ class Subnet:
 
     if hosts is not None:
       for ip in hosts:
-        if not isinstance(ip, IPv4):
-          ip = IPv4(ip)
-        
-        if (
-          (ip.is_in_subnet(self.addr.get_address())) and
-          (ip.get_address() != self.address.get_address()) and
-          (ip.get_address() != self.broadcast.get_address())
-        ):
-          self.hosts[ip.address] = ip
+        self.add_host(ip)
+
         
   # ****************************************************************
   # Methods
@@ -63,25 +55,26 @@ class Subnet:
   def get_address(self) -> IPv4:
     """ Getter for subnet address """
     return self.address
+  
+  def get_broadcast_address(self) -> IPv4:
+    """ Returns the broadcast address of the current subnet """
+    broadcast_int = i_or(int(self.address.get_mask().get_wildcard()), int(self.address))
+    return IPv4(ip_int_to_str(broadcast_int) + f"/{self.address.get_mask().get_cidr()}")
 
   def contains(self, ip: Union[str, IPv4]) -> bool:
     """ Checks wheither the provided IP is in the current subnet """
     if not isinstance(ip, IPv4):
       ip = IPv4(ip)
 
-    mask_address = self.address.get_mask().get_address()
-    return (ip.get_address() & mask_address) == (self.address.get_address() & mask_address)
+    mask_address = int(self.address.get_mask())
+    return i_and(int(ip), mask_address) == i_and(int(self.address), mask_address)
 
   def list_addresses(self) -> List[str]:
     """ Lists all possible hosts in subnet """
     start = self.address.get_address() + 1
     end = self.broadcast.get_address()
 
-    addresses = []
-    for i in range(start, end):
-      addresses.append(f"{ip_int_to_str(i)}/{self.address.get_mask().get_cidr()}")
-      
-    return addresses
+    return [ f"{ip_int_to_str(i)}/{self.address.get_mask().get_cidr()}" for i in range(start, end) ]
 
   def add_host(self, host: Union[str, IPv4]) -> None:
     """ Adds a new host to the subnet """
@@ -89,16 +82,12 @@ class Subnet:
     if not isinstance(host, IPv4):
       host = IPv4(host)
       
-    if (
-      (host.is_in_subnet(self.addr.get_address())) and
-      (host.get_address() != self.addr.get_address()) and
-      (host.get_address() != self.broadcast.get_address())
-    ):
-      self.hosts[host.get_address()] = host
+    if (self.contains(host) and (int(host) != int(self.address)) and (int(host) != int(self.broadcast))):
+      self.hosts[str(host)] = host
 
-  def to_string(self, showDescription: bool = False) -> str:
+  def __str__(self, showDescription: bool = False) -> str:
     """ Returns a string based on current instance """
-    sub_str = f"{self.name}: {self.address.get_address()}/{self.address.get_mask().get_cidr()}"
+    sub_str = f"{self.name}: {self.address}/{self.address.get_mask().get_cidr()}"
 
     if showDescription:
       sub_str += f" ({self.description})"

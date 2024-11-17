@@ -3,7 +3,7 @@ import re
 from enum import Enum
 from typing import List, Union
 
-from oudjat.utils import count_1_bits
+from oudjat.utils import count_1_bits, i_not, i_and
 
 from . import Port
 
@@ -14,6 +14,10 @@ def ip_str_to_int(ip: str) -> int:
 def ip_int_to_str(ip: int) -> str:
   """ Converts an ip address integer into a string """
   return '.'.join([str((ip >> i) & 0xff) for i in (24, 16, 8, 0)])
+
+def cidr_to_int(cidr: int) -> int:
+  """ Returns a mask integer value based on the given network length """
+  return (0xffffffff << (32 - cidr)) & 0xffffffff
 
 class IPVersion(Enum):
   IPV4 = {
@@ -28,8 +32,11 @@ class IPBase:
   # ****************************************************************
   # Attributes & Constructors
 
-  def __init__(self, addr: str):
+  def __init__(self, addr: Union[int, str]):
     """ Constructor """
+
+    if type(addr) is int:
+      addr = ip_int_to_str(addr)
 
     if re.match(IPVersion.IPV4.value["pattern"], addr):
       self.version = IPVersion.IPV4
@@ -49,6 +56,10 @@ class IPBase:
     """ Getter for ip string address """
     return self.address
 
+  def __int__(self) -> int:
+    """ Converts the current ip base into an integer """
+    return self.address
+
   def __str__(self) -> str:
     """ Converts the current ip base into a string """
     return ip_int_to_str(self.address)
@@ -60,24 +71,23 @@ class IPv4Mask(IPBase):
   # ****************************************************************
   # Attributes & Constructors
 
-  def __init__(self, mask: Union[int, str]):
+  def __init__(self, mask: Union[int, str] = None, cidr: int = None):
     """ Constructor """
-    
-    if type(mask) is str:
-      super().__init__(mask)
-      cidr = count_1_bits(self.address)
-      
-    elif type(mask) is int:
-      if not 1 < mask < 33:
+
+    if mask is None and cidr is None:
+      raise ValueError("Please provide either a CIDR mask or a mask value as integer or string")
+
+    if cidr is not None:
+      if not 1 < cidr < 33:
         raise ValueError("Mask CIDR value must be between 1 and 32!")
 
-      cidr = mask
-      super().__init__(self.get_netmask(cidr))
-      
-    else:
+      mask = cidr_to_int(cidr)
+
+    if type(mask) is not int and type(mask) is not str:
       raise ValueError(f"Invalid mask provided : {mask}. You must provide a string or an integer !")
 
-    self.cidr = cidr
+    super().__init__(mask)
+    self.cidr = count_1_bits(self.address)
 
   # ****************************************************************
   # Methods
@@ -92,7 +102,7 @@ class IPv4Mask(IPBase):
 
   def get_wildcard(self) -> IPBase:
     """ Returns mask wildcard """
-    return IPBase(ip_int_to_str(~self.address & 0xffffffff))
+    return IPBase(i_not(self.address))
 
   @staticmethod
   def get_netcidr(mask: str) -> int:
@@ -116,11 +126,7 @@ class IPv4Mask(IPBase):
     if not 0 < network_length < 33:
       raise ValueError("Network length value must be between 1 and 32!")
     
-    mask = (0xffffffff >> (32 - network_length)) << (32 - network_length)
-    return (str( (0xff000000 & mask) >> 24) + '.' +
-            str( (0x00ff0000 & mask) >> 16) + '.' +
-            str( (0x0000ff00 & mask) >> 8)  + '.' +
-            str( (0x000000ff & mask)))
+    return ip_int_to_str(cidr_to_int(network_length))
 
 
 class IPv4(IPBase):
@@ -129,24 +135,27 @@ class IPv4(IPBase):
   # ****************************************************************
   # Attributes & Constructors
 
-  def __init__(self, address: str, mask: Union[int, str, IPv4Mask] = None):
+  def __init__(self, address: Union[int, str], mask: Union[int, str, IPv4Mask] = None):
     """ Constructor """
     
-    net = None
-    if "/" in address:
-      address, net = address.split("/")
-      net = int(net)
+    self.mask: IPv4Mask = None
+
+    # Try to extract mask if provided as CIDR notation
+    cidr = None
+    if (type(address) is str) and ("/" in address):
+      address, cidr = address.split("/")
+      cidr = int(cidr)
 
     super().__init__(address)
 
-    if net is not None and mask is None:
-      mask = net
+    if cidr is not None:
+      self.mask = IPv4Mask(cidr=cidr)
 
-    if mask is not None:
+    if (self.mask is None) and (mask is not None):
       if not isinstance(mask, IPv4Mask):
         mask = IPv4Mask(mask)
 
-    self.mask: IPv4Mask = mask
+      self.mask = mask
 
     self.ports = []
 
@@ -159,11 +168,11 @@ class IPv4(IPBase):
 
   def get_port_numbers(self) -> List[int]:
     """ Getter for the Port numbers """
-    return [p.get_number() for p in self.ports]
+    return [ p.get_number() for p in self.ports ]
 
   def get_port_strings(self) -> List[int]:
     """ Getter for the Port strings """
-    return [p.to_string() for p in self.ports]
+    return [ p.to_string() for p in self.ports ]
 
   def set_mask(self, mask: Union[int, str, IPv4Mask]):
     """ Setter for ip mask """
@@ -172,7 +181,7 @@ class IPv4(IPBase):
 
     self.mask = mask
 
-  def set_open_ports(self, ports: List[int] | List[Port]):
+  def set_open_ports(self, ports: Union[List[int], List[Port]]):
     """ Set the open ports """
     # Clear the list of open ports
     self.ports.clear()
@@ -182,7 +191,7 @@ class IPv4(IPBase):
 
   def get_net_addr(self) -> "IPv4":
     """ Returns network address for given IP """
-    return IPv4(address=ip_int_to_str(self.address & self.mask.get_address()), mask=self.mask)
+    return IPv4(address=i_and(int(self.address), int(self.mask)), mask=self.mask)
 
   def is_port_in_list(self, port: Union[int, Port]) -> bool:
     """ Check if the given port is in the list of ports """
@@ -217,14 +226,14 @@ class IPv4(IPBase):
 
     del self.ports[index]
 
-  def is_in_subnet(self, net_addr: str) -> bool:
+  def is_in_subnet(self, net_addr: Union[int, str], mask) -> bool:
     """ Checks if the current ip is in the provided subnet """
     if "/" not in net_addr:
       raise ValueError(f"Invalid net address provided: {net_addr} ! Please include a net mask as CIDR notation")
 
-    net = IPv4(net_addr)
-    mask = net.get_mask().to_int()
-    return (self.to_int() & mask) == (net.to_int() & mask)
+    net = IPv4(address=net_addr)
+    net_mask = int(net.get_mask())
+    return (i_and(int(self) & net_mask)) == (int(net) & net_mask)
 
   def __str__(self, show_mask: bool = True) -> str:
     """ Returns the current instance as a string """
