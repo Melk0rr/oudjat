@@ -3,7 +3,7 @@ import re
 from enum import Enum
 from typing import List, Union
 
-from oudjat.utils import b_and, b_not, bytes_2_ipstr, count_1_bits
+from oudjat.utils import count_1_bits
 
 from . import Port
 
@@ -52,6 +52,7 @@ class IPBase:
   def __str__(self) -> str:
     """ Converts the current ip base into a string """
     return ip_int_to_str(self.address)
+
 
 class IPv4Mask(IPBase):
   """ Simple Class providing tools to manipulate IPv4 mask """
@@ -181,7 +182,7 @@ class IPv4(IPBase):
 
   def get_net_addr(self) -> "IPv4":
     """ Returns network address for given IP """
-    return IPv4(ip_int_to_str(self.address & self.mask.get_address()))
+    return IPv4(address=ip_int_to_str(self.address & self.mask.get_address()), mask=self.mask)
 
   def is_port_in_list(self, port: Union[int, Port]) -> bool:
     """ Check if the given port is in the list of ports """
