@@ -1,8 +1,6 @@
 from typing import List, Union
 
-from oudjat.utils import bytes_2_ipstr, b_or, int_2_bytes
-
-from . import IPv4, IPv4Mask
+from . import IPv4, IPv4Mask, ip_int_to_str
 
 class Subnet:
   """ A class to handle subnets """
@@ -31,11 +29,8 @@ class Subnet:
 
     self.address = addr.get_net_addr()
 
-    broadcast_bytes = [
-      b_or(self.addr.bytes[i], self.address.mask.get_wildcard().bytes[i])
-      for i, x in enumerate(self.address)
-    ]
-    self.broadcast = IPv4(bytes_2_ipstr(broadcast_bytes) + f"/{self.address.get_mask().get_cidr()}")
+    broadcast_int = self.address.get_mask().get_wildcard().get_address() | self.address.get_address()
+    self.broadcast = IPv4(ip_int_to_str(broadcast_int) + f"/{self.address.get_mask().get_cidr()}")
 
     self.name = name
     self.description = description
@@ -79,12 +74,12 @@ class Subnet:
 
   def list_addresses(self) -> List[str]:
     """ Lists all possible hosts in subnet """
-    start = self.address.to_int() + 1
-    end = self.broadcast.to_int()
+    start = self.address.get_address() + 1
+    end = self.broadcast.get_address()
 
     addresses = []
     for i in range(start, end):
-      addresses.append(f"{('.'.join(f"{o}" for o in int_2_bytes(i)))}/{self.address.get_mask().get_cidr()}")
+      addresses.append(f"{ip_int_to_str(i)}/{self.address.get_mask().get_cidr()}")
       
     return addresses
 
