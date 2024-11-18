@@ -30,7 +30,7 @@ class Computer(Asset):
       raise ValueError(f"Invalid OS provided for computer {self.name}. Please provide an OS release")
     
     self.os_release = os_release
-    self.os_edition = None
+    self.os_edition = os_edition
 
     self.ip = ip
     self.softwares: List[SoftwareRelease] = []
