@@ -87,6 +87,7 @@ class Computer(Asset):
       **asset_dict,
       "computer_type": self.get_computer_type(),
       "os_release": release_dict.pop("name"),
+      "os_release_label": release_dict.pop("label"),
       "os_release_full_name": release_dict.pop("full_name"),
       "os_release_version": release_dict.pop("version"),
       "os_release_date": release_dict.pop("release_date"),
