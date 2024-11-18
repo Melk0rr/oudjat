@@ -83,6 +83,7 @@ class Computer(Asset):
     release_dict = self.os_release.to_dict()
     release_dict.pop("is_supported")
     release_dict.pop("software")
+    release_dict.pop("support")
     
     return {
       **asset_dict,
@@ -94,7 +95,6 @@ class Computer(Asset):
       "os_release_date": release_dict.pop("release_date"),
       "os_release_main_version": release_dict.pop("version_main"),
       "os_release_build": release_dict.pop("version_build"),
-      "os_release_support": release_dict.pop("support"),
       **release_dict,
       "is_os_supported": self.is_os_supported(),
     }
