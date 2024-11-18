@@ -82,6 +82,7 @@ class Computer(Asset):
     asset_dict = super().to_dict()
     release_dict = self.os_release.to_dict()
     release_dict.pop("is_supported")
+    release_dict.pop("software")
     
     return {
       **asset_dict,
