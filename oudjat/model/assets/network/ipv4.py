@@ -1,9 +1,10 @@
 import re
+import socket
 
 from enum import Enum
 from typing import List, Union
 
-from oudjat.utils import count_1_bits, i_not, i_and
+from oudjat.utils import ColorPrint, count_1_bits, i_not, i_and
 
 from . import Port
 
@@ -63,6 +64,18 @@ class IPBase:
   def __str__(self) -> str:
     """ Converts the current ip base into a string """
     return ip_int_to_str(self.address)
+
+  @staticmethod
+  def resolve_from_hostname(hostname: str) -> str:
+    """ Resolves the IP address for the current URL """
+    ip = None
+    try:
+      ip = socket.gethostbyname(hostname)
+
+    except Exception as e:
+      ColorPrint.red(f"{hostname}: could not resolve IP address\n{e}")
+
+    return ip
 
 
 class IPv4Mask(IPBase):

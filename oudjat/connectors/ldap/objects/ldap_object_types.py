@@ -15,7 +15,7 @@ class LDAPObjectType(Enum):
       "cn",
       "description",
       "distinguishedName",
-      "dnsHostName",
+      "dNSHostName",
       "ipHostNumber",
       "lastLogonTimestamp",
       "memberOf",
