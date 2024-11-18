@@ -27,7 +27,7 @@ class DataFilter:
     """ Returns whether or not the element match the filter """
     return self.operation[self.operator](element[self.fieldname], self.value)
   
-  def to_string(self) -> str:
+  def __str__(self) -> str:
     """ Converts the current instance into a string """
     return f"{self.fieldname} {self.operator} {self.value}"
   

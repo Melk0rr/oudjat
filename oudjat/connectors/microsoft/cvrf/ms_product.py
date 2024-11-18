@@ -32,7 +32,7 @@ class MSProduct:
     """ Getter for product name """
     return self.name
         
-  def to_string(self) -> str:
+  def __str__(self) -> str:
     """ Converts instance to string """
     return f"{self.pid}: {self.name}"
 

@@ -78,7 +78,7 @@ class Risk:
 
     self.impact = impact
     
-  def to_string(self) -> str:
+  def __str__(self) -> str:
     """ Converts the current instance into a string """
     return f"{self.name} => {self.get_severity().name} : {self.value}"
 

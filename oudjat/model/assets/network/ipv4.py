@@ -172,7 +172,7 @@ class IPv4(IPBase):
 
   def get_port_strings(self) -> List[int]:
     """ Getter for the Port strings """
-    return [ p.to_string() for p in self.ports ]
+    return [ str(p) for p in self.ports ]
 
   def set_mask(self, mask: Union[int, str, IPv4Mask]):
     """ Setter for ip mask """

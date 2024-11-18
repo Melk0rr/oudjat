@@ -47,7 +47,7 @@ class Port:
     """ Setter for port open state """
     self.state = new_state
 
-  def to_string(self) -> str:
+  def __str__(self) -> str:
     """ Returns a string based on port number and application """
     return f"{self.application}({self.number})"
 

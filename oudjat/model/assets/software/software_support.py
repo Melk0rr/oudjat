@@ -110,7 +110,7 @@ class SoftwareReleaseSupport:
       
     return all([ self.supports_edition(e) for e in edition_labels ]) and lts == self.lts
   
-  def to_string(self) -> str:
+  def __str__(self) -> str:
     """ Converts the current support instance into a string """
     return f"{self.get_edition_str()} ({self.status()}){" - LTS" if self.lts else ''}"
   

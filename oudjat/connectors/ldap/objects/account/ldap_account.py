@@ -105,5 +105,5 @@ class LDAPAccount(LDAPObject):
       "pwd_last_set": acc_date_str(self.pwd_last_set),
       "pwd_last_set_days": self.get_pwd_last_set_days(),
       "account_ctl": self.account_control,
-      "account_flags": self.account_flags
+      "account_flags": '-'.join(self.account_flags)
     }

@@ -103,6 +103,7 @@ class Computer(Asset):
       "os_release_date": release_dict.pop("release_date"),
       "os_release_main_version": release_dict.pop("version_main"),
       "os_release_build": release_dict.pop("version_build"),
+      "os_edition": str(self.os_edition),
       **release_dict,
       "is_os_supported": self.is_os_supported(),
     }

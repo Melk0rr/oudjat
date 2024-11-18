@@ -79,11 +79,11 @@ class Software(Asset):
 
   def retired_releases(self) -> List[SoftwareRelease]:
     """ Gets a list of retired releases """
-    return [ r.to_string() for r in self.releases.values() if not r.is_supported() ]
+    return [ str(r) for r in self.releases.values() if not r.is_supported() ]
 
   def supported_releases(self) -> List[SoftwareRelease]:
     """ Gets a list of retired releases """
-    return [ r.to_string() for r in self.releases.values() if r.is_supported() ]
+    return [ str(r) for r in self.releases.values() if r.is_supported() ]
   
   def get_matching_editions(self, test_str: str) -> SoftwareEditionDict:
     """ Returns editions which pattern matches the given string """
@@ -95,7 +95,7 @@ class Software(Asset):
     return {
       **base_dict,
       "editor": self.editor,
-      "releases": ','.join([ r.to_string() for r in self.releases ]),
+      "releases": ','.join([ str(r) for r in self.releases ]),
       "supported_releases": ','.join(self.supported_releases()),
       "retired_releases": ','.join(self.retired_releases())
     }

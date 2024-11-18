@@ -107,7 +107,7 @@ class SoftwareRelease:
     """ Adds a vulnerability to the current release """
     self.vulnerabilities.add(vuln)
 
-  def to_string(self, show_version: bool = False) -> str:
+  def __str__(self, show_version: bool = False) -> str:
     """ Converts current release to a string """
     name = self.get_full_name()
 
@@ -132,7 +132,7 @@ class SoftwareRelease:
       "label": self.label,
       "release_date": soft_date_str(self.release_date),
       **self.os_info_dict(),
-      "support": ', '.join([ s.to_string() for s in self.support ]),
+      "support": ', '.join([ str(s) for s in self.support ]),
     }
 
 

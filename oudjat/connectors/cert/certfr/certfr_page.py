@@ -111,7 +111,7 @@ class CERTFRPage:
       ColorPrint.red(
           f"CERTFRPage::A parsing error occured for {self.ref}\n{e}")
 
-  def to_string(self) -> str:
+  def __str__(self) -> str:
     """ Converts current instance into a string """
     return f"{self.ref}: {self.title}"
 

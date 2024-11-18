@@ -59,7 +59,7 @@ class KPI(DataScope):
     print_details: bool = True
   ) -> None:
     """ Print value with color based on kpi level """
-    scope_str = self.to_string()
+    scope_str = str(self)
 
     print(prefix, end="")
     if print_details:
@@ -87,7 +87,7 @@ class KPI(DataScope):
       "date": self.get_date_str()
     }
 
-  def to_string(self) -> Tuple[str, str]:
+  def __str__(self) -> Tuple[str, str]:
     """ Converts the current instance into a string """
     k_value = self.get_kpi_value()
     return (f"{len(self.get_data())} / {len(self.get_input_data())}", f"{k_value}")
