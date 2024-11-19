@@ -95,20 +95,12 @@ class SoftwareReleaseSupport:
     """ Returns wheither the release has long term support or not """
     return self.lts
 
-  def supports_edition(self, edition_label: str) -> bool:
+  def supports_edition(self, edition: "SoftwareEdition", lts: bool = False) -> bool:
     """ Checks if current support concerns the provided edition """
-    if edition_label is None:
+    if edition is None:
       return False
     
-    return self.edition is None or edition_label in self.edition.get_edition_labels()
-
-  def compare_support_scope(self, edition_labels: Union[str, List[str]], lts: bool = False) -> bool:
-    """ Compares current support with given values """
-    
-    if not isinstance(edition_labels, list):
-      edition_labels = [ edition_labels ]
-      
-    return all([ self.supports_edition(e) for e in edition_labels ]) and lts == self.lts
+    return (self.edition is None) or (str(edition) in self.edition.get_edition_labels()) and lts == self.lts
   
   def __str__(self) -> str:
     """ Converts the current support instance into a string """
@@ -137,19 +129,19 @@ class SoftwareReleaseSupportList(list):
   # Methods
   def contains(
     self,
-    edition: Union[str, List[str]] = None,
+    edition: "SoftwareEdition" = None,
     lts: bool = False,
   ) -> bool:
     """ Check if list contains element matching provided attributes """
-    return any([ s.compare_support_scope(edition, lts) for s in self ])
+    return any([ support.supports_edition(edition, lts) for support in self ])
 
   def get(
     self,
-    edition: Union[str, List[str]] = None,
+    edition: "SoftwareEdition" = None,
     lts: bool = False,
   ) -> List[SoftwareReleaseSupport]:
     """ Returns releases matching arguments """
-    return [ s for s in self if s.compare_support_scope(edition, lts) ]
+    return [ support for s in self if support.supports_edition(edition, lts) ]
 
   def append(self, support: SoftwareReleaseSupport) -> None:
     """ Appends a new support to the list """

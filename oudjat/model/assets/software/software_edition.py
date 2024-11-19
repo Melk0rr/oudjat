@@ -52,7 +52,7 @@ class SoftwareEditionDict(dict):
   
   def get_edition_labels(self) -> List[str]:
     """ Returns a list of edition labels """
-    return [ e.get_label() for e in self.values() ]
+    return [ str(edition) for edition in self.values() ]
   
   def get_editions_per_ctg(self, category: str) -> "SoftwareEditionDict":
     """ Returns a sub software edition dict based on category value """

@@ -53,7 +53,7 @@ class SoftwareRelease:
     
     return days_diff(self.end_of_life, reverse=True) > 0
   
-  def is_supported(self, edition: str = None) -> bool:
+  def is_supported(self, edition: "SoftwareEdition" = None) -> bool:
     """ Checks if the current release has an ongoin support """
     return any([ s.is_ongoing() and (edition is None or s.supports_edition(edition)) for s in self.support ])
 
@@ -61,12 +61,12 @@ class SoftwareRelease:
     """ Getter for support list """
     return self.support
 
-  def get_support_for_edition(self, edition: str) -> SoftwareReleaseSupportList:
+  def get_support_for_edition(self, edition: str, lts: bool = False) -> SoftwareReleaseSupportList:
     """ Returns support for given edition """
     if edition is None:
       return None
     
-    return [ s.supports_edition(edition) for s in self.support ]
+    return self.support.get(edition, lts=lts)
   
   def get_ongoing_support(self) -> List[SoftwareReleaseSupport]:
     """ Returns ongoing support instances """

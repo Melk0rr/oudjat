@@ -2,7 +2,7 @@ from typing import List, Dict
 
 from oudjat.model.assets import Asset, AssetType
 from oudjat.model.assets.network import IPv4
-from oudjat.model.assets.software import SoftwareRelease, SoftwareType, SoftwareEdition, SoftwareReleaseSupportList
+from oudjat.model.assets.software import SoftwareRelease, SoftwareType, SoftwareEdition, SoftwareReleaseSupport
 from oudjat.model.assets.software.os import OSRelease
 from . import ComputerType
 
@@ -64,7 +64,7 @@ class Computer(Asset):
     """ Getter for the computer software release list """
     return self.softwares
   
-  def get_os_support(self) -> SoftwareReleaseSupportList:
+  def get_os_support(self) -> List[SoftwareReleaseSupport]:
     """ Get support for current computer os release and edition """
     return self.os_release.get_support_for_edition(self.os_edition)
 
