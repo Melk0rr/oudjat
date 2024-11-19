@@ -20,7 +20,7 @@ class Computer(Asset):
     description: str = None,
     os_release: OSRelease = None,
     os_edition: SoftwareEdition = None,
-    ip: List[IPv4] = None
+    ip: IPv4 = None
   ):
     """ Constructor """
     
@@ -67,6 +67,10 @@ class Computer(Asset):
   def get_os_support(self) -> SoftwareReleaseSupportList:
     """ Get support for current computer os release and edition """
     return self.os_release.get_support_for_edition(self.os_edition)
+
+  def resolve_ip(self) -> None:
+    """ Try to resolve ip address """
+    self.ip = IPv4.resolve_from_hostname(hostname=self.label)
 
   def set_os(self, os_release: OSRelease, edition: str = None) -> None:
     """ Setter for computer os """

@@ -44,12 +44,14 @@ class LDAPComputer(LDAPAccount, Computer):
           
         if os_edition is not None and len(os_edition) != 0:
           os_edition = os_edition[0]
+
+    self.hostname = self.entry.get("dNSHostName")
       
     Computer.__init__(
       self,
       id=self.uuid,
       name=self.name,
-      label=self.san,
+      label=self.hostname,
       os_release=os_release,
       os_edition=os_edition
     )
@@ -65,5 +67,6 @@ class LDAPComputer(LDAPAccount, Computer):
 
     return {
       **base_dict,
+      "hostname": cpt_dict.pop("label"),
       **cpt_dict
     }
