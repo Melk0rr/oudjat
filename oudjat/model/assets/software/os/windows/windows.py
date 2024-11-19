@@ -143,8 +143,8 @@ class MicrosoftOperatingSystem(OperatingSystem):
         edition=editions
       )
       
-      win_rel.add_support(win_sup)
       self.add_release(win_rel)
+      self.releases.get(win_rel.get_version()).get(win_rel.get_label()).add_support(win_sup)
 
   # ****************************************************************
   # Static methods
