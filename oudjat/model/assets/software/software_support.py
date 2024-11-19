@@ -141,7 +141,7 @@ class SoftwareReleaseSupportList(list):
     lts: bool = False,
   ) -> List[SoftwareReleaseSupport]:
     """ Returns releases matching arguments """
-    return [ support for s in self if support.supports_edition(edition, lts) ]
+    return [ support for support in self if support.supports_edition(edition, lts) ]
 
   def append(self, support: SoftwareReleaseSupport) -> None:
     """ Appends a new support to the list """
