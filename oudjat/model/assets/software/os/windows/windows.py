@@ -132,10 +132,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
           release_label=rel["releaseLabel"],
         )
 
-      editions = SoftwareEditionDict()
-      for ctg in rel.get("edition", []):
-        rel_edit = win_rel.get_software().get_editions().get_editions_per_ctg(ctg)
-        editions = SoftwareEditionDict(**editions, **rel_edit)
+      editions = [ win_rel.get_software().get_editions().get_editions_per_ctg(ctg) for ctg in rel.get("editions", []) ]
 
       win_sup = SoftwareReleaseSupport(
         active_support=rel["support"],

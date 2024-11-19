@@ -56,5 +56,4 @@ class SoftwareEditionDict(dict):
   
   def get_editions_per_ctg(self, category: str) -> "SoftwareEditionDict":
     """ Returns a sub software edition dict based on category value """
-    res = { k: v for k, v in self.items() if v.get_category() == category }
-    return SoftwareEditionDict(**res)
+    return [ str(e) for e in self.values() if e.get_category() == category ]
