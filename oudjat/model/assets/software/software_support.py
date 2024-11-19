@@ -23,13 +23,10 @@ class SoftwareReleaseSupport:
     self,
     active_support: Union[str, datetime] = None,
     end_of_life: Union[str, datetime] = None,
-    edition: Union[Dict, SoftwareEditionDict] = None,
+    edition: List[str] = None,
     long_term_support: bool = False
   ):
     """ Constructor """
-
-    if edition is not None and not isinstance(edition, SoftwareEditionDict):
-      edition = SoftwareEditionDict(**edition)
 
     self.edition = edition
 
@@ -63,10 +60,6 @@ class SoftwareReleaseSupport:
     """ Getter for release edition """
     return self.edition
   
-  def get_edition_str(self, join_char: str = ',') -> str:
-    """ Returns joined editions """
-    return join_char.join(self.edition.get_edition_labels())
-  
   def is_ongoing(self) -> bool:
     """ Returns wheither or not the current support is ongoing """
     if self.end_of_life is None:
@@ -95,13 +88,19 @@ class SoftwareReleaseSupport:
     """ Returns wheither the release has long term support or not """
     return self.lts
 
-  def supports_edition(self, edition: "SoftwareEdition", lts: bool = False) -> bool:
+  def supports_edition(self, edition: Union[str, List[str]], lts: bool = False) -> bool:
     """ Checks if current support concerns the provided edition """
     if edition is None:
       return False
+
+    if not isinstance(edition, list):
+      edition = [ edition ]
+
+    if self.edition is None:
+      return True
     
-    return (self.edition is None) or (str(edition) in self.edition.get_edition_labels()) and lts == self.lts
-  
+    return any([ (((e in self.edition)) and (lts == self.lts)) for e in edition ])
+
   def __str__(self) -> str:
     """ Converts the current support instance into a string """
     return f"{self.get_edition_str()} ({self.status()}){" - LTS" if self.lts else ''}"
@@ -129,7 +128,7 @@ class SoftwareReleaseSupportList(list):
   # Methods
   def contains(
     self,
-    edition: "SoftwareEdition" = None,
+    edition: Union[str, List[str]] = None,
     lts: bool = False,
   ) -> bool:
     """ Check if list contains element matching provided attributes """
@@ -137,7 +136,7 @@ class SoftwareReleaseSupportList(list):
 
   def get(
     self,
-    edition: "SoftwareEdition" = None,
+    edition: Union[str, List[str]] = None,
     lts: bool = False,
   ) -> List[SoftwareReleaseSupport]:
     """ Returns releases matching arguments """

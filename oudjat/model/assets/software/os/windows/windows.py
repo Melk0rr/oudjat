@@ -140,11 +140,12 @@ class MicrosoftOperatingSystem(OperatingSystem):
       win_sup = SoftwareReleaseSupport(
         active_support=rel["support"],
         end_of_life=rel["eol"],
+        long_term_support=rel["lts"],
         edition=editions
       )
       
       self.add_release(win_rel)
-      self.releases.get(win_rel.get_version()).get(win_rel.get_label()).add_support(win_sup)
+      self.releases[win_rel.get_version()][win_rel.get_label()].add_support(win_sup)
 
   # ****************************************************************
   # Static methods

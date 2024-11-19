@@ -66,7 +66,7 @@ class Computer(Asset):
   
   def get_os_support(self) -> List[SoftwareReleaseSupport]:
     """ Get support for current computer os release and edition """
-    return self.os_release.get_support_for_edition(self.os_edition)
+    return self.os_release.get_support_for_edition(str(self.os_edition))
 
   def resolve_ip(self) -> None:
     """ Try to resolve ip address """
@@ -87,7 +87,7 @@ class Computer(Asset):
     if self.os_release is None:
       return False
     
-    return self.os_release.is_supported(edition=self.os_edition)
+    return self.os_release.is_supported(str(self.os_edition))
   
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dictionary """

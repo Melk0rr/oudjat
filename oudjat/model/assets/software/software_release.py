@@ -53,7 +53,7 @@ class SoftwareRelease:
     
     return days_diff(self.end_of_life, reverse=True) > 0
   
-  def is_supported(self, edition: "SoftwareEdition" = None) -> bool:
+  def is_supported(self, edition: Union[str, List[str]] = None) -> bool:
     """ Checks if the current release has an ongoin support """
     return any([ s.is_ongoing() and (edition is None or s.supports_edition(edition)) for s in self.support ])
 
@@ -61,7 +61,7 @@ class SoftwareRelease:
     """ Getter for support list """
     return self.support
 
-  def get_support_for_edition(self, edition: str, lts: bool = False) -> SoftwareReleaseSupportList:
+  def get_support_for_edition(self, edition: Union[str, List[str]], lts: bool = False) -> SoftwareReleaseSupportList:
     """ Returns support for given edition """
     if edition is None:
       return None
@@ -87,10 +87,10 @@ class SoftwareRelease:
   
   def add_support(self, support: SoftwareReleaseSupport) -> None:
     """ Adds a support instance to the current release """
-    if (
-      isinstance(support, SoftwareReleaseSupport) and 
-      not self.support.contains(edition=support.get_edition(), lts=support.has_long_term_support())
-    ):
+    if not isinstance(support, SoftwareReleaseSupport):
+      return
+
+    if (not self.support.contains(edition=support.get_edition(), lts=support.has_long_term_support())):
       self.support.append(support)
       
   def has_vulnerability(self, vuln: Union[str, List[str]] = None) -> List[str]:
