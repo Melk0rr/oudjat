@@ -3,7 +3,7 @@ from typing import Dict, List
 
 from oudjat.utils import date_format_from_flag, DATE_TIME_FLAGS, days_diff
 from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject
-from oudjat.connectors.ldap.objects.account import LDAPAccountFlag, check_account_flag, is_disabled, pwd_expires, pwd_expired
+from oudjat.connectors.ldap.objects.account import LDAPAccountFlag, check_account_flag, is_disabled, pwd_expires, pwd_expired, pwd_required
 
 MS_ACCOUNT_CTL_PROPERTY = "msDS-User-Account-Control-Computed"
 
@@ -32,12 +32,14 @@ class LDAPAccount(LDAPObject):
     self.enabled = True
     self.pwd_expires = False
     self.pwd_expired = False
+    self.pwd_required = False
     self.account_flags = []
 
     if self.account_control is not None:
       self.enabled = not is_disabled(self.account_control)
       self.pwd_expires = pwd_expires(self.account_control)
       self.pwd_expired = pwd_expired(self.account_control)
+      self.pwd_required = pwd_required(self.account_control)
 
       self.account_flags = [
         f.name for f in LDAPAccountFlag 
@@ -100,6 +102,7 @@ class LDAPAccount(LDAPObject):
       "status": self.get_status(),
       "pwd_expires": self.pwd_expires,
       "pwd_expired": self.pwd_expired,
+      "pwd_required": self.pwd_required,
       "last_logon": acc_date_str(self.last_logon),
       "last_logon_days": self.get_last_logon_days(),
       "pwd_last_set": acc_date_str(self.pwd_last_set),
