@@ -106,7 +106,7 @@ class SoftwareReleaseSupport:
 
   def __str__(self) -> str:
     """ Converts the current support instance into a string """
-    return f"{','.join(self.edition)} ({self.status()}){" - LTS" if self.lts else ''}"
+    return f"{','.join(self.edition)} : {self.status()}{" - LTS" if self.lts else ''}"
   
   def to_dict(self) -> Dict:
     """ Converts the current support instance into a dict """
