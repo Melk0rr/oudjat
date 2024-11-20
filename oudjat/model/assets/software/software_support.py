@@ -152,4 +152,4 @@ class SoftwareReleaseSupportList(list):
 
   def __str__(self) -> str:
     """ Converts the current support list into a string """
-    return [ str(s) for s in self ]
+    return f"[ {','.join([ str(s) for s in self ])} ]"
