@@ -111,7 +111,7 @@ class SoftwareReleaseSupport:
   def to_dict(self) -> Dict:
     """ Converts the current support instance into a dict """
     return {
-      "edition": self.get_edition_str(),
+      "edition": self.edition,
       "active_support": soft_date_str(self.active_support),
       "end_of_life": soft_date_str(self.end_of_life),
       "status": self.status(),
