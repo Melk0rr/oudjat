@@ -149,3 +149,7 @@ class SoftwareReleaseSupportList(list):
     """ Appends a new support to the list """
     if isinstance(support, SoftwareReleaseSupport):
       super().append(support)
+
+  def __str__(self) -> str:
+    """ Converts the current support list into a string """
+    return [ str(s) for s in self ]
