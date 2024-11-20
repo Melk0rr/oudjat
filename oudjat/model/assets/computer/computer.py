@@ -91,11 +91,18 @@ class Computer(Asset):
   
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dictionary """
+  
     asset_dict = super().to_dict()
+
+    # OS Release informations
     release_dict = self.os_release.to_dict()
     release_dict.pop("is_supported")
     release_dict.pop("software")
     release_dict.pop("support")
+    
+    # OS support information
+    os_support_dict = self.get_os_support().to_dict()
+    print(os_support_dict)
     
     return {
       **asset_dict,
