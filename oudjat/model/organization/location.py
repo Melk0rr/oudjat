@@ -14,6 +14,7 @@ class Location:
     id: str,
     name: str,
     description: str,
+    city: str = None,
     label: str = None,
     subnet: Union[Subnet, List[Subnet]] = None
   ):
@@ -28,6 +29,12 @@ class Location:
   # ****************************************************************
   # Methods
     
-  def addAsset(asset: Asset, type: AssetType) -> None:
+  def add_asset(asset: Asset, asset_type: AssetType) -> None:
     """ Adds a new asset to the current location """
+
+    if asset_type not in self.assets.keys():
+      self.assets[asset_type] = {}
+
+    if asset.get_id() not in self.assets.keys():
+      self.assets[asset_type][asset.get_id()] = asset
     
