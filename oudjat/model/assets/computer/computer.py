@@ -1,9 +1,10 @@
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from oudjat.model.assets import Asset, AssetType
 from oudjat.model.assets.network import IPv4
 from oudjat.model.assets.software import SoftwareRelease, SoftwareType, SoftwareEdition, SoftwareReleaseSupport
 from oudjat.model.assets.software.os import OSRelease
+
 from . import ComputerType
 
 class Computer(Asset):
@@ -14,7 +15,7 @@ class Computer(Asset):
 
   def __init__(
     self,
-    id: str,
+    id: Union[int, str],
     name: str,
     label: str = None,
     description: str = None,
