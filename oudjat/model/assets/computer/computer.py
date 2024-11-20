@@ -120,6 +120,7 @@ class Computer(Asset):
       "os_active_support": os_support_dict.pop("active_support"),
       "os_end_of_life": os_support_dict.pop("end_of_life"),
       "os_support_details": os_support_dict.pop("details"),
+      "os_has_lts": os_support_dict.pop("lts"),
       **release_dict,
       "is_os_supported": self.is_os_supported(),
     }
