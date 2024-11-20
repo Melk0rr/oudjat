@@ -50,8 +50,11 @@ class Computer(Asset):
   
   def get_computer_type(self) -> ComputerType:
     """ Getter for the current computer type """
-    return self.os_release.get_os().get_computer_type()
-  
+    cpt_type = 
+    if self.os_release is not None:
+      cpt_type = self.os_release.get_os().get_computer_type()
+    
+    return cpt_type
   def get_os_release(self) -> OSRelease:
     """ Getter for the computer operating system """
     return self.os_release
