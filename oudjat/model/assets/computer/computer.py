@@ -102,7 +102,6 @@ class Computer(Asset):
     
     # OS support information
     os_support_dict = self.get_os_support()[0].to_dict()
-    print(os_support_dict)
     
     return {
       **asset_dict,
@@ -115,6 +114,9 @@ class Computer(Asset):
       "os_release_main_version": release_dict.pop("version_main"),
       "os_release_build": release_dict.pop("version_build"),
       "os_edition": str(self.os_edition),
+      "os_active_support": os_support_dict.pop("active_support"),
+      "os_end_of_life": os_support_dict.pop("end_of_life"),
+      "os_support_details": os_support_dict.pop("details"),
       **release_dict,
       "is_os_supported": self.is_os_supported(),
     }
