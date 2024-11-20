@@ -138,6 +138,7 @@ class LDAPObjectType(Enum):
       "givenName",
       "lastLogonTimestamp",
       "mail",
+      "manager",
       "memberOf",
       "msDS-User-Account-Control-Computed",
       "msExchRecipientTypeDetails",
