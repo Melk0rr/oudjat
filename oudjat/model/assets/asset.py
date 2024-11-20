@@ -1,5 +1,7 @@
 from typing import Dict, Union
 
+from oudjat.model.organization import Location
+
 from . import AssetType
 
 class Asset:
@@ -12,9 +14,10 @@ class Asset:
     self,
     id: Union[int, str],
     name: str,
-    type: AssetType,
+    asset_type: AssetType,
     label: str = None,
-    desctiption: str = None
+    desctiption: str = None,
+    location: Location = None
   ):
     """ Constructor """
 
@@ -22,7 +25,8 @@ class Asset:
     self.name = name
     self.label = label
     self.desctiption = desctiption
-    self.type = type
+    self.location = location
+    self.asset_type = asset_type
 
   # ****************************************************************
   # Methods
@@ -43,9 +47,19 @@ class Asset:
     """ Getter for asset description """
     return self.desctiption
 
-  def get_type(self) -> AssetType:
+  def get_location(self) -> Location:
+    """ Getter for the asset location """
+    return self.location
+
+  def get_asset_type(self) -> AssetType:
     """ Getter for asset type """
-    return self.type
+    return self.asset_type
+  
+  def set_location(self, location: Location) -> None:
+    """ Setter for asset location """
+    
+    if isinstance(location, Location):
+      self.location = location
   
   def to_dict(self) -> Dict:
     """ Converts current asset into a dict """
@@ -54,5 +68,5 @@ class Asset:
       "name": self.name,
       "label": self.label,
       "description": self.desctiption,
-      "type": self.type.name
+      "type": self.asset_type.name
     }
