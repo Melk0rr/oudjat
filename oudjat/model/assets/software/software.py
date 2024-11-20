@@ -67,11 +67,12 @@ class Software(Asset):
       return
 
     new_rel_ver = new_release.get_version()
-    
     if new_rel_ver not in self.releases.keys():
       self.releases[new_rel_ver] = SoftwareReleaseDict()
 
-    self.releases[new_rel_ver][new_release.get_label()] = new_release
+    new_rel_label = new_release.get_label()
+    if new_rel_label not in self.releases[new_rel_ver].keys():
+      self.releases[new_rel_ver][new_release.get_label()] = new_release
 
   def find_release(self, rel_ver: str, rel_label: str = None) -> SoftwareRelease:
     """ Finds a release by label """
