@@ -8,7 +8,7 @@ class LDAPUser(LDAPAccount):
     # Attributes & Constructors
 
   def __init__(self, ldap_entry: LDAPEntry):
-    """ Construcotr """
+    """ Constructor """
 
     # TODO: user locked
     # TODO: user must change pwd at next logon
