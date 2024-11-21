@@ -1,0 +1,1 @@
+from .generic_identifiable import GenericIdentifiable
