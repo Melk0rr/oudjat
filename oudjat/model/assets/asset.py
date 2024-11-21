@@ -1,10 +1,15 @@
-from typing import Dict, Union
+from __future__ import annotations
 
-from oudjat.model.organization import Location
+from typing import List, Dict, Union
+
+import oudjat.model.organization
+
+from oudjat.utils import ColorPrint
+from oudjat.model import GenericIdentifiable
 
 from . import AssetType
 
-class Asset:
+class Asset(GenericIdentifiable):
   """ Generic asset class to be inherited by all model asset types """
 
   # ****************************************************************
@@ -17,37 +22,22 @@ class Asset:
     asset_type: AssetType,
     label: str = None,
     desctiption: str = None,
-    location: Location = None
+    location: Union[oudjat.model.organization.Location, List[oudjat.model.organization.Location]] = None
   ):
     """ Constructor """
 
-    self.id = id
-    self.name = name
-    self.label = label
-    self.desctiption = desctiption
-    self.location = location
+    super().__init__(id=id, name=name, label=label, description=desctiption)
+
+    self.location = []
+    self.set_location(location)
+
     self.asset_type = asset_type
+    self.location = location
 
   # ****************************************************************
   # Methods
 
-  def get_id(self) -> Union[int, str]:
-    """ Getter for asset id """
-    return self.id
-
-  def get_name(self) -> str:
-    """ Getter for asset name """
-    return self.name
-
-  def get_label(self) -> str:
-    """ Getter for asset label """
-    return self.label
-
-  def get_description(self) -> str:
-    """ Getter for asset description """
-    return self.desctiption
-
-  def get_location(self) -> Location:
+  def get_location(self) -> Union[oudjat.model.organization.Location, List[oudjat.model.organization.Location]]:
     """ Getter for the asset location """
     return self.location
 
@@ -55,18 +45,28 @@ class Asset:
     """ Getter for asset type """
     return self.asset_type
   
-  def set_location(self, location: Location) -> None:
+  def set_location(
+    self,
+    location: Union[oudjat.model.organization.Location, List[oudjat.model.organization.Location]]
+  ) -> None:
     """ Setter for asset location """
+
+    if not isinstance(location, list):
+      location = [ location ]
+
+    new_location = []    
     
-    if isinstance(location, Location):
-      self.location = location
+    for l in location:
+      if isinstance(l, oudjat.model.organization.Location):
+        new_location.append(l)
+        
+    self.location = new_location
   
   def to_dict(self) -> Dict:
     """ Converts current asset into a dict """
+
     return {
-      "id": self.id,
-      "name": self.name,
-      "label": self.label,
-      "description": self.desctiption,
-      "type": self.asset_type.name
+      **super().to_dict(),
+      "asset_type": self.asset_type.name,
+      "location": self.location
     }
