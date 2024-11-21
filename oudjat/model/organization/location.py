@@ -11,7 +11,7 @@ class Location:
 
   def __init__(
     self,
-    id: str,
+    id: Union[int, str],
     name: str,
     description: str,
     city: str = None,
@@ -28,6 +28,18 @@ class Location:
 
   # ****************************************************************
   # Methods
+  
+  def get_id(self) -> Union[int, str]:
+    """ Getter for the location id """
+    return self.id
+  
+  def get_name(self) -> str:
+    """ Getter for the location name """
+    return self.name
+  
+  def get_description(self) -> str:
+    """ Getter for the location description """
+    return self.description
     
   def add_asset(asset: Asset, asset_type: AssetType) -> None:
     """ Adds a new asset to the current location """
