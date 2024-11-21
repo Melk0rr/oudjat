@@ -149,6 +149,7 @@ class LDAPObjectType(Enum):
       "pwdLastSet",
       "sn",
       "sAMAccountName",
+      "surName",
       "title",
       "userAccountControl",
       "userPrincipalName",
