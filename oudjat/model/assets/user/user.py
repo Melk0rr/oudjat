@@ -24,7 +24,7 @@ class User(Asset):
   ):
     """ Constructor """
 
-    super().__init__(id=id, name=name, label=label, desctiption=description, asset_type=AssetType.USER)
+    super().__init__(id=id, name=name, label=login, desctiption=description, asset_type=AssetType.USER)
     
     self.firstname = firstname
     self.lastname = lastname
@@ -60,8 +60,11 @@ class User(Asset):
 
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dictionary """
+    asset_dict = super().to_dict()
+    asset_dict.pop("label")
+    
     return {
-      **super().to_dict(),
+      **asset_dict,
       "firstname": self.firstname,
       "lastname": self.lastname,
       "email": self.email,
