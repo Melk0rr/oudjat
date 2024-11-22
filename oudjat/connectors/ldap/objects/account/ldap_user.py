@@ -24,7 +24,7 @@ class LDAPUser(LDAPAccount, User):
       id=self.uuid,
       name=self.name,
       firstname=self.entry.get("givenName"),
-      lastname=self.entry.get("surName"),
+      lastname=self.entry.get("sn"),
       email=self.entry.get("mail", None),
       login=self.san,
       description=self.description,
