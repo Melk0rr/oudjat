@@ -41,7 +41,7 @@ class LDAPObject:
     self.creation_date = self.entry.get("whenCreated")
     self.change_date = self.entry.get("whenChanged")
     
-    self.followup_flags: List[str] = []
+    self.oudjat_flags: List[str] = []
 
   # ****************************************************************
   # Methods
@@ -78,6 +78,10 @@ class LDAPObject:
     """ Getter for object domain """
     return self.domain
   
+  def get_account_groups(self) -> List[str]:
+    """ Getter for the account 'memberOf' property """
+    return self.entry.get("memberOf", [])
+  
   def get_creation_date(self) -> str:
     """ Getter for ldap object creation date"""
     return self.creation_date
@@ -100,5 +104,6 @@ class LDAPObject:
       "description": self.description,
       "domain": self.domain,
       "creation_date": self.creation_date.strftime(date_format_from_flag(DATE_TIME_FLAGS)),
-      "change_date": self.change_date.strftime(date_format_from_flag(DATE_TIME_FLAGS))
+      "change_date": self.change_date.strftime(date_format_from_flag(DATE_TIME_FLAGS)),
+      "oudjat_flags": self.oudjat_flags
     }
