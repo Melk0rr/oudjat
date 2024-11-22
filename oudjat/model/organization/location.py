@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import List, Dict, Union
 
 from oudjat.model import GenericIdentifiable
 from oudjat.model.assets import AssetType, Asset

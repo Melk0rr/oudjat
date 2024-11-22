@@ -1,8 +1,4 @@
-from __future__ import annotations
-
 from typing import List, Dict, Union
-
-import oudjat.model.organization
 
 from oudjat.utils import ColorPrint
 from oudjat.model import GenericIdentifiable
@@ -22,7 +18,7 @@ class Asset(GenericIdentifiable):
     asset_type: AssetType,
     label: str = None,
     desctiption: str = None,
-    location: Union[oudjat.model.organization.Location, List[oudjat.model.organization.Location]] = None
+    location: Union["Location", List["Location"]] = None
   ):
     """ Constructor """
 
@@ -37,7 +33,7 @@ class Asset(GenericIdentifiable):
   # ****************************************************************
   # Methods
 
-  def get_location(self) -> Union[oudjat.model.organization.Location, List[oudjat.model.organization.Location]]:
+  def get_location(self) -> Union["Location", List["Location"]]:
     """ Getter for the asset location """
     return self.location
 
@@ -47,7 +43,7 @@ class Asset(GenericIdentifiable):
   
   def set_location(
     self,
-    location: Union[oudjat.model.organization.Location, List[oudjat.model.organization.Location]]
+    location: Union["Location", List["Location"]]
   ) -> None:
     """ Setter for asset location """
 
@@ -57,7 +53,7 @@ class Asset(GenericIdentifiable):
     new_location = []    
     
     for l in location:
-      if isinstance(l, oudjat.model.organization.Location):
+      if type(test).__name__ == "Location":
         new_location.append(l)
         
     self.location = new_location
