@@ -1,6 +1,6 @@
 import re
 
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from oudjat.model.assets import Asset, AssetType
 
