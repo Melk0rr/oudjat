@@ -29,7 +29,9 @@ class User(Asset):
     self.firstname = firstname
     self.lastname = lastname
     
-    self.email = self.set_email(email)      
+    self.email = None
+    self.set_email(email)
+    
     self.login = login
 
   # ****************************************************************
@@ -56,7 +58,6 @@ class User(Asset):
 
     if re.match(self.EMAIL_REG, email):
       self.email = email
-
 
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dictionary """
