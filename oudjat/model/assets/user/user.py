@@ -55,7 +55,9 @@ class User(Asset):
   
   def set_email(self, email: str) -> None:
     """ Setter for the user's email address """
-
+    if email is None:
+      return
+    
     if re.match(self.EMAIL_REG, email):
       self.email = email
 
