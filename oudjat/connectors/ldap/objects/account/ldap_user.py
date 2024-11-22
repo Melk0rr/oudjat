@@ -40,6 +40,16 @@ class LDAPUser(LDAPAccount, User):
   def get_manager(self) -> str:
     """ Getter for the user's manager """
     return self.manager
+
+  def is_admin(self) -> bool:
+    """ Checks if the current user is an admin """
+    is_admin = False
+    adm_count = self.entry.get("adminCount", None)
+    
+    if adm_count is not None:
+      is_admin = adm_count == 1
+
+    return is_admin
   
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dictionary """
@@ -52,5 +62,6 @@ class LDAPUser(LDAPAccount, User):
       **base_dict,
       "employeeID": self.employeeId,
       "manager": self.manager,
+      "is_admin": self.is_admin(),
       **user_dict
     }
