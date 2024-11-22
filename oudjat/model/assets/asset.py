@@ -53,7 +53,7 @@ class Asset(GenericIdentifiable):
     new_location = []    
     
     for l in location:
-      if type(test).__name__ == "Location":
+      if type(l).__name__ == "Location":
         new_location.append(l)
         
     self.location = new_location
