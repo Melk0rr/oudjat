@@ -19,13 +19,17 @@ class LDAPUser(LDAPAccount, User):
     self.employeeId = self.entry.get("employeeID", None)
     self.manager = self.entry.get("manager", None)
 
+    email = self.entry.get("mail", None)
+    if email is not None:
+      email = email.lower()
+
     User.__init__(
       self,
       id=self.uuid,
       name=self.name,
       firstname=self.entry.get("givenName"),
       lastname=self.entry.get("sn"),
-      email=self.entry.get("mail", None).lower(),
+      email=email,
       login=self.san,
       description=self.description,
     )
