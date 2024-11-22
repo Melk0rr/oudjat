@@ -11,14 +11,14 @@ class GenericIdentifiable:
     id: Union[int, str],
     name: str,
     label: str = None,
-    desctiption: str = None,
+    description: str = None,
   ):
     """ Constructor """
 
     self.id = id
     self.name = name
     self.label = label
-    self.desctiption = desctiption
+    self.description = description
 
   # ****************************************************************
   # Methods
@@ -37,7 +37,7 @@ class GenericIdentifiable:
 
   def get_description(self) -> str:
     """ Getter for instance description """
-    return self.desctiption
+    return self.description
   
   def set_description(self) -> None:
     """ Setter for instance description """
@@ -53,5 +53,5 @@ class GenericIdentifiable:
       "id": self.id,
       "name": self.name,
       "label": self.label,
-      "description": self.desctiption
+      "description": self.description
     }
