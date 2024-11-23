@@ -11,7 +11,8 @@ class DataFilter:
     self,
     fieldname: str,
     value: Union[Any, List[Any]],
-    operator: str = "in"
+    operator: str = "in",
+    negate: bool = False
   ):
     """ Constructor """
     if operator not in DataFilterOperations.keys():
@@ -20,13 +21,16 @@ class DataFilter:
     self.fieldname = fieldname
     self.operator = operator
     self.value = value
-
-    self.operation = DataFilterOperations[self.operator]
+    self.negate = negate
 
   def check_filter(self, element: Dict) -> bool:
     """ Returns whether or not the element match the filter """
-    return self.operation[self.operator](element[self.fieldname], self.value)
-  
+    check = DataFilterOperations[self.operator][self.operator](element[self.fieldname], self.value)
+    if self.negate:
+      return not check
+
+    return check
+    
   def __str__(self) -> str:
     """ Converts the current instance into a string """
     return f"{self.fieldname} {self.operator} {self.value}"
@@ -35,7 +39,7 @@ class DataFilter:
   def datafilter_from_dict(dictionnary: Dict) -> "DataFilter":
     """ Converts a dictionary """
     return DataFilter(
-      fieldname=dictionnary["field"],
+      fieldname=dictionnary["fieldname"],
       operator=dictionnary.get("operator", "in"),
       value=dictionnary["value"]
     )
