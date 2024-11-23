@@ -30,6 +30,14 @@ def ope_lower_equal_than(a: Union[int, float], b: Union[int, float]) -> bool:
   """ Checks if a is greater than b """
   return a <= b
 
+def ope_is(a: Any, b: Any) -> bool:
+  """ Checks if a is b """
+  return a is b
+
+def ope_is_not(a: Any, b: Any) -> bool:
+  """ Checks if a is not b """
+  return a is not b
+
 def ope_reg_match(value: str, pattern: str) -> bool:
   """ Checks if the value matches the provided pattern """
   return re.match(pattern, value)
@@ -46,6 +54,8 @@ DataFilterOperations = {
   ">=": ope_greater_equal_than,
   "<": ope_lower_than,
   "<=": ope_lower_equal_than,
+  "is": ope_is,
+  "isnt": ope_is_not,
   "match": ope_reg_match,
   "search": ope_reg_search
 }
