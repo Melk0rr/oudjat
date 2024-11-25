@@ -1,9 +1,10 @@
 from typing import Dict
 
+from oudjat.control.data import DataFilter
 from oudjat.model.assets.user import User
 from oudjat.connectors.ldap.objects import LDAPEntry
 
-from . import LDAPAccount
+from . import LDAPUserType, LDAPAccount
 
 class LDAPUser(LDAPAccount, User):
   """ A class to describe LDAP user objects """
@@ -54,6 +55,16 @@ class LDAPUser(LDAPAccount, User):
       is_admin = adm_count == 1
 
     return is_admin
+
+  def is_service_account(self) -> bool:
+    """ Try to determine if the current user is a service account """
+    check = False
+    
+    svc_filters = DataFilter.gen_from_dict(LDAPUserType.SERVICE.value["filters"])
+    if all(f.filter_value(value=self.entry.get(f.get_fieldname(), None)) for f in svc_filters):
+      check = True
+      
+    return check
   
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dictionary """
