@@ -10,7 +10,7 @@ class DataFilter:
   def __init__(
     self,
     fieldname: str,
-    value: Union[Any, List[Any]],
+    value: Any,
     operator: str = "in",
     negate: bool = False
   ):
@@ -23,12 +23,33 @@ class DataFilter:
     self.value = value
     self.negate = negate
 
-  def check_filter(self, element: Dict) -> bool:
-    """ Returns whether or not the element match the filter """
-    check = DataFilterOperations[self.operator][self.operator](element[self.fieldname], self.value)
+  def get_fieldname(self) -> str:
+    """ Getter for filter fieldname """
+    return self.fieldname
+  
+  def get_operator(self) -> str:
+    """ Getter for filter operator """
+    return self.operator
+  
+  def get_value(self) -> Any:
+    """ Getter for filter value """
+    return self.value
+
+  def filter_dict(self, element: Dict) -> bool:
+    """ Returns wheither or not the dictionary element matches the filter """
+    check = DataFilterOperations[self.operator](element[self.fieldname], self.value)
     if self.negate:
       return not check
 
+    return check
+
+  def filter_value(self, value: Any) -> bool:
+    """ Returns wheither or not the given value matches the filter """
+    check = DataFilterOperations[self.operator](value, self.value)
+    
+    if self.negate:
+      return not check
+    
     return check
     
   def __str__(self) -> str:
@@ -83,7 +104,7 @@ class DataFilter:
 
     for f in filters:
       if isinstance(f, DataFilter):
-        checks.append(f.check_filter(element))
+        checks.append(f.filter_dict(element))
       
       else:
         operation = DataFilterOperations[f["operator"]]
@@ -96,7 +117,7 @@ class DataFilter:
     """ Filters data based on given filters """
     filtered_data = []
     for el in data_to_filter:
-      conditions = all(f.check_filter(el) for f in filters)
+      conditions = all(f.filter_dict(el) for f in filters)
       if conditions:
         filtered_data.append(el)
 
