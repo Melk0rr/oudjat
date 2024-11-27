@@ -2,7 +2,7 @@ from typing import List, Dict, Union, Any
 
 from oudjat.utils import ColorPrint
 
-from . import DataFilterOperations
+from . import DataFilterOperation
 
 class DataFilter:
   """ DataFilter class : handling data filtering """
@@ -15,7 +15,7 @@ class DataFilter:
     negate: bool = False
   ):
     """ Constructor """
-    if operator not in DataFilterOperations.keys():
+    if operator not in DataFilterOperation.keys():
       raise ValueError(f"Invalid operator provided: {operator}")
 
     self.fieldname = fieldname
@@ -37,7 +37,7 @@ class DataFilter:
 
   def filter_dict(self, element: Dict) -> bool:
     """ Returns wheither or not the dictionary element matches the filter """
-    check = DataFilterOperations[self.operator](element[self.fieldname], self.value)
+    check = DataFilterOperation[self.operator](element[self.fieldname], self.value)
     if self.negate:
       return not check
 
@@ -45,7 +45,7 @@ class DataFilter:
 
   def filter_value(self, value: Any) -> bool:
     """ Returns wheither or not the given value matches the filter """
-    check = DataFilterOperations[self.operator](value, self.value)
+    check = DataFilterOperation[self.operator](value, self.value)
     
     if self.negate:
       return not check
@@ -107,7 +107,7 @@ class DataFilter:
         checks.append(f.filter_dict(element))
       
       else:
-        operation = DataFilterOperations[f["operator"]]
+        operation = DataFilterOperation[f["operator"]]
         checks.append(operation(element[f["fieldname"]], f["value"]))
       
     return all(checks)

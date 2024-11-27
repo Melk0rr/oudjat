@@ -46,7 +46,7 @@ def ope_reg_search(value: str, patter: str) -> bool:
   """ Searches for the provided pattern in value """
   return re.search(pattern, value)
 
-DataFilterOperations = {
+DataFilterOperation = {
   "eq": ope_equals,
   "contains": ope_contains,
   "in": ope_in,
