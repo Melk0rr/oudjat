@@ -47,13 +47,13 @@ def ope_reg_search(value: str, patter: str) -> bool:
   return re.search(pattern, value)
 
 DataFilterOperations = {
-  "=": ope_equals,
+  "eq": ope_equals,
   "contains": ope_contains,
   "in": ope_in,
-  ">": ope_greater_than,
-  ">=": ope_greater_equal_than,
-  "<": ope_lower_than,
-  "<=": ope_lower_equal_than,
+  "gt": ope_greater_than,
+  "ge": ope_greater_equal_than,
+  "lt": ope_lower_than,
+  "le": ope_lower_equal_than,
   "is": ope_is,
   "isnt": ope_is_not,
   "match": ope_reg_match,
