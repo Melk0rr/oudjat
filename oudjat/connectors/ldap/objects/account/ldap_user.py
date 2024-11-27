@@ -17,9 +17,6 @@ class LDAPUser(LDAPAccount, User):
 
     super().__init__(ldap_entry=ldap_entry)
 
-    self.employeeId = self.entry.get("employeeID", None)
-    self.manager = self.entry.get("manager", None)
-
     email = self.entry.get("mail", None)
     if email is not None:
       email = email.lower()
@@ -40,11 +37,11 @@ class LDAPUser(LDAPAccount, User):
   
   def get_employee_id(self) -> str:
     """ Getter for the employee id """
-    return self.employeeId
+    return self.entry.get("employeeID", None)
   
   def get_manager(self) -> str:
     """ Getter for the user's manager """
-    return self.manager
+    return self.entry.get("manager", None)
 
   def is_admin(self) -> bool:
     """ Checks if the current user is an admin """
@@ -56,15 +53,34 @@ class LDAPUser(LDAPAccount, User):
 
     return is_admin
 
-  def is_service_account(self) -> bool:
-    """ Try to determine if the current user is a service account """
+  def user_type_check(self, user_type: LDAPUserType) -> List[DataFilter]:
+    """ Returns a list of data filters based on ldap user type """
     check = False
-    
-    svc_filters = DataFilter.gen_from_dict(LDAPUserType.SERVICE.value["filters"])
-    if all(f.filter_value(value=self.entry.get(f.get_fieldname(), None)) for f in svc_filters):
+
+    filters = DataFilter.gen_from_dict(LDAPUserType[user_type].value.get("filters", None))
+    if all(f.filter_value(value=self.entry.get(f.get_fieldname(), None)) for f in filters):
       check = True
       
     return check
+
+  def is_service_account(self) -> bool:
+    """ Try to determine if the current user is a service account """
+    return self.user_type_check(user_type=LDAPUserType.SERVICE)
+  
+  def is_person(self) -> bool:
+    """ Try to determine if the current user is a person """
+    return self.user_type_check(user_type=LDAPUserType.PERSON)
+  
+  def guess_user_type(self) -> LDAPUserType:
+    """ Try to guess user type """
+    user_type = None
+    
+    for t in LDAPUserType:
+      if self.user_type_check(t):
+        user_type = t
+        
+    return user_type
+    
   
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dictionary """
@@ -75,8 +91,8 @@ class LDAPUser(LDAPAccount, User):
 
     return {
       **base_dict,
-      "employeeID": self.employeeId,
-      "manager": self.manager,
+      "employeeID": self.get_employee_id(),
+      "manager": self.get_manager(),
       "is_admin": self.is_admin(),
       **user_dict
     }
