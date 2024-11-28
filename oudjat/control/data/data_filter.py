@@ -7,6 +7,9 @@ from . import DataFilterOperation
 class DataFilter:
   """ DataFilter class : handling data filtering """
 
+  # ****************************************************************
+  # Attributes & Constructors
+
   def __init__(
     self,
     fieldname: str,
@@ -22,6 +25,9 @@ class DataFilter:
     self.operator = operator
     self.value = value
     self.negate = negate
+
+  # ****************************************************************
+  # Methods
 
   def get_fieldname(self) -> str:
     """ Getter for filter fieldname """
@@ -55,6 +61,9 @@ class DataFilter:
   def __str__(self) -> str:
     """ Converts the current instance into a string """
     return f"{self.fieldname} {self.operator} {self.value}"
+
+  # ****************************************************************
+  # Static methods
   
   @staticmethod
   def datafilter_from_dict(dictionnary: Dict) -> "DataFilter":
@@ -122,3 +131,53 @@ class DataFilter:
         filtered_data.append(el)
 
     return filtered_data
+  
+
+class DataFilterGroup:
+  """ Group of data filters joined with """
+
+  # ****************************************************************
+  # Attributes & Constructors
+
+  def __init__(self, join_operator: str = "and", filters: List[DataFilter] = None):
+    """ Constructor """
+    
+    if join_operator != "and" and join_operator != "or":
+      raise ValueError(f"Invalid join operator provided: {join_operator}. Please use either 'or' or 'and'")
+    
+    self.join_operator = join_operator
+    self.filters = filters
+
+  # ****************************************************************
+  # Methods
+  
+  def get_join_operator(self) -> str:
+    """ Getter for join operator """
+    return self.join_operator
+  
+  def get_filters(self) -> List[DataFilter]:
+    """ Getter for filters """
+    return self.filters
+  
+  def get_result(self, element: Dict) -> bool:
+    """ Get the group result based on parameters """
+    res = None
+
+    if self.join_operator == "or":
+      res = any(f.filter_dict(element) for f in self.filters)
+      
+    else:
+      res = all(f.filter_dict(element) for f in self.filters)
+      
+  
+  # ****************************************************************
+  # Static methods
+  
+  @staticmethod
+  def gen_from_dict(filter_dict: Dict) -> "DataFilterGroup":
+    """ Creates a new data filter group from dictionary """
+    
+    return DataFilterGroup(
+      join_operator=filter_dict.get("join_operator", "and"),
+      filters=DataFilter.gen_from_dict(filters=filter_dict.get("filters", []))
+    )
