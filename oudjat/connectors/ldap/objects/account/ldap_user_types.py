@@ -59,7 +59,7 @@ LDAPUserType = {
     ]
   },
 
-  SERCIVE: [
+  SERVICE: [
     {
       "fieldname": "sAMAccountName",
       "operator": "match",
