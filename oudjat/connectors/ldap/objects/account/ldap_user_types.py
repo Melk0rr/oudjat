@@ -1,21 +1,54 @@
-from enum import Enum
+from typing import List, Dict
 
+from oudjat.control.data import DataFilter
 
 PERSON_REG = r"^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð '-]+$"
 
-class LDAPUserType(Enum):
-  """ LDAP User type enum """
+class LDAPUserType:
+  """ LDAP User types """
   
-  PERSON = {
+  # ****************************************************************
+    # Attributes & Constructors
+
+  def __init__(
+    self,
+    name: str,
+    filters: Union[List[Dict], List[DataFilter]],
+    description: str = None
+  ):
+    """ Constructor """
+
+    self.name = name
+    self.description = description
+    
+    self.filters = []
+    if not isinstance(filters, list):
+      filters = [ filters ]
+      
+    self.filters = DataFilter.gen_from_dict(filters)
+
+  # ****************************************************************
+  # Methods
+  
+  def get_name() -> str:
+    """ Getter for ldap user type name """
+    return self.name
+  
+
+
+
+LDAPUserType = {
+  PERSON: {
+    "join_operator": "or",
     "filters": [
       {
         "fieldname": "sn",
-        "operation": "match",
+        "operator": "match",
         "value": PERSON_REG
       },
       {
         "fieldname": "givenName",
-        "operation": "match",
+        "operator": "match",
         "value": PERSON_REG
       },
       {
@@ -24,19 +57,20 @@ class LDAPUserType(Enum):
         "value": None
       }
     ]
-  }
-  SERVICE = {
-    "filters": [
-      {
-        "fieldname": "sAMAccountName",
-        "operator": "match",
-        "value": r'^svc[-_].*$'
-      },
-      {
-        "fieldname": "distinguishedName",
-        "operator": "search",
-        "value": r'OU=Service Accounts|OU=Services,OU=Users,DC='
-      }
-    ]
-  }
-  GENERIC = {}
+  },
+
+  SERCIVE: [
+    {
+      "fieldname": "sAMAccountName",
+      "operator": "match",
+      "value": r'^svc[-_].*$'
+    },
+    {
+      "fieldname": "distinguishedName",
+      "operator": "search",
+      "value": r'OU=Service Accounts|OU=Services,OU=Users,DC='
+    }
+  ],
+
+  GENERIC: []
+}
