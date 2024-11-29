@@ -34,7 +34,33 @@ class LDAPUserType:
     """ Getter for ldap user type name """
     return self.name
   
-
+tree = {
+  "node": {
+    "operator": "or",
+    "leaves": [
+      {
+        "fieldname": "employeeID",
+        "operator": "isnt",
+        "value": None
+      }
+    ],
+    "node": {
+      "operator": "and",
+      "leaves": [
+        {
+          "fieldname": "sn",
+          "operator": "match",
+          "value": PERSON_REG
+        },
+        {
+          "fieldname": "givenName",
+          "operator": "match",
+          "value": PERSON_REG
+        },
+      ]
+    }
+  }
+}
 
 
 LDAPUserType = {
