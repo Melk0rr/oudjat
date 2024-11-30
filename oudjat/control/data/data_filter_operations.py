@@ -40,7 +40,7 @@ def ope_is_not(a: Any, b: Any) -> bool:
 
 def ope_reg_match(value: str, pattern: str) -> bool:
   """ Checks if the value matches the provided pattern """
-  return re.match(pattern, value)
+  return True if re.match(pattern, value) else False
 
 def ope_reg_search(value: str, patter: str) -> bool:
   """ Searches for the provided pattern in value """
