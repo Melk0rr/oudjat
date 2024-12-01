@@ -84,6 +84,16 @@ class DecisionTree:
   def get_operator(self) -> str:
     """ Getter for decision tree operator """
     return self.operator
+
+  def set_operator(self, new_operator: str) -> None:
+    """ Setter for tree operator """
+
+    if new_operator.lower() in ["or", "and"]:
+      self.operator = new_operator.lower()
+
+  def add_node(self, node: Dict) -> None:
+    """ Adds a new node to the tree """
+    # TODO
   
   def build(self) -> None:
     """ Builds the decision tree """
