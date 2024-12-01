@@ -28,8 +28,9 @@ class DecisionTreeNode:
       raise ValueError("DecisionTreeNode.get_result::Node result is None, please provide a comparison element")
 
     if self.result is None:
+      res_value = self.node_filter.filter_dict(element)
       self.result = {
-        "value": self.node_filter.filter_dict(element),
+        "value": res_value,
         "details": str(self.node_filter)
       }
     
@@ -39,12 +40,23 @@ class DecisionTreeNode:
     """ Converts the current node into a string """
     res_str = ''
     if self.result is not None:
-      res_str = f" = {self.result["value"]}"
+      res_str = f" => {self.result["value"]}"
 
     return f"(({self.node_filter}){res_str})"
   
   # ****************************************************************
   # Static methods
+
+class DecisionTreeNodeList(list):
+  """ A list of decision tree nodes """
+
+  def get_by_value(self, value: bool = True) -> "DecisionTreeNodeList":
+    """ Returns a sub decision tree node list matching the given value """
+    return DecisionTreeNodeList(filter(lambda l: l.get_result()["value"] == value, self))
+  
+  def get_details_list(self) -> List[str]:
+    """ Returns a list of decision tree node detail string """
+    return [ n.get_result()["details"] for n in self ]
 
 class DecisionTree:
   """ A binary tree to  """
@@ -55,9 +67,12 @@ class DecisionTree:
   def __init__(self, tree_dict: Dict):
     """ Constructor """
     
+    self.raw = tree_dict
     self.operator = tree_dict.get("operator", "and")
-    self.nodes = tree_dict.get("nodes", [])
+    
+    self.nodes = None
     self.result = None
+
 
   # ****************************************************************
   # Methods
@@ -74,7 +89,7 @@ class DecisionTree:
     """ Builds the decision tree """
     
     built_nodes = []
-    for n in self.nodes:
+    for n in self.raw.get("nodes", []):
       if n.get("nodes", None) is not None:
         n = DecisionTree(tree_dict=n)
         n.build()
@@ -85,6 +100,11 @@ class DecisionTree:
       built_nodes.append(n)
       
     self.nodes = built_nodes
+
+  def clear(self) -> None:
+    """ Clears the tree """
+    self.nodes = None
+    self.result = None
 
   def get_result(self, element: Dict) -> bool:
     """ Get results for each nodes in current tree and join with operator """
@@ -100,6 +120,25 @@ class DecisionTree:
 
     return self.result
 
+  def get_leaves(self) -> DecisionTreeNodeList:
+    """ Returns a flattened list of decision tree nodes """
+
+    if self.nodes is None:
+      return None
+
+    leaves = DecisionTreeNodeList()
+    for n in self.nodes:
+      if isinstance(n, DecisionTreeNode):
+        leaves.append(n)
+        
+      elif isinstance(n, DecisionTree):
+        leaves.extend(n.get_leaves())
+        
+      else:
+        raise ValueError("DecisionTree.get_leaves::Invalid node found")
+
+    return leaves
+
   def get_result_matches(self) -> bool:
     """ Get a flat list of the true assesments in the tree """
     
@@ -114,7 +153,10 @@ class DecisionTree:
           
       elif isinstance(n, DecisionTree):
         res.extend(n.get_result_matches())
-        
+
+      else:
+        raise ValueError()  
+
     return res
   
   def __str__(self) -> str:
