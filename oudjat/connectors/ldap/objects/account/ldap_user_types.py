@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from oudjat.control.data import DataFilter
+from oudjat.control.data import DataFilter, DecisionTree
 
 PERSON_REG = r"^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð '-]+$"
 
@@ -35,18 +35,16 @@ class LDAPUserType:
     return self.name
   
 tree = {
-  "node": {
-    "operator": "or",
-    "leaves": [
-      {
-        "fieldname": "employeeID",
-        "operator": "isnt",
-        "value": None
-      }
-    ],
-    "node": {
+  "operator": "or",
+  "nodes": [
+    {
+      "fieldname": "employeeID",
+      "operator": "isnt",
+      "value": None
+    },
+    {
       "operator": "and",
-      "leaves": [
+      "nodes": [
         {
           "fieldname": "sn",
           "operator": "match",
@@ -59,7 +57,7 @@ tree = {
         },
       ]
     }
-  }
+  ],
 }
 
 
