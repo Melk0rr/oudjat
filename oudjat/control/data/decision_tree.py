@@ -1,5 +1,6 @@
 from typing import List, Dict
 
+from oudjat.utils import ColorPrint
 from oudjat.control.data import DataFilter
 
 class DecisionTreeNode:
@@ -93,24 +94,36 @@ class DecisionTree:
 
   def add_node(self, node: Dict) -> None:
     """ Adds a new node to the tree """
-    # TODO
+    
+    if node.get("nodes", None) is not None:
+      node = DecisionTree(tree_dict=node)
+      node.build()
+
+    else:
+      node = DecisionTreeNode(node_dict=node)
+
+    self.nodes.append(node)
   
   def build(self) -> None:
     """ Builds the decision tree """
     
-    built_nodes = []
-    for n in self.raw.get("nodes", []):
-      if n.get("nodes", None) is not None:
-        n = DecisionTree(tree_dict=n)
-        n.build()
+    try:
+      self.nodes = []
+      for n in self.raw.get("nodes", []):
+        if n.get("nodes", None) is not None:
+          n = DecisionTree(tree_dict=n)
+          n.build()
 
-      else:
-        n = DecisionTreeNode(node_dict=n)
+        else:
+          n = DecisionTreeNode(node_dict=n)
 
-      built_nodes.append(n)
+        self.nodes.append(n)
+
+    except Exception as e:
+      self.nodes = None
+      ColorPrint.red(f"DecisionTree.build::An error occured while building tree\n{e}")
+
       
-    self.nodes = built_nodes
-
   def clear(self) -> None:
     """ Clears the tree """
     self.nodes = None
@@ -148,26 +161,6 @@ class DecisionTree:
         raise ValueError("DecisionTree.get_leaves::Invalid node found")
 
     return leaves
-
-  def get_result_matches(self) -> bool:
-    """ Get a flat list of the true assesments in the tree """
-    
-    if self.result is None:
-      return None
-
-    res = []
-    for n in self.nodes:
-      if isinstance(n, DecisionTreeNode):
-        if n.get_result()["value"] is True:
-          res.append(str(n.get_node_filter()))
-          
-      elif isinstance(n, DecisionTree):
-        res.extend(n.get_result_matches())
-
-      else:
-        raise ValueError()  
-
-    return res
   
   def __str__(self) -> str:
     """ Converts the current decision tree into a string """
