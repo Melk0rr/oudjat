@@ -110,19 +110,25 @@ class DecisionTree:
     try:
       self.nodes = []
       for n in self.raw.get("nodes", []):
-        if n.get("nodes", None) is not None:
-          n = DecisionTree(tree_dict=n)
-          n.build()
-
-        else:
-          n = DecisionTreeNode(node_dict=n)
-
-        self.nodes.append(n)
+        self.add_node(n)
 
     except Exception as e:
       self.nodes = None
       ColorPrint.red(f"DecisionTree.build::An error occured while building tree\n{e}")
 
+  def init(self, element: Dict) -> None:
+    """ Initialize tree """
+    
+    if self.nodes is None:
+      self.build()
+      
+    details = [ n.get_result(element) for n in self.nodes ]
+    values = [ d["value"] for d in details ]
+    
+    self.result = {
+      "value": all(values) if self.operator == "and" else any(values),
+      "details": details,
+    }
       
   def clear(self) -> None:
     """ Clears the tree """
@@ -133,13 +139,7 @@ class DecisionTree:
     """ Get results for each nodes in current tree and join with operator """
 
     if self.result is None:
-      details = [ n.get_result(element) for n in self.nodes ]
-      values = [ d["value"] for d in details ]
-      
-      self.result = {
-        "value": all(values) if self.operator == "and" else any(values),
-        "details": details,
-      }
+      self.init(element)
 
     return self.result
 
@@ -171,4 +171,3 @@ class DecisionTree:
   # ****************************************************************
   # Static methods
   
-
