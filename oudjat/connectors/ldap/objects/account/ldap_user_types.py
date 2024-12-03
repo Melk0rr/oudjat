@@ -2,11 +2,9 @@ from typing import List, Dict
 
 PERSON_REG = r"^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð '-]+$"
 
-class LDAPUserType:
-  """ A class to list LDAP user types in order to categorize users """
-
-  PERSON = {
-    "description": "",
+LDAPUserType = {
+  PERSON: {
+    "description": "User account binded to a physical person",
     "tree": {
       "operator": "or",
       "nodes": [
@@ -34,8 +32,8 @@ class LDAPUserType:
     }
   },
 
-  SERVICE = {
-    "description": "",
+  SERVICE: {
+    "description": "User account used to run a service or for application purposes",
     "tree": {
       "operator": "or",
       "nodes": [
@@ -51,9 +49,9 @@ class LDAPUserType:
         }
       ]
     }
+  },
+
+  GENERIC: {
+    "description": "User account used by multiple persons"
   }
-  
-  @staticmethod
-  def options() -> List[Dict]:
-    """ List options """
-    
+}
