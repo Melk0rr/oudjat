@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from oudjat.utils import ColorPrint
 from oudjat.control.data import DataFilter
@@ -12,11 +12,16 @@ class DecisionTreeNode:
   def __init__(self, node_dict: Dict):
     """ Constructor """
 
+    self.flag = node_dict.get("flag", None)
     self.node_filter: DataFilter = DataFilter.datafilter_from_dict(dictionnary=node_dict)
     self.result = None
 
   # ****************************************************************
   # Methods
+  
+  def get_flag(self) -> Union[int, str]:
+    """ Getter for node flag """
+    return self.flag
 
   def get_node_filter(self) -> DataFilter:
     """ Getter for current node filter """
@@ -32,7 +37,8 @@ class DecisionTreeNode:
       res_value = self.node_filter.filter_dict(element)
       self.result = {
         "value": res_value,
-        "details": str(self.node_filter)
+        "details": str(self.node_filter),
+        "flags": self.flag
       }
     
     return self.result
@@ -58,6 +64,10 @@ class DecisionTreeNodeList(list):
   def get_details_list(self) -> List[str]:
     """ Returns a list of decision tree node detail string """
     return [ n.get_result()["details"] for n in self ]
+
+  def get_flags_list(self) -> List[Union[int, str]]:
+    """ Returns a list of decision tree node flags """
+    return [ n.get_result()["flags"] for n in self ]
 
 class DecisionTree:
   """ A binary tree to  """
