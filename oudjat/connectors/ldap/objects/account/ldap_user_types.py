@@ -3,7 +3,7 @@ from typing import List, Dict
 PERSON_REG = r"^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð '-]+$"
 
 LDAPUserType = {
-  PERSON: {
+  "PERSON": {
     "description": "User account binded to a physical person",
     "tree": {
       "operator": "or",
@@ -32,7 +32,7 @@ LDAPUserType = {
     }
   },
 
-  SERVICE: {
+  "SERVICE": {
     "description": "User account used to run a service or for application purposes",
     "tree": {
       "operator": "or",
@@ -51,7 +51,7 @@ LDAPUserType = {
     }
   },
 
-  GENERIC: {
+  "GENERIC": {
     "description": "User account used by multiple persons"
   }
 }

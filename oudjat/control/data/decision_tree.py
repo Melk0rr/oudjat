@@ -135,9 +135,12 @@ class DecisionTree:
     self.nodes = None
     self.result = None
 
-  def get_result(self, element: Dict) -> bool:
+  def get_result(self, element: Dict, clear_result: bool = False) -> bool:
     """ Get results for each nodes in current tree and join with operator """
 
+    if clear_result:
+      self.clear()
+      
     if self.result is None:
       self.init(element)
 
