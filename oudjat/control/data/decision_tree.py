@@ -79,7 +79,10 @@ class DecisionTree:
     """ Constructor """
     
     self.raw = tree_dict
+    self.flag = tree_dict.get("flag", None)
     self.operator = tree_dict.get("operator", "and")
+    if self.operator not in ["or", "and"]:
+      raise ValueError(f"Invalid operator provided: {self.operator}")
     
     self.nodes = None
     self.result = None
