@@ -79,13 +79,13 @@ class DecisionTree:
     """ Constructor """
     
     self.raw = tree_dict
-    self.flag = tree_dict.get("flag", None)
     self.operator = tree_dict.get("operator", "and")
     if self.operator not in ["or", "and"]:
       raise ValueError(f"Invalid operator provided: {self.operator}")
     
     self.nodes = None
-    self.result = None
+    self.value = None
+    self.details = None
 
 
   # ****************************************************************
@@ -99,6 +99,10 @@ class DecisionTree:
     """ Getter for decision tree operator """
     return self.operator
 
+  def get_value(self) -> bool:
+    """ Getter for tree value """
+    return self.value
+
   def set_operator(self, new_operator: str) -> None:
     """ Setter for tree operator """
 
@@ -108,6 +112,7 @@ class DecisionTree:
   def add_node(self, node: Dict) -> None:
     """ Adds a new node to the tree """
     
+    # If the provided node contains subnodes : it is a decision tree else: it is a simple node
     if node.get("nodes", None) is not None:
       node = DecisionTree(tree_dict=node)
       node.build()
@@ -132,16 +137,21 @@ class DecisionTree:
   def init(self, element: Dict) -> None:
     """ Initialize tree """
     
+    # If nods have not yet been built -> build
     if self.nodes is None:
       self.build()
       
-    details = [ n.get_result(element) for n in self.nodes ]
-    values = [ d["value"] for d in details ]
     
-    self.result = {
-      "value": all(values) if self.operator == "and" else any(values),
-      "details": details,
-    }
+    details = [ n.get_result(element) for n in self.nodes ]
+    sub_values = [ d["value"] for d in details ]
+
+    tree_value = all(sub_values) if self.operator == "and" else any(sub_values)
+    if tree_value and self.flag is not None:
+      tree_value = self.flag
+    
+    self.value = tree_value
+    self.details = details
+      
       
   def clear(self) -> None:
     """ Clears the tree """
