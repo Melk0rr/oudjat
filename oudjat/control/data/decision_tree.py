@@ -27,6 +27,14 @@ class DecisionTreeNode:
     """ Getter for current node filter """
     return self.node_filter
 
+  def get_value(self, element: Dict) -> bool:
+    """ Getter for node value """
+    
+    if self.value is None:
+      self.init(element)
+      
+    return self.value
+
   def clear(self) -> None:
     """ Clears current node """
     self.value = None
@@ -90,8 +98,12 @@ class DecisionTree:
     """ Getter for decision tree operator """
     return self.operator
 
-  def get_value(self) -> bool:
+  def get_value(self, element: Dict) -> bool:
     """ Getter for tree value """
+
+    if self.value is None:
+      self.init(element)
+      
     return self.value
 
   def set_operator(self, new_operator: str) -> None:
@@ -114,7 +126,7 @@ class DecisionTree:
     self.nodes.append(node)
   
   def build(self) -> None:
-    """ Builds the decision tree """
+    """ Builds tree nodes instances from raw dict """
     
     try:
       self.nodes = []
@@ -126,28 +138,24 @@ class DecisionTree:
       ColorPrint.red(f"DecisionTree.build::An error occured while building tree\n{e}")
 
   def init(self, element: Dict) -> None:
-    """ Initialize tree """
+    """ Initialize tree values """
     
     # If nods have not yet been built -> build
     if self.nodes is None:
       self.build()
     
-    details = [ n.get_result(element) for n in self.nodes ]
-    sub_values = [ d["value"] for d in details ]
+    sub_values = [ n.get_value() for n in self.nodes ]
 
     tree_value = all(sub_values) if self.operator == "and" else any(sub_values)
     if tree_value and self.flag is not None:
       tree_value = self.flag
     
     self.value = tree_value
-    self.details = details
-      
       
   def clear(self) -> None:
     """ Clears the tree """
     
     self.value = None
-
     for n in self.nodes:
       del n
 
