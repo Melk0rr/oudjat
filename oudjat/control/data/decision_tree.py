@@ -14,7 +14,7 @@ class DecisionTreeNode:
 
     self.flag = node_dict.get("flag", None)
     self.node_filter: DataFilter = DataFilter.datafilter_from_dict(dictionnary=node_dict)
-    self.result = None
+    self.value = None
 
   # ****************************************************************
   # Methods
@@ -26,22 +26,15 @@ class DecisionTreeNode:
   def get_node_filter(self) -> DataFilter:
     """ Getter for current node filter """
     return self.node_filter
+
+  def clear(self) -> None:
+    """ Clears current node """
+    self.value = None
+    del self.node_filter
   
-  def get_result(self, element: Dict = None) -> bool:
-    """ Get the node filter result """
-
-    if element is None and self.result is None:
-      raise ValueError("DecisionTreeNode.get_result::Node result is None, please provide a comparison element")
-
-    if self.result is None:
-      res_value = self.node_filter.filter_dict(element)
-      self.result = {
-        "value": res_value,
-        "details": str(self.node_filter),
-        "flags": self.flag
-      }
-    
-    return self.result
+  def init(self, element: Dict) -> None:
+    """ Initialize node value """
+    self.value = self.node_filter.filter_dict(element)
   
   def __str__(self) -> str:
     """ Converts the current node into a string """
@@ -85,8 +78,6 @@ class DecisionTree:
     
     self.nodes = None
     self.value = None
-    self.details = None
-
 
   # ****************************************************************
   # Methods
@@ -140,7 +131,6 @@ class DecisionTree:
     # If nods have not yet been built -> build
     if self.nodes is None:
       self.build()
-      
     
     details = [ n.get_result(element) for n in self.nodes ]
     sub_values = [ d["value"] for d in details ]
@@ -155,8 +145,12 @@ class DecisionTree:
       
   def clear(self) -> None:
     """ Clears the tree """
-    self.nodes = None
-    self.result = None
+    
+    self.value = None
+
+    for n in self.nodes:
+      del n
+
 
   def get_result(self, element: Dict, clear_result: bool = False) -> bool:
     """ Get results for each nodes in current tree and join with operator """
