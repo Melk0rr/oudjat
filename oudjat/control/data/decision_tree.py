@@ -35,6 +35,14 @@ class DecisionTreeNode:
       
     return self.value
 
+  def to_dict(self) -> Dict:
+    """ Converts the current instance into a dict """
+    return {
+      "flag": self.flag,
+      "value": self.value,
+      "filter": str(self.node_filter)
+    }
+
   def clear(self) -> None:
     """ Clears current node """
     self.value = None
