@@ -167,18 +167,6 @@ class DecisionTree:
     for n in self.nodes:
       del n
 
-
-  def get_result(self, element: Dict, clear_result: bool = False) -> bool:
-    """ Get results for each nodes in current tree and join with operator """
-
-    if clear_result:
-      self.clear()
-      
-    if self.result is None:
-      self.init(element)
-
-    return self.result
-
   def get_leaves(self) -> DecisionTreeNodeList:
     """ Returns a flattened list of decision tree nodes """
 
@@ -204,6 +192,13 @@ class DecisionTree:
     return f"({sep.join([ str(n) for n in self.nodes ])})"
 
   
+  def to_dict(self) -> Dict:
+    """ Converts the current instance into a dictionary """
+    return {
+      "value": self.value,
+      "operator": self.operator,
+      "details": [ n.to_dict() for n in self.nodes ]
+    }
   # ****************************************************************
   # Static methods
   
