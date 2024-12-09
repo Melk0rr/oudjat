@@ -41,6 +41,10 @@ class DataFilter:
     """ Getter for filter value """
     return self.value
 
+  def set_negate(self, new_negate: bool) -> None:
+    """ Setter for filter negate """
+    self.negate = new_negate
+
   def filter_dict(self, element: Dict) -> bool:
     """ Returns wheither or not the dictionary element matches the filter """
     check = DataFilterOperation[self.operator](element[self.fieldname], self.value)
