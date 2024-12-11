@@ -94,4 +94,24 @@ class LDAPUserType:
       self.decision_tree = new_decision_tree
       self.decision_tree.build()
       
-  
+
+LDAPUserTypeOptions = {
+  "PERSON": LDAPUserType(
+    name="PERSON",
+    description=BaseLDAPUserTypeDefinition.PERSON.value["description"],
+    tree_dict=BaseLDAPUserTypeDefinition.PERSON.value["tree"]
+  ),
+
+  "SERVICE": LDAPUserType(
+    name="SERVICE",
+    description=BaseLDAPUserTypeDefinition.SERVICE.value["description"],
+    tree_dict=BaseLDAPUserTypeDefinition.SERVICE.value["tree"]
+  ),
+
+  "GENERIC": LDAPUserType(
+    name="GENERIC",
+    description=BaseLDAPUserTypeDefinition.GENERIC.value["description"],
+    tree_dict=BaseLDAPUserTypeDefinition.GENERIC.value["tree"]
+  ),
+
+}
