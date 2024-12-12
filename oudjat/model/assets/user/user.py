@@ -2,12 +2,13 @@ import re
 
 from typing import List, Dict, Union
 
+from oudjat.control.data import DecisionTree
 from oudjat.model.assets import Asset, AssetType
+
+from . import EMAIL_REG
 
 class User(Asset):
   """ A common class for users """
-
-  EMAIL_REG = r'[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+'
 
   # ****************************************************************
   # Attributes & Constructor
@@ -33,6 +34,8 @@ class User(Asset):
     self.set_email(email)
     
     self.login = login
+    self.user_type = None
+    self.flags = []
 
   # ****************************************************************
   # Methods
@@ -71,5 +74,6 @@ class User(Asset):
       "firstname": self.firstname,
       "lastname": self.lastname,
       "email": self.email,
-      "login": self.login
+      "login": self.login,
+      "type": self.user_type
     }
