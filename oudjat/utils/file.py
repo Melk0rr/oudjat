@@ -67,7 +67,7 @@ def import_csv(
       data = callback(list(reader))
 
     else:
-      data = [ row for row in list(reader) ]
+      data = list(reader)
 
   return data
 

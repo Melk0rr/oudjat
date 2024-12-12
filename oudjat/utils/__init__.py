@@ -5,5 +5,6 @@ from .file import export_csv, import_csv, import_txt, import_json
 from .credentials import get_credentials
 from .custom_enum import CustomMetaEnum
 from .datestr_flags import *
-from .convertions import *
+from .dictionary import *
+from .time_convertions import *
 from .bytes import *
