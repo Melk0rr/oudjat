@@ -114,8 +114,11 @@ class DecisionTree:
     """ Getter for decision tree operator """
     return self.operator
 
-  def get_value(self, element: Dict = None) -> bool:
+  def get_value(self, element: Dict = None, clear: bool = True) -> bool:
     """ Getter for tree value """
+    
+    if clear:
+      self.clear()
 
     if self.value is None and element is not None:
       self.init(element)
