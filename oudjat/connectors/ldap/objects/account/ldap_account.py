@@ -5,7 +5,7 @@ from oudjat.utils import date_format_from_flag, DATE_TIME_FLAGS, days_diff
 from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject
 from oudjat.connectors.ldap.objects.account import LDAPAccountFlag, check_account_flag, is_disabled, pwd_expires, pwd_expired, pwd_required
 
-MS_ACCOUNT_CTL_PROPERTY = "msDS-User-Account-Control-Computed"
+from . import MS_ACCOUNT_CTL_PROPERTY
 
 def acc_date_str(date: datetime) -> str:
   """ Converts an account date into a string """

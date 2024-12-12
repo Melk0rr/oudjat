@@ -4,7 +4,7 @@ from oudjat.control.data import DataFilter
 from oudjat.model.assets.user import User
 from oudjat.connectors.ldap.objects import LDAPEntry
 
-from . import LDAPUserType, LDAPAccount
+from . import LDAPAccount
 
 class LDAPUser(LDAPAccount, User):
   """ A class to describe LDAP user objects """
@@ -51,36 +51,7 @@ class LDAPUser(LDAPAccount, User):
     if adm_count is not None:
       is_admin = adm_count == 1
 
-    return is_admin
-
-  def user_type_check(self, user_type: LDAPUserType) -> List[DataFilter]:
-    """ Returns a list of data filters based on ldap user type """
-    check = False
-
-    filters = DataFilter.gen_from_dict(LDAPUserType[user_type].value.get("filters", None))
-    if all(f.filter_value(value=self.entry.get(f.get_fieldname(), None)) for f in filters):
-      check = True
-      
-    return check
-
-  def is_service_account(self) -> bool:
-    """ Try to determine if the current user is a service account """
-    return self.user_type_check(user_type=LDAPUserType.SERVICE)
-  
-  def is_person(self) -> bool:
-    """ Try to determine if the current user is a person """
-    return self.user_type_check(user_type=LDAPUserType.PERSON)
-  
-  def guess_user_type(self) -> LDAPUserType:
-    """ Try to guess user type """
-    user_type = None
-    
-    for t in LDAPUserType:
-      if self.user_type_check(t):
-        user_type = t
-        
-    return user_type
-    
+    return is_admin    
   
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dictionary """

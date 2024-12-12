@@ -3,61 +3,7 @@ from typing import List, Dict
 
 from oudjat.control.data import DecisionTree
 
-PERSON_REG = r"^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð '-]+$"
-
-class BaseLDAPUserTypeDefinition(Enum):
-  PERSON = {
-    "description": "User account binded to a physical person",
-    "tree": {
-      "operator": "or",
-      "nodes": [
-        {
-          "fieldname": "employeeID",
-          "operator": "isnt",
-          "value": None
-        },
-        {
-          "operator": "and",
-          "nodes": [
-            {
-              "fieldname": "sn",
-              "operator": "match",
-              "value": PERSON_REG
-            },
-            {
-              "fieldname": "givenName",
-              "operator": "match",
-              "value": PERSON_REG
-            },
-          ]
-        }
-      ]
-    }
-  },
-
-  SERVICE = {
-    "description": "User account used to run a service or for application purposes",
-    "tree": {
-      "operator": "or",
-      "nodes": [
-        {
-          "fieldname": "sAMAccountName",
-          "operator": "match",
-          "value": r'^svc[-_].*$'
-        },
-        {
-          "fieldname": "distinguishedName",
-          "operator": "search",
-          "value": r'OU=Service Accounts|OU=Services,OU=Users,DC='
-        }
-      ]
-    }
-  },
-
-  GENERIC = {
-    "description": "User account used by multiple persons",
-    "tree": None
-  }
+from . import PERSON_REG
 
 class LDAPUserType:
 
@@ -93,25 +39,60 @@ class LDAPUserType:
     if isinstance(new_decision_tree, DecisionTree):
       self.decision_tree = new_decision_tree
       self.decision_tree.build()
-      
 
-LDAPUserTypeOptions = {
-  "PERSON": LDAPUserType(
+class BaseLDAPUserType(Enum):
+  PERSON = LDAPUserType(
     name="PERSON",
-    description=BaseLDAPUserTypeDefinition.PERSON.value["description"],
-    tree_dict=BaseLDAPUserTypeDefinition.PERSON.value["tree"]
-  ),
+    description="User account binded to a physical person",
+    tree_dict={
+      "operator": "or",
+      "nodes": [
+        {
+          "fieldname": "employeeID",
+          "operator": "isnt",
+          "value": None
+        },
+        {
+          "operator": "and",
+          "nodes": [
+            {
+              "fieldname": "sn",
+              "operator": "match",
+              "value": PERSON_REG
+            },
+            {
+              "fieldname": "givenName",
+              "operator": "match",
+              "value": PERSON_REG
+            },
+          ]
+        }
+      ]
+    }
+  )
 
-  "SERVICE": LDAPUserType(
+  SERVICE = LDAPUserType(
     name="SERVICE",
-    description=BaseLDAPUserTypeDefinition.SERVICE.value["description"],
-    tree_dict=BaseLDAPUserTypeDefinition.SERVICE.value["tree"]
-  ),
+    description="User account used to run a service or for application purposes",
+    tree_dict={
+      "operator": "or",
+      "nodes": [
+        {
+          "fieldname": "sAMAccountName",
+          "operator": "match",
+          "value": r'^svc[-_].*$'
+        },
+        {
+          "fieldname": "distinguishedName",
+          "operator": "search",
+          "value": r'OU=Service Accounts|OU=Services,OU=Users,DC='
+        }
+      ]
+    }
+  )
 
-  "GENERIC": LDAPUserType(
+  GENERIC = LDAPUserType(
     name="GENERIC",
-    description=BaseLDAPUserTypeDefinition.GENERIC.value["description"],
-    tree_dict=BaseLDAPUserTypeDefinition.GENERIC.value["tree"]
-  ),
-
-}
+    description="User account used by multiple persons",
+    tree_dict=None
+  )
