@@ -35,7 +35,6 @@ class User(Asset):
     
     self.login = login
     self.user_type = None
-    self.flags = []
 
   # ****************************************************************
   # Methods
