@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Any
 
 from oudjat.utils import ColorPrint
 from oudjat.model import GenericIdentifiable
@@ -29,6 +29,7 @@ class Asset(GenericIdentifiable):
 
     self.asset_type = asset_type
     self.location = location
+    self.custom_attributes = {}
 
   # ****************************************************************
   # Methods
@@ -40,6 +41,29 @@ class Asset(GenericIdentifiable):
   def get_asset_type(self) -> AssetType:
     """ Getter for asset type """
     return self.asset_type
+  
+  def get_custom_attr(self, key: str = None) -> Any:
+    """ Getter for custom attributes """
+    if key is None:
+      return self.custom_attributes
+    
+    return self.custom_attributes[key]
+  
+  def set_custom_attr(self, new_custom_attr: Dict[str, Any]) -> None:
+    """ Setter for custom attributes """
+    self.custom_attributes = new_custom_attr
+    
+  def add_custom_attr(self, key: str, value: Any) -> None:
+    """ Adds a new custom attribute """
+    self.custom_attributes[key] = value
+    
+  def add_multiple_custom_attr(self, new_custom_attr: Dict[str, Any]) -> None:
+    """ Adds multiple new custom attributes """
+    self.custom_attributes.update(new_custom_attr)
+    
+  def clear_custom_attr(self) -> None:
+    """ Clears custom attributes """
+    self.custom_attributes = {}
   
   def set_location(
     self,
@@ -65,4 +89,5 @@ class Asset(GenericIdentifiable):
       **super().to_dict(),
       "asset_type": self.asset_type.name,
       "location": self.location
+      **self.custom_attributes
     }
