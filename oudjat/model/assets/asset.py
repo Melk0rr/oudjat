@@ -61,6 +61,10 @@ class Asset(GenericIdentifiable):
     """ Adds multiple new custom attributes """
     self.custom_attributes.update(new_custom_attr)
     
+  def del_custom_attr(self, key: str) -> None:
+    """ Deletes a custom attribute by key """
+    del self.custom_attributes[key]
+    
   def clear_custom_attr(self) -> None:
     """ Clears custom attributes """
     self.custom_attributes = {}
