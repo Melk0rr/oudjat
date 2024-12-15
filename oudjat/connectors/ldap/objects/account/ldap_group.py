@@ -1,9 +1,10 @@
 from typing import List, Dict
 
+from oudjat.model import Group
 from .. import LDAPObject
 from . import LDAPAccount
 
-class LDAPGroup(LDAPObject):
+class LDAPGroup(LDAPObject, Group):
   """ A class to handle LDAP group objects """
   
   # ****************************************************************
