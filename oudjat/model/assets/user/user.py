@@ -25,7 +25,7 @@ class User(Asset):
   ):
     """ Constructor """
 
-    super().__init__(id=id, name=name, label=login, desctiption=description, asset_type=AssetType.USER)
+    super().__init__(id=id, name=name, label=login, description=description, asset_type=AssetType.USER)
     
     self.firstname = firstname
     self.lastname = lastname

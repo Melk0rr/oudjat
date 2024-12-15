@@ -17,12 +17,12 @@ class Asset(GenericIdentifiable):
     name: str,
     asset_type: AssetType,
     label: str = None,
-    desctiption: str = None,
+    description: str = None,
     location: Union["Location", List["Location"]] = None
   ):
     """ Constructor """
 
-    super().__init__(id=id, name=name, label=label, description=desctiption)
+    super().__init__(id=id, name=name, label=label, description=description)
 
     self.location = []
     self.set_location(location)

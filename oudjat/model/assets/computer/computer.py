@@ -25,7 +25,7 @@ class Computer(Asset):
   ):
     """ Constructor """
     
-    super().__init__(id=id, name=name, label=label, desctiption=description, asset_type=AssetType.COMPUTER)
+    super().__init__(id=id, name=name, label=label, description=description, asset_type=AssetType.COMPUTER)
     
     if not isinstance(os_release, OSRelease):
       raise ValueError(f"Invalid OS provided for computer {self.name}. Please provide an OS release")

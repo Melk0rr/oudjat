@@ -27,7 +27,7 @@ class Software(Asset):
     description: str = None,
   ):
     """ Constructor """
-    super().__init__(id=id, name=name, label=label, asset_type=AssetType.SOFTWARE, desctiption=description)
+    super().__init__(id=id, name=name, label=label, asset_type=AssetType.SOFTWARE, description=description)
     
     self.editor = editor
     self.type = software_type
