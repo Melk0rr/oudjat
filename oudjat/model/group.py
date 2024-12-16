@@ -2,6 +2,9 @@ from typing import List, Dict, Union
 
 from . import GenericIdentifiable
 
+class GroupMemberList(dict):
+  """ Dict override to handle member list """
+
 class Group(GenericIdentifiable):
   """  """
 
@@ -19,6 +22,6 @@ class Group(GenericIdentifiable):
 
     super().__init__(id=id, name=name, label=label, description=description)
 
-
+    self.members = GroupMemberList()
   # ****************************************************************
   # Methods
