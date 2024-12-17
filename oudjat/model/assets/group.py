@@ -1,11 +1,11 @@
 from typing import List, Dict, Union
 
-from . import GenericIdentifiable
+from . import Asset
 
 class GroupMemberList(dict):
   """ Dict override to handle member list """
 
-class Group(GenericIdentifiable):
+class Group(Asset):
   """  """
 
   # ****************************************************************
