@@ -28,7 +28,7 @@ class LDAPUser(LDAPAccount, User):
       firstname=self.entry.get("givenName"),
       lastname=self.entry.get("sn"),
       email=email,
-      login=self.san,
+      login=self.get_san(),
       description=self.description,
     )
 
