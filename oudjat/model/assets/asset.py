@@ -92,6 +92,6 @@ class Asset(GenericIdentifiable):
     return {
       **super().to_dict(),
       "asset_type": self.asset_type.name,
-      "location": self.location
+      "location": self.location,
       **self.custom_attributes
     }
