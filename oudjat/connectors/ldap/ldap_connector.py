@@ -7,9 +7,10 @@ from typing import List, Union
 from oudjat.utils import ColorPrint
 
 from oudjat.connectors import Connector
-from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObjectType
-from oudjat.connectors.ldap.objects.gpo import LDAPGroupPolicyObject
-from oudjat.connectors.ldap.objects.subnet import LDAPSubnet
+from .objects import LDAPEntry, LDAPObjectType
+from .objects.gpo import LDAPGroupPolicyObject
+from .objects.subnet import LDAPSubnet
+from .objects.account import LDAPComputer, LDAPUser
 
 class LDAPConnector(Connector):
   """ LDAP connector to interact and query LDAP servers """
@@ -197,7 +198,7 @@ class LDAPConnector(Connector):
     name: str = "*",
     attributes: Union[str, List[str]] = None
   ) -> List[LDAPGroupPolicyObject]:
-    """ Specific GPO retreiving method """
+    """ Specific method to retreive LDAP GPO instances """
     gpo_entries = self.search(
       search_type="GPO",
       search_base=None,
@@ -218,7 +219,8 @@ class LDAPConnector(Connector):
     self,
     search_filter: str = None,
     attributes: Union[str, List[str]] = None
-  ) -> List:
+  ) -> List[LDAPSubnet]:
+    """ Specific method to retreive LDAP subnet instances """
 
     sb_dc = ','.join([ f"DC={dc.lower()}" for dc in self.domain.split('.') ])
     
@@ -237,3 +239,50 @@ class LDAPConnector(Connector):
     )
     
     return subnet
+  
+  def get_computer(
+    self,
+    search_filter: str = None,
+    attributes: Union[str, List[str]] = None
+  ) -> List[LDAPComputer]:
+    """ Specific method to retreive LDAP Computer instances """
+    
+    computer_entries = self.search(
+      search_type="COMPUTER",
+      search_base=None,
+      search_filter=search_filter,
+      attributes=attributes
+    )
+    
+    computers = list(
+      map(
+        lambda entry: LDAPComputer(ldap_entry=entry),
+        computer_entries
+      )
+    )
+    
+    return computers
+  
+
+  def get_users(
+    self,
+    search_filter: str = None,
+    attributes: Union[str, List[str]] = None
+  ) -> List[LDAPUser]:
+    """ Specific method to retreive LDAP User instances """
+
+    user_entries = self.search(
+      search_type="USER",
+      search_base=None,
+      search_filter=search_filter,
+      attributes=attributes
+    )
+    
+    users = list(
+      map(
+        lambda entry: LDAPUser(ldap_entry=entry),
+        user_entries
+      )
+    )
+    
+    return users
