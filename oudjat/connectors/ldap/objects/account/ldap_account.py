@@ -22,7 +22,7 @@ class LDAPAccount(LDAPObject):
     
     super().__init__(ldap_entry=ldap_entry)
 
-    self.pwd_last_set_timestp = self.pwd_last_set.timestamp()
+    self.pwd_last_set_timestp = self.get_pwd_last_set().timestamp()
 
     self.account_control = self.entry.get("userAccountControl", None)
     ms_acc_ctl = self.entry.get(MS_ACCOUNT_CTL_PROPERTY, None)
