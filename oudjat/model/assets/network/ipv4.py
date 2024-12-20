@@ -29,6 +29,7 @@ class IPVersion(Enum):
   }
 
 class IPBase:
+  # TODO : Merge with IPv4
 
   # ****************************************************************
   # Attributes & Constructors
@@ -151,6 +152,7 @@ class IPv4(IPBase):
   def __init__(self, address: Union[int, str], mask: Union[int, str, IPv4Mask] = None):
     """ Constructor """
     
+    # TODO : Move to subnet
     self.mask: IPv4Mask = None
 
     # Try to extract mask if provided as CIDR notation
