@@ -13,7 +13,7 @@ class Subnet:
     self,
     addr: Union[str, IPv4],
     name: str,
-    mask: Union[int, str, IPv4Mask] = None,
+    mask: Union[int, str, IPv4Mask],
     description: str = None,
     hosts: Union[List[IPv4], List[str]] = None
   ):
@@ -22,13 +22,11 @@ class Subnet:
     if not isinstance(addr, IPv4):
       addr = IPv4(addr)
 
-    if addr.get_mask() is None:
-      if mask is None:
-        raise ValueError(f"Subnet::Provided net address has no mask set: {addr.get_address()}")
+    if mask is None:
+      raise ValueError(f"Subnet::Provided net address has no mask set: {addr.get_address()}")
 
-      addr.set_mask(mask)
-
-    self.address = addr.get_net_addr()
+    self.address: IPv4 = addr.get_net_addr()
+    self.mask: IPv4Mask = self.set_mask(mask)
     self.broadcast = self.get_broadcast_address()
 
     self.name = name
@@ -59,7 +57,14 @@ class Subnet:
   def get_broadcast_address(self) -> IPv4:
     """ Returns the broadcast address of the current subnet """
     broadcast_int = i_or(int(self.address.get_mask().get_wildcard()), int(self.address))
-    return IPv4(ip_int_to_str(broadcast_int) + f"/{self.address.get_mask().get_cidr()}")
+    return IPv4(ip_int_to_str(broadcast_int) + f"/{self.mask.get_cidr()}")
+
+  def set_mask(self, mask: Union[int, str, IPv4Mask]):
+    """ Setter for ip mask """
+    if not isinstance(mask, IPv4Mask):
+      mask = IPv4Mask(mask)
+
+    self.mask = mask
 
   def contains(self, ip: Union[str, IPv4]) -> bool:
     """ Checks wheither the provided IP is in the current subnet """
