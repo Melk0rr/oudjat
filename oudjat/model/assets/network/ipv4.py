@@ -189,13 +189,6 @@ class IPv4(IPBase):
     """ Getter for the Port strings """
     return [ str(p) for p in self.ports ]
 
-  def set_mask(self, mask: Union[int, str, IPv4Mask]):
-    """ Setter for ip mask """
-    if not isinstance(mask, IPv4Mask):
-      mask = IPv4Mask(mask)
-
-    self.mask = mask
-
   def set_open_ports(self, ports: Union[List[int], List[Port]]):
     """ Set the open ports """
     # Clear the list of open ports
