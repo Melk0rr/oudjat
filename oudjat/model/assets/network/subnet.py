@@ -24,7 +24,15 @@ class Subnet:
 
     if mask is None:
       raise ValueError(f"Subnet::Provided net address has no mask set: {addr.get_address()}")
+     
+    self.mask: IPv4Mask = None
 
+    # Try to extract mask if provided as CIDR notation
+    cidr = None
+    if (type(address) is str) and ("/" in address):
+      address, cidr = address.split("/")
+      cidr = int(cidr)
+      
     self.address: IPv4 = addr.get_net_addr()
     self.mask: IPv4Mask = self.set_mask(mask)
     self.broadcast = self.get_broadcast_address()
