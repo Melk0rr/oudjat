@@ -177,9 +177,6 @@ class IPv4(IPBase):
   # ****************************************************************
   # Methods
 
-  def get_mask(self) -> IPv4Mask:
-    """ Getter for ip mask instance """
-    return self.mask
 
   def get_port_numbers(self) -> List[int]:
     """ Getter for the Port numbers """

@@ -54,6 +54,10 @@ class Subnet:
     """ Getter for subnet address """
     return self.address
   
+  def get_mask(self) -> IPv4Mask:
+    """ Getter for ip mask instance """
+    return self.mask
+  
   def get_broadcast_address(self) -> IPv4:
     """ Returns the broadcast address of the current subnet """
     broadcast_int = i_or(int(self.address.get_mask().get_wildcard()), int(self.address))
@@ -71,7 +75,7 @@ class Subnet:
     if not isinstance(ip, IPv4):
       ip = IPv4(ip)
 
-    mask_address = int(self.address.get_mask())
+    mask_address = int(self.mask)
     return i_and(int(ip), mask_address) == i_and(int(self.address), mask_address)
 
   def list_addresses(self) -> List[str]:
@@ -79,7 +83,7 @@ class Subnet:
     start = self.address.get_address() + 1
     end = self.broadcast.get_address()
 
-    return [ f"{ip_int_to_str(i)}/{self.address.get_mask().get_cidr()}" for i in range(start, end) ]
+    return [ f"{ip_int_to_str(i)}/{self.mask.get_cidr()}" for i in range(start, end) ]
 
   def add_host(self, host: Union[str, IPv4]) -> None:
     """ Adds a new host to the subnet """
@@ -92,7 +96,7 @@ class Subnet:
 
   def __str__(self, showDescription: bool = False) -> str:
     """ Returns a string based on current instance """
-    sub_str = f"{self.name}: {self.address}/{self.address.get_mask().get_cidr()}"
+    sub_str = f"{self.name}: {self.address}/{self.mask.get_cidr()}"
 
     if showDescription:
       sub_str += f" ({self.description})"
