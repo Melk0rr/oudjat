@@ -1,8 +1,7 @@
 from typing import List, Dict
 
 from oudjat.model.assets.group import Group
-from .. import LDAPObject
-from . import LDAPAccount
+from oudjat.connectors.ldap.objects import LDAPObject, LDAPEntry
 
 class LDAPGroup(LDAPObject, Group):
   """ A class to handle LDAP group objects """
@@ -14,7 +13,7 @@ class LDAPGroup(LDAPObject, Group):
     """ Constructor """
 
     super().__init__(ldap_entry=ldap_entry)
-
+    print(self.entry)
     
 
   # ****************************************************************
