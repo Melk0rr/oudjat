@@ -32,3 +32,10 @@ class LDAPGroup(LDAPObject, Group):
     return self.entry.get("members")
     
   # TODO : method to use ldap connector to get member ldap objects
+  
+  def to_dict(self) -> Dict:
+    """ Converts the current instance into a dictionary """
+    return {
+      **super().to_dict(),
+      "group_type": self.get_group_type().name
+    }
