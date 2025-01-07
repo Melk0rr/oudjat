@@ -23,5 +23,10 @@ class Group(Asset):
     super().__init__(id=id, name=name, label=label, description=description)
 
     self.members = GroupMemberList()
+    
   # ****************************************************************
   # Methods
+
+  def __str__(self) -> str:
+    """ Converts the current instance into a string """
+    return f"{self.name}"
