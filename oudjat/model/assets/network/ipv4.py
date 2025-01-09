@@ -28,15 +28,16 @@ class IPVersion(Enum):
     "pattern": r'^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$'
   }
 
-class IPBase:
-  # TODO : Merge with IPv4
+
+class IPv4:
+  """ Simple Class providing tools to manipulate IPv4 addresses """
 
   # ****************************************************************
   # Attributes & Constructors
 
-  def __init__(self, addr: Union[int, str]):
+  def __init__(self, address: Union[int, str], mask: Union[int, str, IPv4Mask] = None):
     """ Constructor """
-
+    
     if type(addr) is int:
       addr = ip_int_to_str(addr)
 
@@ -50,6 +51,8 @@ class IPBase:
       raise ValueError(f"Invalid IPv4 address provided: {addr}")
 
     self.address: int = ip_str_to_int(addr)
+
+    self.ports = []
 
   # ****************************************************************
   # Methods
@@ -65,118 +68,6 @@ class IPBase:
   def __str__(self) -> str:
     """ Converts the current ip base into a string """
     return ip_int_to_str(self.address)
-
-  @staticmethod
-  def resolve_from_hostname(hostname: str) -> str:
-    """ Resolves the IP address for the current URL """
-    ip = None
-    try:
-      ip = socket.gethostbyname(hostname)
-
-    except Exception as e:
-      ColorPrint.red(f"{hostname}: could not resolve IP address\n{e}")
-
-    return ip
-
-
-class IPv4Mask(IPBase):
-  """ Simple Class providing tools to manipulate IPv4 mask """
-
-  # ****************************************************************
-  # Attributes & Constructors
-
-  def __init__(self, mask: Union[int, str] = None, cidr: int = None):
-    """ Constructor """
-
-    if mask is None and cidr is None:
-      raise ValueError("Please provide either a CIDR mask or a mask value as integer or string")
-
-    if cidr is not None:
-      if not 1 < cidr < 33:
-        raise ValueError("Mask CIDR value must be between 1 and 32!")
-
-      mask = cidr_to_int(cidr)
-
-    if type(mask) is not int and type(mask) is not str:
-      raise ValueError(f"Invalid mask provided : {mask}. You must provide a string or an integer !")
-
-    super().__init__(mask)
-    self.cidr = count_1_bits(self.address)
-
-  # ****************************************************************
-  # Methods
-
-  def get_cidr(self) -> int:
-    """ Getter for mask CIDR """
-    return self.cidr
-
-  def cidr_to_int(self) -> int:
-    """ Returns the current mask as an integer """
-    return (0xffffffff << (32 - self.cidr)) & 0xffffffff
-
-  def get_wildcard(self) -> IPBase:
-    """ Returns mask wildcard """
-    return IPBase(i_not(self.address))
-
-  @staticmethod
-  def get_netcidr(mask: str) -> int:
-    """ Static method to return CIDR notation for a given mask """
-    if mask not in IPv4Mask.get_valid_mask():
-      raise ValueError(f"Invalid mask provided: {mask}")
-
-    base = IPBase(mask)
-    return ''.join(base.to_binary_array()).count('1')
-
-  @staticmethod
-  def get_valid_mask():
-    return [ IPv4Mask.get_netmask(x) for x in range(1, 33) ]
-
-  @staticmethod
-  def get_netmask(network_length: int) -> str:
-    """ Static method to return an ipv4 mask based on a network length """
-    if not type(network_length) is int:
-      raise ValueError("Network length must be an integer")
-      
-    if not 0 < network_length < 33:
-      raise ValueError("Network length value must be between 1 and 32!")
-    
-    return ip_int_to_str(cidr_to_int(network_length))
-
-
-class IPv4(IPBase):
-  """ Simple Class providing tools to manipulate IPv4 addresses """
-
-  # ****************************************************************
-  # Attributes & Constructors
-
-  def __init__(self, address: Union[int, str], mask: Union[int, str, IPv4Mask] = None):
-    """ Constructor """
-    
-    # TODO : Move to subnet
-    self.mask: IPv4Mask = None
-
-    # Try to extract mask if provided as CIDR notation
-    cidr = None
-    if (type(address) is str) and ("/" in address):
-      address, cidr = address.split("/")
-      cidr = int(cidr)
-
-    super().__init__(address)
-
-    if cidr is not None:
-      self.mask = IPv4Mask(cidr=cidr)
-
-    if (self.mask is None) and (mask is not None):
-      if not isinstance(mask, IPv4Mask):
-        mask = IPv4Mask(mask)
-
-      self.mask = mask
-
-    self.ports = []
-
-  # ****************************************************************
-  # Methods
-
 
   def get_port_numbers(self) -> List[int]:
     """ Getter for the Port numbers """
@@ -248,3 +139,80 @@ class IPv4(IPBase):
       ip_str += f"/{self.mask.get_cidr()}"
 
     return ip_str
+
+  @staticmethod
+  def resolve_from_hostname(hostname: str) -> str:
+    """ Resolves the IP address for the current URL """
+    ip = None
+    try:
+      ip = socket.gethostbyname(hostname)
+
+    except Exception as e:
+      ColorPrint.red(f"{hostname}: could not resolve IP address\n{e}")
+
+    return ip
+
+
+class IPv4Mask(IPv4):
+  """ Simple Class providing tools to manipulate IPv4 mask """
+
+  # ****************************************************************
+  # Attributes & Constructors
+
+  def __init__(self, mask: Union[int, str] = None, cidr: int = None):
+    """ Constructor """
+
+    if mask is None and cidr is None:
+      raise ValueError("Please provide either a CIDR mask or a mask value as integer or string")
+
+    if cidr is not None:
+      if not 1 < cidr < 33:
+        raise ValueError("Mask CIDR value must be between 1 and 32!")
+
+      mask = cidr_to_int(cidr)
+
+    if type(mask) is not int and type(mask) is not str:
+      raise ValueError(f"Invalid mask provided : {mask}. You must provide a string or an integer !")
+
+    super().__init__(mask)
+    self.cidr = count_1_bits(self.address)
+
+  # ****************************************************************
+  # Methods
+
+  def get_cidr(self) -> int:
+    """ Getter for mask CIDR """
+    return self.cidr
+
+  def cidr_to_int(self) -> int:
+    """ Returns the current mask as an integer """
+    return (0xffffffff << (32 - self.cidr)) & 0xffffffff
+
+  def get_wildcard(self) -> IPBase:
+    """ Returns mask wildcard """
+    return IPBase(i_not(self.address))
+
+  @staticmethod
+  def get_netcidr(mask: str) -> int:
+    """ Static method to return CIDR notation for a given mask """
+    if mask not in IPv4Mask.get_valid_mask():
+      raise ValueError(f"Invalid mask provided: {mask}")
+
+    base = IPBase(mask)
+    return ''.join(base.to_binary_array()).count('1')
+
+  @staticmethod
+  def get_valid_mask():
+    return [ IPv4Mask.get_netmask(x) for x in range(1, 33) ]
+
+  @staticmethod
+  def get_netmask(network_length: int) -> str:
+    """ Static method to return an ipv4 mask based on a network length """
+    if not type(network_length) is int:
+      raise ValueError("Network length must be an integer")
+      
+    if not 0 < network_length < 33:
+      raise ValueError("Network length value must be between 1 and 32!")
+    
+    return ip_int_to_str(cidr_to_int(network_length))
+
