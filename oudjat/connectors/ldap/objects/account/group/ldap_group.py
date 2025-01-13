@@ -29,7 +29,7 @@ class LDAPGroup(LDAPObject, Group):
 
   def get_member_refs(self) -> List[str]:
     """ Getter for member refs """
-    return self.entry.get("members")
+    return self.entry.get("member")
     
   # TODO : method to use ldap connector to get member ldap objects
   
