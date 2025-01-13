@@ -28,7 +28,7 @@ class Subnet:
       cidr = int(cidr)
       
       if cidr is not None:
-        mask = cidr
+        mask = IPv4Mask.get_netmask(cidr)
     
     if not isinstance(address, IPv4):
       address = IPv4(address)
@@ -77,6 +77,7 @@ class Subnet:
 
   def set_mask(self, mask: Union[int, str, IPv4Mask]):
     """ Setter for ip mask """
+
     if not isinstance(mask, IPv4Mask):
       mask = IPv4Mask(mask)
 
