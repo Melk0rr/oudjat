@@ -124,5 +124,5 @@ class Subnet:
       "net_mask": str(self.get_mask()),
       "net_mask_cidr": self.get_mask().__str__(as_cidr=True),
       "hosts": self.hosts,
-      "broadcast_address": self.get_broadcast_address()
+      "broadcast_address": str(self.get_broadcast_address())
     }
