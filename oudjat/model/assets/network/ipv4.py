@@ -38,19 +38,19 @@ class IPv4:
   def __init__(self, address: Union[int, str]):
     """ Constructor """
     
-    if type(addr) is int:
-      addr = ip_int_to_str(addr)
+    if type(address) is int:
+      address = ip_int_to_str(address)
 
-    if re.match(IPVersion.IPV4.value["pattern"], addr):
+    if re.match(IPVersion.IPV4.value["pattern"], address):
       self.version = IPVersion.IPV4
     
-    elif re.match(IPVersion.IPV6.value["pattern"], addr):
+    elif re.match(IPVersion.IPV6.value["pattern"], address):
       self.version = IPVersion.IPV6
     
     else:
-      raise ValueError(f"Invalid IPv4 address provided: {addr}")
+      raise ValueError(f"Invalid IPv4 address provided: {address}")
 
-    self.address: int = ip_str_to_int(addr)
+    self.address: int = ip_str_to_int(address)
 
     self.ports = []
 
