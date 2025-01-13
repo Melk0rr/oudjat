@@ -112,16 +112,10 @@ class IPv4:
     index = self.get_port_numbers().index(port)
     del self.ports[index]
 
-  def is_in_subnet(self, net_addr: Union[int, str], net_mask: str) -> bool:
+  def is_in_subnet(self, net: "Subnet") -> bool:
     """ Checks if the current ip is in the provided subnet """
 
-    if type(net_addr) is not int:
-      net_addr = ip_str_to_int(net_addr)
-      
-    if type(net_mask) is not int:
-      net_mask = ip_str_to_int(net_mask)
-
-    return i_and(int(self), net_mask) == i_and(net_addr, net_mask)
+    return i_and(int(self), int(net.get_mask())) == i_and(int(net.get_address()), int(net.get_mask()))
 
   def __int__(self) -> int:
     """ Converts the current ip base into an integer """
