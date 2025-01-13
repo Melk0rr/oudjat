@@ -38,7 +38,7 @@ class Subnet:
       
     self.set_mask(mask)
 
-    self.address: IPv4 = i_and(int(address), int(self.mask))
+    self.address: IPv4 = IPv4(address=i_and(int(address), int(self.mask)))
     self.broadcast = self.get_broadcast_address()
 
     self.name = name
