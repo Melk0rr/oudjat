@@ -176,6 +176,13 @@ class IPv4Mask(IPv4):
   def get_wildcard(self) -> IPv4:
     """ Returns mask wildcard """
     return IPv4(i_not(self.address))
+  
+  def __str__(self, as_cidr: bool = False) -> str:
+    """ Converts the current instance into a string """
+    if as_cidr:
+      return f"{self.cidr}"
+    
+    return super().__str__()
 
   @staticmethod
   def get_netcidr(mask: str) -> int:
