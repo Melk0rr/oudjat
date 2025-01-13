@@ -35,7 +35,7 @@ class IPv4:
   # ****************************************************************
   # Attributes & Constructors
 
-  def __init__(self, address: Union[int, str], mask: Union[int, str, IPv4Mask] = None):
+  def __init__(self, address: Union[int, str]):
     """ Constructor """
     
     if type(addr) is int:
