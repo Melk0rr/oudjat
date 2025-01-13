@@ -188,9 +188,9 @@ class IPv4Mask(IPv4):
     """ Returns the current mask as an integer """
     return (0xffffffff << (32 - self.cidr)) & 0xffffffff
 
-  def get_wildcard(self) -> IPBase:
+  def get_wildcard(self) -> IPv4:
     """ Returns mask wildcard """
-    return IPBase(i_not(self.address))
+    return IPv4(i_not(self.address))
 
   @staticmethod
   def get_netcidr(mask: str) -> int:
@@ -198,7 +198,7 @@ class IPv4Mask(IPv4):
     if mask not in IPv4Mask.get_valid_mask():
       raise ValueError(f"Invalid mask provided: {mask}")
 
-    base = IPBase(mask)
+    base = IPv4(mask)
     return ''.join(base.to_binary_array()).count('1')
 
   @staticmethod
