@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Dict, Union
 
 from oudjat.utils import i_or, i_and
 from . import IPv4, IPv4Mask, ip_int_to_str
