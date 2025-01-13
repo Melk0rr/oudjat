@@ -121,7 +121,7 @@ class IPv4:
     if type(net_mask) is not int:
       net_mask = ip_str_to_int(net_mask)
 
-    return i_and(int(self), net_mask) == iand(net_addr, net_mask)
+    return i_and(int(self), net_mask) == i_and(net_addr, net_mask)
 
   def __int__(self) -> int:
     """ Converts the current ip base into an integer """
