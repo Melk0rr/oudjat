@@ -173,7 +173,7 @@ class IPv4Mask(IPv4):
 
   def cidr_to_int(self) -> int:
     """ Returns the current mask as an integer """
-    return (0xffffffff << (32 - self.cidr)) & 0xffffffff
+    return cidr_to_int(self.cidr)
 
   def get_wildcard(self) -> IPv4:
     """ Returns mask wildcard """
