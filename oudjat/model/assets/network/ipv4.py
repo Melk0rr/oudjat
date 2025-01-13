@@ -129,7 +129,7 @@ class IPv4:
 
   def __str__(self, show_mask: bool = True) -> str:
     """ Returns the current instance as a string """
-    return self.__str__()
+    return super().__str__()
 
   @staticmethod
   def resolve_from_hostname(hostname: str) -> str:
