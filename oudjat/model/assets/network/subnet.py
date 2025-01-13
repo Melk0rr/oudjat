@@ -36,7 +36,7 @@ class Subnet:
     if mask is None:
       raise ValueError(f"Subnet::Provided net address has no mask set: {addr.get_address()}")
       
-    self.mask = self.set_mask(mask)
+    self.set_mask(mask)
 
     self.address: IPv4 = i_and(int(address), int(self.mask))
     self.broadcast = self.get_broadcast_address()
@@ -75,7 +75,7 @@ class Subnet:
     broadcast_int = i_or(int(self.address.get_mask().get_wildcard()), int(self.address))
     return IPv4(ip_int_to_str(broadcast_int) + f"/{self.mask.get_cidr()}")
 
-  def set_mask(self, mask: Union[int, str, IPv4Mask]):
+  def set_mask(self, mask: Union[int, str, IPv4Mask]) -> None:
     """ Setter for ip mask """
 
     if not isinstance(mask, IPv4Mask):
