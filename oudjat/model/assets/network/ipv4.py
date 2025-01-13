@@ -71,6 +71,7 @@ class IPv4:
 
   def set_open_ports(self, ports: Union[List[int], List[Port]]):
     """ Set the open ports """
+
     # Clear the list of open ports
     self.ports.clear()
 
@@ -79,6 +80,7 @@ class IPv4:
 
   def is_port_in_list(self, port: Union[int, Port]) -> bool:
     """ Check if the given port is in the list of ports """
+
     port_number = port
 
     if isinstance(port, Port):
@@ -106,18 +108,20 @@ class IPv4:
 
   def remove_port(self, port: int):
     """ Remove the port from the list of open ports """
+  
     index = self.get_port_numbers().index(port)
-
     del self.ports[index]
 
-  def is_in_subnet(self, net_addr: Union[int, str], mask) -> bool:
+  def is_in_subnet(self, net_addr: Union[int, str], net_mask: str) -> bool:
     """ Checks if the current ip is in the provided subnet """
-    if "/" not in net_addr:
-      raise ValueError(f"Invalid net address provided: {net_addr} ! Please include a net mask as CIDR notation")
 
-    net = IPv4(address=net_addr)
-    net_mask = int(net.get_mask())
-    return (i_and(int(self) & net_mask)) == (int(net) & net_mask)
+    if type(net_addr) is not int:
+      net_addr = ip_str_to_int(net_addr)
+      
+    if type(net_mask) is not int:
+      net_mask = ip_str_to_int(net_mask)
+
+    return i_and(int(self), net_mask) == iand(net_addr, net_mask)
 
   def __int__(self) -> int:
     """ Converts the current ip base into an integer """
