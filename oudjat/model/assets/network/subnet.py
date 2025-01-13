@@ -11,16 +11,13 @@ class Subnet:
   
   def __init__(
     self,
-    addr: Union[str, IPv4],
+    address: Union[str, IPv4],
     name: str,
-    mask: Union[int, str, IPv4Mask],
+    mask: Union[int, str, IPv4Mask] = None,
     description: str = None,
     hosts: Union[List[IPv4], List[str]] = None
   ):
     """ Constructor """
-    
-    if not isinstance(addr, IPv4):
-      addr = IPv4(addr)
 
     self.mask: IPv4Mask = None
 
@@ -32,13 +29,16 @@ class Subnet:
       
       if cidr is not None:
         mask = cidr
-      
+    
+    if not isinstance(address, IPv4):
+      address = IPv4(address)
+
     if mask is None:
       raise ValueError(f"Subnet::Provided net address has no mask set: {addr.get_address()}")
       
     self.mask = self.set_mask(mask)
 
-    self.address: IPv4 = i_and(int(addr), int(self.mask))
+    self.address: IPv4 = i_and(int(address), int(self.mask))
     self.broadcast = self.get_broadcast_address()
 
     self.name = name
