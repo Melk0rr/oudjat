@@ -85,10 +85,6 @@ class IPv4:
     for p in ports:
       self.append_open_port(p)
 
-  def get_net_addr(self) -> "IPv4":
-    """ Returns network address for given IP """
-    return IPv4(address=i_and(int(self.address), int(self.mask)), mask=self.mask)
-
   def is_port_in_list(self, port: Union[int, Port]) -> bool:
     """ Check if the given port is in the list of ports """
     port_number = port
@@ -133,12 +129,7 @@ class IPv4:
 
   def __str__(self, show_mask: bool = True) -> str:
     """ Returns the current instance as a string """
-    ip_str = super().__str__()
-
-    if self.mask and show_mask:
-      ip_str += f"/{self.mask.get_cidr()}"
-
-    return ip_str
+    return self.__str__()
 
   @staticmethod
   def resolve_from_hostname(hostname: str) -> str:
