@@ -72,7 +72,7 @@ class Subnet:
   
   def get_broadcast_address(self) -> IPv4:
     """ Returns the broadcast address of the current subnet """
-    broadcast_int = i_or(int(self.address.get_mask().get_wildcard()), int(self.address))
+    broadcast_int = i_or(int(self.mask.get_wildcard()), int(self.address))
     return IPv4(ip_int_to_str(broadcast_int) + f"/{self.mask.get_cidr()}")
 
   def set_mask(self, mask: Union[int, str, IPv4Mask]) -> None:
