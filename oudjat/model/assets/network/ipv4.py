@@ -61,14 +61,6 @@ class IPv4:
     """ Getter for ip string address """
     return self.address
 
-  def __int__(self) -> int:
-    """ Converts the current ip base into an integer """
-    return self.address
-
-  def __str__(self) -> str:
-    """ Converts the current ip base into a string """
-    return ip_int_to_str(self.address)
-
   def get_port_numbers(self) -> List[int]:
     """ Getter for the Port numbers """
     return [ p.get_number() for p in self.ports ]
@@ -127,9 +119,13 @@ class IPv4:
     net_mask = int(net.get_mask())
     return (i_and(int(self) & net_mask)) == (int(net) & net_mask)
 
-  def __str__(self, show_mask: bool = True) -> str:
-    """ Returns the current instance as a string """
-    return super().__str__()
+  def __int__(self) -> int:
+    """ Converts the current ip base into an integer """
+    return self.address
+
+  def __str__(self) -> str:
+    """ Converts the current ip base into a string """
+    return ip_int_to_str(self.address)
 
   @staticmethod
   def resolve_from_hostname(hostname: str) -> str:
