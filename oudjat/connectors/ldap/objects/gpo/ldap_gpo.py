@@ -1,15 +1,11 @@
-from __future__ import annotations
-
 import re
 from enum import Enum
 from typing import List, Dict, Union
 
-import oudjat.connectors.ldap
+from oudjat.connectors.ldap import UUID_REG
 from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject, LDAPObjectType
 
 from . import MS_GPPREF
-
-UUID_REG = r'(?:\{{0,1}(?:[0-9a-fA-F]){8}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){12}\}{0,1})'
 
 class LDAPGPOScope(Enum):
   """ GPO scope """
@@ -69,7 +65,7 @@ class LDAPGroupPolicyObject(LDAPObject):
 
   def get_linked_objects(
     self,
-    ldap_connector: oudjat.connectors.ldap.LDAPConnector,
+    ldap_connector: "LDAPConnector",
     attributes: Union[str, List[str]] = None,
     ou: str = "*"
   ) -> List[LDAPEntry]:
