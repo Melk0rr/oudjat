@@ -44,7 +44,8 @@ class LDAPEntry(dict):
     obj_type = None
 
     for t in LDAPObjectType.__members__:
-      if t in self.attr().__getitem__("objectClass"):
+      obj_class = LDAPObjectType[t].value["objectClass"]
+      if obj_class in self.attr().__getitem__("objectClass"):
         obj_type = t
         
     return obj_type
