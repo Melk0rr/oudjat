@@ -33,7 +33,7 @@ class LDAPObject:
     self.sid = self.entry.get("objectSid")
     self.description = self.entry.get("description", [])
 
-    self.object_classes = self.entry.get("objectClass", [])
+    self.classes = self.entry.get("objectClass", [])
     
     self.dn_pieces = parse_dn(self.dn)
     self.domain = '.'.join(self.dn_pieces.get("DC")).lower()
@@ -65,6 +65,10 @@ class LDAPObject:
   def get_entry(self) -> Dict:
     """ Getter for entry attributes """
     return self.entry
+
+  def get_classes(self) -> List[str]:
+    """ Getter for object classes """
+    return self.entry.get("objectClass")
   
   def get_dn_pieces(self) -> Dict:
     """ Getter for object dn pieces """
@@ -90,10 +94,6 @@ class LDAPObject:
     """ Getter for ldap object change date"""
     return self.change_date
 
-  def is_of_class(self, obj_cl: str) -> bool:
-    """ Checks if the current object is of given class """
-    return obj_cl.lower() in self.object_classes
-
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dict """
     return {
@@ -101,6 +101,7 @@ class LDAPObject:
       "name": self.name,
       "guid": self.uuid,
       "sid": self.sid,
+      "classes": self.classes,
       "description": self.description,
       "domain": self.domain,
       "creation_date": self.creation_date.strftime(date_format_from_flag(DATE_TIME_FLAGS)),

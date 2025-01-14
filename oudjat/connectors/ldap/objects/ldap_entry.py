@@ -38,6 +38,10 @@ class LDAPEntry(dict):
     """ Retreive ldap attributes """
     return self.__getitem__("attributes")
 
+  def is_of_class(self, obj_cls: str) -> bool:
+    """ Checks if the current object is of given class """
+    return obj_cls.lower() in self.attr().__getitem__("objectClass")
+
   def get_type(self) -> str:
     """ Returns the entry oject type (based on objectClass attribute) """
 
@@ -45,7 +49,7 @@ class LDAPEntry(dict):
 
     for t in LDAPObjectType.__members__:
       obj_class = LDAPObjectType[t].value["objectClass"]
-      if obj_class in self.attr().__getitem__("objectClass"):
+      if is_of_class(obj_class):
         obj_type = t
         
     return obj_type
