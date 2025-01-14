@@ -1,5 +1,7 @@
 from typing import Any
 
+from . import LDAPObjectType
+
 class LDAPEntry(dict):
   """ LDAP entry dict """
 
@@ -9,6 +11,7 @@ class LDAPEntry(dict):
 
   def get(self, key: str, default_value: Any = None) -> Any:
     """ Retreive the value of the given attribute """
+
     if key not in self.__getitem__("attributes").keys():
       return default_value
 
@@ -25,6 +28,7 @@ class LDAPEntry(dict):
 
   def get_raw(self, key: str) -> Any:
     """ Retreive the value of the given raw attribute """
+
     if key not in self.__getitem__("raw_attributes").keys():
       return None
 
@@ -33,3 +37,14 @@ class LDAPEntry(dict):
   def attr(self):
     """ Retreive ldap attributes """
     return self.__getitem__("attributes")
+
+  def get_type(self) -> str:
+    """ Returns the entry oject type (based on objectClass attribute) """
+
+    obj_type = None
+
+    for t in LDAPObjectType.__members__:
+      if t in self.attr().__getitem__("objectClass"):
+        obj_type = t
+        
+    return obj_type
