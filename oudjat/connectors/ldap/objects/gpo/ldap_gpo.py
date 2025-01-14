@@ -2,7 +2,7 @@ import re
 from enum import Enum
 from typing import List, Dict, Union
 
-from oudjat.connectors.ldap.definitions import UUID_REG
+from oudjat.connectors.ldap.objects.definitions import UUID_REG
 from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject, LDAPObjectType
 
 from . import MS_GPPREF
