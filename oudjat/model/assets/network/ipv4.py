@@ -4,7 +4,7 @@ import socket
 from enum import Enum
 from typing import List, Union
 
-from wepwawet.utils import ColorPrint, count_1_bits, i_not, i_and
+from oudjat.utils import ColorPrint, count_1_bits, i_not, i_and
 
 from . import Port
 
