@@ -49,7 +49,7 @@ class LDAPEntry(dict):
 
     for t in LDAPObjectType.__members__:
       obj_class = LDAPObjectType[t].value["objectClass"]
-      if is_of_class(obj_class):
+      if self.is_of_class(obj_class):
         obj_type = t
         
     return obj_type
