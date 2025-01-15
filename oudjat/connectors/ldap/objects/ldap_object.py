@@ -69,6 +69,10 @@ class LDAPObject:
   def get_classes(self) -> List[str]:
     """ Getter for object classes """
     return self.entry.get("objectClass")
+
+  def get_type(self) -> str:
+    """ Get ldap object type based on objectClass attribute """
+    return self.entry.get_type()
   
   def get_dn_pieces(self) -> Dict:
     """ Getter for object dn pieces """
