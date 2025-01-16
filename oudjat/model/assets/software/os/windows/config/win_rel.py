@@ -532,6 +532,16 @@ WINDOWS_RELEASES = {
 
 	# Windows Server releases
 	"windows-server": [
+		# Windows Server 2025
+		{
+			"releaseLabel": "2025",
+			"releaseDate": "2024-11-01",
+			"support": "2029-10-09",
+			"eol": "2034-10-10",
+			"latest": "10.0.26100",
+			"link": "https://learn.microsoft.com/en-us/windows/release-health/windows-server-release-info",
+			"lts": False,
+		},
 
 		# Windows Server 23H2
 		{
