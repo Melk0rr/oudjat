@@ -52,28 +52,28 @@ class IPv4:
 
     self.address: int = ip_str_to_int(address)
 
-    self.ports = []
+    self.ports = {}
 
   # ****************************************************************
   # Methods
 
-  def get_address(self) -> str:
+  def get_address(self) -> int:
     """ Getter for ip string address """
     return self.address
 
   def get_port_numbers(self) -> List[int]:
     """ Getter for the Port numbers """
-    return [ p.get_number() for p in self.ports ]
+    return self.ports.keys()
 
   def get_port_strings(self) -> List[int]:
     """ Getter for the Port strings """
-    return [ str(p) for p in self.ports ]
+    return [ str(p) for p in self.ports.values() ]
 
   def set_open_ports(self, ports: Union[List[int], List[Port]]):
     """ Set the open ports """
 
     # Clear the list of open ports
-    self.ports.clear()
+    self.ports = {}
 
     for p in ports:
       self.append_open_port(p)
@@ -86,9 +86,9 @@ class IPv4:
     if isinstance(port, Port):
       port_number = port.get_number()
 
-    return port_number in self.get_port_numbers()
+    return port_number in self.ports.keys()
 
-  def append_open_port(self, port: Union[int, Port]):
+  def append_open_port(self, port: Union[int, Port], force: bool = False):
     """ Append the port to the list of open ports """
     is_port = isinstance(port, Port)
     is_number = isinstance(port, int)
@@ -97,20 +97,19 @@ class IPv4:
       raise ValueError(
           "Provided port must be an instance of class Port or an integer")
 
-    if not self.is_port_in_list(port):
-      if is_number:
-        port = Port(port_number=port)
+    if is_number:
+      port = Port(port_number=port)
 
-      self.ports.append(port)
+    if not self.is_port_in_list(port) or force:
+      self.ports[port.get_number()] = port
 
     else:
       print(f"{port} is already in the list of open ports")
 
   def remove_port(self, port: int):
     """ Remove the port from the list of open ports """
-  
-    index = self.get_port_numbers().index(port)
-    del self.ports[index]
+
+    del self.ports[port]
 
   def is_in_subnet(self, net: "Subnet") -> bool:
     """ Checks if the current ip is in the provided subnet """
