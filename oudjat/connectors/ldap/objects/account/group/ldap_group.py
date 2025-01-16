@@ -31,8 +31,31 @@ class LDAPGroup(LDAPObject, Group):
     """ Getter for member refs """
     return self.entry.get("member")
     
-  # TODO : method to use ldap connector to get member ldap objects
-  
+  def get_members(
+    self,
+    ldap_connector: "LDAPConnector",
+    recursive: bool = False
+  ) -> List[LDAPObject]:
+    """ Retreives the group members """
+    
+    for ref in self.get_member_refs():
+      # Search for the ref in LDAP server
+      ref_search = ldap_connector.search(
+        search_filter=f"(distinguishedName={ref})"
+      )
+      
+      if len(ref_search) > 0:
+        ref_search = ref_search[0]
+        obj_class = ref_search.get("objectClass")
+        
+        new_member = None
+        
+        if "group" in obj_class:
+          new_member = LDAPGroup(ldap_entry=ref_search)
+          
+          if recursive:
+            new_member.get_members()
+
   def to_dict(self) -> Dict:
     """ Converts the current instance into a dictionary """
     return {
