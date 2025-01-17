@@ -9,6 +9,7 @@ class LDAPObjectType(Enum):
   }
 
   COMPUTER = {
+    "pythonClass": "LDAPComputer",
     "objectClass": "computer",
     "filter": "(objectClass=computer)",
     "attributes": [
@@ -34,6 +35,7 @@ class LDAPObjectType(Enum):
   }
   
   GPO = {
+    "pythonClass": "LDAPGroupPolicyObject",
     "objectClass": "groupPolicyContainer",
     "filter": "(objectClass=groupPolicyContainer)",
     "attributes": [
@@ -52,6 +54,7 @@ class LDAPObjectType(Enum):
   }
 
   GROUP = {
+    "pythonClass": "LDAPGroup",
     "objectClass": "group",
     "filter": "(objectClass=group)",
     "attributes": [
@@ -70,6 +73,7 @@ class LDAPObjectType(Enum):
   }
 
   OU = {
+    "pythonClass": "LDAPOrganizationalUnit",
     "objectClass": "organizationalUnit",
     "filter": "(objectClass=organizationalUnit)",
     "attributes": [
@@ -84,33 +88,8 @@ class LDAPObjectType(Enum):
     ]
   }
 
-  PERSON = {
-    "objectClass": "person",
-    "filter": "(&(objectClass=person)(!(objectClass=computer)))",
-    "attributes": [
-      "accountExpires",
-      "cn",
-      "description",
-      "distinguishedName",
-      "employeeID",
-      "givenName",
-      "lastLogonTimestamp",
-      "mail",
-      "name",
-      "objectClass",
-      "objectGUID",
-      "objectSid",
-      "pwdLastSet",
-      "sn",
-      "sAMAccountName",
-      "title",
-      "userAccountControl",
-      "whenChanged",
-      "whenCreated"
-    ]
-  }
-
   SUBNET = {
+    "pythonClass": "LDAPSubnet",
     "objectClass": "subnet",
     "filter": "(objectClass=subnet)",
     "attributes": [
@@ -126,6 +105,7 @@ class LDAPObjectType(Enum):
   }
 
   USER = {
+    "pythonClass": "LDAPUser",
     "objectClass": "user",
     "filter": "(&(objectClass=user)(!(objectClass=computer)))",
     "attributes": [
