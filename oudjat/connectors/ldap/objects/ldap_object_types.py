@@ -1,5 +1,7 @@
 from enum import Enum
 
+# TODO : imports
+
 class LDAPObjectType(Enum):
   """ These are the default LDAP search parameters per object type """
   DEFAULT = {
@@ -9,7 +11,7 @@ class LDAPObjectType(Enum):
   }
 
   COMPUTER = {
-    "pythonClass": "LDAPComputer",
+    "pythonClass": LDAPComputer,
     "objectClass": "computer",
     "filter": "(objectClass=computer)",
     "attributes": [
@@ -35,7 +37,7 @@ class LDAPObjectType(Enum):
   }
   
   GPO = {
-    "pythonClass": "LDAPGroupPolicyObject",
+    "pythonClass": LDAPGroupPolicyObject,
     "objectClass": "groupPolicyContainer",
     "filter": "(objectClass=groupPolicyContainer)",
     "attributes": [
@@ -54,7 +56,7 @@ class LDAPObjectType(Enum):
   }
 
   GROUP = {
-    "pythonClass": "LDAPGroup",
+    "pythonClass": LDAPGroup,
     "objectClass": "group",
     "filter": "(objectClass=group)",
     "attributes": [
@@ -73,7 +75,7 @@ class LDAPObjectType(Enum):
   }
 
   OU = {
-    "pythonClass": "LDAPOrganizationalUnit",
+    "pythonClass": LDAPOrganizationalUnit,
     "objectClass": "organizationalUnit",
     "filter": "(objectClass=organizationalUnit)",
     "attributes": [
@@ -89,7 +91,7 @@ class LDAPObjectType(Enum):
   }
 
   SUBNET = {
-    "pythonClass": "LDAPSubnet",
+    "pythonClass": LDAPSubnet,
     "objectClass": "subnet",
     "filter": "(objectClass=subnet)",
     "attributes": [
@@ -105,7 +107,7 @@ class LDAPObjectType(Enum):
   }
 
   USER = {
-    "pythonClass": "LDAPUser",
+    "pythonClass": LDAPUser,
     "objectClass": "user",
     "filter": "(&(objectClass=user)(!(objectClass=computer)))",
     "attributes": [

@@ -3,7 +3,7 @@ from enum import Enum
 from typing import List, Dict, Union
 
 from oudjat.connectors.ldap.objects.definitions import UUID_REG
-from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject, LDAPObjectType
+from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject
 
 from . import MS_GPPREF
 
@@ -25,9 +25,6 @@ class LDAPGroupPolicyObject(LDAPObject):
   def __init__(self, ldap_entry: LDAPEntry):
     """ Constructor """
     super().__init__(ldap_entry=ldap_entry)
-
-    if LDAPObjectType.GPO.value["objectClass"] not in self.entry.get("objectClass"):
-      raise ValueError("Invalid LDAPEntry provided. Please provide a groupPolicyContainer type entry")
 
     self.display_name = self.entry.get("displayName")
     

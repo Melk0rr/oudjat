@@ -45,14 +45,14 @@ class LDAPGroup(LDAPObject, Group):
       )
       
       if len(ref_search) > 0:
-        ref_search = ref_search[0]
+        ref_search: LDAPEntry = ref_search[0]
         obj_class = ref_search.get("objectClass")
         
         new_member = None
         
-        if "group" in obj_class:
+        if ref_search.get_type() == "GROUP":
           new_member = LDAPGroup(ldap_entry=ref_search)
-          
+
           if recursive:
             new_member.get_members()
 
