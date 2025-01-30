@@ -34,7 +34,7 @@ class LDAPGroup(LDAPObject, Group):
 
     def get_members(
         self,
-        ldap_connector: "LDAPConnector",  # noqa: F821
+        ldap_connector: "LDAPConnector",
         recursive: bool = False,  # noqa: F821
     ) -> List[LDAPObject]:
         """Retreives the group members"""
