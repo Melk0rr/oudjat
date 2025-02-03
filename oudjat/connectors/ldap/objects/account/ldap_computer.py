@@ -3,7 +3,6 @@ from typing import List, Dict
 from oudjat.model.assets.computer import Computer
 from oudjat.model.assets.software import SoftwareEdition, SoftwareReleaseDict
 from oudjat.model.assets.software.os import OperatingSystem, OSOption
-from oudjat.connectors.ldap.objects import LDAPEntry
 
 from . import LDAPAccount
 
@@ -14,7 +13,7 @@ class LDAPComputer(LDAPAccount, Computer):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: LDAPEntry):
+    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
         """Construcotr"""
 
         super().__init__(ldap_entry=ldap_entry)

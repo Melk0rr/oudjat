@@ -12,7 +12,7 @@ class LDAPGroup(LDAPObject, Group):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry"):
+    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
         """Constructor"""
 
         super().__init__(ldap_entry=ldap_entry)
