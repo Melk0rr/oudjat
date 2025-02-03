@@ -3,3 +3,4 @@ PERSON_REG = r"^[a-zA-Zàáâäãåąčćęèéêëėįìíîïłńòóôöõø�
 
 # MS VARIABLES
 MS_ACCOUNT_CTL_PROPERTY = "msDS-User-Account-Control-Computed"
+
