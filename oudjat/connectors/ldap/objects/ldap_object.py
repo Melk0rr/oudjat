@@ -1,6 +1,5 @@
 from typing import Dict, List
 
-from oudjat.connectors.ldap.objects import LDAPEntry
 from oudjat.utils import DATE_TIME_FLAGS, date_format_from_flag
 
 
@@ -25,7 +24,7 @@ class LDAPObject:
 
     # ****************************************************************
     # Attributes & Constructors
-    def __init__(self, ldap_entry: LDAPEntry):
+    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
         """Constructor"""
 
         self.entry = ldap_entry

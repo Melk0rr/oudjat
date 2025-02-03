@@ -1,8 +1,6 @@
 from typing import Dict
 
-from oudjat.control.data import DataFilter
 from oudjat.model.assets.user import User
-from oudjat.connectors.ldap.objects import LDAPEntry
 
 from . import LDAPAccount
 
@@ -12,7 +10,7 @@ class LDAPUser(LDAPAccount, User):
   # ****************************************************************
     # Attributes & Constructors
 
-  def __init__(self, ldap_entry: LDAPEntry):
+  def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
     """ Constructor """
 
     super().__init__(ldap_entry=ldap_entry)

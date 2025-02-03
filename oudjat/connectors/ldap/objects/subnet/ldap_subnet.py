@@ -1,5 +1,5 @@
 from oudjat.model.assets.network import Subnet
-from oudjat.connectors.ldap.objects import LDAPObject, LDAPEntry
+from oudjat.connectors.ldap.objects import LDAPObject
 
 class LDAPSubnet(LDAPObject, Subnet):
   """ A class to describe LDAP subnet objects """
@@ -7,7 +7,7 @@ class LDAPSubnet(LDAPObject, Subnet):
   # ****************************************************************
   # Attributes & Constructors
 
-  def __init__(self, ldap_entry: LDAPEntry):
+  def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
     """ Constructor """
     super().__init__(ldap_entry=ldap_entry)
     Subnet.__init__(

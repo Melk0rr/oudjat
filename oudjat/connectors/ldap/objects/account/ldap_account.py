@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import Dict, List
 
 from oudjat.utils import date_format_from_flag, DATE_TIME_FLAGS, days_diff
-from ..ldap_entry import LDAPEntry
 from ..ldap_object import LDAPObject
 from . import (
     LDAPAccountFlag,
@@ -27,8 +26,8 @@ class LDAPAccount(LDAPObject):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: LDAPEntry):
-        """ Constructor """
+    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
+        """Constructor"""
 
         super().__init__(ldap_entry=ldap_entry)
 
