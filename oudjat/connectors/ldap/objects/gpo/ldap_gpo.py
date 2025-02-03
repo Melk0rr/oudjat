@@ -3,7 +3,7 @@ from enum import Enum
 from typing import List, Dict, Union
 
 from ..definitions import UUID_REG
-from ..objects import LDAPObject
+from ..ldap_object import LDAPObject
 
 from . import MS_GPPREF
 
