@@ -1,5 +1,5 @@
 from oudjat.model.assets.network import Subnet
-from oudjat.connectors.ldap.objects import LDAPObject
+from ..ldap_object import LDAPObject
 
 class LDAPSubnet(LDAPObject, Subnet):
   """ A class to describe LDAP subnet objects """
