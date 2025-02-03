@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from oudjat.connectors.ldap.objects import LDAPObject
+from ...ldap_object import LDAPObject
 from oudjat.model.assets.group import Group
 
 from . import LDAPGroupType
