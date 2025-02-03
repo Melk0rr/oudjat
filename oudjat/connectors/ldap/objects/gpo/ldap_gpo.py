@@ -2,92 +2,94 @@ import re
 from enum import Enum
 from typing import List, Dict, Union
 
-from oudjat.connectors.ldap.objects.definitions import UUID_REG
-from oudjat.connectors.ldap.objects import LDAPEntry, LDAPObject
+from ..objects.definitions import UUID_REG
+from ..objects import LDAPObject
 
 from . import MS_GPPREF
 
+
 class LDAPGPOScope(Enum):
-  """ GPO scope """
-  USER = "gPCUserExtensionNames"
-  MACHINE = "gPCMachineExtensionNames"
+    """GPO scope"""
+
+    USER = "gPCUserExtensionNames"
+    MACHINE = "gPCMachineExtensionNames"
+
 
 class LDAPGPOState(Enum):
-  ENABLED = 0
-  DISABLED = 1
-  ENFORCED = 2
+    ENABLED = 0
+    DISABLED = 1
+    ENFORCED = 2
+
 
 class LDAPGroupPolicyObject(LDAPObject):
-  """ A class to manipulate Group Policy Objects """
-  
-  # ****************************************************************
-  # Attributes & Constructors
-  def __init__(self, ldap_entry: LDAPEntry):
-    """ Constructor """
-    super().__init__(ldap_entry=ldap_entry)
+    """A class to manipulate Group Policy Objects"""
 
-    self.display_name = self.entry.get("displayName")
-    
-    self.scope = None
-    self.state = None
-    
-    wql = self.entry.get("gPCWQLFilter", None)
+    # ****************************************************************
+    # Attributes & Constructors
+    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
+        """Constructor"""
+        super().__init__(ldap_entry=ldap_entry)
 
-    if wql is not None:
-      self.state = LDAPGPOState(int(wql.split(';')[-1][0]))
-    
-    try:
-      if self.entry.get(LDAPGPOScope.USER.value) is not None:
-        self.scope = LDAPGPOScope.USER
+        self.display_name = self.entry.get("displayName")
 
-      else:
-        self.scope = LDAPGPOScope.MACHINE
+        self.scope = None
+        self.state = None
 
-    except Exception as e:
-      raise(f"LDAPGPO::Error while trying to get group policy scope\n{e}")
+        wql = self.entry.get("gPCWQLFilter", None)
 
-    guids = re.findall(UUID_REG, self.entry.get(self.scope.value))
-    self.infos = { guid: MS_GPPREF[guid] for guid in guids }
+        if wql is not None:
+            self.state = LDAPGPOState(int(wql.split(";")[-1][0]))
 
-  # ****************************************************************
-  # Methods
-  
-  def get_display_name(self) -> str:
-    """ Getter for GPO display name """
-    return self.display_name
+        try:
+            if self.entry.get(LDAPGPOScope.USER.value) is not None:
+                self.scope = LDAPGPOScope.USER
 
-  def get_infos(self) -> List[str]:
-    """ Getter for policy GUIDs """
-    return self.infos
+            else:
+                self.scope = LDAPGPOScope.MACHINE
 
-  def get_linked_objects(
-    self,
-    ldap_connector: "LDAPConnector",
-    attributes: Union[str, List[str]] = None,
-    ou: str = "*"
-  ) -> List[LDAPEntry]:
-    """ Gets the gpo linked objects """
-    search_filter = f"(gPLink={f"*{self.name}*"})(name={ou})"
-    
-    linked_entries = ldap_connector.search(
-      search_type="OU",
-      search_filter=search_filter,
-      attributes=attributes
-    )
+        except Exception as e:
+            raise (f"LDAPGPO::Error while trying to get group policy scope\n{e}")
 
-    return linked_entries
+        guids = re.findall(UUID_REG, self.entry.get(self.scope.value))
+        self.infos = {guid: MS_GPPREF[guid] for guid in guids}
 
-  def to_dict(self) -> Dict:
-    """ Converts the current instance into a dict """
-    base_dict = super().to_dict()
-    
-    return {
-      **base_dict,
-      "displayName": self.display_name,
-      "scope": self.scope.name,
-      "state": self.state.name,
-      "infos": " - ".join(self.infos.values())
-    }
+    # ****************************************************************
+    # Methods
 
-  # ****************************************************************
-  # Static methods
+    def get_display_name(self) -> str:
+        """Getter for GPO display name"""
+        return self.display_name
+
+    def get_infos(self) -> List[str]:
+        """Getter for policy GUIDs"""
+        return self.infos
+
+    def get_linked_objects(
+        self,
+        ldap_connector: "LDAPConnector",  # noqa: F821
+        attributes: Union[str, List[str]] = None,
+        ou: str = "*",
+    ) -> List["LDAPEntry"]:  # noqa: F821
+        """Gets the gpo linked objects"""
+        search_filter = f"(gPLink={f'*{self.name}*'})(name={ou})"
+
+        linked_entries = ldap_connector.search(
+            search_type="OU", search_filter=search_filter, attributes=attributes
+        )
+
+        return linked_entries
+
+    def to_dict(self) -> Dict:
+        """Converts the current instance into a dict"""
+        base_dict = super().to_dict()
+
+        return {
+            **base_dict,
+            "displayName": self.display_name,
+            "scope": self.scope.name,
+            "state": self.state.name,
+            "infos": " - ".join(self.infos.values()),
+        }
+
+    # ****************************************************************
+    # Static methods
