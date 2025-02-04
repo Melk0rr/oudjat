@@ -1,16 +1,16 @@
-import ssl
-import ldap3
 import socket
+import ssl
+from typing import TYPE_CHECKING, List, Union
 
-from typing import List, Union
-
-from oudjat.utils import ColorPrint
+import ldap3
 
 from oudjat.connectors import Connector
-from .objects import LDAPEntry, LDAPObjectType
-from .objects.gpo import LDAPGroupPolicyObject
-from .objects.subnet import LDAPSubnet
-from .objects.account import LDAPComputer, LDAPUser
+from oudjat.utils import ColorPrint
+
+from .objects import LDAPEntry, LDAPObjectType, get_ldap_class
+
+if TYPE_CHECKING:
+    from .objects import LDAPComputer, LDAPGroup, LDAPGroupPolicyObject, LDAPSubnet, LDAPUser
 
 
 class LDAPConnector(Connector):
@@ -110,7 +110,7 @@ class LDAPConnector(Connector):
                         and result["message"].split(":")[0] == "80090346"
                     ):
                         raise Exception(
-                            "Failed to bind to LDAP. LDAP channel binding or signing is required. Use -scheme ldaps -ldap-channel-binding"
+                            "LDAP channel binding or signing is required. Use -scheme ldaps -ldap-channel-binding"
                         )
 
                     raise Exception(
@@ -191,63 +191,88 @@ class LDAPConnector(Connector):
 
     def get_gpo(
         self, displayName: str = "*", name: str = "*", attributes: Union[str, List[str]] = None
-    ) -> List[LDAPGroupPolicyObject]:
+    ) -> List["LDAPGroupPolicyObject"]:
         """Specific method to retreive LDAP GPO instances"""
+        ldap_obj_type = "GPO"
         gpo_entries = self.search(
-            search_type="GPO",
+            search_type=ldap_obj_type,
             search_base=None,
             search_filter=f"(displayName={displayName})(name={name})",
             attributes=attributes,
         )
 
-        gpos = list(map(lambda entry: LDAPGroupPolicyObject(ldap_entry=entry), gpo_entries))
+        ldap_gpo_cls = get_ldap_class("GPO")
+        gpos = list(map(lambda entry: ldap_gpo_cls(ldap_entry=entry), gpo_entries))
 
         return gpos
 
     def get_subnet(
         self, search_filter: str = None, attributes: Union[str, List[str]] = None
-    ) -> List[LDAPSubnet]:
+    ) -> List["LDAPSubnet"]:
         """Specific method to retreive LDAP subnet instances"""
+        ldap_obj_type = "SUBNET"
 
         sb_dc = ",".join([f"DC={dc.lower()}" for dc in self.domain.split(".")])
 
         subnet_entries = self.search(
-            search_type="SUBNET",
+            search_type=ldap_obj_type,
             search_base=f"CN=Subnets,CN=Sites,CN=Configuration,{sb_dc}",
             search_filter=search_filter,
             attributes=attributes,
         )
 
-        subnet = list(map(lambda entry: LDAPSubnet(ldap_entry=entry), subnet_entries))
+        ldap_subnet_cls = get_ldap_class(ldap_obj_type)
+        subnet = list(map(lambda entry: ldap_subnet_cls(ldap_entry=entry), subnet_entries))
 
         return subnet
 
     def get_computer(
         self, search_filter: str = None, attributes: Union[str, List[str]] = None
-    ) -> List[LDAPComputer]:
+    ) -> List["LDAPComputer"]:
         """Specific method to retreive LDAP Computer instances"""
+        ldap_obj_type = "COMPUTER"
 
         computer_entries = self.search(
-            search_type="COMPUTER",
+            search_type=ldap_obj_type,
             search_base=None,
             search_filter=search_filter,
             attributes=attributes,
         )
 
-        computers = list(map(lambda entry: LDAPComputer(ldap_entry=entry), computer_entries))
+        ldap_computer_cls = get_ldap_class(ldap_obj_type)
+        computers = list(map(lambda entry: ldap_computer_cls(ldap_entry=entry), computer_entries))
 
         return computers
 
     def get_users(
         self, search_filter: str = None, attributes: Union[str, List[str]] = None
-    ) -> List[LDAPUser]:
+    ) -> List["LDAPUser"]:
         """Specific method to retreive LDAP User instances"""
+        ldap_obj_type = "USER"
 
         user_entries = self.search(
-            search_type="USER", search_base=None, search_filter=search_filter, attributes=attributes
+            search_type=ldap_obj_type,
+            search_base=None,
+            search_filter=search_filter,
+            attributes=attributes,
         )
 
-        users = list(map(lambda entry: LDAPUser(ldap_entry=entry), user_entries))
+        ldap_user_cls = get_ldap_class(ldap_obj_type)
+        users = list(map(lambda entry: ldap_user_cls(ldap_entry=entry), user_entries))
 
         return users
+
+    def get_group_members(self, ldap_group: "LDAPGroup", recursive: bool = False) -> "LDAPObject":
+        for ref in self.get_member_refs():
+            # Search for the ref in LDAP server
+            ref_search = self.search(search_filter=f"(distinguishedName={ref})")
+
+            if len(ref_search) > 0:
+                ref_search = ref_search[0]
+                obj_class = ref_search.get_type()
+
+                new_member = get_ldap_class(ldap_group.entry.get_type())
+
+                if ldap_group.entry.get_type() == "GROUP" and recursive:
+                    new_member.get_members()
 
