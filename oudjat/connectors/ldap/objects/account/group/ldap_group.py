@@ -40,6 +40,10 @@ class LDAPGroup(LDAPObject, Group):
         recursive: bool = False,
     ) -> List[LDAPObject]:
         """Retreives the group members"""
+        if len(self.members.keys()) > 0:
+            return super().get_members()
+
+        return ldap_connector.get_group_members(ldap_group=self, recursive=recursive)
 
 
     def to_dict(self) -> Dict:
