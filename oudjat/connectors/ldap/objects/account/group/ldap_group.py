@@ -1,10 +1,12 @@
-from typing import Dict, List
+from typing import TYPE_CHECKING, Dict, List
 
-from ...ldap_object import LDAPObject
 from oudjat.model.assets.group import Group
 
+from ...ldap_object import LDAPObject
 from . import LDAPGroupType
 
+if TYPE_CHECKING:
+    from oudjat.connectors.ldap import LDAPConnector
 
 class LDAPGroup(LDAPObject, Group):
     """A class to handle LDAP group objects"""
@@ -34,26 +36,11 @@ class LDAPGroup(LDAPObject, Group):
 
     def get_members(
         self,
-        ldap_connector: "LDAPConnector",  # noqa: F821
+        ldap_connector: "LDAPConnector",
         recursive: bool = False,
     ) -> List[LDAPObject]:
         """Retreives the group members"""
 
-        for ref in self.get_member_refs():
-            # Search for the ref in LDAP server
-            ref_search = ldap_connector.search(search_filter=f"(distinguishedName={ref})")
-
-            if len(ref_search) > 0:
-                ref_search = ref_search[0]
-                obj_class = ref_search.get("objectClass")
-
-                new_member = None
-
-                if self.entry.get_type() == "GROUP":
-                    new_member = LDAPGroup(ldap_entry=ref_search)
-
-                    if recursive:
-                        new_member.get_members()
 
     def to_dict(self) -> Dict:
         """Converts the current instance into a dictionary"""
