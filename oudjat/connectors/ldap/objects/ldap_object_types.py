@@ -2,6 +2,7 @@ from enum import Enum
 
 from .account import LDAPComputer, LDAPGroup, LDAPUser
 from .gpo import LDAPGroupPolicyObject
+from .ldap_object import LDAPObject
 from .subnet import LDAPSubnet
 
 
@@ -139,3 +140,7 @@ class LDAPObjectType(Enum):
         ],
     }
 
+
+def get_ldap_class(object_type: str) -> LDAPObject:
+    """Returns an ldap object instance based on given type"""
+    return LDAPObjectType[object_type.upper()].value["pythonClass"]
