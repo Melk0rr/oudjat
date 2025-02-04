@@ -10,7 +10,14 @@ from oudjat.utils import ColorPrint
 from .objects import LDAPEntry, LDAPObjectType, get_ldap_class
 
 if TYPE_CHECKING:
-    from .objects import LDAPComputer, LDAPGroup, LDAPGroupPolicyObject, LDAPSubnet, LDAPUser
+    from .objects import (
+        LDAPComputer,
+        LDAPGroup,
+        LDAPGroupPolicyObject,
+        LDAPObject,
+        LDAPSubnet,
+        LDAPUser,
+    )
 
 
 class LDAPConnector(Connector):
@@ -263,7 +270,8 @@ class LDAPConnector(Connector):
         return users
 
     def get_group_members(self, ldap_group: "LDAPGroup", recursive: bool = False) -> "LDAPObject":
-        for ref in self.get_member_refs():
+        """Retreives and returns the members of the given group"""
+        for ref in ldap_group.get_member_refs():
             # Search for the ref in LDAP server
             ref_search = self.search(search_filter=f"(distinguishedName={ref})")
 
@@ -276,3 +284,6 @@ class LDAPConnector(Connector):
                 if ldap_group.entry.get_type() == "GROUP" and recursive:
                     new_member.get_members()
 
+                ldap_group.add_member(new_member)
+
+        return ldap_group.get_members()
