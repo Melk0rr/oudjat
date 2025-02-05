@@ -271,19 +271,20 @@ class LDAPConnector(Connector):
 
     def get_group_members(self, ldap_group: "LDAPGroup", recursive: bool = False) -> "LDAPObject":
         """Retreives and returns the members of the given group"""
+        members = []
         for ref in ldap_group.get_member_refs():
             # Search for the ref in LDAP server
             ref_search = self.search(search_filter=f"(distinguishedName={ref})")
 
             if len(ref_search) > 0:
-                ref_search = ref_search[0]
+                ref_search: LDAPEntry = ref_search[0]
                 obj_class = ref_search.get_type()
 
-                new_member = get_ldap_class(ldap_group.entry.get_type())
+                new_member = get_ldap_class(obj_class)(ldap_entry=ref_search)
 
                 if ldap_group.entry.get_type() == "GROUP" and recursive:
-                    new_member.get_members()
+                    new_member.get_members(ldap_connector=self, recursive=recursive)
 
-                ldap_group.add_member(new_member)
+                members.append(new_member)
 
-        return ldap_group.get_members()
+        return members
