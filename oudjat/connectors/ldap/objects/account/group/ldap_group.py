@@ -8,6 +8,7 @@ from . import LDAPGroupType
 if TYPE_CHECKING:
     from oudjat.connectors.ldap import LDAPConnector
 
+
 class LDAPGroup(LDAPObject, Group):
     """A class to handle LDAP group objects"""
 
@@ -43,8 +44,53 @@ class LDAPGroup(LDAPObject, Group):
         if len(self.members.keys()) > 0:
             return super().get_members()
 
-        return ldap_connector.get_group_members(ldap_group=self, recursive=recursive)
+        direct_members = ldap_connector.get_group_members(ldap_group=self, recursive=recursive)
 
+        for member in direct_members:
+            self.add_member(member)
+
+        return self.members
+
+    def get_sub_groups(
+        self, ldap_connector: "LDAPConnector", recursive: bool = False
+    ) -> List["LDAPGroup"]:
+        """Returns child group of the current group"""
+        if len(self.members.keys()) == 0:
+            self.get_members()
+
+        sub_groups = []
+        for member in self.members.values():
+            if member.get_type().lower() == "group":
+                sub_groups.append(member)
+
+                if recursive:
+                    sub_groups.extend(
+                        member.get_sub_groups(ldap_connector=ldap_connector, recursive=recursive)
+                    )
+
+        return sub_groups
+
+    def get_non_group_members(
+        self, ldap_connector: "LDAPConnector", recursive: bool = False
+    ) -> List["LDAPObject"]:
+        """Returns non group members of the current group"""
+        if len(self.members.keys()) == 0:
+            self.get_members()
+
+        members = []
+        for member in self.members.values():
+            if member.get_type().lower() != "group":
+                members.append(member)
+
+            else:
+                if recursive:
+                    members.extend(
+                        member.get_non_group_members(
+                            ldap_connector=ldap_connector, recursive=recursive
+                        )
+                    )
+
+        return members
 
     def to_dict(self) -> Dict:
         """Converts the current instance into a dictionary"""
