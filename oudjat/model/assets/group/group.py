@@ -1,6 +1,7 @@
 from typing import List, Dict, Union
 
-from . import Asset
+from ..asset import Asset
+from ..asset_type import AssetType
 
 
 class GroupMemberList(dict):
@@ -22,7 +23,7 @@ class Group(Asset):
     ):
         """Constructor"""
 
-        super().__init__(id=id, name=name, label=label, description=description)
+        super().__init__(id=id, name=name, label=label, description=description, asset_type=AssetType.GROUP)
 
         self.members = GroupMemberList()
 
