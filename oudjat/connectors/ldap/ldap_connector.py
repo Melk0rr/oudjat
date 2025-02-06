@@ -166,6 +166,8 @@ class LDAPConnector(Connector):
         if search_base is None:
             search_base = self.default_search_base
 
+        # INFO: If the search type is default : final filter is equal to provided search filter
+        # Else final filter is a combination of the filter matching search type and provided search filter
         formated_filter = LDAPObjectType[search_type].value.get("filter", "")
         if search_type.lower() == "default" and search_filter is not None:
             formated_filter = search_filter
@@ -273,6 +275,7 @@ class LDAPConnector(Connector):
         for ref in ldap_group.get_member_refs():
             # Search for the ref in LDAP server
 
+            # WARNING: Must implement an LDAPFilter class to handle ldap filters and potentially escape characters
             ref = ldap3.utils.conv.escape_filter_chars(ref)
             ref_search = self.search(search_filter=f"(distinguishedName={ref})")
 
