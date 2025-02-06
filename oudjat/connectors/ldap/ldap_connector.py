@@ -280,9 +280,9 @@ class LDAPConnector(Connector):
                 ref_search: LDAPEntry = ref_search[0]
                 obj_class = ref_search.get_type()
 
-                new_member = get_ldap_class(obj_class)(ldap_entry=ref_search)
+                new_member: "LDAPObject" = get_ldap_class(obj_class)(ldap_entry=ref_search)
 
-                if ldap_group.entry.get_type() == "GROUP" and recursive:
+                if new_member.get_type() == "GROUP" and recursive:
                     new_member.get_members(ldap_connector=self, recursive=recursive)
 
                 members.append(new_member)
