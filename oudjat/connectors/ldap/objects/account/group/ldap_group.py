@@ -42,7 +42,7 @@ class LDAPGroup(LDAPObject, Group):
 
     def get_member_refs(self) -> List[str]:
         """Getter for member refs"""
-        return self.entry.get("member")
+        return self.entry.get("member") or []
 
     def get_members(
         self,
