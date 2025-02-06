@@ -16,7 +16,7 @@ class LDAPGroup(LDAPObject, Group):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry"):
+    def __init__(self, ldap_entry: "LDAPEntry", ldap_parent_group: "LDAPGroup" = None):
         """Constructor"""
 
         super().__init__(ldap_entry=ldap_entry)
@@ -88,7 +88,7 @@ class LDAPGroup(LDAPObject, Group):
 
         members = []
         for member in self.members.values():
-            if member.get_type().lower() != "group":
+            if not isinstance(member, LDAPGroup):
                 members.append(member)
 
             else:
@@ -100,6 +100,22 @@ class LDAPGroup(LDAPObject, Group):
                     )
 
         return members
+
+    def get_members_flat(self, ldap_connector: "LDAPConnector") -> List["LDAPObject"]:
+        """Returns a flat list of the current group members"""
+        if len(self.members.keys()) == 0:
+            self.get_members()
+
+        members = []
+        for member in self.members.values():
+            if isinstance(member, LDAPGroup):
+                members.extend(member.get_members_flat(ldap_connector=ldap_connector))
+
+            else:
+                member.append(member)
+
+        return members
+
 
     def to_dict(self) -> Dict:
         """Converts the current instance into a dictionary"""
