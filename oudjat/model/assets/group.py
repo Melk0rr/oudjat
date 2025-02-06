@@ -29,7 +29,7 @@ class Group(Asset):
     # ****************************************************************
     # Methods
 
-    def get_members(self) -> Dict[Asset]:
+    def get_members(self) -> Dict[str, Asset]:
         """Returns members of the group"""
         return self.members
 
