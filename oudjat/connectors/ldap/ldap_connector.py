@@ -117,11 +117,11 @@ class LDAPConnector(Connector):
                         and result["message"].split(":")[0] == "80090346"
                     ):
                         raise Exception(
-                            "LDAP channel binding or signing is required. Use -scheme ldaps -ldap-channel-binding"
+                            "LDAP channel binding required. Use -scheme ldaps -ldap-channel-binding"
                         )
 
                     raise Exception(
-                        f"Failed to authenticate to LDAP: ({result['description']}) {result['message']}]"
+                        f"Failed LDAP authentication ({result['description']}) {result['message']}]"
                     )
 
         if ldap_server.schema is None:
@@ -130,7 +130,7 @@ class LDAPConnector(Connector):
             if ldap_connection.result["result"] != 0:
                 if ldap_connection.result["message"].split(":")[0] == "000004DC":
                     raise Exception(
-                        "Failed to bind to LDAP. This is most likely because of an invalid username specified for logon"
+                        "Failed to bind to LDAP. Most likely due to an invalid username"
                     )
 
             if ldap_server.schema is None:
@@ -167,7 +167,7 @@ class LDAPConnector(Connector):
             search_base = self.default_search_base
 
         # INFO: If the search type is default : final filter is equal to provided search filter
-        # Else final filter is a combination of the filter matching search type and provided search filter
+        # Else final filter is a combination of filter matching search type + provided search filter
         formated_filter = LDAPObjectType[search_type].value.get("filter", "")
         if search_type.lower() == "default" and search_filter is not None:
             formated_filter = search_filter
@@ -275,9 +275,9 @@ class LDAPConnector(Connector):
         for ref in ldap_group.get_member_refs():
             # Search for the ref in LDAP server
 
-            # WARNING: Must implement an LDAPFilter class to handle ldap filters and potentially escape characters
-            ref = ldap3.utils.conv.escape_filter_chars(ref)
-            ref_search = self.search(search_filter=f"(distinguishedName={ref})")
+            # WARNING: Must implement an LDAPFilter class to handle potential escape characters
+            escaped_ref = ldap3.utils.conv.escape_filter_chars(ref)
+            ref_search = self.search(search_filter=f"(distinguishedName={escaped_ref})")
 
             if len(ref_search) > 0:
                 ref_search: LDAPEntry = ref_search[0]
@@ -291,3 +291,9 @@ class LDAPConnector(Connector):
                 members.append(new_member)
 
         return members
+
+    def is_object_member_of(
+        self, ldap_object: "LDAPObject", ldap_group: "LDAPGroup", indirect: bool = False
+    ) -> bool:
+        """Checks wheither the given object is member of the giver group"""
+        
