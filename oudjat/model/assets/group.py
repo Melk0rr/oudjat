@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import List, Dict, Union
 
 from . import Asset
 
@@ -28,9 +28,14 @@ class Group(Asset):
 
     # ****************************************************************
     # Methods
+
     def get_members(self) -> Dict[Asset]:
         """Returns members of the group"""
         return self.members
+
+    def get_member_names(self) -> List[str]:
+        """Returns the list of member names"""
+        return [ m.get_name() for m in self.members.values() ]
 
     def add_member(self, member: Asset) -> None:
         """Adds a new member to the member list"""
