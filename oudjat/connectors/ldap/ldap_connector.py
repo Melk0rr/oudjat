@@ -174,8 +174,6 @@ class LDAPConnector(Connector):
             if search_filter:
                 formated_filter = f"(&{formated_filter}{search_filter})"
 
-        formated_filter = ldap3.utils.conv.escape_filter_chars(formated_filter)
-
         if attributes is None:
             attributes = LDAPObjectType[search_type].value.get("attributes", "*")
 
@@ -274,6 +272,8 @@ class LDAPConnector(Connector):
         members = []
         for ref in ldap_group.get_member_refs():
             # Search for the ref in LDAP server
+
+            ref = ldap3.utils.conv.escape_filter_chars(ref)
             ref_search = self.search(search_filter=f"(distinguishedName={ref})")
 
             if len(ref_search) > 0:
