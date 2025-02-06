@@ -174,7 +174,7 @@ class LDAPConnector(Connector):
             if search_filter:
                 formated_filter = f"(&{formated_filter}{search_filter})"
 
-        # print(formated_filter)
+        formated_filter = ldap3.utils.conv.escape_filter_chars(formated_filter)
 
         if attributes is None:
             attributes = LDAPObjectType[search_type].value.get("attributes", "*")
