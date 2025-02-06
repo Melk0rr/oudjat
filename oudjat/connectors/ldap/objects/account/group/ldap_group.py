@@ -7,6 +7,7 @@ from .ldap_group_types import LDAPGroupType
 
 if TYPE_CHECKING:
     from oudjat.connectors.ldap import LDAPConnector
+
     from ...ldap_entry import LDAPEntry
 
 
@@ -20,13 +21,9 @@ class LDAPGroup(LDAPObject, Group):
         """Constructor"""
 
         super().__init__(ldap_entry=ldap_entry)
-        
+
         Group.__init__(
-            self,
-            id=self.uuid,
-            name=self.name,
-            label=self.dn,
-            description=self.description
+            self, id=self.uuid, name=self.name, label=self.dn, description=self.description
         )
 
     # ****************************************************************
@@ -116,20 +113,14 @@ class LDAPGroup(LDAPObject, Group):
 
         return members
 
-    def is_member(self, ldap_connector: "LDAPConnector", ldap_object: "LDAPObject", extended: bool = False) -> bool:
+    def has_member(
+        self, ldap_connector: "LDAPConnector", ldap_object: "LDAPObject", extended: bool = False
+    ) -> bool:
         """Checks if the provided object is a member of the current group"""
-        if len(self.members.keys()) == 0:
-            self.get_members()
 
-        member_ref_list = None
-
-        if extended:
-            member_ref_list = self.get_members_flat(ldap_connector=ldap_connector)
-
-        else:
-            member_ref_list = self.members.values()
-
-        return ldap_object.get_uuid() in [ m.get_id() for m in member_ref_list ]
+        return ldap_connector.is_object_member_of(
+            ldap_object=ldap_object, ldap_group=self, extended=extended
+        )
 
     def to_dict(self) -> Dict:
         """Converts the current instance into a dictionary"""
@@ -138,5 +129,6 @@ class LDAPGroup(LDAPObject, Group):
             "group_type": self.get_group_type().name,
             "member_names": self.get_member_names(),
         }
+
 
 # TODO: implement an LDAPGroupList to handle lists of LDAPGroup and build membership

@@ -293,7 +293,15 @@ class LDAPConnector(Connector):
         return members
 
     def is_object_member_of(
-        self, ldap_object: "LDAPObject", ldap_group: "LDAPGroup", indirect: bool = False
+        self, ldap_object: "LDAPObject", ldap_group: "LDAPGroup", extended: bool = False
     ) -> bool:
         """Checks wheither the given object is member of the giver group"""
-        
+        member_ref_list = None
+
+        if extended:
+            member_ref_list = ldap_group.get_members_flat(ldap_connector=self)
+
+        else:
+            member_ref_list = ldap_group.members.values()
+
+        return ldap_object.get_uuid() in [ m.get_id() for m in member_ref_list ]
