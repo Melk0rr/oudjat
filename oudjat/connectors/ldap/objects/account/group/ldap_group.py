@@ -116,6 +116,20 @@ class LDAPGroup(LDAPObject, Group):
 
         return members
 
+    def is_member(self, ldap_connector: "LDAPConnector", ldap_object: "LDAPObject", extended: bool = False) -> bool:
+        """Checks if the provided object is a member of the current group"""
+        if len(self.members.keys()) == 0:
+            self.get_members()
+
+        member_ref_list = None
+
+        if extended:
+            member_ref_list = self.get_members_flat(ldap_connector=ldap_connector)
+
+        else:
+            member_ref_list = self.members.values()
+
+        return ldap_object.get_uuid() in [ m.get_id() for m in member_ref_list ]
 
     def to_dict(self) -> Dict:
         """Converts the current instance into a dictionary"""
