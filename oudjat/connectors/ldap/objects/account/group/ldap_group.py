@@ -3,10 +3,11 @@ from typing import TYPE_CHECKING, Dict, List
 from oudjat.model.assets.group import Group
 
 from ...ldap_object import LDAPObject
-from . import LDAPGroupType
+from .ldap_group_types import LDAPGroupType
 
 if TYPE_CHECKING:
     from oudjat.connectors.ldap import LDAPConnector
+    from ...ldap_entry import LDAPEntry
 
 
 class LDAPGroup(LDAPObject, Group):
@@ -15,7 +16,7 @@ class LDAPGroup(LDAPObject, Group):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
+    def __init__(self, ldap_entry: "LDAPEntry"):
         """Constructor"""
 
         super().__init__(ldap_entry=ldap_entry)
@@ -94,4 +95,8 @@ class LDAPGroup(LDAPObject, Group):
 
     def to_dict(self) -> Dict:
         """Converts the current instance into a dictionary"""
-        return {**super().to_dict(), "group_type": self.get_group_type().name}
+        return {
+            **super().to_dict(),
+            "group_type": self.get_group_type().name,
+            "member_names": self.get_member_names(),
+        }
