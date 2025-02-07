@@ -25,7 +25,7 @@ class TenableSCConnector(Connector):
             target = f"{scheme}://{target}"
 
         super().__init__(target=urlparse(target), service_name=service_name, use_credentials=True)
-        self.target = urlparse(f"{self.target.scheme}://{self.target.netloc}:{port}")
+        self.target = urlparse(f"{self.target.scheme}://{self.target.netloc}")
 
         self.repos = None
 
@@ -38,7 +38,7 @@ class TenableSCConnector(Connector):
         connection = None
         try:
             connection = TenableSC(
-                host=self.target,
+                host=self.target.netloc,
                 access_key=self.credentials.username,
                 secret_key=self.credentials.password,
             )
