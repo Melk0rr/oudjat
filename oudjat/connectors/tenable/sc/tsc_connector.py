@@ -13,6 +13,7 @@ class TenableSCSeverity(Enum):
     HIGH = 3
     MEDIUM = 2
     LOW = 1
+    INFO = 0
 
 class TenableSCConnector(Connector):
     # ****************************************************************
