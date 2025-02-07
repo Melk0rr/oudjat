@@ -1,1 +1,1 @@
-from .tsc_connector import TenabeSCConnector
+from .tsc_connector import TenableSCConnector
