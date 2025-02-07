@@ -29,6 +29,10 @@ class TenabeSCConnector(Connector):
 
         self.repos = None
 
+    def get_repos(self):
+        """Returns repositories list"""
+        return self.repos
+
     def connect(self) -> None:
         """Connects to API using connector parameters"""
         connection = None
