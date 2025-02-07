@@ -1,5 +1,6 @@
 import re
 
+from enum import Enum
 from urllib.parse import urlparse
 from typing import Dict
 from tenable.sc import TenableSC
@@ -7,6 +8,11 @@ from tenable.sc import TenableSC
 from oudjat.utils import ColorPrint
 from oudjat.connectors.connector import Connector
 
+class TenableSCSeverity(Enum):
+    CRITICAL = 4
+    HIGH = 3
+    MEDIUM = 2
+    LOW = 1
 
 class TenableSCConnector(Connector):
     # ****************************************************************
@@ -55,6 +61,20 @@ class TenableSCConnector(Connector):
         del self.connection
         self.connection = None
         self.repos = None
+
+    def get_vulns(self) -> Dict:
+        """Returns vulnerabilities sorted in a dictionary"""
+        if self.connection is None:
+            raise ConnectionError("Connection not initialized")
+
+        sevs = { sev_name: [] for sev_name in TenableSCSeverity._member_names_ }
+
+        exploitable_vulns = self.connection.analysis.vulns(("exploitAvailable", "=", "true"))
+        for vuln in exploitable_vulns:
+            sevs[vuln["severity"]["name"].upper()].append(vuln)
+
+        return sevs
+
 
     def get_critical_vulns(self) -> Dict:
         """Getter for current vulnerabilities"""
