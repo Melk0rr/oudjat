@@ -1,17 +1,60 @@
+import re
+
+from urllib.parse import urlparse
 from typing import Dict
-from tenable import sc
+from tenable.sc import TenabeSC
 
-class TenabeSCConnector:
-  # ****************************************************************
-  # Attributes & Constructors
+from oudjat.utils import ColorPrint
+from oudjat.connectors.connector import Connector
 
-  def __init__(self, url: str, access_key: str, secret_key: str):
-    """ Constructor """
-    
-    self.api = sc.TenableSC(url, access_key=access_key, secret_key=secret_key)
-    self.repos = self.api.repositories.list()
-    
 
-  def get_critical_vulns(self) -> Dict:
-    """ Getter for current vulnerabilities """
-    return self.api.analysis.vulns(('severity', '=', '4,3'),('exploitAvailable', '=', 'true'))
+class TenabeSCConnector(Connector):
+    # ****************************************************************
+    # Attributes & Constructors
+
+    def __init__(
+        self, target: str, service_name: str = "OudjatTenableSCAPI", port: int = 443
+    ) -> None:
+        """Constructor"""
+
+        scheme = "http"
+        if port == 443:
+            scheme += "s"
+
+        if not re.match(r"http(s?):", target):
+            target = f"{scheme}://{target}"
+
+        super().__init__(target=urlparse(target), service_name=service_name, use_credentials=True)
+        self.target = urlparse(f"{self.target.scheme}://{self.target.netloc}:{port}")
+
+        self.repos = None
+
+    def connect(self) -> None:
+        """Connects to API using connector parameters"""
+        connection = None
+        try:
+            connection = TenabeSC(
+                host=self.target,
+                access_key=self.credentials.username,
+                secret_key=self.credentials.password,
+            )
+
+        except Exception as e:
+            raise e
+
+        ColorPrint.green(f"Connected to {self.target}")
+        self.connection = connection
+        self.repos = self.connection.repositories.list()
+
+    def disconnect(self) -> None:
+        """Disconnect from API"""
+        del self.connection
+        self.connection = None
+        self.repos = None
+
+    def get_critical_vulns(self) -> Dict:
+        """Getter for current vulnerabilities"""
+        if self.connection is None:
+            raise ConnectionError("Connection not initialized")
+
+        return self.connection.analysis.vulns(("severity", "=", "4,3"), ("exploitAvailable", "=", "true"))
