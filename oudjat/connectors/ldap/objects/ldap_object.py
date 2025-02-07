@@ -1,6 +1,10 @@
-from typing import Dict, List
+from typing import Dict, List, TYPE_CHECKING
 
 from oudjat.utils import DATE_TIME_FLAGS, date_format_from_flag
+
+if TYPE_CHECKING:
+    from ..ldap_connector import LDAPConnector
+    from .account.group.ldap_group import LDAPGroup
 
 
 def parse_dn(dn: str) -> Dict:
@@ -98,6 +102,15 @@ class LDAPObject:
     def get_change_date(self) -> str:
         """Getter for ldap object change date"""
         return self.change_date
+
+    def is_member_of(
+        self, ldap_connector: "LDAPConnector", ldap_group: "LDAPGroup", extended: bool = False
+    ) -> bool:
+        """Checks wheither the current user is a member of the provided group"""
+
+        return ldap_connector.is_object_member_of(
+            ldap_object=self, ldap_group=ldap_group, extended=extended
+        )
 
     def to_dict(self) -> Dict:
         """Converts the current instance into a dict"""
