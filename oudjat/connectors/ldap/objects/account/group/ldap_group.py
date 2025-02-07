@@ -62,7 +62,7 @@ class LDAPGroup(LDAPObject, Group):
     ) -> List["LDAPGroup"]:
         """Returns child group of the current group"""
         if len(self.members.keys()) == 0:
-            self.get_members()
+            self.get_members(ldap_connector=ldap_connector, recursive=recursive)
 
         sub_groups = []
         for member in self.members.values():
@@ -81,7 +81,7 @@ class LDAPGroup(LDAPObject, Group):
     ) -> List["LDAPObject"]:
         """Returns non group members of the current group"""
         if len(self.members.keys()) == 0:
-            self.get_members()
+            self.get_members(ldap_connector=ldap_connector, recursive=recursive)
 
         members = []
         for member in self.members.values():
@@ -101,7 +101,7 @@ class LDAPGroup(LDAPObject, Group):
     def get_members_flat(self, ldap_connector: "LDAPConnector") -> List["LDAPObject"]:
         """Returns a flat list of the current group members"""
         if len(self.members.keys()) == 0:
-            self.get_members()
+            self.get_members(ldap_connector=ldap_connector, recursive=True)
 
         members = []
         for member in self.members.values():
