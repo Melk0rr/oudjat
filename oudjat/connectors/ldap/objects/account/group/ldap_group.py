@@ -109,7 +109,7 @@ class LDAPGroup(LDAPObject, Group):
                 members.extend(member.get_members_flat(ldap_connector=ldap_connector))
 
             else:
-                member.append(member)
+                members.append(member)
 
         return members
 
