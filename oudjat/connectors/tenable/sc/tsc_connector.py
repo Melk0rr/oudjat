@@ -46,7 +46,7 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-        ColorPrint.green(f"Connected to {self.target}")
+        ColorPrint.green(f"Connected to {self.target.netloc}")
         self.connection = connection
         self.repos = self.connection.repositories.list()
 
