@@ -8,7 +8,7 @@ from oudjat.utils import ColorPrint
 from oudjat.connectors.connector import Connector
 
 
-class TenabeSCConnector(Connector):
+class TenableSCConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
 
@@ -37,7 +37,7 @@ class TenabeSCConnector(Connector):
         """Connects to API using connector parameters"""
         connection = None
         try:
-            connection = TenabeSC(
+            connection = TenableSC(
                 host=self.target,
                 access_key=self.credentials.username,
                 secret_key=self.credentials.password,
