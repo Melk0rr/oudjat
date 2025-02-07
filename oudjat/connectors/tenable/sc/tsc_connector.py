@@ -2,7 +2,7 @@ import re
 
 from urllib.parse import urlparse
 from typing import Dict
-from tenable.sc import TenabeSC
+from tenable.sc import TenableSC
 
 from oudjat.utils import ColorPrint
 from oudjat.connectors.connector import Connector
