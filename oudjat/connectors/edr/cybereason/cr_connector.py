@@ -1,16 +1,14 @@
-import re
 import json
 import math
-import requests
-
+import re
+from typing import Dict, List, Union
 from urllib.parse import urlparse
-from typing import List, Dict, Union
 
-from oudjat.utils import ColorPrint
-from oudjat.utils import unixtime_to_str
+import requests
 
 from oudjat.connectors import Connector
 from oudjat.connectors.edr.cybereason import CybereasonEndpoint
+from oudjat.utils import ColorPrint, unixtime_to_str
 
 
 class CybereasonEntry(dict):
@@ -196,7 +194,6 @@ class CybereasonConnector(Connector):
             file_name = [file_name]
 
         file_filters = [{"fieldName": "fileName", "values": file_name, "operator": "Equals"}]
-        # return self.search(endpoint="FILES", search_filter=search_filter, limit=limit, fileFilters=file_filters)
 
         if limit is None:
             limit = CybereasonEndpoint.FILES.value.get("limit")
