@@ -1,12 +1,13 @@
 import re
-
 from enum import Enum
-from urllib.parse import urlparse
 from typing import Dict
+from urllib.parse import urlparse
+
 from tenable.sc import TenableSC
 
-from oudjat.utils import ColorPrint
 from oudjat.connectors.connector import Connector
+from oudjat.utils import ColorPrint
+
 
 class TenableSCSeverity(Enum):
     CRITICAL = 4
@@ -82,4 +83,6 @@ class TenableSCConnector(Connector):
         if self.connection is None:
             raise ConnectionError("Connection not initialized")
 
-        return self.connection.analysis.vulns(("severity", "=", "4,3"), ("exploitAvailable", "=", "true"))
+        severity_filter = ("severity", "=", "4,3")
+        exploit_filter = ("exploitAvailable", "=", "true")
+        return self.connection.analysis.vulns(severity_filter, exploit_filter)
