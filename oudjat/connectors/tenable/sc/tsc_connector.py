@@ -1,5 +1,4 @@
 import re
-from enum import Enum
 from typing import Dict, List, Tuple, Union
 from urllib.parse import urlparse
 
@@ -8,13 +7,8 @@ from tenable.sc import TenableSC
 from oudjat.connectors.connector import Connector
 from oudjat.utils import ColorPrint
 
-
-class TenableSCSeverity(Enum):
-    CRITICAL = 4
-    HIGH = 3
-    MEDIUM = 2
-    LOW = 1
-    INFO = 0
+from .tsc_severities import TenableSCSeverity
+from .tsc_vuln import TenableSCVulns
 
 
 class TenableSCConnector(Connector):
@@ -41,11 +35,10 @@ class TenableSCConnector(Connector):
         self.target = urlparse(f"{self.target.scheme}://{self.target.netloc}")
         self.connection: TenableSC = None
         self.repos = None
-
-        self.reset_vulns()
+        self.vulns: TenableSCVulns = None
 
     def get_vuln_number(self, *severities: List[str]) -> int:
-        """Returns a number of vulnerabilities currently retreived based on the provided severities"""
+        """Returns a number of vulnerabilities currently retreived based on provided severities"""
         if severities is None:
             severities = TenableSCSeverity._member_names_
 
@@ -76,6 +69,7 @@ class TenableSCConnector(Connector):
         ColorPrint.green(f"Connected to {self.target.netloc}")
         self.connection = connection
         self.repos = self.connection.repositories.list()
+        self.vulns = TenableSCVulns()
 
     def check_connection(self) -> None:
         """Checks if the connection is initialized"""
@@ -87,15 +81,6 @@ class TenableSCConnector(Connector):
         del self.connection
         self.connection = None
         self.repos = None
-
-    def reset_vulns(self, *severities: List[str]) -> None:
-        """Resets vulns list"""
-        if severities is None:
-            severities = TenableSCSeverity._member_names_
-
-        for sev in severities:
-            if sev.upper() in TenableSCSeverity._member_names_:
-                self.vulns[sev.upper()].clear()
 
     def search(self, *search_filter: List[Tuple], search_type: str = "vulns") -> List:
         """Searches the API for elements"""
@@ -120,30 +105,4 @@ class TenableSCConnector(Connector):
         """Searches for vulns"""
         return self.search(search_filter=search_filter)
 
-    def add_vuln(self, vuln: Union[Dict, List[Dict]]) -> None:
-        """Adds a vuln to the connector vuln dictionary"""
-        if not isinstance(vuln, list):
-            vuln = [vuln]
-
-        for v in vuln:
-            self.vulns[v["severity"]["name"].upper()] = v
-
-    def build_severity_filter(self, *severities: List[str]) -> Tuple:
-        """Returns a severity filter based on the provided severities"""
-        return ("severity", "=", ','.join([ TenableSCSeverity[sev] for sev in severities ]))
-
-    def get_vulns(self, *severities: List[str]) -> Dict:
-        """Getter for the currently retreived vulnerabilities"""
-        if self.connection is None:
-            return None
-
-        filters = [ self.BUILTIN_FILTERS["exploitable"] ]
-        if severities is not None:
-            filters += self.build_severity_filter(severities)
-
-        if self.get_vuln_number() == 0:
-            exploitable_vulns = self.search_vulns(*filters)
-            self.add_vuln(exploitable_vulns)
-
-        return { key: self.vulns[key] for key in severities }
 
