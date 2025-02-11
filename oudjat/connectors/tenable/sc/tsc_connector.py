@@ -85,4 +85,6 @@ class TenableSCConnector(Connector):
 
         severity_filter = ("severity", "=", "4,3")
         exploit_filter = ("exploitAvailable", "=", "true")
-        return self.connection.analysis.vulns(severity_filter, exploit_filter)
+
+        search = self.connection.analysis.vulns(severity_filter, exploit_filter)
+        return list(search)
