@@ -31,6 +31,11 @@ class TenableSCVulns(dict):
 
         return { key: self.vulns[key] for key in severities }
 
+    def search(self, *search_filter: List[Tuple]) -> List:
+        """Searches for vulns"""
+        search = self.tsc.analysis.vuln(search_filter)
+        return list(search)
+
     def reset(self, *severities: List[str]) -> None:
         """Resets vulns list"""
         if severities is None:
@@ -38,7 +43,7 @@ class TenableSCVulns(dict):
 
         for sev in severities:
             if sev.upper() in TenableSCSeverity._member_names_:
-                self.vulns[sev.upper()].clear()
+                self[sev.upper()].clear()
 
     def add_vuln(self, vuln: Union[Dict, List[Dict]]) -> None:
         """Adds a vuln to the connector vuln dictionary"""
@@ -46,7 +51,7 @@ class TenableSCVulns(dict):
             vuln = [vuln]
 
         for v in vuln:
-            self.vulns[v["severity"]["name"].upper()] = v
+            self[v["severity"]["name"].upper()] = v
 
     def build_severity_filter(self, *severities: List[str]) -> Tuple:
         """Returns a severity filter based on the provided severities"""

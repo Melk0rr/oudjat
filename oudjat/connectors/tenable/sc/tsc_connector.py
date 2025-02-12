@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List, Tuple, Union
+from typing import List, Tuple
 from urllib.parse import urlparse
 
 from tenable.sc import TenableSC
@@ -87,7 +87,7 @@ class TenableSCConnector(Connector):
         self.check_connection()
 
         search_type = search_type.upper()
-        search_options = {"VULNS": self.connection.analysis.vulns}
+        search_options = {"VULNS": self.vulns.search}
 
         if search_type not in search_options.keys():
             raise ValueError(f"Invalid search type {search_type}")
@@ -100,9 +100,4 @@ class TenableSCConnector(Connector):
             raise e
 
         return list(search)
-
-    def search_vulns(self, *search_filter: List[Tuple]) -> List:
-        """Searches for vulns"""
-        return self.search(search_filter=search_filter)
-
 
