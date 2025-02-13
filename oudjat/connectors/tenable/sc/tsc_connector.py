@@ -37,19 +37,11 @@ class TenableSCConnector(Connector):
         self.repos = None
         self.vulns: TenableSCVulns = None
 
-    def get_vuln_number(self, *severities: List[str]) -> int:
-        """Returns a number of vulnerabilities currently retreived based on provided severities"""
-        if severities is None:
-            severities = TenableSCSeverity._member_names_
+    def get_vulns(self) -> TenableSCVulns:
+        """Returns a TenableSCVulns instance"""
+        return self.vulns
 
-        count = 0
-        for sev in severities:
-            if sev.upper() in TenableSCSeverity._member_names_:
-                count += len(self.vulns[sev.upper()])
-
-        return count
-
-    def get_repos(self):
+    def get_repos(self) -> List:
         """Returns repositories list"""
         return self.repos
 

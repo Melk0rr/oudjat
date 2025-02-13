@@ -31,6 +31,18 @@ class TenableSCVulns(dict):
 
         return { key: self.vulns[key] for key in severities }
 
+    def count(self, *severities: List[str]) -> int:
+        """Returns a number of vulnerabilities currently retreived based on provided severities"""
+        if severities is None:
+            severities = TenableSCSeverity._member_names_
+
+        count = 0
+        for sev in severities:
+            if sev.upper() in TenableSCSeverity._member_names_:
+                count += len(self[sev.upper()])
+
+        return count
+
     def search(self, *search_filter: List[Tuple]) -> List:
         """Searches for vulns"""
         search = self.tsc.analysis.vuln(search_filter)
