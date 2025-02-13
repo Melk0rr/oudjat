@@ -61,7 +61,7 @@ class TenableSCConnector(Connector):
         ColorPrint.green(f"Connected to {self.target.netloc}")
         self.connection = connection
         self.repos = self.connection.repositories.list()
-        self.vulns = TenableSCVulns()
+        self.vulns = TenableSCVulns(tsc_connection=self.connection)
 
     def check_connection(self) -> None:
         """Checks if the connection is initialized"""
