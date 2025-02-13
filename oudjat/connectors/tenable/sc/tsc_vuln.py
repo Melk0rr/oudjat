@@ -36,7 +36,7 @@ class TenableSCVulns(dict):
             exploitable_vulns = self.search(*filters)
             self.add_vuln(exploitable_vulns)
 
-        return { key: self.vulns[key] for key in severities }
+        return { key: self[key] for key in severities }
 
     def count(self, *severities: List[str]) -> int:
         """Returns a number of vulnerabilities currently retreived based on provided severities"""
@@ -52,8 +52,7 @@ class TenableSCVulns(dict):
 
     def search(self, *search_filter: List[Tuple]) -> List:
         """Searches for vulns"""
-        search = self.tsc.analysis.vulns(search_filter)
-        return list(search)
+        return list(self.tsc.analysis.vulns(*search_filter))
 
     def reset(self, *severities: List[str]) -> None:
         """Resets vulns list"""
