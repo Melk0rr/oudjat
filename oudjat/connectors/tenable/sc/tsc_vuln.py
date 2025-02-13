@@ -52,7 +52,7 @@ class TenableSCVulns(dict):
 
     def search(self, *search_filter: List[Tuple]) -> List:
         """Searches for vulns"""
-        search = self.tsc.analysis.vuln(search_filter)
+        search = self.tsc.analysis.vulns(search_filter)
         return list(search)
 
     def reset(self, *severities: List[str]) -> None:
