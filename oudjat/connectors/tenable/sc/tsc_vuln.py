@@ -32,7 +32,7 @@ class TenableSCVulns(dict):
         if severities is not None:
             filters += self.build_severity_filter(severities)
 
-        if self.get_vuln_number() == 0:
+        if self.count() == 0:
             exploitable_vulns = self.search_vulns(*filters)
             self.add_vuln(exploitable_vulns)
 
@@ -74,4 +74,5 @@ class TenableSCVulns(dict):
 
     def build_severity_filter(self, *severities: List[str]) -> Tuple:
         """Returns a severity filter based on the provided severities"""
-        return ("severity", "=", ','.join([ TenableSCSeverity[sev] for sev in severities ]))
+        sev_scores = ','.join([ f"{TenableSCSeverity[sev].value}" for sev in list(*severities) ])
+        return ("severity", "=", sev_scores)
