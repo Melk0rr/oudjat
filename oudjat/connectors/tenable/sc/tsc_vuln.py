@@ -33,7 +33,7 @@ class TenableSCVulns(dict):
             filters += self.build_severity_filter(severities)
 
         if self.count() == 0:
-            exploitable_vulns = self.search_vulns(*filters)
+            exploitable_vulns = self.search(*filters)
             self.add_vuln(exploitable_vulns)
 
         return { key: self.vulns[key] for key in severities }
