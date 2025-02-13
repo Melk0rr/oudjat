@@ -7,17 +7,12 @@ from tenable.sc import TenableSC
 from oudjat.connectors.connector import Connector
 from oudjat.utils import ColorPrint
 
-from .tsc_severities import TenableSCSeverity
 from .tsc_vuln import TenableSCVulns
 
 
 class TenableSCConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
-
-    BUILTIN_FILTERS = {
-        "exploitable": ("exploitAvailable", "=", "true")
-    }
 
     def __init__(
         self, target: str, service_name: str = "OudjatTenableSCAPI", port: int = 443
@@ -36,6 +31,9 @@ class TenableSCConnector(Connector):
         self.connection: TenableSC = None
         self.repos = None
         self.vulns: TenableSCVulns = None
+
+    # ****************************************************************
+    # Methods
 
     def get_vulns(self) -> TenableSCVulns:
         """Returns a TenableSCVulns instance"""

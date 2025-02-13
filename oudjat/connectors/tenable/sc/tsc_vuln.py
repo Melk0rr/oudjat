@@ -10,6 +10,10 @@ class TenableSCVulns(dict):
     # ****************************************************************
     # Attributes & Constructors
 
+    BUILTIN_FILTERS = {
+        "exploitable": ("exploitAvailable", "=", "true")
+    }
+
     def __init__(self, tsc_connection: "TenableSC") -> None:
         """Constructor"""
 
@@ -17,6 +21,9 @@ class TenableSCVulns(dict):
         self.tsc = tsc_connection
 
         self.update({key: [] for key in TenableSCSeverity._member_names_})
+
+    # ****************************************************************
+    # Methods
 
     def get(self, *severities: List[str]) -> Dict:
         """Getter for the currently retreived vulnerabilities"""
