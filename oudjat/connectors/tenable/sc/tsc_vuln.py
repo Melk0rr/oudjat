@@ -69,7 +69,7 @@ class TenableSCVulns(dict):
             vuln = [vuln]
 
         for v in vuln:
-            self[v["severity"]["name"].upper()] = v
+            self[v["severity"]["name"].upper()].append(v)
 
     def build_severity_filter(self, *severities: List[str]) -> Tuple:
         """Returns a severity filter based on the provided severities"""
