@@ -10,9 +10,7 @@ class TenableSCVulns(dict):
     # ****************************************************************
     # Attributes & Constructors
 
-    BUILTIN_FILTERS = {
-        "exploitable": ("exploitAvailable", "=", "true")
-    }
+    BUILTIN_FILTERS = {"exploitable": ("exploitAvailable", "=", "true")}
 
     def __init__(self, tsc_connection: "TenableSC") -> None:
         """Constructor"""
@@ -26,9 +24,9 @@ class TenableSCVulns(dict):
     # Methods
 
     def get(self, *severities: List[str]) -> Dict:
-        """Getter for the currently retreived vulnerabilities"""
+        """Retreive the current vulnerabilities"""
 
-        filters = [ self.BUILTIN_FILTERS["exploitable"] ]
+        filters = [self.BUILTIN_FILTERS["exploitable"]]
         if severities is not None:
             filters.append(self.build_severity_filter(severities))
 
@@ -36,7 +34,57 @@ class TenableSCVulns(dict):
             exploitable_vulns = self.search(*filters)
             self.add_vuln(exploitable_vulns)
 
-        return { key: self[key] for key in severities }
+        return {sev: self[sev.upper()] for sev in severities}
+
+    def get_unique(self, *severities: List[str]) -> Dict:
+        """Returns a dictionary of unique vulnerabilities"""
+
+        if severities is None:
+            severities = TenableSCSeverity._member_names_
+
+        res = {}
+        for sev in list(*severities):
+            for vuln in self[sev.upper()]:
+                if vuln["cve"] not in res.keys():
+                    res[vuln["cve"]] = {
+                        "cve": vuln["cve"],
+                        "cvssV3": vuln["cvssV3BaseScore"],
+                        "repo": vuln["repository"]["name"],
+                        "assets": []
+                    }
+
+                res[vuln["cve"]]["assets"].append({
+                    "ip": vuln["ip"],
+                    "dnsName": vuln["dnsName"],
+                    "os": vuln["operatingSystem"]
+                })
+
+        return res
+
+    def get_vulnerable_assets(self, *severities: List[str]) -> Dict:
+        """Returns vulnerable assets for the given severities"""
+
+        if severities is None:
+            severities = TenableSCSeverity._member_names_
+
+        res = {}
+        for sev in severities:
+            for vuln in self[sev.upper()]:
+                if vuln["ip"] not in res.keys():
+                    res[vuln["ip"]] = {
+                        "ip": vuln["ip"],
+                        "dnsName": vuln["dnsName"],
+                        "os": vuln["operatingSystem"],
+                        "vulns": []
+                    }
+
+                res[vuln["ip"]]["vulns"].append({
+                    "cve": vuln["cve"],
+                    "cvssV3": vuln["cvssV3BaseScore"],
+                    "repo": vuln["repository"]["name"]
+                })
+
+        return res
 
     def count(self, *severities: List[str]) -> int:
         """Returns a number of vulnerabilities currently retreived based on provided severities"""
@@ -55,8 +103,7 @@ class TenableSCVulns(dict):
         if severities is None:
             severities = TenableSCSeverity._member_names_
 
-        return { k: len(self[k]) for k in severities }
-
+        return {sev: len(self[sev]) for sev in severities}
 
     def search(self, *search_filter: List[Tuple]) -> List:
         """Searches for vulns"""
@@ -81,5 +128,5 @@ class TenableSCVulns(dict):
 
     def build_severity_filter(self, *severities: List[str]) -> Tuple:
         """Returns a severity filter based on the provided severities"""
-        sev_scores = ','.join([ f"{TenableSCSeverity[sev].value}" for sev in list(*severities) ])
+        sev_scores = ",".join([f"{TenableSCSeverity[sev].value}" for sev in list(*severities)])
         return "severity", "=", sev_scores
