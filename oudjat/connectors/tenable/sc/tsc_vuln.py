@@ -23,7 +23,7 @@ class TenableSCVulns(dict):
     # ****************************************************************
     # Methods
 
-    def get(self, *severities: List[str]) -> Dict:
+    def get(self, *severities: List[str], key_exclude: List[str] = None) -> Dict:
         """Retreive the current vulnerabilities"""
 
         filters = [self.BUILTIN_FILTERS["exploitable"]]
@@ -34,7 +34,13 @@ class TenableSCVulns(dict):
             exploitable_vulns = self.search(*filters)
             self.add_vuln(exploitable_vulns)
 
-        return {sev.upper(): self[sev.upper()] for sev in severities}
+        return {
+            sev.upper(): [
+                {k: v for k, v in vuln if key_exclude is None or k not in key_exclude}
+                for vuln in self[sev.upper()]
+            ]
+            for sev in severities
+        }
 
     def get_unique(self, *severities: List[str]) -> Dict:
         """Returns a dictionary of unique vulnerabilities"""
@@ -54,15 +60,14 @@ class TenableSCVulns(dict):
                     res[vuln["uuid"]] = {
                         "cve": vuln["cve"],
                         "cvssV3": vuln["cvssV3BaseScore"],
+                        "severity": sev.upper(),
                         "repo": vuln["repository"]["name"],
-                        "assets": []
+                        "assets": [],
                     }
 
-                res[vuln["uuid"]]["assets"].append({
-                    "ip": vuln["ip"],
-                    "dnsName": vuln["dnsName"],
-                    "os": vuln["operatingSystem"]
-                })
+                res[vuln["uuid"]]["assets"].append(
+                    {"ip": vuln["ip"], "dnsName": vuln["dnsName"], "os": vuln["operatingSystem"]}
+                )
 
         return res
 
@@ -85,14 +90,16 @@ class TenableSCVulns(dict):
                         "ip": vuln["ip"],
                         "dnsName": vuln["dnsName"],
                         "os": vuln["operatingSystem"],
-                        "vulns": []
+                        "vulns": [],
                     }
 
-                res[vuln["ip"]]["vulns"].append({
-                    "cve": vuln["cve"],
-                    "cvssV3": vuln["cvssV3BaseScore"],
-                    "repo": vuln["repository"]["name"]
-                })
+                res[vuln["ip"]]["vulns"].append(
+                    {
+                        "cve": vuln["cve"],
+                        "cvssV3": vuln["cvssV3BaseScore"],
+                        "repo": vuln["repository"]["name"],
+                    }
+                )
 
         return res
 
