@@ -39,8 +39,13 @@ class TenableSCVulns(dict):
     def get_unique(self, *severities: List[str]) -> Dict:
         """Returns a dictionary of unique vulnerabilities"""
 
+        # Retreive all severities if none provided
         if severities is None:
             severities = TenableSCSeverity._member_names_
+
+        # Retreives vulnerabilities vulnerabilities for the given severities if necessary
+        if self.count(severities) == 0:
+            self.get()
 
         res = {}
         for sev in severities:
@@ -64,8 +69,13 @@ class TenableSCVulns(dict):
     def get_vulnerable_assets(self, *severities: List[str]) -> Dict:
         """Returns vulnerable assets for the given severities"""
 
+        # Retreive all severities if none provided
         if severities is None:
             severities = TenableSCSeverity._member_names_
+
+        # Retreives vulnerabilities vulnerabilities for the given severities if necessary
+        if self.count(severities) == 0:
+            self.get()
 
         res = {}
         for sev in severities:
@@ -88,6 +98,8 @@ class TenableSCVulns(dict):
 
     def count(self, *severities: List[str]) -> int:
         """Returns a number of vulnerabilities currently retreived based on provided severities"""
+
+        # Retreive all severities if none provided
         if severities is None:
             severities = TenableSCSeverity._member_names_
 
@@ -111,6 +123,8 @@ class TenableSCVulns(dict):
 
     def reset(self, *severities: List[str]) -> None:
         """Resets vulns list"""
+
+        # Retreive all severities if none provided
         if severities is None:
             severities = TenableSCSeverity._member_names_
 
@@ -120,6 +134,7 @@ class TenableSCVulns(dict):
 
     def add_vuln(self, vuln: Union[Dict, List[Dict]]) -> None:
         """Adds a vuln to the connector vuln dictionary"""
+
         if not isinstance(vuln, list):
             vuln = [vuln]
 
