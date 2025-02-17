@@ -45,7 +45,7 @@ class TenableSCVulns(dict):
 
         # Retreives vulnerabilities vulnerabilities for the given severities if necessary
         if self.count(*severities) == 0:
-            self.get()
+            self.get(*severities)
 
         res = {}
         for sev in severities:
@@ -74,8 +74,8 @@ class TenableSCVulns(dict):
             severities = TenableSCSeverity._member_names_
 
         # Retreives vulnerabilities vulnerabilities for the given severities if necessary
-        if self.count(severities) == 0:
-            self.get()
+        if self.count(*severities) == 0:
+            self.get(*severities)
 
         res = {}
         for sev in severities:
