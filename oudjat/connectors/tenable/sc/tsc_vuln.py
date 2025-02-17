@@ -43,7 +43,7 @@ class TenableSCVulns(dict):
         """Cleans a vuln of unwanted keys and line breaks if relevant"""
         return { 
             k: v.replace('\n', '') if type(v) is str else v
-            for k,v in vuln if k not in key_exclude 
+            for k,v in vuln.items() if k not in key_exclude 
         }
 
     def get_unique(self, *severities: List[str]) -> Dict:
