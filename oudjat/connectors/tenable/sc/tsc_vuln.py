@@ -36,7 +36,7 @@ class TenableSCVulns(dict):
 
         return {
             sev.upper(): [
-                {k: v for k, v in vuln if key_exclude is None or k not in key_exclude}
+                {k: v.replace('\n', '') for k, v in vuln if key_exclude is None or k not in key_exclude}
                 for vuln in self[sev.upper()]
             ]
             for sev in severities
