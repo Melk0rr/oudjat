@@ -43,7 +43,7 @@ class TenableSCVulns(dict):
             severities = TenableSCSeverity._member_names_
 
         res = {}
-        for sev in list(*severities):
+        for sev in severities:
             for vuln in self[sev.upper()]:
                 if vuln["cve"] not in res.keys():
                     res[vuln["cve"]] = {
