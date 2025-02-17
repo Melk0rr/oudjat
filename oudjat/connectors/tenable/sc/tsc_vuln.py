@@ -35,7 +35,7 @@ class TenableSCVulns(dict):
             self.add_vuln(exploitable_vulns)
 
         return {
-            sev.upper(): [ self.clean_vuln(vuln) for vuln in self[sev.upper()] ]
+            sev.upper(): [ self.clean_vuln(vuln=vuln, key_exclude=key_exclude) for vuln in self[sev.upper()] ]
             for sev in severities
         }
 
@@ -43,7 +43,7 @@ class TenableSCVulns(dict):
         """Cleans a vuln of unwanted keys and line breaks if relevant"""
         return { 
             k: v.replace('\n', '') if type(v) is str else v
-            for k,v in vuln.items() if k not in key_exclude 
+            for k,v in vuln.items() if key_exclude is None or k not in key_exclude
         }
 
     def get_unique(self, *severities: List[str]) -> Dict:
