@@ -34,7 +34,7 @@ class TenableSCVulns(dict):
             exploitable_vulns = self.search(*filters)
             self.add_vuln(exploitable_vulns)
 
-        return {sev: self[sev.upper()] for sev in severities}
+        return {sev.upper(): self[sev.upper()] for sev in severities}
 
     def get_unique(self, *severities: List[str]) -> Dict:
         """Returns a dictionary of unique vulnerabilities"""
@@ -51,14 +51,14 @@ class TenableSCVulns(dict):
         for sev in severities:
             for vuln in self[sev.upper()]:
                 if vuln["cve"] not in res.keys():
-                    res[vuln["cve"]] = {
+                    res[vuln["uuid"]] = {
                         "cve": vuln["cve"],
                         "cvssV3": vuln["cvssV3BaseScore"],
                         "repo": vuln["repository"]["name"],
                         "assets": []
                     }
 
-                res[vuln["cve"]]["assets"].append({
+                res[vuln["uuid"]]["assets"].append({
                     "ip": vuln["ip"],
                     "dnsName": vuln["dnsName"],
                     "os": vuln["operatingSystem"]
