@@ -30,7 +30,7 @@ class TenableSCVulns(dict):
         if severities is not None:
             filters.append(self.build_severity_filter(severities))
 
-        if self.count() == 0:
+        if self.count(*severities) == 0:
             exploitable_vulns = self.search(*filters)
             self.add_vuln(exploitable_vulns)
 
