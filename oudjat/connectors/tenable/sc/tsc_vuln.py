@@ -59,19 +59,11 @@ class TenableSCVulns(dict):
 
         res = {}
         for sev in severities:
+            sev_uniq_vuln = set()
             for vuln in self[sev.upper()]:
-                if vuln["cve"] not in res.keys():
-                    res[vuln["uuid"]] = {
-                        "cve": vuln["cve"],
-                        "cvssV3": vuln["cvssV3BaseScore"],
-                        "severity": sev.upper(),
-                        "repo": vuln["repository"]["name"],
-                        "assets": [],
-                    }
+                sev_uniq_vuln.update(vuln["cve"].split(','))
 
-                res[vuln["uuid"]]["assets"].append(
-                    {"ip": vuln["ip"], "dnsName": vuln["dnsName"], "os": vuln["operatingSystem"]}
-                )
+            res[sev.upper()] = list(sev_uniq_vuln)
 
         return res
 
@@ -87,23 +79,20 @@ class TenableSCVulns(dict):
             self.get(*severities)
 
         res = {}
+        vuln_keys = ["pluginID", "pluginName", "description", "solution", "cvssV3BaseScore", "cve"]
         for sev in severities:
             for vuln in self[sev.upper()]:
-                if vuln["ip"] not in res.keys():
-                    res[vuln["ip"]] = {
+                if vuln["uuid"] not in res.keys():
+                    res[vuln["uuid"]] = {
                         "ip": vuln["ip"],
                         "dnsName": vuln["dnsName"],
                         "os": vuln["operatingSystem"],
                         "vulns": [],
                     }
 
-                res[vuln["ip"]]["vulns"].append(
-                    {
-                        "cve": vuln["cve"],
-                        "cvssV3": vuln["cvssV3BaseScore"],
-                        "repo": vuln["repository"]["name"],
-                    }
-                )
+                new_vuln = { k: v for k,v in vuln if k in vuln_keys }
+                new_vuln["severity"] = sev.upper()
+                res[vuln["uuid"]]["vulns"].append(new_vuln)
 
         return res
 
