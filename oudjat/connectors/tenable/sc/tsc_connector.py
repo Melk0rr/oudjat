@@ -72,7 +72,7 @@ class TenableSCConnector(Connector):
         self.connection = None
         self.repos = None
 
-    def search(self, search_type: str = "vulns", *args, **kwargs) -> List:
+    def search(self, search_type: str, *args, **kwargs) -> List:
         """Searches the API for elements"""
         self.check_connection()
 
