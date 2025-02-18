@@ -33,7 +33,7 @@ class TenableSCVulns(dict):
             filters.append(self.build_severity_filter(severities))
 
         if self.count(*severities) == 0:
-            exploitable_vulns = self.search(*filters, tool)
+            exploitable_vulns = self.search(*filters, tool=tool)
             self.add_vuln(exploitable_vulns)
 
         return {
@@ -109,6 +109,10 @@ class TenableSCVulns(dict):
             severities = TenableSCSeverity._member_names_
 
         count = 0
+
+        if not isinstance(severities, tuple):
+            severities = tuple(severities)
+
         for sev in severities:
             if sev.upper() in TenableSCSeverity._member_names_:
                 count += len(self[sev.upper()])
@@ -122,7 +126,7 @@ class TenableSCVulns(dict):
 
         return {sev: len(self[sev]) for sev in severities}
 
-    def search(self, *search_filter: List[Tuple], tool: str = "vulndetails") -> List:
+    def search(self, *search_filter: List[Tuple], tool: str = "vulndetail") -> List:
         """Searches for vulns"""
         return list(self.tsc.analysis.vulns(*search_filter, tool=tool))
 
