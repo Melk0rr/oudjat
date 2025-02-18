@@ -90,7 +90,7 @@ class TenableSCVulns(dict):
                         "vulns": [],
                     }
 
-                new_vuln = { k: v for k,v in vuln if k in vuln_keys }
+                new_vuln = { k: v for k,v in vuln.items() if k in vuln_keys }
                 new_vuln["severity"] = sev.upper()
                 res[vuln["uuid"]]["vulns"].append(new_vuln)
 
