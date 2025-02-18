@@ -1,5 +1,5 @@
 import re
-from typing import List, Tuple
+from typing import List
 from urllib.parse import urlparse
 
 from tenable.sc import TenableSC
@@ -72,7 +72,7 @@ class TenableSCConnector(Connector):
         self.connection = None
         self.repos = None
 
-    def search(self, *search_filter: List[Tuple], search_type: str = "vulns") -> List:
+    def search(self, search_type: str = "vulns", *args, **kwargs) -> List:
         """Searches the API for elements"""
         self.check_connection()
 
@@ -84,7 +84,7 @@ class TenableSCConnector(Connector):
 
         search = None
         try:
-            search = search_options[search_type](search_filter)
+            search = search_options[search_type](*args, **kwargs)
 
         except Exception as e:
             raise e

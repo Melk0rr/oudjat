@@ -23,7 +23,9 @@ class TenableSCVulns(dict):
     # ****************************************************************
     # Methods
 
-    def get(self, *severities: List[str], key_exclude: List[str] = None) -> Dict:
+    def get(
+        self, *severities: List[str], key_exclude: List[str] = None, tool: str = "vulndetails"
+    ) -> Dict:
         """Retreive the current vulnerabilities"""
 
         filters = [self.BUILTIN_FILTERS["exploitable"]]
@@ -31,19 +33,22 @@ class TenableSCVulns(dict):
             filters.append(self.build_severity_filter(severities))
 
         if self.count(*severities) == 0:
-            exploitable_vulns = self.search(*filters)
+            exploitable_vulns = self.search(*filters, tool)
             self.add_vuln(exploitable_vulns)
 
         return {
-            sev.upper(): [ self.clean_vuln(vuln=vuln, key_exclude=key_exclude) for vuln in self[sev.upper()] ]
+            sev.upper(): [
+                self.clean_vuln(vuln=vuln, key_exclude=key_exclude) for vuln in self[sev.upper()]
+            ]
             for sev in severities
         }
 
     def clean_vuln(self, vuln: Dict, key_exclude: List[str] = None) -> Dict:
         """Cleans a vuln of unwanted keys and line breaks if relevant"""
-        return { 
-            k: v.replace('\n', '') if type(v) is str else v
-            for k,v in vuln.items() if key_exclude is None or k not in key_exclude
+        return {
+            k: v.replace("\n", "") if type(v) is str else v
+            for k, v in vuln.items()
+            if key_exclude is None or k not in key_exclude
         }
 
     def get_unique(self, *severities: List[str]) -> Dict:
@@ -61,7 +66,7 @@ class TenableSCVulns(dict):
         for sev in severities:
             sev_uniq_vuln = set()
             for vuln in self[sev.upper()]:
-                sev_uniq_vuln.update(vuln["cve"].split(','))
+                sev_uniq_vuln.update(vuln["cve"].split(","))
 
             res[sev.upper()] = list(sev_uniq_vuln)
 
@@ -90,7 +95,7 @@ class TenableSCVulns(dict):
                         "vulns": [],
                     }
 
-                new_vuln = { k: v for k,v in vuln.items() if k in vuln_keys }
+                new_vuln = {k: v for k, v in vuln.items() if k in vuln_keys}
                 new_vuln["severity"] = sev.upper()
                 res[vuln["uuid"]]["vulns"].append(new_vuln)
 
@@ -117,9 +122,9 @@ class TenableSCVulns(dict):
 
         return {sev: len(self[sev]) for sev in severities}
 
-    def search(self, *search_filter: List[Tuple]) -> List:
+    def search(self, *search_filter: List[Tuple], tool: str = "vulndetails") -> List:
         """Searches for vulns"""
-        return list(self.tsc.analysis.vulns(*search_filter))
+        return list(self.tsc.analysis.vulns(*search_filter, tool=tool))
 
     def reset(self, *severities: List[str]) -> None:
         """Resets vulns list"""
