@@ -1,9 +1,12 @@
 from datetime import datetime
-from typing import List, Dict, Union
+from typing import List, Dict, Union, TYPE_CHECKING
 
 from oudjat.utils import date_format_from_flag, DATE_FLAGS, days_diff
 
-from . import SoftwareReleaseSupport, SoftwareReleaseSupportList, soft_date_str
+from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList, soft_date_str
+
+if TYPE_CHECKING:
+    from .software import Software
 
 
 class SoftwareRelease:
@@ -14,7 +17,7 @@ class SoftwareRelease:
 
     def __init__(
         self,
-        software: "Software",  # noqa: F821
+        software: "Software",
         version: Union[int, str],
         release_date: Union[str, datetime],
         release_label: str,
