@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import Dict, List, Tuple
 from urllib.parse import urlparse
 
 from tenable.sc import TenableSC
@@ -8,11 +8,14 @@ from oudjat.connectors.connector import Connector
 from oudjat.utils import ColorPrint
 
 from .tsc_vuln import TenableSCVulns
+from .tsc_severities import TenableSCSeverity
 
 
 class TenableSCConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
+
+    BUILTIN_FILTERS = {"exploitable": ("exploitAvailable", "=", "true")}
 
     def __init__(
         self, target: str, service_name: str = "OudjatTenableSCAPI", port: int = 443
@@ -30,14 +33,9 @@ class TenableSCConnector(Connector):
         self.target = urlparse(f"{self.target.scheme}://{self.target.netloc}")
         self.connection: TenableSC = None
         self.repos = None
-        self.vulns: TenableSCVulns = None
 
     # ****************************************************************
     # Methods
-
-    def get_vulns(self) -> TenableSCVulns:
-        """Returns a TenableSCVulns instance"""
-        return self.vulns
 
     def get_repos(self) -> List:
         """Returns repositories list"""
@@ -59,7 +57,6 @@ class TenableSCConnector(Connector):
         ColorPrint.green(f"Connected to {self.target.netloc}")
         self.connection = connection
         self.repos = self.connection.repositories.list()
-        self.vulns = TenableSCVulns(tsc_connection=self.connection)
 
     def check_connection(self) -> None:
         """Checks if the connection is initialized"""
@@ -77,7 +74,7 @@ class TenableSCConnector(Connector):
         self.check_connection()
 
         search_type = search_type.upper()
-        search_options = {"VULNS": self.vulns.search}
+        search_options = {"VULNS": self.search_vulns}
 
         if search_type not in search_options.keys():
             raise ValueError(f"Invalid search type {search_type}")
@@ -91,3 +88,19 @@ class TenableSCConnector(Connector):
 
         return list(search)
 
+    def search_vulns(
+        self, *severities: List[str], key_exclude: List[str] = None, tool: str = "vulndetails"
+    ) -> Dict:
+        """Retreive the current vulnerabilities"""
+
+        filters = [self.BUILTIN_FILTERS["exploitable"]]
+        if severities is not None:
+            filters.append(self.build_severity_filter(severities))
+
+        search = self.tsc.analysis.vulns(*filters, tool=tool)
+        return list(search)
+
+    def build_severity_filter(self, *severities: List[str]) -> Tuple:
+        """Returns a severity filter based on the provided severities"""
+        sev_scores = ",".join([f"{TenableSCSeverity[sev].value}" for sev in list(*severities)])
+        return "severity", "=", sev_scores
