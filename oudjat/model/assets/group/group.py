@@ -1,5 +1,6 @@
 from typing import List, Dict, Union
 
+from ...generic_identifiable import GenericIdentifiable
 from ..asset import Asset
 from ..asset_type import AssetType
 
@@ -38,9 +39,9 @@ class Group(Asset):
         """Returns the list of member names"""
         return [ m.get_name() for m in self.members.values() ]
 
-    def add_member(self, member: Asset) -> None:
+    def add_member(self, member: GenericIdentifiable) -> None:
         """Adds a new member to the member list"""
-        if isinstance(member, Asset):
+        if isinstance(member, GenericIdentifiable):
             self.members[member.get_id()] = member
 
     def clear_members(self) -> None:
