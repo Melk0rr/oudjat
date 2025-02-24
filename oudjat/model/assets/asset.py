@@ -1,9 +1,11 @@
-from typing import List, Dict, Union, Any
+from typing import Dict, List, Union, TYPE_CHECKING
 
 from oudjat.model import GenericIdentifiable
 
 from . import AssetType
 
+if TYPE_CHECKING:
+    from ..organization.location import Location
 
 class Asset(GenericIdentifiable):
     """Generic asset class to be inherited by all model asset types"""
@@ -29,12 +31,11 @@ class Asset(GenericIdentifiable):
 
         self.asset_type = asset_type
         self.location = location
-        self.custom_attributes = {}
 
     # ****************************************************************
     # Methods
 
-    def get_location(self) -> Union["Location", List["Location"]]:  # noqa: F821
+    def get_location(self) -> Union["Location", List["Location"]]:
         """Getter for the asset location"""
         return self.location
 
@@ -42,34 +43,7 @@ class Asset(GenericIdentifiable):
         """Getter for asset type"""
         return self.asset_type
 
-    def get_custom_attr(self, key: str = None) -> Any:
-        """Getter for custom attributes"""
-        if key is None:
-            return self.custom_attributes
-
-        return self.custom_attributes[key]
-
-    def set_custom_attr(self, new_custom_attr: Dict[str, Any]) -> None:
-        """Setter for custom attributes"""
-        self.custom_attributes = new_custom_attr
-
-    def add_custom_attr(self, key: str, value: Any) -> None:
-        """Adds a new custom attribute"""
-        self.custom_attributes[key] = value
-
-    def add_multiple_custom_attr(self, new_custom_attr: Dict[str, Any]) -> None:
-        """Adds multiple new custom attributes"""
-        self.custom_attributes.update(new_custom_attr)
-
-    def del_custom_attr(self, key: str) -> None:
-        """Deletes a custom attribute by key"""
-        del self.custom_attributes[key]
-
-    def clear_custom_attr(self) -> None:
-        """Clears custom attributes"""
-        self.custom_attributes = {}
-
-    def set_location(self, location: Union["Location", List["Location"]]) -> None:  # noqa: F821
+    def set_location(self, location: Union["Location", List["Location"]]) -> None:
         """Setter for asset location"""
 
         if not isinstance(location, list):
@@ -90,6 +64,5 @@ class Asset(GenericIdentifiable):
             **super().to_dict(),
             "asset_type": self.asset_type.name,
             "location": self.location,
-            **self.custom_attributes,
         }
 
