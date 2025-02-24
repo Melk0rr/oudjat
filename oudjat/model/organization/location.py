@@ -62,7 +62,7 @@ class Location(GenericIdentifiable):
     
     return self.assets[asset_type]
   
-  def add_asset(asset: Asset, asset_type: AssetType) -> None:
+  def add_asset(self, asset: Asset, asset_type: AssetType) -> None:
     """ Adds a new asset to the current location """
 
     if asset_type not in self.assets.keys():
@@ -71,40 +71,3 @@ class Location(GenericIdentifiable):
     if asset.get_id() not in self.assets.keys():
       self.assets[asset_type][asset.get_id()] = asset
     
-
-class LocationGroup(GenericIdentifiable):
-  """ A class to handle multiple locations as groups """
-  
-  # ****************************************************************
-  # Attributes & Constructors
-
-  def __init__(
-    self,
-    id: Union[int, str],
-    name: str,
-    description: str,
-    label: str = None,
-  ):
-    """ Constructor """
-    super().__init__(id=id, name=name, label=label, description=description)
-    
-    self.locations = {}
-
-  # ****************************************************************
-  # Methods
-  
-  def get_location(self, location_id: Union[int, str]) -> Location:
-    """ Returns a location based on its id """
-    return self.locations.get(location_id, None)
-  
-  def add_location(self, location: Location) -> None:
-    """ Adds a location to the current group """
-    
-    if location.get_id() not in self.locations.keys():
-      self.locations[location.get_id()] = location
-      
-  def remove_location(self, location_id: Union[int, str]) -> None:
-    """ Removes a location from the group """
-    
-    if location_id in self.locations.keys():
-      del self.locations[location_id]
