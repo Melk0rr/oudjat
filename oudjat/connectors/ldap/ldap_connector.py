@@ -273,9 +273,8 @@ class LDAPConnector(Connector):
         """Retreives and returns the members of the given group"""
         members = []
         for ref in ldap_group.get_member_refs():
-            # Search for the ref in LDAP server
-
-            # WARNING: Must implement an LDAPFilter class to handle potential escape characters
+            # INFO: Search for the ref in LDAP server
+            # TODO: Must implement an LDAPFilter class to handle potential escape characters
             escaped_ref = ldap3.utils.conv.escape_filter_chars(ref)
             ref_search = self.search(search_filter=f"(distinguishedName={escaped_ref})")
 
