@@ -53,7 +53,7 @@ class IPv4:
             self.version = IPVersion.IPV6
 
         else:
-            raise ValueError(f"Invalid IPv4 address provided: {address}")
+            raise ValueError(f"Invalid IPv4 address provided: '{address}'")
 
         self.address: int = ip_str_to_int(address)
 
