@@ -34,7 +34,7 @@ class Subnet:
       address = IPv4(address)
 
     if mask is None:
-      raise ValueError(f"Subnet::Provided net address has no mask set: {addr.get_address()}")
+      raise ValueError(f"Subnet::Provided net address has no mask set: {address.get_address()}")
       
     self.set_mask(mask)
 
@@ -107,14 +107,9 @@ class Subnet:
     if (self.contains(host) and (int(host) != int(self.address)) and (int(host) != int(self.broadcast))):
       self.hosts[str(host)] = host
 
-  def __str__(self, showDescription: bool = False) -> str:
+  def __str__(self) -> str:
     """ Returns a string based on current instance """
-    sub_str = f"{self.name}: {self.address}/{self.mask.get_cidr()}"
-
-    if showDescription:
-      sub_str += f" ({self.description})"
-
-    return sub_str
+    return f"{self.address}/{self.mask.get_cidr()}"
   
   def to_dict(self) -> Dict:
     """ Converts the current subnet instance into a dictionary """
