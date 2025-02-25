@@ -27,7 +27,7 @@ class Computer(Asset):
         computer_type: Union[str, ComputerType] = None,
         os_release: OSRelease = None,
         os_edition: SoftwareEdition = None,
-        ip: IPv4 = None,
+        ip: Union[str, IPv4] = None,
     ):
         """Constructor"""
 
@@ -35,17 +35,18 @@ class Computer(Asset):
             id=id, name=name, label=label, description=description, asset_type=AssetType.COMPUTER
         )
 
-        if not isinstance(os_release, OSRelease):
-            raise ValueError(
-                f"Invalid OS provided for computer {self.name}. Please provide an OS release"
-            )
-        self.os_release = os_release
-        self.os_edition = os_edition
+        self.os_release = None
+        self.os_edition = None
+        if os_release is not None:
+            self.set_os(os_release=os_release, edition=os_edition)
+
         self.computer_type: ComputerType = None
+        self.ip:IPv4 = None
 
-        self.ip = ip
+        if ip is not None:
+            self.set_ip(ip)
+        
         self.softwares: List[SoftwareRelease] = []
-
         self.protection_agent = None
 
     # ****************************************************************
@@ -90,20 +91,33 @@ class Computer(Asset):
 
         self.computer_type = cpt_type
 
+    def get_ip(self) -> IPv4:
+        """Getter for computer IP address"""
+        return self.ip
+
+    def set_ip(self, ip: Union[str, IPv4]) -> None:
+        """Sets the current computer ip address"""
+
+        if not isinstance(ip, IPv4):
+            ip = IPv4(ip)
+
+        self.ip: IPv4 = ip
+
     def resolve_ip(self) -> None:
         """Try to resolve ip address"""
         self.ip = IPv4.resolve_from_hostname(hostname=self.label)
 
-    def set_os(self, os_release: OSRelease, edition: str = None) -> None:
+    def set_os(self, os_release: OSRelease, edition: SoftwareEdition = None) -> None:
         """Setter for computer os"""
         if not isinstance(os_release, OSRelease):
-            raise ValueError(
-                f"Invalid OS provided for computer {self.name}. Please provide an OS release"
-            )
+            raise ValueError(f"Computer.set_os::Invalid OS provided for {self.name}")
 
         self.os_release = os_release
 
         if edition is not None:
+            if not isinstance(edition, SoftwareEdition):
+                raise ValueError(f"Computer.set_os::Invalid edition provided for {self.name}")
+
             self.os_edition = edition
 
     def is_os_supported(self) -> bool:
