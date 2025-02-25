@@ -1,1 +1,1 @@
-from .location import Location, LocationGroup
+from .location import Location
