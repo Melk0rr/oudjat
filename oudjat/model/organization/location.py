@@ -78,5 +78,5 @@ class Location(GenericIdentifiable):
         return (
             self.subnet[f"{subnet}"].contains(ip)
             if subnet is not None
-            else any(self.subnet.values(), lambda net: net.contains(ip))
+            else any([ net.contains(ip) for net in self.subnet.values() ])
         )
