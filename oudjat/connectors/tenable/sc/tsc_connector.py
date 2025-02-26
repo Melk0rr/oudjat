@@ -50,12 +50,12 @@ class TenableSCConnector(Connector):
                 secret_key=self.credentials.password,
             )
 
+            ColorPrint.green(f"Connected to {self.target.netloc}")
+            self.connection = connection
+            self.repos = self.connection.repositories.list()
+
         except Exception as e:
             raise e
-
-        ColorPrint.green(f"Connected to {self.target.netloc}")
-        self.connection = connection
-        self.repos = self.connection.repositories.list()
 
     def check_connection(self) -> None:
         """Checks if the connection is initialized"""
