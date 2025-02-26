@@ -83,7 +83,7 @@ def import_txt(file_path: str, delete_duplicates: bool = False) -> List[Any]:
     return data
 
 
-def export_txt(data: List, file_path: str, append: bool = False) -> None:
+def export_txt(data: List[str], file_path: str, append: bool = False) -> None:
     """Helper function to export data into a txt file"""
 
     if len(data) == 0:
