@@ -72,7 +72,7 @@ class Location(GenericIdentifiable):
 
     def is_ip_in_subnet(self, ip: str, subnet: str = None) -> bool:
         """Checks if the provided computer is in the location subnet"""
-        if self.subnet is None or subnet not in self.subnet.keys():
+        if self.subnet is None or (subnet is not None and subnet not in self.subnet.keys()):
             return False
 
         return (
