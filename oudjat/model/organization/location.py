@@ -1,8 +1,10 @@
 from typing import Dict, Union
 
 from oudjat.model import GenericIdentifiable
-from ..assets import AssetType, Asset
+
+from ..assets import Asset, AssetType
 from ..assets.network.subnet import Subnet
+
 
 class Location(GenericIdentifiable):
     """A class to describe generic location with subnets, assets, users"""
@@ -45,7 +47,7 @@ class Location(GenericIdentifiable):
         if not isinstance(subnet, Subnet):
             raise ValueError("Location.add_subnet::Invalid subnet provided")
 
-        self.subnet[subnet] = subnet
+        self.subnet[f"{subnet}"] = subnet
 
     def get_asset(self, asset_type: AssetType, asset_id: Union[int, str]) -> Asset:
         """Looks for an asset based on asset type and id"""
@@ -72,10 +74,9 @@ class Location(GenericIdentifiable):
         """Checks if the provided computer is in the location subnet"""
         if self.subnet is None or subnet not in self.subnet.keys():
             return False
-        
+
         return (
-            self.subnet[subnet].contains(ip) 
-            if subnet is not None 
+            self.subnet[f"{subnet}"].contains(ip)
+            if subnet is not None
             else any(self.subnet.values(), lambda net: net.contains(ip))
         )
-
