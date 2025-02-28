@@ -132,13 +132,13 @@ class Computer(Asset):
 
         asset_dict = super().to_dict()
 
-        # OS Release informations
+        # INFO: OS Release informations
         release_dict = self.os_release.to_dict()
         release_dict.pop("is_supported")
         release_dict.pop("software")
         release_dict.pop("support")
 
-        # OS support information
+        # INFO: OS support information
         os_support_dict = self.get_os_support()[0].to_dict()
 
         return {
