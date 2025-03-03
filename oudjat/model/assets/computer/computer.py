@@ -1,10 +1,10 @@
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from oudjat.model.assets import Asset, AssetType
 from oudjat.model.assets.network import IPv4
 from oudjat.model.assets.software import (
-    SoftwareRelease,
     SoftwareEdition,
+    SoftwareRelease,
     SoftwareReleaseSupport,
 )
 from oudjat.model.assets.software.os import OSRelease
@@ -41,11 +41,11 @@ class Computer(Asset):
             self.set_os(os_release=os_release, edition=os_edition)
 
         self.computer_type: ComputerType = None
-        self.ip:IPv4 = None
+        self.ip: IPv4 = None
 
         if ip is not None:
             self.set_ip(ip)
-        
+
         self.softwares: List[SoftwareRelease] = []
         self.protection_agent = None
 
@@ -132,13 +132,13 @@ class Computer(Asset):
 
         asset_dict = super().to_dict()
 
-        # OS Release informations
+        # INFO: OS Release informations
         release_dict = self.os_release.to_dict()
         release_dict.pop("is_supported")
         release_dict.pop("software")
         release_dict.pop("support")
 
-        # OS support information
+        # INFO: OS support information
         os_support_dict = self.get_os_support()[0].to_dict()
 
         return {
@@ -159,4 +159,3 @@ class Computer(Asset):
             **release_dict,
             "is_os_supported": self.is_os_supported(),
         }
-

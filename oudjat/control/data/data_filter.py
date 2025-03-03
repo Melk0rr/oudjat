@@ -1,4 +1,4 @@
-from typing import List, Dict, Union, Any
+from typing import Any, Dict, List, Union
 
 from oudjat.utils import ColorPrint
 
@@ -130,4 +130,3 @@ class DataFilter:
                 filtered_data.append(el)
 
         return filtered_data
-
