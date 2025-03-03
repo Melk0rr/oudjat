@@ -96,10 +96,27 @@ class TenableSCConnector(Connector):
         if severities is not None:
             filters.append(self.build_severity_filter(severities))
 
-        search = self.tsc.analysis.vulns(*filters, tool=tool)
+        search = self.connection.analysis.vulns(*filters, tool=tool)
         return list(search)
 
     def build_severity_filter(self, *severities: List[str]) -> Tuple:
         """Returns a severity filter based on the provided severities"""
         sev_scores = ",".join([f"{TenableSCSeverity[sev].value}" for sev in list(*severities)])
         return "severity", "=", sev_scores
+
+    def create_asset_list(
+        self,
+        name: str,
+        list_type: str = "combination",
+        description: str = None,
+        ips: List[str] = None,
+        dns_names: List[str] = None,
+    ) -> None:
+        """Creates a new asset list"""
+
+        try:
+            self.connection.asset_lists.create()
+
+        except Exception as e:
+            raise e
+
