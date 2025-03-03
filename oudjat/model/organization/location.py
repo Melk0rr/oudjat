@@ -37,9 +37,12 @@ class Location(GenericIdentifiable):
     # ****************************************************************
     # Methods
 
-    def get_subnet(self) -> Subnet:
+    def get_subnet(self, subnet: str = None) -> Subnet:
         """Getter for the location subnet"""
-        return self.subnet
+        if self.subnet is None or (subnet is not None and subnet not in self.subnet.keys()):
+            return self.subnet
+
+        return self.subnet[subnet]
 
     def add_subnet(self, subnet: Subnet) -> None:
         """Adds a new subnet to the location"""
