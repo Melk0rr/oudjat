@@ -7,8 +7,8 @@ from tenable.sc import TenableSC
 from oudjat.connectors.connector import Connector
 from oudjat.utils import ColorPrint
 
-from .tsc_severities import TenableSCSeverity
 from .tsc_asset_list_types import TSCAssetListType
+from .tsc_severities import TenableSCSeverity
 
 
 class TenableSCConnector(Connector):
