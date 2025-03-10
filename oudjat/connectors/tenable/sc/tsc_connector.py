@@ -8,6 +8,7 @@ from oudjat.connectors.connector import Connector
 from oudjat.utils import ColorPrint
 
 from .tsc_severities import TenableSCSeverity
+from .tsc_asset_list_types import TSCAssetListType
 
 
 class TenableSCConnector(Connector):
@@ -107,7 +108,7 @@ class TenableSCConnector(Connector):
     def create_asset_list(
         self,
         name: str,
-        list_type: str = "combination",
+        list_type: TSCAssetListType = TSCAssetListType.COMBINATION,
         description: str = None,
         ips: List[str] = None,
         dns_names: List[str] = None,
@@ -115,8 +116,13 @@ class TenableSCConnector(Connector):
         """Creates a new asset list"""
 
         try:
-            self.connection.asset_lists.create()
+            self.connection.asset_lists.create(
+                name=name,
+                description=description,
+                list_type=list_type.value,
+                ips=ips,
+                dns_names=dns_names,
+            )
 
         except Exception as e:
             raise e
-
