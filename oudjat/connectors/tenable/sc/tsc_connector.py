@@ -37,10 +37,12 @@ class TenableSCConnector(Connector):
     # ****************************************************************
     # Methods
 
+    # INFO: Getters
     def get_repos(self) -> List:
         """Returns repositories list"""
         return self.repos
 
+    # INFO: Base connector methods
     def connect(self) -> None:
         """Connects to API using connector parameters"""
         connection = None
@@ -88,6 +90,7 @@ class TenableSCConnector(Connector):
 
         return list(search)
 
+    # INFO: Vulns
     def search_vulns(
         self, *severities: List[str], key_exclude: List[str] = None, tool: str = "vulndetails"
     ) -> Dict:
@@ -105,6 +108,7 @@ class TenableSCConnector(Connector):
         sev_scores = ",".join([f"{TenableSCSeverity[sev].value}" for sev in list(*severities)])
         return "severity", "=", sev_scores
 
+    # INFO: Asset lists
     def create_asset_list(
         self,
         name: str,
@@ -114,6 +118,11 @@ class TenableSCConnector(Connector):
         dns_names: List[str] = None,
     ) -> None:
         """Creates a new asset list"""
+
+        if self.connection is None:
+            raise ConnectionError(
+                "TenableSCConnector.create_asset_list::Can't create asset list if connection is not initialized"
+            )
 
         try:
             self.connection.asset_lists.create(
@@ -126,3 +135,20 @@ class TenableSCConnector(Connector):
 
         except Exception as e:
             raise e
+
+    def delete_asset_list(self, id=int) -> None:
+        """Deletes an asset list based on given id"""
+
+        # TODO: Ability to delete multiple asset lists
+        if self.connection is None:
+            raise ConnectionError(
+                "TenableSCConnector.delete_asset_list::Can't delete asset list if connection is not initialized"
+            )
+
+        try:
+            self.connection.asset_lists.delete(id=id)
+
+        except Exception as e:
+            raise e
+
+    # TODO: Edit asset list
