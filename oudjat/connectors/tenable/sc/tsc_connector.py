@@ -136,7 +136,7 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    def delete_asset_list(self, id=int) -> None:
+    def delete_asset_list(self, list_id: int) -> None:
         """Deletes an asset list based on given id"""
 
         # TODO: Ability to delete multiple asset lists
@@ -146,7 +146,7 @@ class TenableSCConnector(Connector):
             )
 
         try:
-            self.connection.asset_lists.delete(id=id)
+            self.connection.asset_lists.delete(id=list_id)
 
         except Exception as e:
             raise e
