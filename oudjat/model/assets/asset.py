@@ -1,4 +1,4 @@
-from typing import Dict, List, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Union
 
 from oudjat.model import GenericIdentifiable
 
@@ -6,6 +6,7 @@ from . import AssetType
 
 if TYPE_CHECKING:
     from ..organization.location import Location
+
 
 class Asset(GenericIdentifiable):
     """Generic asset class to be inherited by all model asset types"""
@@ -65,4 +66,3 @@ class Asset(GenericIdentifiable):
             "asset_type": self.asset_type.name,
             "location": self.location,
         }
-
