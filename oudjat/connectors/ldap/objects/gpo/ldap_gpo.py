@@ -1,10 +1,9 @@
 import re
 from enum import Enum
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from ..definitions import UUID_REG
 from ..ldap_object import LDAPObject
-
 from . import MS_GPPREF
 
 

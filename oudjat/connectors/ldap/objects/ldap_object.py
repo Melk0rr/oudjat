@@ -1,4 +1,4 @@
-from typing import Dict, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List
 
 from oudjat.utils import DATE_TIME_FLAGS, date_format_from_flag
 
@@ -6,6 +6,9 @@ if TYPE_CHECKING:
     from ..ldap_connector import LDAPConnector
     from .account.group.ldap_group import LDAPGroup
 
+
+# ****************************************************************
+# Helper functions
 
 def parse_dn(dn: str) -> Dict:
     """Parses a DN into pieces"""

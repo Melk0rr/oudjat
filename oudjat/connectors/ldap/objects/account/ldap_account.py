@@ -1,18 +1,18 @@
 from datetime import datetime
 from typing import Dict, List
 
-from oudjat.utils import date_format_from_flag, DATE_TIME_FLAGS, days_diff
+from oudjat.utils import DATE_TIME_FLAGS, date_format_from_flag, days_diff
+
 from ..ldap_object import LDAPObject
 from . import (
+    MS_ACCOUNT_CTL_PROPERTY,
     LDAPAccountFlag,
     check_account_flag,
     is_disabled,
-    pwd_expires,
     pwd_expired,
+    pwd_expires,
     pwd_required,
 )
-
-from . import MS_ACCOUNT_CTL_PROPERTY
 
 
 def acc_date_str(date: datetime) -> str:

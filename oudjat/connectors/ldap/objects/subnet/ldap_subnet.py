@@ -1,4 +1,5 @@
 from oudjat.model.assets.network import Subnet
+
 from ..ldap_object import LDAPObject
 
 

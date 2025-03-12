@@ -51,4 +51,3 @@ def pwd_expired(account_control: int) -> bool:
 def pwd_required(account_control: int) -> bool:
     """Checks if the account requires a password"""
     return not check_account_flag(account_control, LDAPAccountFlag.PASSWD_NOTREQD)
-

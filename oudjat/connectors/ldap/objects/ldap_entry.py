@@ -54,4 +54,3 @@ class LDAPEntry(dict):
                 obj_type = t
 
         return obj_type
-

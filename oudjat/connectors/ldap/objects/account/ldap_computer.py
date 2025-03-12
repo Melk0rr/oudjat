@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict, List
 
 from oudjat.model.assets.computer import Computer
 from oudjat.model.assets.software import SoftwareEdition, SoftwareReleaseDict
@@ -66,4 +66,3 @@ class LDAPComputer(LDAPAccount, Computer):
         cpt_dict = Computer.to_dict(self)
 
         return {**base_dict, "hostname": cpt_dict.pop("label"), **cpt_dict}
-

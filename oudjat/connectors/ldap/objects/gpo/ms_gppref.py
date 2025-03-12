@@ -1,4 +1,4 @@
-# https://github.com/zloeber/PSAD/blob/fcf2936b79b5e49c99f09cea96fbafd26e6ecbf2/src/other/CSEGUIDMap.csv
+# HACK: https://github.com/zloeber/PSAD/blob/fcf2936b79b5e49c99f09cea96fbafd26e6ecbf2/src/other/CSEGUIDMap.csv
 MS_GPPREF = {
     "{00000000-0000-0000-0000-000000000000}": "Core GPO Engine",
     "{0ACDD40C-75AC-47AB-BAA0-BF6DE7E7FE63}": "Wireless Group Policy",
@@ -101,4 +101,3 @@ MS_GPPREF = {
     "{FD2D917B-6519-4BF7-8403-456C0C64312F}": "Policy Maker",
     "{FFC64763-70D2-45BC-8DEE-7ACAF1BA7F89}": "Policy Maker",
 }
-

@@ -2,7 +2,7 @@ from typing import Dict, List, Union
 
 from oudjat.utils import i_and, i_or
 
-from . import IPv4, IPv4Mask, ip_int_to_str
+from .ipv4 import IPv4, IPv4Mask, ip_int_to_str
 
 
 class Subnet:

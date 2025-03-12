@@ -1,23 +1,16 @@
 from enum import Enum
 
+
 class CybereasonSearchFilter(Enum):
-  """ Samples of Cybereason search filters """
-  MALWARE_KNOWN = [
-    {
-      "fieldName": "type",
-      "operator": "Equals",
-      "values":["KnownMalware"]
-    }
-  ]
+    """Samples of Cybereason search filters"""
+
+    MALWARE_KNOWN = [{"fieldName": "type", "operator": "Equals", "values": ["KnownMalware"]}]
+
 
 class CybereasonSearchSort(Enum):
-  """ Samples of possible Cybereason search """
-  NEWEST_TO_OLDEST = {
-    "sortingFieldName": "timestamp",
-    "sortDirection": "DESC"
-  }
+    """Samples of possible Cybereason search"""
 
-  OLDEST_TO_NEWEST = {
-    "sortingFieldName": "timestamp",
-    "sortDirection": "ASC"
-  }
+    NEWEST_TO_OLDEST = {"sortingFieldName": "timestamp", "sortDirection": "DESC"}
+
+    OLDEST_TO_NEWEST = {"sortingFieldName": "timestamp", "sortDirection": "ASC"}
+

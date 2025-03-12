@@ -28,7 +28,7 @@ def import_csv(file_path: str, callback: object = None, delimiter: str = None) -
     full_path = os.path.join(os.getcwd(), file_path)
 
     with open(full_path, "r", encoding="utf-8", newline="") as f:
-        # Try to guess the delimiter if none was specified
+        # WARN: Try to guess the delimiter if none was specified
         if not delimiter:
             first_line = f.readline().strip("\n")
             f.seek(0)

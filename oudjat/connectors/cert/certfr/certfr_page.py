@@ -1,357 +1,361 @@
 import re
-import requests
+from typing import Dict, List, Set
 
-from typing import List, Dict, Set
+import requests
 from bs4 import BeautifulSoup, element
 
-from oudjat.utils import ColorPrint
-from oudjat.model.vulnerability import CVE, CVE_REGEX
 from oudjat.connectors.cert import RiskType
+from oudjat.model.vulnerability import CVE, CVE_REGEX
+from oudjat.utils import ColorPrint
 
 from . import CERTFRPageType
 
-REF_TYPES = '|'.join([ pt.name for pt in CERTFRPageType ])
-LINK_TYPES = '|'.join([ pt.value for pt in CERTFRPageType ])
+# ****************************************************************
+# Useful regexes
+REF_TYPES = "|".join([pt.name for pt in CERTFRPageType])
+LINK_TYPES = "|".join([pt.value for pt in CERTFRPageType])
 CERTFR_REF_REGEX = rf"CERTFR-\d{{4}}-(?:{REF_TYPES})-\d{{3,4}}"
 CERTFR_LINK_REGEX = rf"https:\/\/www\.cert\.ssi\.gouv\.fr\/(?:{LINK_TYPES})\/{CERTFR_REF_REGEX}"
-URL_REGEX = r'http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+URL_REGEX = r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+
 
 class CERTFRPage:
-  """ Describes a CERTFR page """
+    """Describes a CERTFR page"""
 
-  # ****************************************************************
-  # Attributes & Constructors
+    # ****************************************************************
+    # Attributes & Constructors
 
-  BASE_LINK = "https://www.cert.ssi.gouv.fr"
+    BASE_LINK = "https://www.cert.ssi.gouv.fr"
 
-  def __init__(self, ref: str):
-    """ Constructor """
+    def __init__(self, ref: str):
+        """Constructor"""
 
-    if not self.is_valid_ref(ref) and not self.is_valid_link(ref):
-      raise ValueError(f"Invalid CERTFR ref provided : {ref}")
-    
-    self.ref = ref if self.is_valid_ref(ref) else self.get_ref_from_link(ref)
+        if not self.is_valid_ref(ref) and not self.is_valid_link(ref):
+            raise ValueError(f"Invalid CERTFR ref provided : {ref}")
 
-    self.raw_content: element = None
-    self.title: str = None
+        self.ref = ref if self.is_valid_ref(ref) else self.get_ref_from_link(ref)
 
-    self.meta: CERTFRPageMeta = None
-    self.content: CERTFRPageContent = None
+        self.raw_content: element = None
+        self.title: str = None
 
-    self.CVE_RESOLVED = False
+        self.meta: CERTFRPageMeta = None
+        self.content: CERTFRPageContent = None
 
-    # Set page type
-    ref_type = re.search(rf"(?:{REF_TYPES})", self.ref).group(0)
-    self.page_type = CERTFRPageType[ref_type].value
-    
-    self.link = f"{self.BASE_LINK}/{self.page_type}/{self.ref}/"
+        self.CVE_RESOLVED = False
 
-  # ****************************************************************
-  # Methods
+        # Set page type
+        ref_type = re.search(rf"(?:{REF_TYPES})", self.ref).group(0)
+        self.page_type = CERTFRPageType[ref_type].value
 
-  def get_ref(self) -> str:
-    """ Getter for the reference """
-    return self.ref
+        self.link = f"{self.BASE_LINK}/{self.page_type}/{self.ref}/"
 
-  def get_title(self) -> str:
-    """ Getter for the page title """
-    return self.title
+    # ****************************************************************
+    # Methods
 
-  def get_cves(self) -> List["CVE"]:
-    """ Getter to retreive page cves """
-    cves = self.content.get_cves()
-    
-    if cves is not None:
-      cves = cves.values()
+    def get_ref(self) -> str:
+        """Getter for the reference"""
+        return self.ref
 
-    return cves
+    def get_title(self) -> str:
+        """Getter for the page title"""
+        return self.title
 
-  def connect(self) -> None:
-    """ Connects to a CERTFR page based on given ref """
-     # Handle possible connection error
-    try:
-      req = requests.get(self.link)
-      
-      if req.status_code != 200:
-        raise ConnectionError(f"Error while trying to connect to {self.ref}")
-      
-      self.raw_content = BeautifulSoup(req.content, 'html.parser')
-      self.title = self.raw_content.title.text
+    def get_cves(self) -> List["CVE"]:
+        """Getter to retreive page cves"""
+        cves = self.content.get_cves()
 
-      print(self.title)
+        if cves is not None:
+            cves = cves.values()
 
-    except ConnectionError:
-      ColorPrint.red(
-        f"CERTFRPage::Error while requesting {self.ref}. Make sure it is accessible")
+        return cves
 
-  def disconnect(self) -> None:
-    """ Resets parsing """
-    self.raw_content = None
-    self.meta = None
-    self.content = None
+    def connect(self) -> None:
+        """Connects to a CERTFR page based on given ref"""
+        # Handle possible connection error
+        try:
+            req = requests.get(self.link)
 
-  def parse(self) -> None:
-    """ Parse page content """
-    
-    if self.raw_content is None:
-      self.connect()
-      
-    try:
-      sections = self.raw_content.article.find_all("section")
+            if req.status_code != 200:
+                raise ConnectionError(f"Error while trying to connect to {self.ref}")
 
-      # Meta parsing
-      self.meta = CERTFRPageMeta(meta_section=sections[0])
-      self.meta.parse()
+            self.raw_content = BeautifulSoup(req.content, "html.parser")
+            self.title = self.raw_content.title.text
 
-      # Content parsing
-      self.content = CERTFRPageContent(content_section=sections[1])
-      self.content.parse()
+            print(self.title)
 
-    except Exception as e:
-      ColorPrint.red(
-          f"CERTFRPage::A parsing error occured for {self.ref}\n{e}")
+        except ConnectionError:
+            ColorPrint.red(
+                f"CERTFRPage::Error while requesting {self.ref}. Make sure it is accessible"
+            )
 
-  def __str__(self) -> str:
-    """ Converts current instance into a string """
-    return f"{self.ref}: {self.title}"
+    def disconnect(self) -> None:
+        """Resets parsing"""
+        self.raw_content = None
+        self.meta = None
+        self.content = None
 
-  def to_dictionary(self) -> Dict:
-    """ Converts current instance into a dictionary """
-    page_dict = {}
-    
-    if self.meta is not None:
-      page_dict= {
-        "ref": self.ref,
-        "title": self.title,
-        **self.meta.to_dictionary(),
-        **self.content.to_dictionary(),
-      }
+    def parse(self) -> None:
+        """Parse page content"""
 
-    return page_dict
+        if self.raw_content is None:
+            self.connect()
 
-  # ****************************************************************
-  # Static methods
+        try:
+            sections = self.raw_content.article.find_all("section")
 
-  @staticmethod
-  def is_valid_ref(ref: str) -> bool:
-    """ Returns whether the ref is valid or not """
-    return re.match(CERTFR_REF_REGEX, ref)
+            # Meta parsing
+            self.meta = CERTFRPageMeta(meta_section=sections[0])
+            self.meta.parse()
 
-  @staticmethod
-  def is_valid_link(link: str) -> bool:
-    """ Returns whether the link is valid or not """
-    return re.match(CERTFR_LINK_REGEX, link)
+            # Content parsing
+            self.content = CERTFRPageContent(content_section=sections[1])
+            self.content.parse()
 
-  @staticmethod
-  def get_ref_from_link(link: str) -> str:
-    """ Returns a CERTFR ref based on a link """
-    if not re.match(CERTFR_LINK_REGEX, link):
-      raise ValueError(f"Invalid CERTFR link provided: {link}")
+        except Exception as e:
+            ColorPrint.red(f"CERTFRPage::A parsing error occured for {self.ref}\n{e}")
 
-    return re.findall(CERTFR_REF_REGEX, link)[0]
+    def __str__(self) -> str:
+        """Converts current instance into a string"""
+        return f"{self.ref}: {self.title}"
+
+    def to_dictionary(self) -> Dict:
+        """Converts current instance into a dictionary"""
+        page_dict = {}
+
+        if self.meta is not None:
+            page_dict = {
+                "ref": self.ref,
+                "title": self.title,
+                **self.meta.to_dictionary(),
+                **self.content.to_dictionary(),
+            }
+
+        return page_dict
+
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def is_valid_ref(ref: str) -> bool:
+        """Returns whether the ref is valid or not"""
+        return re.match(CERTFR_REF_REGEX, ref)
+
+    @staticmethod
+    def is_valid_link(link: str) -> bool:
+        """Returns whether the link is valid or not"""
+        return re.match(CERTFR_LINK_REGEX, link)
+
+    @staticmethod
+    def get_ref_from_link(link: str) -> str:
+        """Returns a CERTFR ref based on a link"""
+        if not re.match(CERTFR_LINK_REGEX, link):
+            raise ValueError(f"Invalid CERTFR link provided: {link}")
+
+        return re.findall(CERTFR_REF_REGEX, link)[0]
 
 
 class CERTFRPageMeta:
-  """ Handles meta table from CERTFR page """
-  
-  # ****************************************************************
-  # Attributes & Constructors
+    """Handles meta table from CERTFR page"""
 
-  def __init__(self, meta_section: element):
-    """ Constructor """
-    self.meta_table = meta_section.find_all("table")[0]
-    self.data = None
+    # ****************************************************************
+    # Attributes & Constructors
 
-    self.date_initial: str = None
-    self.date_last: str = None
-    self.sources: List[str] = None
+    def __init__(self, meta_section: element):
+        """Constructor"""
+        self.meta_table = meta_section.find_all("table")[0]
+        self.data = None
 
-  # ****************************************************************
-  # Methods
+        self.date_initial: str = None
+        self.date_last: str = None
+        self.sources: List[str] = None
 
-  def parse(self) -> None:
-    """ Parse meta table """
-    meta = {}
+    # ****************************************************************
+    # Methods
 
-    for row in self.meta_table.find_all("tr"):
-      cells = row.find_all("td")
-      c_name = cells[0].text.strip()
-      c_value = cells[-1].text.strip()
+    def parse(self) -> None:
+        """Parse meta table"""
+        meta = {}
 
-      meta[self.clean_str(c_name)] = self.clean_str(c_value)
-    
-    self.data = meta
+        for row in self.meta_table.find_all("tr"):
+            cells = row.find_all("td")
+            c_name = cells[0].text.strip()
+            c_value = cells[-1].text.strip()
 
-  def get_date_initial(self) -> str:
-    """ Getter / parser for initial page date """
+            meta[self.clean_str(c_name)] = self.clean_str(c_value)
 
-    if self.data is not None and self.date_initial is None:
-      self.date_initial = self.data.get("Date de la première version", None)
+        self.data = meta
 
-    return self.date_initial
+    def get_date_initial(self) -> str:
+        """Getter / parser for initial page date"""
 
-  def get_date_last(self) -> str:
-    """ Getter / parser for page last change date """
-    
-    if self.data is not None and self.date_last is None:
-      self.date_last = self.data.get("Date de la dernière version", None)
+        if self.data is not None and self.date_initial is None:
+            self.date_initial = self.data.get("Date de la première version", None)
 
-    return self.date_last
+        return self.date_initial
 
-  def get_sources(self) -> List[str]:
-    """ Getter / parser for page sources """
-    
-    if self.data is not None and self.sources is None:
-      clean_sources = self.data.get("Source(s)", "").split("\n")
-      clean_sources = [
-        re.sub(r'\s+', ' ', line).strip()
-        for line in clean_sources if re.sub(r'\s+', '', line).strip()
-      ]
+    def get_date_last(self) -> str:
+        """Getter / parser for page last change date"""
 
-      self.sources = clean_sources
+        if self.data is not None and self.date_last is None:
+            self.date_last = self.data.get("Date de la dernière version", None)
 
-    return self.sources
+        return self.date_last
 
-  def to_dictionary(self) -> Dict:
-    """ Converts current instance into a dictionary """
-    meta_dict = {}
+    def get_sources(self) -> List[str]:
+        """Getter / parser for page sources"""
 
-    if self.data is not None:
-      meta_dict = {
-        "date_initial": self.get_date_initial(),
-        "date_last": self.get_date_last(),
-        "sources": self.get_sources()
-      }
+        if self.data is not None and self.sources is None:
+            clean_sources = self.data.get("Source(s)", "").split("\n")
+            clean_sources = [
+                re.sub(r"\s+", " ", line).strip()
+                for line in clean_sources
+                if re.sub(r"\s+", "", line).strip()
+            ]
 
-    return meta_dict
+            self.sources = clean_sources
 
-  # ****************************************************************
-  # Static methods
+        return self.sources
 
-  @staticmethod
-  def clean_str(str: str) -> str:
-    return str.replace("\r", "").strip()
+    def to_dictionary(self) -> Dict:
+        """Converts current instance into a dictionary"""
+        meta_dict = {}
 
+        if self.data is not None:
+            meta_dict = {
+                "date_initial": self.get_date_initial(),
+                "date_last": self.get_date_last(),
+                "sources": self.get_sources(),
+            }
+
+        return meta_dict
+
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def clean_str(str: str) -> str:
+        return str.replace("\r", "").strip()
 
 
 class CERTFRPageContent:
-  """ Handles content section from CERTFR page """
-  
-  # ****************************************************************
-  # Attributes & Constructors
+    """Handles content section from CERTFR page"""
 
-  def __init__(self, content_section: element):
-    """ Constructor """
-    self.content = content_section
-    self.data = None
+    # ****************************************************************
+    # Attributes & Constructors
 
-    self.solutions = None
-    self.description = None
-    self.risks: Set[str] = None
-    self.cves: Dict["CVE"] = None
-    self.documentations: List[str] = None
-    self.affected_products: List[str] = None
+    def __init__(self, content_section: element):
+        """Constructor"""
+        self.content = content_section
+        self.data = None
 
-  # ****************************************************************
-  # Methods
+        self.solutions = None
+        self.description = None
+        self.risks: Set[str] = None
+        self.cves: Dict["CVE"] = None
+        self.documentations: List[str] = None
+        self.affected_products: List[str] = None
 
-  def get_risks(self, short: bool = True) -> Set["RiskType"]:
-    """ Getter / parser for the list of risks """
-    
-    if self.data is not None and self.risks is None:
-      risk_set = set()
+    # ****************************************************************
+    # Methods
 
-      for risk in list(RiskType):
-        if risk.value["fr"].lower() in [ r.lower() for r in self.data.get("Risques", []) ]:
-          risk_set.add(risk)
+    def get_risks(self, short: bool = True) -> Set["RiskType"]:
+        """Getter / parser for the list of risks"""
 
-      self.risks = risk_set
+        if self.data is not None and self.risks is None:
+            risk_set = set()
 
-    return self.risks
+            for risk in list(RiskType):
+                if risk.value["fr"].lower() in [r.lower() for r in self.data.get("Risques", [])]:
+                    risk_set.add(risk)
 
-  def get_products(self) -> List[str]:
-    """ Getter / parser for affected products """
+            self.risks = risk_set
 
-    if self.data is not None and self.affected_products is None:
-      self.affected_products = self.data.get("Systèmes affectés", [])
+        return self.risks
 
-    return self.affected_products
-  
-  def get_description(self) -> str:
-    """ Getter / parser for description """
-    
-    if self.data is not None and self.description is None:
-      self.description = self.data.get("Résumé", None)
-      
-    return self.description
+    def get_products(self) -> List[str]:
+        """Getter / parser for affected products"""
 
-  def get_solutions(self) -> str:
-    """ Getter / parser for solutions """
-    
-    if self.data is not None and self.solutions is None:
-      self.solutions = self.data.get("Solutions", None)
+        if self.data is not None and self.affected_products is None:
+            self.affected_products = self.data.get("Systèmes affectés", [])
 
-    return self.solutions
+        return self.affected_products
 
-  def get_cves(self) -> List[str]:
-    """ Returns the refs of all the related cves """
+    def get_description(self) -> str:
+        """Getter / parser for description"""
 
-    if self.data is not None and self.cves is None:
-      cves = {}
+        if self.data is not None and self.description is None:
+            self.description = self.data.get("Résumé", None)
 
-      for cve in self.data.get("CVEs", []):
-        if cve not in cves.keys():
-          cves[cve] = CVE(ref=cve)
+        return self.description
 
-      self.cves = cves
-        
-    return self.cves
+    def get_solutions(self) -> str:
+        """Getter / parser for solutions"""
 
-  def get_documentations(self, filter: str = None) -> List[str]:
-    """ Getter for the documentations """
-    
-    if self.data is not None and self.documentations is None:
-      self.documentations = self.data.get("Documentation", [])
+        if self.data is not None and self.solutions is None:
+            self.solutions = self.data.get("Solutions", None)
 
-    docs = self.documentations
+        return self.solutions
 
-    if filter is not None and filter != "":
-      docs = [ d for d in self.documentations if filter not in d ]
+    def get_cves(self) -> List[str]:
+        """Returns the refs of all the related cves"""
 
-    return docs
+        if self.data is not None and self.cves is None:
+            cves = {}
 
-  def parse(self) -> None:
-    """ Parse content section """
-    data = {}
+            for cve in self.data.get("CVEs", []):
+                if cve not in cves.keys():
+                    cves[cve] = CVE(ref=cve)
 
-    titles = self.content.find_all("h2")
+            self.cves = cves
 
-    for t in titles:
-      next_el = t.find_next_sibling()
+        return self.cves
 
-      if next_el.name == "ul":
-        data[t.text] = [ li.text for li in next_el.find_all("li") ]
-        
-      else:
-        data[t.text] = next_el.text
-        
-    data["CVEs"] = set(re.findall(CVE_REGEX, self.content.text))
-    data["Documentation"] = re.findall(URL_REGEX, self.content.text)
+    def get_documentations(self, filter: str = None) -> List[str]:
+        """Getter for the documentations"""
 
-    self.data = data
+        if self.data is not None and self.documentations is None:
+            self.documentations = self.data.get("Documentation", [])
 
-  def to_dictionary(self) -> Dict:
-    """ Converts current instance into a dictionary """
-    content_dict = {}
+        docs = self.documentations
 
-    if self.data is not None:
-      content_dict = {
-        "risks": [ r.name for r in self.get_risks() ],
-        "products": self.get_products(),
-        "description": self.get_description(),
-        "cves": [ cve.get_ref() for cve in self.get_cves().values() ],
-        "solutions": self.get_solutions(),
-        "documentations": self.get_documentations(filter="cve.org")
-      }
+        if filter is not None and filter != "":
+            docs = [d for d in self.documentations if filter not in d]
 
-    return content_dict
+        return docs
+
+    def parse(self) -> None:
+        """Parse content section"""
+        data = {}
+
+        titles = self.content.find_all("h2")
+
+        for t in titles:
+            next_el = t.find_next_sibling()
+
+            if next_el.name == "ul":
+                data[t.text] = [li.text for li in next_el.find_all("li")]
+
+            else:
+                data[t.text] = next_el.text
+
+        data["CVEs"] = set(re.findall(CVE_REGEX, self.content.text))
+        data["Documentation"] = re.findall(URL_REGEX, self.content.text)
+
+        self.data = data
+
+    def to_dictionary(self) -> Dict:
+        """Converts current instance into a dictionary"""
+        content_dict = {}
+
+        if self.data is not None:
+            content_dict = {
+                "risks": [r.name for r in self.get_risks()],
+                "products": self.get_products(),
+                "description": self.get_description(),
+                "cves": [cve.get_ref() for cve in self.get_cves().values()],
+                "solutions": self.get_solutions(),
+                "documentations": self.get_documentations(filter="cve.org"),
+            }
+
+        return content_dict
+

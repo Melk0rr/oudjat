@@ -14,6 +14,9 @@ from oudjat.utils import ColorPrint, unixtime_to_str
 class CybereasonEntry(dict):
     """Cybereason entry dict"""
 
+    # ****************************************************************
+    # Attributes & Constructors
+
     def __init__(self, entry_type: "CybereasonEndpoint", **kwargs):
         """Constructor"""
 
@@ -23,11 +26,11 @@ class CybereasonEntry(dict):
 
         for k, v in kwargs.items():
             if k in entry_attrs:
-                # Handle unix time
+                # WARN: Handle unix time
                 if "time" in k.lower():
                     v = unixtime_to_str(v)
 
-                # Add short policy version
+                # NOTE: Add short policy version
                 if k == "policyName":
                     cleaned_kwargs["policyShort"] = v
                     shortPolicy = re.search(r"Detect|Protect", v)
@@ -47,6 +50,9 @@ class CybereasonEntry(dict):
 class CybereasonConnector(Connector):
     """Cybereason connector to interact and query Cybereason API"""
 
+    # ****************************************************************
+    # Attributes & Constructors
+
     def __init__(self, target: str, service_name: str = "OudjatCybereasonAPI", port: int = 443):
         """Constructor"""
 
@@ -61,6 +67,9 @@ class CybereasonConnector(Connector):
         super().__init__(target=urlparse(target), service_name=service_name, use_credentials=True)
 
         self.target = urlparse(f"{self.target.scheme}://{self.target.netloc}:{port}")
+
+    # ****************************************************************
+    # Methods
 
     def connect(self) -> None:
         """Connects to API using connector parameters"""
@@ -119,6 +128,7 @@ class CybereasonConnector(Connector):
         if endpoint_url_sfx is not None:
             endpoint_url += f"/{endpoint_url_sfx}"
 
+        # WARN: HTTP method varies between endpoints
         cnx_method = endpoint.value.get("method")
 
         if endpoint_cnx_method is not None:
@@ -131,7 +141,7 @@ class CybereasonConnector(Connector):
             if api_resp.content:
                 res = json.loads(api_resp.content)
 
-                # Handling CR nonesense
+                # NOTE: Handling CR nonesense (response format not unified)
                 if not isinstance(res, list):
                     if "data" in res:
                         if res.get("data") is None:
@@ -180,7 +190,6 @@ class CybereasonConnector(Connector):
                 res.extend(search_i)
 
         print(f"{len(res)} {endpoint_attr.name.lower()} found")
-
         entries = list(map(lambda entry: CybereasonEntry(entry_type=endpoint_attr, **entry), res))
 
         return entries
@@ -219,3 +228,4 @@ class CybereasonConnector(Connector):
                 res = res.get("data")
 
         return res
+

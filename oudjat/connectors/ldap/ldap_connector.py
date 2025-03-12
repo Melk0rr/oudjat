@@ -25,6 +25,7 @@ class LDAPConnector(Connector):
 
     # ****************************************************************
     # Attributes & Constructors
+
     def __init__(
         self, server: str, service_name: str = "OudjatLDAPConnection", use_tls: bool = False
     ):
