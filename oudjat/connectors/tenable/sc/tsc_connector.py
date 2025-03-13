@@ -169,14 +169,17 @@ class TenableSCConnector(Connector):
         try:
             asset_lists = self.connection.asset_lists.list()
 
+            if asset_lists is not None:
+                asset_lists = asset_lists.get("usable", [])
+
+            if list_filter is not None:
+                f_key, f_operator, f_value = list_filter
+                asset_lists = list(
+                    filter(lambda al: DataFilterOperation[f_operator](f_value, al[f_key]), asset_lists)
+                )
         except Exception as e:
             raise e
 
-        if list_filter is not None:
-            f_key, f_operator, f_value = list_filter
-            asset_lists = list(
-                filter(lambda al: DataFilterOperation[f_operator](f_value, al[f_key]), asset_lists)
-            )
 
         return asset_lists
 
