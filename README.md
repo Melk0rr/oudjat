@@ -24,11 +24,14 @@
 
 ### Prerequisites
 
+
 ### Installing
 
-Please note that Oudjat is in alpha
+> [!caution]
+> Please note that Oudjat is in **alpha** 
+>
 
-```
+```bash
 git clone https://github.com/Melk0rr/Oudjat.git
 cd Oudjat
 pip3 install  -r requirements.txt
@@ -82,3 +85,4 @@ pip3 install .
         https://github.com/Melk0rr/Oudjat
 
 ## License
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details
