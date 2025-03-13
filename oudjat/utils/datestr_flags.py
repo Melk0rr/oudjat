@@ -1,3 +1,4 @@
+# INFO: Date format bit flag
 from enum import Enum
 
 

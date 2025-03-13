@@ -1,3 +1,5 @@
+# INFO: Helper functions to handle credentials
+
 import getpass
 
 import keyring

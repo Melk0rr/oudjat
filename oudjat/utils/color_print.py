@@ -1,3 +1,5 @@
+# INFO: Helper functions to print in color
+
 class ColorPrint:
     RED = "\033[91m"
     GREEN = "\033[92m"

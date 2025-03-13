@@ -96,4 +96,3 @@ def export_txt(data: List[str], file_path: str, append: bool = False) -> None:
     with open(full_path, mode, encoding="utf-8", newline="") as f:
         for line in data:
             f.write(line + "\n")
-

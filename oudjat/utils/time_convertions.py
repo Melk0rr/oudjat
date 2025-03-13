@@ -1,3 +1,5 @@
+# INFO: Helper functions to handle some time convertions
+
 from datetime import datetime, timedelta, timezone
 from functools import reduce
 from typing import Union

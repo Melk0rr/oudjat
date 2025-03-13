@@ -1,7 +1,7 @@
 """
 Usage:
   oudjat cert (-t TARGET | -f FILE) [options]   [--feed] [--filter=FILTER]
-                                                [--keywords=KEYWORDS | --keywordfile=FILE]   
+                                                [--keywords=KEYWORDS | --keywordfile=FILE]
   oudjat vuln (-t TARGET | -f FILE) [options]
   oudjat kpi (-d DIRECTORY) (-s SOURCES) [options] [--config=CONFIG] [--history=HIST] [--history-gap=GAP]
   oudjat sc (-t TARGET | -f FILE) (--sc-url=SC_URL) [--sc-mode=SC_MODE]
@@ -12,7 +12,7 @@ Commands
   cert                            parse data from cert page
   kpi                             generates kpi
   vuln                            parse CVE data from Nist page
-  
+
 Options:
   -a --append                     append to the output file
   -c --config=CONFIG              specify config file
@@ -48,70 +48,70 @@ Help:
 
 import sys
 import time
+from typing import Any, Dict
 
 from docopt import docopt
-from typing import Dict, Any
 
 import oudjat.commands
 from oudjat.banner import banner
-from oudjat.utils import ColorPrint
-from oudjat.utils import seconds_to_str
-from oudjat.utils import StdOutHook
+from oudjat.utils import ColorPrint, StdOutHook, seconds_to_str
 
 from . import __version__ as VERSION
 
 COMMAND_OPTIONS = ["vuln", "cert", "sc", "kpi"]
 
-def command_switch(options: Dict) -> Any:
-  """ Script command switch case """
-  
-  switch = {
-    "vuln": oudjat.commands.vuln.Vuln,
-    "cert": oudjat.commands.cert.Cert,
-    "kpi" : oudjat.commands.kpi_factory.KPIFactory
-    # "sc"  : oudjat.commands.SC,
-  }
 
-  command_name = next(command for command in COMMAND_OPTIONS if options[command])
-  return switch[command_name](options)
+def command_switch(options: Dict) -> Any:
+    """Script command switch case"""
+
+    switch = {
+        "vuln": oudjat.commands.vuln.Vuln,
+        "cert": oudjat.commands.cert.Cert,
+        "kpi": oudjat.commands.kpi_factory.KPIFactory,
+        # "sc"  : oudjat.commands.SC,
+    }
+
+    command_name = next(command for command in COMMAND_OPTIONS if options[command])
+    return switch[command_name](options)
+
 
 def main() -> None:
-  """ Main program function """
+    """Main program function"""
 
-  try:
-    if sys.version_info < (3, 0):
-      sys.stdout.write("Sorry, requires Python 3.x\n")
-      sys.exit(1)
+    try:
+        if sys.version_info < (3, 0):
+            sys.stdout.write("Sorry, requires Python 3.x\n")
+            sys.exit(1)
 
-    start_time = time.time()
+        start_time = time.time()
 
-    options = docopt(__doc__, version=VERSION)
+        options = docopt(__doc__, version=VERSION)
 
-    if options["--output"] or options["--silent"]:
-      sys.stdout = StdOutHook(
-          options["FILENAME"], options["--silent"], options["--output"])
+        if options["--output"] or options["--silent"]:
+            sys.stdout = StdOutHook(options["FILENAME"], options["--silent"], options["--output"])
 
-    if not options["--target"] and not options["--file"] and not options["--directory"]:
-      ColorPrint.red(
-          "Target required! Run with -h for usage instructions. Either -t target.host or -f file.txt required")
-      return
+        if not options["--target"] and not options["--file"] and not options["--directory"]:
+            ColorPrint.red(
+                "Target required! Run with -h for usage instructions. Either -t target.host or -f file.txt required"
+            )
+            return
 
-    if options["--target"] and options["--file"]:
-      ColorPrint.red(
-          "Please only supply one target method - either read by file with -f or as an argument to -t.")
-      return
+        if options["--target"] and options["--file"]:
+            ColorPrint.red(
+                "Please only supply one target method - either read by file with -f or as an argument to -t."
+            )
+            return
 
-    ColorPrint.blue(banner)
+        ColorPrint.blue(banner)
 
-    command = command_switch(options)
-    command.run()
+        command = command_switch(options)
+        command.run()
 
-    print(
-        f"\nWatchers infos search took {seconds_to_str(time.time() - start_time)}s")
+        print(f"\nWatchers infos search took {seconds_to_str(time.time() - start_time)}s")
 
-    if options["--output"]:
-      sys.stdout.write_out()
+        if options["--output"]:
+            sys.stdout.write_out()
 
-  except KeyboardInterrupt:
-    print("\nQuitting...")
-    sys.exit(0)
+    except KeyboardInterrupt:
+        print("\nQuitting...")
+        sys.exit(0)

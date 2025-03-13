@@ -1,3 +1,5 @@
+# INFO: Helper functions to handle bit operations
+
 def i_not(val: int) -> int:
     """Byte NOT"""
     return ~val & 0xFFFFFFFF
