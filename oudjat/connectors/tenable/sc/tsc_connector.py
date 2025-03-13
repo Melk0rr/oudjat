@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 from urllib.parse import urlparse
 
 from tenable.sc import TenableSC
@@ -136,19 +136,39 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    def delete_asset_list(self, list_id: int) -> None:
+    def delete_asset_list(self, list_id: Union[int, List[int]]) -> None:
         """Deletes an asset list based on given id"""
 
-        # TODO: Ability to delete multiple asset lists
+        if self.connection is None:
+            raise ConnectionError(
+                "TenableSCConnector.delete_asset_list::Can't delete asset list if connection is not initialized"
+            )
+
+        if not isinstance(list_id, list):
+            list_id = [list_id]
+
+        try:
+            for lid in list_id:
+                self.connection.asset_lists.delete(id=lid)
+
+        except Exception as e:
+            raise e
+
+    # TODO: Edit asset list
+    # TODO: List asset list
+    def list_asset_lists(self) -> List[Dict]:
+        """Retreives a list of asset lists"""
+
         if self.connection is None:
             raise ConnectionError(
                 "TenableSCConnector.delete_asset_list::Can't delete asset list if connection is not initialized"
             )
 
         try:
-            self.connection.asset_lists.delete(id=list_id)
+            self.connection.asset_lists.list()
 
         except Exception as e:
             raise e
 
-    # TODO: Edit asset list
+    # TODO: Get asset list details
+
