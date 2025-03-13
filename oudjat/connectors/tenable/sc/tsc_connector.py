@@ -175,7 +175,7 @@ class TenableSCConnector(Connector):
         if list_filter is not None:
             f_key, f_operator, f_value = list_filter
             asset_lists = list(
-                filter(lambda al: DataFilterOperation[f_operator](f_value, al[f_key]))
+                filter(lambda al: DataFilterOperation[f_operator](f_value, al[f_key]), asset_lists)
             )
 
         return asset_lists
