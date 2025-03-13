@@ -66,6 +66,20 @@ def ope_reg_search(value: str, pattern: str) -> bool:
 
 
 DataFilterOperation = {
+    # INFO: Symbols options
+    "=": ope_equals,
+    "∋": ope_contains,
+    "∈": ope_in,
+    ">": ope_greater_than,
+    ">=": ope_greater_equal_than,
+    "<": ope_lower_than,
+    "<=": ope_lower_equal_than,
+    ":": ope_is,
+    "!:": ope_is_not,
+    "~": ope_reg_match,
+    "?": ope_reg_search,
+
+    # INFO: Full name options
     "eq": ope_equals,
     "contains": ope_contains,
     "in": ope_in,
