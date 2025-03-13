@@ -159,16 +159,19 @@ class TenableSCConnector(Connector):
     def list_asset_lists(self) -> List[Dict]:
         """Retreives a list of asset lists"""
 
+        asset_lists = []
         if self.connection is None:
             raise ConnectionError(
                 "TenableSCConnector.delete_asset_list::Can't delete asset list if connection is not initialized"
             )
 
         try:
-            self.connection.asset_lists.list()
+            asset_lists = self.connection.asset_lists.list()
 
         except Exception as e:
             raise e
+
+        return asset_lists
 
     # TODO: Get asset list details
 
