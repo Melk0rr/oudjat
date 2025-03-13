@@ -1,10 +1,11 @@
 import re
-from typing import Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 from urllib.parse import urlparse
 
 from tenable.sc import TenableSC
 
 from oudjat.connectors.connector import Connector
+from oudjat.control.data.data_filter_operations import DataFilterOperation
 from oudjat.model.vulnerability.cve import get_severity_by_score
 from oudjat.utils import ColorPrint
 
@@ -105,7 +106,9 @@ class TenableSCConnector(Connector):
 
     def build_severity_filter(self, *severities: List[str]) -> Tuple:
         """Returns a severity filter based on the provided severities"""
-        sev_scores = ",".join([f"{get_severity_by_score(sev).value['score']}" for sev in list(*severities)])
+        sev_scores = ",".join(
+            [f"{get_severity_by_score(sev).value['score']}" for sev in list(*severities)]
+        )
         return "severity", "=", sev_scores
 
     # INFO: Asset lists
@@ -154,9 +157,7 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    # TODO: Edit asset list
-    # TODO: List asset list
-    def list_asset_lists(self) -> List[Dict]:
+    def list_asset_lists(self, list_filter: Tuple[str, str, Any] = None) -> List[Dict]:
         """Retreives a list of asset lists"""
 
         asset_lists = []
@@ -171,7 +172,13 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
+        if list_filter is not None:
+            f_key, f_operator, f_value = list_filter
+            asset_lists = list(
+                filter(lambda al: DataFilterOperation[f_operator](al[f_key], f_value))
+            )
+
         return asset_lists
 
     # TODO: Get asset list details
-
+    # TODO: Edit asset list
