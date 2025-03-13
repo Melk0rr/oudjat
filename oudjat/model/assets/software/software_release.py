@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import List, Dict, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Union
 
-from oudjat.utils import date_format_from_flag, DATE_FLAGS, days_diff
+from oudjat.utils import DATE_FLAGS, date_format_from_flag, days_diff
 
 from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList, soft_date_str
 
@@ -150,6 +150,9 @@ class SoftwareRelease:
 class SoftwareReleaseDict(dict):
     """Software release dictionary"""
 
+    # ****************************************************************
+    # Methods
+
     def find_rel_matching_label(self, val: str) -> "SoftwareReleaseDict":
         """Try to find release with a label matching the given string"""
         return {k: v for k, v in self.items() if k in val}
@@ -163,4 +166,3 @@ class SoftwareReleaseDict(dict):
             lab_search = ver_search.get(rel_label, None)
 
         return ver_search if lab_search is None else {lab_search.get_label(): lab_search}
-

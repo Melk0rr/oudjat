@@ -1,17 +1,16 @@
 import re
-
-from enum import Enum
 from datetime import datetime
-from typing import List, Dict, Union
+from enum import Enum
+from typing import Dict, List, Union
 
 from oudjat.model.assets.computer import ComputerType
 from oudjat.model.assets.software import (
-    SoftwareReleaseSupport,
     SoftwareEdition,
     SoftwareEditionDict,
+    SoftwareReleaseSupport,
 )
-from oudjat.model.assets.software.os import OperatingSystem, OSRelease, OSFamily
 
+from ..operating_system import OperatingSystem, OSFamily, OSRelease
 from . import WINDOWS_RELEASES
 
 
@@ -36,9 +35,9 @@ class MSOSRelease(OSRelease):
             release_label=release_label,
         )
 
-        version_split = self.version.split('.')
+        version_split = self.version.split(".")
         self.version_build = version_split[-1]
-        self.version_main = '.'.join(version_split[:-1])
+        self.version_main = ".".join(version_split[:-1])
 
     # ****************************************************************
     # Methods
@@ -167,4 +166,3 @@ class MicrosoftOperatingSystem(OperatingSystem):
             res = ".".join([search.group(1), search.group(2)])
 
         return res
-

@@ -1,10 +1,9 @@
 from enum import Enum
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from ..asset import Asset
 from ..asset_type import AssetType
-
-from . import SoftwareRelease, SoftwareReleaseDict, SoftwareEditionDict
+from . import SoftwareEditionDict, SoftwareRelease, SoftwareReleaseDict
 
 
 class SoftwareType(Enum):

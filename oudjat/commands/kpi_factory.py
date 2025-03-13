@@ -2,14 +2,11 @@
 
 import json
 from multiprocessing import Pool
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
-from oudjat.utils import ColorPrint
-from oudjat.utils import import_csv, export_csv
-
-from oudjat.control.data import DataScope
-from oudjat.control.data import DataFilter
+from oudjat.control.data import DataFilter, DataScope
 from oudjat.control.kpi import KPI
+from oudjat.utils import ColorPrint, export_csv, import_csv
 
 from .base import Base
 

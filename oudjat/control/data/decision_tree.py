@@ -1,7 +1,7 @@
-from typing import List, Dict, Union, Any
+from typing import Any, Dict, List, Union
 
-from oudjat.utils import ColorPrint
 from oudjat.control.data import DataFilter
+from oudjat.utils import ColorPrint
 
 
 class DecisionTreeNode:

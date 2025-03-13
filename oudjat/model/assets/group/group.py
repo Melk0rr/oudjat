@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from ...generic_identifiable import GenericIdentifiable
 from ..asset import Asset
@@ -24,7 +24,9 @@ class Group(Asset):
     ):
         """Constructor"""
 
-        super().__init__(id=id, name=name, label=label, description=description, asset_type=AssetType.GROUP)
+        super().__init__(
+            id=id, name=name, label=label, description=description, asset_type=AssetType.GROUP
+        )
 
         self.members = GroupMemberList()
 
@@ -37,7 +39,7 @@ class Group(Asset):
 
     def get_member_names(self) -> List[str]:
         """Returns the list of member names"""
-        return [ m.get_name() for m in self.members.values() ]
+        return [m.get_name() for m in self.members.values()]
 
     def add_member(self, member: GenericIdentifiable) -> None:
         """Adds a new member to the member list"""

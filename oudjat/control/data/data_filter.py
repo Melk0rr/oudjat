@@ -130,3 +130,4 @@ class DataFilter:
                 filtered_data.append(el)
 
         return filtered_data
+

@@ -198,6 +198,9 @@ class IPv4Mask(IPv4):
 
         return super().__str__()
 
+    # ****************************************************************
+    # Static methods
+
     @staticmethod
     def get_netcidr(mask: str) -> int:
         """Static method to return CIDR notation for a given mask"""
@@ -221,3 +224,4 @@ class IPv4Mask(IPv4):
             raise ValueError("Network length value must be between 1 and 32!")
 
         return ip_int_to_str(cidr_to_int(network_length))
+

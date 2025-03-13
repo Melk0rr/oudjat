@@ -1,5 +1,3 @@
-"""The base command."""
-
 
 class Base(object):
   """A base command."""

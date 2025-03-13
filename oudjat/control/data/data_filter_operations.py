@@ -78,4 +78,3 @@ DataFilterOperation = {
     "match": ope_reg_match,
     "search": ope_reg_search,
 }
-

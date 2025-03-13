@@ -1,11 +1,10 @@
 import re
-
 from enum import Enum
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
-from oudjat.utils import ColorPrint
 from oudjat.model.assets.computer import ComputerType
-from oudjat.model.assets.software import Software, SoftwareType, SoftwareRelease
+from oudjat.model.assets.software import Software, SoftwareRelease, SoftwareType
+from oudjat.utils import ColorPrint
 
 
 class OSFamily(Enum):
@@ -15,12 +14,16 @@ class OSFamily(Enum):
         "name": "android",
         "pattern": r"[Aa]ndroid|[Aa][Oo][Ss][Pp]|[Gg]raphene[Oo][Ss]|[Ll]ineage[Oo][Ss]|\/e\/[Oo][Ss]|[Cc]alyx[Oo][Ss]",
     }
+
     BSD = {"name": "bsd", "pattern": r"[Bb][Ss][Dd]"}
+
     LINUX = {
         "name": "linux",
         "pattern": r"[Dd]ebian|[Uu]buntu|[Mm]int|[Nn]ix[Oo][Ss]|(?:[Oo]pen)?[Ss][Uu][Ss][Ee]|[Ff]edora|[Rr](?:ed )?[Hh](?:at )?[Ee](?:nterprise )?[Ll](?:inux)?|[Oo]racle(?: Linux)?",
     }
+
     MAC = {"name": "mac", "pattern": r"[Mm][Aa][Cc](?:[Oo][Ss])?"}
+
     WINDOWS = {"name": "windows", "pattern": r"[Ww]indows(?: [Ss]erver)?"}
 
 
@@ -127,4 +130,3 @@ class OSRelease(SoftwareRelease):
         os_name = base_dict.pop("software")
 
         return {"os": os_name, **base_dict}
-

@@ -1,6 +1,7 @@
 from typing import List
 
 from oudjat.utils import ColorPrint
+
 from .kpi import KPI
 from .kpi_comparator import KPIComparator
 
@@ -65,4 +66,3 @@ class KPIHistory:
                 print_end = "\n"
 
             c.print_tendency(print_first_value=print_first, sfx=print_end)
-

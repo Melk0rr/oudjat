@@ -1,10 +1,8 @@
 import re
-
 from typing import Dict, Union
 
 from ..asset import Asset
 from ..asset_type import AssetType
-
 from . import EMAIL_REG
 
 
@@ -79,4 +77,3 @@ class User(Asset):
             "login": self.login,
             "type": self.user_type,
         }
-

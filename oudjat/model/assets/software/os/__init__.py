@@ -1,3 +1,4 @@
-from .os import OperatingSystem, OSRelease, OSFamily
-from .windows import MicrosoftOperatingSystem
+from .operating_system import OperatingSystem, OSFamily, OSRelease
 from .os_option import OSOption
+from .windows import MicrosoftOperatingSystem
+

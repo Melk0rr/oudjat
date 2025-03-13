@@ -1,5 +1,6 @@
-import keyring
 import getpass
+
+import keyring
 
 
 def save_credentials(service: str, username: str, password: str) -> None:
@@ -40,4 +41,3 @@ def del_credentials(service: str, username: str) -> None:
 
     except keyring.errors.PasswordDeleteError as e:
         raise (f"Error while deleting password for {service}:{username}\n{e}")
-

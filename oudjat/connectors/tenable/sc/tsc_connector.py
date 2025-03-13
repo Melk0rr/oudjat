@@ -5,10 +5,10 @@ from urllib.parse import urlparse
 from tenable.sc import TenableSC
 
 from oudjat.connectors.connector import Connector
+from oudjat.model.vulnerability.cve import get_severity_by_score
 from oudjat.utils import ColorPrint
 
 from .tsc_asset_list_types import TSCAssetListType
-from .tsc_severities import TenableSCSeverity
 
 
 class TenableSCConnector(Connector):
@@ -105,7 +105,7 @@ class TenableSCConnector(Connector):
 
     def build_severity_filter(self, *severities: List[str]) -> Tuple:
         """Returns a severity filter based on the provided severities"""
-        sev_scores = ",".join([f"{TenableSCSeverity[sev].value}" for sev in list(*severities)])
+        sev_scores = ",".join([f"{get_severity_by_score(sev).value['score']}" for sev in list(*severities)])
         return "severity", "=", sev_scores
 
     # INFO: Asset lists
