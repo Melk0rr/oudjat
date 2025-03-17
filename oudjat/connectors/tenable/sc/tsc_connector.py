@@ -169,6 +169,7 @@ class TenableSCConnector(Connector):
             if asset_lists is not None:
                 asset_lists = asset_lists.get("usable", [])
 
+            # If a filter is provided
             if list_filter is not None:
                 f_key, f_operator, f_value = list_filter
                 asset_lists = list(
@@ -203,7 +204,6 @@ class TenableSCConnector(Connector):
     # TODO: Edit asset list
 
     # INFO: Scans
-    # TODO: List scans
     def list_scans(self, scan_filter: Tuple[str, str, Any] = None) -> List[Dict]:
         """Retrieves a list of scans"""
 
@@ -212,6 +212,18 @@ class TenableSCConnector(Connector):
         scan_list = []
         try:
             scan_list = self.connection.scans.list()
+
+            if scan_list is not None:
+                scan_list = scan_list.get("usable", [])
+
+            # If a filter is provided
+            if scan_filter is not None:
+                f_key, f_operator, f_value = scan_filter
+                scan_list = list(
+                    filter(
+                        lambda sl: DataFilterOperation[f_operator](f_value, sl[f_key]), scan_list
+                    )
+                )
 
         except Exception as e:
             raise e
