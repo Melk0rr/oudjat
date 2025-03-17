@@ -200,7 +200,7 @@ class TenableSCConnector(Connector):
         list_details = []
         try:
             for lid in list_id:
-                list_details.append(self.connection.asset_lists.details(id=list_id))
+                list_details.append(self.connection.asset_lists.details(id=lid))
 
         except Exception as e:
             raise e
