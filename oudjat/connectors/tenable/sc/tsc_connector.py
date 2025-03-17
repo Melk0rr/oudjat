@@ -61,10 +61,13 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    def check_connection(self) -> None:
+    def check_connection(self, prefix: str = None) -> None:
         """Checks if the connection is initialized"""
+
         if self.connection is None:
-            raise ConnectionError("Connection not initialized")
+            error_pre = '.' + prefix if prefix is not None else ''
+            error_msg = f"TenableSCConnector{error_pre}::Can't create asset list if connection is not initialized"
+            raise ConnectionError(error_msg)
 
     def disconnect(self) -> None:
         """Disconnect from API"""
@@ -74,7 +77,8 @@ class TenableSCConnector(Connector):
 
     def search(self, search_type: str, *args, **kwargs) -> List:
         """Searches the API for elements"""
-        self.check_connection()
+
+        self.check_connection(prefix="search")
 
         search_type = search_type.upper()
         search_options = {"VULNS": self.search_vulns}
@@ -91,11 +95,13 @@ class TenableSCConnector(Connector):
 
         return list(search)
 
+        """Raises an exception if connection is not set"""
+
     # INFO: Vulns
     def search_vulns(
         self, *severities: List[str], key_exclude: List[str] = None, tool: str = "vulndetails"
     ) -> Dict:
-        """Retreive the current vulnerabilities"""
+        """Retrieve the current vulnerabilities"""
 
         filters = [self.BUILTIN_FILTERS["exploitable"]]
         if severities is not None:
@@ -122,10 +128,7 @@ class TenableSCConnector(Connector):
     ) -> None:
         """Creates a new asset list"""
 
-        if self.connection is None:
-            raise ConnectionError(
-                "TenableSCConnector.create_asset_list::Can't create asset list if connection is not initialized"
-            )
+        self.check_connection(prefix="create_asset_list")
 
         try:
             self.connection.asset_lists.create(
@@ -142,10 +145,7 @@ class TenableSCConnector(Connector):
     def delete_asset_list(self, list_id: Union[int, List[int]]) -> None:
         """Deletes an asset list based on given id"""
 
-        if self.connection is None:
-            raise ConnectionError(
-                "TenableSCConnector.delete_asset_list::Can't delete asset list if connection is not initialized"
-            )
+        self.check_connection(prefix="delete_asset_list")
 
         if not isinstance(list_id, list):
             list_id = [list_id]
@@ -158,12 +158,9 @@ class TenableSCConnector(Connector):
             raise e
 
     def list_asset_lists(self, list_filter: Tuple[str, str, Any] = None) -> List[Dict]:
-        """Retreives a list of asset lists"""
+        """Retrieves a list of asset lists"""
 
-        if self.connection is None:
-            raise ConnectionError(
-                "TenableSCConnector.delete_asset_list::Can't delete asset list if connection is not initialized"
-            )
+        self.check_connection(prefix="list_asset_lists")
 
         asset_lists = []
         try:
@@ -185,14 +182,10 @@ class TenableSCConnector(Connector):
 
         return asset_lists
 
-    # TODO: Get asset list details
     def get_asset_list_details(self, list_id: Union[int, List[int]]) -> List[Dict]:
         """Returns the details of one or more asset lists"""
 
-        if self.connection is None:
-            raise ConnectionError(
-                "TenableSCConnector.delete_asset_list::Can't delete asset list if connection is not initialized"
-            )
+        self.check_connection(prefix="get_asset_list_details")
 
         if not isinstance(list_id, list):
             list_id = [list_id]
@@ -208,3 +201,23 @@ class TenableSCConnector(Connector):
         return list_details
 
     # TODO: Edit asset list
+
+    # INFO: Scans
+    # TODO: List scans
+    def list_scans(self, scan_filter: Tuple[str, str, Any] = None) -> List[Dict]:
+        """Retrieves a list of scans"""
+
+        self.check_connection(prefix="list_scans")
+
+        scan_list = []
+        try:
+            scan_list = self.connection.scans.list()
+
+        except Exception as e:
+            raise e
+
+        return scan_list
+
+    # TODO: Get scans details
+    # TODO: Delete scans details
+    # TODO: Create scans details
