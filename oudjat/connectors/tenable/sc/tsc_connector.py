@@ -160,12 +160,12 @@ class TenableSCConnector(Connector):
     def list_asset_lists(self, list_filter: Tuple[str, str, Any] = None) -> List[Dict]:
         """Retreives a list of asset lists"""
 
-        asset_lists = []
         if self.connection is None:
             raise ConnectionError(
                 "TenableSCConnector.delete_asset_list::Can't delete asset list if connection is not initialized"
             )
 
+        asset_lists = []
         try:
             asset_lists = self.connection.asset_lists.list()
 
@@ -175,13 +175,31 @@ class TenableSCConnector(Connector):
             if list_filter is not None:
                 f_key, f_operator, f_value = list_filter
                 asset_lists = list(
-                    filter(lambda al: DataFilterOperation[f_operator](f_value, al[f_key]), asset_lists)
+                    filter(
+                        lambda al: DataFilterOperation[f_operator](f_value, al[f_key]), asset_lists
+                    )
                 )
         except Exception as e:
             raise e
 
-
         return asset_lists
 
     # TODO: Get asset list details
+    def get_asset_list_details(self, list_id: Union[int, List[int]]) -> List[Dict]:
+        """Returns the details of one or more asset lists"""
+
+        if self.connection is None:
+            raise ConnectionError(
+                "TenableSCConnector.delete_asset_list::Can't delete asset list if connection is not initialized"
+            )
+
+        list_details = []
+        try:
+            list_details = self.connection.asset_lists.details(id=list_id)
+
+        except Exception as e:
+            raise e
+
+        return list_details
+
     # TODO: Edit asset list
