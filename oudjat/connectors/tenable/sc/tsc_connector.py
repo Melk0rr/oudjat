@@ -230,7 +230,6 @@ class TenableSCConnector(Connector):
 
         return scan_list
 
-    # TODO: Get scans details
     def get_scan_details(self, scan_id: Union[int, List[int]]) -> List[Dict]:
         """Returns the details of one or more scans"""
 
@@ -249,5 +248,19 @@ class TenableSCConnector(Connector):
 
         return scan_details
 
-    # TODO: Delete scans details
+    def delete_scan(self, scan_id: Union[int, List[int]]) -> None:
+        """Deletes an asset list based on given id"""
+
+        self.check_connection(prefix="delete_scan")
+
+        if not isinstance(scan_id, list):
+            scan_id = [scan_id]
+
+        try:
+            for sid in scan_id:
+                self.connection.scans.delete(id=sid)
+
+        except Exception as e:
+            raise e
+
     # TODO: Create scans details
