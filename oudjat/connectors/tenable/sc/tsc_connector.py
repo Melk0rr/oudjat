@@ -179,6 +179,7 @@ class TenableSCConnector(Connector):
                         lambda al: DataFilterOperation[f_operator](f_value, al[f_key]), asset_lists
                     )
                 )
+
         except Exception as e:
             raise e
 
@@ -193,9 +194,13 @@ class TenableSCConnector(Connector):
                 "TenableSCConnector.delete_asset_list::Can't delete asset list if connection is not initialized"
             )
 
+        if not isinstance(list_id, list):
+            list_id = [list_id]
+
         list_details = []
         try:
-            list_details = self.connection.asset_lists.details(id=list_id)
+            for lid in list_id:
+                list_details.append(self.connection.asset_lists.details(id=list_id))
 
         except Exception as e:
             raise e
