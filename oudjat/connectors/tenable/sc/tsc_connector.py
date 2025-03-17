@@ -231,5 +231,23 @@ class TenableSCConnector(Connector):
         return scan_list
 
     # TODO: Get scans details
+    def get_scan_details(self, scan_id: Union[int, List[int]]) -> List[Dict]:
+        """Returns the details of one or more scans"""
+
+        self.check_connection(prefix="get_scan_details")
+
+        if not isinstance(scan_id, list):
+            scan_id = [scan_id]
+
+        scan_details = []
+        try:
+            for sid in scan_id:
+                scan_details.append(self.connection.scans.details(id=sid))
+
+        except Exception as e:
+            raise e
+
+        return scan_details
+
     # TODO: Delete scans details
     # TODO: Create scans details
