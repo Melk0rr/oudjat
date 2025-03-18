@@ -23,7 +23,11 @@
 ## Getting Started
 
 ### Prerequisites
-
+- python3
+- setuptools
+- docopt
+- keyring
+- requests
 
 ### Installing
 
