@@ -20,6 +20,9 @@
   \____/\_,_/\_,_/_/ /\_,_/\__/ 
                 |___/           
 ```
+## What is it ?
+Oudjat is a SOC toolbox and maybe more if I have the time
+
 ## Getting Started
 
 ### Prerequisites
