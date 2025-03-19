@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, List, Union
 
 from oudjat.utils import ColorPrint, count_1_bits, i_and, i_not
 
-from . import Port
+from .port import Port
 
 if TYPE_CHECKING:
     from .subnet import Subnet
