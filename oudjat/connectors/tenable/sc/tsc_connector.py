@@ -13,6 +13,10 @@ from .tsc_asset_list_types import TSCAssetListType
 
 
 class TenableSCConnector(Connector):
+    """
+    A class to handle Tenable.sc API interactions (inherits from Connector)
+    """
+
     # ****************************************************************
     # Attributes & Constructors
 
@@ -21,7 +25,17 @@ class TenableSCConnector(Connector):
     def __init__(
         self, target: str, service_name: str = "OudjatTenableSCAPI", port: int = 443
     ) -> None:
-        """Constructor"""
+        """
+        Constructor
+
+        Args:
+            target (str) : Tenable.sc appliance URL
+            service_name (str) : service name used to store credentials
+            port (int) : port number
+
+        Return:
+            None
+        """
 
         scheme = "http"
         if port == 443:
@@ -40,12 +54,28 @@ class TenableSCConnector(Connector):
 
     # INFO: Getters
     def get_repos(self) -> List:
-        """Returns repositories list"""
+        """
+        Returns repositories list
+
+        Args:
+            None
+
+        Return:
+            None
+        """
         return self.repos
 
     # INFO: Base connector methods
     def connect(self) -> None:
-        """Connects to API using connector parameters"""
+        """
+        Connects to API using connector parameters
+
+        Args:
+            None
+
+        Return:
+            None
+        """
         connection = None
         try:
             connection = TenableSC(
@@ -62,26 +92,56 @@ class TenableSCConnector(Connector):
             raise e
 
     def check_connection(self, prefix: str = None) -> None:
-        """Checks if the connection is initialized"""
+        """
+        Checks if the connection is initialized
+
+        Args:
+            prefix (str) : prefix string to include in error message
+
+        Return:
+            None
+        """
 
         if self.connection is None:
-            error_pre = '.' + prefix if prefix is not None else ''
+            error_pre = "." + prefix if prefix is not None else ""
             error_msg = f"TenableSCConnector{error_pre}::Can't create asset list if connection is not initialized"
             raise ConnectionError(error_msg)
 
     def disconnect(self) -> None:
-        """Disconnect from API"""
+        """
+        Disconnect from API
+
+        Args:
+            None
+
+        Return:
+            None
+        """
         del self.connection
         self.connection = None
         self.repos = None
 
     def search(self, search_type: str, *args, **kwargs) -> List:
-        """Searches the API for elements"""
+        """
+        Searches the API for elements
+
+        Args:
+            search_type (str) : search type (VULNS | ASSETS | SCANS)
+            *args (List) : anything to pass to further search method
+            **kwargs (Dict) : anything to pass to further search method
+
+        Return
+            List : search result depending on search type
+        """
 
         self.check_connection(prefix="search")
 
         search_type = search_type.upper()
-        search_options = {"VULNS": self.search_vulns}
+        search_options = {
+            "ASSETS": self.list_asset_lists,
+            "SCANS": self.list_scans,
+            "VULNS": self.search_vulns,
+        }
 
         if search_type not in search_options.keys():
             raise ValueError(f"Invalid search type {search_type}")
@@ -98,10 +158,17 @@ class TenableSCConnector(Connector):
         """Raises an exception if connection is not set"""
 
     # INFO: Vulns
-    def search_vulns(
-        self, *severities: List[str], key_exclude: List[str] = None, tool: str = "vulndetails"
-    ) -> Dict:
-        """Retrieve the current vulnerabilities"""
+    def search_vulns(self, *severities: List[str], tool: str = "vulndetails") -> Dict:
+        """
+        Retrieve the current vulnerabilities
+
+        Args:
+            severities (List[str]) : vuln severities to include
+            tool (str) : tool to use for the search
+
+        Return:
+            Dict : vulnerabilities matching arguments
+        """
 
         filters = [self.BUILTIN_FILTERS["exploitable"]]
         if severities is not None:
@@ -111,7 +178,12 @@ class TenableSCConnector(Connector):
         return list(search)
 
     def build_severity_filter(self, *severities: List[str]) -> Tuple:
-        """Returns a severity filter based on the provided severities"""
+        """
+        Returns a severity filter based on the provided severities
+
+        Args:
+            severities (List[str]) : severities to include in the filter (see )
+        """
         sev_scores = ",".join(
             [f"{get_severity_by_score(sev).value['score']}" for sev in list(*severities)]
         )
@@ -126,7 +198,19 @@ class TenableSCConnector(Connector):
         ips: List[str] = None,
         dns_names: List[str] = None,
     ) -> None:
-        """Creates a new asset list"""
+        """
+        Creates a new asset list
+
+        Args:
+            name (str) : name of the asset list
+            list_type (TSCAssetListType) : type of the asset list (see tsc_asset_list_types.py for details)
+            description (str) : asset list description
+            ips: (List[str]) : a list of ip addresses to associate with the list
+            dns_names: (List[str]) : a list of dns names to associate with the list
+
+        Return:
+            None
+        """
 
         self.check_connection(prefix="create_asset_list")
 
@@ -184,7 +268,15 @@ class TenableSCConnector(Connector):
         return asset_lists
 
     def get_asset_list_details(self, list_id: Union[int, List[int]]) -> List[Dict]:
-        """Returns the details of one or more asset lists"""
+        """
+        Returns the details of one or more asset lists
+
+        Args:
+            list_id (int | List[int]) : list of ids matching the asset lists to retreive
+
+        Return:
+            List[Dict] : list o
+        """
 
         self.check_connection(prefix="get_asset_list_details")
 
@@ -204,8 +296,17 @@ class TenableSCConnector(Connector):
     # TODO: Edit asset list
 
     # INFO: Scans
+    # TODO: Allow multiple filters
     def list_scans(self, scan_filter: Tuple[str, str, Any] = None) -> List[Dict]:
-        """Retrieves a list of scans"""
+        """
+        Retrieves a list of scans
+
+        Args:
+            scan_filter (Tuple[str, str, any]) : filter to apply to the listing
+
+        Return:
+            List[Dict] : a list of scans matching the filter
+        """
 
         self.check_connection(prefix="list_scans")
 
@@ -231,7 +332,15 @@ class TenableSCConnector(Connector):
         return scan_list
 
     def get_scan_details(self, scan_id: Union[int, List[int]]) -> List[Dict]:
-        """Returns the details of one or more scans"""
+        """
+        Returns the details of one or more scans
+
+        Args:
+            scan_id (int | List[int]) : one or more scan id to retrieve
+
+        Return:
+            List[Dict] : a list of dicionaries containing scan details
+        """
 
         self.check_connection(prefix="get_scan_details")
 
@@ -249,7 +358,15 @@ class TenableSCConnector(Connector):
         return scan_details
 
     def delete_scan(self, scan_id: Union[int, List[int]]) -> None:
-        """Deletes an asset list based on given id"""
+        """
+        Deletes an asset list based on given id
+
+        Args:
+            scan_id (int | List[int]) : one or more scan id to delete
+
+        Return:
+            None
+        """
 
         self.check_connection(prefix="delete_scan")
 
@@ -263,4 +380,34 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    # TODO: Create scans details
+    # TODO: Create scans
+    def create_scan(
+        self,
+        name: str,
+        repo_id: int,
+        asset_lists: List[int] = None,
+        description: str = None,
+        schedule: Dict = None,
+    ) -> None:
+        """
+        Creates a new scan
+
+        Args:
+            name (str) : name of the scan
+            repo_id (int) : repository id for the scan
+            asset_lists (List[int]) : the asset lists ids to run the scan against
+            description (str) : scan description
+
+        Return:
+            None
+        """
+
+        self.check_connection(prefix="create_scan")
+
+        try:
+            self.connection.scans.create(
+                name=name, repo=repo_id, asset_lists=asset_lists, description=description, schedule = schedule
+            )
+
+        except Exception as e:
+            raise e
