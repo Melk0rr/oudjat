@@ -29,9 +29,9 @@ class TenableSCConnector(Connector):
         Constructor
 
         Args:
-            target (str) : Tenable.sc appliance URL
-            service_name (str) : service name used to store credentials
-            port (int) : port number
+            target (str)        : Tenable.sc appliance URL
+            service_name (str)  : service name used to store credentials
+            port (int)          : port number
 
         Return:
             None
@@ -47,7 +47,7 @@ class TenableSCConnector(Connector):
         super().__init__(target=urlparse(target), service_name=service_name, use_credentials=True)
         self.target = urlparse(f"{self.target.scheme}://{self.target.netloc}")
         self.connection: TenableSC = None
-        self.repos = None
+        self.repos: List = None
 
     # ****************************************************************
     # Methods
@@ -61,7 +61,7 @@ class TenableSCConnector(Connector):
             None
 
         Return:
-            None
+            List : list of repos defined on security center
         """
         return self.repos
 
@@ -126,9 +126,9 @@ class TenableSCConnector(Connector):
         Searches the API for elements
 
         Args:
-            search_type (str) : search type (VULNS | ASSETS | SCANS)
-            *args (List) : anything to pass to further search method
-            **kwargs (Dict) : anything to pass to further search method
+            search_type (str)   : search type (VULNS | ASSETS | SCANS)
+            *args (List)        : anything to pass to further search method
+            **kwargs (Dict)     : anything to pass to further search method
 
         Return
             List : search result depending on search type
@@ -163,8 +163,8 @@ class TenableSCConnector(Connector):
         Retrieve the current vulnerabilities
 
         Args:
-            severities (List[str]) : vuln severities to include
-            tool (str) : tool to use for the search
+            severities (List[str])  : vuln severities to include
+            tool (str)              : tool to use for the search
 
         Return:
             Dict : vulnerabilities matching arguments
@@ -202,11 +202,11 @@ class TenableSCConnector(Connector):
         Creates a new asset list
 
         Args:
-            name (str) : name of the asset list
+            name (str)                   : name of the asset list
             list_type (TSCAssetListType) : type of the asset list (see tsc_asset_list_types.py for details)
-            description (str) : asset list description
-            ips: (List[str]) : a list of ip addresses to associate with the list
-            dns_names: (List[str]) : a list of dns names to associate with the list
+            description (str)            : asset list description
+            ips: (List[str])             : a list of ip addresses to associate with the list
+            dns_names: (List[str])       : a list of dns names to associate with the list
 
         Return:
             None
@@ -227,7 +227,15 @@ class TenableSCConnector(Connector):
             raise e
 
     def delete_asset_list(self, list_id: Union[int, List[int]]) -> None:
-        """Deletes an asset list based on given id"""
+        """
+        Deletes an asset list based on given id
+
+        Args:
+            list_id (int | List[int]) : list of ids of the asset lists to delete
+
+        Return:
+            None
+        """
 
         self.check_connection(prefix="delete_asset_list")
 
@@ -242,7 +250,15 @@ class TenableSCConnector(Connector):
             raise e
 
     def list_asset_lists(self, list_filter: Tuple[str, str, Any] = None) -> List[Dict]:
-        """Retrieves a list of asset lists"""
+        """
+        Retrieves a list of asset lists
+
+        Args:
+            list_filter (Tuple[str, str, any]) : filter to apply to the listing
+
+        Return:
+            List[Dict] : asset lists matching filter
+        """
 
         self.check_connection(prefix="list_asset_lists")
 
@@ -393,10 +409,10 @@ class TenableSCConnector(Connector):
         Creates a new scan
 
         Args:
-            name (str) : name of the scan
-            repo_id (int) : repository id for the scan
+            name (str)              : name of the scan
+            repo_id (int)           : repository id for the scan
             asset_lists (List[int]) : the asset lists ids to run the scan against
-            description (str) : scan description
+            description (str)       : scan description
 
         Return:
             None
@@ -406,7 +422,11 @@ class TenableSCConnector(Connector):
 
         try:
             self.connection.scans.create(
-                name=name, repo=repo_id, asset_lists=asset_lists, description=description, schedule = schedule
+                name=name,
+                repo=repo_id,
+                asset_lists=asset_lists,
+                description=description,
+                schedule=schedule,
             )
 
         except Exception as e:
