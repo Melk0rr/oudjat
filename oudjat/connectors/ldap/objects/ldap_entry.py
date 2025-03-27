@@ -19,9 +19,8 @@ class LDAPEntry(dict):
 
     def get(self, key: str, default_value: Any = None) -> Any:
         """
-        Retrieve the value of the given attribute
-
-        Retrieves the value of the specified attribute. If the attribute is not present in the "attributes" dictionary, or if it is a list with no elements, returns the provided default value.
+        Retrieves the value of the specified attribute.
+        If the attribute is not present in the "attributes" dictionary, or if it is a list with no elements, returns the provided default value.
 
         Args:
             key (str)                    : The attribute key to retrieve.
@@ -55,8 +54,6 @@ class LDAPEntry(dict):
 
     def get_raw(self, key: str) -> Any:
         """
-        Retrieve the value of the given raw attribute
-
         Retrieves the value of the specified raw attribute. If the attribute is not present in the "raw_attributes" dictionary, returns None.
 
         Args:
@@ -72,8 +69,6 @@ class LDAPEntry(dict):
 
     def attr(self):
         """
-        Retrieve ldap attributes
-
         Returns the "attributes" dictionary of the LDAP entry.
 
         Returns:

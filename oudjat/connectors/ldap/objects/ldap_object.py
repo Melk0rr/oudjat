@@ -5,10 +5,12 @@ from oudjat.utils import DATE_TIME_FLAGS, date_format_from_flag
 if TYPE_CHECKING:
     from ..ldap_connector import LDAPConnector
     from .account.group.ldap_group import LDAPGroup
+    from .ldap_entry import LDAPEntry
 
 
 # ****************************************************************
 # Helper functions
+
 
 def parse_dn(dn: str) -> Dict:
     """Parses a DN into pieces"""
@@ -31,8 +33,16 @@ class LDAPObject:
 
     # ****************************************************************
     # Attributes & Constructors
-    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
-        """Constructor"""
+    def __init__(self, ldap_entry: "LDAPEntry") -> None:
+        """
+        Constructor
+
+        Args:
+            ldap_entry (LDAPEntry) : ldap entry instance to be used to populate object data
+
+        Returns:
+            None
+        """
 
         self.entry = ldap_entry
         self.dn = self.entry.get_dn()
@@ -55,68 +65,147 @@ class LDAPObject:
     # Methods
 
     def get_dn(self) -> str:
-        """Getter for ldap object dn"""
+        """
+        Getter for ldap object dn.
+
+        Returns:
+            str: The distinguished name (DN) of the LDAP object.
+        """
         return self.dn
 
     def get_name(self) -> str:
-        """Getter for ldap object name"""
+        """
+        Getter for ldap object name.
+
+        Returns:
+            str: The name attribute of the LDAP object.
+        """
         return self.name
 
     def get_sid(self) -> str:
-        """Getter for ldap object sid"""
+        """
+        Getter for ldap object sid.
+
+        Returns:
+            str: The security identifier (SID) of the LDAP object.
+        """
         return self.sid
 
     def get_uuid(self) -> str:
-        """Getter for ldap object uuid"""
+        """
+        Getter for ldap object uuid.
+
+        Returns:
+            str: The universally unique identifier (UUID) of the LDAP object.
+        """
         return self.uuid
 
     def get_entry(self) -> Dict:
-        """Getter for entry attributes"""
+        """
+        Getter for entry attributes.
+
+        Returns:
+            dict: A dictionary containing the entry attributes from the LDAP object.
+        """
         return self.entry
 
     def get_classes(self) -> List[str]:
-        """Getter for object classes"""
-        return self.entry.get("objectClass")
+        """
+        Getter for object classes.
+
+        Returns:
+            list of str: The 'objectClass' attribute values from the LDAP entry dictionary.
+        """
+        return self.entry.get("objectClass", [])
 
     def get_type(self) -> str:
-        """Get ldap object type based on objectClass attribute"""
-        return self.entry.get_type()
+        """
+        Get ldap object type based on objectClass attribute.
+
+        Returns:
+            str: The type of the LDAP object inferred from its 'objectClass' attributes.
+        """
+        return self.entry.get("type", "")
 
     def get_dn_pieces(self) -> Dict:
-        """Getter for object dn pieces"""
+        """
+        Getter for object dn pieces.
+
+        Returns:
+            dict: A dictionary containing the individual components of the DN (Distinguished Name) of the LDAP object.
+        """
         return self.dn_pieces
 
     def get_description(self) -> str:
-        """Getter for ldap object description"""
+        """
+        Getter for ldap object description.
+
+        Returns:
+            str: The description attribute of the LDAP object.
+        """
         return self.description
 
     def get_domain(self) -> str:
-        """Getter for object domain"""
+        """
+        Getter for object domain.
+
+        Returns:
+            str: The domain to which the LDAP object belongs.
+        """
         return self.domain
 
     def get_account_groups(self) -> List[str]:
-        """Getter for the account 'memberOf' property"""
+        """
+        Getter for the account 'memberOf' property.
+
+        Returns:
+            list of str: The groups this account is a member of, as specified in the 'memberOf' attribute.
+        """
         return self.entry.get("memberOf", [])
 
     def get_creation_date(self) -> str:
-        """Getter for ldap object creation date"""
+        """
+        Getter for ldap object creation date.
+
+        Returns:
+            str: The timestamp of when the LDAP object was created.
+        """
         return self.creation_date
 
     def get_change_date(self) -> str:
-        """Getter for ldap object change date"""
+        """
+        Getter for ldap object change date.
+
+        Returns:
+            str: The timestamp of the last modification to the LDAP object.
+        """
         return self.change_date
 
     def is_member_of(
         self, ldap_connector: "LDAPConnector", ldap_group: "LDAPGroup", extended: bool = False
     ) -> bool:
-        """Checks wheither the current user is a member of the provided group"""
+        """
+        Checks whether the current user is a member of the provided group.
 
+        Args:
+            ldap_connector (LDAPConnector): The LDAP connection object used to perform the membership check.
+            ldap_group (LDAPGroup)        : The group to which the user's membership should be checked against.
+            extended (bool, optional)     : A flag indicating whether an extended search should be performed. Defaults to False.
+
+        Returns:
+            bool: True if the current user is a member of the provided LDAP group; otherwise, False.
+        """
         return ldap_connector.is_object_member_of(
             ldap_object=self, ldap_group=ldap_group, extended=extended
         )
 
     def to_dict(self) -> Dict:
-        """Converts the current instance into a dict"""
+        """
+        Converts the current instance into a dictionary.
+
+        Returns:
+            dict: A dictionary containing the attributes of the LDAP object in a structured format
+        """
         return {
             "dn": self.dn,
             "name": self.name,
