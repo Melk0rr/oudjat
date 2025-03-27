@@ -33,11 +33,11 @@ class LDAPConnector(Connector):
         Constructor
 
         Args:
-            server (str) : server name
-            service_name (str) : service name used to store credentials
-            use_tls (bool) : should the connector use TLS for LDAPS connection
+            server (str)        : server name
+            service_name (str)  : service name used to store credentials
+            use_tls (bool)      : should the connector use TLS for LDAPS connection
 
-        Return:
+        Returns:
             None
         """
         self.use_tls = use_tls
@@ -59,10 +59,7 @@ class LDAPConnector(Connector):
         """
         Getter for AD domain
 
-        Args:
-            None
-
-        Return:
+        Returns:
             str : domain name
         """
         return self.domain
@@ -71,10 +68,7 @@ class LDAPConnector(Connector):
         """
         Getter for the server connection
 
-        Args:
-            None
-
-        Return:
+        Returns:
             ldap3.Connection : active connection
         """
         return self.connection
@@ -83,10 +77,7 @@ class LDAPConnector(Connector):
         """
         Getter for the default search base
 
-        Args:
-            None
-
-        Return:
+        Returns:
             str : default domain search base
         """
         return self.default_search_base
@@ -98,7 +89,7 @@ class LDAPConnector(Connector):
         Args:
             use_tls (bool) : should the connector use TLS
 
-        Return:
+        Returns:
             None
         """
         self.use_tls = use_tls
@@ -115,7 +106,7 @@ class LDAPConnector(Connector):
         Args:
             version (ssl._SSLMethod) : SSL/TLS version
 
-        Return:
+        Returns:
             None
         """
 
@@ -214,7 +205,7 @@ class LDAPConnector(Connector):
             attributes (str | List[str]) : attributes to include in the result
             **kwargs (Dict)              : any other argument to pass
 
-        Return:
+        Returns:
             List[LDAPEntry] : list of ldap entries
         """
 
@@ -271,7 +262,7 @@ class LDAPConnector(Connector):
             name (str)                   : GPO name
             attributes (str | List[str]) : attributes to include in result
 
-        Return:
+        Returns:
             List[LDAPGroupPolicyObject] : list of LDAPGroupPolicyObject instances
         """
         ldap_obj_type = "GPO"
@@ -297,7 +288,7 @@ class LDAPConnector(Connector):
             search_filter (str) : search filter
             attributes (str | List[str]) : attributes to include in result
 
-        Return:
+        Returns:
             List[LDAPSubnet] : list of subnets
         """
         ldap_obj_type = "SUBNET"
@@ -326,7 +317,7 @@ class LDAPConnector(Connector):
             search_filter (str) : search filter
             attributes (str | List[str]) : attributes to include in result
 
-        Return:
+        Returns:
             List[LDAPComputer] : list of computers
         """
         ldap_obj_type = "COMPUTER"
@@ -353,7 +344,7 @@ class LDAPConnector(Connector):
             search_filter (str) : search filter
             attributes (str | List[str]) : attributes to include in result
 
-        Return:
+        Returns:
             List[LDAPUser] : list of users
         """
         ldap_obj_type = "USER"
@@ -378,7 +369,7 @@ class LDAPConnector(Connector):
             ldap_group (LDAPGroup)  : group to retreive members from
             recursive (bool)        : wheither to retrieve members recursively or not
 
-        Return:
+        Returns:
             List[LDAPObject] : list of members
         """
         members = []
@@ -411,7 +402,7 @@ class LDAPConnector(Connector):
             ldap_object (LDAPObject) : object to check membership of
             ldap_group (LDAPGroup)   : group to check object membership
 
-        Return:
+        Returns:
             bool : wheither the object is a member of the group or not
         """
         member_ref_list = None
