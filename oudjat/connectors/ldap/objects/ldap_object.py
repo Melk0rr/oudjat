@@ -13,7 +13,15 @@ if TYPE_CHECKING:
 
 
 def parse_dn(dn: str) -> Dict:
-    """Parses a DN into pieces"""
+    """
+    Parses a DN into pieces
+
+    Args:
+        dn (str) : distinguished name to parse
+
+    Return:
+        Dict : dictionary of dn pieces (CN, OU, DN)
+    """
     split = dn.split(",")
     pieces = {}
 

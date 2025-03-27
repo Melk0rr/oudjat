@@ -18,5 +18,5 @@ class LDAPOrganizationalUnit(LDAPObject):
     # ****************************************************************
     # Methods
 
-    # TODO: Get OU members
+    # TODO: Get OU members with filter per object type
     # TODO: Get sub OU
