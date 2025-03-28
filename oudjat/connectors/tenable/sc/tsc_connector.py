@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from tenable.sc import TenableSC
 
 from oudjat.connectors.connector import Connector
+from oudjat.control.data.data_filter import DataFilter
 from oudjat.control.data.data_filter_operations import DataFilterOperation
 from oudjat.model.vulnerability.cve import get_severity_by_score
 from oudjat.utils import ColorPrint
@@ -256,8 +257,7 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    # TODO: Allow multiple filters
-    def list_asset_lists(self, list_filter: Tuple[str, str, Any] = None) -> List[Dict]:
+    def list_asset_lists(self, list_filter: Union[Tuple, List[Tuple]] = None) -> List[Dict]:
         """
         Retrieves a list of asset lists with minimal informations like list ids
 
@@ -277,14 +277,9 @@ class TenableSCConnector(Connector):
             if asset_lists is not None:
                 asset_lists = asset_lists.get("usable", [])
 
-            # If a filter is provided
-            if list_filter is not None:
-                f_key, f_operator, f_value = list_filter
-                asset_lists = list(
-                    filter(
-                        lambda al: DataFilterOperation[f_operator](f_value, al[f_key]), asset_lists
-                    )
-                )
+            asset_lists = DataFilter.filter_data(
+                data_to_filter=asset_lists, filters=DataFilter.gen_from_tuple(list_filter)
+            )
 
         except Exception as e:
             raise e
