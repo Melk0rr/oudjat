@@ -116,7 +116,11 @@ class DataFilter:
 
         return list(map(lambda f: DataFilter.datafilter_from_dict(f), filters))
 
+    @staticmethod
+    def gen_from_tuple(filters: List[Tuple]) -> List["DataFilter"]:
+        """Generates DataFitler instances based on tuples"""
 
+        return list(map(lambda f: DataFilter.datafilter_from_tuple(f), filters))
 
     @staticmethod
     def get_conditions(element: Any, filters: Union[List["DataFilter"], List[Dict]]) -> bool:
