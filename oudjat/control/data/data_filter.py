@@ -13,6 +13,7 @@ class DataFilter:
 
     def __init__(self, fieldname: str, value: Any, operator: str = "in", negate: bool = False):
         """Constructor"""
+
         if operator not in DataFilterOperation.keys():
             raise ValueError(f"Invalid operator provided: {operator}")
 
@@ -69,7 +70,7 @@ class DataFilter:
         return DataFilter(
             fieldname=filter_dict["fieldname"],
             operator=filter_dict.get("operator", "in"),
-            value=filter_dict["value"],
+            value=filter_dict.get("value", None),
         )
 
     @staticmethod
