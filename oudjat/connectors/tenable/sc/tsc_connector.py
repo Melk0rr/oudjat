@@ -1,12 +1,11 @@
 import re
-from typing import Any, Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 from urllib.parse import urlparse
 
 from tenable.sc import TenableSC
 
 from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
-from oudjat.control.data.data_filter_operations import DataFilterOperation
 from oudjat.model.vulnerability.cve import get_severity_by_score
 from oudjat.utils import ColorPrint
 
@@ -317,8 +316,7 @@ class TenableSCConnector(Connector):
     # TODO: Edit asset list
 
     # INFO: Scans
-    # TODO: Allow multiple filters
-    def list_scans(self, scan_filter: Tuple[str, str, Any] = None) -> List[Dict]:
+    def list_scans(self, scan_filter: Union[Tuple, List[Tuple]] = None) -> List[Dict]:
         """
         Retrieves a list of scans with minimal information like scan ids
 
@@ -338,14 +336,9 @@ class TenableSCConnector(Connector):
             if scan_list is not None:
                 scan_list = scan_list.get("usable", [])
 
-            # If a filter is provided
-            if scan_filter is not None:
-                f_key, f_operator, f_value = scan_filter
-                scan_list = list(
-                    filter(
-                        lambda sl: DataFilterOperation[f_operator](f_value, sl[f_key]), scan_list
-                    )
-                )
+            scan_list = DataFilter.filter_data(
+                data_to_filter=scan_list, filters=DataFilter.gen_from_tuple(scan_filter)
+            )
 
         except Exception as e:
             raise e
