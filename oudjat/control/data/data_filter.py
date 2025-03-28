@@ -1,8 +1,8 @@
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 from oudjat.utils import ColorPrint
 
-from . import DataFilterOperation
+from .data_filter_operations import DataFilterOperation
 
 
 class DataFilter:
@@ -32,6 +32,11 @@ class DataFilter:
         """Getter for filter operator"""
         return self.operator
 
+    def get_operation(self, value: Any) -> Callable:
+        """Returns a DataFilterOperation based on current parameters"""
+        base_operation = DataFilterOperation[self.operator](value, self.value)
+        return not base_operation if self.negate else base_operation
+
     def get_value(self) -> Any:
         """Getter for filter value"""
         return self.value
@@ -42,20 +47,13 @@ class DataFilter:
 
     def filter_dict(self, element: Dict) -> bool:
         """Returns wheither or not the dictionary element matches the filter"""
-        check = DataFilterOperation[self.operator](element[self.fieldname], self.value)
-        if self.negate:
-            return not check
 
-        return check
+        return self.get_operation(value=element[self.fieldname])
 
     def filter_value(self, value: Any) -> bool:
         """Returns wheither or not the given value matches the filter"""
-        check = DataFilterOperation[self.operator](value, self.value)
 
-        if self.negate:
-            return not check
-
-        return check
+        return self.get_operation(value)
 
     def __str__(self) -> str:
         """Converts the current instance into a string"""
