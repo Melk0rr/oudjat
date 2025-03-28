@@ -1,4 +1,3 @@
-from typing import Any, Dict, List, Union
 from typing import Any, Dict, List, Tuple, Union
 
 from oudjat.utils import ColorPrint
@@ -66,8 +65,15 @@ class DataFilter:
     # Static methods
 
     @staticmethod
-    def datafilter_from_dict(dictionnary: Dict) -> "DataFilter":
-        """Converts a dictionary"""
+    def datafilter_from_dict(filter_dict: Dict) -> "DataFilter":
+        """Creates a datafilter instance from a dictionary"""
+
+        return DataFilter(
+            fieldname=filter_dict["fieldname"],
+            operator=filter_dict.get("operator", "in"),
+            value=filter_dict["value"],
+        )
+
     @staticmethod
     def datafilter_from_tuple(filter_tuple: Tuple[str, str, Any]) -> "DataFilter":
         """Creates a datafilter instance from a tuple"""
@@ -107,13 +113,10 @@ class DataFilter:
     @staticmethod
     def gen_from_dict(filters: List[Dict]) -> List["DataFilter"]:
         """Generates DataFitler instances based on dictionnaries"""
-        filter_instances = []
 
-        for f in filters:
-            current_filter = DataFilter.datafilter_from_dict(f)
-            filter_instances.append(current_filter)
+        return list(map(lambda f: DataFilter.datafilter_from_dict(f), filters))
 
-        return filter_instances
+
 
     @staticmethod
     def get_conditions(element: Any, filters: Union[List["DataFilter"], List[Dict]]) -> bool:
@@ -121,23 +124,28 @@ class DataFilter:
         checks = []
 
         for f in filters:
+            check = None
             if isinstance(f, DataFilter):
-                checks.append(f.filter_dict(element))
+                check = f.filter_dict(element)
 
             else:
                 operation = DataFilterOperation[f["operator"]]
-                checks.append(operation(element[f["fieldname"]], f["value"]))
+                check = operation(element[f["fieldname"]], f["value"])
+
+            checks.append(check)
 
         return all(checks)
 
     @staticmethod
-    def filter_data(data_to_filter: List[Dict], filters: List["DataFilter"]) -> List[Dict]:
+    def filter_data(
+        data_to_filter: List[Dict], filters: Union["DataFilter", List["DataFilter"]] = None
+    ) -> List[Dict]:
         """Filters data based on given filters"""
-        filtered_data = []
-        for el in data_to_filter:
-            conditions = all(f.filter_dict(el) for f in filters)
-            if conditions:
-                filtered_data.append(el)
 
-        return filtered_data
+        if filters is None:
+            return data_to_filter
 
+        if not isinstance(filters, list):
+            filters = [filters]
+
+        return list(filter(lambda el: all(f.filter_dict(el) for f in filters), data_to_filter))
