@@ -8,7 +8,7 @@ import requests
 from oudjat.connectors import Connector
 from oudjat.utils import ColorPrint
 
-from . import API_BASE_URL, API_REQ_HEADERS, CVE_REGEX, MSCVRFDocument
+from .definitions import API_BASE_URL, API_REQ_HEADERS, CVE_REGEX, MSCVRFDocument
 
 
 class MSAPIConnector(Connector):

@@ -1,7 +1,9 @@
 import re
 from typing import Any, Dict, List
 
-from . import CVE_REGEX, KB_NUM_REGEX, MSProduct, MSRemed
+from .definitions import CVE_REGEX, KB_NUM_REGEX
+from .ms_product import MSProduct
+from .ms_remed import MSRemed
 
 
 class MSVuln:

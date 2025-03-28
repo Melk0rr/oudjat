@@ -8,7 +8,7 @@ from oudjat.connectors.cert import RiskType
 from oudjat.model.vulnerability import CVE, CVE_REGEX
 from oudjat.utils import ColorPrint
 
-from . import CERTFRPageType
+from .certfr_page import CERTFRPageType
 
 # ****************************************************************
 # Useful regexes

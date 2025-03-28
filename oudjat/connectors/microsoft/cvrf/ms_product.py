@@ -1,7 +1,7 @@
 import re
 from typing import Dict
 
-from . import MS_PRODUCT_REGEX
+from .definitions import MS_PRODUCT_REGEX
 
 
 class MSProduct:

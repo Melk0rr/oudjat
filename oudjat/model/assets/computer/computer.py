@@ -9,7 +9,7 @@ from oudjat.model.assets.software import (
 )
 from oudjat.model.assets.software.os import OSRelease
 
-from . import ComputerType
+from .computer_type import ComputerType
 
 
 class Computer(Asset):

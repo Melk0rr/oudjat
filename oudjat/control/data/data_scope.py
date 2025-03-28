@@ -2,7 +2,7 @@
 
 from typing import Dict, List, Union
 
-from . import DataFilter
+from .data_filter import DataFilter
 
 
 class DataScope:

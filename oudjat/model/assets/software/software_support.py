@@ -3,7 +3,7 @@ from typing import Dict, List, Union
 
 from oudjat.utils import DATE_FLAGS, date_format_from_flag, days_diff
 
-from . import SoftwareEditionDict
+from .software_edition import SoftwareEditionDict
 
 
 def soft_date_str(date: datetime) -> str:

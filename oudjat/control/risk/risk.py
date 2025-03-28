@@ -1,6 +1,6 @@
 from typing import Union
 
-from . import RiskMeasure
+from .risk_measure import RiskMeasure
 
 
 class Risk:

@@ -4,7 +4,7 @@ from oudjat.model.assets.computer import Computer
 from oudjat.model.assets.software import SoftwareEdition, SoftwareReleaseDict
 from oudjat.model.assets.software.os import OperatingSystem, OSOption
 
-from . import LDAPAccount
+from .ldap_account import LDAPAccount
 
 
 class LDAPComputer(LDAPAccount, Computer):

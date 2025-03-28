@@ -2,7 +2,7 @@ from typing import Dict, Tuple, Union
 
 from oudjat.utils import ColorPrint
 
-from . import KPI
+from .kpi import KPI
 
 
 class KPIComparator:

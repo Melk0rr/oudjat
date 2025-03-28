@@ -3,7 +3,8 @@ from typing import Dict, List, Union
 
 from ..asset import Asset
 from ..asset_type import AssetType
-from . import SoftwareEditionDict, SoftwareRelease, SoftwareReleaseDict
+from .software_edition import SoftwareEditionDict
+from .software_release import SoftwareRelease, SoftwareReleaseDict
 
 
 class SoftwareType(Enum):

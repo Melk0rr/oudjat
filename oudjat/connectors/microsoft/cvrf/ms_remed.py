@@ -1,7 +1,8 @@
 import re
 from typing import Any, Dict, List
 
-from . import KB_NUM_REGEX, MSProduct
+from .definitions import KB_NUM_REGEX
+from .ms_product import MSProduct
 
 
 class MSRemed:

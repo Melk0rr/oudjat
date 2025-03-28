@@ -11,7 +11,7 @@ from oudjat.model.assets.software import (
 )
 
 from ..operating_system import OperatingSystem, OSFamily, OSRelease
-from . import WINDOWS_RELEASES
+from .config.win_rel import WINDOWS_RELEASES
 
 
 class MSOSRelease(OSRelease):

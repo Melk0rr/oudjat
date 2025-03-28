@@ -4,8 +4,8 @@ from typing import Dict, List
 from oudjat.utils import DATE_TIME_FLAGS, date_format_from_flag, days_diff
 
 from ..ldap_object import LDAPObject
-from . import (
-    MS_ACCOUNT_CTL_PROPERTY,
+from .definitions import MS_ACCOUNT_CTL_PROPERTY
+from .ldap_account_flags import (
     LDAPAccountFlag,
     check_account_flag,
     is_disabled,
