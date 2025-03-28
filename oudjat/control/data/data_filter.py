@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Tuple, Union
 
 from oudjat.utils import ColorPrint
 
@@ -67,10 +68,19 @@ class DataFilter:
     @staticmethod
     def datafilter_from_dict(dictionnary: Dict) -> "DataFilter":
         """Converts a dictionary"""
+    @staticmethod
+    def datafilter_from_tuple(filter_tuple: Tuple[str, str, Any]) -> "DataFilter":
+        """Creates a datafilter instance from a tuple"""
+
+        if len(filter_tuple) < 3:
+            raise ValueError(
+                "DataFilter.datafilter_from_tuple::3 parameters needed to create a DataFilter instance"
+            )
+
         return DataFilter(
-            fieldname=dictionnary["fieldname"],
-            operator=dictionnary.get("operator", "in"),
-            value=dictionnary["value"],
+            fieldname=filter_tuple[0],
+            operator=filter_tuple[1],
+            value=filter_tuple[2],
         )
 
     @staticmethod
