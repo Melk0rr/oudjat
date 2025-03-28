@@ -204,7 +204,7 @@ class TenableSCConnector(Connector):
         ips: List[str] = None,
         dns_names: List[str] = None,
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Creates a new asset list
@@ -230,7 +230,7 @@ class TenableSCConnector(Connector):
                 ips=ips,
                 dns_names=dns_names,
                 *args,
-                **kwargs
+                **kwargs,
             )
 
         except Exception as e:
@@ -409,7 +409,7 @@ class TenableSCConnector(Connector):
         description: str = None,
         schedule: Dict = None,
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Creates a new scan
@@ -435,7 +435,7 @@ class TenableSCConnector(Connector):
                 description=description,
                 schedule=schedule,
                 *args,
-                **kwargs
+                **kwargs,
             )
 
         except Exception as e:
