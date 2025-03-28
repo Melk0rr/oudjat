@@ -161,13 +161,15 @@ class TenableSCConnector(Connector):
         """Raises an exception if connection is not set"""
 
     # INFO: Vulns
-    def search_vulns(self, *severities: List[str], tool: TSCVulnTool = TSCVulnTool.VULNDETAILS) -> Dict:
+    def search_vulns(
+        self, *severities: List[str], tool: TSCVulnTool = TSCVulnTool.VULNDETAILS
+    ) -> Dict:
         """
         Retrieve the current vulnerabilities
 
         Args:
             severities (List[str])  : vuln severities to include
-            tool (str)              : tool to use for the search
+            tool (TSCVulnTool)      : tool to use for the search
 
         Return:
             Dict : vulnerabilities matching arguments
