@@ -10,11 +10,13 @@ from oudjat.model.vulnerability.cve import get_severity_by_score
 from oudjat.utils import ColorPrint
 
 from .tsc_asset_list_types import TSCAssetListType
+from .tsc_vuln_tools import TSCVulnTool
 
 
 class TenableSCConnector(Connector):
     """
     A class to handle Tenable.sc API interactions (inherits from Connector)
+    For details, see : https://pytenable.readthedocs.io/en/stable/index.html
     """
 
     # ****************************************************************
@@ -30,7 +32,7 @@ class TenableSCConnector(Connector):
 
         Args:
             target (str)        : Tenable.sc appliance URL
-            service_name (str)  : service name used to store credentials
+            service_name (str)  : service name used to register credentials
             port (int)          : port number
 
         Return:
@@ -158,7 +160,7 @@ class TenableSCConnector(Connector):
         """Raises an exception if connection is not set"""
 
     # INFO: Vulns
-    def search_vulns(self, *severities: List[str], tool: str = "vulndetails") -> Dict:
+    def search_vulns(self, *severities: List[str], tool: TSCVulnTool = TSCVulnTool.VULNDETAILS) -> Dict:
         """
         Retrieve the current vulnerabilities
 
@@ -174,7 +176,8 @@ class TenableSCConnector(Connector):
         if severities is not None:
             filters.append(self.build_severity_filter(severities))
 
-        search = self.connection.analysis.vulns(*filters, tool=tool)
+        search = self.connection.analysis.vulns(*filters, tool=tool.value)
+
         return list(search)
 
     def build_severity_filter(self, *severities: List[str]) -> Tuple:
@@ -182,7 +185,7 @@ class TenableSCConnector(Connector):
         Returns a severity filter based on the provided severities
 
         Args:
-            severities (List[str]) : severities to include in the filter (see )
+            severities (List[str]) : severities to include in the filter (see cve.py)
         """
         sev_scores = ",".join(
             [f"{get_severity_by_score(sev).value['score']}" for sev in list(*severities)]
@@ -197,6 +200,8 @@ class TenableSCConnector(Connector):
         description: str = None,
         ips: List[str] = None,
         dns_names: List[str] = None,
+        *args,
+        **kwargs
     ) -> None:
         """
         Creates a new asset list
@@ -221,6 +226,8 @@ class TenableSCConnector(Connector):
                 list_type=list_type.value,
                 ips=ips,
                 dns_names=dns_names,
+                *args,
+                **kwargs
             )
 
         except Exception as e:
@@ -249,9 +256,10 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
+    # TODO: Allow multiple filters
     def list_asset_lists(self, list_filter: Tuple[str, str, Any] = None) -> List[Dict]:
         """
-        Retrieves a list of asset lists
+        Retrieves a list of asset lists with minimal informations like list ids
 
         Args:
             list_filter (Tuple[str, str, any]) : filter to apply to the listing
@@ -315,7 +323,7 @@ class TenableSCConnector(Connector):
     # TODO: Allow multiple filters
     def list_scans(self, scan_filter: Tuple[str, str, Any] = None) -> List[Dict]:
         """
-        Retrieves a list of scans
+        Retrieves a list of scans with minimal information like scan ids
 
         Args:
             scan_filter (Tuple[str, str, any]) : filter to apply to the listing
@@ -396,7 +404,6 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    # TODO: Create scans
     def create_scan(
         self,
         name: str,
@@ -404,6 +411,8 @@ class TenableSCConnector(Connector):
         asset_lists: List[int] = None,
         description: str = None,
         schedule: Dict = None,
+        *args,
+        **kwargs
     ) -> None:
         """
         Creates a new scan
@@ -413,6 +422,7 @@ class TenableSCConnector(Connector):
             repo_id (int)           : repository id for the scan
             asset_lists (List[int]) : the asset lists ids to run the scan against
             description (str)       : scan description
+            schedule (Dict)         : schedule dictionary
 
         Return:
             None
@@ -427,6 +437,8 @@ class TenableSCConnector(Connector):
                 asset_lists=asset_lists,
                 description=description,
                 schedule=schedule,
+                *args,
+                **kwargs
             )
 
         except Exception as e:
