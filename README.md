@@ -38,10 +38,6 @@ Oudjat is a SOC toolbox and maybe more if I have the time
 > Please note that Oudjat is in **alpha** 
 >
 
-> [!WARNING]
-> As of version 0.7.x the cli, options and commands are out of date and require further development of core modules before a proper rework
->
-
 ```bash
 git clone https://github.com/Melk0rr/Oudjat.git
 cd Oudjat
@@ -50,6 +46,10 @@ pip3 install .
 ```
 
 ## Usage
+
+> [!WARNING]
+> As of version 0.7.x the cli, options and commands are out of date and require further development of core modules before a proper rework
+>
 
       Usage:
         oudjat cert (-t TARGET | -f FILE) [options]  [--feed] [--filter=FILTER]
