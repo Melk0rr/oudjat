@@ -1,20 +1,25 @@
 import re
 from enum import Enum
-from typing import Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 from ..definitions import UUID_REG
 from ..ldap_object import LDAPObject
 from .ms_gppref import MS_GPPREF
 
+if TYPE_CHECKING:
+    from ..ldap_entry import LDAPEntry
+
 
 class LDAPGPOScope(Enum):
-    """GPO scope"""
+    """GPO scope enumeration"""
 
     USER = "gPCUserExtensionNames"
     MACHINE = "gPCMachineExtensionNames"
 
 
 class LDAPGPOState(Enum):
+    """GPO state enumeration"""
+
     ENABLED = 0
     DISABLED = 1
     ENFORCED = 2
@@ -25,8 +30,15 @@ class LDAPGroupPolicyObject(LDAPObject):
 
     # ****************************************************************
     # Attributes & Constructors
-    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
-        """Constructor"""
+    def __init__(self, ldap_entry: "LDAPEntry"):
+        """
+        Initializes an instance of LDAPGPO.
+
+        This constructor takes an LDAP entry as input and initializes the object with necessary attributes derived from the entry.
+
+        Args:
+            ldap_entry (LDAPEntry): An LDAP entry representing a group policy object.
+        """
         super().__init__(ldap_entry=ldap_entry)
 
         self.display_name = self.entry.get("displayName")
@@ -56,11 +68,21 @@ class LDAPGroupPolicyObject(LDAPObject):
     # Methods
 
     def get_display_name(self) -> str:
-        """Getter for GPO display name"""
+        """
+        Getter for GPO display name.
+
+        Returns:
+            str: The display name of the group policy object.
+        """
         return self.display_name
 
     def get_infos(self) -> List[str]:
-        """Getter for policy GUIDs"""
+        """
+        Getter for policy GUIDs.
+
+        Returns:
+            List[str]: A list of GUIDs associated with the group policy preferences.
+        """
         return self.infos
 
     def get_linked_objects(
@@ -69,7 +91,19 @@ class LDAPGroupPolicyObject(LDAPObject):
         attributes: Union[str, List[str]] = None,
         ou: str = "*",
     ) -> List["LDAPEntry"]:  # noqa: F821
-        """Gets the gpo linked objects"""
+        """
+        Gets the GPO linked objects.
+        This method searches for LDAP entries that are linked to the current group policy object (GPO).
+
+        Args:
+            ldap_connector (LDAPConnector)              : An instance of an LDAP connector used to perform the search operation.
+            attributes (Union[str, List[str], optional) : The attributes to retrieve from the linked LDAP entries.
+            ou (str, optional)                          : The organizational unit (OU) in which to search for linked objects.
+
+        Returns:
+            List["LDAPEntry"]: A list of LDAPEntry instances that are linked to the current GPO.
+        """
+
         search_filter = f"(gPLink={f'*{self.name}*'})(name={ou})"
 
         linked_entries = ldap_connector.search(
@@ -79,7 +113,14 @@ class LDAPGroupPolicyObject(LDAPObject):
         return linked_entries
 
     def to_dict(self) -> Dict:
-        """Converts the current instance into a dict"""
+        """
+        Converts the current instance into a dict.
+        This method converts the group policy object (GPO) and its related information into a dictionary format for easier serialization or transmission.
+
+        Returns:
+            Dict: A dictionary containing the GPO's display name, scope, state, and linked GUIDs.
+        """
+
         base_dict = super().to_dict()
 
         return {
