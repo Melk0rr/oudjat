@@ -19,7 +19,7 @@ def parse_dn(dn: str) -> Dict:
     Args:
         dn (str) : distinguished name to parse
 
-    Return:
+    Returns:
         Dict : dictionary of dn pieces (CN, OU, DN)
     """
     split = dn.split(",")
@@ -43,10 +43,12 @@ class LDAPObject:
     # Attributes & Constructors
     def __init__(self, ldap_entry: "LDAPEntry") -> None:
         """
-        Constructor
+        Constructor for initializing an LDAP Entry-based object.
+
+        This method initializes the object with data from an LDAP entry.
 
         Args:
-            ldap_entry (LDAPEntry) : ldap entry instance to be used to populate object data
+            ldap_entry (LDAPEntry): An instance of an LDAP entry containing relevant data.
 
         Returns:
             None

@@ -27,7 +27,17 @@ class LDAPAccount(LDAPObject):
     # Attributes & Constructors
 
     def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
-        """Constructor"""
+        """
+        Constructor for initializing an LDAP Entry-based object with specific handling for user accounts.
+
+        This method initializes the object using data from an `LDAPEntry` instance and performs additional checks to determine account status based on the presence of certain properties like 'userAccountControl'. Additional flags are derived from the 'userAccountControl' property or its Microsoft equivalent (controlled by MS_ACCOUNT_CTL_PROPERTY).
+
+        Args:
+            ldap_entry (LDAPEntry): An instance of an LDAP entry containing relevant data for user accounts.
+
+        Returns:
+            None
+        """
 
         super().__init__(ldap_entry=ldap_entry)
 
@@ -62,55 +72,107 @@ class LDAPAccount(LDAPObject):
     # Methods
 
     def get_san(self) -> str:
-        """Getter for account sAMAccountName"""
+        """Getter for account sAMAccountName
+
+        Returns:
+            str: The value of the sAMAccountName attribute from the entry dictionary.
+        """
         return self.entry.get("sAMAccountName")
 
     def is_enabled(self) -> bool:
-        """Returns wheither the account is enabled or not"""
+        """Returns whether the account is enabled or not
+
+        Returns:
+            bool: True if the account is enabled, False otherwise.
+        """
         return self.enabled
 
     def get_status(self) -> str:
-        """Getter to retreive account status"""
+        """Getter to retrieve account status
+
+        Returns:
+            str: "Enabled" if the account is enabled, otherwise "Disabled".
+        """
         return "Enabled" if self.enabled else "Disabled"
 
     def get_account_expiration(self) -> datetime:
-        """Getter for account expire property"""
-        return self.entry.get("accountExpires")
+        """Getter for account expire property
+
+        Returns:
+            datetime: The expiration date of the account as a datetime object, or a fixed year 9999 if it does not have an expiration.
+        """
+        return self.entry.get("accountExpires", datetime(9999, 12, 31))
 
     def get_last_logon(self) -> datetime:
-        """Getter for account last logon datetime"""
+        """Getter for account last logon datetime
+
+        Returns:
+            datetime: The timestamp of the last logon as a datetime object.
+        """
         return self.entry.get("lastLogonTimestamp")
 
     def get_last_logon_days(self) -> int:
-        """Getter for account last logon in days"""
+        """Getter for account last logon in days
+
+        Returns:
+            int: The difference in days between the current date and the last logon date.
+        """
         return days_diff(self.get_last_logon())
 
     def get_pwd_last_set(self) -> datetime:
-        """Getter for account password last set date"""
+        """Getter for account password last set date
+
+        Returns:
+            datetime: The timestamp of when the password was last set as a datetime object.
+        """
         return self.entry.get("pwdLastSet")
 
     def get_pwd_last_set_days(self) -> int:
-        """Getter for account password last set in days"""
+        """Getter for account password last set in days
+
+        Returns:
+            int: The difference in days between the current date and the date when the password was last set.
+        """
         return days_diff(self.get_pwd_last_set())
 
     def get_account_flags(self) -> List[str]:
-        """Getter to retreive account flags"""
+        """Getter to retrieve account flags
+
+        Returns:
+            List[str]: A list of strings representing the account flags.
+        """
         return self.account_flags
 
     def does_account_expires(self) -> bool:
-        """Checks wheither the account expires"""
+        """Checks whether the account expires
+
+        Returns:
+            bool: True if the account does not expire (not year 9999), False otherwise.
+        """
         return not self.get_account_expiration().year == 9999
 
     def does_pwd_expires(self) -> bool:
-        """Getter to check if the account's password expires"""
+        """Getter to check if the account's password expires
+
+        Returns:
+            bool: True if the password is set to expire, False otherwise.
+        """
         return self.pwd_expires
 
     def is_pwd_expired(self) -> bool:
-        """Getter to check if account password is expired"""
+        """Getter to check if account password is expired
+
+        Returns:
+            bool: True if the password has expired, False otherwise.
+        """
         return self.pwd_expired
 
     def to_dict(self) -> Dict:
-        """Converts the current instance into a dict"""
+        """Converts the current instance into a dict
+
+        Returns:
+            Dict: A dictionary containing various account details including sAMAccountName, status, expiration date, etc.
+        """
         base_dict = super().to_dict()
         return {
             **base_dict,
