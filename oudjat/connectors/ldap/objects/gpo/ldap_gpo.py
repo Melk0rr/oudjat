@@ -1,10 +1,14 @@
 import re
 from enum import Enum
-from typing import Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 from ..definitions import UUID_REG
 from ..ldap_object import LDAPObject
 from . import MS_GPPREF
+
+if TYPE_CHECKING:
+    from ...ldap_connector import LDAPConnector
+    from ..ldap_entry import LDAPEntry
 
 
 class LDAPGPOScope(Enum):
@@ -25,7 +29,7 @@ class LDAPGroupPolicyObject(LDAPObject):
 
     # ****************************************************************
     # Attributes & Constructors
-    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
+    def __init__(self, ldap_entry: "LDAPEntry"):
         """Constructor"""
         super().__init__(ldap_entry=ldap_entry)
 
@@ -65,18 +69,15 @@ class LDAPGroupPolicyObject(LDAPObject):
 
     def get_linked_objects(
         self,
-        ldap_connector: "LDAPConnector",  # noqa: F821
+        ldap_connector: "LDAPConnector",
         attributes: Union[str, List[str]] = None,
         ou: str = "*",
-    ) -> List["LDAPEntry"]:  # noqa: F821
+    ) -> List["LDAPEntry"]:
         """Gets the gpo linked objects"""
-        search_filter = f"(gPLink={f'*{self.name}*'})(name={ou})"
 
-        linked_entries = ldap_connector.search(
-            search_type="OU", search_filter=search_filter, attributes=attributes
+        return ldap_connector.get_ou(
+            search_filter=f"(gPLink={f'*{self.name}*'})(name={ou})", attributes=attributes
         )
-
-        return linked_entries
 
     def to_dict(self) -> Dict:
         """Converts the current instance into a dict"""
