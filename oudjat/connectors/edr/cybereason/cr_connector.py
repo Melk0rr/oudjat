@@ -229,3 +229,12 @@ class CybereasonConnector(Connector):
 
         return res
 
+    def edit_policy(self, sensor_ids: List[str], policy_id: str) -> None:
+        """Edit policy for the given sensors"""
+
+        endpoint = CybereasonEndpoint.POLICIES
+
+        policy_query = json.dumps({"sensorsIds": sensor_ids,"keepManualOverrides":False})
+        policy_edit = self.request(method=endpoint.value.get("method"), url=f"{endpoint.value.get("url")}/{policy_id}/assign", query=policy_query)
+
+        return json.loads(policy_edit.content)

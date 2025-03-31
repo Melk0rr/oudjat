@@ -48,6 +48,11 @@ class CybereasonEndpoint(Enum):
         ],
     }
 
+    POLICIES = {
+        "endpoint": "rest/policies/",
+        "method": "POST",
+    }
+
     FILES = {
         "endpoint": "/rest/sensors/action/fileSearch",
         "method": "POST",
