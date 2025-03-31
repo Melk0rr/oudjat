@@ -1,8 +1,11 @@
 from enum import Enum
 
-from .account import LDAPComputer, LDAPGroup, LDAPUser
-from .gpo import LDAPGroupPolicyObject
+from .account.group.ldap_group import LDAPGroup
+from .account.ldap_computer import LDAPComputer
+from .account.ldap_user import LDAPUser
+from .gpo.ldap_gpo import LDAPGroupPolicyObject
 from .ldap_object import LDAPObject
+from .ou.ldap_ou import LDAPOrganizationalUnit
 from .subnet import LDAPSubnet
 
 
@@ -76,7 +79,7 @@ class LDAPObjectType(Enum):
     }
 
     OU = {
-        "pythonClass": "LDAPOrganizationalUnit",
+        "pythonClass": LDAPOrganizationalUnit,
         "objectClass": "organizationalUnit",
         "filter": "(objectClass=organizationalUnit)",
         "attributes": [

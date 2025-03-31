@@ -47,9 +47,6 @@ class LDAPObject:
 
         Args:
             ldap_entry (LDAPEntry) : ldap entry instance to be used to populate object data
-
-        Returns:
-            None
         """
 
         self.entry = ldap_entry
