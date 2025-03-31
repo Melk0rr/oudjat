@@ -31,6 +31,11 @@ class CybereasonEndpoint(Enum):
         ],
     }
 
+    SENSORS_ACTION = {
+        "endpoint": "/rest/sensors/action/removeFromGroup",
+        "method": "POST"
+    }
+
     MALWARES = {
         "endpoint": "/rest/malware/query",
         "method": "POST",

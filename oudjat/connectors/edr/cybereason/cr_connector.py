@@ -229,14 +229,30 @@ class CybereasonConnector(Connector):
 
         return res
 
-    def edit_policy(self, sensor_ids: List[str], policy_id: str) -> None:
+    def edit_policy(self, sensor_ids: Union[str, List[str]], policy_id: str) -> None:
         """Edit policy for the given sensors"""
+
+        if not isinstance(sensor_ids, list):
+            sensor_ids = [ sensor_ids ]
 
         endpoint = CybereasonEndpoint.POLICIES
 
         policy_query = json.dumps({"sensorsIds": sensor_ids,"keepManualOverrides": False})
-        policy_url = f"{self.target.geturl()}/{endpoint.value.get("endpoint")}{policy_id}/assign"
+        policy_url = f"{self.target.geturl()}/{endpoint.value.get('endpoint')}{policy_id}/assign"
 
         policy_edit = self.request(method=endpoint.value.get("method"), url=policy_url, query=policy_query)
 
         return json.loads(policy_edit.content)
+
+    def remove_sensors_group(self, sensor_ids: Union[str, List[str]]) -> None:
+        """Removes given sensors from group optionally specified"""
+
+        if not isinstance(sensor_ids, list):
+            sensor_ids = [ sensor_ids ]
+
+        endpoint = CybereasonEndpoint.SENSORS_ACTION
+
+        remove_query = json.dumps({"sensorsIds": sensor_ids,"filters": None})
+        remove = self.request(method=endpoint.value.get("method"), url=f"{self.target.geturl()}/{endpoint.value.get('endpoint')}", query=remove_query)
+
+        return json.loads(remove)
