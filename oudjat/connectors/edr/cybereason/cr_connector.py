@@ -234,8 +234,9 @@ class CybereasonConnector(Connector):
 
         endpoint = CybereasonEndpoint.POLICIES
 
-        policy_query = json.dumps({"sensorsIds": sensor_ids,"keepManualOverrides":False})
-        policy_edit = self.request(method=endpoint.value.get("method"), url=f"{self.target.geturl()}/{endpoint.value.get("url")}/{policy_id}/assign", query=policy_query)
+        policy_query = json.dumps({"sensorsIds": sensor_ids,"keepManualOverrides": False})
+        policy_url = f"{self.target.geturl()}/{endpoint.value.get("endpoint")}{policy_id}/assign"
 
-        print(policy_edit)
-        return policy_edit
+        policy_edit = self.request(method=endpoint.value.get("method"), url=policy_url, query=policy_query)
+
+        return json.loads(policy_edit)
