@@ -239,4 +239,4 @@ class CybereasonConnector(Connector):
 
         policy_edit = self.request(method=endpoint.value.get("method"), url=policy_url, query=policy_query)
 
-        return json.loads(policy_edit)
+        return json.loads(policy_edit.content)
