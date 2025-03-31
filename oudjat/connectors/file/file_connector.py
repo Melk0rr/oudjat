@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Union
 from oudjat.connectors import Connector
 from oudjat.control.data import DataFilter
 
-from . import FileType
+from .file_types import FileType
 
 # ****************************************************************
 # Helper functions

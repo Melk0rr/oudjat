@@ -47,6 +47,10 @@ pip3 install .
 
 ## Usage
 
+> [!WARNING]
+> As of version 0.7.x the cli, options and commands are out of date and require further development of core modules before a proper rework
+>
+
       Usage:
         oudjat cert (-t TARGET | -f FILE) [options]  [--feed] [--filter=FILTER]
                                                       [--keywords=KEYWORDS | --keywordfile=FILE]   

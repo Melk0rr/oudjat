@@ -3,7 +3,7 @@ from typing import Dict
 
 from oudjat.control.data import DecisionTree
 
-from . import PERSON_REG
+from .definitions import PERSON_REG
 
 
 class LDAPUserType:

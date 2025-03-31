@@ -1,18 +1,46 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 from oudjat.utils import ColorPrint
 
-from . import DataFilterOperation
+from .data_filter_operations import DataFilterOperation
 
 
 class DataFilter:
-    """DataFilter class : handling data filtering"""
+    """
+    A class to handle data filtering operations
+    Once created, a filter can be run against one or multiple elements to check if they are as expected
+
+    Exemple 1:
+        my_filter = DataFilter(fieldname="anything", operator="=", value=9)
+        check = my_filter.filter_value(8)
+        print(check) -> False
+
+    Exemple 2:
+        my_filter = DataFilter(fieldname="name", operator="in", value="Batty")
+        replicant = { "name": "Roy Batty", "age": 4 }
+        check = my_filter.filter_dict(replicant)
+        print(check) -> True
+    """
 
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, fieldname: str, value: Any, operator: str = "in", negate: bool = False):
-        """Constructor"""
+    def __init__(
+        self, fieldname: str, value: Any, operator: str = "in", negate: bool = False
+    ) -> None:
+        """
+        Constructor
+
+        Args:
+            fieldname (str) : name of the field to filter
+            value (Any)     : the value of the filter and the value the filtered element must have
+            operator (str)  : the operator used to filter the element
+            negate (bool)   : if you want to negate the filter result or not (True -> False; False -> True)
+
+        Returns:
+            None
+        """
+
         if operator not in DataFilterOperation.keys():
             raise ValueError(f"Invalid operator provided: {operator}")
 
@@ -25,59 +53,156 @@ class DataFilter:
     # Methods
 
     def get_fieldname(self) -> str:
-        """Getter for filter fieldname"""
+        """
+        Returns the filter fieldname
+
+        Returns:
+            str : fieldname of the instance that will be used to filter a dictionary
+        """
+
         return self.fieldname
 
     def get_operator(self) -> str:
-        """Getter for filter operator"""
+        """
+        Returns the filter operator
+
+        Returns
+            str : operator used to determine which function will be used to filter
+        """
+
         return self.operator
 
+    def get_operation(self) -> Callable:
+        """
+        Returns a DataFilterOperation based on current parameters
+
+        Returns:
+            Callable: DataFilterOperation function
+        """
+
+        return DataFilterOperation[self.operator]
+
     def get_value(self) -> Any:
-        """Getter for filter value"""
+        """
+        Returns the filter value
+
+        Returns:
+            Any : the value the filtered element must have
+        """
         return self.value
 
     def set_negate(self, new_negate: bool) -> None:
-        """Setter for filter negate"""
+        """
+        Setter for filter negate
+
+
+        """
         self.negate = new_negate
 
     def filter_dict(self, element: Dict) -> bool:
-        """Returns wheither or not the dictionary element matches the filter"""
-        check = DataFilterOperation[self.operator](element[self.fieldname], self.value)
-        if self.negate:
-            return not check
+        """
+        Runs the current filter against a dictionary
 
-        return check
+        Args:
+            element (Dict) : element to run the filter against
+
+        Returns:
+            bool: wheither or not the dictionary matches the filter
+        """
+
+        check = self.get_operation()(element[self.fieldname], self.value)
+        return not check if self.negate else check
 
     def filter_value(self, value: Any) -> bool:
-        """Returns wheither or not the given value matches the filter"""
-        check = DataFilterOperation[self.operator](value, self.value)
+        """
+        Runs the current filter against the provided value
 
-        if self.negate:
-            return not check
+        Args:
+            value (Any) : value to run the filter against
 
-        return check
+        Returns:
+            bool : wheither or not the given value matches the filter
+        """
+
+        check = self.get_operation()(value, self.value)
+        return not check if self.negate else check
 
     def __str__(self) -> str:
-        """Converts the current instance into a string"""
+        """
+        Converts the current instance into a string
+
+        Returns:
+            str : current filter converted into a string
+
+        Exemple:
+            my_filter = DataFilter(fieldname="name", operator="=", value="Roy Batty")
+            print(my_filter) -> name = Roy Batty
+        """
         return f"{self.fieldname} {self.operator} {self.value}"
 
     # ****************************************************************
     # Static methods
 
     @staticmethod
-    def datafilter_from_dict(dictionnary: Dict) -> "DataFilter":
-        """Converts a dictionary"""
+    def from_dict(filter_dict: Dict) -> "DataFilter":
+        """
+        Creates a datafilter instance from a dictionary
+
+        Args:
+            filter_dict (Dict) : dictionary used to create DataFilter instance
+
+        Returns:
+            DataFilter : new instance
+
+        Exemple:
+            my_filter = DataFilter.from_dict({ "fieldname": "name", "operator": "=", "value": "Rick Deckard"})
+        """
+
         return DataFilter(
-            fieldname=dictionnary["fieldname"],
-            operator=dictionnary.get("operator", "in"),
-            value=dictionnary["value"],
+            fieldname=filter_dict["fieldname"],
+            operator=filter_dict.get("operator", "in"),
+            value=filter_dict.get("value", None),
+        )
+
+    @staticmethod
+    def from_tuple(filter_tuple: Tuple[str, str, Any]) -> "DataFilter":
+        """
+        Creates a datafilter instance from a tuple
+
+        Args:
+            filter_tuple (Tuple) : tuple used to create DataFilter instance
+
+        Returns:
+            DataFilter : new instance
+
+        Exemple:
+            my_filter = DataFilter.from_tuple(( "name", "=", "Rick Deckard" ))
+        """
+
+        if len(filter_tuple) < 3:
+            raise ValueError(
+                "DataFilter.datafilter_from_tuple::3 parameters needed to create a DataFilter instance"
+            )
+
+        return DataFilter(
+            fieldname=filter_tuple[0],
+            operator=filter_tuple[1],
+            value=filter_tuple[2],
         )
 
     @staticmethod
     def get_valid_filters_list(
         filters_list: Union[List[Dict], List["DataFilter"]],
     ) -> List["DataFilter"]:
-        """Check filters type and format them into DataFilter instances if needed"""
+        """
+        Check filters type and format them into DataFilter instances if needed
+
+        Args:
+            filter_list (List[Dict] | List[DataFilter]) : filter list to check / format
+
+        Returns:
+            List[DataFilter] : formated list of data filter instances
+        """
         filters = []
 
         for f in filters_list:
@@ -88,7 +213,7 @@ class DataFilter:
 
             filter_i = f
             if isinstance(f, dict):
-                filter_i = DataFilter.datafilter_from_dict(f)
+                filter_i = DataFilter.from_dict(f)
 
             filters.append(filter_i)
 
@@ -96,38 +221,78 @@ class DataFilter:
 
     @staticmethod
     def gen_from_dict(filters: List[Dict]) -> List["DataFilter"]:
-        """Generates DataFitler instances based on dictionnaries"""
-        filter_instances = []
+        """
+        Generates multiple DataFitler instances based on dictionnaries
 
-        for f in filters:
-            current_filter = DataFilter.datafilter_from_dict(f)
-            filter_instances.append(current_filter)
+        Args:
+            filters (List[Dict]) : list of dictionaries used to generated instances
 
-        return filter_instances
+        Returns:
+            List[DataFilter] : data filter instances
+        """
+
+        return list(map(lambda f: DataFilter.from_dict(f), filters))
+
+    @staticmethod
+    def gen_from_tuple(filters: List[Tuple]) -> List["DataFilter"]:
+        """
+        Generates DataFitler instances based on tuples
+
+        Args:
+            filters (List[Tuple]) : list of tuples used to generated instances
+
+        Returns:
+            List[DataFilter] : data filter instances
+        """
+
+        return list(map(lambda f: DataFilter.from_tuple(f), filters))
 
     @staticmethod
     def get_conditions(element: Any, filters: Union[List["DataFilter"], List[Dict]]) -> bool:
-        """Checks given filters on provided element"""
+        """
+        Runs all given filters against a single provided element
+
+        Args:
+            element (Any)                           : element to check
+            filters (List[Dict] | List[DataFilter]) : filters to run
+
+        Returns:
+            bool : filter results
+        """
         checks = []
 
         for f in filters:
+            check = None
             if isinstance(f, DataFilter):
-                checks.append(f.filter_dict(element))
+                check = f.filter_dict(element)
 
             else:
                 operation = DataFilterOperation[f["operator"]]
-                checks.append(operation(element[f["fieldname"]], f["value"]))
+                check = operation(element[f["fieldname"]], f["value"])
+
+            checks.append(check)
 
         return all(checks)
 
     @staticmethod
-    def filter_data(data_to_filter: List[Dict], filters: List["DataFilter"]) -> List[Dict]:
-        """Filters data based on given filters"""
-        filtered_data = []
-        for el in data_to_filter:
-            conditions = all(f.filter_dict(el) for f in filters)
-            if conditions:
-                filtered_data.append(el)
+    def filter_data(
+        data_to_filter: List[Dict], filters: Union["DataFilter", List["DataFilter"]] = None
+    ) -> List[Dict]:
+        """
+        Filters data based on given filters
 
-        return filtered_data
+        Args:
+            data_to_filter (List[Dict])             : well... the data to be filtered duh
+            filters (DataFilter | List[DataFilter]) : filters to run
 
+        Returns:
+            List[Dict] : filtered data
+        """
+
+        if filters is None:
+            return data_to_filter
+
+        if not isinstance(filters, list):
+            filters = [filters]
+
+        return list(filter(lambda el: all(f.filter_dict(el) for f in filters), data_to_filter))

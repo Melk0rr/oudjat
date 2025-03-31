@@ -2,7 +2,7 @@ from enum import Enum
 
 from oudjat.model.assets.computer import ComputerType
 
-from . import MicrosoftOperatingSystem
+from .windows.windows import MicrosoftOperatingSystem
 
 
 class OSOption(Enum):

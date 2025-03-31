@@ -1,11 +1,11 @@
 import re
-from typing import Any, Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 from urllib.parse import urlparse
 
 from tenable.sc import TenableSC
 
 from oudjat.connectors.connector import Connector
-from oudjat.control.data.data_filter_operations import DataFilterOperation
+from oudjat.control.data.data_filter import DataFilter
 from oudjat.model.vulnerability.cve import get_severity_by_score
 from oudjat.utils import ColorPrint
 
@@ -142,13 +142,15 @@ class TenableSCConnector(Connector):
         """Raises an exception if connection is not set"""
 
     # INFO: Vulns
-    def search_vulns(self, *severities: List[str], tool: TSCVulnTool = TSCVulnTool.VULNDETAILS) -> Dict:
+    def search_vulns(
+        self, *severities: List[str], tool: TSCVulnTool = TSCVulnTool.VULNDETAILS
+    ) -> Dict:
         """
         Retrieve the current vulnerabilities
 
         Args:
             severities (List[str])  : vuln severities to include
-            tool (str)              : tool to use for the search
+            tool (TSCVulnTool)      : tool to use for the search
 
         Return:
             Dict : vulnerabilities matching arguments
@@ -183,7 +185,7 @@ class TenableSCConnector(Connector):
         ips: List[str] = None,
         dns_names: List[str] = None,
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Creates a new asset list
@@ -209,7 +211,7 @@ class TenableSCConnector(Connector):
                 ips=ips,
                 dns_names=dns_names,
                 *args,
-                **kwargs
+                **kwargs,
             )
 
         except Exception as e:
@@ -238,8 +240,7 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    # TODO: Allow multiple filters
-    def list_asset_lists(self, list_filter: Tuple[str, str, Any] = None) -> List[Dict]:
+    def list_asset_lists(self, list_filter: Union[Tuple, List[Tuple]] = None) -> List[Dict]:
         """
         Retrieves a list of asset lists with minimal informations like list ids
 
@@ -259,14 +260,9 @@ class TenableSCConnector(Connector):
             if asset_lists is not None:
                 asset_lists = asset_lists.get("usable", [])
 
-            # If a filter is provided
-            if list_filter is not None:
-                f_key, f_operator, f_value = list_filter
-                asset_lists = list(
-                    filter(
-                        lambda al: DataFilterOperation[f_operator](f_value, al[f_key]), asset_lists
-                    )
-                )
+            asset_lists = DataFilter.filter_data(
+                data_to_filter=asset_lists, filters=DataFilter.gen_from_tuple(list_filter)
+            )
 
         except Exception as e:
             raise e
@@ -302,8 +298,7 @@ class TenableSCConnector(Connector):
     # TODO: Edit asset list
 
     # INFO: Scans
-    # TODO: Allow multiple filters
-    def list_scans(self, scan_filter: Tuple[str, str, Any] = None) -> List[Dict]:
+    def list_scans(self, scan_filter: Union[Tuple, List[Tuple]] = None) -> List[Dict]:
         """
         Retrieves a list of scans with minimal information like scan ids
 
@@ -323,14 +318,9 @@ class TenableSCConnector(Connector):
             if scan_list is not None:
                 scan_list = scan_list.get("usable", [])
 
-            # If a filter is provided
-            if scan_filter is not None:
-                f_key, f_operator, f_value = scan_filter
-                scan_list = list(
-                    filter(
-                        lambda sl: DataFilterOperation[f_operator](f_value, sl[f_key]), scan_list
-                    )
-                )
+            scan_list = DataFilter.filter_data(
+                data_to_filter=scan_list, filters=DataFilter.gen_from_tuple(scan_filter)
+            )
 
         except Exception as e:
             raise e
@@ -391,7 +381,7 @@ class TenableSCConnector(Connector):
         description: str = None,
         schedule: Dict = None,
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Creates a new scan
@@ -414,7 +404,7 @@ class TenableSCConnector(Connector):
                 description=description,
                 schedule=schedule,
                 *args,
-                **kwargs
+                **kwargs,
             )
 
         except Exception as e:

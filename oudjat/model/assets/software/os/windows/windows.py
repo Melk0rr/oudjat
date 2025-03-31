@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 from oudjat.model.assets.computer import ComputerType
 from oudjat.model.assets.software import (
@@ -11,23 +11,37 @@ from oudjat.model.assets.software import (
 )
 
 from ..operating_system import OperatingSystem, OSFamily, OSRelease
-from . import WINDOWS_RELEASES
+from .config.win_rel import WINDOWS_RELEASES
+
+if TYPE_CHECKING:
+    from ...software import Software
 
 
 class MSOSRelease(OSRelease):
-    """A class to handle Microsoft OS releases"""
+    """
+    A class to handle OS releases specific to Microsoft
+    """
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(
         self,
-        software: "Software",  # noqa: F821
+        software: "Software",
         version: Union[int, str],
         release_date: Union[str, datetime],
         release_label: str,
-    ):
-        """Constructor"""
+    ) -> None:
+        """
+        Instanciates OS release specific to Microsoft
+
+        Args:
+            software (Software): software instance the release is based on
+            version (Union[int, str]): release version
+            release_date (Union[str, datetime]): release date
+            release_label (str): release label
+        """
+
         super().__init__(
             software=software,
             version=version,
@@ -43,34 +57,72 @@ class MSOSRelease(OSRelease):
     # Methods
 
     def get_version_build(self) -> int:
-        """Get the build number from release version"""
+        """
+        Get the build number from release version
+
+        Returns:
+            int: build number of the release
+        """
+
         return self.version_build
 
     def get_version_main(self) -> str:
-        """Get the version main release number from release version"""
+        """
+        Get the version main release number from release version
+
+        Returns:
+            str: The main version of the software release.
+        """
         return self.version_main
 
     def get_name(self) -> str:
-        """Returns a forged name of the release"""
+        """
+        Returns a forged name of the release
+
+        This method constructs and returns a string that includes the name of the software
+        concatenated with the first word from the label. The software name and label are instance variables of this class.
+
+        Returns:
+            str: A combined name based on the software's name and part of its label.
+        """
         return f"{self.get_software().get_name()} {self.label.split(' ')[0]}"
 
     def os_info_dict(self) -> Dict:
-        """Returns a dictionary with os infos"""
+        """
+        Returns a dictionary with os infos
+
+        This method extends the functionality of its parent class to include specific OS information such as name and version numbers, by combining data from both itself and the superclass. The extended dictionary includes 'name', 'version_main', and 'version_build' keys.
+
+        Returns:
+            Dict: A dictionary containing OS-specific information including the software name and versions.
+        """
+        base_dict = super().os_info_dict()  # Assuming superclass has an os_info_dict method
         return {
-            **super().os_info_dict(),
+            **base_dict,
             "name": self.get_name(),
             "version_main": self.version_main,
             "version_build": self.version_build,
         }
 
     def to_dict(self) -> Dict:
-        """Converts the current instance into a dictionary"""
-        base_dict = super().to_dict()
+        """
+        Converts the current instance into a dictionary
+
+        This method overrides or extends the standard conversion behavior to include specific class information such as OS name and version numbers.
+
+        Returns:
+            Dict: A dictionary representation of the instance including extended OS-related information.
+        """
+        base_dict = super().to_dict()  # Assuming superclass has a to_dict method
         return {**base_dict, **self.os_info_dict()}
 
 
 class WindowsEdition(Enum):
-    """Windows edition enum"""
+    """
+    Windows edition enum
+
+    Tries to handle edition types (E,W,IOT)
+    """
 
     WINDOWS = {
         "Enterprise": SoftwareEdition(label="Enterprise", category="E", pattern=r"Ent[er]{2}prise"),
@@ -104,11 +156,21 @@ class MicrosoftOperatingSystem(OperatingSystem):
         id: Union[int, str],
         name: str,
         label: str,
-        computer_type: Union[Union[str, ComputerType], List[Union[str, ComputerType]]],
+        computer_type: Union[ComputerType, List[ComputerType]],
         description: str = None,
     ):
-        """Constructor"""
+        """
+        Constructor for the MicrosoftOperatingSystem class.
 
+        Initializes a new instance of the MicrosoftOperatingSystem class with the specified parameters.
+
+        Args:
+            id (Union[int, str])                                    : The identifier for the operating system.
+            name (str)                                              : The name of the operating system.
+            label (str)                                             : A short label or abbreviation for the operating system.
+            computer_type (Union[ComputerType, List[ComputerType]]) : The type(s) of computer compatible with this operating system.
+            description (str, optional)                             : A detailed description of the operating system. Defaults to None.
+        """
         super().__init__(
             id=id,
             name=name,
@@ -127,8 +189,12 @@ class MicrosoftOperatingSystem(OperatingSystem):
     # Methods
 
     def gen_releases(self) -> None:
-        """Generates Windows releases"""
+        """
+        Generates Windows releases for the Microsoft operating system.
 
+        This method iterates through predefined release data to create or update MSOSRelease instances
+        based on the version and label found in the data. It also sets support details for each release.
+        """
         for rel in WINDOWS_RELEASES[self.id]:
             win_rel = self.find_release(rel["releaseLabel"])
 
@@ -157,8 +223,19 @@ class MicrosoftOperatingSystem(OperatingSystem):
     # ****************************************************************
     # Static methods
 
+    @staticmethod
     def get_matching_version(test_str: str) -> str:
-        """Returns a version matching given string"""
+        """
+        Returns a version matching the given string.
+
+        This static method uses a regular expression to find and return a version number from the input string.
+
+        Args:
+            test_str (str): The string to search for a version match.
+
+        Returns:
+            str: A string representing the matched version, or None if no match is found.
+        """
         res = None
         search = re.search(MicrosoftOperatingSystem.VERSION_REG, test_str)
 

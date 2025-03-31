@@ -2,7 +2,7 @@ from typing import Dict
 
 from oudjat.model.assets.user import User
 
-from . import LDAPAccount
+from .ldap_account import LDAPAccount
 
 
 class LDAPUser(LDAPAccount, User):

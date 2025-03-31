@@ -1,7 +1,8 @@
 from typing import Any, Dict, List, Union
 
-from oudjat.control.data import DataFilter
 from oudjat.utils import ColorPrint
+
+from .data_filter import DataFilter
 
 
 class DecisionTreeNode:
@@ -14,7 +15,7 @@ class DecisionTreeNode:
         """Constructor"""
 
         self.flag = node_dict.get("flag", None)
-        self.node_filter: DataFilter = DataFilter.datafilter_from_dict(dictionnary=node_dict)
+        self.node_filter: DataFilter = DataFilter.from_dict(dictionnary=node_dict)
         self.node_filter.set_negate(node_dict.get("negate", False))
         self.value = None
 
