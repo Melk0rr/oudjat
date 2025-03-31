@@ -252,7 +252,7 @@ class CybereasonConnector(Connector):
 
         endpoint = CybereasonEndpoint.SENSORS_ACTION
 
-        remove_query = json.dumps({"sensorsIds": sensor_ids,"filters": None})
+        remove_query = json.dumps({"sensorsIds": sensor_ids, "filters": None})
         remove = self.request(method=endpoint.value.get("method"), url=f"{self.target.geturl()}/{endpoint.value.get('endpoint')}", query=remove_query)
 
-        return json.loads(remove)
+        return json.loads(remove.content)
