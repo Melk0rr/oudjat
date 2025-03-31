@@ -59,10 +59,7 @@ class TenableSCConnector(Connector):
         """
         Returns repositories list
 
-        Args:
-            None
-
-        Return:
+        Returns:
             List : list of repos defined on security center
         """
         return self.repos
@@ -71,12 +68,6 @@ class TenableSCConnector(Connector):
     def connect(self) -> None:
         """
         Connects to API using connector parameters
-
-        Args:
-            None
-
-        Return:
-            None
         """
         connection = None
         try:
@@ -99,9 +90,6 @@ class TenableSCConnector(Connector):
 
         Args:
             prefix (str) : prefix string to include in error message
-
-        Return:
-            None
         """
 
         if self.connection is None:
@@ -112,12 +100,6 @@ class TenableSCConnector(Connector):
     def disconnect(self) -> None:
         """
         Disconnect from API
-
-        Args:
-            None
-
-        Return:
-            None
         """
         del self.connection
         self.connection = None
@@ -387,9 +369,6 @@ class TenableSCConnector(Connector):
 
         Args:
             scan_id (int | List[int]) : one or more scan id to delete
-
-        Return:
-            None
         """
 
         self.check_connection(prefix="delete_scan")
@@ -423,9 +402,6 @@ class TenableSCConnector(Connector):
             asset_lists (List[int]) : the asset lists ids to run the scan against
             description (str)       : scan description
             schedule (Dict)         : schedule dictionary
-
-        Return:
-            None
         """
 
         self.check_connection(prefix="create_scan")
