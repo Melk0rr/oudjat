@@ -14,13 +14,18 @@ from .cr_sensor_actions import CybereasonSensorAction
 
 
 class CybereasonEntry(dict):
-    """Cybereason entry dict"""
+    """
+    Cybereason entry inherits from dict
+    Handles some data transformations for ease of read
+    """
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self, entry_type: "CybereasonEndpoint", **kwargs):
-        """Constructor"""
+        """
+        Creates a new instance of CybereasonEntry
+        """
 
         self.type = entry_type
         cleaned_kwargs = {}
@@ -50,7 +55,10 @@ class CybereasonEntry(dict):
 
 
 class CybereasonConnector(Connector):
-    """Cybereason connector to interact and query Cybereason API"""
+    """
+    Cybereason connector inherinting from base Connector
+    Handles interactions and queries to Cybereason API
+    """
 
     # ****************************************************************
     # Attributes & Constructors
@@ -95,6 +103,7 @@ class CybereasonConnector(Connector):
     def disconnect(self) -> None:
         """Close session with target"""
         self.connection.close()
+        ColorPrint.yellow(f"Connection to {self.target.netloc} is closed")
 
     def request(self, method: str, url: str, query: str = None) -> requests.models.Response:
         """Performs a request to given url using connector established connection"""
