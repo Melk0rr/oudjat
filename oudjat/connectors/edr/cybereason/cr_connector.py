@@ -252,7 +252,7 @@ class CybereasonConnector(Connector):
         self,
         action: CybereasonSensorAction,
         sensor_ids: Union[str, List[str]],
-        query: Dict,
+        query: str,
         *args,
         **kwargs,
     ) -> Dict:
@@ -271,8 +271,20 @@ class CybereasonConnector(Connector):
 
         return json.loads(query.content)
 
-    def remove_sensors_group(self, sensor_ids: Union[str, List[str]]) -> Dict:
+    def sensor_remove_group(self, sensor_ids: Union[str, List[str]]) -> Dict:
         """Removes given sensors from group optionally specified"""
+
+        if not isinstance(sensor_ids, list):
+            sensor_ids = [sensor_ids]
 
         remove_query = json.dumps({"sensorsIds": sensor_ids, "filters": None})
         return self.do_sensor_action(action=CybereasonSensorAction.REMOVEFROMGROUP, sensor_ids=sensor_ids, query=remove_query)
+
+    def sensor_assign_group(self, sensor_ids: Union[str, List[str]], groupId: str) -> Dict:
+        """Assigns given sensors to a group"""
+
+        if not isinstance(sensor_ids, list):
+            sensor_ids = [sensor_ids]
+
+        assign_query = json.dumps({"sensorsIds": sensor_ids,"argument": groupId})
+        return self.do_sensor_action(action=CybereasonSensorAction.ADDTOGROUP, sensor_ids=sensor_ids, query=assign_query)
