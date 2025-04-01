@@ -10,6 +10,8 @@ from oudjat.connectors import Connector
 from oudjat.connectors.edr.cybereason import CybereasonEndpoint
 from oudjat.utils import ColorPrint, unixtime_to_str
 
+from .cr_sensor_actions import CybereasonSensorAction
+
 
 class CybereasonEntry(dict):
     """Cybereason entry dict"""
@@ -229,30 +231,48 @@ class CybereasonConnector(Connector):
 
         return res
 
-    def edit_policy(self, sensor_ids: Union[str, List[str]], policy_id: str) -> None:
+    def edit_policy(self, sensor_ids: Union[str, List[str]], policy_id: str) -> Dict:
         """Edit policy for the given sensors"""
 
         if not isinstance(sensor_ids, list):
-            sensor_ids = [ sensor_ids ]
+            sensor_ids = [sensor_ids]
 
         endpoint = CybereasonEndpoint.POLICIES
 
-        policy_query = json.dumps({"sensorsIds": sensor_ids,"keepManualOverrides": False})
+        policy_query = json.dumps({"sensorsIds": sensor_ids, "keepManualOverrides": False})
         policy_url = f"{self.target.geturl()}/{endpoint.value.get('endpoint')}{policy_id}/assign"
 
-        policy_edit = self.request(method=endpoint.value.get("method"), url=policy_url, query=policy_query)
+        policy_edit = self.request(
+            method=endpoint.value.get("method"), url=policy_url, query=policy_query
+        )
 
         return json.loads(policy_edit.content)
 
-    def remove_sensors_group(self, sensor_ids: Union[str, List[str]]) -> None:
-        """Removes given sensors from group optionally specified"""
+    def do_sensor_action(
+        self,
+        action: CybereasonSensorAction,
+        sensor_ids: Union[str, List[str]],
+        query: Dict,
+        *args,
+        **kwargs,
+    ) -> Dict:
+        """Do a custom action on a list of sensors"""
 
         if not isinstance(sensor_ids, list):
-            sensor_ids = [ sensor_ids ]
+            sensor_ids = [sensor_ids]
 
         endpoint = CybereasonEndpoint.SENSORS_ACTION
 
-        remove_query = json.dumps({"sensorsIds": sensor_ids, "filters": None})
-        remove = self.request(method=endpoint.value.get("method"), url=f"{self.target.geturl()}/{endpoint.value.get('endpoint')}", query=remove_query)
+        query = self.request(
+            method=endpoint.value.get("method"),
+            url=f"{self.target.geturl()}/{endpoint.value.get('endpoint')}/{action.value}",
+            query=query,
+        )
 
-        return json.loads(remove.content)
+        return json.loads(query.content)
+
+    def remove_sensors_group(self, sensor_ids: Union[str, List[str]]) -> Dict:
+        """Removes given sensors from group optionally specified"""
+
+        remove_query = json.dumps({"sensorsIds": sensor_ids, "filters": None})
+        return self.do_sensor_action(action=CybereasonSensorAction.REMOVEFROMGROUP, sensor_ids=sensor_ids, query=remove_query)

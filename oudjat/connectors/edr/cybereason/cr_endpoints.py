@@ -32,7 +32,7 @@ class CybereasonEndpoint(Enum):
     }
 
     SENSORS_ACTION = {
-        "endpoint": "/rest/sensors/action/removeFromGroup",
+        "endpoint": "/rest/sensors/action",
         "method": "POST"
     }
 
