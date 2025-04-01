@@ -64,7 +64,9 @@ class CybereasonConnector(Connector):
     # Attributes & Constructors
 
     def __init__(self, target: str, service_name: str = "OudjatCybereasonAPI", port: int = 443):
-        """Constructor"""
+        """
+        Creates a new instance of CybereasonConnector
+        """
 
         scheme = "http"
         if port == 443:
