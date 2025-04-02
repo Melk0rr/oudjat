@@ -262,7 +262,8 @@ class CybereasonConnector(Connector):
         endpoint_attr = CybereasonEndpoint[endpoint]
         endpoint_search_limit = endpoint_attr.value.get("limit")
 
-        # Set search limit
+        # NOTE: Cybereason API returns data by pages
+        # Set search limit based on page result number and max limit
         if limit is None:
             limit = endpoint_search_limit
 
