@@ -7,7 +7,6 @@ if TYPE_CHECKING:
     from .account.group.ldap_group import LDAPGroup
     from .ldap_entry import LDAPEntry
 
-
 # ****************************************************************
 # Helper functions
 
@@ -188,11 +187,25 @@ class LDAPObject:
         """
         return self.change_date
 
+    def is_in_ou(self, ou_name: str, recursive: bool = True) -> bool:
+        """
+        Checks whether the current object is contained directly or indirectly in the given OU
+
+        Args
+            ou (str)        : the LDAP OU name the object is supposed to be contained in
+            recursive (bool): True to check if the object is indirectly inside the OU; False to check only a direct belonging
+
+        Returns:
+            bool: True if the object is contained in the given OU; otherwise, False.
+        """
+
+        return ou_name in self.dn if recursive else f"{self.get_name()}OU={ou_name}" in self.dn
+
     def is_member_of(
         self, ldap_connector: "LDAPConnector", ldap_group: "LDAPGroup", extended: bool = False
     ) -> bool:
         """
-        Checks whether the current user is a member of the provided group.
+        Checks whether the current object is a member of the provided group.
 
         Args:
             ldap_connector (LDAPConnector): The LDAP connection object used to perform the membership check.
