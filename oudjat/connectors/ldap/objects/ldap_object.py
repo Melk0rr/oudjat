@@ -21,6 +21,7 @@ def parse_dn(dn: str) -> Dict:
     Returns:
         Dict : dictionary of dn pieces (CN, OU, DN)
     """
+
     split = dn.split(",")
     pieces = {}
 
@@ -40,6 +41,7 @@ class LDAPObject:
 
     # ****************************************************************
     # Attributes & Constructors
+
     def __init__(self, ldap_entry: "LDAPEntry") -> None:
         """
         Constructor for initializing an LDAP Entry-based object.
@@ -77,6 +79,7 @@ class LDAPObject:
         Returns:
             str: The distinguished name (DN) of the LDAP object.
         """
+
         return self.dn
 
     def get_name(self) -> str:
@@ -86,6 +89,7 @@ class LDAPObject:
         Returns:
             str: The name attribute of the LDAP object.
         """
+
         return self.name
 
     def get_sid(self) -> str:
@@ -95,6 +99,7 @@ class LDAPObject:
         Returns:
             str: The security identifier (SID) of the LDAP object.
         """
+
         return self.sid
 
     def get_uuid(self) -> str:
@@ -104,6 +109,7 @@ class LDAPObject:
         Returns:
             str: The universally unique identifier (UUID) of the LDAP object.
         """
+
         return self.uuid
 
     def get_entry(self) -> Dict:
@@ -113,6 +119,7 @@ class LDAPObject:
         Returns:
             dict: A dictionary containing the entry attributes from the LDAP object.
         """
+
         return self.entry
 
     def get_classes(self) -> List[str]:
@@ -122,6 +129,7 @@ class LDAPObject:
         Returns:
             list of str: The 'objectClass' attribute values from the LDAP entry dictionary.
         """
+
         return self.entry.get("objectClass", [])
 
     def get_type(self) -> str:
@@ -131,6 +139,7 @@ class LDAPObject:
         Returns:
             str: The type of the LDAP object inferred from its 'objectClass' attributes.
         """
+
         return self.entry.get("type", "")
 
     def get_dn_pieces(self) -> Dict:
@@ -140,6 +149,7 @@ class LDAPObject:
         Returns:
             dict: A dictionary containing the individual components of the DN (Distinguished Name) of the LDAP object.
         """
+
         return self.dn_pieces
 
     def get_description(self) -> str:
@@ -149,6 +159,7 @@ class LDAPObject:
         Returns:
             str: The description attribute of the LDAP object.
         """
+
         return self.description
 
     def get_domain(self) -> str:
@@ -158,6 +169,7 @@ class LDAPObject:
         Returns:
             str: The domain to which the LDAP object belongs.
         """
+
         return self.domain
 
     def get_account_groups(self) -> List[str]:
@@ -167,6 +179,7 @@ class LDAPObject:
         Returns:
             list of str: The groups this account is a member of, as specified in the 'memberOf' attribute.
         """
+
         return self.entry.get("memberOf", [])
 
     def get_creation_date(self) -> str:
@@ -176,6 +189,7 @@ class LDAPObject:
         Returns:
             str: The timestamp of when the LDAP object was created.
         """
+
         return self.creation_date
 
     def get_change_date(self) -> str:
@@ -185,6 +199,7 @@ class LDAPObject:
         Returns:
             str: The timestamp of the last modification to the LDAP object.
         """
+
         return self.change_date
 
     def is_in_ou(self, ou_name: str, recursive: bool = True) -> bool:
@@ -215,6 +230,7 @@ class LDAPObject:
         Returns:
             bool: True if the current user is a member of the provided LDAP group; otherwise, False.
         """
+
         return ldap_connector.is_object_member_of(
             ldap_object=self, ldap_group=ldap_group, extended=extended
         )
@@ -226,6 +242,7 @@ class LDAPObject:
         Returns:
             dict: A dictionary containing the attributes of the LDAP object in a structured format
         """
+
         return {
             "dn": self.dn,
             "name": self.name,
