@@ -54,7 +54,7 @@ class CybereasonEndpoint(Enum):
     }
 
     POLICIES = {
-        "endpoint": "rest/policies/",
+        "endpoint": "rest/policies",
         "method": "POST",
     }
 

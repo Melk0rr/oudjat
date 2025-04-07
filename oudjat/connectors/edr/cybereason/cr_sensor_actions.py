@@ -14,7 +14,7 @@ class CybereasonSensorAction(Enum):
     SETRANSOMWAREMODE = "setRansomwareMode"
     SETPREVENTIONMODE = "setPreventionMode"
     SETANTIMALWARESTATUS = "set-antimalware-status"
-    SETPOWERSHELLPROTECTIONSTATUS = "set-PowershellProtection-status"
+    SETPSPROTECTIONSTATUS = "set-PowershellProtection-status"
     STARTCOLLECTION = "startCollection"
     STOPCOLLECTION = "stopCollection"
     DELETE = "delete"

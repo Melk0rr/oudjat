@@ -20,7 +20,9 @@ if TYPE_CHECKING:
 
 
 class LDAPConnector(Connector):
-    """LDAP connector to interact and query LDAP servers"""
+    """
+    LDAP connector to interact and query LDAP servers
+    """
 
     # ****************************************************************
     # Attributes & Constructors
@@ -35,9 +37,6 @@ class LDAPConnector(Connector):
             server (str)        : server name
             service_name (str)  : service name used to store credentials
             use_tls (bool)      : should the connector use TLS for LDAPS connection
-
-        Returns:
-            None
         """
         self.use_tls = use_tls
         self.port = 389
@@ -87,9 +86,6 @@ class LDAPConnector(Connector):
 
         Args:
             use_tls (bool) : should the connector use TLS
-
-        Returns:
-            None
         """
         self.use_tls = use_tls
         if use_tls:
@@ -104,9 +100,6 @@ class LDAPConnector(Connector):
 
         Args:
             version (ssl._SSLMethod) : SSL/TLS version
-
-        Returns:
-            None
         """
 
         if version is None:
@@ -307,7 +300,10 @@ class LDAPConnector(Connector):
         return subnet
 
     def get_computer(
-        self, search_filter: str = None, attributes: Union[str, List[str]] = None, search_base: str = None
+        self,
+        search_filter: str = None,
+        attributes: Union[str, List[str]] = None,
+        search_base: str = None,
     ) -> List["LDAPComputer"]:
         """
         Specific method to retreive LDAP Computer instances
@@ -334,7 +330,10 @@ class LDAPConnector(Connector):
         return computers
 
     def get_users(
-        self, search_filter: str = None, attributes: Union[str, List[str]] = None, search_base: str = None
+        self,
+        search_filter: str = None,
+        attributes: Union[str, List[str]] = None,
+        search_base: str = None,
     ) -> List["LDAPUser"]:
         """
         Specific method to retreive LDAP User instances
@@ -360,7 +359,9 @@ class LDAPConnector(Connector):
 
         return users
 
-    def get_group_members(self, ldap_group: "LDAPGroup", recursive: bool = False) -> List["LDAPObject"]:
+    def get_group_members(
+        self, ldap_group: "LDAPGroup", recursive: bool = False
+    ) -> List["LDAPObject"]:
         """
         Retreives and returns the members of the given group
 
@@ -414,7 +415,7 @@ class LDAPConnector(Connector):
             member_ref_list = ldap_group.members.values()
 
         return ldap_object.get_uuid() in [m.get_id() for m in member_ref_list]
-k
+
     def get_ou(
         self, search_filter: str = None, attributes: Union[str, List[str]] = None
     ) -> List["LDAPOrganizationalUnit"]:
@@ -443,6 +444,13 @@ k
 
         return ous
 
-    def get_ou_members(self, ldap_ou: "LDAPOrganizationalUnit", recursive: bool = False) -> List["LDAPObject"]:
-        """"""
+    def get_ou_members(
+        self, ldap_ou: "LDAPOrganizationalUnit", recursive: bool = False
+    ) -> List["LDAPObject"]:
+        """
+        Returns members of a given OU
+        """
+
+        objects = self.search()
+
 

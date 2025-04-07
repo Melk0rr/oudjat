@@ -22,9 +22,13 @@ class CybereasonEntry(dict):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, entry_type: "CybereasonEndpoint", **kwargs):
+    def __init__(self, entry_type: "CybereasonEndpoint", **kwargs) -> None:
         """
         Creates a new instance of CybereasonEntry
+
+        Parameters:
+            entry_type (CybereasonEndpoint): The type of the entry.
+            **kwargs: Arbitrary keyword arguments to initialize the dictionary.
         """
 
         self.type = entry_type
@@ -63,9 +67,16 @@ class CybereasonConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, target: str, service_name: str = "OudjatCybereasonAPI", port: int = 443):
+    def __init__(
+        self, target: str, service_name: str = "OudjatCybereasonAPI", port: int = 443
+    ) -> None:
         """
         Creates a new instance of CybereasonConnector
+
+        Parameters:
+            target (str): The target URL or hostname to connect to.
+            service_name (str, optional): The name of the service. Used to register API credentials. Defaults to "OudjatCybereasonAPI".
+            port (int, optional): The port number to use for the connection. Defaults to 443.
         """
 
         scheme = "http"
@@ -84,7 +95,16 @@ class CybereasonConnector(Connector):
     # Methods
 
     def connect(self) -> None:
-        """Connects to API using connector parameters"""
+        """
+        Connects to API using connector parameters.
+
+        This method initializes a session with the target API and authenticates using the provided credentials.
+        It sets up necessary headers and attempts to post login credentials to the `/login.html` endpoint of the API.
+        If successful, it prints a confirmation message in green color indicating the connection is established.
+
+        Raises:
+            ConnectionError: If there's an issue with establishing the connection to the Cybereason API.
+        """
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         session = requests.session()
 
@@ -94,28 +114,51 @@ class CybereasonConnector(Connector):
                 f"{self.target.geturl()}/login.html", data=creds, headers=headers, verify=True
             )
 
+            ColorPrint.green(f"Connected to {self.target.netloc}")
+            self.connection = session
+
         except ConnectionError as e:
             raise (
                 f"An error occured while trying to connect to Cybereason API at {self.target}: {e}"
             )
 
-        ColorPrint.green(f"Connected to {self.target.netloc}")
-        self.connection = session
-
     def disconnect(self) -> None:
-        """Close session with target"""
+        """
+        Close session with target.
+
+        This method closes the active session with the API endpoint and prints a yellow color message indicating that the connection is closed.
+        """
         self.connection.close()
         ColorPrint.yellow(f"Connection to {self.target.netloc} is closed")
 
     def request(self, method: str, url: str, query: str = None) -> requests.models.Response:
-        """Performs a request to given url using connector established connection"""
+        """
+        Performs a request to given url using connector established connection.
+
+        This method sends an HTTP request to the specified URL with the provided
+        method (e.g., GET, POST). It includes necessary headers and uses the already
+        established connection if available. If no active connection is found, it raises a ConnectionError.
+
+        Args:
+            method (str): The HTTP method for the request ('GET', 'POST', etc.).
+            url (str): The target URL to send the request to.
+            query (str, optional): Data payload for POST requests or query parameters for GET requests. Defaults to None.
+
+        Returns:
+            requests.models.Response: The response object from the API request.
+
+        Raises:
+            ConnectionError: If no connection has been established and required for making a request.
+        """
         if self.connection is None:
             raise ConnectionError(
                 f"Please initialize connection to {self.target.geturl()} before attempting request"
             )
 
         api_headers = {"Content-Type": "application/json"}
-        return self.connection.request(method=method, url=url, data=query, headers=api_headers)
+        return self.connection.request(
+            method=method, url=f"{self.target.geturl()}/{url}", data=query, headers=api_headers
+        )
 
     def endpoint_search(
         self,
@@ -127,7 +170,21 @@ class CybereasonConnector(Connector):
         endpoint_cnx_method: str = None,
         **kwargs,
     ) -> List[Dict]:
-        """Runs search in specific endpoint"""
+        """
+        This function performs a search operation on a specified CybereasonEndpoint.
+
+        Args:
+            endpoint (CybereasonEndpoint)               : The specific endpoint where the search will be performed. This should be an instance of 'CybereasonEndpoint' representing the API endpoint to query.
+            limit (int, optional)                       : Maximum number of results to return. Defaults to None.
+            offset (int, optional)                      : Starting point for the search results. Defaults to 0.
+            search_filter (List[Dict], optional)        : List of filters applied during the search operation. Each filter is a dictionary that defines the criteria for filtering. Defaults to None.
+            endpoint_url_sfx (Union[int, str], optional): Suffix to append to the base endpoint URL. Defaults to None.
+            endpoint_cnx_method (str, optional)         : Override for the HTTP method used to communicate with the API. If not provided, it defaults to the method defined in the endpoint configuration.
+            **kwargs                                    : Additional keyword arguments that can be passed to the query construction or API request.
+
+        Returns:
+            List[Dict]: A list of dictionaries representing the search results after applying any filters and querying the specified endpoint. If there's an error during the API call, it returns None.
+        """
 
         filter_opt = {"filters": []}
         if search_filter is not None:
@@ -136,7 +193,7 @@ class CybereasonConnector(Connector):
         query_content = {"limit": limit, "offset": offset, **filter_opt, **kwargs}
         query = json.dumps(query_content)
 
-        endpoint_url = f"{self.target.geturl()}{endpoint.value.get('endpoint')}"
+        endpoint_url = f"{endpoint.value.get('endpoint')}"
 
         if endpoint_url_sfx is not None:
             endpoint_url += f"/{endpoint_url_sfx}"
@@ -173,7 +230,25 @@ class CybereasonConnector(Connector):
     def search(
         self, endpoint: str, search_filter: List[Dict] = None, limit: int = None, **kwargs
     ) -> List["CybereasonEntry"]:
-        """Runs search in API"""
+        """
+        Runs a search query in the API.
+
+        This method allows you to perform searches on different endpoints of the Cybereason platform.
+
+        Parameters:
+            self (Any)                          : The instance of the class containing this method.
+            endpoint (str)                      : A string representing the API endpoint to search on. Must be one of the Cybereason endpoints defined in `CybereasonEndpoint`.
+            search_filter (List[Dict], optional): A list of dictionaries specifying filters for the search query. Defaults to None.
+            limit (int, optional)               : An integer specifying the number of results to return per request. If not provided, it defaults to the endpoint's defined limit.
+            **kwargs                            : Additional keyword arguments that can be passed to the underlying API call.
+
+        Returns:
+            List[CybereasonEntry]: A list of `CybereasonEntry` objects representing the results of the search query.
+
+        Raises:
+            ConnectionError : If no connection has been established with the Cybereason system.
+            ValueError      : If an invalid endpoint is provided for searching.
+        """
 
         if self.connection is None:
             raise ConnectionError(
@@ -187,7 +262,8 @@ class CybereasonConnector(Connector):
         endpoint_attr = CybereasonEndpoint[endpoint]
         endpoint_search_limit = endpoint_attr.value.get("limit")
 
-        # Set search limit
+        # NOTE: Cybereason API returns data by pages
+        # Set search limit based on page result number and max limit
         if limit is None:
             limit = endpoint_search_limit
 
@@ -210,7 +286,18 @@ class CybereasonConnector(Connector):
     def search_files(
         self, file_name: Union[str, List[str]], search_filter: List[Dict] = None, limit: int = None
     ) -> List["CybereasonEntry"]:
-        """Searches for specific file(s)"""
+        """
+        This method allows you to search for one or multiple files based on their names.
+
+        Parameters:
+            self (Any)                          : The instance of the class containing this method.
+            file_name (Union[str, List[str]])   : A string or list of strings representing the names of the files to search for.
+            search_filter (List[Dict], optional): A list of dictionaries specifying additional filters for the search query. Defaults to None.
+            limit (int, optional)               : An integer specifying the number of results to return per request. If not provided, it defaults to the `limit` value defined for the `FILES` endpoint in `CybereasonEndpoint`.
+
+        Returns:
+            List[CybereasonEntry]: A list of `CybereasonEntry` objects representing the files found.
+        """
 
         if not isinstance(file_name, list):
             file_name = [file_name]
@@ -233,7 +320,7 @@ class CybereasonConnector(Connector):
         if batch_id is not None:
             file_search_resp = self.request(
                 method="GET",
-                url=f"{self.target.geturl()}{CybereasonEndpoint.FILES.value.get('endpoint')}/{batch_id}",
+                url=f"{CybereasonEndpoint.FILES.value.get('endpoint')}/{batch_id}",
             )
 
             if file_search_resp.content:
@@ -243,7 +330,17 @@ class CybereasonConnector(Connector):
         return res
 
     def edit_policy(self, sensor_ids: Union[str, List[str]], policy_id: str) -> Dict:
-        """Edit policy for the given sensors"""
+        """
+        This method allows you to update the policy settings for one or multiple sensors identified by their IDs.
+
+        Parameters:
+            self (Any)                        : The instance of the class containing this method.
+            sensor_ids (Union[str, List[str]]): A string or list of strings representing the IDs of the sensors whose policies should be edited.
+            policy_id (str)                   : A string representing the ID of the policy to be updated.
+
+        Returns:
+            Dict: A dictionary containing the response from the API after editing the policy.
+        """
 
         if not isinstance(sensor_ids, list):
             sensor_ids = [sensor_ids]
@@ -251,7 +348,7 @@ class CybereasonConnector(Connector):
         endpoint = CybereasonEndpoint.POLICIES
 
         policy_query = json.dumps({"sensorsIds": sensor_ids, "keepManualOverrides": False})
-        policy_url = f"{self.target.geturl()}/{endpoint.value.get('endpoint')}{policy_id}/assign"
+        policy_url = f"{endpoint.value.get('endpoint')}/{policy_id}/assign"
 
         policy_edit = self.request(
             method=endpoint.value.get("method"), url=policy_url, query=policy_query
@@ -259,7 +356,7 @@ class CybereasonConnector(Connector):
 
         return json.loads(policy_edit.content)
 
-    def do_sensor_action(
+    def sensor_action(
         self,
         action: CybereasonSensorAction,
         sensor_ids: Union[str, List[str]],
@@ -267,7 +364,17 @@ class CybereasonConnector(Connector):
         *args,
         **kwargs,
     ) -> Dict:
-        """Do a custom action on a list of sensors"""
+        """
+        This method allows you to perform sensor actions (defined by `action`) on a list of sensors identified by their IDs.
+
+        Args:
+            action (CybereasonSensorAction)     : The type of action to perform, which is one of the actions defined in CybereasonSensorAction enum.
+            sensor_ids (Union[str, List[str]])  : A single sensor ID or a list of sensor IDs for which the action should be performed.
+            query (str)                         : Query parameters as a string that will be included in the request.
+
+        Returns:
+            Dict: The JSON response content from the API call is returned as a dictionary.
+        """
 
         if not isinstance(sensor_ids, list):
             sensor_ids = [sensor_ids]
@@ -276,26 +383,49 @@ class CybereasonConnector(Connector):
 
         query = self.request(
             method=endpoint.value.get("method"),
-            url=f"{self.target.geturl()}/{endpoint.value.get('endpoint')}/{action.value}",
+            url=f"{endpoint.value.get('endpoint')}/{action.value}",
             query=query,
         )
 
         return json.loads(query.content)
 
     def sensor_remove_group(self, sensor_ids: Union[str, List[str]]) -> Dict:
-        """Removes given sensors from group optionally specified"""
+        """
+        This method removes the specified sensors from any group they may be a part of. If no specific group is defined for removal, it defaults to removing them from an unspecified group.
+
+        Args:
+            sensor_ids (Union[str, List[str]]): A single sensor ID or a list of sensor IDs that should be removed from their group.
+
+        Returns:
+            Dict: The JSON response content from the API call is returned as a dictionary after removing sensors from their group.
+        """
 
         if not isinstance(sensor_ids, list):
             sensor_ids = [sensor_ids]
 
         remove_query = json.dumps({"sensorsIds": sensor_ids, "filters": None})
-        return self.do_sensor_action(action=CybereasonSensorAction.REMOVEFROMGROUP, sensor_ids=sensor_ids, query=remove_query)
+        return self.sensor_action(
+            action=CybereasonSensorAction.REMOVEFROMGROUP, sensor_ids=sensor_ids, query=remove_query
+        )
 
     def sensor_assign_group(self, sensor_ids: Union[str, List[str]], groupId: str) -> Dict:
-        """Assigns given sensors to a group"""
+        """
+        Assigns given sensors to a specified group.
+
+        This method assigns the specified sensors to the group identified by `groupId`
+
+        Args:
+            sensor_ids (Union[str, List[str]])  : A single sensor ID or a list of sensor IDs that should be assigned to the specified group.
+            groupId (str)                       : The unique identifier for the group to which the sensors will be assigned.
+
+        Returns:
+            Dict: The JSON response content from the API call is returned as a dictionary after assigning sensors to the specified group.
+        """
 
         if not isinstance(sensor_ids, list):
             sensor_ids = [sensor_ids]
 
-        assign_query = json.dumps({"sensorsIds": sensor_ids,"argument": groupId})
-        return self.do_sensor_action(action=CybereasonSensorAction.ADDTOGROUP, sensor_ids=sensor_ids, query=assign_query)
+        assign_query = json.dumps({"sensorsIds": sensor_ids, "argument": groupId})
+        return self.sensor_action(
+            action=CybereasonSensorAction.ADDTOGROUP, sensor_ids=sensor_ids, query=assign_query
+        )

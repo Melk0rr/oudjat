@@ -1,5 +1,3 @@
-"""Several functions that aim to parse a certfr page"""
-
 from datetime import datetime
 from typing import List, Union
 
@@ -13,13 +11,20 @@ from .certfr_page import CERTFRPage
 
 
 class CERTFRConnector(Connector):
-    """CERTFR class addressing certfr page behavior"""
+    """
+    CERTFR class addressing certfr page behavior
+    """
 
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self):
-        """Constructor"""
+    def __init__(self) -> None:
+        """
+        Initializes a new instance of OudjatCERTFRConnection with the base link and service name set to "OudjatCERTFRConnection".
+
+        Args:
+            self (OudjatCERTFRConnection): The instance being initialized.
+        """
 
         super().__init__(target=CERTFRPage.BASE_LINK, service_name="OudjatCERTFRConnection")
 
@@ -27,7 +32,19 @@ class CERTFRConnector(Connector):
     # Methods
 
     def connect(self) -> None:
-        """Checks connection to CERTFR"""
+        """
+        This method attempts to make a GET request to the target URL and sets connection attribute to True if the status code is 200.
+
+        Raises:
+            ConnectionError : if connection to target is unsuccessful
+
+        Args:
+            self (OudjatCERTFRConnection): The instance on which this method is called.
+
+        Returns:
+            None
+        """
+
         try:
             req = requests.get(self.target)
 
@@ -38,7 +55,16 @@ class CERTFRConnector(Connector):
             raise (f"Could not connect to {CERTFRPage.BASE_LINK}\n{e}")
 
     def search(self, search_filter: Union[str, List[str]]) -> List[CERTFRPage]:
-        """Search for page or ref in CERTFR website"""
+        """
+        This method searches the CERTFR website using a filter (either a single string or a list of strings) and returns a list of CERTFRPage objects that match the search criteria.
+
+        Args:
+            self (OudjatCERTFRConnection): The instance on which this method is called.
+            search_filter (Union[str, List[str]]): A single string or a list of strings used as filters for searching within CERTFR pages.
+
+        Returns:
+            List[CERTFRPage]: A list of CERTFRPage objects that match the search criteria.
+        """
 
         res = []
 
@@ -66,7 +92,17 @@ class CERTFRConnector(Connector):
 
     @staticmethod
     def parse_feed(feed_url: str, date_str_filter: str = None) -> List[str]:
-        """Parse a CERTFR Feed page"""
+        """
+        This static method makes a GET request to the provided feed URL and parses its content using BeautifulSoup to extract items based on optional filtering by date string.
+
+        Args:
+            feed_url (str): The URL of the RSS feed to be parsed.
+            date_str_filter (str, optional): A date string used for filtering extracted items. Defaults to None.
+
+        Returns:
+            List[str]: A list of references extracted from the CERTFR feed page that match the date filter criteria if provided.
+        """
+
         try:
             feed_req = requests.get(feed_url)
             feed_soup = BeautifulSoup(feed_req.content, "xml")
@@ -103,4 +139,3 @@ class CERTFRConnector(Connector):
                 filtered_feed.append(certfr_ref)
 
         return filtered_feed
-

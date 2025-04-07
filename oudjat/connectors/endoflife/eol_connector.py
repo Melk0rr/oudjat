@@ -16,8 +16,10 @@ class EndOfLifeConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self):
-        """Construcotr"""
+    def __init__(self) -> None:
+        """
+        Initializes the EndOfLifeAPIConnector by setting up the connection to the EOL API URL and initializes an empty list of products.
+        """
 
         super().__init__(target=EOL_API_URL)
         self.products = []
@@ -26,11 +28,23 @@ class EndOfLifeConnector(Connector):
     # Methods
 
     def get_products(self) -> List[str]:
-        """Getter for list of products"""
+        """
+        Getter for list of products
+
+        Returns:
+            List[str]: A list containing the names of available products.
+        """
+
         return self.products
 
     def connect(self) -> None:
-        """Connects to target"""
+        """
+        This method attempts to establish a connection to the API endpoint and retrieves product information if successful.
+        It sets up the connection status and loads the product list from the API response.
+
+        Raises:
+            ConnectionError: If unable to connect to the API endpoint or retrieve data.
+        """
         self.connection = None
 
         try:
@@ -45,7 +59,21 @@ class EndOfLifeConnector(Connector):
             raise ConnectionError(f"Could not connect to {self.target}\n{e}")
 
     def search(self, search_filter: str, attributes: Union[str, List[str]] = None) -> List[Dict]:
-        """Searches the API for product infos"""
+        """
+        Searches the API for product infos
+
+        Args:
+            search_filter (str): The specific product to search for.
+            attributes (Union[str, List[str], optional): Specify which attributes of the product to retrieve. Can be a single string or a list of strings. Defaults to None.
+
+        Returns:
+            List[Dict]: A list of dictionaries containing information about the products that match the search criteria.
+
+        Raises:
+            ConnectionError: If unable to connect to the API endpoint or retrieve data.
+            ValueError: If the provided `search_filter` is not a valid product in the catalog.
+        """
+
         res = []
 
         if self.connection is None or len(self.products) == 0:
@@ -73,7 +101,19 @@ class EndOfLifeConnector(Connector):
         return res
 
     def get_windows_rel(self, target: str = "windows") -> List[Dict]:
-        """Specific method to retreive windows releases"""
+        """
+        Specific method to retrieve Windows releases
+
+        Args:
+            target (str, optional): The product name to search for. Defaults to "windows".
+
+        Returns:
+            List[Dict]: A list of dictionaries containing information about the Windows releases that match the criteria.
+
+        Raises:
+            ConnectionError: If unable to connect to the API endpoint or retrieve data.
+        """
+
         win_eol = self.search(search_filter=target)
 
         for rel in win_eol:
@@ -95,4 +135,3 @@ class EndOfLifeConnector(Connector):
                     rel["eol"] = rel["extendedSupport"]
 
         return win_eol
-
