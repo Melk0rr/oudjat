@@ -235,6 +235,16 @@ class LDAPObject:
             ldap_object=self, ldap_group=ldap_group, extended=extended
         )
 
+    def __str__(self) -> str:
+        """
+        Converts the current instance into a string
+
+        Returns:
+            str : string representing the LDAP object instance (basically its DN)
+        """
+
+        return self.get_dn()
+
     def to_dict(self) -> Dict:
         """
         Converts the current instance into a dictionary.
