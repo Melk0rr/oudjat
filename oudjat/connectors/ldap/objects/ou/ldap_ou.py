@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Dict, List
 
 from ..ldap_object import LDAPObject
 
@@ -62,3 +62,16 @@ class LDAPOrganizationalUnit(LDAPObject):
 
     # TODO: Get sub OU
     # TODO: Get GPOs that applies on current OU
+
+    def to_dict(self) -> Dict:
+        """
+        Converts the current instance into a dictionary.
+
+        Returns:
+            dict: A dictionary containing the attributes of the LDAP ou in a structured format
+        """
+
+        return {
+            **super().to_dict(),
+            "gpLink": self.get_gplink()
+        }
