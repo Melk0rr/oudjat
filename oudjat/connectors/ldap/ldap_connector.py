@@ -275,7 +275,7 @@ class LDAPConnector(Connector):
         )
 
         ldap_obj_cls = search_type.value.get("pythonClass")
-        return list(map(lambda entry: ldap_obj_cls(ldap_entry=entry), entries))
+        return self.map_entries(entries, ldap_cls=ldap_obj_cls)
 
     def get_gpo(
         self, displayName: str = "*", name: str = "*", attributes: Union[str, List[str]] = None
