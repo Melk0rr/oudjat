@@ -1,8 +1,9 @@
 from typing import Dict, List
 
-from oudjat.model.assets.computer import Computer
-from oudjat.model.assets.software import SoftwareEdition, SoftwareReleaseDict
+from oudjat.model.assets.computer.computer import Computer
 from oudjat.model.assets.software.os import OperatingSystem, OSOption
+from oudjat.model.assets.software.software_edition import SoftwareEdition
+from oudjat.model.assets.software.software_release import SoftwareReleaseDict
 
 from .ldap_account import LDAPAccount
 
