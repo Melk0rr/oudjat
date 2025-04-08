@@ -455,12 +455,12 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-    def get_ou_members(
+    def get_ou_objects(
         self,
         ldap_ou: "LDAPOrganizationalUnit",
         object_types: List[LDAPObjectType] = None,
         recursive: bool = False,
-    ) -> List["LDAPObject"]:
+    ) -> List["LDAPEntry"]:
         """
         Returns members of a given OU
         """
