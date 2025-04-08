@@ -89,7 +89,6 @@ class LDAPObjectType(Enum):
             "objectClass",
             "objectGUID",
             "objectSid",
-            "protectedFromAccidentalDeletion",
             "whenChanged",
             "whenCreated",
         ],
