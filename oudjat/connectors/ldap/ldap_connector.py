@@ -7,14 +7,15 @@ import ldap3
 from oudjat.connectors import Connector
 from oudjat.utils import ColorPrint
 
-from .objects import LDAPEntry, LDAPObjectType, get_ldap_class
+from .objects.ldap_entry import LDAPEntry
+from .objects.ldap_object import LDAPObject
+from .objects.ldap_object_types import LDAPObjectType, get_ldap_class
 
 if TYPE_CHECKING:
     from .objects.account.group.ldap_group import LDAPGroup
     from .objects.account.ldap_computer import LDAPComputer
     from .objects.account.ldap_user import LDAPUser
     from .objects.gpo.ldap_gpo import LDAPGroupPolicyObject
-    from .objects.ldap_object import LDAPObject
     from .objects.ou.ldap_ou import LDAPOrganizationalUnit
     from .objects.subnet.ldap_subnet import LDAPSubnet
 
