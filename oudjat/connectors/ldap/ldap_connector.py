@@ -441,7 +441,7 @@ class LDAPConnector(Connector):
 
         Args:
             search_filter (str)          : filter to reduce search results
-            attributes (str | List[str]) : attributes to include in result
+            attributes (str | List[str]) : attrbutes to include in result
             search_base (str)            : where to base the search on in terms of directory location
 
         Returns:
@@ -468,8 +468,9 @@ class LDAPConnector(Connector):
         search_args = {"search_base": ldap_ou.get_dn()}
 
         if object_types is not None:
-            types_filter_str = "".join([f"(objectClass={t.value["objectClass"]})" for t in object_types])
+            types_filter_str = "".join(
                 [f"(objectClass={t.value['objectClass']})" for t in object_types]
+            )
             search_args["search_filter"] = f"(|{types_filter_str})"
 
         return self.search(**search_args)
