@@ -340,7 +340,7 @@ class LDAPConnector(Connector):
             List[LDAPComputer] : list of computers
         """
 
-        return self.search(
+        return self.get_mapped_object(
             search_type=LDAPObjectType.COMPUTER,
             search_base=search_base,
             search_filter=search_filter,
@@ -365,7 +365,7 @@ class LDAPConnector(Connector):
             List[LDAPUser] : list of users
         """
 
-        return self.search(
+        return self.get_mapped_object(
             search_type=LDAPObjectType.USER,
             search_base=search_base,
             search_filter=search_filter,
@@ -448,7 +448,7 @@ class LDAPConnector(Connector):
             List["LDAPOrganizationalUnit"] : list of OU matching filter
         """
 
-        return self.search(
+        return self.get_mapped_object(
             search_type=LDAPObjectType.OU,
             search_base=search_base,
             search_filter=search_filter,
