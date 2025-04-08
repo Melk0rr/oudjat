@@ -1,8 +1,9 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from ..ldap_object import LDAPObject
 
 if TYPE_CHECKING:
+    from ...ldap_connector import LDAPConnector
     from ..ldap_entry import LDAPEntry
 
 
@@ -46,5 +47,18 @@ class LDAPOrganizationalUnit(LDAPObject):
         return self.entry.get("protectedFromAccidentalDeletion")
 
     # TODO: Get OU members with filter per object type
+    def get_objects(self, ldap_connector: "LDAPConnector") -> List["LDAPEntry"]:
+        """
+        Returns the objects contained in the current OU
+
+        Args:
+            ldap_connector (LDAPConnector) : connector used for the query
+
+        Returns:
+            List[LDAPEntry] : entries of the objects contained in the OU
+        """
+
+        return ldap_connector.get_ou_objects(ldap_ou=self)
+
     # TODO: Get sub OU
     # TODO: Get GPOs that applies on current OU
