@@ -469,6 +469,27 @@ class LDAPConnector(Connector):
 
         if object_types is not None:
             types_filter_str = "".join([f"(objectClass={t.value["objectClass"]})" for t in object_types])
+                [f"(objectClass={t.value['objectClass']})" for t in object_types]
             search_args["search_filter"] = f"(|{types_filter_str})"
 
         return self.search(**search_args)
+
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def map_entries(entries: List["LDAPEntry"], ldap_cls: "LDAPObject") -> List["LDAPObject"]:
+        """
+        Maps a list of ldap entries to a list of the provided LDAP class
+
+        Args:
+            entries (List[LDAPEntry]) : list of entries to map
+            ldap_cls (LDAPObject)     : ldap class used to map
+
+        Returns:
+            List[LDAPObject] : mapped list of ldap object
+        """
+
+        if not isinstance(ldap_cls, LDAPObject):
+            raise ValueError("Invalid class provided. Please provide a valid LDAPObject instance")
+        return list(map(lambda entry: ldap_cls(ldap_entry=entry), entries))
