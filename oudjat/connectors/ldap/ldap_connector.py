@@ -492,6 +492,7 @@ class LDAPConnector(Connector):
             List[LDAPObject] : mapped list of ldap object
         """
 
-        if not isinstance(ldap_cls, LDAPObject):
+        if not issubclass(ldap_cls, LDAPObject):
             raise ValueError("Invalid class provided. Please provide a valid LDAPObject instance")
+
         return list(map(lambda entry: ldap_cls(ldap_entry=entry), entries))
