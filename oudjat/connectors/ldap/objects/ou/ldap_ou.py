@@ -36,16 +36,6 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return self.entry.get("gpLink")
 
-    def is_protected_from_deletion(self) -> bool:
-        """
-        Returns whether the OU is protected from accidental deletion
-
-        Returns:
-            bool: True if the OU is protected; False otherwise
-        """
-
-        return self.entry.get("protectedFromAccidentalDeletion")
-
     # TODO: Get OU members with filter per object type
     def get_objects(self, ldap_connector: "LDAPConnector") -> List["LDAPEntry"]:
         """
