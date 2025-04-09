@@ -459,7 +459,7 @@ class LDAPConnector(Connector):
     def get_ou_objects(
         self,
         ldap_ou: "LDAPOrganizationalUnit",
-        object_types: List[LDAPObjectType] = None,
+        object_types: List[str] = None,
         recursive: bool = False,
     ) -> List["LDAPEntry"]:
         """
@@ -470,7 +470,7 @@ class LDAPConnector(Connector):
 
         if object_types is not None:
             types_filter_str = "".join(
-                [f"(objectClass={t.value['objectClass']})" for t in object_types]
+                [f"(objectClass={t})" for t in object_types]
             )
             search_args["search_filter"] = f"(|{types_filter_str})"
 
