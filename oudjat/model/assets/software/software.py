@@ -44,6 +44,7 @@ class Software(Asset):
                 of the software
             description (str, optional)             : A detailed description of the software. Defaults to None.
         """
+
         super().__init__(
             id=id, name=name, label=label, asset_type=AssetType.SOFTWARE, description=description
         )
@@ -73,6 +74,7 @@ class Software(Asset):
         Returns:
             SoftwareReleaseDict: A dictionary containing all the software releases associated with this instance.
         """
+
         return self.releases
 
     def get_software_type(self) -> SoftwareType:
@@ -82,6 +84,7 @@ class Software(Asset):
         Returns:
             SoftwareType: The type of the software as specified during initialization or defaulted to Application.
         """
+
         return self.type
 
     def get_editions(self) -> SoftwareEditionDict:
@@ -91,6 +94,7 @@ class Software(Asset):
         Returns:
             SoftwareEditionDict: A dictionary containing all the software editions associated with this instance.
         """
+
         return self.editions
 
     def set_editor(self, editor: Union[str, List[str]]) -> None:
@@ -100,6 +104,7 @@ class Software(Asset):
         Args:
             editor (Union[str, List[str]]): The new editor to be assigned to the software instance. Can be a single string or a list of strings.
         """
+
         self.editor = editor
 
     def has_release(self, rel_ver: str, rel_label: str) -> bool:
@@ -113,6 +118,7 @@ class Software(Asset):
         Returns:
             bool: True if a matching release is found, otherwise False.
         """
+
         return self.releases.find_rel(rel_ver, rel_label) is not None
 
     def add_release(self, new_release: SoftwareRelease) -> None:
@@ -125,6 +131,7 @@ class Software(Asset):
         Note:
             This method does not allow adding non-SoftwareRelease objects and returns silently if so.
         """
+
         if not isinstance(new_release, SoftwareRelease):
             return
 
@@ -147,6 +154,7 @@ class Software(Asset):
         Returns:
             SoftwareRelease: The found release object or None if not found.
         """
+
         return self.releases.find_rel(rel_ver, rel_label)
 
     def retired_releases(self) -> List[SoftwareRelease]:
@@ -156,6 +164,7 @@ class Software(Asset):
         Returns:
             List[SoftwareRelease]: A list of SoftwareRelease objects that are not supported.
         """
+
         return [str(r) for r in self.releases.values() if not r.is_supported()]
 
     def supported_releases(self) -> List[SoftwareRelease]:
@@ -165,6 +174,7 @@ class Software(Asset):
         Returns:
             List[SoftwareRelease]: A list of SoftwareRelease objects that are supported.
         """
+
         return [str(r) for r in self.releases.values() if r.is_supported()]
 
     def get_matching_editions(self, test_str: str) -> SoftwareEditionDict:
@@ -177,6 +187,7 @@ class Software(Asset):
         Returns:
             SoftwareEditionDict: A dictionary containing matching editions.
         """
+
         return self.editions.get_matching_editions(test_str)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -186,11 +197,12 @@ class Software(Asset):
         Returns:
             Dict: A dictionary containing basic class information and lists of releases.
         """
+
         base_dict = super().to_dict()
         return {
             **base_dict,
             "editor": self.editor,
-            "releases": ",".join([str(r) for r in self.releases]),
-            "supported_releases": ",".join(self.supported_releases()),
-            "retired_releases": ",".join(self.retired_releases()),
+            "releases": ','.join(map(str, self.releases)),
+            "supported_releases": ','.join(self.supported_releases()),
+            "retired_releases": ','.join(self.retired_releases()),
         }

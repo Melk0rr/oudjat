@@ -21,7 +21,7 @@ def ip_str_to_int(ip: str) -> int:
     Returns:
         int: The equivalent integer representation of the IP address.
     """
-    return int("".join([bin(int(x) + 256)[3:] for x in ip.split(".")]), 2)
+    return int(''.join([bin(int(x) + 256)[3:] for x in ip.split(".")]), 2)
 
 
 def ip_int_to_str(ip: int) -> str:
@@ -34,7 +34,8 @@ def ip_int_to_str(ip: int) -> str:
     Returns:
         str: The equivalent dot-decimal notation string of the IP address.
     """
-    return ".".join([str((ip >> i) & 0xFF) for i in (24, 16, 8, 0)])
+
+    return '.'.join([str((ip >> i) & 0xFF) for i in (24, 16, 8, 0)])
 
 
 def cidr_to_int(cidr: int) -> int:

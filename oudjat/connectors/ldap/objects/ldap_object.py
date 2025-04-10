@@ -22,11 +22,11 @@ def parse_dn(dn: str) -> Dict:
         Dict : dictionary of dn pieces (CN, OU, DN)
     """
 
-    split = dn.split(",")
+    split = dn.split(',')
     pieces = {}
 
     for p in split:
-        p_split = p.split("=")
+        p_split = p.split('=')
 
         if p_split[0] not in pieces.keys():
             pieces[p_split[0]] = []
@@ -62,7 +62,7 @@ class LDAPObject:
         self.classes = self.entry.get("objectClass", [])
 
         self.dn_pieces = parse_dn(self.dn)
-        self.domain = ".".join(self.dn_pieces.get("DC")).lower()
+        self.domain = '.'.join(self.dn_pieces.get("DC")).lower()
 
         self.creation_date = self.entry.get("whenCreated")
         self.change_date = self.entry.get("whenChanged")
