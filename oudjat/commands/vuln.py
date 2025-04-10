@@ -30,7 +30,7 @@ class Vuln(Target):
     def cve_process(self, cve: "CVE") -> Dict:
         """Process to be run on each cve"""
         cve.parse_nist()
-        return cve.to_dictionary(minimal=False)
+        return cve.to_dict(minimal=False)
 
     def run(self) -> None:
         """Run cve target"""

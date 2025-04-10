@@ -1,5 +1,3 @@
-"""CVE Target class"""
-
 from multiprocessing import Pool
 from typing import Dict, List
 
@@ -64,7 +62,7 @@ class Cert(Target):
 
         try:
             cert_page = self.connector.search(search_filter=target)[0]
-            cert_data = cert_page.to_dictionary()
+            cert_data = cert_page.to_dict()
 
             # Resolve CVE data
             CVE.resolve_cve_data(cves=cert_page.get_cves(), cve_data=self.options["--cve-list"])

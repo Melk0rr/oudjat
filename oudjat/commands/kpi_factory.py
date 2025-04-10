@@ -120,7 +120,7 @@ class KPIFactory(Base):
 
             # Pass the scope to the kpi and get conformity data
             kpi_i.set_initial_scope(scope_i)
-            kpi_data.append(kpi_i.to_dictionary())
+            kpi_data.append(kpi_i.to_dict())
             kpi_i.print_value(prefix=f"=> {scope_i.get_name()}: ")
 
         return (kpi_i, kpi_data)

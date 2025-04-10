@@ -89,8 +89,14 @@ class KPI(DataScope):
 
         return f"{len(self.get_data())} / {len(self.get_input_data())} = {self.get_kpi_value()}"
 
-    def to_dictionary(self) -> Dict:
-        """Converts the current instance into a dictionary"""
+    def to_dict(self) -> Dict:
+        """
+        Converts the current instance into a dictionary
+
+        Returns:
+            Dict : dictionary representation of the current kpi
+        """
+
         k_value = self.get_kpi_value()
         conformity = self.get_conformity_level(k_value)
 

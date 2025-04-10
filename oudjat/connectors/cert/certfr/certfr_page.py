@@ -177,7 +177,7 @@ class CERTFRPage:
 
         return f"{self.ref}: {self.title}"
 
-    def to_dictionary(self) -> Dict:
+    def to_dict(self) -> Dict:
         """
         Converts the current CERTFRPage instance into a dictionary representation.
 
@@ -193,8 +193,8 @@ class CERTFRPage:
             page_dict = {
                 "ref": self.ref,
                 "title": self.title,
-                **self.meta.to_dictionary(),
-                **self.content.to_dictionary(),
+                **self.meta.to_dict(),
+                **self.content.to_dict(),
             }
 
         return page_dict
@@ -350,7 +350,7 @@ class CERTFRPageMeta:
 
         return self.sources
 
-    def to_dictionary(self) -> Dict:
+    def to_dict(self) -> Dict:
         """
         This method converts the metadata of the instance into a dictionary format, including initial date, last change date, and sources.
 
@@ -521,7 +521,7 @@ class CERTFRPageContent:
 
         self.data = data
 
-    def to_dictionary(self) -> Dict:
+    def to_dict(self) -> Dict:
         """
         Converts current instance into a dictionary.
 

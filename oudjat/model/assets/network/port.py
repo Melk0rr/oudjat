@@ -112,7 +112,7 @@ class Port:
 
         return f"{self.application}({self.number})"
 
-    def to_dictionary(self) -> Dict:
+    def to_dict(self) -> Dict:
         """
         Returns a dictionary based on port number and application.
 
