@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Union
 
-from oudjat.utils import ColorPrint
+from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.mappers import any_to_dict
 
 from .data_filter import DataFilter
 
@@ -231,4 +232,5 @@ class DecisionTree:
 
     # ****************************************************************
     # Static methods
+
 
