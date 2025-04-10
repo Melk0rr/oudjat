@@ -1,9 +1,20 @@
 import re
+from enum import Enum
 from typing import Any, Dict, List
+
+from oudjat.utils.mappers import any_to_dict
 
 from .definitions import KB_NUM_REGEX
 from .ms_product import MSProduct
 
+
+class MSRemedType(Enum):
+    """
+    An enumeration of remediation types
+    """
+
+    KB = "KB"
+    PATCH = "Patch"
 
 class MSRemed:
     """Class to manipulate MS KBs"""
@@ -15,11 +26,11 @@ class MSRemed:
         """Constructor"""
         self.number = num
 
-        self.type = "KB"
+        self.type: MSRemedType = MSRemedType.KB
         if not re.match(KB_NUM_REGEX, self.number):
-            self.type = "Patch"
+            self.type = MSRemedType.PATCH
 
-        self.products = {}
+        self.products: Dict[str, MSProduct] = {}
 
     # ****************************************************************
     # Methods
