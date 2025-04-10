@@ -1,6 +1,8 @@
 import re
 from typing import Any, Dict, List
 
+from oudjat.utils.mappers import any_to_dict
+
 from .definitions import CVE_REGEX, KB_NUM_REGEX
 from .ms_product import MSProduct
 from .ms_remed import MSRemed
@@ -12,15 +14,15 @@ class MSVuln:
     # ****************************************************************
     # Attributes & Constructor
 
-    def __init__(self, cve: str):
+    def __init__(self, cve: str) -> None:
         """Constructor"""
 
         if not re.match(CVE_REGEX, cve):
             raise (f"Invalid CVE provided: {cve}")
 
         self.cve = cve
-        self.kbs = {}
-        self.products = {}
+        self.kbs: Dict[str, MSRemed] = {}
+        self.products: Dict[str, MSProduct] = {}
 
     # ****************************************************************
     # Methods
