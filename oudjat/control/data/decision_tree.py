@@ -212,11 +212,15 @@ class DecisionTree:
 
     def __str__(self) -> str:
         """Converts the current decision tree into a string"""
+
         sep = f" {self.operator.upper()} "
         return f"({sep.join(map(str, self.nodes))})"
 
     def to_dict(self) -> Dict:
-        """Converts the current instance into a dictionary"""
+        """
+        Returns a dictionary representing the current decision tree
+        """
+
         return {
             "value": self.value,
             "negate": self.negate,

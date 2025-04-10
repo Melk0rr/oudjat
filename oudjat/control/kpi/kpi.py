@@ -50,6 +50,7 @@ class KPI(DataScope):
 
     def get_conformity_level(self, value: float = None) -> "ConformityLevel":
         """Establish the conformity level"""
+
         if value is None:
             value = self.get_kpi_value()
         return next(
@@ -58,10 +59,12 @@ class KPI(DataScope):
 
     def get_kpi_value(self) -> float:
         """Returns the percentage of conform data based on kpi control"""
+
         return round(len(self.get_data()) / len(self.get_input_data()) * 100, 2)
 
     def get_print_function(self) -> object:
         """Defines print function"""
+
         return self.get_conformity_level().value["color"]
 
     def print_value(
@@ -78,10 +81,12 @@ class KPI(DataScope):
 
     def get_date_str(self) -> str:
         """Returns formated date string"""
+
         return self.date.strftime("%Y-%m-%d")
 
     def __str__(self) -> Tuple[str, str]:
         """Converts the current instance into a string"""
+
         return f"{len(self.get_data())} / {len(self.get_input_data())} = {self.get_kpi_value()}"
 
     def to_dictionary(self) -> Dict:
