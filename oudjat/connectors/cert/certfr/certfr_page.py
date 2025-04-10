@@ -4,7 +4,7 @@ from typing import Dict, List, Set
 import requests
 from bs4 import BeautifulSoup, element
 
-from oudjat.connectors.cert import RiskType
+from oudjat.connectors.cert.risk_types import RiskType, risk_name
 from oudjat.model.vulnerability import CVE, CVE_REGEX
 from oudjat.utils import ColorPrint
 
@@ -456,7 +456,7 @@ class CERTFRPageContent:
 
         return self.solutions
 
-    def get_cves(self) -> List[str]:
+    def get_cves(self) -> Dict[str, CVE]:
         """
         Returns the refs of all the related CVEs.
 
