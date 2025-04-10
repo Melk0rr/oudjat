@@ -151,18 +151,17 @@ class LDAPConnector(Connector):
                     self.set_tls_usage(use_tls=True)
                     return self.connect()
 
-                else:
-                    if (
-                        result["description"] == "invalidCredentials"
-                        and result["message"].split(":")[0] == "80090346"
-                    ):
-                        raise Exception(
-                            "LDAP channel binding required. Use -scheme ldaps -ldap-channel-binding"
-                        )
-
+                if (
+                    result["description"] == "invalidCredentials"
+                    and result["message"].split(":")[0] == "80090346"
+                ):
                     raise Exception(
-                        f"Failed LDAP authentication ({result['description']}) {result['message']}]"
+                        "LDAP channel binding required. Use -scheme ldaps -ldap-channel-binding"
                     )
+
+                raise Exception(
+                    f"Failed LDAP authentication ({result['description']}) {result['message']}]"
+                )
 
         if ldap_server.schema is None:
             ldap_server.get_info_from_server(ldap_connection)

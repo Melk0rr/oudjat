@@ -72,7 +72,7 @@ class DecisionTreeNodeList(list):
 
     def get_details_list(self) -> List[str]:
         """Returns a list of decision tree node detail string"""
-        return [str(n) for n in self]
+        return map(str, self)
 
     def get_flags_list(self) -> List[Union[int, str]]:
         """Returns a list of decision tree node flags"""
@@ -213,7 +213,7 @@ class DecisionTree:
     def __str__(self) -> str:
         """Converts the current decision tree into a string"""
         sep = f" {self.operator.upper()} "
-        return f"({sep.join([str(n) for n in self.nodes])})"
+        return f"({sep.join(map(str, self.nodes))})"
 
     def to_dict(self) -> Dict:
         """Converts the current instance into a dictionary"""
