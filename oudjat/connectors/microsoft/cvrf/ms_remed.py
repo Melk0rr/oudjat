@@ -43,6 +43,6 @@ class MSRemed:
         """Converts the current kb into a dict"""
         return {
             "remed": self.number,
-            "patched_products": [p.to_dict() for p in self.products.values()],
+            "patched_products": list(map(any_to_dict, self.products.values()))
         }
 

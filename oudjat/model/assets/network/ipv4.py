@@ -369,7 +369,7 @@ class IPv4Mask(IPv4):
             raise ValueError(f"Invalid mask provided: {mask}")
 
         base = IPv4(mask)
-        return "".join(base.to_binary_array()).count("1")
+        return ''.join(base.to_binary_array()).count("1")
 
     @staticmethod
     def get_valid_mask():
@@ -379,7 +379,7 @@ class IPv4Mask(IPv4):
         Returns:
             List[str]: A list of valid netmask strings."""
 
-        return [IPv4Mask.get_netmask(x) for x in range(1, 33)]
+        return list(map(IPv4Mask.get_netmask, range(1, 33)))
 
     @staticmethod
     def get_netmask(network_length: int) -> str:

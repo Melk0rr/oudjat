@@ -62,5 +62,5 @@ class MSVuln:
         """Converts current vuln into a dict"""
         return {
             "cve": self.cve,
-            "kbs": [kb.to_dict() for kb in self.kbs.values()],
+            "kbs": list(map(any_to_dict, self.kbs.values())),
         }

@@ -259,4 +259,4 @@ class SoftwareReleaseSupportList(list):
         Returns:
             str: A string representing the list of software releases, formatted as "[release1, release2, ...]".
         """
-        return f"[{', '.join(map(str, self))}]"
+        return f"[{', '.join(list(map(str, self)))}]"

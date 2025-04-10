@@ -72,7 +72,7 @@ class DecisionTreeNodeList(list):
 
     def get_details_list(self) -> List[str]:
         """Returns a list of decision tree node detail string"""
-        return map(str, self)
+        return list(map(str, self))
 
     def get_flags_list(self) -> List[Union[int, str]]:
         """Returns a list of decision tree node flags"""
@@ -214,7 +214,7 @@ class DecisionTree:
         """Converts the current decision tree into a string"""
 
         sep = f" {self.operator.upper()} "
-        return f"({sep.join(map(str, self.nodes))})"
+        return f"({sep.join(list(map(str, self.nodes)))})"
 
     def to_dict(self) -> Dict:
         """
@@ -226,7 +226,7 @@ class DecisionTree:
             "negate": self.negate,
             "operator": self.operator,
             "mapped_value": self.get_mapped_value(),
-            "details": [n.to_dict() for n in self.nodes],
+            "details": list(map(any_to_dict, self.nodes))
         }
 
     # ****************************************************************

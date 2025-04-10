@@ -533,7 +533,7 @@ class CERTFRPageContent:
 
         if self.data is not None:
             content_dict = {
-                "risks": [r.name for r in self.get_risks()],
+                "risks": list(map(risk_name, self.get_ris)),
                 "products": self.get_products(),
                 "description": self.get_description(),
                 "cves": [cve.get_ref() for cve in self.get_cves().values()],

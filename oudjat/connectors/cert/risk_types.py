@@ -14,3 +14,15 @@ class RiskType(Enum):
     TMP = {"en": "Integrity Violation", "fr": "Atteinte à l'intégrité des données"}
     XSS = {"en": "Code Injection", "fr": "Exécution de code arbitraire"}
 
+def risk_name(risk: RiskType) -> str:
+    """
+    Returns the name of the given risk
+
+    Args:
+        risk (RiskType) : risk type to return the name of
+
+    Returns:
+        str : risk name
+    """
+
+    return risk.name
