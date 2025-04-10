@@ -53,8 +53,10 @@ class KPI(DataScope):
 
         if value is None:
             value = self.get_kpi_value()
+
+        conformity_lvls = list(ConformityLevel)
         return next(
-            filter(lambda lvl: lvl.value["min"] <= value <= lvl.value["max"], list(ConformityLevel))
+            filter(KPI.conformity_value_level, conformity_lvls, [value] * len(conformity_lvls))
         )
 
     def get_kpi_value(self) -> float:
@@ -111,3 +113,11 @@ class KPI(DataScope):
             "date": self.get_date_str(),
         }
 
+    # ****************************************************************
+    # Static methods
+
+    def conformity_value_level(lvl: ConformityLevel, value: float) -> bool:
+        """
+        Checks if the given value is between the provided conformity level min and max values
+        """
+        return lvl.value["min"] <= value <= lvl.value["max"]

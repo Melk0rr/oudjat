@@ -1,6 +1,6 @@
 import socket
 import ssl
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 import ldap3
 
@@ -241,8 +241,8 @@ class LDAPConnector(Connector):
 
         entries = list(
             map(
-                lambda entry: LDAPEntry(**entry),
-                filter(lambda entry: entry["type"] == "searchResEntry", results),
+                LDAPConnector.ldap_entry_from_dict,
+                filter(LDAPConnector.check_entry_type, results),
             )
         )
 
@@ -313,7 +313,7 @@ class LDAPConnector(Connector):
             List[LDAPSubnet] : list of subnets
         """
 
-        sb_dc = ",".join([f"DC={dc.lower()}" for dc in self.domain.split(".")])
+        sb_dc = ','.join([f"DC={dc.lower()}" for dc in self.domain.split(".")])
 
         return self.get_mapped_object(
             search_type=LDAPObjectType.SUBNET,
@@ -468,9 +468,7 @@ class LDAPConnector(Connector):
         search_args = {"search_base": ldap_ou.get_dn()}
 
         if object_types is not None:
-            types_filter_str = "".join(
-                [f"(objectClass={t})" for t in object_types]
-            )
+            types_filter_str = ''.join([f"(objectClass={t})" for t in object_types])
             search_args["search_filter"] = f"(|{types_filter_str})"
 
         return self.search(**search_args)
@@ -495,3 +493,20 @@ class LDAPConnector(Connector):
             raise ValueError("Invalid class provided. Please provide a valid LDAPObject instance")
 
         return list(map(lambda entry: ldap_cls(ldap_entry=entry), entries))
+
+    @staticmethod
+    def check_entry_type(entry: Dict) -> bool:
+        """
+        Checks if the provided entry is a searchResEntry
+        """
+        return entry["type"] == "searchResEntry"
+
+    def ldap_entry_from_dict(entry: Dict) -> "LDAPEntry":
+        """
+        Creates an LDAPEntry from the provided dictionary
+        """
+
+        if entry.get("attributes", None) is None:
+            raise ValueError("LDAPConnector.ldap_entry_from_dict::Invalid entry provided")
+
+        return LDAPEntry(**entry)
