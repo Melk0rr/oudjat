@@ -5,9 +5,17 @@ import re
 from typing import Any, Dict, List, Union
 
 
+def check_path(path: str) -> None:
+    """Check if the provided path is valid"""
+
+    if not os.path.isfile(path):
+        raise (f"Invalid file path provided: {path}")
+
+
 # INFO: JSON file functions
 def import_json(file_path: str) -> Union[Dict, List]:
     """Helper function to import json data"""
+
     full_path = os.path.join(os.getcwd(), file_path)
 
     with open(full_path, "r", encoding="utf-8") as json_file:
@@ -18,6 +26,7 @@ def import_json(file_path: str) -> Union[Dict, List]:
 
 def export_json(data: Union[List[Dict], Dict], file_path: str) -> None:
     """Exports data to a JSON file"""
+
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
@@ -25,6 +34,7 @@ def export_json(data: Union[List[Dict], Dict], file_path: str) -> None:
 # INFO: CSV file functions
 def import_csv(file_path: str, callback: object = None, delimiter: str = None) -> List[Dict]:
     """Helper function to import CSV content into a list of dictionaries"""
+
     full_path = os.path.join(os.getcwd(), file_path)
 
     with open(full_path, "r", encoding="utf-8", newline="") as f:
@@ -51,6 +61,7 @@ def export_csv(
     data: List[Dict], file_path: str, delimiter: str = ",", append: bool = False
 ) -> None:
     """Helper function to export data into a CSV file"""
+
     if len(data) == 0:
         print("No data to export !")
         return
@@ -71,6 +82,7 @@ def export_csv(
 # INFO: TXT file functions
 def import_txt(file_path: str, delete_duplicates: bool = False) -> List[Any]:
     """Helper function to import a txt file"""
+
     data = []
     full_path = os.path.join(os.getcwd(), file_path)
 

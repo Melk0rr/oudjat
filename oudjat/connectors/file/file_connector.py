@@ -1,22 +1,13 @@
-import os
 from typing import Any, Dict, List, Union
 
-from oudjat.connectors import Connector
+from oudjat.connectors.connector import Connector
 from oudjat.control.data import DataFilter
+from oudjat.utils.file import check_path
 
 from .file_types import FileType
 
 # ****************************************************************
 # Helper functions
-
-def check_path(path: str) -> None:
-    """Check if the provided path is valid"""
-    if not os.path.isfile(path):
-        raise (f"Invalid file path provided: {path}")
-
-    file_ext = path.split(".")[-1]
-    if file_ext.upper() not in FileType.__members__:
-        raise ValueError(f"Invalid filetype provided: {file_ext}")
 
 
 class FileConnector(Connector):
@@ -108,4 +99,3 @@ class CSVConnector(FileConnector):
 
         except Exception as e:
             raise (f"CSVConnector::Error connecting to file {self.target}\n{e}")
-
