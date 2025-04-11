@@ -6,9 +6,6 @@ from oudjat.utils.file import check_path
 
 from .file_types import FileType
 
-# ****************************************************************
-# Helper functions
-
 
 class FileConnector(Connector):
     """File connector to interact with different file types"""
@@ -17,7 +14,12 @@ class FileConnector(Connector):
     # Attributes & Constructors
 
     def __init__(self, path: str, source: str):
-        """Constructor"""
+        """Constructor for the FileConnector class.
+
+        Args:
+            path (str)  : The path to the file.
+            source (str): The source identifier or description of the file.
+        """
 
         check_path(path)
         file_ext = path.split(".")[-1]
@@ -34,7 +36,12 @@ class FileConnector(Connector):
     # Methods
 
     def get_data(self) -> List[Any]:
-        """Getter for file data"""
+        """
+        Getter for file data.
+
+        Returns:
+            List[Any]: The stored data from the file.
+        """
 
         if not self.connection:
             self.connect()
@@ -42,18 +49,30 @@ class FileConnector(Connector):
         return self.data
 
     def set_path(self, new_path: str) -> None:
-        """Setter for connector path"""
+        """
+        Setter for connector path.
+
+        Args:
+            new_path (str): The new file path to be set.
+        """
 
         check_path(new_path)
         self.target = new_path
 
     def connect(self) -> None:
-        """'Connects' to the file and uses the"""
+        """
+        'Connects' (kind of) to the file and uses the import function to load data.
+
+        Raises:
+            NotImplementedError: This method must be implemented by inheriting classes.
+        """
 
         raise NotImplementedError("data() method must be implemented by the overloading class")
 
     def disconnect(self) -> None:
-        """'Disconnects' from the targeted file"""
+        """
+        'Disconnects' from the targeted file by resetting data and connection status.
+        """
 
         self.data = None
         self.connection = False
@@ -61,7 +80,16 @@ class FileConnector(Connector):
     def search(
         self, search_filter: List[Dict], attributes: Union[str, List[str]] = None
     ) -> List[Any]:
-        """Searches into the imported data"""
+        """
+        Searches into the imported data based on given filters and attributes.
+
+        Args:
+            search_filter (List[Dict])                 : Filters to apply for searching.
+            attributes (Union[str, List[str], optional): Specific attributes to retrieve from filtered results.
+
+        Returns:
+            List[Any]: The list of elements that match the search criteria.
+        """
 
         if not self.connection:
             self.connect()
@@ -84,7 +112,17 @@ class CSVConnector(FileConnector):
     # Attributes & Constructors
 
     def __init__(self, path: str, source: str, delimiter: str = "|"):
-        """Constructor"""
+        """
+        Constructor for the CSVConnector class.
+
+        Args:
+            path (str)               : The path to the CSV file.
+            source (str)             : The source identifier or description of the CSV file.
+            delimiter (str, optional): Delimiter used in the CSV file. Defaults to "|".
+
+        Raises:
+            ValueError: If an invalid delimiter is provided.
+        """
 
         if len(delimiter) > 1:
             raise ("Invalid delimiter provided. Please provide a single character")
@@ -96,7 +134,19 @@ class CSVConnector(FileConnector):
     # Methods
 
     def connect(self, callback: object) -> List[Any]:
-        """Implementation of parent function"""
+        """
+        Implementation of the parent's 'connect' method specific to CSV files.
+
+        Args:
+            callback (object): Callback function for additional processing after file import.
+
+        Returns:
+            List[Any]: The list of data imported from the CSV file.
+
+        Raises:
+            Exception: If there is an error during the connection process.
+        """
+
         try:
             self.data = self.import_function(
                 file_path=self.target, delimiter=self.delimiter, callback=callback
