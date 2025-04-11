@@ -18,6 +18,7 @@ class FileConnector(Connector):
 
     def __init__(self, path: str, source: str):
         """Constructor"""
+
         check_path(path)
         file_ext = path.split(".")[-1]
 
@@ -34,6 +35,7 @@ class FileConnector(Connector):
 
     def get_data(self) -> List[Any]:
         """Getter for file data"""
+
         if not self.connection:
             self.connect()
 
@@ -41,15 +43,18 @@ class FileConnector(Connector):
 
     def set_path(self, new_path: str) -> None:
         """Setter for connector path"""
+
         check_path(new_path)
         self.target = new_path
 
     def connect(self) -> None:
         """'Connects' to the file and uses the"""
+
         raise NotImplementedError("data() method must be implemented by the overloading class")
 
     def disconnect(self) -> None:
         """'Disconnects' from the targeted file"""
+
         self.data = None
         self.connection = False
 
@@ -80,6 +85,7 @@ class CSVConnector(FileConnector):
 
     def __init__(self, path: str, source: str, delimiter: str = "|"):
         """Constructor"""
+
         if len(delimiter) > 1:
             raise ("Invalid delimiter provided. Please provide a single character")
 
