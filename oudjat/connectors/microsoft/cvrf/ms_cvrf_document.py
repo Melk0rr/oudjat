@@ -4,7 +4,7 @@ from typing import Dict
 
 import requests
 
-from oudjat.utils import ColorPrint
+from oudjat.utils.color_print import ColorPrint
 
 from .definitions import API_BASE_URL, API_REQ_HEADERS, CVRF_ID_REGEX
 from .ms_product import MSProduct

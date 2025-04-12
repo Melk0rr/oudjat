@@ -6,7 +6,7 @@ from .account.ldap_user import LDAPUser
 from .gpo.ldap_gpo import LDAPGroupPolicyObject
 from .ldap_object import LDAPObject
 from .ou.ldap_ou import LDAPOrganizationalUnit
-from .subnet import LDAPSubnet
+from .subnet.ldap_subnet import LDAPSubnet
 
 
 class LDAPObjectType(Enum):

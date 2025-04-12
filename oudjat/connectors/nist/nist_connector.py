@@ -4,8 +4,9 @@ from typing import Dict, List, Union
 
 import requests
 
-from oudjat.connectors import Connector
-from oudjat.utils import ColorPrint
+from oudjat.utils.color_print import ColorPrint
+
+from ..connector import Connector
 
 NIST_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 

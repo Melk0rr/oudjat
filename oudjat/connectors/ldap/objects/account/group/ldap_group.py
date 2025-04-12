@@ -6,7 +6,7 @@ from ...ldap_object import LDAPObject
 from .ldap_group_types import LDAPGroupType
 
 if TYPE_CHECKING:
-    from oudjat.connectors.ldap import LDAPConnector
+    from oudjat.connectors.ldap.ldap_connector import LDAPConnector
 
     from ...ldap_entry import LDAPEntry
 

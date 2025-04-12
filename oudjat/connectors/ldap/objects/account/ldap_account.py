@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import TYPE_CHECKING, Dict, List
 
-from oudjat.utils import DATE_TIME_FLAGS, date_format_from_flag, days_diff
+from oudjat.utils.datestr_flags import DATE_TIME_FLAGS, date_format_from_flag
+from oudjat.utils.time_convertions import days_diff
 
 from ..ldap_object import LDAPObject
 from .definitions import MS_ACCOUNT_CTL_PROPERTY
@@ -14,6 +15,8 @@ from .ldap_account_flags import (
     pwd_required,
 )
 
+if TYPE_CHECKING:
+    from ..ldap_entry import LDAPEntry
 
 def acc_date_str(date: datetime) -> str:
     """Converts an account date into a string"""
@@ -26,7 +29,7 @@ class LDAPAccount(LDAPObject):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
+    def __init__(self, ldap_entry: "LDAPEntry"):
         """
         Constructor for initializing an LDAP Entry-based object with specific handling for user accounts.
 

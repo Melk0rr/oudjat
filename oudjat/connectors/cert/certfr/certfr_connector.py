@@ -4,8 +4,8 @@ from typing import List, Union
 import requests
 from bs4 import BeautifulSoup
 
-from oudjat.connectors import Connector
-from oudjat.utils import ColorPrint
+from oudjat.connectors.connector import Connector
+from oudjat.utils.color_print import ColorPrint
 
 from .certfr_page import CERTFRPage
 

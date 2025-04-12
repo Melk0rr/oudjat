@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Union
 
 from oudjat.connectors.connector import Connector
-from oudjat.control.data import DataFilter
+from oudjat.control.data.data_filter import DataFilter
 from oudjat.utils.file import check_path
 
 from .file_types import FileType

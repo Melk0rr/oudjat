@@ -1,7 +1,7 @@
 from typing import Dict, List, Union
 
 from oudjat.model.assets import Asset, AssetType
-from oudjat.model.assets.network import IPv4
+from oudjat.model.assets.network.ipv4 import IPv4
 from oudjat.model.assets.software import (
     SoftwareEdition,
     SoftwareRelease,

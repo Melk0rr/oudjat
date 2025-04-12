@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from oudjat.model.assets.network import Subnet
+from oudjat.model.assets.network.subnet import Subnet
 
 from ..ldap_object import LDAPObject
 

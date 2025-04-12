@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Dict, List, Union
 
 import ldap3
 
-from oudjat.connectors import Connector
-from oudjat.utils import ColorPrint
+from oudjat.connectors.connector import Connector
+from oudjat.utils.color_print import ColorPrint
 
 from .objects.ldap_entry import LDAPEntry
 from .objects.ldap_object import LDAPObject

@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Tuple
 
-from oudjat.control.data import DataFilter, DataScope
+from oudjat.control.data import DataFilter, DataSet
 from oudjat.utils import ColorPrint
 
 

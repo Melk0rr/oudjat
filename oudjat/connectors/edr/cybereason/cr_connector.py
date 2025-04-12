@@ -6,9 +6,10 @@ from urllib.parse import urlparse
 
 import requests
 
-from oudjat.connectors import Connector
-from oudjat.connectors.edr.cybereason import CybereasonEndpoint
-from oudjat.utils import ColorPrint, unixtime_to_str
+from oudjat.connectors.connector import Connector
+from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoint
+from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.time_convertions import unixtime_to_str
 
 from .cr_sensor_actions import CybereasonSensorAction
 
