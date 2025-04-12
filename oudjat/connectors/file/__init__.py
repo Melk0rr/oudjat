@@ -1,2 +1,4 @@
+from .file_connector import CSVConnector, FileConnector
 from .file_types import FileType
-from .file_connector import FileConnector
+
+__all__ = ["FileType", "FileConnector", "CSVConnector"]
