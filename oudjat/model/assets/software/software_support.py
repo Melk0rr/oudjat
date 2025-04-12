@@ -17,10 +17,8 @@ def soft_date_str(date: datetime) -> str:
         str : date string
     """
 
-    if date is None:
-        return None
-
-    return date.strftime(date_format_from_flag(DATE_FLAGS))
+    if date is not None:
+        return date.strftime(date_format_from_flag(DATE_FLAGS))
 
 
 class SoftwareReleaseSupport:
