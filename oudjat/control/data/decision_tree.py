@@ -25,10 +25,12 @@ class DecisionTreeNode:
 
     def get_flag(self) -> Union[int, str]:
         """Getter for node flag"""
+
         return self.flag
 
     def get_node_filter(self) -> DataFilter:
         """Getter for current node filter"""
+
         return self.node_filter
 
     def get_value(self, element: Dict = None) -> bool:
@@ -41,19 +43,23 @@ class DecisionTreeNode:
 
     def to_dict(self) -> Dict:
         """Converts the current instance into a dict"""
+
         return {"flag": self.flag, "value": self.value, "filter": str(self.node_filter)}
 
     def clear(self) -> None:
         """Clears current node"""
+
         self.value = None
         del self.node_filter
 
     def init(self, element: Dict) -> None:
         """Initialize node value"""
+
         self.value = self.node_filter.filter_dict(element)
 
     def __str__(self) -> str:
         """Converts the current node into a string"""
+
         res_str = ""
         if self.value is not None:
             res_str = f" => {self.get_value()}"
@@ -63,21 +69,38 @@ class DecisionTreeNode:
     # ****************************************************************
     # Static methods
 
+    @staticmethod
+    def node_flag(node: "DecisionTreeNode") -> str:
+        """
+        Returns a node flag
+
+        Args:
+            node (DecisionTreeNode): node to return the flag of
+
+        Returns:
+            str: node flag
+        """
+
+        return node.get_flag()
 
 class DecisionTreeNodeList(list):
     """A list of decision tree nodes"""
 
     def get_by_value(self, value: bool = True) -> "DecisionTreeNodeList":
         """Returns a sub decision tree node list matching the given value"""
+
         return DecisionTreeNodeList(filter(lambda node: node.get_value() == value, self))
 
     def get_details_list(self) -> List[str]:
         """Returns a list of decision tree node detail string"""
+
         return list(map(str, self))
 
     def get_flags_list(self) -> List[Union[int, str]]:
         """Returns a list of decision tree node flags"""
-        return [n.get_flag() for n in self]
+
+        return list(map(DecisionTreeNode.node_flag, self))
+
 
 
 class DecisionTree:
