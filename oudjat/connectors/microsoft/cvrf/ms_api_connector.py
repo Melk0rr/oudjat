@@ -11,7 +11,7 @@ from oudjat.utils import ColorPrint
 from .definitions import API_BASE_URL, API_REQ_HEADERS, CVE_REGEX, MSCVRFDocument
 
 
-class MSAPIConnector(Connector):
+class MSCVRFConnector(Connector):
     """Connector to interact with Microsoft API"""
 
     # ****************************************************************
