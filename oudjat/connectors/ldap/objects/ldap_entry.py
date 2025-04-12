@@ -8,8 +8,6 @@ class LDAPEntry(dict):
 
     def get_dn(self) -> str:
         """
-        Retrieve entry dn
-
         Returns the Distinguished Name (DN) of the LDAP entry. The DN is retrieved from the "dn" key in the dictionary representation of the LDAP entry.
 
         Returns:

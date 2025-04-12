@@ -32,13 +32,10 @@ class DataFilter:
         Constructor
 
         Args:
-            fieldname (str) : name of the field to filter
-            value (Any)     : the value of the filter and the value the filtered element must have
-            operator (str)  : the operator used to filter the element
-            negate (bool)   : if you want to negate the filter result or not (True -> False; False -> True)
-
-        Returns:
-            None
+            fieldname (str): name of the field to filter
+            value (Any)    : the value of the filter and the value the filtered element must have
+            operator (str) : the operator used to filter the element
+            negate (bool)  : if you want to negate the filter result or not (True -> False; False -> True)
         """
 
         if operator not in DataFilterOperation.keys():
@@ -57,7 +54,7 @@ class DataFilter:
         Returns the filter fieldname
 
         Returns:
-            str : fieldname of the instance that will be used to filter a dictionary
+            str: fieldname of the instance that will be used to filter a dictionary
         """
 
         return self.fieldname
@@ -67,7 +64,7 @@ class DataFilter:
         Returns the filter operator
 
         Returns
-            str : operator used to determine which function will be used to filter
+            str: operator used to determine which function will be used to filter
         """
 
         return self.operator
@@ -87,7 +84,7 @@ class DataFilter:
         Returns the filter value
 
         Returns:
-            Any : the value the filtered element must have
+            Any: the value the filtered element must have
         """
         return self.value
 
@@ -104,7 +101,7 @@ class DataFilter:
         Runs the current filter against a dictionary
 
         Args:
-            element (Dict) : element to run the filter against
+            element (Dict): element to run the filter against
 
         Returns:
             bool: wheither or not the dictionary matches the filter
@@ -118,10 +115,10 @@ class DataFilter:
         Runs the current filter against the provided value
 
         Args:
-            value (Any) : value to run the filter against
+            value (Any): value to run the filter against
 
         Returns:
-            bool : wheither or not the given value matches the filter
+            bool: wheither or not the given value matches the filter
         """
 
         check = self.get_operation()(value, self.value)
@@ -132,7 +129,7 @@ class DataFilter:
         Converts the current instance into a string
 
         Returns:
-            str : current filter converted into a string
+            str: current filter converted into a string
 
         Exemple:
             my_filter = DataFilter(fieldname="name", operator="=", value="Roy Batty")
@@ -149,10 +146,10 @@ class DataFilter:
         Creates a datafilter instance from a dictionary
 
         Args:
-            filter_dict (Dict) : dictionary used to create DataFilter instance
+            filter_dict (Dict): dictionary used to create DataFilter instance
 
         Returns:
-            DataFilter : new instance
+            DataFilter: new instance
 
         Exemple:
             my_filter = DataFilter.from_dict({ "fieldname": "name", "operator": "=", "value": "Rick Deckard"})
@@ -170,10 +167,10 @@ class DataFilter:
         Creates a datafilter instance from a tuple
 
         Args:
-            filter_tuple (Tuple) : tuple used to create DataFilter instance
+            filter_tuple (Tuple): tuple used to create DataFilter instance
 
         Returns:
-            DataFilter : new instance
+            DataFilter: new instance
 
         Exemple:
             my_filter = DataFilter.from_tuple(( "name", "=", "Rick Deckard" ))
@@ -198,10 +195,10 @@ class DataFilter:
         Check filters type and format them into DataFilter instances if needed
 
         Args:
-            filter_list (List[Dict] | List[DataFilter]) : filter list to check / format
+            filter_list (List[Dict] | List[DataFilter]): filter list to check / format
 
         Returns:
-            List[DataFilter] : formated list of data filter instances
+            List[DataFilter]: formated list of data filter instances
         """
         filters = []
 
@@ -225,10 +222,10 @@ class DataFilter:
         Generates multiple DataFitler instances based on dictionnaries
 
         Args:
-            filters (List[Dict]) : list of dictionaries used to generated instances
+            filters (List[Dict]): list of dictionaries used to generated instances
 
         Returns:
-            List[DataFilter] : data filter instances
+            List[DataFilter]: data filter instances
         """
 
         return list(map(lambda f: DataFilter.from_dict(f), filters))
@@ -239,10 +236,10 @@ class DataFilter:
         Generates DataFitler instances based on tuples
 
         Args:
-            filters (List[Tuple]) : list of tuples used to generated instances
+            filters (List[Tuple]): list of tuples used to generated instances
 
         Returns:
-            List[DataFilter] : data filter instances
+            List[DataFilter]: data filter instances
         """
 
         return list(map(lambda f: DataFilter.from_tuple(f), filters))
@@ -253,11 +250,11 @@ class DataFilter:
         Runs all given filters against a single provided element
 
         Args:
-            element (Any)                           : element to check
-            filters (List[Dict] | List[DataFilter]) : filters to run
+            element (Any)                          : element to check
+            filters (List[Dict] | List[DataFilter]): filters to run
 
         Returns:
-            bool : filter results
+            bool: filter results
         """
         checks = []
 
@@ -282,11 +279,11 @@ class DataFilter:
         Filters data based on given filters
 
         Args:
-            data_to_filter (List[Dict])             : well... the data to be filtered duh
-            filters (DataFilter | List[DataFilter]) : filters to run
+            data_to_filter (List[Dict])            : well... the data to be filtered duh
+            filters (DataFilter | List[DataFilter]): filters to run
 
         Returns:
-            List[Dict] : filtered data
+            List[Dict]: filtered data
         """
 
         if filters is None:

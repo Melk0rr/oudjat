@@ -1,6 +1,7 @@
 from oudjat.connectors import Connector
 
 
+# TODO: Work in progress
 class WMIConnector(Connector):
     """A class to use WMI"""
 
