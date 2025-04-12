@@ -15,7 +15,7 @@ class MSExchFlag(Enum):
     DISTRIBUTIONGROUP = 256
     DYNAMICDISTRIBUTIONGROUP = 512
     MAILOFFICIALFOLDER = 1024
-    UNIVERSALdistributiongroup = 2048
+    UNIVERSALDISTRIBUTIONGROUP = 2048
     UNIVERSALSECURITYGROUP = 4096
     NONUNIVERSALGROUP = 8192
     MAILRECIPIENT = 16384
@@ -36,6 +36,6 @@ class MSExchFlag(Enum):
     REMOTESHAREDMAILBOX = 34359738368
 
 
-def check_account_flag(value: int, flag: "LDAPAccountFlag") -> int:  # noqa: F821
+def check_account_flag(value: int, flag: "MSExchFlag") -> int:
     """Compare given value to the chosen flag"""
     return value & flag.value
