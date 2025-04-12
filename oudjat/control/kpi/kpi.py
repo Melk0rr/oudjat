@@ -16,7 +16,7 @@ class ConformityLevel(Enum):
     NOTCONFORM = {"min": 0, "max": 70, "color": ColorPrint.red}
 
 
-class KPI(DataScope):
+class KPI(DataSet):
     """KPI class"""
 
     # ****************************************************************
@@ -26,7 +26,7 @@ class KPI(DataScope):
         self,
         name: str,
         perimeter: str,
-        scope: List[Dict] | DataScope = None,
+        scope: List[Dict] | DataSet = None,
         filters: List[Dict] | List[DataFilter] = [],
         description: str = None,
         date: datetime = None,
