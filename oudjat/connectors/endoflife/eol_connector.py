@@ -63,7 +63,7 @@ class EndOfLifeConnector(Connector):
         Searches the API for product infos
 
         Args:
-            search_filter (str): The specific product to search for.
+            search_filter (str)                        : The specific product to search for.
             attributes (Union[str, List[str], optional): Specify which attributes of the product to retrieve. Can be a single string or a list of strings. Defaults to None.
 
         Returns:
@@ -71,7 +71,7 @@ class EndOfLifeConnector(Connector):
 
         Raises:
             ConnectionError: If unable to connect to the API endpoint or retrieve data.
-            ValueError: If the provided `search_filter` is not a valid product in the catalog.
+            ValueError     : If the provided `search_filter` is not a valid product in the catalog.
         """
 
         res = []

@@ -18,7 +18,12 @@ class MSAPIConnector(Connector):
     # Attributes & Constructor
 
     def __init__(self):
-        """Constructor"""
+        """
+        Initializes a new instance of MSAPIConnector.
+
+        This method sets up the connector by initializing the current date and version,
+        setting up the connection using superclass methods, and marking it as not connected.
+        """
 
         self.date = datetime.now()
         self.api_version = str(self.date.year)
@@ -30,7 +35,20 @@ class MSAPIConnector(Connector):
     # Methods
 
     def get_cvrf_id_from_cve(self, cve: str) -> str:
-        """Returns a CVRF ID based on a CVE ref"""
+        """
+        Retrieves a CVRF ID based on a provided CVE reference.
+
+        Args:
+            cve (str): The CVE identifier to search for.
+
+        Returns:
+            str: The CVRF ID corresponding to the given CVE.
+
+        Raises:
+            ValueError     : If the provided CVE is invalid.
+            ConnectionError: If unable to connect to the API to retrieve the CVRF ID.
+        """
+
         if not re.match(CVE_REGEX, cve):
             raise (f"Invalid CVE provided: {cve}")
 
@@ -50,7 +68,16 @@ class MSAPIConnector(Connector):
         return cvrf_id
 
     def connect(self, cvrf_id: str) -> "MSCVRFDocument":
-        """Retreives an existing document instance or create new one"""
+        """
+        Retrieves an existing document instance or creates a new one based on the CVRF ID.
+
+        Args:
+            cvrf_id (str): The identifier of the CVRF document to connect to.
+
+        Returns:
+            MSCVRFDocument: An instance of the CVRF document corresponding to the provided CVRF ID.
+        """
+
         self.connection = False
 
         cvrf = self.target.get(cvrf_id, None)
@@ -69,7 +96,13 @@ class MSAPIConnector(Connector):
         return self.target[cvrf_id]
 
     def add_target(self, doc: "MSCVRFDocument") -> None:
-        """Adds a CVRF document to the list"""
+        """
+        Adds a CVRF document to the internal target dictionary.
+
+        Args:
+            doc (MSCVRFDocument): The CVRF document instance to be added.
+        """
+
         if doc.get_doc_id() not in self.target.keys():
             self.target[doc.get_doc_id()] = doc
 
@@ -77,7 +110,16 @@ class MSAPIConnector(Connector):
         self,
         search_filter: Union[str, List[str]],
     ) -> List[Dict]:
-        """Retreives CVE informations like KB, affected products, etc"""
+        """
+        Searches for information about CVEs based on the provided filter.
+
+        Args:
+            search_filter (Union[str, List[str]]): The CVE identifier or list of identifiers to search for.
+
+        Returns:
+            List[Dict]: A list of dictionaries containing vulnerability information corresponding to the filtered CVEs.
+        """
+
         res = []
 
         if not isinstance(search_filter, list):
@@ -92,4 +134,3 @@ class MSAPIConnector(Connector):
                 res.append(cvrf.get_vulnerabilities()[cve])
 
         return res
-

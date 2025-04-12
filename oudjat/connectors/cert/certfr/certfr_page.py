@@ -86,8 +86,6 @@ class CERTFRPage:
 
     def get_cves(self) -> List["CVE"]:
         """
-        Getter to retrieve a list of CVEs associated with the CERTFRPageContent.
-
         This method retrieves the CVEs from the content section and returns them as a list. If no CVEs are found, it returns an empty list.
 
         Returns:
@@ -168,7 +166,6 @@ class CERTFRPage:
     def __str__(self) -> str:
         """
         Converts the current CERTFRPage instance to a string representation.
-
         This method returns a string in the format "ref: title", where ref is the reference and title is the page title.
 
         Returns:
@@ -180,7 +177,6 @@ class CERTFRPage:
     def to_dict(self) -> Dict:
         """
         Converts the current CERTFRPage instance into a dictionary representation.
-
         This method creates a dictionary containing the ref, title, and parsed meta and content information if available.
 
         Returns:

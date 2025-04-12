@@ -35,9 +35,9 @@ class LDAPConnector(Connector):
         Constructor
 
         Args:
-            server (str)        : server name
-            service_name (str)  : service name used to store credentials
-            use_tls (bool)      : should the connector use TLS for LDAPS connection
+            server (str)      : server name
+            service_name (str): service name used to store credentials
+            use_tls (bool)    : should the connector use TLS for LDAPS connection
         """
 
         self.use_tls = use_tls
@@ -60,7 +60,7 @@ class LDAPConnector(Connector):
         Getter for AD domain
 
         Returns:
-            str : domain name
+            str: domain name
         """
 
         return self.domain
@@ -70,7 +70,7 @@ class LDAPConnector(Connector):
         Getter for the server connection
 
         Returns:
-            ldap3.Connection : active connection
+            ldap3.Connection: active connection
         """
 
         return self.connection
@@ -80,7 +80,7 @@ class LDAPConnector(Connector):
         Getter for the default search base
 
         Returns:
-            str : default domain search base
+            str: default domain search base
         """
 
         return self.default_search_base
@@ -90,7 +90,7 @@ class LDAPConnector(Connector):
         Setter for connector tls usage
 
         Args:
-            use_tls (bool) : should the connector use TLS
+            use_tls (bool): should the connector use TLS
         """
 
         self.use_tls = use_tls
@@ -105,7 +105,7 @@ class LDAPConnector(Connector):
         Initiate connection to target server
 
         Args:
-            version (ssl._SSLMethod) : SSL/TLS version
+            version (ssl._SSLMethod): SSL/TLS version
         """
 
         if version is None:
@@ -196,14 +196,14 @@ class LDAPConnector(Connector):
         Runs an LDAP search based on the provided parameters
 
         Args:
-            search_type (str)            : search type (see ldap_object_type.py for details)
-            search_base (str)            : search base (location in domain tree)
-            search_filter (str)          : search filter
-            attributes (str | List[str]) : attributes to include in the result
-            **kwargs (Dict)              : any other argument to pass
+            search_type (str)           : search type (see ldap_object_type.py for details)
+            search_base (str)           : search base (location in domain tree)
+            search_filter (str)         : search filter
+            attributes (str | List[str]): attributes to include in the result
+            **kwargs (Dict)             : any other argument to pass
 
         Returns:
-            List[LDAPEntry] : list of ldap entries
+            List[LDAPEntry]: list of ldap entries
         """
 
         if self.connection is None:
@@ -259,12 +259,12 @@ class LDAPConnector(Connector):
         Generitc method to generate LDAPObject instances based on an LDAP entry search result
 
         Args:
-            search_filter (str)          : filter to reduce search results
-            attributes (str | List[str]) : attributes to include in result
-            search_base (str)            : where to base the search on in terms of directory location
+            search_filter (str)         : filter to reduce search results
+            attributes (str | List[str]): attributes to include in result
+            search_base (str)           : where to base the search on in terms of directory location
 
         Returns:
-            List[LDAPComputer] : list of computers
+            List[LDAPComputer]: list of computers
         """
 
         entries = self.search(
@@ -284,12 +284,12 @@ class LDAPConnector(Connector):
         Specific method to retreive LDAP GPO instances
 
         Args:
-            displayName (str)            : GPO display name
-            name (str)                   : GPO name
-            attributes (str | List[str]) : attributes to include in result
+            displayName (str)           : GPO display name
+            name (str)                  : GPO name
+            attributes (str | List[str]): attributes to include in result
 
         Returns:
-            List[LDAPGroupPolicyObject] : list of LDAPGroupPolicyObject instances
+            List[LDAPGroupPolicyObject]: list of LDAPGroupPolicyObject instances
         """
 
         return self.get_mapped_object(
@@ -306,11 +306,11 @@ class LDAPConnector(Connector):
         Specific method to retreive LDAP subnet instances
 
         Args:
-            search_filter (str) : filter to reduce search results
-            attributes (str | List[str]) : attributes to include in result
+            search_filter (str)         : filter to reduce search results
+            attributes (str | List[str]): attributes to include in result
 
         Returns:
-            List[LDAPSubnet] : list of subnets
+            List[LDAPSubnet]: list of subnets
         """
 
         sb_dc = ','.join([f"DC={dc.lower()}" for dc in self.domain.split(".")])
@@ -332,12 +332,12 @@ class LDAPConnector(Connector):
         Specific method to retreive LDAP Computer instances
 
         Args:
-            search_filter (str)          : filter to reduce search results
-            attributes (str | List[str]) : attributes to include in result
-            search_base (str)            : where to base the search on in terms of directory location
+            search_filter (str)         : filter to reduce search results
+            attributes (str | List[str]): attributes to include in result
+            search_base (str)           : where to base the search on in terms of directory location
 
         Returns:
-            List[LDAPComputer] : list of computers
+            List[LDAPComputer]: list of computers
         """
 
         return self.get_mapped_object(
@@ -357,12 +357,12 @@ class LDAPConnector(Connector):
         Specific method to retreive LDAP User instances
 
         Args:
-            search_filter (str)          : filter to reduce search results
-            attributes (str | List[str]) : attributes to include in result
-            search_base (str)            : where to base the search on in terms of directory location
+            search_filter (str)         : filter to reduce search results
+            attributes (str | List[str]): attributes to include in result
+            search_base (str)           : where to base the search on in terms of directory location
 
         Returns:
-            List[LDAPUser] : list of users
+            List[LDAPUser]: list of users
         """
 
         return self.get_mapped_object(
@@ -379,11 +379,11 @@ class LDAPConnector(Connector):
         Retreives and returns the members of the given group
 
         Args:
-            ldap_group (LDAPGroup)  : group to retreive members from
-            recursive (bool)        : wheither to retrieve members recursively or not
+            ldap_group (LDAPGroup): group to retreive members from
+            recursive (bool)      : wheither to retrieve members recursively or not
 
         Returns:
-            List[LDAPObject] : list of members
+            List[LDAPObject]: list of members
         """
 
         members = []
@@ -413,11 +413,11 @@ class LDAPConnector(Connector):
         Checks wheither the given object is member of the giver group
 
         Args:
-            ldap_object (LDAPObject) : object to check membership of
-            ldap_group (LDAPGroup)   : group to check object membership
+            ldap_object (LDAPObject): object to check membership of
+            ldap_group (LDAPGroup)  : group to check object membership
 
         Returns:
-            bool : wheither the object is a member of the group or not
+            bool: wheither the object is a member of the group or not
         """
 
         member_ref_list = None
@@ -440,12 +440,12 @@ class LDAPConnector(Connector):
         Specific method to retrieve LDAP organizational unit objects
 
         Args:
-            search_filter (str)          : filter to reduce search results
-            attributes (str | List[str]) : attrbutes to include in result
-            search_base (str)            : where to base the search on in terms of directory location
+            search_filter (str)         : filter to reduce search results
+            attributes (str | List[str]): attrbutes to include in result
+            search_base (str)           : where to base the search on in terms of directory location
 
         Returns:
-            List["LDAPOrganizationalUnit"] : list of OU matching filter
+            List[LDAPOrganizationalUnit]: list of OU matching filter
         """
 
         return self.get_mapped_object(
@@ -482,11 +482,11 @@ class LDAPConnector(Connector):
         Maps a list of ldap entries to a list of the provided LDAP class
 
         Args:
-            entries (List[LDAPEntry]) : list of entries to map
-            ldap_cls (LDAPObject)     : ldap class used to map
+            entries (List[LDAPEntry]): list of entries to map
+            ldap_cls (LDAPObject)    : ldap class used to map
 
         Returns:
-            List[LDAPObject] : mapped list of ldap object
+            List[LDAPObject]: mapped list of ldap object
         """
 
         if not issubclass(ldap_cls, LDAPObject):

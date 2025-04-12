@@ -17,7 +17,12 @@ class NistConnector(Connector):
     # Attributes & Constructors
 
     def __init__(self):
-        """Constructor"""
+        """
+        Constructor
+
+        Initializes a new instance of the `NistConnector` class, inheriting from `Connector`.
+        It sets the target URL to the NIST API URL.
+        """
 
         super().__init__(target=NIST_API_URL)
 
@@ -25,7 +30,16 @@ class NistConnector(Connector):
     # Methods
 
     def connect(self, target: str) -> None:
-        """Test connection to NIST API"""
+        """
+        Test connection to NIST API
+
+        Sends a GET request to the specified target URL with an Accept header set to application/json.
+        If the response status code is 200, it parses the JSON content and stores it in `self.connection`. Raises a ConnectionError if the connection cannot be established.
+
+        Args:
+            target (str): The URL to which the GET request will be sent.
+        """
+
         self.connection = None
 
         try:
@@ -41,7 +55,21 @@ class NistConnector(Connector):
     def search(
         self, search_filter: Union[str, List[str]], attributes: Union[str, List[str]] = None
     ) -> List[Dict]:
-        """Searches the API for CVEs"""
+        """
+        Searches the API for CVEs
+
+        Retrieves vulnerability information from the NIST API based on the provided CVE IDs.
+        If `search_filter` is not a list, it converts it to one. Similarly, if `attributes` is provided but not a list, it converts it to a list.
+        It iterates over each CVE ID in `search_filter`, constructs the API endpoint URL for that CVE, and connects to retrieve data.
+        If a valid response is received, it extracts vulnerability information and filters it based on the specified attributes before appending it to the result list.
+
+        Args:
+            search_filter (Union[str, List[str]]): A single CVE ID or a list of CVE IDs to be searched.
+            attributes (Union[str, List[str]], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
+
+        Returns:
+            List[Dict]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
+        """
 
         res = []
 

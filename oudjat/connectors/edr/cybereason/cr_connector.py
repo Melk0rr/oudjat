@@ -28,7 +28,7 @@ class CybereasonEntry(dict):
 
         Parameters:
             entry_type (CybereasonEndpoint): The type of the entry.
-            **kwargs: Arbitrary keyword arguments to initialize the dictionary.
+            **kwargs                       : Arbitrary keyword arguments to initialize the dictionary.
         """
 
         self.type = entry_type
@@ -74,9 +74,9 @@ class CybereasonConnector(Connector):
         Creates a new instance of CybereasonConnector
 
         Parameters:
-            target (str): The target URL or hostname to connect to.
+            target (str)                : The target URL or hostname to connect to.
             service_name (str, optional): The name of the service. Used to register API credentials. Defaults to "OudjatCybereasonAPI".
-            port (int, optional): The port number to use for the connection. Defaults to 443.
+            port (int, optional)        : The port number to use for the connection. Defaults to 443.
         """
 
         scheme = "http"
@@ -133,15 +133,12 @@ class CybereasonConnector(Connector):
 
     def request(self, method: str, url: str, query: str = None) -> requests.models.Response:
         """
-        Performs a request to given url using connector established connection.
-
-        This method sends an HTTP request to the specified URL with the provided
-        method (e.g., GET, POST). It includes necessary headers and uses the already
+        This method sends an HTTP request to the specified URL with the provided method (e.g., GET, POST). It includes necessary headers and uses the already
         established connection if available. If no active connection is found, it raises a ConnectionError.
 
         Args:
-            method (str): The HTTP method for the request ('GET', 'POST', etc.).
-            url (str): The target URL to send the request to.
+            method (str)         : The HTTP method for the request ('GET', 'POST', etc.).
+            url (str)            : The target URL to send the request to.
             query (str, optional): Data payload for POST requests or query parameters for GET requests. Defaults to None.
 
         Returns:
@@ -246,8 +243,8 @@ class CybereasonConnector(Connector):
             List[CybereasonEntry]: A list of `CybereasonEntry` objects representing the results of the search query.
 
         Raises:
-            ConnectionError : If no connection has been established with the Cybereason system.
-            ValueError      : If an invalid endpoint is provided for searching.
+            ConnectionError: If no connection has been established with the Cybereason system.
+            ValueError     : If an invalid endpoint is provided for searching.
         """
 
         if self.connection is None:
@@ -368,9 +365,9 @@ class CybereasonConnector(Connector):
         This method allows you to perform sensor actions (defined by `action`) on a list of sensors identified by their IDs.
 
         Args:
-            action (CybereasonSensorAction)     : The type of action to perform, which is one of the actions defined in CybereasonSensorAction enum.
-            sensor_ids (Union[str, List[str]])  : A single sensor ID or a list of sensor IDs for which the action should be performed.
-            query (str)                         : Query parameters as a string that will be included in the request.
+            action (CybereasonSensorAction)   : The type of action to perform, which is one of the actions defined in CybereasonSensorAction enum.
+            sensor_ids (Union[str, List[str]]): A single sensor ID or a list of sensor IDs for which the action should be performed.
+            query (str)                       : Query parameters as a string that will be included in the request.
 
         Returns:
             Dict: The JSON response content from the API call is returned as a dictionary.
@@ -410,13 +407,11 @@ class CybereasonConnector(Connector):
 
     def sensor_assign_group(self, sensor_ids: Union[str, List[str]], groupId: str) -> Dict:
         """
-        Assigns given sensors to a specified group.
-
         This method assigns the specified sensors to the group identified by `groupId`
 
         Args:
-            sensor_ids (Union[str, List[str]])  : A single sensor ID or a list of sensor IDs that should be assigned to the specified group.
-            groupId (str)                       : The unique identifier for the group to which the sensors will be assigned.
+            sensor_ids (Union[str, List[str]]): A single sensor ID or a list of sensor IDs that should be assigned to the specified group.
+            groupId (str)                     : The unique identifier for the group to which the sensors will be assigned.
 
         Returns:
             Dict: The JSON response content from the API call is returned as a dictionary after assigning sensors to the specified group.

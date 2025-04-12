@@ -31,12 +31,9 @@ class TenableSCConnector(Connector):
         Constructor
 
         Args:
-            target (str)        : Tenable.sc appliance URL
-            service_name (str)  : service name used to register credentials
-            port (int)          : port number
-
-        Return:
-            None
+            target (str)      : Tenable.sc appliance URL
+            service_name (str): service name used to register credentials
+            port (int)        : port number
         """
 
         scheme = "http"
@@ -89,7 +86,10 @@ class TenableSCConnector(Connector):
         Checks if the connection is initialized
 
         Args:
-            prefix (str) : prefix string to include in error message
+            prefix (str): prefix string to include in error message
+
+        Raises:
+            ConnectionError: if connector connection is not initialized
         """
 
         if self.connection is None:
@@ -110,12 +110,15 @@ class TenableSCConnector(Connector):
         Searches the API for elements
 
         Args:
-            search_type (str)   : search type (VULNS | ASSETS | SCANS)
-            *args (List)        : anything to pass to further search method
-            **kwargs (Dict)     : anything to pass to further search method
+            search_type (str): search type (VULNS | ASSETS | SCANS)
+            *args (List)     : anything to pass to further search method
+            **kwargs (Dict)  : anything to pass to further search method
 
-        Return
-            List : search result depending on search type
+        Returns
+            List: search result depending on search type
+
+        Raises:
+            Exception: if something goes wrong with the search
         """
 
         self.check_connection(prefix="search")
@@ -139,8 +142,6 @@ class TenableSCConnector(Connector):
 
         return list(search)
 
-        """Raises an exception if connection is not set"""
-
     # INFO: Vulns
     def search_vulns(
         self, *severities: List[str], tool: TSCVulnTool = TSCVulnTool.VULNDETAILS
@@ -152,7 +153,7 @@ class TenableSCConnector(Connector):
             severities (List[str])  : vuln severities to include
             tool (TSCVulnTool)      : tool to use for the search
 
-        Return:
+        Returns:
             Dict : vulnerabilities matching arguments
         """
 
@@ -171,6 +172,7 @@ class TenableSCConnector(Connector):
         Args:
             severities (List[str]) : severities to include in the filter (see cve.py)
         """
+
         sev_scores = ",".join(
             [f"{get_severity_by_score(sev).value['score']}" for sev in list(*severities)]
         )
@@ -197,8 +199,8 @@ class TenableSCConnector(Connector):
             ips: (List[str])             : a list of ip addresses to associate with the list
             dns_names: (List[str])       : a list of dns names to associate with the list
 
-        Return:
-            None
+        Raises:
+            Exception: if something goes wrong while creating the asset list
         """
 
         self.check_connection(prefix="create_asset_list")
@@ -224,8 +226,8 @@ class TenableSCConnector(Connector):
         Args:
             list_id (int | List[int]) : list of ids of the asset lists to delete
 
-        Return:
-            None
+        Raises:
+            Exception: if something goes wrong while deleting the asset list
         """
 
         self.check_connection(prefix="delete_asset_list")
@@ -245,10 +247,13 @@ class TenableSCConnector(Connector):
         Retrieves a list of asset lists with minimal informations like list ids
 
         Args:
-            list_filter (Tuple[str, str, any]) : filter to apply to the listing
+            list_filter (Tuple[str, str, any]): filter to apply to the listing
 
-        Return:
-            List[Dict] : asset lists matching filter
+        Returns:
+            List[Dict]: asset lists matching filter
+
+        Raises:
+            Exception: if something goes wrong while listing asset lists
         """
 
         self.check_connection(prefix="list_asset_lists")
@@ -274,10 +279,13 @@ class TenableSCConnector(Connector):
         Returns the details of one or more asset lists
 
         Args:
-            list_id (int | List[int]) : list of ids matching the asset lists to retreive
+            list_id (int | List[int]): list of ids matching the asset lists to retreive
 
-        Return:
-            List[Dict] : list o
+        Returns:
+            List[Dict]: list of asset list details
+
+        Raises:
+            Exception: if something goes wrong while reteiving asset list details
         """
 
         self.check_connection(prefix="get_asset_list_details")
@@ -296,7 +304,6 @@ class TenableSCConnector(Connector):
         return list_details
 
     # TODO: Edit asset list
-
     # INFO: Scans
     def list_scans(self, scan_filter: Union[Tuple, List[Tuple]] = None) -> List[Dict]:
         """
@@ -307,6 +314,9 @@ class TenableSCConnector(Connector):
 
         Return:
             List[Dict] : a list of scans matching the filter
+
+        Raises:
+            Exception: if something goes wrong while listing scans
         """
 
         self.check_connection(prefix="list_scans")
@@ -336,6 +346,9 @@ class TenableSCConnector(Connector):
 
         Return:
             List[Dict] : a list of dicionaries containing scan details
+
+        Raises:
+            Exception: if something goes wrong while reteiving scan details
         """
 
         self.check_connection(prefix="get_scan_details")
@@ -359,6 +372,9 @@ class TenableSCConnector(Connector):
 
         Args:
             scan_id (int | List[int]) : one or more scan id to delete
+
+        Raises:
+            Exception: if something goes wrong while deleting scan
         """
 
         self.check_connection(prefix="delete_scan")
@@ -392,6 +408,9 @@ class TenableSCConnector(Connector):
             asset_lists (List[int]) : the asset lists ids to run the scan against
             description (str)       : scan description
             schedule (Dict)         : schedule dictionary
+
+        Raises:
+            Exception: if something goes wrong while creating scan
         """
 
         self.check_connection(prefix="create_scan")
