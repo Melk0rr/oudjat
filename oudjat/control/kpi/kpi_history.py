@@ -10,23 +10,51 @@ class KPIHistory:
     """KPIEvolution class to handle"""
 
     def __init__(self, name: str, kpis: List[KPI] = []):
-        """Constructor"""
+        """
+        Constructor for the KPIHistory class.
+
+        Args:
+            name (str)                : The name of the object instance.
+            kpis (List[KPI], optional): A list of KPI objects to initialize with. Defaults to an empty list.
+        """
+
         self.name = name
         self.kpis = []
 
         self.comparators = []
 
     def get_kpis(self):
-        """Getter for kpi list"""
+        """
+        Getter for the kpi list.
+
+        Returns:
+            List[KPI]: The list of KPI objects associated with this instance.
+        """
+
         return self.kpis
 
     def set_kpis(self, kpis: List[KPI] = []) -> None:
-        """Setter for kpi list"""
+        """
+        Setter for the kpi list. Updates the list of KPIs in the class.
+
+        Args:
+            kpis (List[KPI], optional): A list of KPI objects to set. Defaults to an empty list.
+        """
+
         for k in kpis:
             self.add_kpi(k)
 
     def add_kpi(self, kpi: "KPI") -> None:
-        """Add a kpi to the kpi list"""
+        """
+        Adds a KPI object to the list of KPIs if their names match.
+
+        Args:
+            kpi (KPI): The KPI object to be added.
+
+        Raises:
+            ValueError: If the name of the provided KPI does not match the instance's name.
+        """
+
         if self.name != kpi.get_name():
             raise ValueError(
                 f"{__class__} error while adding new kpi. KPI name and KPIHistory name must match !"
@@ -35,7 +63,10 @@ class KPIHistory:
         self.kpis.append(kpi)
 
     def build_history(self) -> None:
-        """Builds the KPI history"""
+        """
+        Builds the history of KPIs by comparing each pair in order based on their dates.
+        """
+
         comp_list = []
         sorted_kpis = sorted(self.kpis, key=lambda k: k.get_date())
 
@@ -48,7 +79,10 @@ class KPIHistory:
         self.comparators = comp_list
 
     def print_history(self) -> None:
-        """Print the KPI history"""
+        """
+        Prints the history of KPIs by calling each comparator's print method to display their comparison results.
+        """
+
         if len(self.comparators) == 0:
             self.build_history()
 
