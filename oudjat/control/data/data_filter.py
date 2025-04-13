@@ -29,7 +29,7 @@ class DataFilter:
         self, fieldname: str, value: Any, operator: str = "in", negate: bool = False
     ) -> None:
         """
-        Constructor
+        Returs a new instance of data filter
 
         Args:
             fieldname (str): name of the field to filter

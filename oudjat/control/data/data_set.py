@@ -17,7 +17,16 @@ class DataSet:
         filters: Union[List[Dict], List["DataFilter"]] = [],
         description: str = None,
     ):
-        """Constructor"""
+        """
+        Constructor for DataSet class.
+
+        Args:
+            name (str)                                               : The name of the dataset.
+            perimeter (str)                                          : The perimeter or boundary of the dataset.
+            scope (Union[List[Dict], "DataSet"], optional)           : Initial data set or list of dictionaries representing data. Defaults to None.
+            filters (Union[List[Dict], List["DataFilter"]], optional): Filters applied to the data. Defaults to an empty list.
+            description (str, optional)                              : A brief description of the dataset. Defaults to None.
+        """
 
         self.name = name
         self.description = description
@@ -31,22 +40,42 @@ class DataSet:
     # Methods
 
     def get_name(self) -> str:
-        """Getter for perimeter name"""
+        """
+        Getter for the dataset name.
+
+        Returns:
+            str: The name of the dataset.
+        """
 
         return self.name
 
     def get_initial_scope(self) -> Union[List[Dict], "DataSet"]:
-        """Getter for parent scope"""
+        """
+        Retrieves the initial scope dataset or a list of dictionaries that define the starting point for this dataset.
+
+        Returns:
+            Union[List[Dict], "DataSet"]: The initial scope data set or list of dictionaries.
+        """
 
         return self.initial_scope
 
     def get_initial_scope_name(self) -> str:
-        """Getter for initial scope name"""
+        """
+        Getter for the name of the initial scope data set.
+
+        Returns:
+            str: The name of the initial scope data set, or None if not applicable.
+        """
 
         return self.initial_scope.get_name() if isinstance(self.initial_scope, DataSet) else None
 
     def get_input_data(self) -> List[Dict]:
-        """Getter for input data"""
+        """
+        Getter for input data.
+
+        Returns:
+            List[Dict]: The input data either from the initial scope or directly if not a DataSet.
+        """
 
         return (
             self.initial_scope.get_data()
@@ -55,22 +84,45 @@ class DataSet:
         )
 
     def get_perimeter(self) -> str:
-        """Getter for perimeter"""
+        """
+        Getter for the perimeter of the dataset.
+
+        Returns:
+            str: The perimeter string.
+        """
 
         return self.perimeter
 
     def set_initial_scope(self, scope: Union[List[Dict], "DataSet"]) -> None:
-        """Setter for input data"""
+        """
+        Setter for the initial scope data set or list of dictionaries.
+
+        Args:
+            scope (Union[List[Dict], "DataSet"]): The new initial scope to be set.
+        """
 
         self.initial_scope = scope
 
     def set_filters(self, filters: Union[List[Dict], List["DataFilter"]] = []) -> None:
-        """Setter for filters"""
+        """
+        Setter for the list of data filters.
+
+        Args:
+            filters (Union[List[Dict], List["DataFilter"]], optional): The new list of filters to be set. Defaults to an empty list.
+        """
 
         self.filters = DataFilter.get_valid_filters_list(filters)
 
     def get_data(self) -> List[Dict]:
-        """Getter for perimeter data"""
+        """
+        Getter for the filtered data in the dataset's perimeter.
+
+        Returns:
+            List[Dict]: The list of dictionaries representing the filtered data.
+
+        Raises:
+            ValueError: If no parent scope is defined.
+        """
 
         if self.initial_scope is None:
             raise ValueError(
@@ -89,7 +141,19 @@ class DataSet:
 
     @staticmethod
     def merge_sets(name: str, scopes: List["DataSet"]) -> "DataSet":
-        """Merges given scopes into one"""
+        """
+        Static method to merge multiple DataSet instances into one.
+
+        Args:
+            name (str)              : The name of the merged dataset.
+            scopes (List["DataSet"]): A list of DataSet instances to be merged.
+
+        Returns:
+            DataSet: A new DataSet instance containing the merged data from all provided scopes.
+
+        Raises:
+            ValueError: If the scopes do not have the same perimeter.
+        """
 
         # Check if all scopes are on the same perimeter
         perimeters = set([s.get_perimeter() for s in scopes])
@@ -105,4 +169,3 @@ class DataSet:
         merge = DataSet(name=name, perimeter=list(perimeters)[0], scope=merge_data, filters=[])
 
         return merge
-
