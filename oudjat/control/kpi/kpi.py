@@ -11,9 +11,9 @@ from oudjat.utils import ColorPrint
 class ConformityLevel(Enum):
     """Defines the levels of conformity for a KPI or any other related element"""
 
-    CONFORM = {"min": 95, "max": 100.01, "color": ColorPrint.green}
-    PARTIALLYCONFORM = {"min": 70, "max": 95, "color": ColorPrint.yellow}
     NOTCONFORM = {"min": 0, "max": 70, "color": ColorPrint.red}
+    PARTIALLYCONFORM = {"min": 70, "max": 95, "color": ColorPrint.yellow}
+    CONFORM = {"min": 95, "max": 100.01, "color": ColorPrint.green}
 
 
 class KPI(DataSet):
