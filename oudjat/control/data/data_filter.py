@@ -38,7 +38,7 @@ class DataFilter:
             negate (bool)  : if you want to negate the filter result or not (True -> False; False -> True)
         """
 
-        if operator not in DataFilterOperation.keys():
+        if operator not in Operation.keys():
             raise ValueError(f"Invalid operator provided: {operator}")
 
         self.fieldname = fieldname
@@ -77,7 +77,7 @@ class DataFilter:
             Callable: DataFilterOperation function
         """
 
-        return DataFilterOperation[self.operator]
+        return Operation[self.operator]
 
     def get_value(self) -> Any:
         """
@@ -264,7 +264,7 @@ class DataFilter:
                 check = f.filter_dict(element)
 
             else:
-                operation = DataFilterOperation[f["operator"]]
+                operation = Operation[f["operator"]]
                 check = operation(element[f["fieldname"]], f["value"])
 
             checks.append(check)
