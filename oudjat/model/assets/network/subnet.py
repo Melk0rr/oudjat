@@ -1,8 +1,9 @@
 from typing import Dict, List, Union
 
-from oudjat.utils import i_and, i_or
+from oudjat.utils.logical_operations import logical_and, logical_or
 
-from .ipv4 import IPv4, IPv4Mask, ip_int_to_str
+from .definitions import ip_int_to_str
+from .ipv4 import IPv4, IPv4Mask
 
 
 class Subnet:

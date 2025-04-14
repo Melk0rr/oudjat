@@ -3,8 +3,10 @@ import socket
 from enum import Enum
 from typing import TYPE_CHECKING, List, Union
 
-from oudjat.utils import ColorPrint, count_1_bits, i_and, i_not
+from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.logical_operations import logical_and
 
+from .definitions import cidr_to_int, count_1_bits, ip_int_to_str, ip_not, ip_str_to_int
 from .port import Port
 
 if TYPE_CHECKING:
