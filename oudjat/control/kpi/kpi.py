@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Tuple
+from typing import Callable, Dict, List, Union
 
 from oudjat.control.data import DataFilter, DataSet
 from oudjat.utils import ColorPrint
@@ -26,12 +26,23 @@ class KPI(DataSet):
         self,
         name: str,
         perimeter: str,
-        scope: List[Dict] | DataSet = None,
-        filters: List[Dict] | List[DataFilter] = [],
+        scope: Union[List[Dict], DataSet] = None,
+        filters: Union[List[Dict], List[DataFilter]] = [],
         description: str = None,
         date: datetime = None,
-    ):
-        """Constructor"""
+    ) -> None:
+        """
+        Returns a new instance of KPI
+
+        Args:
+            name (str)                             : name to assign to the new KPI
+            perimeter (str)                        : perimeter of the new KPI
+            scope (List[Dict] | DataSet)           : the scope the KPI is based on
+            filters (List[Dict] | List[DataFilter]): the filters the KPI result is based on
+            description (str)                      : a description of the KPI
+            date (datetime)                        : the date the KPI is generated
+        """
+
         super().__init__(
             name=name, perimeter=perimeter, scope=scope, filters=filters, description=description
         )
@@ -45,11 +56,25 @@ class KPI(DataSet):
     # Methods
 
     def get_date(self) -> datetime:
-        """Getter for kpi date"""
+        """
+        Returns the generation date of the KPI
+
+        Returns:
+            datetime: the date the KPI was generated
+        """
+
         return self.date
 
     def get_conformity_level(self, value: float = None) -> "ConformityLevel":
-        """Establish the conformity level"""
+        """
+        Returns the conformity level of the KPI based on its value
+
+        Args:
+            value (float): the value of the KPI computed based on its scope and filters
+
+        Returns:
+            ConformityLevel: the computed level of conformity
+        """
 
         if value is None:
             value = self.get_kpi_value()
@@ -60,19 +85,36 @@ class KPI(DataSet):
         )
 
     def get_kpi_value(self) -> float:
-        """Returns the percentage of conform data based on kpi control"""
+        """
+        Returns the percentage of conform data based on kpi control
+
+        Returs:
+            float: final KPI value which represent the percentage of conform data based on the KPI scope and filters
+        """
 
         return round(len(self.get_data()) / len(self.get_input_data()) * 100, 2)
 
-    def get_print_function(self) -> object:
-        """Defines print function"""
+    def get_print_function(self) -> Callable:
+        """
+        Defines and returns the print function to be used based on the KPI value and conformity level
+
+        Returns:
+            Callable: print function to use with different color
+        """
 
         return self.get_conformity_level().value["color"]
 
     def print_value(
         self, prefix: str = None, suffix: str = "%\n", print_details: bool = True
     ) -> None:
-        """Print value with color based on kpi level"""
+        """
+        Prints value with color based on kpi level
+
+        Args:
+            prefix (str)        : string to include as prefix to the printed infos
+            suffix (str)        : string to include as suffix to the printed infos
+            print_details (bool): include additional details to the printed infos
+        """
         scope_str = str(self)
 
         print(prefix, end="")
@@ -82,12 +124,22 @@ class KPI(DataSet):
         self.get_print_function()(f"{scope_str[1]}", end=f"{suffix}")
 
     def get_date_str(self) -> str:
-        """Returns formated date string"""
+        """
+        Returns formated date string
+
+        Returns:
+            str: the generation date of the KPI formated as a string
+        """
 
         return self.date.strftime("%Y-%m-%d")
 
-    def __str__(self) -> Tuple[str, str]:
-        """Converts the current instance into a string"""
+    def __str__(self) -> str:
+        """
+        Converts the current instance into a string
+
+        Returns:
+            str: string representation of the current instance
+        """
 
         return f"{len(self.get_data())} / {len(self.get_input_data())} = {self.get_kpi_value()}"
 
@@ -119,5 +171,12 @@ class KPI(DataSet):
     def conformity_value_level(lvl: ConformityLevel, value: float) -> bool:
         """
         Checks if the given value is between the provided conformity level min and max values
+
+        Args:
+            lvl (ConformityLevel): conformity level to compare with provided value
+            value (flaot)        : value that will be compared to the provided conformity level
+
+        Returns:
+            bool: True if the provided value matches the given conforimty level, False otherwise
         """
         return lvl.value["min"] <= value <= lvl.value["max"]

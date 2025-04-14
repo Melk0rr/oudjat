@@ -6,7 +6,9 @@ from .kpi import KPI
 
 
 class KPIComparator:
-    """KPIComparator class to compare two KPIs"""
+    """
+    A class to compare the results of 2 KPIs
+    """
 
     tendencies = {
         "+": {"icon": "", "print": ColorPrint.green},
@@ -17,9 +19,9 @@ class KPIComparator:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, kpi_a: KPI, kpi_b: KPI):
+    def __init__(self, kpi_a: KPI, kpi_b: KPI) -> None:
         """
-        Constructor for the Comparator class.
+        Returns a new instance of KPIComparator
 
         Args:
             kpi_a (KPI): The first KPI object to compare.
