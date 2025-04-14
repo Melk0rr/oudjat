@@ -59,7 +59,7 @@ class Subnet:
 
         self.set_mask(mask)
 
-        self.address: IPv4 = IPv4(address=i_and(int(address), int(self.mask)))
+        self.address: IPv4 = IPv4(address=logical_and(int(address), int(self.mask)))
         self.broadcast = self.get_broadcast_address()
 
         self.name = name
@@ -112,7 +112,7 @@ class Subnet:
         Returns:
             IPv4: The broadcast IP address of the subnet.
         """
-        broadcast_int = i_or(int(self.mask.get_wildcard()), int(self.address))
+        broadcast_int = logical_or(int(self.mask.get_wildcard()), int(self.address))
         return IPv4(ip_int_to_str(broadcast_int))
 
     def set_mask(self, mask: Union[int, str, IPv4Mask]) -> None:
@@ -137,7 +137,7 @@ class Subnet:
         if not isinstance(ip, IPv4):
             ip = IPv4(ip)
         mask_address = int(self.mask)
-        return i_and(int(ip), mask_address) == i_and(int(self.address), mask_address)
+        return logical_and(int(ip), mask_address) == logical_and(int(self.address), mask_address)
 
     def list_addresses(self) -> List[str]:
         """Lists all possible hosts in the subnet.

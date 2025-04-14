@@ -13,46 +13,6 @@ if TYPE_CHECKING:
     from .subnet import Subnet
 
 
-def ip_str_to_int(ip: str) -> int:
-    """
-    Converts an IP address string into an integer.
-
-    Args:
-        ip (str): A string representing the IP address in dot-decimal notation.
-
-    Returns:
-        int: The equivalent integer representation of the IP address.
-    """
-    return int(''.join([bin(int(x) + 256)[3:] for x in ip.split(".")]), 2)
-
-
-def ip_int_to_str(ip: int) -> str:
-    """
-    Converts an IP address integer into a string.
-
-    Args:
-        ip (int): An integer representing the IP address.
-
-    Returns:
-        str: The equivalent dot-decimal notation string of the IP address.
-    """
-
-    return '.'.join([str((ip >> i) & 0xFF) for i in (24, 16, 8, 0)])
-
-
-def cidr_to_int(cidr: int) -> int:
-    """
-    Returns a mask integer value based on the given network length.
-
-    Args:
-        cidr (int): The network prefix length from which to calculate the netmask.
-
-    Returns:
-        int: The netmask as an integer, where bits 0-31 represent the mask.
-    """
-    return (0xFFFFFFFF << (32 - cidr)) & 0xFFFFFFFF
-
-
 class IPVersion(Enum):
     """
     Enumeration representing different versions of IP addresses.
@@ -76,7 +36,7 @@ class IPv4:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, address: Union[int, str]):
+    def __init__(self, address: Union[int, str]) -> None:
         """
         Constructor for the IPAddress class.
 
@@ -113,6 +73,7 @@ class IPv4:
         Returns:
             int: The integer representation of the IP address.
         """
+
         return self.address
 
     def get_port_numbers(self) -> List[int]:
@@ -122,6 +83,7 @@ class IPv4:
         Returns:
             List[int]: A list of integers representing the port numbers.
         """
+
         return list(self.ports.keys())
 
     def get_port_strings(self) -> List[str]:
@@ -131,6 +93,7 @@ class IPv4:
         Returns:
             List[str]: A list of strings representing the port numbers converted to string format.
         """
+
         return [str(p) for p in self.ports.values()]
 
     def clear_ports(self) -> None:
@@ -139,6 +102,7 @@ class IPv4:
 
         This method removes all entries from the `ports` dictionary.
         """
+
         for port in list(
             self.ports.keys()
         ):  # Making a copy of keys to avoid RuntimeError during modification
@@ -153,6 +117,7 @@ class IPv4:
 
         This method first clears the existing ports and then adds the new ports provided in the argument.
         """
+
         self.clear_ports()
         for p in ports:
             self.append_open_port(p)
@@ -169,6 +134,7 @@ class IPv4:
 
         This method first converts the given argument to an integer representation of a port and then checks its presence in the `ports` dictionary.
         """
+
         port_number = port
 
         if isinstance(port, Port):
@@ -186,6 +152,7 @@ class IPv4:
         Raises:
             ValueError: If the provided port is neither an instance of Port nor an integer, a ValueError is raised.
         """
+
         is_port = isinstance(port, Port)
         is_number = isinstance(port, int)
 
@@ -220,7 +187,7 @@ class IPv4:
             bool: True if the IP is within the subnet, False otherwise.
         """
 
-        return i_and(int(self), int(net.get_mask())) == i_and(
+        return logical_and(int(self), int(net.get_mask())) == logical_and(
             int(net.get_address()), int(net.get_mask())
         )
 
@@ -231,6 +198,7 @@ class IPv4:
         Returns:
             int: The integer representation of the IP address.
         """
+
         return self.address
 
     def __str__(self) -> str:
@@ -240,6 +208,7 @@ class IPv4:
         Returns:
             str: The string representation of the IP address.
         """
+
         return ip_int_to_str(self.address)
 
     @staticmethod
@@ -253,6 +222,7 @@ class IPv4:
         Returns:
             str: The resolved IP address.
         """
+
         ip = None
         try:
             ip = socket.gethostbyname(hostname)
@@ -308,32 +278,32 @@ class IPv4Mask(IPv4):
     def get_cidr(self) -> int:
         """
         Getter for mask CIDR.
-
-        Returns the current netmask's CIDR notation value."""
+        Returns the current netmask's CIDR notation value
+        """
 
         return self.cidr
 
     def cidr_to_int(self) -> int:
         """
         Returns the current mask as an integer.
-
         This method converts the network mask in CIDR notation to its integer representation.
 
         Returns:
-            int: The netmask as an integer."""
+            int: The netmask as an integer
+        """
 
         return cidr_to_int(self.cidr)
 
     def get_wildcard(self) -> IPv4:
         """
         Returns mask wildcard.
-
         This method calculates and returns the wildcard address for the current network mask.
 
         Returns:
-            IPv4: The wildcard address as an IPv4 object."""
+            IPv4: The wildcard address as an IPv4 object
+        """
 
-        return IPv4(i_not(self.address))
+        return IPv4(ip_not(self.address))
 
     def __str__(self, as_cidr: bool = False) -> str:
         """
@@ -345,6 +315,7 @@ class IPv4Mask(IPv4):
         Returns:
             str: The string representation of the netmask, either in CIDR notation if `as_cidr` is True, or the default format otherwise.
         """
+
         if as_cidr:
             return f"{self.cidr}"
 
@@ -365,13 +336,14 @@ class IPv4Mask(IPv4):
             int: The CIDR notation of the provided netmask.
 
         Raises:
-            ValueError: If the provided mask is not valid."""
+            ValueError: If the provided mask is not valid
+        """
 
         if mask not in IPv4Mask.get_valid_mask():
             raise ValueError(f"Invalid mask provided: {mask}")
 
         base = IPv4(mask)
-        return ''.join(base.to_binary_array()).count("1")
+        return "".join(base.to_binary_array()).count("1")
 
     @staticmethod
     def get_valid_mask():
@@ -379,7 +351,8 @@ class IPv4Mask(IPv4):
         Static method to list all valid netmask strings for CIDR notation from 1 to 32.
 
         Returns:
-            List[str]: A list of valid netmask strings."""
+            List[str]: A list of valid netmask strings
+        """
 
         return list(map(IPv4Mask.get_netmask, range(1, 33)))
 
@@ -395,7 +368,8 @@ class IPv4Mask(IPv4):
             str: The netmask as a string.
 
         Raises:
-            ValueError: If the provided network length is not an integer or outside the range 1 to 32."""
+            ValueError: If the provided network length is not an integer or outside the range 1 to 32
+        """
 
         if type(network_length) is not int:
             raise ValueError("Network length must be an integer")
