@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class RiskMeasure(Enum):
+    """An enumeration to handle risk measures (likelihood and impact)"""
     MINOR = 1
     MODERATE = 2
     HIGH = 3
