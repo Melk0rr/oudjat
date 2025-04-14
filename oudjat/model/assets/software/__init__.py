@@ -1,7 +1,7 @@
 from .software import Software, SoftwareType
 from .software_edition import SoftwareEdition, SoftwareEditionDict
 from .software_release import SoftwareRelease, SoftwareReleaseDict
-from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList, soft_date_str
+from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList
 
 __all__ = [
     "Software",
@@ -12,5 +12,4 @@ __all__ = [
     "SoftwareReleaseDict",
     "SoftwareReleaseSupport",
     "SoftwareReleaseSupportList",
-    "soft_date_str",
 ]
