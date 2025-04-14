@@ -98,7 +98,7 @@ def logical_nand(a: int | bool, b: int | bool) -> int | bool:
 
     return logical_not(logical_and(a, b))
 
-BooleanOperation = {
+LogicalOperation = {
     "OR": logical_or,
     "AND": logical_and,
     "XOR": logical_xor,

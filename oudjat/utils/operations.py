@@ -165,7 +165,7 @@ def ope_reg_search(value: str, pattern: str) -> bool:
     return re.search(pattern, value) is not None
 
 
-DataFilterOperation = {
+Operation = {
     # INFO: Symbols options
     "=": ope_equals,
     "∋": ope_contains,
