@@ -144,7 +144,10 @@ class TenableSCConnector(Connector):
 
     # INFO: Vulns
     def search_vulns(
-        self, *severities: List[str], tool: TSCVulnTool = TSCVulnTool.VULNDETAILS
+        self,
+        *severities: List[str],
+        tool: TSCVulnTool = TSCVulnTool.VULNDETAILS,
+        exploitable: bool = True,
     ) -> Dict:
         """
         Retrieve the current vulnerabilities
@@ -157,7 +160,11 @@ class TenableSCConnector(Connector):
             Dict : vulnerabilities matching arguments
         """
 
-        filters = [self.BUILTIN_FILTERS["exploitable"]]
+        filters = []
+
+        if exploitable:
+            filters.append(self.BUILTIN_FILTERS["exploitable"])
+
         if severities is not None:
             filters.append(self.build_severity_filter(severities))
 
