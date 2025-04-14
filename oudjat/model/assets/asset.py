@@ -16,13 +16,13 @@ class Asset(GenericIdentifiable):
 
     def __init__(
         self,
-        id: Union[int, str],
+        asset_id: Union[int, str],
         name: str,
         asset_type: AssetType,
         label: str = None,
         description: str = None,
-        location: Union["Location", List["Location"]] = None,  # noqa: F821
-    ):
+        location: Union["Location", List["Location"]] = None,
+    ) -> None:
         """
         Constructor for the Asset class.
 
@@ -38,7 +38,7 @@ class Asset(GenericIdentifiable):
             location (Union["Location", List["Location"]], optional): The location(s) where the asset is situated. Defaults to None.
         """
 
-        super().__init__(id=id, name=name, label=label, description=description)
+        super().__init__(gid=asset_id, name=name, label=label, description=description)
 
         self.location = []
         self.set_location(location)

@@ -14,14 +14,14 @@ class User(Asset):
 
     def __init__(
         self,
-        id: Union[int, str],
+        user_id: Union[int, str],
         name: str,
         firstname: str,
         lastname: str,
         login: str,
         email: str = None,
         description: str = None,
-    ):
+    ) -> None:
         """
         Constructor for the User class.
 
@@ -38,7 +38,7 @@ class User(Asset):
         """
 
         super().__init__(
-            id=id, name=name, label=login, description=description, asset_type=AssetType.USER
+            asset_id=user_id, name=name, label=login, description=description, asset_type=AssetType.USER
         )
 
         self.firstname = firstname
@@ -60,6 +60,7 @@ class User(Asset):
         Returns:
             str: The first name of the user.
         """
+
         return self.firstname
 
     def get_lastname(self) -> str:
@@ -69,6 +70,7 @@ class User(Asset):
         Returns:
             str: The last name of the user.
         """
+
         return self.lastname
 
     def get_email(self) -> str:
@@ -78,6 +80,7 @@ class User(Asset):
         Returns:
             str: The email address of the user.
         """
+
         return self.email
 
     def get_login(self) -> str:
@@ -87,6 +90,7 @@ class User(Asset):
         Returns:
             str: The login username for the user.
         """
+
         return self.login
 
     def set_email(self, email: str) -> None:
@@ -96,6 +100,7 @@ class User(Asset):
         Args:
             email (str): The new email address to be set.
         """
+
         if email is None:
             return
 
@@ -109,6 +114,7 @@ class User(Asset):
         Returns:
             Dict: A dictionary representation of the User instance.
         """
+
         asset_dict = super().to_dict()
         asset_dict.pop("label")
 

@@ -50,7 +50,7 @@ class LDAPComputer(LDAPAccount, Computer):
 
         Computer.__init__(
             self,
-            id=self.uuid,
+            computer_id=self.uuid,
             name=self.name,
             label=self.hostname,
             description=self.description,

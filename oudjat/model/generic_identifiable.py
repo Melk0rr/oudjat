@@ -9,14 +9,14 @@ class GenericIdentifiable:
 
     def __init__(
         self,
-        id: Union[int, str],
+        gid: Union[int, str],
         name: str,
         label: str = None,
         description: str = None,
     ):
         """Constructor"""
 
-        self.id = id
+        self.id = gid
         self.name = name
         self.label = label
         self.description = description

@@ -22,7 +22,7 @@ class LDAPUser(LDAPAccount, User):
 
         User.__init__(
             self,
-            id=self.uuid,
+            user_id=self.uuid,
             name=self.name,
             firstname=self.entry.get("givenName"),
             lastname=self.entry.get("sn"),

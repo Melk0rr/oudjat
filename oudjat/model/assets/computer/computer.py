@@ -20,7 +20,7 @@ class Computer(Asset):
 
     def __init__(
         self,
-        id: Union[int, str],
+        computer_id: Union[int, str],
         name: str,
         label: str = None,
         description: str = None,
@@ -45,7 +45,7 @@ class Computer(Asset):
         """
 
         super().__init__(
-            id=id, name=name, label=label, description=description, asset_type=AssetType.COMPUTER
+            asset_id=computer_id, name=name, label=label, description=description, asset_type=AssetType.COMPUTER
         )
 
         self.os_release = None

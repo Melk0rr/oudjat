@@ -14,7 +14,7 @@ class Location(GenericIdentifiable):
 
     def __init__(
         self,
-        id: Union[int, str],
+        location_id: Union[int, str],
         name: str,
         description: str = None,
         city: str = None,
@@ -35,7 +35,7 @@ class Location(GenericIdentifiable):
             label (str, optional)                               : A short label for the location. Defaults to None.
             subnet (Union[Subnet, Dict[str, Subnet]], optional) : The subnet or subnets associated with this location.
         """
-        super().__init__(id=id, name=name, label=label, description=description)
+        super().__init__(gid=location_id, name=name, label=label, description=description)
 
         self.assets = {}
         self.subnet: Dict[str, Subnet] = {}
@@ -49,6 +49,14 @@ class Location(GenericIdentifiable):
 
     # ****************************************************************
     # Methods
+
+    def get_id(self) -> Union[int, str]:
+        """
+        Returns the current location id
+
+        Returns:
+            Union[int, str]: unique location id
+        """
 
     def get_subnet(self, subnet: str = None) -> Subnet:
         """

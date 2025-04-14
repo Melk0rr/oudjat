@@ -22,13 +22,13 @@ class Software(Asset):
 
     def __init__(
         self,
-        id: Union[int, str],
+        software_id: Union[int, str],
         name: str,
         label: str,
         software_type: SoftwareType = SoftwareType.APPLICATION,
         editor: Union[str, List[str]] = None,
         description: str = None,
-    ):
+    ) -> None:
         """
         Initialize a new instance of the Software class.
 
@@ -46,7 +46,7 @@ class Software(Asset):
         """
 
         super().__init__(
-            id=id, name=name, label=label, asset_type=AssetType.SOFTWARE, description=description
+            asset_id=software_id, name=name, label=label, asset_type=AssetType.SOFTWARE, description=description
         )
 
         self.editor = editor

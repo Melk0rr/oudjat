@@ -23,7 +23,7 @@ class LDAPGroup(LDAPObject, Group):
         super().__init__(ldap_entry=ldap_entry)
 
         Group.__init__(
-            self, id=self.uuid, name=self.name, label=self.dn, description=self.description
+            self, group_id=self.uuid, name=self.name, label=self.dn, description=self.description
         )
 
     # ****************************************************************

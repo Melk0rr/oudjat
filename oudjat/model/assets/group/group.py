@@ -17,7 +17,7 @@ class Group(Asset):
 
     def __init__(
         self,
-        id: Union[int, str],
+        group_id: Union[int, str],
         name: str,
         label: str = None,
         description: str = None,
@@ -33,7 +33,7 @@ class Group(Asset):
         """
 
         super().__init__(
-            id=id, name=name, label=label, description=description, asset_type=AssetType.GROUP
+            asset_id=group_id, name=name, label=label, description=description, asset_type=AssetType.GROUP
         )
 
         self.members = GroupMemberList()
