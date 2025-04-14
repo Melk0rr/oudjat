@@ -264,7 +264,7 @@ class CybereasonConnector(Connector):
         self,
         action: CybereasonSensorAction,
         sensor_ids: Union[str, List[str]],
-        query: str,
+        query_dict: Dict,
         *args,
         **kwargs,
     ) -> Dict:
@@ -273,6 +273,7 @@ class CybereasonConnector(Connector):
         if not isinstance(sensor_ids, list):
             sensor_ids = [sensor_ids]
 
+        query = json.dumps({**query_dict, "sensorsIds": sensor_ids})
         endpoint = CybereasonEndpoint.SENSORS_ACTION
 
         query = self.request(
@@ -289,8 +290,11 @@ class CybereasonConnector(Connector):
         if not isinstance(sensor_ids, list):
             sensor_ids = [sensor_ids]
 
-        remove_query = json.dumps({"sensorsIds": sensor_ids, "filters": None})
-        return self.sensor_action(action=CybereasonSensorAction.REMOVEFROMGROUP, sensor_ids=sensor_ids, query=remove_query)
+        return self.sensor_action(
+            action=CybereasonSensorAction.REMOVEFROMGROUP,
+            sensor_ids=sensor_ids,
+            query_dict={"sensorsIds": sensor_ids, "filters": None},
+        )
 
     def sensor_assign_group(self, sensor_ids: Union[str, List[str]], groupId: str) -> Dict:
         """Assigns given sensors to a group"""
@@ -298,5 +302,16 @@ class CybereasonConnector(Connector):
         if not isinstance(sensor_ids, list):
             sensor_ids = [sensor_ids]
 
-        assign_query = json.dumps({"sensorsIds": sensor_ids,"argument": groupId})
-        return self.sensor_action(action=CybereasonSensorAction.ADDTOGROUP, sensor_ids=sensor_ids, query=assign_query)
+        return self.sensor_action(
+            action=CybereasonSensorAction.ADDTOGROUP,
+            sensor_ids=sensor_ids,
+            query_dict={"sensorsIds": sensor_ids, "argument": groupId},
+        )
+
+    def sensor_restart(self, sensor_ids: Union[str, List[str]]) -> Dict:
+
+        return self.sensor_action(
+            action=CybereasonSensorAction.RESTART,
+            sensor_ids=sensor_ids,
+            query_dict={"sensorsIds": sensor_ids, "filters": None},
+        )
