@@ -8,7 +8,8 @@ import requests
 from oudjat.connectors import Connector
 from oudjat.utils import ColorPrint
 
-from .definitions import API_BASE_URL, API_REQ_HEADERS, CVE_REGEX, MSCVRFDocument
+from .definitions import API_BASE_URL, API_REQ_HEADERS, CVE_REGEX
+from .ms_cvrf_document import MSCVRFDocument
 
 
 class MSCVRFConnector(Connector):
@@ -60,7 +61,9 @@ class MSCVRFConnector(Connector):
         # Retreive CVRF ID
         id_resp = requests.get(id_url, headers=API_REQ_HEADERS)
         if id_resp.status_code != 200:
-            raise ConnectionError(f"Could not connect to {self.id_url}")
+            raise ConnectionError(
+                f"MSCVRFConnector.get_cvrf_id_from_cve::Could not connect to {self.id_url}"
+            )
 
         data = json.loads(id_resp.content)
         cvrf_id = data["value"][0]["ID"]
