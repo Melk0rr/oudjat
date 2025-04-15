@@ -2,9 +2,11 @@ import re
 from enum import Enum
 from typing import Dict, List, Union
 
-from oudjat.model.assets.computer import ComputerType
-from oudjat.model.assets.software import Software, SoftwareRelease, SoftwareType
-from oudjat.utils import ColorPrint
+from oudjat.model.assets.computer.computer_type import ComputerType
+from oudjat.utils.color_print import ColorPrint
+
+from ..software import Software, SoftwareType
+from ..software_release import SoftwareRelease
 
 
 class OSFamily(Enum):
