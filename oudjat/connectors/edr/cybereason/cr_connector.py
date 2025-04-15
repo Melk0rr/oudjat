@@ -161,11 +161,11 @@ class CybereasonConnector(Connector):
 
         Args:
             endpoint (CybereasonEndpoint): Cybereason endpoint used for this search
-            limit (int): search results limit
-            offset (int): basically page number as CR may return results with pagination
-            search_filter (List[Dict]): filter to narrow down search results
-            endpoint_url_sfx (int | str): Optional URL sufix
-            endpoint_cnx_method (str): HTTP connection method. By default it is retrieved from the endpoint parameters
+            limit (int)                  : search results limit
+            offset (int)                 : basically page number as CR may return results with pagination
+            search_filter (List[Dict])   : filter to narrow down search results
+            endpoint_url_sfx (int | str) : Optional URL sufix
+            endpoint_cnx_method (str)    : HTTP connection method. By default it is retrieved from the endpoint parameters
 
         Returns:
             List[Dict]: search results
@@ -214,7 +214,11 @@ class CybereasonConnector(Connector):
         return res
 
     def search(
-        self, endpoint: CybereasonEndpoint, search_filter: List[Dict] = None, limit: int = None, **kwargs
+        self,
+        endpoint: CybereasonEndpoint,
+        search_filter: List[Dict] = None,
+        limit: int = None,
+        **kwargs,
     ) -> List["CybereasonEntry"]:
         """
         Runs search in API
