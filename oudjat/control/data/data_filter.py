@@ -1,8 +1,7 @@
 from typing import Any, Callable, Dict, List, Tuple, Union
 
 from oudjat.utils.color_print import ColorPrint
-
-from .data_filter_operations import Operation
+from oudjat.utils.operations import Operation
 
 
 class DataFilter:
