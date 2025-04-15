@@ -1,6 +1,6 @@
-from .ldap_connector import (
+from .ldap_connector import LDAPConnector
+from .objects import (
     LDAPComputer,
-    LDAPConnector,
     LDAPGroup,
     LDAPGroupPolicyObject,
     LDAPOrganizationalUnit,
