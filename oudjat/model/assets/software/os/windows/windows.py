@@ -153,7 +153,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
 
     def __init__(
         self,
-        id: Union[int, str],
+        msos_id: Union[int, str],
         name: str,
         label: str,
         computer_type: Union[ComputerType, List[ComputerType]],
@@ -172,7 +172,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
             description (str, optional)                             : A detailed description of the operating system. Defaults to None.
         """
         super().__init__(
-            id=id,
+            os_id=id,
             name=name,
             label=label,
             computer_type=computer_type,
@@ -227,7 +227,6 @@ class MicrosoftOperatingSystem(OperatingSystem):
     def get_matching_version(test_str: str) -> str:
         """
         Returns a version matching the given string.
-
         This static method uses a regular expression to find and return a version number from the input string.
 
         Args:
