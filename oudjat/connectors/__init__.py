@@ -1,6 +1,5 @@
 from .cert import CERTFRConnector, CERTFRPage, CERTFRPageType, RiskType
 from .connector import Connector
-from .cvrf import MSCVRFConnector
 from .edr import (
     CybereasonConnector,
     CybereasonEndpoint,
@@ -18,6 +17,7 @@ from .ldap import (
     LDAPSubnet,
     LDAPUser,
 )
+from .microsoft import MSCVRFConnector
 from .nist import NistConnector
 from .tenable import TenableSCConnector, TSCAssetListType, TSCVulnTool
 
