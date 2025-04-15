@@ -9,7 +9,7 @@ class OSOption(Enum):
     """Agregation of oses"""
 
     WINDOWS = MicrosoftOperatingSystem(
-        id="windows",
+        msos_id="windows",
         name="Windows",
         label="ms-windows",
         computer_type=ComputerType.WORKSTATION,
@@ -17,7 +17,7 @@ class OSOption(Enum):
     )
 
     WINDOWSSERVER = MicrosoftOperatingSystem(
-        id="windows-server",
+        msos_id="windows-server",
         name="Windows Server",
         label="ms-windows-server",
         computer_type=ComputerType.SERVER,
