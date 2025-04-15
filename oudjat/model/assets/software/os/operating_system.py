@@ -37,18 +37,29 @@ class OperatingSystem(Software):
 
     def __init__(
         self,
-        id: Union[int, str],
+        os_id: Union[int, str],
         name: str,
         label: str,
         os_family: OSFamily,
         computer_type: Union[Union[str, ComputerType], List[Union[str, ComputerType]]],
         editor: Union[str, List[str]] = None,
         description: str = None,
-    ):
-        """Constructor"""
+    ) -> None:
+        """
+        Returns a new instance of OperatingSystem
+
+        Args:
+            os_id (int | str)                       : OS unique ID
+            name (str)                              : the name of the operating system
+            label (str)                             : a short string to labelize the os
+            os_family (OSFamily)                    : family of operating system, usually (Linux, MAC, Windows)
+            computer_type (List[str | ComputerType]): the type(s) of computer the OS is tide to
+            editor (str | List[str])                : the editor in charge of the OS maintenance and/or development
+            description (str)                       : a string to describe the OS
+        """
 
         super().__init__(
-            id=id,
+            software_id=id,
             name=name,
             label=label,
             software_type=SoftwareType.OS,
@@ -77,15 +88,31 @@ class OperatingSystem(Software):
     # Methods
 
     def get_computer_type(self) -> List[ComputerType]:
-        """Getter for the OS computer type"""
+        """
+        Returns the computer types related to the current OS
+
+        Returns:
+            List[ComputerType]: the list of computer types as ComputerType enumeration elements
+        """
+
         return self.computer_type
 
     def get_os_family(self) -> OSFamily:
-        """Getter for OS family"""
+        """
+        Returns the OS family of the current OS
+
+        Returns:
+            OSFamily: the OS family represented by an OSFamily enumeration element
+        """
+
         return self.os_family
 
     def gen_releases(self) -> None:
-        """Method to generate releases"""
+        """
+        This method must generate the list of releases of the current OS
+        It must be overwritten by the classes inheriting OperatingSystem
+        """
+
         raise NotImplementedError(
             "gen_releases() method must be implemented by the overloading class"
         )
@@ -95,7 +122,16 @@ class OperatingSystem(Software):
 
     @staticmethod
     def get_matching_os_family(test_str: str) -> str:
-        """Returns the OS family which pattern matches the provided string"""
+        """
+        Tries to retrieve a substring of the provided string matching an OSFamily element
+
+        Args:
+            test_str (str): provided string that possibly matches an OSFamily element
+
+        Returns:
+            str: substring that match an OSFamily element
+        """
+
         if test_str is None:
             return None
 
@@ -106,9 +142,18 @@ class OperatingSystem(Software):
 
     @staticmethod
     def get_matching_version(test_str: str) -> str:
-        """Returns a version matching given string"""
+        """
+        This static method uses a regular expression to find and return a version number from the input string.
+        It must be implemented by the class inheriting OperatingSystem
+
+        Args:
+            test_str (str): The string to search for a version match.
+
+        Returns:
+            str: A string representing the matched version, or None if no match is found.
+        """
         raise NotImplementedError(
-            "get_matching_version() method must be implemented by the overloading class"
+            "OperatingSystem.get_matching_version() method must be implemented by the overloading class"
         )
 
 
@@ -118,16 +163,36 @@ class OSRelease(SoftwareRelease):
     # ****************************************************************
     # Methods
 
-    def get_name(self) -> None:
-        """Method to generate releases"""
-        raise NotImplementedError("get_name() method must be implemented by the overloading class")
+    def get_name(self) -> str:
+        """
+        Returns the OS release name
+        Must be implemented by overloading classes
+
+        Returns:
+            str: forged name of the OS release
+        """
+        raise NotImplementedError(
+            "OSRelease.get_name() method must be implemented by the overloading class"
+        )
 
     def get_os(self) -> OperatingSystem:
-        """Getter equivalent to SoftwareRelease get_software for convenience"""
+        """
+        Returns the operating system instance tide to the current release
+
+        Returns:
+            OperatingSystem: operating system instance of the current release
+        """
+
         return self.software
 
     def to_dict(self) -> Dict:
-        """Converts the current instance into a dictionary"""
+        """
+        Converts the current instance into a dictionary
+
+        Returns:
+            Dict: dictionary representation of the current instance
+        """
+
         base_dict = super().to_dict()
         os_name = base_dict.pop("software")
 
