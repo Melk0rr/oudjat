@@ -36,24 +36,27 @@ class CybereasonEntry(dict):
         entry_attrs = entry_type.value.get("attributes")
 
         for k, v in kwargs.items():
-            if k in entry_attrs:
-                # WARN: Handle unix time
-                if "time" in k.lower():
-                    v = unixtime_to_str(v)
+            if k not in entry_attrs:
+                continue
 
-                # NOTE: Add short policy version
-                if k == "policyName":
-                    cleaned_kwargs["policyShort"] = v
-                    shortPolicy = re.search(r"Detect|Protect", v)
+            formated_value = v
+            # WARN: Convert unix time into readable string
+            if "time" in k.lower():
+                formated_value = unixtime_to_str(v)
 
-                    if shortPolicy is not None:
-                        cleaned_kwargs["policyShort"] = shortPolicy.group(0)
+            # NOTE: Add short policy version
+            if k == "policyName":
+                cleaned_kwargs["policyShort"] = formated_value
+                policyShort = re.search(r"Detect|Protect", formated_value)
 
-                # Handle malware file path
-                if k == "malwareDataModel":
-                    cleaned_kwargs["filePath"] = v.get("filePath", None)
+                if policyShort is not None:
+                    cleaned_kwargs["policyShort"] = policyShort.group(0)
 
-                cleaned_kwargs[k] = v
+            # Handle malware file path
+            if k == "malwareDataModel":
+                cleaned_kwargs["filePath"] = formated_value.get("filePath", None)
+
+            cleaned_kwargs[k] = formated_value
 
         dict.__init__(self, **cleaned_kwargs)
 
@@ -108,7 +111,7 @@ class CybereasonConnector(Connector):
 
         except ConnectionError as e:
             raise (
-                f"An error occured while trying to connect to Cybereason API at {self.target}: {e}"
+                f"CybereasonConnector.connect::An error occured while trying to connect to Cybereason API at {self.target}: {e}"
             )
 
         ColorPrint.green(f"Connected to {self.target.netloc}")
@@ -129,7 +132,7 @@ class CybereasonConnector(Connector):
         Args:
             method (str): HTTP method used for the query (usually: GET, POST, PUT)
             url (str)   : targeted query URL
-            query (str) : query to run
+            query (str) : dumped JSON query to run
 
         Returns:
             requests.models.Response: query response
@@ -137,7 +140,7 @@ class CybereasonConnector(Connector):
 
         if self.connection is None:
             raise ConnectionError(
-                f"Please initialize connection to {self.target.geturl()} before attempting request"
+                f"CybereasonConnector.request::Please initialize connection to {self.target.geturl()} before attempting request"
             )
 
         api_headers = {"Content-Type": "application/json"}
@@ -168,9 +171,7 @@ class CybereasonConnector(Connector):
             List[Dict]: search results
         """
 
-        filter_opt = {"filters": []}
-        if search_filter is not None:
-            filter_opt["filters"] = search_filter
+        filter_opt = search_filter if search_filter is not None else {"filters": None}
 
         query_content = {"limit": limit, "offset": offset, **filter_opt, **kwargs}
         query = json.dumps(query_content)
@@ -206,12 +207,14 @@ class CybereasonConnector(Connector):
                         res = res.get(endpoint.name.lower())
 
         except Exception as e:
-            ColorPrint.red(f"An error occured while querying {endpoint.value.get('endpoint')}\n{e}")
+            ColorPrint.red(
+                f"CybereasonConnector.endpoint_search::An error occured while querying {endpoint.value.get('endpoint')}\n{e}"
+            )
 
         return res
 
     def search(
-        self, endpoint: str, search_filter: List[Dict] = None, limit: int = None, **kwargs
+        self, endpoint: CybereasonEndpoint, search_filter: List[Dict] = None, limit: int = None, **kwargs
     ) -> List["CybereasonEntry"]:
         """
         Runs search in API
@@ -230,30 +233,23 @@ class CybereasonConnector(Connector):
                 f"You must initiate connection to {self.target.netloc} before running search !"
             )
 
-        endpoint = endpoint.upper()
-        if endpoint not in CybereasonEndpoint.__members__:
-            raise ValueError(f"Invalid Cybereason endpoint provided: {endpoint}")
-
-        endpoint_attr = CybereasonEndpoint[endpoint]
-        endpoint_search_limit = endpoint_attr.value.get("limit")
+        endpoint_search_limit = endpoint.value.get("limit")
 
         # Set search limit
-        if limit is None:
-            limit = endpoint_search_limit
-
+        limit = limit or endpoint_search_limit
         offset_mult = math.ceil(limit / endpoint_search_limit)
 
         res = []
         for i in range(0, offset_mult):
             search_i = self.endpoint_search(
-                endpoint=endpoint_attr, search_filter=search_filter, limit=limit, offset=i, **kwargs
+                endpoint=endpoint, search_filter=search_filter, limit=limit, offset=i, **kwargs
             )
 
             if search_i is not None:
                 res.extend(search_i)
 
-        print(f"{len(res)} {endpoint_attr.name.lower()} found")
-        entries = list(map(lambda entry: CybereasonEntry(entry_type=endpoint_attr, **entry), res))
+        print(f"{len(res)} {endpoint.name.lower()} found")
+        entries = list(map(lambda entry: CybereasonEntry(entry_type=endpoint, **entry), res))
 
         return entries
 
