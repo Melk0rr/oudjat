@@ -46,7 +46,11 @@ class Software(Asset):
         """
 
         super().__init__(
-            asset_id=software_id, name=name, label=label, asset_type=AssetType.SOFTWARE, description=description
+            asset_id=software_id,
+            name=name,
+            label=label,
+            asset_type=AssetType.SOFTWARE,
+            description=description,
         )
 
         self.editor = editor
@@ -202,7 +206,7 @@ class Software(Asset):
         return {
             **base_dict,
             "editor": self.editor,
-            "releases": ','.join(map(str, self.releases)),
-            "supported_releases": ','.join(self.supported_releases()),
-            "retired_releases": ','.join(self.retired_releases()),
+            "releases": ",".join(map(str, self.releases)),
+            "supported_releases": ",".join(self.supported_releases()),
+            "retired_releases": ",".join(self.retired_releases()),
         }
