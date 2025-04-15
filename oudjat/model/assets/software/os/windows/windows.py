@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Dict, List, Union
 
-from oudjat.model.assets.computer import ComputerType
+from oudjat.model.assets.computer.computer_type import ComputerType
 from oudjat.model.assets.software import (
     SoftwareEdition,
     SoftwareEditionDict,
