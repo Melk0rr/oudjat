@@ -171,7 +171,7 @@ class CybereasonConnector(Connector):
             List[Dict]: search results
         """
 
-        filter_opt = search_filter if search_filter is not None else {"filters": None}
+        filter_opt = search_filter if search_filter is not None else {"filters": []}
 
         query_content = {"limit": limit, "offset": offset, **filter_opt, **kwargs}
         query = json.dumps(query_content)
@@ -374,7 +374,7 @@ class CybereasonConnector(Connector):
         return self.sensor_action(
             action=CybereasonSensorAction.REMOVEFROMGROUP,
             sensor_ids=sensor_ids,
-            query_dict={"sensorsIds": sensor_ids, "filters": None},
+            query_dict={"sensorsIds": sensor_ids, "filters": []},
         )
 
     def sensor_assign_group(self, sensor_ids: Union[str, List[str]], groupId: str) -> Dict:
@@ -409,5 +409,5 @@ class CybereasonConnector(Connector):
         return self.sensor_action(
             action=CybereasonSensorAction.RESTART,
             sensor_ids=sensor_ids,
-            query_dict={"sensorsIds": sensor_ids, "filters": None},
+            query_dict={"sensorsIds": sensor_ids, "filters": []},
         )
