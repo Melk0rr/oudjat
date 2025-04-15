@@ -8,7 +8,7 @@ from oudjat.model.vulnerability.cve import CVE, CVE_REGEX
 from oudjat.utils.color_print import ColorPrint
 
 from ..risk_types import RiskType, risk_name
-from .certfr_page import CERTFRPageType
+from .certfr_page_types import CERTFRPageType
 from .definitions import CERTFR_LINK_REGEX, CERTFR_REF_REGEX, REF_TYPES, URL_REGEX
 
 
