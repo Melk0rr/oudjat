@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 from .account.group.ldap_group import LDAPGroup
 from .account.ldap_computer import LDAPComputer
@@ -143,7 +144,55 @@ class LDAPObjectType(Enum):
         ],
     }
 
+    # ****************************************************************
+    # Attributes
 
 def get_ldap_class(object_type: str) -> LDAPObject:
     """Returns an ldap object instance based on given type"""
     return LDAPObjectType[object_type.upper()].value["pythonClass"]
+    @property
+    def python_cls(self) -> "LDAPObject":
+        """
+        Returns the pythonClass property of an LDAPObjectType
+        This property is used to dynamically instanciate any class that inherits from LDAPObject
+
+        Returns:
+            LDAPObject: an LDAPObject inheriting class
+        """
+
+        return self._value_["pythonClass"]
+
+    @property
+    def object_cls(self) -> str:
+        """
+        Returns the objectClass property of an LDAPObjectType
+        This function is used to make LDAP queries
+
+        Returns:
+            str: the LDAP object class tide to this type
+        """
+
+        return self._value_["objectClass"]
+
+    @property
+    def filter(self) -> str:
+        """
+        Returns the filter property of an LDAPObjectType
+        This property is used to make LDAP queries
+
+        Returns:
+            str: LDAP filter matching this type
+        """
+
+        return self._value_["filter"]
+
+    @property
+    def attributes(self) -> List[str]:
+        """
+        Returns the attributes property of an LDAPObjectType
+
+        Returns:
+            List[atr]: a list of attributes to include in the results when searching for this type
+        """
+
+        return self._value_["attributes"]
