@@ -147,9 +147,6 @@ class LDAPObjectType(Enum):
     # ****************************************************************
     # Attributes
 
-def get_ldap_class(object_type: str) -> LDAPObject:
-    """Returns an ldap object instance based on given type"""
-    return LDAPObjectType[object_type.upper()].value["pythonClass"]
     @property
     def python_cls(self) -> "LDAPObject":
         """
@@ -196,3 +193,46 @@ def get_ldap_class(object_type: str) -> LDAPObject:
         """
 
         return self._value_["attributes"]
+
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def object_cls_is(object_type: str, value: str) -> bool:
+        """
+        Checks if the provided LDAPObjectType objectClass attribute is equal to the given value
+        This method is used as a filter function for LDAPObjectType.from_object_cls method
+
+        Args:
+            object_type (str): element of the LDAPObjectType enumearation
+            value (str)      : value to compare to the objectClass attribute of the provided LDAPObjectType
+
+        Returns:
+            bool: True if the value is equal to the objectClass attribute of the provided LDAPObjectType
+        """
+
+        return LDAPObjectType[object_type.upper()].object_cls == value
+
+    @staticmethod
+    def from_object_cls(object_cls: str) -> "LDAPObjectType":
+        return next(
+            filter(
+                LDAPObjectType.object_cls_is,
+                LDAPObjectType._member_names_,
+                [object_cls] * len(LDAPObjectType._member_names_),
+            )
+        )
+
+    @staticmethod
+    def get_ldap_class(object_type: str) -> LDAPObject:
+        """
+        Returns an LDAPObject derivated class matching the provided type
+
+        Args:
+            object_type (str): object type to search
+
+        Returns:
+            LDAPObject: LDAPObject derivated class
+        """
+
+        return LDAPObjectType[object_type.upper()].python_cls
