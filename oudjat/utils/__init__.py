@@ -29,3 +29,5 @@ __all__ = [
     "unixtime_to_str",
     "seconds_to_str",
 ]
+
+# TODO: Rework utils modules to use OOP when possible
