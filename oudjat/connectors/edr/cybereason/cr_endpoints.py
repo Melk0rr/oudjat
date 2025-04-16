@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 
 class CybereasonEndpoint(Enum):
@@ -79,3 +80,46 @@ class CybereasonEndpoint(Enum):
         "attributes": ["creationTime", "description", "id", "lastUpdate", "name"],
     }
 
+    @property
+    def path(self) -> str:
+        """
+        Returns a CybereasonEndpoint element path
+
+        Returns:
+            str: the path of the endpoint
+        """
+
+        return self._value_["path"]
+
+    @property
+    def method(self) -> str:
+        """
+        Returns a CybereasonEndpoint element HTTP method
+
+        Returns:
+            str: the HTTP method to use for the endpoint
+        """
+
+        return self._value_["method"]
+
+    @property
+    def limit(self) -> str:
+        """
+        Returns a CybereasonEndpoint element search results limit
+
+        Returns:
+            int: the limit number of search results
+        """
+
+        return self._value_["limit"]
+
+    @property
+    def attributes(self) -> List[str]:
+        """
+        Returns a CybereasonEndpoint element search result attributes
+
+        Returns:
+            List[str]: the list of attributes to return from requesting the endpoint if relevent
+        """
+
+        return self._value_["attributes"]
