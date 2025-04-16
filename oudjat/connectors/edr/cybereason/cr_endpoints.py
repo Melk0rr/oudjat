@@ -103,7 +103,7 @@ class CybereasonEndpoint(Enum):
         return self._value_["method"]
 
     @property
-    def limit(self) -> str:
+    def limit(self) -> int:
         """
         Returns a CybereasonEndpoint element search results limit
 

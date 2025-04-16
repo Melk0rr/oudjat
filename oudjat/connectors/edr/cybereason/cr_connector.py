@@ -393,13 +393,13 @@ class CybereasonConnector(Connector):
             query_dict={"sensorsIds": sensor_ids, "filters": []},
         )
 
-    def sensor_assign_group(self, sensor_ids: Union[str, List[str]], groupId: str) -> Dict:
+    def sensor_assign_group(self, sensor_ids: Union[str, List[str]], group_id: str) -> Dict:
         """
         Assigns given sensors to a group
 
         Args:
             sensor_ids (str | List[str]): list of sensors the action will be performed on
-            groupId (str)               : ID of the group the sensors will be assigned to
+            group_id (str)              : ID of the group the sensors will be assigned to
 
         Returns:
             Dict: API query response
@@ -408,7 +408,7 @@ class CybereasonConnector(Connector):
         return self.sensor_action(
             action=CybereasonSensorAction.ADDTOGROUP,
             sensor_ids=sensor_ids,
-            query_dict={"sensorsIds": sensor_ids, "argument": groupId},
+            query_dict={"sensorsIds": sensor_ids, "argument": group_id},
         )
 
     def sensor_restart(self, sensor_ids: Union[str, List[str]]) -> Dict:
