@@ -493,7 +493,7 @@ class LDAPConnector(Connector):
         if not issubclass(ldap_cls, LDAPObject):
             raise ValueError("Invalid class provided. Please provide a valid LDAPObject instance")
 
-        return list(map(lambda entry: ldap_cls(ldap_entry=entry), entries))
+        return list(map(ldap_cls, entries))
 
     @staticmethod
     def check_entry_type(entry: Dict) -> bool:
