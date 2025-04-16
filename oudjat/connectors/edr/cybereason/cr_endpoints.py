@@ -5,7 +5,7 @@ class CybereasonEndpoint(Enum):
     """Cybereason API endpoint attributes"""
 
     SENSORS = {
-        "endpoint": "/rest/sensors/query",
+        "path": "/rest/sensors/query",
         "method": "POST",
         "limit": 30000,
         "attributes": [
@@ -32,12 +32,12 @@ class CybereasonEndpoint(Enum):
     }
 
     SENSORS_ACTION = {
-        "endpoint": "/rest/sensors/action",
+        "path": "/rest/sensors/action",
         "method": "POST"
     }
 
     MALWARES = {
-        "endpoint": "/rest/malware/query",
+        "path": "/rest/malware/query",
         "method": "POST",
         "limit": 1000,
         "attributes": [
@@ -54,26 +54,26 @@ class CybereasonEndpoint(Enum):
     }
 
     POLICIES = {
-        "endpoint": "rest/policies",
+        "path": "rest/policies",
         "method": "POST",
     }
 
     FILES = {
-        "endpoint": "/rest/sensors/action/fileSearch",
+        "path": "/rest/sensors/action/fileSearch",
         "method": "POST",
         "limit": 30000,
         "attributes": [],
     }
 
     USERS = {
-        "endpoint": "/rest/users",
+        "path": "/rest/users",
         "method": "GET",
         "limit": 200,
         "attributes": ["creationTime", "groups", "lastUpdateTime", "locked", "roles", "username"],
     }
 
     GROUPS = {
-        "endpoint": "/rest/groups",
+        "path": "/rest/groups",
         "method": "GET",
         "limit": 300,
         "attributes": ["creationTime", "description", "id", "lastUpdate", "name"],
