@@ -15,6 +15,39 @@ class ConformityLevel(Enum):
     PARTIALLYCONFORM = {"min": 70, "max": 95, "color": ColorPrint.yellow}
     CONFORM = {"min": 95, "max": 100.01, "color": ColorPrint.green}
 
+    @property
+    def min(self) -> float:
+        """
+        Returns a ConformityLevel minimum value
+
+        Returns:
+            float: minimum value of the conforimty level
+        """
+
+        return self._value_["min"]
+
+    @property
+    def max(self) -> float:
+        """
+        Returns a ConformityLevel maximum value
+
+        Returns:
+            float: maximum value of the conforimty level
+        """
+
+        return self._value_["max"]
+
+    @property
+    def color(self) -> Callable:
+        """
+        Returns a ConformityLevel color print function
+
+        Returns:
+            Callable: conformity level function to print value in a certain color
+        """
+
+        return self._value_["color"]
+
 
 class KPI(DataSet):
     """KPI class"""
