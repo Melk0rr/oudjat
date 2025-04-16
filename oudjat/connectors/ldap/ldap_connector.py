@@ -473,6 +473,25 @@ class LDAPConnector(Connector):
 
         return self.search(**search_args)
         # TODO: handle recursieve arguments
+    def complete_partial_entry(self, ldap_entry: "LDAPEntry") -> "LDAPEntry":
+        """
+        Completes a partial LDAP entry by searching for the full details of the entry in the LDAP directory.
+
+        This method takes an `LDAPEntry` object and performs a search operation to fetch the complete details of the entry.
+        The search is conducted using the distinguished name (DN) of the provided `LDAPEntry`.
+
+        Args:
+            self (object): The instance of the class containing this method, typically a class that interacts with an LDAP directory.
+            ldap_entry (LDAPEntry): An object representing a partial entry in the LDAP directory. It must have methods to get its type and distinguished name (`get_type` and `get_dn` respectively).
+
+        Returns:
+            LDAPEntry: A complete LDAP entry that matches the provided partial entry, including all details found in the search operation.
+        """
+
+        return self.search(
+            search_type=LDAPObjectType.from_object_cls(ldap_entry.get_type()),
+            search_filter=f"(distinguishedName={ldap_entry.get_dn()})",
+        )
 
     # ****************************************************************
     # Static methods
