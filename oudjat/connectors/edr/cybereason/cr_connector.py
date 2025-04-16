@@ -60,6 +60,21 @@ class CybereasonEntry(dict):
 
         dict.__init__(self, **cleaned_kwargs)
 
+    @staticmethod
+    def from_search_result(res_elem: Dict, entry_type: "CybereasonEndpoint") -> "CybereasonEntry":
+        """
+        Creates a new instance of CybereasonEntry from a search result
+
+        Args:
+            res_elem (Dict)                : search result element as a dictionary
+            entry_type (CybereasonEndpoint): CybereasonEndpoint enum element matching the res element
+
+        Returns:
+            CybereasonEntry: new entry
+        """
+
+        return CybereasonEntry(entry_type=entry_type, **res_elem)
+
 
 class CybereasonConnector(Connector):
     """
