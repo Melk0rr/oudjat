@@ -9,7 +9,7 @@ from oudjat.utils.color_print import ColorPrint
 
 from .objects.ldap_entry import LDAPEntry
 from .objects.ldap_object import LDAPObject
-from .objects.ldap_object_types import LDAPObjectType, get_ldap_class
+from .objects.ldap_object_types import LDAPObjectType
 
 if TYPE_CHECKING:
     from .objects.account.group.ldap_group import LDAPGroup
@@ -313,7 +313,7 @@ class LDAPConnector(Connector):
             List[LDAPSubnet]: list of subnets
         """
 
-        sb_dc = ','.join([f"DC={dc.lower()}" for dc in self.domain.split(".")])
+        sb_dc = ",".join([f"DC={dc.lower()}" for dc in self.domain.split(".")])
 
         return self.get_mapped_object(
             search_type=LDAPObjectType.SUBNET,
@@ -391,13 +391,17 @@ class LDAPConnector(Connector):
             # INFO: Search for the ref in LDAP server
             # TODO: Must implement an LDAPFilter class to handle potential escape characters
             escaped_ref = ldap3.utils.conv.escape_filter_chars(ref)
-            ref_search = self.search(search_filter=f"(distinguishedName={escaped_ref})")
+            ref_search = self.search(
+                search_filter=f"(distinguishedName={escaped_ref})", attributes="*"
+            )
 
             if len(ref_search) > 0:
                 ref_search: LDAPEntry = ref_search[0]
                 obj_class = ref_search.get_type()
 
-                new_member: "LDAPObject" = get_ldap_class(obj_class)(ldap_entry=ref_search)
+                new_member: "LDAPObject" = LDAPObjectType.get_ldap_class(obj_class)(
+                    ldap_entry=ref_search
+                )
 
                 if new_member.get_type() == "GROUP" and recursive:
                     new_member.get_members(ldap_connector=self, recursive=recursive)
@@ -462,17 +466,28 @@ class LDAPConnector(Connector):
         recursive: bool = False,
     ) -> List["LDAPEntry"]:
         """
-        Returns members of a given OU
+        Retrieves the members of a given organizational unit (OU).
+        This method fetches all LDAP entries that are direct children or descendants of the specified organizational unit.
+        It supports filtering by object types and can recursively search through all sub-OUs if requested.
+
+        Args:
+            ldap_ou (LDAPOrganizationalUnit)  : An object representing the organizational unit from which to retrieve members. It must have a method to get its distinguished name (`get_dn`).
+            object_types (List[str], optional): A list of strings representing the types of objects to filter by. If provided, only entries with these object classes will be returned. Defaults to None.
+            recursive (bool, optional)        : A boolean indicating whether to search recursively through all sub-OUs. If True, it will include descendants in the search results. Defaults to False.
+
+        Returns:
+            List[LDAPEntry]: A list of LDAP entries that are either direct children or descendants of the specified organizational unit. Each entry is represented by an `LDAPEntry` object.
         """
 
         search_args = {"search_base": ldap_ou.get_dn()}
 
         if object_types is not None:
-            types_filter_str = ''.join([f"(objectClass={t})" for t in object_types])
+            types_filter_str = "".join([f"(objectClass={t})" for t in object_types])
             search_args["search_filter"] = f"(|{types_filter_str})"
 
-        return self.search(**search_args)
         # TODO: handle recursieve arguments
+        return self.search(attributes="*", **search_args)
+
     def complete_partial_entry(self, ldap_entry: "LDAPEntry") -> "LDAPEntry":
         """
         Completes a partial LDAP entry by searching for the full details of the entry in the LDAP directory.
