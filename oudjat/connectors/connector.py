@@ -3,6 +3,7 @@ from typing import Any, List
 from oudjat.utils import get_credentials
 
 
+# TODO: Better connector description
 class Connector:
     """Base connector"""
 

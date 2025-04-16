@@ -472,6 +472,7 @@ class LDAPConnector(Connector):
             search_args["search_filter"] = f"(|{types_filter_str})"
 
         return self.search(**search_args)
+        # TODO: handle recursieve arguments
 
     # ****************************************************************
     # Static methods

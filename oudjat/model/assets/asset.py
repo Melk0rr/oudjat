@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from ..organization.location import Location
 
 
+# TODO: better asset description
 class Asset(GenericIdentifiable):
     """Generic asset class to be inherited by all model asset types"""
 
