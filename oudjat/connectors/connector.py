@@ -3,9 +3,11 @@ from typing import Any, List
 from oudjat.utils import get_credentials
 
 
-# TODO: Better connector description
 class Connector:
-    """Base connector"""
+    """
+    This class serves as a base for any type of connector
+    A connector can be seen as a hook to a data source that is used to pull/extract data from it
+    """
 
     def __init__(
         self, target: Any, service_name: str = None, use_credentials: bool = False
