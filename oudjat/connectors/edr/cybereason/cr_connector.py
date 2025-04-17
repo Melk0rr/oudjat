@@ -368,13 +368,13 @@ class CybereasonConnector(Connector):
         query = json.dumps({**query_dict, "sensorsIds": sensor_ids})
         endpoint = CybereasonEndpoint.SENSORS_ACTION
 
-        query = self.request(
+        api_resp = self.request(
             method=endpoint.method,
             url=f"{self.target.geturl()}/{endpoint.path}/{action.value}",
             query=query,
         )
 
-        return json.loads(query.content)
+        return json.loads(api_resp.content)
 
     def sensor_remove_group(self, sensor_ids: Union[str, List[str]]) -> Dict:
         """
