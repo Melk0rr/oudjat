@@ -165,6 +165,9 @@ class CybereasonConnector(Connector):
                 f"CybereasonConnector.request::Please initialize connection to {self.target.geturl()} before attempting request"
             )
 
+        if type(query) is dict:
+            query = json.dumps(query)
+
         api_headers = {"Content-Type": "application/json"}
         return self.connection.request(method=method, url=url, data=query, headers=api_headers)
 
