@@ -109,3 +109,20 @@ class LDAPAccountFlag(IntEnum):
         return not LDAPAccountFlag.check_account_flag(
             account_control, LDAPAccountFlag.PASSWD_NOTREQD
         )
+
+    @staticmethod
+    def is_locked(account_control: int) -> bool:
+        """
+        Checks if the account is locked.
+
+        Args:
+            account_control (int): The integer representation of account control flags.
+
+        Returns:
+            bool: True if the LOCKOUT flag is set, otherwise False.
+        """
+
+        return not LDAPAccountFlag.check_account_flag(
+            account_control, LDAPAccountFlag.LOCKOUT
+        )
+
