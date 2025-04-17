@@ -36,7 +36,7 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return self.entry.get("gpLink")
 
-    def get_objects(self, ldap_connector: "LDAPConnector", object_types: List[str]) -> List["LDAPEntry"]:
+    def get_objects(self, ldap_connector: "LDAPConnector", object_types: List[str] = None) -> List["LDAPEntry"]:
         """
         Returns the objects contained in the current OU
 
