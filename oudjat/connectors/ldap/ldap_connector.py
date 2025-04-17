@@ -41,9 +41,7 @@ class LDAPConnector(Connector):
         """
 
         self.use_tls = use_tls
-        self.port = 389
-        if use_tls:
-            self.port = 636
+        self.port = 636 if use_tls else 389
 
         super().__init__(target=server, service_name=service_name, use_credentials=True)
 
@@ -94,11 +92,7 @@ class LDAPConnector(Connector):
         """
 
         self.use_tls = use_tls
-        if use_tls:
-            self.port = 636
-
-        else:
-            self.port = 389
+        self.port = 636 if use_tls else 389
 
     def connect(self, version: ssl._SSLMethod = None) -> None:
         """
@@ -114,7 +108,9 @@ class LDAPConnector(Connector):
 
             except ldap3.core.exceptions.LDAPSocketOpenError as e:
                 if not self.use_tls:
-                    ColorPrint.yellow(f"Got error while trying to connect to LDAP: {e}")
+                    ColorPrint.yellow(
+                        f"LDAPConnectorGot.connect::Error while trying to connect to LDAP: {e}"
+                    )
 
                 self.connect(version=ssl.PROTOCOL_TLSv1)
 
@@ -379,15 +375,13 @@ class LDAPConnector(Connector):
             # INFO: Search for the ref in LDAP server
             # TODO: Must implement an LDAPFilter class to handle potential escape characters
             escaped_ref = ldap3.utils.conv.escape_filter_chars(ref)
-            ref_search = self.search(
-                search_filter=f"(distinguishedName={escaped_ref})", attributes="*"
-            )
+            ref_search = self.search(search_filter=f"(distinguishedName={escaped_ref})")
 
             if len(ref_search) > 0:
                 ref_search: LDAPEntry = ref_search[0]
-                obj_class = ref_search.get_type()
+                obj_type = ref_search.get_type()
 
-                new_member: "LDAPObject" = LDAPObjectType.get_ldap_class(obj_class)(
+                new_member: "LDAPObject" = LDAPObjectType.get_ldap_class(obj_type)(
                     ldap_entry=ref_search
                 )
 
