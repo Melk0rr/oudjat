@@ -192,7 +192,7 @@ class LDAPObjectType(Enum):
             List[atr]: a list of attributes to include in the results when searching for this type
         """
 
-        return self._value_["attributes"]
+        return self._value_.get("attributes", "*")
 
     # ****************************************************************
     # Static methods
