@@ -348,8 +348,8 @@ class CybereasonConnector(Connector):
     def sensor_action(
         self,
         action: CybereasonSensorAction,
-        sensor_ids: Union[str, List[str]],
-        query_dict: Dict,
+        sensor_ids: Union[str, List[str]] = [],
+        query_dict: Dict = {},
         *args,
         **kwargs,
     ) -> Dict:
@@ -416,7 +416,7 @@ class CybereasonConnector(Connector):
             query_dict={"argument": group_id},
         )
 
-    def sensor_restart(self, sensor_ids: Union[str, List[str]], query: Dict = None) -> Dict:
+    def sensor_restart(self, sensor_ids: Union[str, List[str]] = None, query: Dict = None) -> Dict:
         """
         Restarts given sensors
 
@@ -427,8 +427,17 @@ class CybereasonConnector(Connector):
             Dict: API query response
         """
 
+        # NOTE: Handling Cybereason nonsense
+        # When sensor IDs are provided, the filers must be empty
+        # When sensor IDs are not provided, the filters must be provided at least as an empty array (WTF/FU/KILLME)
+        if sensor_ids is None and query is None:
+            query = self.DEFAULT_QUERY_DICT
+
+        elif sensor_ids is not None:
+            query = {}
+
         return self.sensor_action(
             action=CybereasonSensorAction.RESTART,
             sensor_ids=sensor_ids,
-            query_dict=self.DEFAULT_QUERY_DICT,
+            query_dict=query,
         )
