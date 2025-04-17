@@ -85,6 +85,8 @@ class CybereasonConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
 
+    DEFAULT_QUERY_DICT = {"filters": []}
+
     def __init__(self, target: str, service_name: str = "OudjatCybereasonAPI", port: int = 443):
         """
         Creates a new instance of CybereasonConnector
@@ -256,7 +258,7 @@ class CybereasonConnector(Connector):
         limit = limit or endpoint.limit
         offset_mult = math.ceil(limit / endpoint.limit)
 
-        built_filter = query if query is not None else {"filters": []}
+        built_filter = query if query is not None else self.DEFAULT_QUERY_DICT
         built_query = {"limit": limit, "offset": 0, **built_filter}
 
         res = []
@@ -390,7 +392,7 @@ class CybereasonConnector(Connector):
         return self.sensor_action(
             action=CybereasonSensorAction.REMOVEFROMGROUP,
             sensor_ids=sensor_ids,
-            query_dict={"sensorsIds": sensor_ids, "filters": []},
+            query_dict=self.DEFAULT_QUERY_DICT,
         )
 
     def sensor_assign_group(self, sensor_ids: Union[str, List[str]], group_id: str) -> Dict:
@@ -408,10 +410,10 @@ class CybereasonConnector(Connector):
         return self.sensor_action(
             action=CybereasonSensorAction.ADDTOGROUP,
             sensor_ids=sensor_ids,
-            query_dict={"sensorsIds": sensor_ids, "argument": group_id},
+            query_dict={"argument": group_id},
         )
 
-    def sensor_restart(self, sensor_ids: Union[str, List[str]]) -> Dict:
+    def sensor_restart(self, sensor_ids: Union[str, List[str]], query: Dict = None) -> Dict:
         """
         Restarts given sensors
 
@@ -425,5 +427,5 @@ class CybereasonConnector(Connector):
         return self.sensor_action(
             action=CybereasonSensorAction.RESTART,
             sensor_ids=sensor_ids,
-            query_dict={"sensorsIds": sensor_ids, "filters": []},
+            query_dict=self.DEFAULT_QUERY_DICT,
         )
