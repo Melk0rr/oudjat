@@ -183,10 +183,9 @@ class LDAPConnector(Connector):
         self.default_search_base = self.ldap_server.info.other["defaultNamingContext"][0]
         self.domain = self.ldap_server.info.other["ldapServiceName"][0].split("@")[-1]
 
-    # TODO: use LDAPObjectType for search type
     def search(
         self,
-        search_type: str = "DEFAULT",
+        search_type: "LDAPObjectType" = LDAPObjectType.DEFAULT,
         search_base: str = None,
         search_filter: str = None,
         attributes: Union[str, List[str]] = None,
@@ -211,30 +210,19 @@ class LDAPConnector(Connector):
                 f"You must initiate connection to {self.target} before running search !"
             )
 
-        search_type = search_type.upper()
-        if search_type not in LDAPObjectType.__members__:
-            raise ValueError(f"Invalid search type proviced: {search_type}")
-
-        if search_base is None:
-            search_base = self.default_search_base
-
         # INFO: If the search type is default : final filter is equal to provided search filter
         # Else final filter is a combination of filter matching search type + provided search filter
-        formated_filter = LDAPObjectType[search_type].value.get("filter", "")
-        if search_type.lower() == "default" and search_filter is not None:
+        formated_filter = search_type.filter
+        if search_type == LDAPObjectType.DEFAULT and search_filter is not None:
             formated_filter = search_filter
 
-        else:
-            if search_filter:
-                formated_filter = f"(&{formated_filter}{search_filter})"
-
-        if attributes is None:
-            attributes = LDAPObjectType[search_type].value.get("attributes", "*")
+        elif search_filter is not None:
+            formated_filter = f"(&{formated_filter}{search_filter})"
 
         results = self.connection.extend.standard.paged_search(
-            search_base=search_base,
+            search_base=search_base or self.default_search_base,
             search_filter=formated_filter,
-            attributes=attributes,
+            attributes=attributes or search_type.attributes,
             generator=False,
             **kwargs,
         )
@@ -250,7 +238,7 @@ class LDAPConnector(Connector):
 
     def get_mapped_object(
         self,
-        search_type: LDAPObjectType,
+        search_type: "LDAPObjectType",
         search_base: str = None,
         search_filter: str = None,
         attributes: Union[str, List[str]] = None,
@@ -268,7 +256,7 @@ class LDAPConnector(Connector):
         """
 
         entries = self.search(
-            search_type=search_type.name,
+            search_type=search_type,
             search_base=search_base,
             search_filter=search_filter,
             attributes=attributes,
