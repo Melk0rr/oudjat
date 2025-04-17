@@ -40,10 +40,11 @@ class LDAPAccount(LDAPObject):
         self.pwd_last_set_timestp = self.get_pwd_last_set().timestamp()
         self.account_control = self.entry.get("userAccountControl", None)
 
-        self.enabled = None
-        self.pwd_expires = None
-        self.pwd_expired = None
-        self.pwd_required = None
+        self.enabled = True
+        self.pwd_expires = True
+        self.pwd_expired = False
+        self.pwd_required = True
+        self.is_locked = False
         self.account_flags: Set[str] = set()
 
         if self.account_control is not None:
@@ -51,6 +52,7 @@ class LDAPAccount(LDAPObject):
             self.pwd_expires = LDAPAccountFlag.pwd_expires(self.account_control)
             self.pwd_expired = LDAPAccountFlag.pwd_expired(self.account_control)
             self.pwd_required = LDAPAccountFlag.pwd_required(self.account_control)
+            self.is_locked = LDAPAccountFlag.is_locked(self.account_control)
 
             for flag in list(LDAPAccountFlag):
                 if LDAPAccountFlag.check_account_flag(self.account_control, flag):
