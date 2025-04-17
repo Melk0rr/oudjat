@@ -1,8 +1,10 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class LDAPAccountFlag(Enum):
-    """Flags to exploit user account control"""
+class LDAPAccountFlag(IntEnum):
+    """
+    Bit flag to exploit user account control
+    """
 
     SCRIPT = 1
     ACCOUNT_DISABLE = 2
@@ -27,27 +29,83 @@ class LDAPAccountFlag(Enum):
     NO_AUTH_DATA_REQUIRED = 33554432
     PARTIAL_SECRETS_ACCOUNT = 67108864
 
+    @staticmethod
+    def check_account_flag(account_control: int, flag: "LDAPAccountFlag") -> int:
+        """
+        Compares given value to the chosen flag.
 
-def check_account_flag(account_control: int, flag: LDAPAccountFlag) -> int:
-    """Compare given value to the chosen flag"""
-    return account_control & flag.value
+        Args:
+            account_control (int): The integer representation of account control flags.
+            flag ("LDAPAccountFlag"): An enum-like class representing LDAP account control flags.
 
+        Returns:
+            int: The result of the bitwise AND operation between `account_control` and `flag`.
+        """
 
-def is_disabled(account_control: int) -> bool:
-    """Checks if an account is disabled based on its account control"""
-    return check_account_flag(account_control, LDAPAccountFlag.ACCOUNT_DISABLE)
+        return account_control & flag
 
+    @staticmethod
+    def is_disabled(account_control: int) -> bool:
+        """
+        Checks if an account is disabled based on its account control.
 
-def pwd_expires(account_control: int) -> bool:
-    """Checks if the account's password expires"""
-    return not check_account_flag(account_control, LDAPAccountFlag.PASSWD_DONT_EXPIRE)
+        Args:
+            account_control (int): The integer representation of account control flags.
 
+        Returns:
+            bool: True if the ACCOUNT_DISABLE flag is set, otherwise False.
+        """
 
-def pwd_expired(account_control: int) -> bool:
-    """Checks if the account's password is expired"""
-    return check_account_flag(account_control, LDAPAccountFlag.PASSWORD_EXPIRED) != 0
+        return (
+            LDAPAccountFlag.check_account_flag(account_control, LDAPAccountFlag.ACCOUNT_DISABLE)
+            != 0
+        )
 
+    @staticmethod
+    def pwd_expires(account_control: int) -> bool:
+        """
+        Checks if the account's password expires.
 
-def pwd_required(account_control: int) -> bool:
-    """Checks if the account requires a password"""
-    return not check_account_flag(account_control, LDAPAccountFlag.PASSWD_NOTREQD)
+        Args:
+            account_control (int): The integer representation of account control flags.
+
+        Returns:
+            bool: True if the PASSWD_DONT_EXPIRE flag is not set, otherwise False.
+        """
+
+        return not LDAPAccountFlag.check_account_flag(
+            account_control, LDAPAccountFlag.PASSWD_DONT_EXPIRE
+        )
+
+    @staticmethod
+    def pwd_expired(account_control: int) -> bool:
+        """
+        Checks if the account's password is expired.
+
+        Args:
+            account_control (int): The integer representation of account control flags.
+
+        Returns:
+            bool: True if the PASSWORD_EXPIRED flag is set, otherwise False.
+        """
+
+        return (
+            LDAPAccountFlag.check_account_flag(account_control, LDAPAccountFlag.PASSWORD_EXPIRED)
+            != 0
+        )
+
+    @staticmethod
+    def pwd_required(account_control: int) -> bool:
+        """
+        Checks if the account requires a password.
+
+        Args:
+            account_control (int): The integer representation of account control flags.
+
+        Returns:
+            bool: True if the PASSWD_NOTREQD flag is not set, otherwise False.
+        """
+
+        return not LDAPAccountFlag.check_account_flag(
+            account_control, LDAPAccountFlag.PASSWD_NOTREQD
+        )
