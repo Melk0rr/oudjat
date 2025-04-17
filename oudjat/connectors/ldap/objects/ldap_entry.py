@@ -100,7 +100,7 @@ class LDAPEntry(dict):
             )
         )
 
-        return obj_type.object_cls if obj_type is not None else None
+        return obj_type.name if obj_type is not None else None
 
     def compare_to_obj_type_cls(self, object_type: LDAPObjectType) -> bool:
         """
