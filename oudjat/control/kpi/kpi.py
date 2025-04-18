@@ -109,8 +109,7 @@ class KPI(DataSet):
             ConformityLevel: the computed level of conformity
         """
 
-        if value is None:
-            value = self.get_kpi_value()
+        value = value or self.get_kpi_value()
 
         conformity_lvls = list(ConformityLevel)
         return next(
@@ -201,7 +200,7 @@ class KPI(DataSet):
     # ****************************************************************
     # Static methods
 
-    def conformity_value_level(lvl: ConformityLevel, value: float) -> bool:
+    def conformity_value_level(lvl: "ConformityLevel", value: float) -> bool:
         """
         Checks if the given value is between the provided conformity level min and max values
 
@@ -212,4 +211,5 @@ class KPI(DataSet):
         Returns:
             bool: True if the provided value matches the given conforimty level, False otherwise
         """
-        return lvl.value["min"] <= value <= lvl.value["max"]
+
+        return lvl.min <= value <= lvl.max
