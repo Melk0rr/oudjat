@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import IntEnum
 from typing import Any, Dict, List, Union
 
 from ..asset import Asset
@@ -7,7 +7,7 @@ from .software_edition import SoftwareEditionDict
 from .software_release import SoftwareRelease, SoftwareReleaseDict
 
 
-class SoftwareType(Enum):
+class SoftwareType(IntEnum):
     """An enumeration to list software types"""
 
     OS = 0
