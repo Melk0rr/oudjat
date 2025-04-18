@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class LDAPGroupType(Enum):
+class LDAPGroupType(IntEnum):
     """LDAP group type values"""
 
     GLOBAL_DISTRIB = 2
