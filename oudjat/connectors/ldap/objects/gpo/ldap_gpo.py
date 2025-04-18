@@ -1,13 +1,10 @@
 import re
-from enum import Enum
+from enum import Enum, IntEnum
 from typing import TYPE_CHECKING, Dict, List, Union
 
 from ..definitions import UUID_REG
 from ..ldap_object import LDAPObject
 from .ms_gppref import MS_GPPREF
-
-if TYPE_CHECKING:
-    from ..ldap_entry import LDAPEntry
 
 if TYPE_CHECKING:
     from ...ldap_connector import LDAPConnector
@@ -21,7 +18,7 @@ class LDAPGPOScope(Enum):
     MACHINE = "gPCMachineExtensionNames"
 
 
-class LDAPGPOState(Enum):
+class LDAPGPOState(IntEnum):
     """GPO state enumeration"""
 
     ENABLED = 0
@@ -56,11 +53,11 @@ class LDAPGroupPolicyObject(LDAPObject):
             self.state = LDAPGPOState(int(wql.split(";")[-1][0]))
 
         try:
-            if self.entry.get(LDAPGPOScope.USER.value) is not None:
-                self.scope = LDAPGPOScope.USER
-
-            else:
-                self.scope = LDAPGPOScope.MACHINE
+            self.scope = (
+                LDAPGPOScope.USER
+                if self.entry.get(LDAPGPOScope.USER.value) is not None
+                else LDAPGPOScope.MACHINE
+            )
 
         except Exception as e:
             raise (f"LDAPGPO::Error while trying to get group policy scope\n{e}")
@@ -107,8 +104,6 @@ class LDAPGroupPolicyObject(LDAPObject):
         Returns:
             List["LDAPEntry"]: A list of LDAPEntry instances that are linked to the current GPO.
         """
-
-        search_filter = f"(gPLink={f'*{self.name}*'})(name={ou})"
 
         return ldap_connector.get_ou(
             search_filter=f"(gPLink={f'*{self.name}*'})(name={ou})", attributes=attributes
