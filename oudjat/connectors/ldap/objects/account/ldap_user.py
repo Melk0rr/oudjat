@@ -33,7 +33,7 @@ class LDAPUser(LDAPAccount, User):
             self.is_locked = LDAPAccountFlag.is_locked(ms_acc_ctl)
 
             for flag in list(LDAPAccountFlag):
-                if LDAPAccountFlag.check_account_flag(ms_acc_ctl, flag):
+                if LDAPAccountFlag.check_flag(ms_acc_ctl, flag):
                     self.account_flags.add(flag.name)
 
         User.__init__(

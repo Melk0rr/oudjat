@@ -1,7 +1,7 @@
-from enum import IntEnum
+from oudjat.utils.bit_flag import BitFlag
 
 
-class LDAPAccountFlag(IntEnum):
+class LDAPAccountFlag(BitFlag):
     """
     Bit flag to exploit user account control
     """
@@ -29,20 +29,6 @@ class LDAPAccountFlag(IntEnum):
     NO_AUTH_DATA_REQUIRED = 33554432
     PARTIAL_SECRETS_ACCOUNT = 67108864
 
-    @staticmethod
-    def check_account_flag(account_control: int, flag: "LDAPAccountFlag") -> int:
-        """
-        Compares given value to the chosen flag.
-
-        Args:
-            account_control (int): The integer representation of account control flags.
-            flag ("LDAPAccountFlag"): An enum-like class representing LDAP account control flags.
-
-        Returns:
-            int: The result of the bitwise AND operation between `account_control` and `flag`.
-        """
-
-        return account_control & flag
 
     @staticmethod
     def is_disabled(account_control: int) -> bool:
@@ -57,7 +43,7 @@ class LDAPAccountFlag(IntEnum):
         """
 
         return (
-            LDAPAccountFlag.check_account_flag(account_control, LDAPAccountFlag.ACCOUNT_DISABLE)
+            LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.ACCOUNT_DISABLE)
             != 0
         )
 
@@ -73,7 +59,7 @@ class LDAPAccountFlag(IntEnum):
             bool: True if the PASSWD_DONT_EXPIRE flag is not set, otherwise False.
         """
 
-        return not LDAPAccountFlag.check_account_flag(
+        return not LDAPAccountFlag.check_flag(
             account_control, LDAPAccountFlag.PASSWD_DONT_EXPIRE
         )
 
@@ -90,7 +76,7 @@ class LDAPAccountFlag(IntEnum):
         """
 
         return (
-            LDAPAccountFlag.check_account_flag(account_control, LDAPAccountFlag.PASSWORD_EXPIRED)
+            LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.PASSWORD_EXPIRED)
             != 0
         )
 
@@ -106,7 +92,7 @@ class LDAPAccountFlag(IntEnum):
             bool: True if the PASSWD_NOTREQD flag is not set, otherwise False.
         """
 
-        return not LDAPAccountFlag.check_account_flag(
+        return not LDAPAccountFlag.check_flag(
             account_control, LDAPAccountFlag.PASSWD_NOTREQD
         )
 
@@ -122,7 +108,7 @@ class LDAPAccountFlag(IntEnum):
             bool: True if the LOCKOUT flag is set, otherwise False.
         """
 
-        return not LDAPAccountFlag.check_account_flag(
+        return not LDAPAccountFlag.check_flag(
             account_control, LDAPAccountFlag.LOCKOUT
         )
 

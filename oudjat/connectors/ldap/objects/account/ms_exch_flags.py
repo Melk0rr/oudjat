@@ -1,7 +1,7 @@
-from enum import Enum
+from oudjat.utils.bit_flag import BitFlag
 
 
-class MSExchFlag(Enum):
+class MSExchFlag(BitFlag):
     """Flags to exploit user account control"""
 
     USERMAILBOX = 1
@@ -35,7 +35,3 @@ class MSExchFlag(Enum):
     REMOTEQUIPMENTMAILBOX = 17179869184
     REMOTESHAREDMAILBOX = 34359738368
 
-
-def check_account_flag(value: int, flag: "MSExchFlag") -> int:
-    """Compare given value to the chosen flag"""
-    return value & flag.value
