@@ -66,9 +66,9 @@ class Risk:
         if self.likelihood is None or self.impact is None:
             raise ValueError("Risk::You need to set risk likelihood and impact to get its score !")
 
-        self.value = self.likelihood.value * self.impact.value
+        self.value = self.likelihood * self.impact
 
-        base_severity = self.risk_table[self.impact.value - 1][self.likelihood.value - 1]
+        base_severity = self.risk_table[self.impact - 1][self.likelihood - 1]
         self.severity = RiskMeasure(base_severity)
 
         return self.severity
