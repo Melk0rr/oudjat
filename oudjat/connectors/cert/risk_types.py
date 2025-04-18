@@ -14,6 +14,14 @@ class RiskType(Enum):
     TMP = {"en": "Integrity Violation", "fr": "Atteinte à l'intégrité des données"}
     XSS = {"en": "Code Injection", "fr": "Exécution de code arbitraire"}
 
+    # TODO: Docstrings
+    @property
+    def en(self) -> str:
+        return self._value_["en"]
+
+    @property
+    def fr(self) -> str:
+        return self._value_["fr"]
 
     @staticmethod
     def risk_name(risk: "RiskType") -> str:
