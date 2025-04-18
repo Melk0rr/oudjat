@@ -1,16 +1,21 @@
 # INFO: Date format bit flag
 from enum import Enum
 
+from .bit_flag import BitFlag
 
-class DateStrFlag(Enum):
+
+class DateFlag(BitFlag):
     """Bit flag to handle date string format"""
 
     YEAR = 1 << 0
-    MONTH = 1 << 1
+    MON = 1 << 1
     DAY = 1 << 2
     HOUR = 1 << 3
     MIN = 1 << 4
     SEC = 1 << 5
+    YMD = YEAR | MON | DAY
+    HMS = HOUR | MIN | SEC
+    YMD_HMS = YMD | HMS
 
 
 class DateFormatChar(Enum):
@@ -29,9 +34,6 @@ class TimeFormatChar(Enum):
     SEC = "%S"
 
 
-DATE_FLAGS = DateStrFlag.YEAR.value | DateStrFlag.MONTH.value | DateStrFlag.DAY.value
-TIME_FLAGS = DateStrFlag.HOUR.value | DateStrFlag.MIN.value | DateStrFlag.SEC.value
-DATE_TIME_FLAGS = DATE_FLAGS | TIME_FLAGS
 
 
 def check_date_flag(format_val: int, date_flag: DateStrFlag) -> int:
