@@ -18,11 +18,11 @@ class DateFlag(BitFlag):
     YMD_HMS = YMD | HMS
 
 
-class DateFormatChar(Enum):
+class DateFormat(Enum):
     """Date format characters"""
 
     YEAR = "%Y"
-    MONTH = "%m"
+    MON = "%m"
     DAY = "%d"
 
 
