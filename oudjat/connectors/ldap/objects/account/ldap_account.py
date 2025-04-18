@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Set
 
-from oudjat.utils.datestr_flags import DATE_TIME_FLAGS, date_format_from_flag
+from oudjat.utils.datestr_flags import DateFormat, DateFlag
 from oudjat.utils.time_convertions import days_diff
 
 from ..ldap_object import LDAPObject
@@ -12,8 +12,17 @@ if TYPE_CHECKING:
 
 
 def acc_date_str(date: datetime) -> str:
-    """Converts an account date into a string"""
-    return date.strftime(date_format_from_flag(DATE_TIME_FLAGS))
+    """
+    Converts an account date into a readable string
+
+    Args:
+        date (datetime): date to convert into a readable string
+
+    Returns:
+        str: readable formated string
+    """
+
+    return date.strftime(DateFormat.from_flag(DateFlag.YMD_HMS))
 
 
 class LDAPAccount(LDAPObject):
@@ -55,7 +64,7 @@ class LDAPAccount(LDAPObject):
             self.is_locked = LDAPAccountFlag.is_locked(self.account_control)
 
             for flag in list(LDAPAccountFlag):
-                if LDAPAccountFlag.check_account_flag(self.account_control, flag):
+                if LDAPAccountFlag.check_flag(self.account_control, flag):
                     self.account_flags.add(flag.name)
 
         else:

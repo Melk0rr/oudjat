@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Union
 
-from oudjat.utils import DATE_FLAGS, date_format_from_flag
+from oudjat.utils.datestr_flags import DateFormat, DateFlag
 
 from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList, soft_date_str
 
@@ -30,7 +30,7 @@ class SoftwareRelease:
             software (Software)                 : The software instance to which this release belongs.
             version (Union[int, str])           : The version of the software, can be either an integer or a string representation of a number.
             release_date (Union[str, datetime]) : The date when the software was released. Can be provided as a string formatted according to `%Y-%m-%d`
-                                                or as a datetime object. If provided as a string, it will be parsed using the format specified by DATE_FLAGS.
+                                                or as a datetime object. If provided as a string, it will be parsed using the format specified by DateStrFlag.YMD.
             release_label (str)                 : A label describing the nature of this release, such as "stable" or "beta".
 
         Raises:
@@ -43,7 +43,7 @@ class SoftwareRelease:
 
         try:
             if not isinstance(release_date, datetime):
-                release_date = datetime.strptime(release_date, date_format_from_flag(DATE_FLAGS))
+                release_date = datetime.strptime(release_date, DateFormat.from_flag(DateFlag.YMD))
 
         except ValueError as e:
             raise ValueError(f"Please provide dates with %Y-%m-%d format\n{e}")
