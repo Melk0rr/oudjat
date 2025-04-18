@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup, element
 from oudjat.model.vulnerability.cve import CVE, CVE_REGEX
 from oudjat.utils.color_print import ColorPrint
 
-from ..risk_types import RiskType, risk_name
+from ..risk_types import RiskType
 from .certfr_page_types import CERTFRPageType
 from .definitions import CERTFR_LINK_REGEX, CERTFR_REF_REGEX, REF_TYPES, URL_REGEX
 
@@ -405,7 +405,7 @@ class CERTFRPageContent:
         if self.data is not None and self.risks is None:
             risk_set = set()
 
-            for risk in list(RiskType):
+            for risk in RiskType:
                 if risk.value["fr"].lower() in [r.lower() for r in self.data.get("Risques", [])]:
                     risk_set.add(risk)
 
@@ -529,7 +529,7 @@ class CERTFRPageContent:
 
         if self.data is not None:
             content_dict = {
-                "risks": list(map(risk_name, self.get_ris)),
+                "risks": list(map(RiskType.risk_name, self.get_risks())),
                 "products": self.get_products(),
                 "description": self.get_description(),
                 "cves": [cve.get_ref() for cve in self.get_cves().values()],
