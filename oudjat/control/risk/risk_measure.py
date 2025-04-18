@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class RiskMeasure(Enum):
+class RiskMeasure(IntEnum):
     """An enumeration to handle risk measures (likelihood and impact)"""
     MINOR = 1
     MODERATE = 2
