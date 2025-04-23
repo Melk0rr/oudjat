@@ -26,7 +26,6 @@ class FileConnector(Connector):
 
         self.source = source
         self.filetype = FileType[file_ext.upper()]
-        self.import_function = self.filetype.value.get("import")
 
         self.connection = False
         self.data = None
@@ -148,10 +147,11 @@ class CSVConnector(FileConnector):
         """
 
         try:
-            self.data = self.import_function(
+            self.data = self.filetype.f_import(
                 file_path=self.target, delimiter=self.delimiter, callback=callback
             )
             self.connection = True
 
         except Exception as e:
             raise (f"CSVConnector::Error connecting to file {self.target}\n{e}")
+

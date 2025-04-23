@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Callable
 
 from oudjat.utils.file import (
     export_csv,
@@ -18,3 +19,23 @@ class FileType(Enum):
     JSON = {"import": import_json, "export": export_json}
 
     TXT = {"import": import_txt, "export": export_txt}
+
+    @property
+    def f_import(self) -> Callable:
+        """Get the import function for the file type.
+
+        Returns:
+            Callable: The import function as a callable object.
+        """
+
+        return self._value_["import"]
+
+    @property
+    def f_export(self) -> Callable:
+        """Get the export function for the file type.
+
+        Returns:
+            Callable: The export function as a callable object.
+        """
+
+        return self._value_["export"]
