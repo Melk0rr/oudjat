@@ -10,7 +10,10 @@ from ..software_release import SoftwareRelease
 
 
 class OSFamily(Enum):
-    """OS family enumeration"""
+    """
+    OS family enumeration
+
+    """
 
     ANDROID = {
         "name": "android",
@@ -27,6 +30,26 @@ class OSFamily(Enum):
     MAC = {"name": "mac", "pattern": r"[Mm][Aa][Cc](?:[Oo][Ss])?"}
 
     WINDOWS = {"name": "windows", "pattern": r"[Ww]indows(?: [Ss]erver)?"}
+
+    @property
+    def name(self) -> str:
+        """
+        Get the name of the operating system family.
+
+        Returns:
+            str: The name of the OS family as a string.
+        """
+        return self._value_["name"]
+
+    @property
+    def pattern(self) -> str:
+        """
+        Get the regex pattern for the operating system family.
+
+        Returns:
+            str: The regex pattern as a string.
+        """
+        return self._value_["pattern"]
 
 
 class OperatingSystem(Software):
@@ -135,8 +158,8 @@ class OperatingSystem(Software):
         if test_str is None:
             return None
 
-        for f in OSFamily._member_names_:
-            search = re.search(OSFamily[f].value.get("pattern"), test_str)
+        for f in OSFamily:
+            search = re.search(f.pattern, test_str)
             if search is not None:
                 return search.group(0)
 
@@ -152,6 +175,7 @@ class OperatingSystem(Software):
         Returns:
             str: A string representing the matched version, or None if no match is found.
         """
+
         raise NotImplementedError(
             "OperatingSystem.get_matching_version() method must be implemented by the overloading class"
         )
@@ -171,6 +195,7 @@ class OSRelease(SoftwareRelease):
         Returns:
             str: forged name of the OS release
         """
+
         raise NotImplementedError(
             "OSRelease.get_name() method must be implemented by the overloading class"
         )
@@ -197,3 +222,4 @@ class OSRelease(SoftwareRelease):
         os_name = base_dict.pop("software")
 
         return {"os": os_name, **base_dict}
+
