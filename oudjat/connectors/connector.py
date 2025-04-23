@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from oudjat.utils import get_credentials
+from oudjat.utils import CredentialHelper
 
 
 class Connector:
@@ -29,7 +29,7 @@ class Connector:
         # Retreive credentials for the service
         self.credentials = None
         if use_credentials:
-            self.credentials = get_credentials(self.service_name)
+            self.credentials = CredentialHelper.get_credentials(self.service_name)
 
         self.connection = None
 
@@ -68,7 +68,7 @@ class Connector:
         self.service_name = new_service_name
 
         if use_credentials:
-            self.credentials = get_credentials(self.service_name)
+            self.credentials = CredentialHelper.get_credentials(self.service_name)
 
     def connect(self) -> None:
         """
