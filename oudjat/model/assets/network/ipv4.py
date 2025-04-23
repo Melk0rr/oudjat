@@ -29,6 +29,16 @@ class IPVersion(Enum):
         "pattern": r"^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$"
     }
 
+    @property
+    def pattern(self) -> str:
+        """
+        Get the regex pattern for the IP version
+
+        Returns:
+            str: The regex pattern as a string.
+        """
+        return self._value_["pattern"]
+
 
 class IPv4:
     """Simple Class providing tools to manipulate IPv4 addresses"""
@@ -50,17 +60,16 @@ class IPv4:
         if type(address) is int:
             address = ip_int_to_str(address)
 
-        if re.match(IPVersion.IPV4.value["pattern"], address):
+        if re.match(IPVersion.IPV4.pattern, address):
             self.version = IPVersion.IPV4
 
-        elif re.match(IPVersion.IPV6.value["pattern"], address):
+        elif re.match(IPVersion.IPV6.pattern, address):
             self.version = IPVersion.IPV6
 
         else:
             raise ValueError(f"Invalid IPv4 address provided: '{address}'")
 
         self.address: int = ip_str_to_int(address)
-
         self.ports = {}
 
     # ****************************************************************
