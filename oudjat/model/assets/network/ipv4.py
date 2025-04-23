@@ -15,11 +15,7 @@ if TYPE_CHECKING:
 
 class IPVersion(Enum):
     """
-    Enumeration representing different versions of IP addresses.
-
-    Attributes:
-        IPV4 (dict): A dictionary with a regex pattern for IPv4 addresses.
-        IPV6 (dict): A dictionary with a regex pattern for IPv6 addresses.
+    Enumeration representing different versions of IP addresses based on a regex pattern
     """
 
     IPV4 = {
