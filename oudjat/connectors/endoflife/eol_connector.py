@@ -118,7 +118,7 @@ class EndOfLifeConnector(Connector):
 
         for rel in win_eol:
             if target == "windows":
-                win_editions = list(set([e["category"] for e in WindowsEdition.WINDOWS.value]))
+                win_editions = list(set([e.get_category() for e in WindowsEdition.WINDOWS.value]))
                 r_edition = win_editions[:-1]
 
                 edi_search = re.search(
