@@ -39,6 +39,7 @@ class OSFamily(Enum):
         Returns:
             str: The name of the OS family as a string.
         """
+
         return self._value_["name"]
 
     @property
@@ -49,6 +50,7 @@ class OSFamily(Enum):
         Returns:
             str: The regex pattern as a string.
         """
+
         return self._value_["pattern"]
 
 
