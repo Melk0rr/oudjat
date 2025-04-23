@@ -1,5 +1,5 @@
 import re
-from enum import Enum
+from enum import IntEnum
 from typing import Any, Dict, List
 
 from oudjat.utils.mappers import any_to_dict
@@ -8,13 +8,13 @@ from .definitions import KB_NUM_REGEX
 from .ms_product import MSProduct
 
 
-class MSRemedType(Enum):
+class MSRemedType(IntEnum):
     """
     An enumeration of remediation types
     """
 
-    KB = "KB"
-    PATCH = "Patch"
+    KB = 0
+    PATCH = 1
 
 
 class MSRemed:
