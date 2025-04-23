@@ -5,7 +5,7 @@ from typing import Dict, List, Tuple
 from oudjat.control.data import DataFilter, DataSet
 from oudjat.control.kpi import KPI
 from oudjat.utils.color_print import ColorPrint
-from oudjat.utils.file import export_csv, import_csv
+from oudjat.utils.file import FileHandler
 
 from .base import Base
 
@@ -78,7 +78,7 @@ class KPIFactory(Base):
             current_data[k] = []
 
             if self.data_sources[k][index] is not None:
-                current_data[k] = import_csv(
+                current_data[k] = FileHandler.import_csv(
                     f"{self.options['DIRECTORY']}/{self.data_sources[k][index]}.csv", delimiter="|"
                 )
 
@@ -147,4 +147,4 @@ class KPIFactory(Base):
 
         if self.options["--export-csv"] and len(self.results) > 0:
             append = True if self.options["--append"] else False
-            export_csv(self.results, self.options["--export-csv"], delimiter="|", append=append)
+            FileHandler.export_csv(self.results, self.options["--export-csv"], delimiter="|", append=append)

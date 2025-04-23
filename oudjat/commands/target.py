@@ -2,7 +2,7 @@ from multiprocessing import Pool
 from typing import Dict, List
 
 from oudjat.model.vulnerability import CVE
-from oudjat.utils import ColorPrint, export_csv, import_csv, str_file_option_handle
+from oudjat.utils import ColorPrint, FileHandler, str_file_option_handle
 
 from .base import Base
 
@@ -30,7 +30,7 @@ class Target(Base):
 
                 return cve_instances
 
-            cve_import = import_csv(self.options["--cve-list"], cve_import_callback)
+            cve_import = FileHandler.import_csv(self.options["--cve-list"], cve_import_callback)
             self.options["--cve-list"] = cve_import
 
     def handle_exception(self, e: Exception, message: str = "") -> None:
@@ -44,7 +44,7 @@ class Target(Base):
     def res_2_csv(self) -> None:
         """Write the results into a CSV file"""
         print("\nExporting results to csv...")
-        export_csv(self.results, self.options["--export-csv"], "|")
+        FileHandler.export_csv(self.results, self.options["--export-csv"], "|")
 
     def run(self) -> None:
         """Main function called from the cli module"""

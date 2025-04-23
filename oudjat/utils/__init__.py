@@ -3,7 +3,7 @@ from .color_print import ColorPrint
 from .credentials import CredentialHelper
 from .datestr_flags import DateFlag, DateFormat
 from .dictionary import join_dictionary_items, join_dictionary_values, map_list_to_dict
-from .file import export_csv, export_json, export_txt, import_csv, import_json, import_txt
+from .file import FileHandler, FileType
 from .init_option_handle import str_file_option_handle
 from .stdouthook import StdOutHook
 from .time_convertions import days_diff, seconds_to_str, unixtime_to_str
@@ -18,12 +18,8 @@ __all__ = [
     "join_dictionary_items",
     "join_dictionary_values",
     "map_list_to_dict",
-    "import_txt",
-    "export_txt",
-    "import_csv",
-    "export_csv",
-    "import_json",
-    "export_json",
+    "FileHandler",
+    "FileType",
     "str_file_option_handle",
     "StdOutHook",
     "days_diff",
