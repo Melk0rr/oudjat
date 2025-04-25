@@ -5,6 +5,8 @@ import re
 from enum import Enum
 from typing import Any, Callable, Dict, List, Union
 
+from .color_print import ColorPrint
+
 
 class FileHandler:
     @staticmethod
@@ -24,7 +26,7 @@ class FileHandler:
 
     # INFO: JSON file functions
     @staticmethod
-    def import_json(file_path: str) -> Union[Dict, List]:
+    def import_json(file_path: str, callback: Callable = None) -> Union[Dict, List]:
         """
         Helper function to import json data from a specified file.
 
@@ -35,10 +37,20 @@ class FileHandler:
             dict or list: The content of the imported JSON file.
         """
 
-        full_path = os.path.join(os.getcwd(), file_path)
+        json_data = None
+        try:
+            full_path = os.path.join(os.getcwd(), file_path)
 
-        with open(full_path, "r", encoding="utf-8") as json_file:
-            json_data = json.load(json_file)
+            with open(full_path, "r", encoding="utf-8") as json_file:
+                json_data = json.load(json_file)
+
+            if callback is not None:
+                json_data = callback(json_data)
+
+            ColorPrint.green(f"Successfully imported JSON data from {file_path}")
+
+        except Exception as e:
+            raise e
 
         return json_data
 
@@ -51,12 +63,23 @@ class FileHandler:
             data (dict or list): The data to be exported.
             file_path (str)    : The path where the JSON file will be saved.
         """
-        with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+
+        if len(data) == 0:
+            print("No data to export !")
+            return
+
+        try:
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+
+            ColorPrint.green(f"Successfully exported JSON data to {file_path}")
+
+        except Exception as e:
+            raise e
 
     # INFO: CSV file functions
     @staticmethod
-    def import_csv(file_path: str, callback: object = None, delimiter: str = None) -> List[Dict]:
+    def import_csv(file_path: str, callback: Callable = None, delimiter: str = None) -> List[Dict]:
         """
         Helper function to import CSV content into a list of dictionaries.
 
@@ -70,23 +93,28 @@ class FileHandler:
         """
 
         full_path = os.path.join(os.getcwd(), file_path)
+        data = None
 
-        with open(full_path, "r", encoding="utf-8", newline="") as f:
-            # WARN: Try to guess the delimiter if none was specified
-            if not delimiter:
-                first_line = f.readline().strip("\n")
-                f.seek(0)
-                delimiter = re.findall(r"\W", first_line)[0]
+        try:
+            with open(full_path, "r", encoding="utf-8", newline="") as f:
+                # WARN: Try to guess the delimiter if none was specified
+                if not delimiter:
+                    first_line = f.readline().strip("\n")
+                    f.seek(0)
+                    delimiter = re.findall(r"\W", first_line)[0]
 
-                print(f"\nNo delimiter specified, guessed '{delimiter}' as a delimiter")
+                    print(f"\nNo delimiter specified, guessed '{delimiter}' as a delimiter")
 
-            reader = csv.DictReader(f, delimiter=delimiter, skipinitialspace=True)
+                reader = csv.DictReader(f, delimiter=delimiter, skipinitialspace=True)
 
-            if callback:
-                data = callback(list(reader))
-
-            else:
                 data = list(reader)
+                if callback is not None:
+                    data = callback(data)
+
+            ColorPrint.green(f"Successfully imported CSV data from {file_path}")
+
+        except Exception as e:
+            raise e
 
         return data
 
@@ -110,19 +138,27 @@ class FileHandler:
 
         full_path = os.path.join(os.getcwd(), file_path)
 
-        mode = "a" if append else "w"
-        with open(full_path, mode, encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=data[0].keys(), delimiter=delimiter)
+        try:
+            mode = "a" if append else "w"
+            with open(full_path, mode, encoding="utf-8", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=data[0].keys(), delimiter=delimiter)
 
-            # Write csv headers if not in append mode
-            if mode != "a":
-                writer.writeheader()
+                # Write csv headers if not in append mode
+                if mode != "a":
+                    writer.writeheader()
 
-            writer.writerows(data)
+                writer.writerows(data)
+
+            ColorPrint.green(f"Successfully exported CSV data to {file_path}")
+
+        except Exception as e:
+            raise e
 
     # INFO: TXT file functions
     @staticmethod
-    def import_txt(file_path: str, delete_duplicates: bool = False) -> List[Any]:
+    def import_txt(
+        file_path: str, delete_duplicates: bool = False, callback: Callable = None
+    ) -> List[Any]:
         """
         Helper function to import a text file and optionally remove duplicates.
 
@@ -134,14 +170,24 @@ class FileHandler:
             list: The content of the text file as a list of strings.
         """
 
-        data = []
-        full_path = os.path.join(os.getcwd(), file_path)
+        data = None
 
-        with open(full_path, encoding="utf-8") as f:
-            data = list(filter(None, f.read().split("\n")))
+        try:
+            full_path = os.path.join(os.getcwd(), file_path)
 
-        if delete_duplicates:
-            data = list(set(data))
+            with open(full_path, encoding="utf-8") as f:
+                data = list(filter(None, f.read().split("\n")))
+
+            if delete_duplicates:
+                data = list(set(data))
+
+            if callback is not None:
+                data = callback(data)
+
+            ColorPrint.green(f"Successfully imported TXT data from {file_path}")
+
+        except Exception as e:
+            raise e
 
         return data
 
@@ -162,10 +208,16 @@ class FileHandler:
 
         full_path = os.path.join(os.getcwd(), file_path)
 
-        mode = "a" if append else "w"
-        with open(full_path, mode, encoding="utf-8", newline="") as f:
-            for line in data:
-                f.write(line + "\n")
+        try:
+            mode = "a" if append else "w"
+            with open(full_path, mode, encoding="utf-8", newline="") as f:
+                for line in data:
+                    f.write(line + "\n")
+
+            ColorPrint.green(f"Successfully exported TXT data to {file_path}")
+
+        except Exception as e:
+            raise e
 
 
 class FileType(Enum):
