@@ -14,15 +14,36 @@ class RiskType(Enum):
     TMP = {"en": "Integrity Violation", "fr": "Atteinte à l'intégrité des données"}
     XSS = {"en": "Code Injection", "fr": "Exécution de code arbitraire"}
 
-def risk_name(risk: RiskType) -> str:
-    """
-    Returns the name of the given risk
+    @property
+    def en(self) -> str:
+        """
+        Returns the English description of the risk.
 
-    Args:
-        risk (RiskType) : risk type to return the name of
+        Returns:
+            str : The English description of the risk.
+        """
+        return self._value_["en"]
 
-    Returns:
-        str : risk name
-    """
+    @property
+    def fr(self) -> str:
+        """
+        Returns the French description of the risk.
 
-    return risk.name
+        Returns:
+            str : The French description of the risk.
+        """
+        return self._value_["fr"]
+
+    @staticmethod
+    def risk_name(risk: "RiskType") -> str:
+        """
+        Returns the name of the given risk
+
+        Args:
+            risk (RiskType) : risk type to return the name of
+
+        Returns:
+            str : risk name
+        """
+
+        return risk.name

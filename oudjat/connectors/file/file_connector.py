@@ -2,9 +2,7 @@ from typing import Any, Dict, List, Union
 
 from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
-from oudjat.utils.file import check_path
-
-from .file_types import FileType
+from oudjat.utils.file import FileHandler, FileType
 
 
 class FileConnector(Connector):
@@ -21,12 +19,11 @@ class FileConnector(Connector):
             source (str): The source identifier or description of the file.
         """
 
-        check_path(path)
+        FileHandler.check_path(path)
         file_ext = path.split(".")[-1]
 
         self.source = source
         self.filetype = FileType[file_ext.upper()]
-        self.import_function = self.filetype.value.get("import")
 
         self.connection = False
         self.data = None
@@ -56,7 +53,7 @@ class FileConnector(Connector):
             new_path (str): The new file path to be set.
         """
 
-        check_path(new_path)
+        FileHandler.check_path(new_path)
         self.target = new_path
 
     def connect(self) -> None:
@@ -148,10 +145,11 @@ class CSVConnector(FileConnector):
         """
 
         try:
-            self.data = self.import_function(
+            self.data = self.filetype.f_import(
                 file_path=self.target, delimiter=self.delimiter, callback=callback
             )
             self.connection = True
 
         except Exception as e:
             raise (f"CSVConnector::Error connecting to file {self.target}\n{e}")
+

@@ -18,6 +18,7 @@ class SoftwareEdition:
             category (str, optional): The category that the software edition belongs to. Defaults to None.
             pattern (str, optional): A regex pattern used for matching strings against this edition. Defaults to None.
         """
+
         self.label = label
         self.category = category
         self.pattern = pattern
@@ -29,6 +30,7 @@ class SoftwareEdition:
         Returns:
             str: The label of the software edition.
         """
+
         return self.label
 
     def get_category(self) -> str:
@@ -38,6 +40,7 @@ class SoftwareEdition:
         Returns:
             str: The category of the software edition.
         """
+
         return self.category
 
     def get_pattern(self) -> str:
@@ -47,6 +50,7 @@ class SoftwareEdition:
         Returns:
             str: The regex pattern used for matching strings against this edition.
         """
+
         return self.pattern
 
     def match_str(self, test_str: str) -> bool:
@@ -59,6 +63,7 @@ class SoftwareEdition:
         Returns:
             bool: True if the string matches the pattern or if no pattern is set, False otherwise.
         """
+
         return self.pattern is None or re.search(self.pattern, test_str)
 
     def __str__(self) -> str:
@@ -68,6 +73,7 @@ class SoftwareEdition:
         Returns:
             str: The label of the software edition as its string representation.
         """
+
         return self.label
 
 
@@ -86,7 +92,12 @@ class SoftwareEditionDict(dict):
         Returns:
             List[SoftwareEdition]: A list of SoftwareEdition instances that match the given label.
         """
-        return [e for e in self.values() if e.match_str(label)]
+
+
+        def filter_values(edition: "SoftwareEdition") -> bool:
+            return edition.match_str(label)
+
+        return list(filter(filter_values, self.values()))
 
     def get_edition_labels(self) -> List[str]:
         """
@@ -95,7 +106,8 @@ class SoftwareEditionDict(dict):
         Returns:
             List[str]: A list of the labels of all software editions in the dictionary.
         """
-        return [str(edition) for edition in self.values()]
+
+        return map(str, self.values())
 
     def get_editions_per_ctg(self, category: str) -> "SoftwareEditionDict":
         """
@@ -107,4 +119,8 @@ class SoftwareEditionDict(dict):
         Returns:
             SoftwareEditionDict: A dictionary containing only the SoftwareEdition instances that belong to the specified category.
         """
-        return [str(e) for e in self.values() if e.get_category() == category]
+
+        def filter_values(edition: "SoftwareEdition") -> bool:
+            return edition.get_category() == category
+
+        return list(map(str, filter(filter_values, self.values())))

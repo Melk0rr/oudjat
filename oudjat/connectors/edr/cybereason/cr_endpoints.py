@@ -1,11 +1,12 @@
 from enum import Enum
+from typing import List
 
 
 class CybereasonEndpoint(Enum):
     """Cybereason API endpoint attributes"""
 
     SENSORS = {
-        "endpoint": "/rest/sensors/query",
+        "path": "/rest/sensors/query",
         "method": "POST",
         "limit": 30000,
         "attributes": [
@@ -32,12 +33,12 @@ class CybereasonEndpoint(Enum):
     }
 
     SENSORS_ACTION = {
-        "endpoint": "/rest/sensors/action",
+        "path": "/rest/sensors/action",
         "method": "POST"
     }
 
     MALWARES = {
-        "endpoint": "/rest/malware/query",
+        "path": "/rest/malware/query",
         "method": "POST",
         "limit": 1000,
         "attributes": [
@@ -54,28 +55,71 @@ class CybereasonEndpoint(Enum):
     }
 
     POLICIES = {
-        "endpoint": "rest/policies",
+        "path": "rest/policies",
         "method": "POST",
     }
 
     FILES = {
-        "endpoint": "/rest/sensors/action/fileSearch",
+        "path": "/rest/sensors/action/fileSearch",
         "method": "POST",
         "limit": 30000,
         "attributes": [],
     }
 
     USERS = {
-        "endpoint": "/rest/users",
+        "path": "/rest/users",
         "method": "GET",
         "limit": 200,
         "attributes": ["creationTime", "groups", "lastUpdateTime", "locked", "roles", "username"],
     }
 
     GROUPS = {
-        "endpoint": "/rest/groups",
+        "path": "/rest/groups",
         "method": "GET",
         "limit": 300,
         "attributes": ["creationTime", "description", "id", "lastUpdate", "name"],
     }
 
+    @property
+    def path(self) -> str:
+        """
+        Returns a CybereasonEndpoint element path
+
+        Returns:
+            str: the path of the endpoint
+        """
+
+        return self._value_["path"]
+
+    @property
+    def method(self) -> str:
+        """
+        Returns a CybereasonEndpoint element HTTP method
+
+        Returns:
+            str: the HTTP method to use for the endpoint
+        """
+
+        return self._value_["method"]
+
+    @property
+    def limit(self) -> int:
+        """
+        Returns a CybereasonEndpoint element search results limit
+
+        Returns:
+            int: the limit number of search results
+        """
+
+        return self._value_["limit"]
+
+    @property
+    def attributes(self) -> List[str]:
+        """
+        Returns a CybereasonEndpoint element search result attributes
+
+        Returns:
+            List[str]: the list of attributes to return from requesting the endpoint if relevent
+        """
+
+        return self._value_["attributes"]

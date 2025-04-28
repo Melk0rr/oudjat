@@ -1,10 +1,13 @@
 from typing import Any, List
 
-from oudjat.utils import get_credentials
+from oudjat.utils import CredentialHelper
 
 
 class Connector:
-    """Base connector"""
+    """
+    This class serves as a base for any type of connector
+    A connector can be seen as a hook to a data source that is used to pull/extract data from it
+    """
 
     def __init__(
         self, target: Any, service_name: str = None, use_credentials: bool = False
@@ -26,7 +29,7 @@ class Connector:
         # Retreive credentials for the service
         self.credentials = None
         if use_credentials:
-            self.credentials = get_credentials(self.service_name)
+            self.credentials = CredentialHelper.get_credentials(self.service_name)
 
         self.connection = None
 
@@ -65,7 +68,7 @@ class Connector:
         self.service_name = new_service_name
 
         if use_credentials:
-            self.credentials = get_credentials(self.service_name)
+            self.credentials = CredentialHelper.get_credentials(self.service_name)
 
     def connect(self) -> None:
         """

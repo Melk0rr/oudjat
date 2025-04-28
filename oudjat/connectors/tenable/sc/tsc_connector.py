@@ -6,7 +6,7 @@ from tenable.sc import TenableSC
 
 from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
-from oudjat.model.vulnerability.cve import CVE
+from oudjat.model.vulnerability.cve import Severity
 from oudjat.utils.color_print import ColorPrint
 
 from .tsc_asset_list_types import TSCAssetListType
@@ -145,7 +145,7 @@ class TenableSCConnector(Connector):
     # INFO: Vulns
     def search_vulns(
         self,
-        *severities: List[str],
+        *severities: List[int],
         tool: TSCVulnTool = TSCVulnTool.VULNDETAILS,
         exploitable: bool = True,
     ) -> Dict:
@@ -172,7 +172,7 @@ class TenableSCConnector(Connector):
 
         return list(search)
 
-    def build_severity_filter(self, *severities: List[str]) -> Tuple:
+    def build_severity_filter(self, *severities: List[int]) -> Tuple:
         """
         Returns a severity filter based on the provided severities
 
@@ -181,7 +181,7 @@ class TenableSCConnector(Connector):
         """
 
         sev_scores = ",".join(
-            [f"{CVE.get_severity_by_score(sev).value['score']}" for sev in list(*severities)]
+            [f"{Severity.from_score(sev).score}" for sev in list(*severities)]
         )
         return "severity", "=", sev_scores
 

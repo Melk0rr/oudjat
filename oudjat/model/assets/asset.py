@@ -9,7 +9,10 @@ if TYPE_CHECKING:
 
 
 class Asset(GenericIdentifiable):
-    """Generic asset class to be inherited by all model asset types"""
+    """
+    Generic asset class. Must be inherited by asset types
+    This class serves as a base for any asset type may it be equipment hardware or software, users, etc.
+    """
 
     # ****************************************************************
     # Attributes & Constructors

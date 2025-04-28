@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Dict, List
 
-from oudjat.utils.datestr_flags import DATE_TIME_FLAGS, date_format_from_flag
+from oudjat.utils.datestr_flags import DateFormat, DateFlag
 
 if TYPE_CHECKING:
     from ..ldap_connector import LDAPConnector
@@ -261,7 +261,7 @@ class LDAPObject:
             "classes": self.classes,
             "description": self.description,
             "domain": self.domain,
-            "creation_date": self.creation_date.strftime(date_format_from_flag(DATE_TIME_FLAGS)),
-            "change_date": self.change_date.strftime(date_format_from_flag(DATE_TIME_FLAGS)),
+            "creation_date": self.creation_date.strftime(DateFormat.from_flag(DateFlag.YMD_HMS)),
+            "change_date": self.change_date.strftime(DateFormat.from_flag(DateFlag.YMD_HMS)),
             "oudjat_flags": self.oudjat_flags,
         }

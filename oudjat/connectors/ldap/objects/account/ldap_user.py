@@ -2,7 +2,9 @@ from typing import Dict
 
 from oudjat.model.assets.user import User
 
+from .definitions import MS_ACCOUNT_CTL_PROPERTY
 from .ldap_account import LDAPAccount
+from .ldap_account_flags import LDAPAccountFlag
 
 
 class LDAPUser(LDAPAccount, User):
@@ -19,6 +21,20 @@ class LDAPUser(LDAPAccount, User):
         email = self.entry.get("mail", None)
         if email is not None:
             email = email.lower()
+
+        # NOTE: Check additional account control bits (see https://learn.microsoft.com/en-us/windows/win32/adschema/a-msds-user-account-control-computed)
+        ms_acc_ctl = self.entry.get(MS_ACCOUNT_CTL_PROPERTY, None)
+
+        if ms_acc_ctl is not None:
+            self.enabled = not LDAPAccountFlag.is_disabled(ms_acc_ctl)
+            self.pwd_expires = LDAPAccountFlag.pwd_expires(ms_acc_ctl)
+            self.pwd_expired = LDAPAccountFlag.pwd_expired(ms_acc_ctl)
+            self.pwd_required = LDAPAccountFlag.pwd_required(ms_acc_ctl)
+            self.is_locked = LDAPAccountFlag.is_locked(ms_acc_ctl)
+
+            for flag in list(LDAPAccountFlag):
+                if LDAPAccountFlag.check_flag(ms_acc_ctl, flag):
+                    self.account_flags.add(flag.name)
 
         User.__init__(
             self,

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, List, Union
 
-from oudjat.utils import DATE_FLAGS, date_format_from_flag, days_diff
+from oudjat.utils import DateFormat, DateFlag, days_diff
 
 from .software_edition import SoftwareEditionDict
 
@@ -18,7 +18,7 @@ def soft_date_str(date: datetime) -> str:
     """
 
     if date is not None:
-        return date.strftime(date_format_from_flag(DATE_FLAGS))
+        return date.strftime(DateFormat.from_flag(DateFlag.YMD))
 
 
 class SoftwareReleaseSupport:
@@ -59,11 +59,11 @@ class SoftwareReleaseSupport:
         # Datetime conversion
         try:
             if end_of_life is not None and not isinstance(end_of_life, datetime):
-                end_of_life = datetime.strptime(end_of_life, date_format_from_flag(DATE_FLAGS))
+                end_of_life = datetime.strptime(end_of_life, DateFormat.from_flag(DateFlag.YMD))
 
             if active_support is not None and not isinstance(active_support, datetime):
                 active_support = datetime.strptime(
-                    active_support, date_format_from_flag(DATE_FLAGS)
+                    active_support, DateFormat.from_flag(DateFlag.YMD)
                 )
 
         except ValueError as e:

@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import IntEnum
 from typing import Dict
 
 
-class PortState(Enum):
+class PortState(IntEnum):
     """State of a port"""
 
     CLOSED = 0

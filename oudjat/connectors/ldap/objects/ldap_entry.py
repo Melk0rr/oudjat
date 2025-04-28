@@ -93,12 +93,24 @@ class LDAPEntry(dict):
         Returns:
             str: The name of the object class, or None if no matching class is found.
         """
-        obj_type = None
 
-        for t in LDAPObjectType.__members__:
-            t_class = LDAPObjectType[t].value["objectClass"]
-            if self.attr().__getitem__("objectClass")[-1] == t_class:
-                obj_type = t
+        obj_type: LDAPObjectType = next(
+            filter(
+                self.compare_to_obj_type_cls, list(LDAPObjectType)
+            )
+        )
 
-        return obj_type
+        return obj_type.name if obj_type is not None else None
 
+    def compare_to_obj_type_cls(self, object_type: LDAPObjectType) -> bool:
+        """
+        Compares current entry objectClass and the provided LDAPObjectType objectClass attribute
+
+        Args:
+            object_type (LDAPObjectType): element containing the objectClass attribute to compare
+
+        Returns:
+            bool: True if both values are equals, False otherwise
+        """
+
+        return self.attr().__getitem__("objectClass")[-1] == object_type.object_cls

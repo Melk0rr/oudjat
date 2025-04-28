@@ -7,7 +7,7 @@ from .edr import (
     CybereasonSearchSort,
 )
 from .endoflife import EndOfLifeConnector
-from .file import CSVConnector, FileConnector, FileType
+from .file import CSVConnector, FileConnector
 from .ldap import (
     LDAPComputer,
     LDAPConnector,
@@ -35,7 +35,6 @@ __all__ = [
     "EndOfLifeConnector",
     "FileConnector",
     "CSVConnector",
-    "FileType",
     "LDAPConnector",
     "LDAPComputer",
     "LDAPGroup",
