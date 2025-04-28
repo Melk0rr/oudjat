@@ -1,5 +1,7 @@
+import re
 from typing import TYPE_CHECKING, Dict, List
 
+from ..definitions import UUID_REG
 from ..ldap_object import LDAPObject
 
 if TYPE_CHECKING:
@@ -36,7 +38,9 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return self.entry.get("gpLink")
 
-    def get_objects(self, ldap_connector: "LDAPConnector", object_types: List[str] = None) -> List["LDAPEntry"]:
+    def get_objects(
+        self, ldap_connector: "LDAPConnector", object_types: List[str] = None
+    ) -> List["LDAPEntry"]:
         """
         Returns the objects contained in the current OU
 
@@ -64,6 +68,14 @@ class LDAPOrganizationalUnit(LDAPObject):
         return self.get_objects(ldap_connector, object_types=["organizationalUnit"])
 
     # TODO: Get GPOs that applies on current OU
+    def get_gpo_from_gplink(self, ldap_connector: "LDAPConnector") -> List["LDAPObject"]:
+        """
+        This method extracts the GPO references (UUIDs) present in the current OU gpLink
+        It the then uses it to retrieve corresponding LDAP GPO instances
+        """
+
+        gpo_refs = re.search(UUID_REG, self.get_gplink())
+        return [ldap_connector.get_gpo(name=link) for link in gpo_refs]
 
     def to_dict(self) -> Dict:
         """
@@ -73,7 +85,4 @@ class LDAPOrganizationalUnit(LDAPObject):
             dict: A dictionary containing the attributes of the LDAP ou in a structured format
         """
 
-        return {
-            **super().to_dict(),
-            "gpLink": self.get_gplink()
-        }
+        return {**super().to_dict(), "gpLink": self.get_gplink()}

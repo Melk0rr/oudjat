@@ -91,7 +91,7 @@ class LDAPGroupPolicyObject(LDAPObject):
         ldap_connector: "LDAPConnector",
         attributes: Union[str, List[str]] = None,
         ou: str = "*",
-    ) -> List["LDAPEntry"]:  # noqa: F821
+    ) -> List["LDAPObject"]:
         """
         Gets the GPO linked objects.
         This method searches for LDAP entries that are linked to the current group policy object (GPO).
@@ -102,7 +102,7 @@ class LDAPGroupPolicyObject(LDAPObject):
             ou (str, optional)                          : The organizational unit (OU) in which to search for linked objects.
 
         Returns:
-            List["LDAPEntry"]: A list of LDAPEntry instances that are linked to the current GPO.
+            List["LDAPObject"]: A list of LDAPOrganizationalUnit instances that are linked to the current GPO.
         """
 
         return ldap_connector.get_ou(
