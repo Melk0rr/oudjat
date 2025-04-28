@@ -143,7 +143,15 @@ class CybereasonConnector(Connector):
         ColorPrint.yellow(f"Connection to {self.target.netloc} is closed")
 
     def get_complete_url(self, endpoint: CybereasonEndpoint) -> str:
-        """"""
+        """
+        Concatenates the base URL set to initialize the connector and the specified endpoint URL
+
+        Args:
+            endpoint (CybereasonEndpoint): the endpoint the path will be concatenated to the main URL
+
+        Returns:
+            str: concatenated URL
+        """
 
         return f"{self.target.geturl()}{endpoint.path}"
 
@@ -428,7 +436,7 @@ class CybereasonConnector(Connector):
         """
 
         # NOTE: Handling Cybereason nonsense
-        # When sensor IDs are provided, the filers must be empty
+        # When sensor IDs are provided, the filters must be empty
         # When sensor IDs are not provided, the filters must be provided at least as an empty array (WTF/FU/KILLME)
         if sensor_ids is None and query is None:
             query = self.DEFAULT_QUERY_DICT
