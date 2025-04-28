@@ -3,7 +3,7 @@ from typing import Dict, List
 
 from oudjat.connectors.cert.certfr import CERTFRConnector, CERTFRPage
 from oudjat.model.vulnerability import CVE
-from oudjat.utils import ColorPrint, str_file_option_handle
+from oudjat.utils.color_print import ColorPrint
 
 from .target import Target
 
@@ -22,9 +22,9 @@ class Cert(Target):
 
         # Handle keywords initialization
         if self.options["--keywords"] or self.options["--keywordfile"]:
-            str_file_option_handle(self, "--keywords", "--keywordfile")
+            super().str_file_option_handle("--keywords", "--keywordfile")
 
-        # If option is provided: retreive alerts from rss feed
+        # If option is provided: retreive alerts from RSS feed
         if self.options["--feed"]:
             print("Parsing CERT pages from feed...")
 

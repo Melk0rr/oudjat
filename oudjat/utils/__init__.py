@@ -3,7 +3,6 @@ from .color_print import ColorPrint
 from .credentials import CredentialHelper
 from .dictionary import join_dictionary_items, join_dictionary_values, map_list_to_dict
 from .file import FileHandler, FileType
-from .init_option_handle import str_file_option_handle
 from .stdouthook import StdOutHook
 from .time import DateFlag, DateFormat, TimeConverter
 
@@ -17,7 +16,6 @@ __all__ = [
     "map_list_to_dict",
     "FileHandler",
     "FileType",
-    "str_file_option_handle",
     "StdOutHook",
     "DateFormat",
     "DateFlag",
