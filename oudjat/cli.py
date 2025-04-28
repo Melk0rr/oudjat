@@ -54,7 +54,7 @@ from docopt import docopt
 
 import oudjat.commands
 from oudjat.banner import banner
-from oudjat.utils import ColorPrint, StdOutHook, seconds_to_str
+from oudjat.utils import ColorPrint, StdOutHook, TimeConverter
 
 from . import __version__ as VERSION
 
@@ -107,7 +107,7 @@ def main() -> None:
         command = command_switch(options)
         command.run()
 
-        print(f"\nWatchers infos search took {seconds_to_str(time.time() - start_time)}s")
+        print(f"\nWatchers infos search took {TimeConverter.seconds_to_str(time.time() - start_time)}s")
 
         if options["--output"]:
             sys.stdout.write_out()

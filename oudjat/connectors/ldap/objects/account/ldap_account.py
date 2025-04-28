@@ -1,8 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Set
 
-from oudjat.utils.datestr_flags import DateFormat, DateFlag
-from oudjat.utils.time_convertions import days_diff
+from oudjat.utils.time import DateFlag, DateFormat, TimeConverter
 
 from ..ldap_object import LDAPObject
 from .ldap_account_flags import LDAPAccountFlag
@@ -125,7 +124,7 @@ class LDAPAccount(LDAPObject):
             int: The difference in days between the current date and the last logon date.
         """
 
-        return days_diff(self.get_last_logon())
+        return TimeConverter.days_diff(self.get_last_logon())
 
     def get_pwd_last_set(self) -> datetime:
         """Getter for account password last set date
@@ -143,7 +142,7 @@ class LDAPAccount(LDAPObject):
             int: The difference in days between the current date and the date when the password was last set.
         """
 
-        return days_diff(self.get_pwd_last_set())
+        return TimeConverter.days_diff(self.get_pwd_last_set())
 
     def get_account_flags(self) -> List[str]:
         """Getter to retrieve account flags

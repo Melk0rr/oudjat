@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, List, Union
 
-from oudjat.utils import DateFormat, DateFlag, days_diff
+from oudjat.utils.time import DateFlag, DateFormat, TimeConverter
 
 from .software_edition import SoftwareEditionDict
 
@@ -98,7 +98,7 @@ class SoftwareReleaseSupport:
         if self.end_of_life is None:
             return True
 
-        return days_diff(self.end_of_life, reverse=True) > 0
+        return TimeConverter.days_diff(self.end_of_life, reverse=True) > 0
 
     def status(self) -> str:
         """
@@ -118,7 +118,7 @@ class SoftwareReleaseSupport:
             str: A string indicating how many days are left in support or whether support has ended already.
         """
 
-        support_days = days_diff(self.end_of_life, reverse=True)
+        support_days = TimeConverter.days_diff(self.end_of_life, reverse=True)
         state = f"{abs(support_days)} days"
 
         if support_days > 0:
