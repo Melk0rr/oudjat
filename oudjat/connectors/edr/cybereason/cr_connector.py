@@ -234,7 +234,7 @@ class CybereasonConnector(Connector):
 
         if self.connection is None:
             raise ConnectionError(
-                f"You must initiate connection to {self.target.netloc} before running search !"
+                f"CybereasonConnector.search::You must initiate connection to {self.target.netloc} before running search !"
             )
 
         endpoint_search_limit = endpoint.value.get("limit")
