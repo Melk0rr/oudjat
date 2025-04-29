@@ -22,7 +22,7 @@ class FileHandler:
         """
 
         if not os.path.isfile(path):
-            raise (f"Invalid file path provided: {path}")
+            raise (f"{__class__.__name__}.check_path::Invalid file path provided: {path}")
 
     # INFO: JSON file functions
     @staticmethod

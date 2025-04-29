@@ -51,7 +51,7 @@ class MSCVRFConnector(Connector):
         """
 
         if not re.match(CVE_REGEX, cve):
-            raise (f"Invalid CVE provided: {cve}")
+            raise (f"{__class__.__name__}.get_cvrf_id_from_cve::Invalid CVE provided: {cve}")
 
         # API URL to retreive CVRF id from CVE
         id_url = f"{API_BASE_URL}Updates('{cve}')"

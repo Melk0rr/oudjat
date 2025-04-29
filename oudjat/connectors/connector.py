@@ -13,24 +13,19 @@ class Connector:
         self, target: Any, service_name: str = None, use_credentials: bool = False
     ) -> None:
         """
-        Constructor
+        Creates a new instance of Connector
 
         Args:
             target (any)            : connector target
             service_name (str)      : service name to associate with the connector, will be used to register credentials
             use_credentials (bool)  : wheither the connector should use credentials
-
-        Return:
-            None
         """
+
         self.target = target
         self.service_name = service_name
 
         # Retreive credentials for the service
-        self.credentials = None
-        if use_credentials:
-            self.credentials = CredentialHelper.get_credentials(self.service_name)
-
+        self.credentials = CredentialHelper.get_credentials(self.service_name) if use_credentials else None
         self.connection = None
 
     def get_connection(self) -> Any:
@@ -43,6 +38,7 @@ class Connector:
         Return:
             any : active connection
         """
+
         return self.connection
 
     def set_target(self, target: Any) -> None:
@@ -52,6 +48,7 @@ class Connector:
         Args:
             target (any) : new target of the connector
         """
+
         self.target = target
 
     def set_service_name(self, new_service_name: str, use_credentials: bool) -> None:
@@ -65,6 +62,7 @@ class Connector:
         Return:
             None
         """
+
         self.service_name = new_service_name
 
         if use_credentials:
@@ -80,7 +78,10 @@ class Connector:
         Return:
             None
         """
-        raise NotImplementedError("connect() method must be implemented by the overloading class")
+
+        raise NotImplementedError(
+            f"{__class__.__name__}.connect::Method must be implemented by the overloading class"
+        )
 
     def search(self) -> List[Any]:
         """
@@ -92,4 +93,7 @@ class Connector:
         Return:
             List[any] : list of results
         """
-        raise NotImplementedError("search() method must be implemented by the overloading class")
+
+        raise NotImplementedError(
+            f"{__class__.__name__}.search::Method must be implemented by the overloading class"
+        )

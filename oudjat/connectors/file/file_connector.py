@@ -11,7 +11,7 @@ class FileConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, path: str, source: str):
+    def __init__(self, path: str, source: str) -> None:
         """Constructor for the FileConnector class.
 
         Args:
@@ -27,6 +27,7 @@ class FileConnector(Connector):
 
         self.connection = False
         self.data = None
+
         super().__init__(path, service_name=None, use_credentials=False)
 
     # ****************************************************************
@@ -64,7 +65,7 @@ class FileConnector(Connector):
             NotImplementedError: This method must be implemented by inheriting classes.
         """
 
-        raise NotImplementedError("data() method must be implemented by the overloading class")
+        raise NotImplementedError(f"{__class__.__name__}.connect::Method must be implemented by the overloading class")
 
     def disconnect(self) -> None:
         """
@@ -108,7 +109,7 @@ class CSVConnector(FileConnector):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, path: str, source: str, delimiter: str = "|"):
+    def __init__(self, path: str, source: str, delimiter: str = "|") -> None:
         """
         Constructor for the CSVConnector class.
 
@@ -122,7 +123,7 @@ class CSVConnector(FileConnector):
         """
 
         if len(delimiter) > 1:
-            raise ("Invalid delimiter provided. Please provide a single character")
+            raise (f"{__class__.__name__}::Invalid delimiter provided. Please provide a single character")
 
         self.delimiter = delimiter
         super().__init__(path, source)

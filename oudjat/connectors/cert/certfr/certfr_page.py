@@ -35,7 +35,8 @@ class CERTFRPage:
     BASE_LINK = "https://www.cert.ssi.gouv.fr"
 
     def __init__(self, ref: str) -> None:
-        """Constructor for initializing a CERTFRPage instance.
+        """
+        Constructor to initialize a CERTFRPage instance.
 
         Args:
             ref (str): The reference string used to identify and validate the page content.
@@ -45,7 +46,7 @@ class CERTFRPage:
         """
 
         if not self.is_valid_ref(ref) and not self.is_valid_link(ref):
-            raise ValueError(f"Invalid CERTFR ref provided : {ref}")
+            raise ValueError(f"{__class__.__name__}::Invalid CERTFR ref provided : {ref}")
 
         self.ref = ref if self.is_valid_ref(ref) else self.get_ref_from_link(ref)
 
@@ -114,7 +115,7 @@ class CERTFRPage:
             req = requests.get(self.link)
 
             if req.status_code != 200:
-                raise ConnectionError(f"Error while trying to connect to {self.ref}")
+                raise ConnectionError(f"{__class__.__name__}.connect::Error while trying to connect to {self.ref}")
 
             self.raw_content = BeautifulSoup(req.content, "html.parser")
             self.title = self.raw_content.title.text
@@ -251,7 +252,7 @@ class CERTFRPage:
         """
 
         if not re.match(CERTFR_LINK_REGEX, link):
-            raise ValueError(f"Invalid CERTFR link provided: {link}")
+            raise ValueError(f"{__class__.__name__}.get_ref_from_link::Invalid CERTFR link provided: {link}")
 
         return re.findall(CERTFR_REF_REGEX, link)[0]
 

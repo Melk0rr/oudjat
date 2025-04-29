@@ -52,7 +52,7 @@ class CERTFRConnector(Connector):
                 self.connection = True
 
         except ConnectionError as e:
-            raise (f"Could not connect to {CERTFRPage.BASE_LINK}\n{e}")
+            raise (f"{__class__.__name__}.connect::Could not connect to {CERTFRPage.BASE_LINK}\n{e}")
 
     def search(self, search_filter: Union[str, List[str]]) -> List[CERTFRPage]:
         """

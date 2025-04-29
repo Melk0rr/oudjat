@@ -13,7 +13,7 @@ class DataSet:
         self,
         name: str,
         perimeter: str,
-        scope: Union[List[Dict], "DataSet"] = None,
+        initial_set: Union[List[Dict], "DataSet"] = None,
         filters: Union[List[Dict], List["DataFilter"]] = [],
         description: str = None,
     ):
@@ -32,7 +32,7 @@ class DataSet:
         self.description = description
         self.perimeter = perimeter
 
-        self.initial_scope = scope
+        self.initial_scope = initial_set
 
         self.filters = DataFilter.get_valid_filters_list(filters)
 
@@ -126,7 +126,7 @@ class DataSet:
 
         if self.initial_scope is None:
             raise ValueError(
-                f"{__class__}: no parent scope defined for the current scope {self.name}"
+                f"{__class__.__name__}.get_data::No parent scope defined for the current scope {self.name}"
             )
 
         data = self.get_input_data()
@@ -140,7 +140,35 @@ class DataSet:
     # Static methods
 
     @staticmethod
-    def merge_sets(name: str, scopes: List["DataSet"]) -> "DataSet":
+    def get_dataset_perimeter(dataset: "DataSet") -> str:
+        """
+        Returns the perimeter of the provided DataSet instance
+
+        Args:
+            dataset (DataSet): DataSet instance the perimeter will be returned
+
+        Returns:
+            str: the perimeter of the provided dataset
+        """
+
+        return dataset.get_perimeter()
+
+    @staticmethod
+    def get_dataset_data(dataset: "DataSet") -> str:
+        """
+        Returns the data of the provided DataSet instance
+
+        Args:
+            dataset (DataSet): DataSet instance the data will be returned
+
+        Returns:
+            str: the perimeter of the provided dataset
+        """
+
+        return dataset.get_data()
+
+    @staticmethod
+    def merge_sets(name: str, sets: List["DataSet"]) -> "DataSet":
         """
         Static method to merge multiple DataSet instances into one.
 
@@ -156,16 +184,15 @@ class DataSet:
         """
 
         # Check if all scopes are on the same perimeter
-        perimeters = set([s.get_perimeter() for s in scopes])
+        perimeters = set(map(DataSet.get_dataset_perimeter, sets))
         if len(perimeters) > 1:
             raise ValueError(
-                f"{__class__}: Error merging scopes. Please provide scopes with the same perimeter"
+                f"{__class__.__name__}.merge_sets::Please provide scopes with the same perimeter"
             )
 
-        merge_data = []
-        for s in scopes:
-            merge_data.extend(s.get_data())
-
-        merge = DataSet(name=name, perimeter=list(perimeters)[0], scope=merge_data, filters=[])
-
-        return merge
+        return DataSet(
+            name=name,
+            perimeter=list(perimeters)[0],
+            initial_set=list(map(DataSet.get_dataset_data, sets)),
+            filters=[],
+        )

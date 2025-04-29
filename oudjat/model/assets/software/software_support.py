@@ -6,21 +6,6 @@ from oudjat.utils.time import DateFlag, DateFormat, TimeConverter
 from .software_edition import SoftwareEditionDict
 
 
-def soft_date_str(date: datetime) -> str:
-    """
-    Converts a software date into a string
-
-    Args:
-        date (datetime) : date to convert
-
-    Returns:
-        str : date string
-    """
-
-    if date is not None:
-        return date.strftime(DateFormat.from_flag(DateFlag.YMD))
-
-
 class SoftwareReleaseSupport:
     """A class to handle software release support concept"""
 
@@ -33,7 +18,7 @@ class SoftwareReleaseSupport:
         end_of_life: Union[str, datetime] = None,
         edition: List[str] = None,
         long_term_support: bool = False,
-    ):
+    ) -> None:
         """
         Constructor for the SoftwareReleaseSupport class.
 
@@ -67,7 +52,7 @@ class SoftwareReleaseSupport:
                 )
 
         except ValueError as e:
-            raise ValueError(f"Please provide dates with %Y-%m-%d format\n{e}")
+            raise ValueError(f"{__class__.__name__}::Please provide dates with %Y-%m-%d format\n{e}")
 
         self.active_support = active_support
         self.end_of_life = end_of_life
@@ -179,14 +164,34 @@ class SoftwareReleaseSupport:
         Returns:
             Dict : dictionary containing software support key attributes
         """
+
         return {
             "edition": self.edition,
-            "active_support": soft_date_str(self.active_support),
-            "end_of_life": soft_date_str(self.end_of_life),
+            "active_support": SoftwareReleaseSupport.soft_date_str(self.active_support),
+            "end_of_life": SoftwareReleaseSupport.soft_date_str(self.end_of_life),
             "status": self.status(),
             "lts": self.lts,
             "details": self.support_details(),
         }
+
+
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def soft_date_str(date: datetime) -> str:
+        """
+        Converts a software date into a string
+
+        Args:
+            date (datetime) : date to convert
+
+        Returns:
+            str : date string
+        """
+
+        if date is not None:
+            return date.strftime(DateFormat.from_flag(DateFlag.YMD))
 
 
 class SoftwareReleaseSupportList(list):

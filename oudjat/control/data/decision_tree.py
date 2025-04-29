@@ -124,7 +124,7 @@ class DecisionTree:
 
         self.operator: str = tree_dict.get("operator", "and")
         if self.operator not in ["or", "and"]:
-            raise ValueError(f"Invalid operator provided: {self.operator}")
+            raise ValueError(f"{__class__.__name__}::Invalid operator provided {self.operator}")
 
         self.nodes = None
         self.value = None

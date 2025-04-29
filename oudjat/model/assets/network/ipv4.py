@@ -64,7 +64,7 @@ class IPv4:
             self.version = IPVersion.IPV6
 
         else:
-            raise ValueError(f"Invalid IPv4 address provided: '{address}'")
+            raise ValueError(f"{__class__.__name__}::Invalid IPv4 address provided: '{address}'")
 
         self.address: int = ip_str_to_int(address)
         self.ports = {}
@@ -163,7 +163,9 @@ class IPv4:
         is_number = isinstance(port, int)
 
         if not (is_port or is_number):
-            raise ValueError("Provided port must be an instance of class Port or an integer")
+            raise ValueError(
+                f"{__class__.__name__}.append_open_port::Provided port must be an instance of class Port or an integer"
+            )
 
         if is_number:
             port = Port(port_number=port)
@@ -193,9 +195,9 @@ class IPv4:
             bool: True if the IP is within the subnet, False otherwise.
         """
 
-        return LogicalOperation.logical_and(int(self), int(net.get_mask())) == LogicalOperation.logical_and(
-            int(net.get_address()), int(net.get_mask())
-        )
+        return LogicalOperation.logical_and(
+            int(self), int(net.get_mask())
+        ) == LogicalOperation.logical_and(int(net.get_address()), int(net.get_mask()))
 
     def __int__(self) -> int:
         """
@@ -261,18 +263,18 @@ class IPv4Mask(IPv4):
 
         if mask is None and cidr is None:
             raise ValueError(
-                "Please provide either a CIDR mask or a mask value as integer or string"
+                f"{__class__.__name__}::Please provide either a CIDR mask or a mask value as integer or string"
             )
 
         if cidr is not None:
             if not 1 < cidr < 33:
-                raise ValueError("Mask CIDR value must be between 1 and 32!")
+                raise ValueError(f"{__class__.__name__}::Mask CIDR value must be between 1 and 32!")
 
             mask = cidr_to_int(cidr)
 
         if type(mask) is not int and type(mask) is not str:
             raise ValueError(
-                f"Invalid mask provided : {mask}. You must provide a string or an integer !"
+                f"{__class__.__name__}::Invalid mask provided : {mask}. You must provide a string or an integer !"
             )
 
         super().__init__(mask)
@@ -346,7 +348,7 @@ class IPv4Mask(IPv4):
         """
 
         if mask not in IPv4Mask.get_valid_mask():
-            raise ValueError(f"Invalid mask provided: {mask}")
+            raise ValueError(f"{__class__.__name__}.get_netcidr::Invalid mask provided: {mask}")
 
         base = IPv4(mask)
         return "".join(base.to_binary_array()).count("1")
@@ -378,9 +380,11 @@ class IPv4Mask(IPv4):
         """
 
         if type(network_length) is not int:
-            raise ValueError("Network length must be an integer")
+            raise ValueError(f"{__class__.__name__}.get_netmask::Network length must be an integer")
 
         if not 0 < network_length < 33:
-            raise ValueError("Network length value must be between 1 and 32!")
+            raise ValueError(
+                f"{__class__.__name__}.get_netmask::Network length value must be between 1 and 32!"
+            )
 
         return ip_int_to_str(cidr_to_int(network_length))

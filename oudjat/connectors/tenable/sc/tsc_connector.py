@@ -81,21 +81,18 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    def check_connection(self, prefix: str = None) -> None:
+    def check_connection(self) -> None:
         """
         Checks if the connection is initialized
-
-        Args:
-            prefix (str): prefix string to include in error message
 
         Raises:
             ConnectionError: if connector connection is not initialized
         """
 
         if self.connection is None:
-            error_pre = "." + prefix if prefix is not None else ""
-            error_msg = f"{__class__.__name__}.check_connection::{error_pre}Can't create asset list if connection is not initialized"
-            raise ConnectionError(error_msg)
+            raise ConnectionError(
+                f"{__class__.__name__}.check_connection::Can't create asset list if connection is not initialized"
+            )
 
     def disconnect(self) -> None:
         """
@@ -121,7 +118,7 @@ class TenableSCConnector(Connector):
             Exception: if something goes wrong with the search
         """
 
-        self.check_connection(prefix="search")
+        self.check_connection()
 
         search_type = search_type.upper()
         search_options = {
@@ -131,7 +128,7 @@ class TenableSCConnector(Connector):
         }
 
         if search_type not in search_options.keys():
-            raise ValueError(f"Invalid search type {search_type}")
+            raise ValueError(f"{__class__.__name__}.search::Invalid search type {search_type}")
 
         search = None
         try:
@@ -180,9 +177,7 @@ class TenableSCConnector(Connector):
             severities (List[str]) : severities to include in the filter (see cve.py)
         """
 
-        sev_scores = ",".join(
-            [f"{Severity.from_score(sev).score}" for sev in list(*severities)]
-        )
+        sev_scores = ",".join([f"{Severity.from_score(sev).score}" for sev in list(*severities)])
         return "severity", "=", sev_scores
 
     # INFO: Asset lists
@@ -210,7 +205,7 @@ class TenableSCConnector(Connector):
             Exception: if something goes wrong while creating the asset list
         """
 
-        self.check_connection(prefix="create_asset_list")
+        self.check_connection()
 
         try:
             self.connection.asset_lists.create(
@@ -237,7 +232,7 @@ class TenableSCConnector(Connector):
             Exception: if something goes wrong while deleting the asset list
         """
 
-        self.check_connection(prefix="delete_asset_list")
+        self.check_connection()
 
         if not isinstance(list_id, list):
             list_id = [list_id]
@@ -263,7 +258,7 @@ class TenableSCConnector(Connector):
             Exception: if something goes wrong while listing asset lists
         """
 
-        self.check_connection(prefix="list_asset_lists")
+        self.check_connection()
 
         asset_lists = []
         try:
@@ -295,7 +290,7 @@ class TenableSCConnector(Connector):
             Exception: if something goes wrong while reteiving asset list details
         """
 
-        self.check_connection(prefix="get_asset_list_details")
+        self.check_connection()
 
         if not isinstance(list_id, list):
             list_id = [list_id]
@@ -326,7 +321,7 @@ class TenableSCConnector(Connector):
             Exception: if something goes wrong while listing scans
         """
 
-        self.check_connection(prefix="list_scans")
+        self.check_connection()
 
         scan_list = []
         try:
@@ -358,7 +353,7 @@ class TenableSCConnector(Connector):
             Exception: if something goes wrong while reteiving scan details
         """
 
-        self.check_connection(prefix="get_scan_details")
+        self.check_connection()
 
         if not isinstance(scan_id, list):
             scan_id = [scan_id]
@@ -384,7 +379,7 @@ class TenableSCConnector(Connector):
             Exception: if something goes wrong while deleting scan
         """
 
-        self.check_connection(prefix="delete_scan")
+        self.check_connection()
 
         if not isinstance(scan_id, list):
             scan_id = [scan_id]
@@ -420,7 +415,7 @@ class TenableSCConnector(Connector):
             Exception: if something goes wrong while creating scan
         """
 
-        self.check_connection(prefix="create_scan")
+        self.check_connection()
 
         try:
             self.connection.scans.create(

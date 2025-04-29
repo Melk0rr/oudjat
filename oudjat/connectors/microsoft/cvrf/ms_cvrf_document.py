@@ -18,7 +18,7 @@ class MSCVRFDocument:
     # ****************************************************************
     # Attributes & Constructor
 
-    def __init__(self, id: str):
+    def __init__(self, doc_id: str) -> None:
         """
         Constructor for the MSCVRFDocument class.
 
@@ -29,16 +29,16 @@ class MSCVRFDocument:
             ValueError: If the provided ID does not match the required regex pattern.
         """
 
-        if not re.match(CVRF_ID_REGEX, id):
-            raise ValueError("CVRF ID must follow the 'YYYY-MMM' format !")
+        if not re.match(CVRF_ID_REGEX, doc_id):
+            raise ValueError(f"{__class__.__name__}::CVRF ID must follow the 'YYYY-MMM' format !")
 
-        self.id = id
+        self.id = doc_id
         self.url = f"{API_BASE_URL}cvrf/{self.id}"
 
         url_resp = requests.get(self.url, headers=API_REQ_HEADERS)
 
         if url_resp.status_code != 200:
-            raise ConnectionError(f"Could not connect to {self.url}")
+            raise ConnectionError(f"{__class__.__name__}::Could not connect to {self.url}")
 
         ColorPrint.green(f"{self.url}")
         self.content = json.loads(url_resp.content)

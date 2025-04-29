@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Union
 
-from oudjat.utils.datestr_flags import DateFormat, DateFlag
+from oudjat.utils.datestr_flags import DateFlag, DateFormat
 
-from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList, soft_date_str
+from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList
 
 if TYPE_CHECKING:
     from .software import Software
@@ -22,7 +22,7 @@ class SoftwareRelease:
         version: Union[int, str],
         release_date: Union[str, datetime],
         release_label: str,
-    ):
+    ) -> None:
         """
         Constructor for the SoftwareRelease class.
 
@@ -46,7 +46,9 @@ class SoftwareRelease:
                 release_date = datetime.strptime(release_date, DateFormat.from_flag(DateFlag.YMD))
 
         except ValueError as e:
-            raise ValueError(f"Please provide dates with %Y-%m-%d format\n{e}")
+            raise ValueError(
+                f"{__class__.__name__}::Please provide dates with %Y-%m-%d format\n{e}"
+            )
 
         self.release_date = release_date
         self.support = SoftwareReleaseSupportList()
@@ -61,6 +63,7 @@ class SoftwareRelease:
         Returns:
             Software: The software associated with the release.
         """
+
         return self.software
 
     def get_label(self) -> str:
@@ -70,6 +73,7 @@ class SoftwareRelease:
         Returns:
             str: The label of the software release.
         """
+
         return self.label
 
     def get_version(self) -> Union[int, str]:
@@ -79,6 +83,7 @@ class SoftwareRelease:
         Returns:
             Union[int, str]: The version number or identifier of the software release.
         """
+
         return self.version
 
     def is_supported(self, edition: Union[str, List[str]] = None) -> bool:
@@ -91,6 +96,7 @@ class SoftwareRelease:
         Returns:
             bool: True if the release is supported, otherwise False.
         """
+
         return any(
             [
                 s.is_ongoing() and (edition is None or s.supports_edition(edition))
@@ -105,6 +111,7 @@ class SoftwareRelease:
         Returns:
             SoftwareReleaseSupportList: The list of support details for the software release.
         """
+
         return self.support
 
     def get_support_for_edition(
@@ -120,10 +127,8 @@ class SoftwareRelease:
         Returns:
             SoftwareReleaseSupportList : The list of support details filtered by the specified edition or LTS status.
         """
-        if edition is None:
-            return None
 
-        return self.support.get(edition, lts=lts)
+        return self.support.get(edition, lts=lts) if edition is not None else None
 
     def get_ongoing_support(self) -> List["SoftwareReleaseSupport"]:
         """
@@ -132,6 +137,7 @@ class SoftwareRelease:
         Returns:
             List[SoftwareReleaseSupport]: A list of support details that are currently ongoing.
         """
+
         return [s for s in self.support if s.is_ongoing()]
 
     def get_retired_support(self) -> List["SoftwareReleaseSupport"]:
@@ -141,6 +147,7 @@ class SoftwareRelease:
         Returns:
             List[SoftwareReleaseSupport]: A list of support details that are no longer ongoing.
         """
+
         return [s for s in self.support if not s.is_ongoing()]
 
     def get_name(self) -> None:
@@ -150,7 +157,10 @@ class SoftwareRelease:
         Raises:
             NotImplementedError: This method must be implemented by the overloading class.
         """
-        raise NotImplementedError("get_name() method must be implemented by the overloading class")
+
+        raise NotImplementedError(
+            f"{__class__.__name__}.get_name::Method must be implemented by the overloading class"
+        )
 
     def get_full_name(self) -> None:
         """
@@ -159,6 +169,7 @@ class SoftwareRelease:
         Returns:
             str: The full name of the software release, combining the software name and its label.
         """
+
         return f"{self.get_software().get_name()} {self.label}"
 
     def add_support(self, support: SoftwareReleaseSupport) -> None:
@@ -171,6 +182,7 @@ class SoftwareRelease:
         Returns:
             None
         """
+
         if not isinstance(support, SoftwareReleaseSupport):
             return
 
@@ -189,6 +201,7 @@ class SoftwareRelease:
         Returns:
             List[str]: A list of vulnerabilities that the release is concerned by. If `vuln` is provided, returns only those in `vuln`.
         """
+
         if vuln is None:
             return list(self.vulnerabilities)
 
@@ -203,10 +216,8 @@ class SoftwareRelease:
 
         Args:
             vuln (str): The vulnerability string to be added.
-
-        Returns:
-            None
         """
+
         self.vulnerabilities.add(vuln)
 
     def __str__(self, show_version: bool = False) -> str:
@@ -219,6 +230,7 @@ class SoftwareRelease:
         Returns:
             str: A string representation of the software release, optionally including the version.
         """
+
         name = self.get_full_name()
 
         if show_version:
@@ -233,6 +245,7 @@ class SoftwareRelease:
         Returns:
             Dict: A dictionary containing information about the operating system, including software name, release name, version, full name, and support status.
         """
+
         return {
             "software": self.get_software().get_name(),
             "name": self.get_name(),
@@ -248,9 +261,10 @@ class SoftwareRelease:
         Returns:
             Dict: A dictionary representation of the software release, including its label, release date, and OS information.
         """
+
         return {
             "label": self.label,
-            "release_date": soft_date_str(self.release_date),
+            "release_date": SoftwareReleaseSupport.soft_date_str(self.release_date),
             **self.os_info_dict(),
             "support": ", ".join([str(s) for s in self.support]),
         }
@@ -277,6 +291,7 @@ class SoftwareReleaseDict(dict):
         Returns:
             SoftwareReleaseDict: A new dictionary containing only the key-value pairs where the keys match `val`.
         """
+
         return {k: v for k, v in self.items() if k in val}
 
     def find_rel(self, rel_ver: str, rel_label: str = None) -> "SoftwareReleaseDict":
@@ -295,6 +310,7 @@ class SoftwareReleaseDict(dict):
         Returns:
             SoftwareReleaseDict: A dictionary containing either the entire release information or a specific label's information based on the provided criteria.
         """
+
         ver_search = self.get(rel_ver, None)
         lab_search = None
 

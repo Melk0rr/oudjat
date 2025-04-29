@@ -38,7 +38,7 @@ class DataFilter:
         """
 
         if operator not in Operation.keys():
-            raise ValueError(f"Invalid operator provided: {operator}")
+            raise ValueError(f"{__class__.__name__}::Invalid operator provided: {operator}")
 
         self.fieldname = fieldname
         self.operator = operator

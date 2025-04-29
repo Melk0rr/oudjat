@@ -119,7 +119,7 @@ class LDAPConnector(Connector):
         target_ip = socket.gethostbyname(self.target)
 
         if not target_ip:
-            raise Exception(f"The target {self.target} is unreachable")
+            raise Exception(f"{__class__.__name__}.connect::The target {self.target} is unreachable")
 
         tls_option = {"use_ssl": self.use_tls}
         if self.use_tls:
@@ -152,11 +152,11 @@ class LDAPConnector(Connector):
                     and result["message"].split(":")[0] == "80090346"
                 ):
                     raise Exception(
-                        "LDAP channel binding required. Use -scheme ldaps -ldap-channel-binding"
+                        f"{__class__.__name__}.connect::LDAP channel binding required. Use -scheme ldaps -ldap-channel-binding"
                     )
 
                 raise Exception(
-                    f"Failed LDAP authentication ({result['description']}) {result['message']}]"
+                    f"{__class__.__name__}.connect::Failed LDAP authentication ({result['description']}) {result['message']}]"
                 )
 
         if ldap_server.schema is None:
@@ -165,11 +165,11 @@ class LDAPConnector(Connector):
             if ldap_connection.result["result"] != 0:
                 if ldap_connection.result["message"].split(":")[0] == "000004DC":
                     raise Exception(
-                        "Failed to bind to LDAP. Most likely due to an invalid username"
+                        f"{__class__.__name__}.connect::Failed to bind to LDAP. Most likely due to an invalid username"
                     )
 
             if ldap_server.schema is None:
-                raise Exception("Failed to get LDAP schema")
+                raise Exception(f"{__class__.__name__}.connect::Failed to get LDAP schema")
 
         ColorPrint.green(f"Bound to {ldap_server}")
 
@@ -203,7 +203,7 @@ class LDAPConnector(Connector):
 
         if self.connection is None:
             raise ConnectionError(
-                f"You must initiate connection to {self.target} before running search !"
+                f"{__class__.__name__}.search::You must initiate connection to {self.target} before running search !"
             )
 
         # INFO: If the search type is default : final filter is equal to provided search filter
@@ -507,7 +507,9 @@ class LDAPConnector(Connector):
         """
 
         if not issubclass(ldap_cls, LDAPObject):
-            raise ValueError("Invalid class provided. Please provide a valid LDAPObject instance")
+            raise ValueError(
+                f"{__class__.__name__}.map_entries::Invalid class provided. Please provide a valid LDAPObject instance"
+            )
 
         return list(map(ldap_cls, entries))
 

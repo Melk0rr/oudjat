@@ -10,7 +10,7 @@ class MSProduct:
     # ****************************************************************
     # Attributes & Constructor
 
-    def __init__(self, pid: str, name: str, product_type: str):
+    def __init__(self, pid: str, name: str, product_type: str) -> None:
         """
         Constructor for the MSProduct class.
 
@@ -24,7 +24,7 @@ class MSProduct:
         """
 
         if not re.match(MS_PRODUCT_REGEX, pid):
-            raise ValueError(f"Invalid MS product ID: {pid}")
+            raise ValueError(f"{__class__.__name__}::Invalid MS product ID: {pid}")
 
         self.pid = pid
         self.name = name

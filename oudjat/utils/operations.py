@@ -13,6 +13,7 @@ def ope_equals(a: Any, b: Any) -> bool:
     Returns:
         bool: True if a is equal to b, False otherwise.
     """
+
     return a == b
 
 
@@ -30,6 +31,7 @@ def ope_contains(a: Union[str, List], b: Any) -> bool:
     Raises:
         AttributeError: If the type of `a` does not support the 'contains' method.
     """
+
     return a.contains(b)
 
 
@@ -44,6 +46,7 @@ def ope_in(a: Any, b: Union[List, str]) -> bool:
     Returns:
         bool: True if a is found within b, False otherwise.
     """
+
     return a in b
 
 
@@ -58,6 +61,7 @@ def ope_greater_than(a: Union[int, float], b: Union[int, float]) -> bool:
     Returns:
         bool: True if a is greater than b, False otherwise.
     """
+
     return a > b
 
 
@@ -72,6 +76,7 @@ def ope_greater_equal_than(a: Union[int, float], b: Union[int, float]) -> bool:
     Returns:
         bool: True if a is greater than or equal to b, False otherwise.
     """
+
     return a >= b
 
 
@@ -86,6 +91,7 @@ def ope_lower_than(a: Union[int, float], b: Union[int, float]) -> bool:
     Returns:
         bool: True if a is less than b, False otherwise.
     """
+
     return a < b
 
 
@@ -100,6 +106,7 @@ def ope_lower_equal_than(a: Union[int, float], b: Union[int, float]) -> bool:
     Returns:
         bool: True if a is less than or equal to b, False otherwise.
     """
+
     return a <= b
 
 
@@ -114,6 +121,7 @@ def ope_is(a: Any, b: Any) -> bool:
     Returns:
         bool: True if a and b are the same object, False otherwise.
     """
+
     return a is b
 
 
@@ -128,6 +136,7 @@ def ope_is_not(a: Any, b: Any) -> bool:
     Returns:
         bool: True if a and b are not the same object, False otherwise.
     """
+
     return a is not b
 
 
@@ -142,6 +151,7 @@ def ope_reg_match(value: str, pattern: str) -> bool:
     Returns:
         bool: True if the value matches the pattern, False otherwise.
     """
+
     if value is None or pattern is None:
         return False
 
@@ -159,6 +169,7 @@ def ope_reg_search(value: str, pattern: str) -> bool:
     Returns:
         bool: True if the pattern is found within the value, False otherwise.
     """
+
     if value is None or pattern is None:
         return False
 

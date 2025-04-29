@@ -139,7 +139,7 @@ class OperatingSystem(Software):
         """
 
         raise NotImplementedError(
-            "gen_releases() method must be implemented by the overloading class"
+            f"{__class__.__name__}.gen_releases::Method must be implemented by the overloading class"
         )
 
     # ****************************************************************
@@ -179,7 +179,7 @@ class OperatingSystem(Software):
         """
 
         raise NotImplementedError(
-            "OperatingSystem.get_matching_version() method must be implemented by the overloading class"
+            f"{__class__.__name__}.get_matching_version::Method must be implemented by the overloading class"
         )
 
 
@@ -199,7 +199,7 @@ class OSRelease(SoftwareRelease):
         """
 
         raise NotImplementedError(
-            "OSRelease.get_name() method must be implemented by the overloading class"
+            f"{__class__.__name__}.get_name()::Method must be implemented by the overloading class"
         )
 
     def get_os(self) -> OperatingSystem:

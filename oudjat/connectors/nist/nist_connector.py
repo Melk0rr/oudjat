@@ -51,7 +51,9 @@ class NistConnector(Connector):
                 self.connection = json.loads(req.content.decode("utf-8"))
 
         except ConnectionError as e:
-            raise ConnectionError(f"Could not connect to {self.target}\n{e}")
+            raise ConnectionError(
+                f"{__class__.__name__}.connect::Could not connect to {self.target}\n{e}"
+            )
 
     def search(
         self, search_filter: Union[str, List[str]], attributes: Union[str, List[str]] = None

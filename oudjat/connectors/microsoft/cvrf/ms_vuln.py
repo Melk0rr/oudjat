@@ -1,3 +1,5 @@
+# TODO: docstrings
+
 import re
 from typing import Any, Dict, List
 
@@ -18,7 +20,7 @@ class MSVuln:
         """Constructor"""
 
         if not re.match(CVE_REGEX, cve):
-            raise (f"Invalid CVE provided: {cve}")
+            raise (f"{__class__.__name__}::Invalid CVE provided: {cve}")
 
         self.cve = cve
         self.kbs: Dict[str, MSRemed] = {}

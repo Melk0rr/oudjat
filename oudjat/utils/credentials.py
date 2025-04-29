@@ -23,7 +23,9 @@ class CredentialHelper:
             keyring.set_password(service, username, password)
 
         except keyring.errors.PasswordSetError as e:
-            raise (f"Error while saving credentials for {service}:{username}\n{e}")
+            raise (
+                f"{__class__.__name__}.save_credentials::Error while saving credentials for {service}:{username}\n{e}"
+            )
 
     @staticmethod
     def get_credentials(service: str) -> keyring.credentials.SimpleCredential:
@@ -57,7 +59,9 @@ class CredentialHelper:
                 cred = keyring.credentials.SimpleCredential(username, password)
 
         except keyring.errors.KeyringError as e:
-            raise (f"\nAn error occured while retreiving user's credentials for {service}\n{e}")
+            raise (
+                f"{__class__.__name__}.get_credentials::An error occured while retreiving credentials for {service}\n{e}"
+            )
 
         return cred
 
@@ -79,4 +83,5 @@ class CredentialHelper:
             keyring.delete_password(service, username)
 
         except keyring.errors.PasswordDeleteError as e:
-            raise (f"Error while deleting password for {service}:{username}\n{e}")
+            raise (f"{__class__.__name__}.del_credentials::Error while deleting password for {service}:{username}\n{e}")
+

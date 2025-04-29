@@ -56,7 +56,7 @@ class EndOfLifeConnector(Connector):
                 self.products = json.loads(req.content.decode("utf-8"))
 
         except ConnectionError as e:
-            raise ConnectionError(f"Could not connect to {self.target}\n{e}")
+            raise ConnectionError(f"{__class__.__name__}.connect::Could not connect to {self.target}\n{e}")
 
     def search(self, search_filter: str, attributes: Union[str, List[str]] = None) -> List[Dict]:
         """
@@ -77,10 +77,10 @@ class EndOfLifeConnector(Connector):
         res = []
 
         if self.connection is None or len(self.products) == 0:
-            raise ConnectionError("Please run connect to initialize endoflife connection")
+            raise ConnectionError(f"{__class__.__name__}.search::Please run connect to initialize endoflife connection")
 
         if search_filter not in self.products:
-            raise ValueError(f"{search_filter} is not a valid product:\n{self.products}")
+            raise ValueError(f"{__class__.__name__}.search::{search_filter} is not a valid product:\n{self.products}")
 
         if attributes is not None and not isinstance(attributes, list):
             attributes = [attributes]
@@ -96,7 +96,7 @@ class EndOfLifeConnector(Connector):
                     res = [{k: v for k, v in e.items() if k in attributes} for e in res]
 
         except ConnectionError as e:
-            raise ConnectionError(f"Could not retreive {search_filter} infos:\n{e}")
+            raise ConnectionError(f"{__class__.__name__}.search::Could not retreive {search_filter} infos:\n{e}")
 
         return res
 

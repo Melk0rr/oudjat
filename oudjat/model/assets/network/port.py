@@ -36,7 +36,7 @@ class Port:
         """
 
         if not isinstance(port_number, int):
-            raise ValueError(f"Invalid port number: {port_number} !")
+            raise ValueError(f"{__class__.__name__}::Invalid port number: {port_number} !")
 
         self.number = port_number
         self.application = application
@@ -90,7 +90,7 @@ class Port:
             self.number = number
 
         else:
-            raise ValueError(f"Invalid port number: {number} !")
+            raise ValueError(f"{__class__.__name__}.set_number::Invalid port number: {number} !")
 
     def set_state(self, new_state: PortState = PortState.OPENED) -> None:
         """

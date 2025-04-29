@@ -32,7 +32,7 @@ class KPIComparator:
         """
 
         if kpi_a.get_perimeter() != kpi_b.get_perimeter():
-            raise ValueError(f"{__class__} error : provided KPI do not share the same perimeter !")
+            raise ValueError(f"{__class__.__name__}::Provided KPIs do not share the same perimeter !")
 
         self.kpis = (kpi_a, kpi_b)
 

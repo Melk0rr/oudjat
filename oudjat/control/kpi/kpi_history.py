@@ -57,7 +57,7 @@ class KPIHistory:
 
         if self.name != kpi.get_name():
             raise ValueError(
-                f"{__class__} error while adding new kpi. KPI name and KPIHistory name must match !"
+                f"{__class__.__name__}.add_kpi::KPI name and KPIHistory name must match !"
             )
 
         self.kpis.append(kpi)
