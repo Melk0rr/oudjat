@@ -3,8 +3,7 @@ import socket
 from enum import Enum
 from typing import TYPE_CHECKING, List, Union
 
-from oudjat.utils.color_print import ColorPrint
-from oudjat.utils.logical_operations import logical_and
+from oudjat.utils import ColorPrint, LogicalOperation
 
 from .definitions import cidr_to_int, count_1_bits, ip_int_to_str, ip_not, ip_str_to_int
 from .port import Port
@@ -36,6 +35,8 @@ class IPVersion(Enum):
         return self._value_["pattern"]
 
 
+# TODO: Handle IP version properly
+# TODO: Centralize some static functions
 class IPv4:
     """Simple Class providing tools to manipulate IPv4 addresses"""
 
@@ -192,7 +193,7 @@ class IPv4:
             bool: True if the IP is within the subnet, False otherwise.
         """
 
-        return logical_and(int(self), int(net.get_mask())) == logical_and(
+        return LogicalOperation.logical_and(int(self), int(net.get_mask())) == LogicalOperation.logical_and(
             int(net.get_address()), int(net.get_mask())
         )
 

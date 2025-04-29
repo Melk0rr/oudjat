@@ -1,4 +1,4 @@
-from oudjat.utils.logical_operations import logical_not
+from oudjat.utils.logical_operations import LogicalOperation
 
 
 def ip_str_to_int(ip: str) -> int:
@@ -54,7 +54,7 @@ def ip_not(ip: int) -> int:
         int: new ip address after the NOT operation
     """
 
-    return logical_not(ip) & 0xFFFFFFFF
+    return LogicalOperation.logical_not(ip) & 0xFFFFFFFF
 
 
 def count_1_bits(val: int) -> int:
@@ -71,3 +71,4 @@ def count_1_bits(val: int) -> int:
     """
 
     return bin(val).count("1")
+
