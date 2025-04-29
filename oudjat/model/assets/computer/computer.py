@@ -198,13 +198,13 @@ class Computer(Asset):
         """
 
         if not isinstance(os_release, OSRelease):
-            raise ValueError(f"Computer.set_os::Invalid OS provided for {self.name}")
+            raise ValueError(f"{__class__.__name__}.set_os::Invalid OS provided for {self.name}")
 
         self.os_release = os_release
 
         if edition is not None:
             if not isinstance(edition, SoftwareEdition):
-                raise ValueError(f"Computer.set_os::Invalid edition provided for {self.name}")
+                raise ValueError(f"{__class__.__name__}.set_os::Invalid edition provided for {self.name}")
 
             self.os_edition = edition
 

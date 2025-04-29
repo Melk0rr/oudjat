@@ -177,7 +177,7 @@ class DataFilter:
 
         if len(filter_tuple) < 3:
             raise ValueError(
-                "DataFilter.datafilter_from_tuple::3 parameters needed to create a DataFilter instance"
+                f"{__class__.__name__}.from_tuple::3 parameters needed to create a DataFilter instance"
             )
 
         return DataFilter(

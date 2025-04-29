@@ -123,7 +123,7 @@ class CERTFRPage:
 
         except ConnectionError:
             ColorPrint.red(
-                f"CERTFRPage::Error while requesting {self.ref}. Make sure it is accessible"
+                f"{__class__.__name__}.connect::Error while requesting {self.ref}. Make sure it is accessible"
             )
 
     def disconnect(self) -> None:
@@ -161,7 +161,7 @@ class CERTFRPage:
             self.content.parse()
 
         except Exception as e:
-            ColorPrint.red(f"CERTFRPage::A parsing error occured for {self.ref}\n{e}")
+            ColorPrint.red(f"{__class__.__name__}.parse::A parsing error occured for {self.ref}\n{e}")
 
     def __str__(self) -> str:
         """

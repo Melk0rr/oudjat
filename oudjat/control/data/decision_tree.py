@@ -1,3 +1,5 @@
+# TODO: docstrings
+
 from typing import Any, Dict, List, Union
 
 from oudjat.utils.color_print import ColorPrint
@@ -191,7 +193,7 @@ class DecisionTree:
 
         except Exception as e:
             self.nodes = None
-            ColorPrint.red(f"DecisionTree.build::An error occured while building tree\n{e}")
+            ColorPrint.red(f"{__class__.__name__}.build::An error occured while building tree\n{e}")
 
     def init(self, element: Dict) -> None:
         """Initialize tree node values"""
@@ -227,7 +229,7 @@ class DecisionTree:
                 leaves.extend(n.get_leaves())
 
             else:
-                raise ValueError("DecisionTree.get_leaves::Invalid node found")
+                raise ValueError(f"{__class__.__name__}.get_leaves::Invalid node found")
 
         if leaves_value is not None:
             leaves = leaves.get_by_value(value=leaves_value)

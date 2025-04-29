@@ -151,5 +151,5 @@ class CSVConnector(FileConnector):
             self.connection = True
 
         except Exception as e:
-            raise (f"CSVConnector::Error connecting to file {self.target}\n{e}")
+            raise (f"{__class__.__name__}.connect::Error connecting to file {self.target}\n{e}")
 

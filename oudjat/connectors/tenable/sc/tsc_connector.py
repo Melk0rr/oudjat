@@ -94,7 +94,7 @@ class TenableSCConnector(Connector):
 
         if self.connection is None:
             error_pre = "." + prefix if prefix is not None else ""
-            error_msg = f"TenableSCConnector{error_pre}::Can't create asset list if connection is not initialized"
+            error_msg = f"{__class__.__name__}.check_connection::{error_pre}Can't create asset list if connection is not initialized"
             raise ConnectionError(error_msg)
 
     def disconnect(self) -> None:

@@ -128,7 +128,7 @@ class CybereasonConnector(Connector):
 
         except ConnectionError as e:
             raise (
-                f"CybereasonConnector.connect::An error occured while trying to connect to Cybereason API at {self.target}: {e}"
+                f"{__class__.__name__}.connect::An error occured while trying to connect to Cybereason API at {self.target}: {e}"
             )
 
         ColorPrint.green(f"Connected to {self.target.netloc}")
@@ -170,7 +170,7 @@ class CybereasonConnector(Connector):
 
         if self.connection is None:
             raise ConnectionError(
-                f"CybereasonConnector.request::Please initialize connection to {self.target.geturl()} before attempting request"
+                f"{__class__.__name__}.request::Please initialize connection to {self.target.geturl()} before attempting request"
             )
 
         if type(query) is dict:
@@ -196,7 +196,7 @@ class CybereasonConnector(Connector):
 
         if self.connection is None:
             raise ConnectionError(
-                f"CybereasonConnector.search::You must initiate connection to {self.target.netloc} before running search !"
+                f"{__class__.__name__}.search::You must initiate connection to {self.target.netloc} before running search !"
             )
 
         search_options: Dict[str, Callable] = {
@@ -246,7 +246,7 @@ class CybereasonConnector(Connector):
 
         except Exception as e:
             ColorPrint.red(
-                f"CybereasonConnector.sensor_page_search::An error occured while querying {endpoint.path}\n{e}"
+                f"{__class__.__name__}.page_search::An error occured while querying {endpoint.path}\n{e}"
             )
 
         return res

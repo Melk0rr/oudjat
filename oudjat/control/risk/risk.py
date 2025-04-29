@@ -63,8 +63,9 @@ class Risk:
         Returns:
             int: severity of the risk (value between 1 and 16)
         """
+
         if self.likelihood is None or self.impact is None:
-            raise ValueError("Risk::You need to set risk likelihood and impact to get its score !")
+            raise ValueError(f"{__class__.__name__}.get_severity::You need to set risk likelihood and impact to get its score !")
 
         self.value = self.likelihood * self.impact
 

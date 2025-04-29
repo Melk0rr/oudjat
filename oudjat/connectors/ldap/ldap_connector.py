@@ -109,7 +109,7 @@ class LDAPConnector(Connector):
             except ldap3.core.exceptions.LDAPSocketOpenError as e:
                 if not self.use_tls:
                     ColorPrint.yellow(
-                        f"LDAPConnectorGot.connect::Error while trying to connect to LDAP: {e}"
+                        f"{__class__.__name__}.connect::Error while trying to connect to LDAP: {e}"
                     )
 
                 self.connect(version=ssl.PROTOCOL_TLSv1)
@@ -515,15 +515,29 @@ class LDAPConnector(Connector):
     def check_entry_type(entry: Dict) -> bool:
         """
         Checks if the provided entry is a searchResEntry
+
+        Args:
+            entry (Dict): entry to check
+
+
+        Returns:
+            bool: True if the entry is a searchResEntry. False otherwise
         """
+
         return entry["type"] == "searchResEntry"
 
     def ldap_entry_from_dict(entry: Dict) -> "LDAPEntry":
         """
         Creates an LDAPEntry from the provided dictionary
+
+        Args:
+            entry (Dict): entry to convert into an LDAPEntry
+
+        Returns:
+            LDAPEntry: the new LDAPEntry instance
         """
 
         if entry.get("attributes", None) is None:
-            raise ValueError("LDAPConnector.ldap_entry_from_dict::Invalid entry provided")
+            raise ValueError(f"{__class__.__name__}.ldap_entry_from_dict::Invalid entry provided")
 
         return LDAPEntry(**entry)

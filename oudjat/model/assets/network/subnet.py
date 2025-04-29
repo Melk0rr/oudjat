@@ -54,7 +54,7 @@ class Subnet:
 
         if mask is None:
             raise ValueError(
-                f"Subnet::Provided net address has no mask set: {address.get_address()}"
+                f"{__class__.__name__}::Provided net address has no mask set: {address.get_address()}"
             )
 
         self.set_mask(mask)

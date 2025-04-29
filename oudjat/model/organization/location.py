@@ -87,7 +87,7 @@ class Location(GenericIdentifiable):
         """
 
         if not isinstance(subnet, Subnet):
-            raise ValueError("Location.add_subnet::Invalid subnet provided")
+            raise ValueError(f"{__class__.__name__}.add_subnet::Invalid subnet provided")
 
         self.subnet[f"{subnet}"] = subnet
 

@@ -60,7 +60,7 @@ class LDAPGroupPolicyObject(LDAPObject):
             )
 
         except Exception as e:
-            raise (f"LDAPGPO::Error while trying to get group policy scope\n{e}")
+            raise (f"{__class__.__name__}::Error while trying to get group policy scope\n{e}")
 
         guids = re.findall(UUID_REG, self.entry.get(self.scope.value))
         self.infos = {guid: MS_GPPREF[guid] for guid in guids}
