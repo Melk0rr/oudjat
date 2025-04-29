@@ -1,5 +1,3 @@
-# INFO: Helper function to handle std out
-
 import sys
 
 

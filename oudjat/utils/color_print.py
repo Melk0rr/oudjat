@@ -1,6 +1,3 @@
-# INFO: Helper functions to print in color
-
-
 class ColorPrint:
     """A utility class to provide colored text output in the terminal."""
 
