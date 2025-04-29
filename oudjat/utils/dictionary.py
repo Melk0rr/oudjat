@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 
 class CustomDict(dict):
@@ -69,7 +69,6 @@ class CustomDict(dict):
 
         return char.join(f"{k}: {v}" for k, v in dictionary.items())
 
-
     @staticmethod
     def join_dictionary_values(dictionary: Dict, char: str) -> str:
         """
@@ -108,4 +107,25 @@ class CustomDict(dict):
 
         return {el[key]: el for el in list_to_map}
 
+    @staticmethod
+    def from_tuple(input_tuple: Tuple, parent: Tuple, res: Dict = {}) -> Dict:
+        """
+        Converts a nested tuple into a dictionary recursively.
 
+        Args:
+            input_tuple (Tuple): The input tuple to be converted into a dictionary.
+            parent (Tuple): The parent tuple from which the current element is taken.
+            res (Dict, optional): A dictionary to store intermediate results. Defaults to an empty dictionary.
+
+        Returns:
+            Dict: A nested dictionary where each key-value pair represents an element and its corresponding parent index.
+        """
+
+        for el in input_tuple:
+            if isinstance(el, tuple):
+                return CustomDict.from_tuple(el, input_tuple, res)
+            else:
+                # Assuming that the first element of each sub-tuple is the key and the second is the value
+                res[el] = parent[0][1]
+
+        return res
