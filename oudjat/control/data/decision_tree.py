@@ -1,8 +1,8 @@
-# TODO: docstrings
+# TODO: fully use LogicalOperator and LogicalOperation classes
 
 from typing import Any, Dict, List, Union
 
-from oudjat.utils.color_print import ColorPrint
+from oudjat.utils import ColorPrint, LogicalOperator
 from oudjat.utils.mappers import any_to_dict
 
 from .data_filter import DataFilter
@@ -14,8 +14,13 @@ class DecisionTreeNode:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, node_dict: Dict):
-        """Constructor"""
+    def __init__(self, node_dict: Dict) -> None:
+        """
+        Creates a new decision tree node instance
+
+        Args:
+            node_dict (Dict): A dictionary containing the initialization data for the node.
+        """
 
         self.flag = node_dict.get("flag", None)
         self.node_filter: DataFilter = DataFilter.from_dict(dictionnary=node_dict)
@@ -26,17 +31,35 @@ class DecisionTreeNode:
     # Methods
 
     def get_flag(self) -> Union[int, str]:
-        """Getter for node flag"""
+        """
+        Getter for node flag
+
+        Returns:
+            Union[int, str]: The flag of the node.
+        """
 
         return self.flag
 
     def get_node_filter(self) -> DataFilter:
-        """Getter for current node filter"""
+        """
+        Getter for current node filter
+
+        Returns:
+            DataFilter: The filter associated with the node.
+        """
 
         return self.node_filter
 
     def get_value(self, element: Dict = None) -> bool:
-        """Getter for node value"""
+        """
+        Returns the node value
+
+        Args:
+            element (Dict, optional): A dictionary representing an element to be filtered. Defaults to None.
+
+        Returns:
+            bool: The value of the node after applying its filter if necessary.
+        """
 
         if self.value is None and element is not None:
             self.init(element)
@@ -44,23 +67,40 @@ class DecisionTreeNode:
         return self.value
 
     def to_dict(self) -> Dict:
-        """Converts the current instance into a dict"""
+        """
+        Converts the current instance into a dict
+
+        Returns:
+            Dict: A dictionary representation of the node containing its flag, value, and filter.
+        """
 
         return {"flag": self.flag, "value": self.value, "filter": str(self.node_filter)}
 
     def clear(self) -> None:
-        """Clears current node"""
+        """
+        Clears current node
+        """
 
         self.value = None
         del self.node_filter
 
     def init(self, element: Dict) -> None:
-        """Initialize node value"""
+        """
+        Initialize node value
+
+        Args:
+            element (Dict): A dictionary representing an element to be filtered.
+        """
 
         self.value = self.node_filter.filter_dict(element)
 
     def __str__(self) -> str:
-        """Converts the current node into a string"""
+        """
+        Converts the current node into a string
+
+        Returns:
+            str: A string representation of the node, showing its filter and value if applicable.
+        """
 
         res_str = ""
         if self.value is not None:
@@ -85,24 +125,39 @@ class DecisionTreeNode:
 
         return node.get_flag()
 
+
 class DecisionTreeNodeList(list):
     """A list of decision tree nodes"""
 
     def get_by_value(self, value: bool = True) -> "DecisionTreeNodeList":
-        """Returns a sub decision tree node list matching the given value"""
+        """Returns a sub decision tree node list matching the given value
+
+        Args:
+            value (bool, optional): The boolean value to filter by. Defaults to True.
+
+        Returns:
+            DecisionTreeNodeList: A list of nodes with the specified value.
+        """
 
         return DecisionTreeNodeList(filter(lambda node: node.get_value() == value, self))
 
     def get_details_list(self) -> List[str]:
-        """Returns a list of decision tree node detail string"""
+        """Returns a list of decision tree node detail string
+
+        Returns:
+            List[str]: A list of strings representing the nodes' details.
+        """
 
         return list(map(str, self))
 
     def get_flags_list(self) -> List[Union[int, str]]:
-        """Returns a list of decision tree node flags"""
+        """Returns a list of decision tree node flags
+
+        Returns:
+            List[Union[int, str]]: A list of the nodes' flags.
+        """
 
         return list(map(DecisionTreeNode.node_flag, self))
-
 
 
 class DecisionTree:
@@ -111,8 +166,13 @@ class DecisionTree:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, tree_dict: Dict):
-        """Constructor"""
+    def __init__(self, tree_dict: Dict) -> None:
+        """
+        Creates a new instance of DecisionTree
+
+        Args:
+            tree_dict (Dict): A dictionary representing the decision tree.
+        """
 
         self.raw = tree_dict
 
@@ -122,9 +182,10 @@ class DecisionTree:
         # Allows to map the tree raw boolean value to a customized value (e.g. {True: "YES", False: "NO"})
         self.value_map: Dict = tree_dict.get("value_map", {True: True, False: False})
 
-        self.operator: str = tree_dict.get("operator", "and")
-        if self.operator not in ["or", "and"]:
-            raise ValueError(f"{__class__.__name__}::Invalid operator provided {self.operator}")
+        # TODO: Check other references of operator (in DecisionTreeNode to)
+        self.operator: LogicalOperator = tree_dict.get("operator", LogicalOperator.AND)
+        if self.operator.name not in LogicalOperator._member_names_:
+            raise ValueError(f"{__class__.__name__}::Invalid operator provided {self.operator.op_name}")
 
         self.nodes = None
         self.value = None
@@ -133,15 +194,36 @@ class DecisionTree:
     # Methods
 
     def get_nodes(self) -> List:
-        """Getter for decision tree nodes"""
+        """
+        Getter for decision tree nodes
+
+        Returns:
+            List: A list of DecisionTreeNode instances representing the tree nodes.
+        """
+
         return self.nodes
 
     def get_operator(self) -> str:
-        """Getter for decision tree operator"""
+        """
+        Getter for decision tree operator
+
+        Returns:
+            str: The logical operator used in the tree ("and" or "or").
+        """
+
         return self.operator
 
     def get_value(self, element: Dict = None, clear: bool = True) -> bool:
-        """Getter for tree value"""
+        """
+        Getter for tree value
+
+        Args:
+            element (Dict, optional): A dictionary representing the data to evaluate against the tree conditions.
+            clear (bool, optional): Whether to clear the current value before computing a new one.
+
+        Returns:
+            bool: The computed boolean value of the tree based on the conditions, or None if not yet computed.
+        """
 
         if clear:
             self.clear()
@@ -150,12 +232,20 @@ class DecisionTree:
             self.init(element)
 
         if self.value is None:
-            return None
+            return False
 
         return self.value if not self.negate else not self.value
 
     def get_mapped_value(self, element: Dict = None) -> Any:
-        """Get mapped value based on value, negate and value map"""
+        """
+        Get mapped value based on value, negate and value map
+
+        Args:
+            element (Dict, optional): A dictionary representing the data to evaluate against the tree conditions.
+
+        Returns:
+            Any: The mapped value based on the current value, negate, and value_map attributes.
+        """
 
         default_value = self.get_value(element)
 
@@ -165,13 +255,23 @@ class DecisionTree:
         return self.value_map[default_value]
 
     def set_operator(self, new_operator: str) -> None:
-        """Setter for tree operator"""
+        """
+        Setter for tree operator
 
-        if new_operator.lower() in ["or", "and"]:
-            self.operator = new_operator.lower()
+        Args:
+            new_operator (str): new operator value as a string
+        """
+
+        if new_operator.upper() in LogicalOperator._member_names_:
+            self.operator = LogicalOperator[new_operator.upper()]
 
     def add_node(self, node: Dict) -> None:
-        """Adds a new node to the tree"""
+        """
+        Adds a new node to the tree
+
+        Args:
+            node (Dict): the node to add to the tree
+        """
 
         # If the provided node contains subnodes : it is a decision tree else: it is a simple node
         if node.get("nodes", None) is not None:
@@ -184,7 +284,9 @@ class DecisionTree:
         self.nodes.append(node)
 
     def build(self) -> None:
-        """Builds tree nodes instances from raw dict"""
+        """
+        Builds tree nodes instances from raw dict
+        """
 
         try:
             self.nodes = []
@@ -196,26 +298,39 @@ class DecisionTree:
             ColorPrint.red(f"{__class__.__name__}.build::An error occured while building tree\n{e}")
 
     def init(self, element: Dict) -> None:
-        """Initialize tree node values"""
+        """
+        Initializes tree node values
+
+        Args:
+            element (Dict): the dictionary to use for initialization
+        """
 
         # If nods have not yet been built -> build
         if self.nodes is None:
             self.build()
 
+        # TODO: See if all logical operators can be used
         sub_values = [n.get_value(element) for n in self.nodes]
-        tree_value = all(sub_values) if self.operator == "and" else any(sub_values)
+        tree_value = all(sub_values) if self.operator.op_name == "and" else any(sub_values)
 
         self.value = tree_value
 
     def clear(self) -> None:
-        """Clears the tree"""
+        """
+        Clears the tree
+        """
 
         self.value = None
         for n in self.nodes:
             del n
 
     def get_leaves(self, leaves_value: bool = None) -> DecisionTreeNodeList:
-        """Returns a flattened list of decision tree nodes"""
+        """
+        Get all leaves of the decision tree as a list of values
+
+        Returns:
+            List: A list of values representing the leaf nodes of the decision tree.
+        """
 
         if self.nodes is None:
             return None
@@ -237,7 +352,12 @@ class DecisionTree:
         return leaves
 
     def __str__(self) -> str:
-        """Converts the current decision tree into a string"""
+        """
+        Converts the current decision tree into a string
+
+        Returns:
+            str: the current instance represented as a string which contains nodes own str representation joined by operators
+        """
 
         sep = f" {self.operator.upper()} "
         return f"({sep.join(list(map(str, self.nodes)))})"
@@ -245,6 +365,9 @@ class DecisionTree:
     def to_dict(self) -> Dict:
         """
         Returns a dictionary representing the current decision tree
+
+        Returns:
+            Dict: the current instance as a dictionary
         """
 
         return {
@@ -252,10 +375,8 @@ class DecisionTree:
             "negate": self.negate,
             "operator": self.operator,
             "mapped_value": self.get_mapped_value(),
-            "details": list(map(any_to_dict, self.nodes))
+            "details": list(map(any_to_dict, self.nodes)),
         }
 
     # ****************************************************************
     # Static methods
-
-
