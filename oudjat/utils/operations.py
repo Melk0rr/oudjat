@@ -1,3 +1,5 @@
+# TODO: Wrap all operation in Operation class and maybe implement an Operator enum
+
 import re
 from typing import Any, List, Union
 
