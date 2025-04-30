@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Dict, List
 
-from oudjat.utils.datestr_flags import DateFormat, DateFlag
+from oudjat.utils.time import DateFlag, DateFormat
 
 if TYPE_CHECKING:
     from ..ldap_connector import LDAPConnector

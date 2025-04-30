@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Union
 
-from oudjat.utils.datestr_flags import DateFlag, DateFormat
+from oudjat.utils.time import DateFlag, DateFormat
 
 from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList
 
