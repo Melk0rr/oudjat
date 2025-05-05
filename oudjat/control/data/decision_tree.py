@@ -185,7 +185,9 @@ class DecisionTree:
         # TODO: Check other references of operator (in DecisionTreeNode to)
         self.operator: LogicalOperator = tree_dict.get("operator", LogicalOperator.AND)
         if self.operator.name not in LogicalOperator._member_names_:
-            raise ValueError(f"{__class__.__name__}::Invalid operator provided {self.operator.op_name}")
+            raise ValueError(
+                f"{__class__.__name__}::Invalid operator provided {self.operator.ope_name}"
+            )
 
         self.nodes = None
         self.value = None
@@ -311,7 +313,7 @@ class DecisionTree:
 
         # TODO: See if all logical operators can be used
         sub_values = [n.get_value(element) for n in self.nodes]
-        tree_value = all(sub_values) if self.operator.op_name == "and" else any(sub_values)
+        tree_value = all(sub_values) if self.operator.ope_name == "and" else any(sub_values)
 
         self.value = tree_value
 
