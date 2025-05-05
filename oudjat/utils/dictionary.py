@@ -86,7 +86,7 @@ class CustomDict(dict):
             '1, 2'
         """
 
-        return char.join(f"{v}" for v in dictionary.values())
+        return char.join(map(str, dictionary.values()))
 
     @staticmethod
     def map_list_to_dict(list_to_map: List, key: str) -> Dict:
