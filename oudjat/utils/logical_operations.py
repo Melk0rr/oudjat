@@ -3,6 +3,14 @@ from typing import Callable
 
 
 class LogicalOperation:
+    """
+    A class to handle logical operations
+
+    > But what's the point ?
+    The point is typically to work with configuration files, and to call a specific logical function from an operator name.
+    It allows to build decision tree or data filter from a JSON or any config file format
+    """
+
     @staticmethod
     def from_str(operator: str, *args) -> int | bool:
         """
@@ -141,16 +149,16 @@ class LogicalOperation:
 class LogicalOperator(Enum):
     """And enumeration of possible logical operators"""
 
-    OR =   {"op_name": "or", "operation": LogicalOperation.logical_or}
-    AND =  {"op_name": "and", "operation": LogicalOperation.logical_and}
-    XOR =  {"op_name": "xor", "operation": LogicalOperation.logical_xor}
-    XAND = {"op_name": "xand", "operation": LogicalOperation.logical_xand}
-    NOT =  {"op_name": "not", "operation": LogicalOperation.logical_not}
-    NOR =  {"op_name": "nor", "operation": LogicalOperation.logical_nor}
-    NAND = {"op_name": "nand", "opearation": LogicalOperation.logical_nand}
+    OR = {"ope_name": "or", "operation": LogicalOperation.logical_or}
+    AND = {"ope_name": "and", "operation": LogicalOperation.logical_and}
+    XOR = {"ope_name": "xor", "operation": LogicalOperation.logical_xor}
+    XAND = {"ope_name": "xand", "operation": LogicalOperation.logical_xand}
+    NOT = {"ope_name": "not", "operation": LogicalOperation.logical_not}
+    NOR = {"ope_name": "nor", "operation": LogicalOperation.logical_nor}
+    NAND = {"ope_name": "nand", "opearation": LogicalOperation.logical_nand}
 
     @property
-    def op_name(self) -> str:
+    def ope_name(self) -> str:
         """
         Returns a logical operator name
 
@@ -158,7 +166,7 @@ class LogicalOperator(Enum):
             str: name of the operator
         """
 
-        return self._value_["op_name"]
+        return self._value_["ope_name"]
 
     @property
     def operation(self) -> Callable:
