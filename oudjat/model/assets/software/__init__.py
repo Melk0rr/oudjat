@@ -13,3 +13,5 @@ __all__ = [
     "SoftwareReleaseSupport",
     "SoftwareReleaseSupportList",
 ]
+
+# TODO: see if releases can be handled in a simpler way -> no imbricated SoftwareReleaseDict

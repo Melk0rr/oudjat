@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, List, Union
 
-from oudjat.utils.time import DateFlag, DateFormat, TimeConverter
+from oudjat.utils.time_utils import TimeConverter
 
 from .software_edition import SoftwareEditionDict
 
@@ -44,15 +44,15 @@ class SoftwareReleaseSupport:
         # Datetime conversion
         try:
             if end_of_life is not None and not isinstance(end_of_life, datetime):
-                end_of_life = datetime.strptime(end_of_life, DateFormat.from_flag(DateFlag.YMD))
+                end_of_life = TimeConverter.str_to_date(end_of_life)
 
             if active_support is not None and not isinstance(active_support, datetime):
-                active_support = datetime.strptime(
-                    active_support, DateFormat.from_flag(DateFlag.YMD)
-                )
+                active_support = TimeConverter.str_to_date(active_support)
 
         except ValueError as e:
-            raise ValueError(f"{__class__.__name__}::Please provide dates with %Y-%m-%d format\n{e}")
+            raise ValueError(
+                f"{__class__.__name__}::Please provide dates with %Y-%m-%d format\n{e}"
+            )
 
         self.active_support = active_support
         self.end_of_life = end_of_life
@@ -167,31 +167,15 @@ class SoftwareReleaseSupport:
 
         return {
             "edition": self.edition,
-            "active_support": SoftwareReleaseSupport.soft_date_str(self.active_support),
-            "end_of_life": SoftwareReleaseSupport.soft_date_str(self.end_of_life),
+            "active_support": TimeConverter.date_to_str(self.active_support),
+            "end_of_life": TimeConverter.date_to_str(self.end_of_life),
             "status": self.status(),
             "lts": self.lts,
             "details": self.support_details(),
         }
 
-
     # ****************************************************************
     # Static methods
-
-    @staticmethod
-    def soft_date_str(date: datetime) -> str:
-        """
-        Converts a software date into a string
-
-        Args:
-            date (datetime) : date to convert
-
-        Returns:
-            str : date string
-        """
-
-        if date is not None:
-            return date.strftime(DateFormat.from_flag(DateFlag.YMD))
 
 
 class SoftwareReleaseSupportList(list):
@@ -217,6 +201,7 @@ class SoftwareReleaseSupportList(list):
         Returns:
             bool: True if there's a match, otherwise False.
         """
+
         return any([support.supports_edition(edition, lts) for support in self])
 
     def get(
@@ -230,13 +215,14 @@ class SoftwareReleaseSupportList(list):
         This method filters and returns a list of `SoftwareReleaseSupport` objects that match the specified criteria for edition and LTS status. It uses the `supports_edition` method to filter the releases based on the provided parameters.
 
         Args:
-            edition (Union[str, List[str]]) : The edition or a list of editions to look for in the software releases.
-            lts (bool)                      : Whether to include only LTS releases in the result. Defaults to False.
+            edition (Union[str, List[str]]): The edition or a list of editions to look for in the software releases.
+            lts (bool)                     : Whether to include only LTS releases in the result. Defaults to False.
 
         Returns:
             List[SoftwareReleaseSupport]: A list of `SoftwareReleaseSupport` objects that meet the specified conditions.
         """
-        return [support for support in self if support.supports_edition(edition, lts)]
+
+        return list(filter(lambda s: s.supports_edition(edition, lts), self))
 
     def append(self, support: SoftwareReleaseSupport) -> None:
         """
@@ -250,6 +236,7 @@ class SoftwareReleaseSupportList(list):
         Raises:
             TypeError: If the provided argument is not an instance of `SoftwareReleaseSupport`.
         """
+
         if isinstance(support, SoftwareReleaseSupport):
             super().append(support)
 
@@ -262,4 +249,5 @@ class SoftwareReleaseSupportList(list):
         Returns:
             str: A string representing the list of software releases, formatted as "[release1, release2, ...]".
         """
+
         return f"[{', '.join(list(map(str, self)))}]"

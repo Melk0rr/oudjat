@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Union
 
-from oudjat.utils.time import DateFlag, DateFormat
+from oudjat.utils.time_utils import TimeConverter
 
 from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList
 
@@ -43,7 +43,7 @@ class SoftwareRelease:
 
         try:
             if not isinstance(release_date, datetime):
-                release_date = datetime.strptime(release_date, DateFormat.from_flag(DateFlag.YMD))
+                release_date = TimeConverter.str_to_date(release_date)
 
         except ValueError as e:
             raise ValueError(
@@ -52,6 +52,8 @@ class SoftwareRelease:
 
         self.release_date = release_date
         self.support = SoftwareReleaseSupportList()
+
+        # NOTE: maybe convert vulnerabilities into a dictionary (CVE instances ?) if needed
         self.vulnerabilities = set()
 
     # ****************************************************************
@@ -311,10 +313,13 @@ class SoftwareReleaseDict(dict):
             SoftwareReleaseDict: A dictionary containing either the entire release information or a specific label's information based on the provided criteria.
         """
 
-        ver_search = self.get(rel_ver, None)
-        lab_search = None
+        if rel_ver not in self.keys():
+            return None
 
-        if ver_search is not None and rel_label is not None:
-            lab_search = ver_search.get(rel_label, None)
+        search: SoftwareReleaseDict = self.get(rel_ver)
 
-        return ver_search if lab_search is None else {lab_search.get_label(): lab_search}
+        if rel_label is not None and rel_label not in search.keys():
+            return search
+
+        search = search.get(rel_label)
+        return {search.get_label(): search}
