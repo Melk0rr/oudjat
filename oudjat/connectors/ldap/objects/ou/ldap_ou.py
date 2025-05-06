@@ -36,7 +36,7 @@ class LDAPOrganizationalUnit(LDAPObject):
             str : gpLink attribute containing links to group policy objects
         """
 
-        return self.entry.get("gpLink")
+        return self.entry.get("gPLink")
 
     def get_objects(
         self, ldap_connector: "LDAPConnector", object_types: List[str] = None
@@ -53,7 +53,6 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return ldap_connector.get_ou_objects(ldap_ou=self, object_types=object_types)
 
-    # TODO: Get sub OU
     def get_sub_ous(self, ldap_connector: "LDAPConnector") -> List["LDAPEntry"]:
         """
         Returns only sub OUs from the ou objects
@@ -81,7 +80,7 @@ class LDAPOrganizationalUnit(LDAPObject):
         """
 
         gpo_refs = re.search(UUID_REG, self.get_gplink())
-        return [ldap_connector.get_gpo(name=link) for link in gpo_refs]
+        return list(map(lambda link: ldap_connector.get_gpo(name=link) , gpo_refs))
 
     def to_dict(self) -> Dict:
         """
