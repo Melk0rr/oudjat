@@ -65,7 +65,7 @@ class LDAPOrganizationalUnit(LDAPObject):
             List[LDAPEntry]: list of sub OUs
         """
 
-        return self.get_objects(ldap_connector, object_types=["organizationalUnit"])
+        return ldap_connector.get_ou(search_base=self.dn)
 
     # TODO: Get GPOs that applies on current OU
     def get_gpo_from_gplink(self, ldap_connector: "LDAPConnector") -> List["LDAPObject"]:
