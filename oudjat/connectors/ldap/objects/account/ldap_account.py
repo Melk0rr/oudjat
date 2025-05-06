@@ -21,7 +21,7 @@ def acc_date_str(date: datetime) -> str:
         str: readable formated string
     """
 
-    return date.strftime(DateFormat.from_flag(DateFlag.YMD_HMS))
+    return TimeConverter.date_to_str(date, date_format=DateFormat.from_flag(DateFlag.YMD_HMS))
 
 
 class LDAPAccount(LDAPObject):
