@@ -32,7 +32,9 @@ class KPIComparator:
         """
 
         if kpi_a.get_perimeter() != kpi_b.get_perimeter():
-            raise ValueError(f"{__class__.__name__}::Provided KPIs do not share the same perimeter !")
+            raise ValueError(
+                f"{__class__.__name__}::Provided KPIs do not share the same perimeter !"
+            )
 
         self.kpis = (kpi_a, kpi_b)
 
@@ -109,6 +111,27 @@ class KPIComparator:
             self.kpis[0].get_print_function()(f"  {self.values[0]}%", end="")
 
         print(" -- ", end="")
-        t_icon = self.tendency["icon"]
         self.kpis[1].get_print_function()(f"{self.values[1]}%", end="")
-        self.tendency["print"](t_icon, end=sfx)
+        self.tendency["print"](self.tendency["icon"], end=sfx)
+
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def compare_2_kpis(kpi_a: "KPI", kpi_b: "KPI") -> "KPIComparator":
+        """
+        Creates a new instance of KPIComparator using the two provided KPI instances
+        Then runs the compare method of the comparator and returns it
+
+        Args:
+            kpi_a (KPI): first KPI for the comparison
+            kpi_b (KPI): second KPI for the comparison
+
+        Returns:
+            KPIComparator: the comparator instance once the compare action has been ran
+        """
+
+        comparator = KPIComparator(kpi_a, kpi_b)
+        comparator.compare()
+
+        return comparator

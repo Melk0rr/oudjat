@@ -1,11 +1,9 @@
-# INFO: KPI module handling operations related to indicators
-
 from datetime import datetime
 from enum import Enum
 from typing import Callable, Dict, List, Union
 
 from oudjat.control.data import DataFilter, DataSet
-from oudjat.utils import ColorPrint
+from oudjat.utils import ColorPrint, DateFlag, DateFormat, TimeConverter
 
 
 class ConformityLevel(Enum):
@@ -59,10 +57,10 @@ class KPI(DataSet):
         self,
         name: str,
         perimeter: str,
+        date: datetime = None,
         scope: Union[List[Dict], DataSet] = None,
         filters: Union[List[Dict], List[DataFilter]] = [],
         description: str = None,
-        date: datetime = None,
     ) -> None:
         """
         Returns a new instance of KPI
@@ -77,16 +75,31 @@ class KPI(DataSet):
         """
 
         super().__init__(
-            name=name, perimeter=perimeter, scope=scope, filters=filters, description=description
+            name=name,
+            perimeter=perimeter,
+            scope=scope,
+            filters=filters,
+            description=description
         )
 
         if date is None:
             date = datetime.today()
 
         self.date: datetime = date
+        self.id = f"{perimeter.lower()}{TimeConverter.date_to_str(date, date_format=DateFormat.from_flag())}"
 
     # ****************************************************************
     # Methods
+
+    def get_id(self) -> str:
+        """
+        Returns the KPI id
+
+        Returns:
+            str: generated ID of the current KPI
+        """
+
+        return self.id
 
     def get_date(self) -> datetime:
         """
