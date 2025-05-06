@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Set
 
-from oudjat.utils.time import DateFlag, DateFormat, TimeConverter
+from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
 
 from ..ldap_object import LDAPObject
 from .ldap_account_flags import LDAPAccountFlag
