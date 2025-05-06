@@ -72,6 +72,10 @@ class DateFormat(Enum):
 
 
 class TimeConverter:
+    """
+    A helper class to wrap up some useful time convertion functions
+    """
+
     @staticmethod
     def seconds_to_str(t: float) -> str:
         """
@@ -126,6 +130,37 @@ class TimeConverter:
             return -1
 
         today = datetime.now(timezone.utc)
-        diff = date - today if reverse else today - date
+        diff = reverse and (date - today) or (today - date)
 
         return diff.days
+
+    @staticmethod
+    def str_to_date(date_str: str, date_format: str = DateFormat.from_flag(DateFlag.YMD)) -> datetime:
+        """
+        Converts the given date string into a proper datetime
+
+        Args:
+            date_str (str)   : the date represented as a string
+            date_format (str): the format to use to parse the date string
+
+        Returns:
+            datetime: datetime object based on provided date string and format
+        """
+
+        return datetime.strptime(date_str, date_format)
+
+    @staticmethod
+    def date_to_str(date: datetime, date_format: str = DateFormat.from_flag(DateFlag.YMD)) -> datetime:
+        """
+        Converts the given datetime object into a string
+
+        Args:
+            date (datetime)   : the datetime object to convert
+            date_format (str) : the format to use to convert the date
+
+        Returns:
+            str: the provided date as a string based on the given format
+        """
+
+        return date is not None and date.strftime(date_format) or date
+
