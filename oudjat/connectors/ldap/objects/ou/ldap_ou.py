@@ -71,7 +71,13 @@ class LDAPOrganizationalUnit(LDAPObject):
     def get_gpo_from_gplink(self, ldap_connector: "LDAPConnector") -> List["LDAPObject"]:
         """
         This method extracts the GPO references (UUIDs) present in the current OU gpLink
-        It the then uses it to retrieve corresponding LDAP GPO instances
+        It then uses it to retrieve corresponding LDAP GPO instances
+
+        Args:
+            ldap_connector (LDAPConnector): the LDAP connector used to retrieve the GPOs
+
+        Returns:
+            List[LDAPObject]: a list of LDAPGroupPolicyObject instances based on the UUIDs in thecurrent OU gpLink attribute
         """
 
         gpo_refs = re.search(UUID_REG, self.get_gplink())
