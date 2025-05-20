@@ -1,11 +1,11 @@
 from .bit_flag import BitFlag
 from .color_print import ColorPrint
 from .credentials import CredentialHelper
-from .dictionary import CustomDict
-from .file import FileHandler, FileType
+from .dictionary_utils import CustomDict
+from .file_utils import FileHandler, FileType
 from .logical_operations import LogicalOperation, LogicalOperator
 from .stdouthook import StdOutHook
-from .time import DateFlag, DateFormat, TimeConverter
+from .time_utils import DateFlag, DateFormat, TimeConverter
 
 __all__ = [
     "BitFlag",
@@ -17,7 +17,7 @@ __all__ = [
     "LogicalOperation",
     "LogicalOperator",
     "StdOutHook",
-    "DateFormat",
     "DateFlag",
+    "DateFormat",
     "TimeConverter",
 ]

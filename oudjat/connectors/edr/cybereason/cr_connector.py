@@ -9,7 +9,7 @@ import requests
 from oudjat.connectors.connector import Connector
 from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoint
 from oudjat.utils.color_print import ColorPrint
-from oudjat.utils.time import TimeConverter
+from oudjat.utils.time_utils import TimeConverter
 
 from .cr_sensor_actions import CybereasonSensorAction
 

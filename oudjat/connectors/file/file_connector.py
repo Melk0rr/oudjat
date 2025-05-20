@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Union
 
 from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
-from oudjat.utils.file import FileHandler, FileType
+from oudjat.utils.file_utils import FileHandler, FileType
 
 
 class FileConnector(Connector):

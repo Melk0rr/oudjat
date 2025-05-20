@@ -167,6 +167,6 @@ class MSCVRFDocument:
                 mskb.set_products([self.products[pid] for pid in kb.get("ProductID", [])])
 
                 self.add_kb(mskb)
-                vuln.add_kb(kb_num=kb_num, kb=mskb)
+                vuln.add_kb(kb=mskb)
 
             self.add_vuln(vuln)

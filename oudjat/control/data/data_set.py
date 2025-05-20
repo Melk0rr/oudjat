@@ -140,20 +140,6 @@ class DataSet:
     # Static methods
 
     @staticmethod
-    def get_dataset_perimeter(dataset: "DataSet") -> str:
-        """
-        Returns the perimeter of the provided DataSet instance
-
-        Args:
-            dataset (DataSet): DataSet instance the perimeter will be returned
-
-        Returns:
-            str: the perimeter of the provided dataset
-        """
-
-        return dataset.get_perimeter()
-
-    @staticmethod
     def get_dataset_data(dataset: "DataSet") -> str:
         """
         Returns the data of the provided DataSet instance
@@ -183,8 +169,11 @@ class DataSet:
             ValueError: If the scopes do not have the same perimeter.
         """
 
+        def map_ds_perim(dataset: "DataSet") -> str:
+            return dataset.get_perimeter()
+
         # Check if all scopes are on the same perimeter
-        perimeters = set(map(DataSet.get_dataset_perimeter, sets))
+        perimeters = set(map(map_ds_perim, sets))
         if len(perimeters) > 1:
             raise ValueError(
                 f"{__class__.__name__}.merge_sets::Please provide scopes with the same perimeter"

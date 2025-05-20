@@ -4,8 +4,7 @@ from typing import Dict, List, Tuple
 
 from oudjat.control.data import DataFilter, DataSet
 from oudjat.control.kpi import KPI
-from oudjat.utils.color_print import ColorPrint
-from oudjat.utils.file import FileHandler
+from oudjat.utils.color_print import ColorPrint, FileHandler
 
 from .base import Base
 

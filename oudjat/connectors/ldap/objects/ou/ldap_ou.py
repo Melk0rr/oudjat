@@ -36,7 +36,7 @@ class LDAPOrganizationalUnit(LDAPObject):
             str : gpLink attribute containing links to group policy objects
         """
 
-        return self.entry.get("gpLink")
+        return self.entry.get("gPLink")
 
     def get_objects(
         self, ldap_connector: "LDAPConnector", object_types: List[str] = None
@@ -53,7 +53,6 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return ldap_connector.get_ou_objects(ldap_ou=self, object_types=object_types)
 
-    # TODO: Get sub OU
     def get_sub_ous(self, ldap_connector: "LDAPConnector") -> List["LDAPEntry"]:
         """
         Returns only sub OUs from the ou objects
@@ -65,17 +64,23 @@ class LDAPOrganizationalUnit(LDAPObject):
             List[LDAPEntry]: list of sub OUs
         """
 
-        return self.get_objects(ldap_connector, object_types=["organizationalUnit"])
+        return ldap_connector.get_ou(search_base=self.dn)
 
     # TODO: Get GPOs that applies on current OU
     def get_gpo_from_gplink(self, ldap_connector: "LDAPConnector") -> List["LDAPObject"]:
         """
         This method extracts the GPO references (UUIDs) present in the current OU gpLink
-        It the then uses it to retrieve corresponding LDAP GPO instances
+        It then uses it to retrieve corresponding LDAP GPO instances
+
+        Args:
+            ldap_connector (LDAPConnector): the LDAP connector used to retrieve the GPOs
+
+        Returns:
+            List[LDAPObject]: a list of LDAPGroupPolicyObject instances based on the UUIDs in thecurrent OU gpLink attribute
         """
 
         gpo_refs = re.search(UUID_REG, self.get_gplink())
-        return [ldap_connector.get_gpo(name=link) for link in gpo_refs]
+        return list(map(lambda link: ldap_connector.get_gpo(name=link) , gpo_refs))
 
     def to_dict(self) -> Dict:
         """

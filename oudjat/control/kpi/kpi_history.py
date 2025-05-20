@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from oudjat.utils import ColorPrint
@@ -67,36 +68,28 @@ class KPIHistory:
         Builds the history of KPIs by comparing each pair in order based on their dates.
         """
 
-        comp_list = []
-        sorted_kpis = sorted(self.kpis, key=lambda k: k.get_date())
+        def kpi_date(kpi: "KPI") -> datetime:
+            return kpi.get_date()
 
-        for i in range(len(self.kpis) - 1):
-            comparator = KPIComparator(sorted_kpis[i], sorted_kpis[i + 1])
-            comparator.compare()
+        sorted_kpis = sorted(self.kpis, kpi_date)
 
-            comp_list.append(comparator)
-
-        self.comparators = comp_list
+        self.comparators = [
+            KPIComparator.compare_2_kpis(sorted_kpis[i], sorted_kpis[i + 1])
+            for i in range(len(self.kpis) - 1)
+        ]
 
     def print_history(self) -> None:
         """
         Prints the history of KPIs by calling each comparator's print method to display their comparison results.
         """
 
-        if len(self.comparators) == 0:
+        comparator_len = len(self.comparators)
+        if comparator_len == 0:
             self.build_history()
 
         ColorPrint.blue(f"\n {self.name} History")
-        for i in range(len(self.comparators)):
-            c = self.comparators[i]
 
-            print_first = False
-            print_end = ""
-
-            if i == 0:
-                print_first = True
-
-            if i == len(self.comparators) - 1:
-                print_end = "\n"
-
-            c.print_tendency(print_first_value=print_first, sfx=print_end)
+        for i in range(comparator_len):
+            self.comparators[i].print_tendency(
+                print_first_value=(i == 0), sfx=(i == comparator_len - 1) and "\n" or ""
+            )

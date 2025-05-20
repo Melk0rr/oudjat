@@ -185,7 +185,9 @@ class DecisionTree:
         # TODO: Check other references of operator (in DecisionTreeNode to)
         self.operator: LogicalOperator = tree_dict.get("operator", LogicalOperator.AND)
         if self.operator.name not in LogicalOperator._member_names_:
-            raise ValueError(f"{__class__.__name__}::Invalid operator provided {self.operator.op_name}")
+            raise ValueError(
+                f"{__class__.__name__}::Invalid operator provided {self.operator.ope_name}"
+            )
 
         self.nodes = None
         self.value = None

@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 
 from oudjat.utils.mappers import any_to_dict
 
-from .definitions import CVE_REGEX, KB_NUM_REGEX
+from .definitions import CVE_REGEX
 from .ms_product import MSProduct
 from .ms_remed import MSRemed
 
@@ -37,40 +37,30 @@ class MSVuln:
 
     def get_cve(self) -> str:
         """
-        Getter for CVE
+        Returns the CVE tied to the current vuln
 
         Returns:
-            str: The Common Vulnerabilities and Exposures identifier.
+            str: CVE reference
         """
 
         return self.cve
 
     def get_remediations(self) -> Dict[str, MSRemed]:
         """
-        Getter for KB list
+        Returns the remediations for the current vuln
 
         Returns:
-            Dict[str, MSRemed]: A dictionary of KB numbers as keys and their corresponding remediation data (MSRemed objects).
+            Dict: a dictionary of MSRemed instances
         """
 
         return self.kbs
 
-    def get_remediation_numbers(self) -> List[int]:
-        """
-        Returns kb numbers
-
-        Returns:
-            List[int]: A list of KB numbers.
-        """
-
-        return list(self.kbs.keys())
-
     def get_impacted_products(self) -> Dict[str, MSProduct]:
         """
-        Getter for impacted product list
+        Returns the products impacted by the current vuln
 
         Returns:
-            Dict[str, MSProduct]: A dictionary of products as keys and their corresponding vulnerability data (MSProduct objects).
+            Dict: a dictionary of MSProduct instances
         """
 
         return self.products

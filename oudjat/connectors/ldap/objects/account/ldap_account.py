@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Set
 
-from oudjat.utils.time import DateFlag, DateFormat, TimeConverter
+from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
 
 from ..ldap_object import LDAPObject
 from .ldap_account_flags import LDAPAccountFlag
@@ -21,7 +21,7 @@ def acc_date_str(date: datetime) -> str:
         str: readable formated string
     """
 
-    return date.strftime(DateFormat.from_flag(DateFlag.YMD_HMS))
+    return TimeConverter.date_to_str(date, date_format=DateFormat.from_flag(DateFlag.YMD_HMS))
 
 
 class LDAPAccount(LDAPObject):
