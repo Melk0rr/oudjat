@@ -1,5 +1,3 @@
-# TODO: docstrings
-
 import re
 from typing import Any, Dict, List
 
@@ -17,10 +15,18 @@ class MSVuln:
     # Attributes & Constructor
 
     def __init__(self, cve: str) -> None:
-        """Constructor"""
+        """
+        Creates a new instance of MSVuln
+
+        Args:
+            cve (str): The Common Vulnerabilities and Exposures identifier for the vulnerability.
+
+        Raises:
+            ValueError: If the provided CVE does not match the expected regex pattern.
+        """
 
         if not re.match(CVE_REGEX, cve):
-            raise (f"{__class__.__name__}::Invalid CVE provided: {cve}")
+            raise ValueError(f"{__class__.__name__}::Invalid CVE provided: {cve}")
 
         self.cve = cve
         self.kbs: Dict[str, MSRemed] = {}
@@ -30,32 +36,67 @@ class MSVuln:
     # Methods
 
     def get_cve(self) -> str:
-        """Getter for CVE"""
+        """
+        Getter for CVE
+
+        Returns:
+            str: The Common Vulnerabilities and Exposures identifier.
+        """
 
         return self.cve
 
     def get_remediations(self) -> Dict[str, MSRemed]:
-        """Getter for KB list"""
+        """
+        Getter for KB list
+
+        Returns:
+            Dict[str, MSRemed]: A dictionary of KB numbers as keys and their corresponding remediation data (MSRemed objects).
+        """
 
         return self.kbs
 
     def get_remediation_numbers(self) -> List[int]:
-        """Returns kb numbers"""
+        """
+        Returns kb numbers
 
-        return self.kbs.keys()
+        Returns:
+            List[int]: A list of KB numbers.
+        """
+
+        return list(self.kbs.keys())
 
     def get_impacted_products(self) -> Dict[str, MSProduct]:
-        """Getter for impacted product list"""
+        """
+        Getter for impacted product list
+
+        Returns:
+            Dict[str, MSProduct]: A dictionary of products as keys and their corresponding vulnerability data (MSProduct objects).
+        """
+
         return self.products
 
     def add_kb(self, kb_num: int, kb: MSRemed) -> None:
-        """Adds a KB to vuln KB list"""
+        """
+        Adds a KB to vuln KB list
 
-        if re.match(KB_NUM_REGEX, kb_num) or re.match(r"(\w+)$", kb_num):
-            self.kbs[kb_num] = kb
+        Args:
+            kb_num (int): The number of the knowledge base article related to the vulnerability.
+            kb (MSRemed): The remediation data for the given KB number.
+
+        Raises:
+            ValueError: If the provided KB number does not match the expected regex pattern.
+        """
+
+        if re.match(KB_NUM_REGEX, str(kb_num)) or re.match(r"(\w+)$", str(kb_num)):
+            self.kbs[str(kb_num)] = kb
 
     def to_flat_dict(self) -> List[Dict]:
-        """Converts kbs into dictionaries"""
+        """
+        Converts kbs into dictionaries
+
+        Returns:
+            List[Dict]: A list of flattened dictionaries, each representing a KB and its related CVE.
+        """
 
         return [
             {"cve": self.cve, **kb_dict}
@@ -63,7 +104,13 @@ class MSVuln:
         ]
 
     def to_dict(self) -> Dict[str, Any]:
-        """Converts current vuln into a dict"""
+        """
+        Converts current vuln into a dict
+
+        Returns:
+            Dict[str, Any]: A dictionary representation of the MSVuln object containing CVE and its associated KBs.
+        """
+
         return {
             "cve": self.cve,
             "kbs": list(map(any_to_dict, self.kbs.values())),
