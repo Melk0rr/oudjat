@@ -1,6 +1,105 @@
+from typing import Dict
+
+from oudjat.connectors.connector import Connector
+
 
 class DataSource:
-  """ A generic class to describe data sources and trace data origin """
-# TODO: add connector
-# TODO: delete connector
-# TODO: get connector
+    """A generic class to describe data sources and trace data origin"""
+
+    # ****************************************************************
+    # Attributes & Constructors
+
+    def __init__(self, name: str, description: str = None) -> None:
+        """
+        Initializes a new instance of DataSource
+
+        Args:
+            name (str)       : the name of the data source
+            description (str): a description for the new data source
+        """
+
+        self.name = name
+        self.description = description
+
+        self.connectors: Dict[str, Connector] = {}
+
+    # ****************************************************************
+    # Methods
+
+    def get_name(self) -> str:
+        """
+        Returns the name of the data source
+
+        Returns:
+            str: current name of the data source
+        """
+
+        return self.name
+
+    def get_description(self) -> str:
+        """
+        Returns the description of the data source
+
+        Returns:
+            str: current description of the data source
+        """
+
+        return self.description
+
+    def get_connectors(self) -> Dict:
+        """
+        Returns the current data source connectors
+
+        Returns:
+            Dict: the connectors attached to this data source
+        """
+
+        return self.connectors
+
+    def get_connector(self, connector_key: str = None) -> "Connector":
+        """
+        Returns one of the data source connector based on its key
+
+        Args:
+            connector_key (str): the key of the desired connector
+
+        Returns:
+            Connector: the connector matching the provided key
+        """
+
+        if connector_key not in self.connectors:
+            raise ValueError(f"{__class__.__name__}.get_connector::Invalid connector key provided")
+
+        return self.connectors[connector_key]
+
+    def add_connector(self, connector_key: str, new_connector: "Connector") -> None:
+        """
+        Adds a new connector to the current data source
+
+        Args:
+            connector_key (str)      : the key to use for the new connector
+            new_connector (Connector): the new connector to add
+        """
+
+        if not isinstance(new_connector, Connector):
+            raise ValueError(f"{__class__.__name__}.add_connector::Invalid new connector provided. Please provide a valid Connector instance")
+
+        self.connectors[connector_key] = new_connector
+
+    def delete_connector(self, connector_key: str) -> None:
+        """
+        Removes one of the connectors of the current data source based on a key
+
+        Args:
+            connector_key (str): key of the connector to delete
+        """
+
+        del self.connectors[connector_key]
+
+    def clear_connectors(self) -> None:
+        """
+        Clears the connectors of the data source
+        """
+
+        del self.connectors
+        self.connectors = {}
