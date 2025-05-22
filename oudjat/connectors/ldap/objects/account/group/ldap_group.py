@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Dict, List
 
-from oudjat.model.assets.group import Group
+from oudjat.assets.group import Group
 
 from ...ldap_object import LDAPObject
 from .ldap_group_types import LDAPGroupType

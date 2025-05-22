@@ -44,7 +44,7 @@ Exemples:
 Help:
     For help using this tool, please open an issue on the Github repository:
     https://github.com/Melk0rr/Oudjat
-"""
+"""  # noqa: E501
 
 import sys
 import time
@@ -108,7 +108,9 @@ def main() -> None:
         command.run()
 
         print(
-            f"\nWatchers infos search took {TimeConverter.seconds_to_str(time.time() - start_time)}s"
+            f"\nWatchers infos search took {
+                TimeConverter.seconds_to_str(time.time() - start_time)
+            }s"
         )
 
         if options["--output"]:

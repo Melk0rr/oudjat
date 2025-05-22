@@ -1,10 +1,13 @@
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 
-from oudjat.model.assets.user import User
+from oudjat.assets.user import User
 
 from .definitions import MS_ACCOUNT_CTL_PROPERTY
 from .ldap_account import LDAPAccount
 from .ldap_account_flags import LDAPAccountFlag
+
+if TYPE_CHECKING:
+    from ..ldap_entry import LDAPEntry
 
 
 class LDAPUser(LDAPAccount, User):
@@ -13,7 +16,7 @@ class LDAPUser(LDAPAccount, User):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
+    def __init__(self, ldap_entry: "LDAPEntry"):
         """Constructor"""
 
         super().__init__(ldap_entry=ldap_entry)

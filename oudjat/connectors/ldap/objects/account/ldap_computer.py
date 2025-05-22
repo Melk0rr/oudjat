@@ -1,11 +1,14 @@
-from typing import Dict, List
+from typing import TYPE_CHECKING, Dict, List
 
-from oudjat.model.assets.computer import Computer
-from oudjat.model.assets.software.os import OperatingSystem, OSOption
-from oudjat.model.assets.software.software_edition import SoftwareEdition
-from oudjat.model.assets.software.software_release import SoftwareReleaseDict
+from oudjat.assets.computer import Computer
+from oudjat.assets.software.os import OperatingSystem, OSOption
+from oudjat.assets.software.software_edition import SoftwareEdition
+from oudjat.assets.software.software_release import SoftwareReleaseDict
 
 from .ldap_account import LDAPAccount
+
+if TYPE_CHECKING:
+    from ..ldap_entry import LDAPEntry
 
 
 class LDAPComputer(LDAPAccount, Computer):
@@ -14,7 +17,7 @@ class LDAPComputer(LDAPAccount, Computer):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
+    def __init__(self, ldap_entry: "LDAPEntry"):
         """Construcotr"""
 
         super().__init__(ldap_entry=ldap_entry)

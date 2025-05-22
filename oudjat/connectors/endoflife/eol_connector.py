@@ -4,8 +4,8 @@ from typing import Dict, List, Union
 
 import requests
 
+from oudjat.assets.software.os.windows import WindowsEdition
 from oudjat.connectors.connector import Connector
-from oudjat.model.assets.software.os.windows import WindowsEdition
 
 EOL_API_URL = "https://endoflife.date/api/"
 

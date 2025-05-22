@@ -4,7 +4,7 @@ from typing import Dict, List, Set
 import requests
 from bs4 import BeautifulSoup, element
 
-from oudjat.model.vulnerability.cve import CVE, CVE_REGEX
+from oudjat.control.vulnerability.cve import CVE, CVE_REGEX
 from oudjat.utils.color_print import ColorPrint
 
 from ..risk_types import RiskType
@@ -115,7 +115,9 @@ class CERTFRPage:
             req = requests.get(self.link)
 
             if req.status_code != 200:
-                raise ConnectionError(f"{__class__.__name__}.connect::Error while trying to connect to {self.ref}")
+                raise ConnectionError(
+                    f"{__class__.__name__}.connect::Error while trying to connect to {self.ref}"
+                )
 
             self.raw_content = BeautifulSoup(req.content, "html.parser")
             self.title = self.raw_content.title.text
@@ -124,7 +126,9 @@ class CERTFRPage:
 
         except ConnectionError:
             ColorPrint.red(
-                f"{__class__.__name__}.connect::Error while requesting {self.ref}. Make sure it is accessible"
+                f"{__class__.__name__}.connect::Error while requesting {
+                    self.ref
+                }. Make sure it is accessible"
             )
 
     def disconnect(self) -> None:
@@ -162,7 +166,9 @@ class CERTFRPage:
             self.content.parse()
 
         except Exception as e:
-            ColorPrint.red(f"{__class__.__name__}.parse::A parsing error occured for {self.ref}\n{e}")
+            ColorPrint.red(
+                f"{__class__.__name__}.parse::A parsing error occured for {self.ref}\n{e}"
+            )
 
     def __str__(self) -> str:
         """
@@ -252,7 +258,9 @@ class CERTFRPage:
         """
 
         if not re.match(CERTFR_LINK_REGEX, link):
-            raise ValueError(f"{__class__.__name__}.get_ref_from_link::Invalid CERTFR link provided: {link}")
+            raise ValueError(
+                f"{__class__.__name__}.get_ref_from_link::Invalid CERTFR link provided: {link}"
+            )
 
         return re.findall(CERTFR_REF_REGEX, link)[0]
 

@@ -6,7 +6,7 @@ from tenable.sc import TenableSC
 
 from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
-from oudjat.model.vulnerability.cve import Severity
+from oudjat.control.vulnerability.cve import Severity
 from oudjat.utils.color_print import ColorPrint
 
 from .tsc_asset_list_types import TSCAssetListType
