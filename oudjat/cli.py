@@ -1,4 +1,6 @@
 """
+A SOC toolbox and maybe more if I have the time.
+
 Usage:
     oudjat cert (-t TARGET | -f FILE) [options]   [--feed] [--filter=FILTER]
                                                   [--keywords=KEYWORDS | --keywordfile=FILE]
@@ -44,7 +46,7 @@ Exemples:
 Help:
     For help using this tool, please open an issue on the Github repository:
     https://github.com/Melk0rr/Oudjat
-"""  # noqa: E501
+"""
 
 import sys
 import time
@@ -58,25 +60,27 @@ from oudjat.utils import ColorPrint, StdOutHook, TimeConverter
 
 from . import __version__ as VERSION
 
-COMMAND_OPTIONS = ["vuln", "cert", "sc", "kpi"]
+COMMAND_OPTIONS = {
+    "vuln": oudjat.commands.vuln.Vuln,
+    "cert": oudjat.commands.cert.Cert,
+    "kpi": oudjat.commands.kpi_factory.KPIFactory,
+    # "sc"  : oudjat.commands.SC,
+}
 
 
 def command_switch(options: Dict) -> Any:
-    """Script command switch case"""
+    """
+    Script command switch case.
+    """
 
-    switch = {
-        "vuln": oudjat.commands.vuln.Vuln,
-        "cert": oudjat.commands.cert.Cert,
-        "kpi": oudjat.commands.kpi_factory.KPIFactory,
-        # "sc"  : oudjat.commands.SC,
-    }
-
-    command_name = next(command for command in COMMAND_OPTIONS if options[command])
-    return switch[command_name](options)
+    command_name = next(command for command in COMMAND_OPTIONS.keys() if options[command])
+    return COMMAND_OPTIONS[command_name](options)
 
 
 def main() -> None:
-    """Main program function"""
+    """
+    Program entry point that runs each time the 'oudjat' command line is executed.
+    """
 
     try:
         if sys.version_info < (3, 0):
@@ -91,15 +95,11 @@ def main() -> None:
             sys.stdout = StdOutHook(options["FILENAME"], options["--silent"], options["--output"])
 
         if not options["--target"] and not options["--file"] and not options["--directory"]:
-            ColorPrint.red(
-                "Target required! Run with -h for usage instructions. Either -t target.host or -f file.txt required"
-            )
+            ColorPrint.red("Target required! Use -h to see usage. Either -f or -t")
             return
 
         if options["--target"] and options["--file"]:
-            ColorPrint.red(
-                "Please only supply one target method - either read by file with -f or as an argument to -t."
-            )
+            ColorPrint.red("Please only supply one target method - either -f or -t.")
             return
 
         ColorPrint.blue(banner)
