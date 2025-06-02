@@ -1,3 +1,4 @@
+"""A module to perform connection to various types of file."""
 from typing import Any, Dict, List, Union
 
 from oudjat.connectors.connector import Connector
@@ -6,13 +7,14 @@ from oudjat.utils.file_utils import FileHandler, FileType
 
 
 class FileConnector(Connector):
-    """File connector to interact with different file types"""
+    """File connector to interact with different file types."""
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self, path: str, source: str) -> None:
-        """Constructor for the FileConnector class.
+        """
+        Create a new instance of FileConnector.
 
         Args:
             path (str)  : The path to the file.
@@ -59,7 +61,7 @@ class FileConnector(Connector):
 
     def connect(self) -> None:
         """
-        'Connects' (kind of) to the file and uses the import function to load data.
+        'Connect' (kind of) to the file and uses the import function to load data.
 
         Raises:
             NotImplementedError: This method must be implemented by inheriting classes.
@@ -79,7 +81,7 @@ class FileConnector(Connector):
         self, search_filter: List[Dict], attributes: Union[str, List[str]] = None
     ) -> List[Any]:
         """
-        Searches into the imported data based on given filters and attributes.
+        Search into the imported data based on given filters and attributes.
 
         Args:
             search_filter (List[Dict])                 : Filters to apply for searching.
@@ -104,14 +106,14 @@ class FileConnector(Connector):
 
 
 class CSVConnector(FileConnector):
-    """Specific file connector for CSV files"""
+    """Specific file connector for CSV files."""
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self, path: str, source: str, delimiter: str = "|") -> None:
         """
-        Constructor for the CSVConnector class.
+        Create a new instance of CSVConnector class.
 
         Args:
             path (str)               : The path to the CSV file.
@@ -133,7 +135,7 @@ class CSVConnector(FileConnector):
 
     def connect(self, callback: object) -> List[Any]:
         """
-        Implementation of the parent's 'connect' method specific to CSV files.
+        Implement the parent's 'connect' method specific to CSV files.
 
         Args:
             callback (object): Callback function for additional processing after file import.
