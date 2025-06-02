@@ -1,12 +1,13 @@
+"""Module to describe and host CERTFR page types."""
+
 from enum import Enum
 
 
 class CERTFRPageType(Enum):
-    """Enumeration describing possible CERTFR page types"""
+    """Enumeration describing possible CERTFR page types."""
 
     ALE = "alerte"
     AVI = "avis"
     CTI = "cti"
     IOC = "ioc"
     DUR = "dur"
-

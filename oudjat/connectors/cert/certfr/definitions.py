@@ -1,3 +1,5 @@
+"""Module hosting package global variables."""
+
 from .certfr_page_types import CERTFRPageType
 
 REF_TYPES = "|".join([pt.name for pt in CERTFRPageType])

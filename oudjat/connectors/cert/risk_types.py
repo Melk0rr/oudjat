@@ -1,8 +1,9 @@
+"""A module to describe different risk types."""
 from enum import Enum
 
 
 class RiskType(Enum):
-    """Enumeration describing possible risk values"""
+    """Enumeration describing possible risk values."""
 
     N_A = {"en": "Not specified", "fr": "Non spécifié"}
     EOP = {"en": "Elevation Of Privilege", "fr": "Élévation de privilèges"}
@@ -17,7 +18,7 @@ class RiskType(Enum):
     @property
     def en(self) -> str:
         """
-        Returns the English description of the risk.
+        Return the English description of the risk.
 
         Returns:
             str : The English description of the risk.
@@ -27,7 +28,7 @@ class RiskType(Enum):
     @property
     def fr(self) -> str:
         """
-        Returns the French description of the risk.
+        Return the French description of the risk.
 
         Returns:
             str : The French description of the risk.
@@ -37,7 +38,7 @@ class RiskType(Enum):
     @staticmethod
     def risk_name(risk: "RiskType") -> str:
         """
-        Returns the name of the given risk
+        Return the name of the given risk.
 
         Args:
             risk (RiskType) : risk type to return the name of

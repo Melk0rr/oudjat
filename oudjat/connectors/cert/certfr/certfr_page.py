@@ -1,3 +1,5 @@
+"""CERTFR module to specifically handle CERTFR pages."""
+
 import re
 from typing import Dict, List, Set
 
@@ -14,7 +16,7 @@ from .definitions import CERTFR_LINK_REGEX, CERTFR_REF_REGEX, REF_TYPES, URL_REG
 
 def clean_str(str_to_clean: str) -> str:
     """
-    Cleans a string from unwanted characters
+    Clean a string from unwanted characters.
 
     Args:
         str_to_clean (str) : string to clean
@@ -27,7 +29,7 @@ def clean_str(str_to_clean: str) -> str:
 
 
 class CERTFRPage:
-    """Describes a CERTFR page"""
+    """Describe a CERTFR page."""
 
     # ****************************************************************
     # Attributes & Constructors
@@ -36,7 +38,7 @@ class CERTFRPage:
 
     def __init__(self, ref: str) -> None:
         """
-        Constructor to initialize a CERTFRPage instance.
+        Initialize a CERTFRPage instance.
 
         Args:
             ref (str): The reference string used to identify and validate the page content.
@@ -87,7 +89,7 @@ class CERTFRPage:
 
     def get_cves(self) -> List["CVE"]:
         """
-        This method retrieves the CVEs from the content section and returns them as a list. If no CVEs are found, it returns an empty list.
+        Retrieve the CVEs from the content section and returns them as a list. If no CVEs are found, it returns an empty list.
 
         Returns:
             List["CVE"]: A list of CVE objects if available, otherwise an empty list.
@@ -101,7 +103,7 @@ class CERTFRPage:
 
     def connect(self) -> None:
         """
-        Connects to a CERTFR page based on the given reference (ref).
+        Connect to a CERTFR page based on the given reference (ref).
 
         This method attempts to fetch the content from the URL associated with the ref using an HTTP GET request.
         If the connection is successful and the status code is 200, it parses the HTML content.
@@ -115,7 +117,9 @@ class CERTFRPage:
             req = requests.get(self.link)
 
             if req.status_code != 200:
-                raise ConnectionError(f"{__class__.__name__}.connect::Error while trying to connect to {self.ref}")
+                raise ConnectionError(
+                    f"{__class__.__name__}.connect::Error while trying to connect to {self.ref}"
+                )
 
             self.raw_content = BeautifulSoup(req.content, "html.parser")
             self.title = self.raw_content.title.text
@@ -129,7 +133,7 @@ class CERTFRPage:
 
     def disconnect(self) -> None:
         """
-        Resets the parsing state of the CERTFRPage instance by setting raw_content, meta, and content to None.
+        Reset the parsing state of the CERTFRPage instance by setting raw_content, meta, and content to None.
         """
 
         self.raw_content = None
@@ -138,7 +142,7 @@ class CERTFRPage:
 
     def parse(self) -> None:
         """
-        Parses the page content if not already parsed.
+        Parse the page content if not already parsed.
 
         This method first ensures that a connection has been made.
         It then extracts meta and content information from the HTML structure of the page, which are encapsulated in CERTFRPageMeta and CERTFRPageContent objects respectively.
@@ -162,12 +166,13 @@ class CERTFRPage:
             self.content.parse()
 
         except Exception as e:
-            ColorPrint.red(f"{__class__.__name__}.parse::A parsing error occured for {self.ref}\n{e}")
+            ColorPrint.red(
+                f"{__class__.__name__}.parse::A parsing error occured for {self.ref}\n{e}"
+            )
 
     def __str__(self) -> str:
         """
-        Converts the current CERTFRPage instance to a string representation.
-        This method returns a string in the format "ref: title", where ref is the reference and title is the page title.
+        Convert the current CERTFRPage instance to a string representation. The method returns a string in the format "ref: title", where ref is the reference and title is the page title.
 
         Returns:
             str: A formatted string representing the CERTFRPage instance.
@@ -177,8 +182,7 @@ class CERTFRPage:
 
     def to_dict(self) -> Dict:
         """
-        Converts the current CERTFRPage instance into a dictionary representation.
-        This method creates a dictionary containing the ref, title, and parsed meta and content information if available.
+        Convert the current CERTFRPage instance into a dictionary representation. The method creates a dictionary containing the ref, title, and parsed meta and content information if available.
 
         Returns:
             Dict: A dictionary containing the page information.
@@ -202,7 +206,7 @@ class CERTFRPage:
     @staticmethod
     def is_valid_ref(ref: str) -> bool:
         """
-        Returns whether the ref is valid or not.
+        Return whether the ref is valid or not.
 
         This method uses a regular expression (regex) to check if the provided reference string matches
         the predefined pattern CERTFR_REF_REGEX. It returns True if it matches, otherwise False.
@@ -219,7 +223,7 @@ class CERTFRPage:
     @staticmethod
     def is_valid_link(link: str) -> bool:
         """
-        Returns whether the link is valid or not.
+        Return whether the link is valid or not.
 
         This method uses a regular expression (regex) to check if the provided link string matches
         the predefined pattern CERTFR_LINK_REGEX. It returns True if it matches, otherwise False.
@@ -236,7 +240,7 @@ class CERTFRPage:
     @staticmethod
     def get_ref_from_link(link: str) -> str:
         """
-        Returns a CERTFR ref based on a link.
+        Return a CERTFR ref based on a link.
 
         This method first checks if the provided link string matches the regex pattern CERTFR_LINK_REGEX.
         If it does not match, it raises a ValueError. If it does match, it then uses another regex (CERTFR_REF_REGEX) to extract and return the reference number from the link.
@@ -252,15 +256,16 @@ class CERTFRPage:
         """
 
         if not re.match(CERTFR_LINK_REGEX, link):
-            raise ValueError(f"{__class__.__name__}.get_ref_from_link::Invalid CERTFR link provided: {link}")
+            raise ValueError(
+                f"{__class__.__name__}.get_ref_from_link::Invalid CERTFR link provided: {link}"
+            )
 
         return re.findall(CERTFR_REF_REGEX, link)[0]
 
 
 class CERTFRPageMeta:
     """
-    CERTFR pages often start with a table containing meta data on the current page
-    This class handles meta data table parsing
+    CERTFR pages often start with a table containing meta data on the current page. This class handles meta data table parsing.
     """
 
     # ****************************************************************
@@ -268,7 +273,7 @@ class CERTFRPageMeta:
 
     def __init__(self, meta_section: element) -> None:
         """
-        Constructor for MetaParser.
+        Initialize new CERTFR meta parser.
 
         Args:
             meta_section (element): A BeautifulSoup4 element containing the meta data in a table format.
@@ -286,8 +291,7 @@ class CERTFRPageMeta:
 
     def parse(self) -> None:
         """
-        Parse the meta table to extract key-value pairs and store them in `data`.
-        This method populates the `data` attribute with a dictionary of cleaned metadata keys and values.
+        Parse the meta table to extract key-value pairs and store them in `data`. This method populates the `data` attribute with a dictionary of cleaned metadata keys and values.
         """
 
         meta = {}
@@ -303,7 +307,7 @@ class CERTFRPageMeta:
 
     def get_date_initial(self) -> str:
         """
-        This method retrieves the initial release date from meta table, if not already set, and returns it.
+        Retrieve the initial release date from meta table, if not already set, and returns it.
 
         Returns:
             str: The initial date of the page or None if not available.
@@ -316,7 +320,7 @@ class CERTFRPageMeta:
 
     def get_date_last(self) -> str:
         """
-        This method retrieves the last change date from meta table, if not already set, and returns it.
+        Retrieve the last change date from meta table, if not already set, and returns it.
 
         Returns:
             str: The last change date of the page or None if not available.
@@ -329,7 +333,7 @@ class CERTFRPageMeta:
 
     def get_sources(self) -> List[str]:
         """
-        This method retrieves the sources from metadata, if not already set, and returns them as a list of cleaned strings.
+        Retrieve the sources from metadata, if not already set, and returns them as a list of cleaned strings.
 
         Returns:
             List[str]: A list of sources or None if not available.
@@ -349,7 +353,7 @@ class CERTFRPageMeta:
 
     def to_dict(self) -> Dict:
         """
-        This method converts the metadata of the instance into a dictionary format, including initial date, last change date, and sources.
+        Convert the metadata of the instance into a dictionary format, including initial date, last change date, and sources.
 
         Returns:
             Dict: A dictionary containing the parsed metadata or an empty dictionary if no data is available.
@@ -367,14 +371,14 @@ class CERTFRPageMeta:
 
 
 class CERTFRPageContent:
-    """Handles content section from CERTFR page"""
+    """Handle content section from CERTFR page."""
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self, content_section: element) -> None:
         """
-        Constructor to initialize new CERTFR page content
+        Initialize new CERTFR page content.
 
         Args:
             content_section (element): The HTML content section to be parsed and used within the class instance.
@@ -455,7 +459,7 @@ class CERTFRPageContent:
 
     def get_cves(self) -> Dict[str, CVE]:
         """
-        Returns the refs of all the related CVEs.
+        Return the refs of all the related CVEs.
 
         Returns:
             list: A list of CVE references that are linked in the content.
@@ -474,10 +478,10 @@ class CERTFRPageContent:
 
     def get_documentations(self, doc_filter: str = None) -> List[str]:
         """
-        Getter for the documentations.
+        Return the documentation section of a CERTFR page.
 
         Args:
-            filter (str): A string to filter out certain documentation URLs. Default is None.
+            doc_filter (str): A string to filter out certain documentation URLs. Default is None.
 
         Returns:
             list: A filtered or unfiltered list of URLs pointing to documentation from the content.
@@ -520,7 +524,7 @@ class CERTFRPageContent:
 
     def to_dict(self) -> Dict:
         """
-        Converts current instance into a dictionary.
+        Convert current instance into a dictionary.
 
         Returns:
             dict: A dictionary representation of the class instance's state, including risks, products, description, CVEs, solutions, and documentations.
