@@ -1,3 +1,5 @@
+"""A simple module to define LDAP GPO types."""
+
 # HACK: https://github.com/zloeber/PSAD/blob/fcf2936b79b5e49c99f09cea96fbafd26e6ecbf2/src/other/CSEGUIDMap.csv
 MS_GPPREF = {
     "{00000000-0000-0000-0000-000000000000}": "Core GPO Engine",
