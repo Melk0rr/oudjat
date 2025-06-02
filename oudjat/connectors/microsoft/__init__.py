@@ -1,3 +1,1 @@
-from .cvrf import MSCVRFConnector
-
-__all__ = ["MSCVRFConnector"]
+"""A package to gather MS related connectors."""
