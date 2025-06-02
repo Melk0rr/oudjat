@@ -1,3 +1,5 @@
+"""A module to handle connection to the endoflife.date website."""
+
 import json
 import re
 from typing import Dict, List, Union
@@ -11,14 +13,14 @@ EOL_API_URL = "https://endoflife.date/api/"
 
 
 class EndOfLifeConnector(Connector):
-    """A class to connect to endoflife.date"""
+    """A class to connect to endoflife.date."""
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self) -> None:
         """
-        Initializes the EndOfLifeAPIConnector by setting up the connection to the EOL API URL and initializes an empty list of products.
+        Initialize the EndOfLifeAPIConnector by setting up the connection to the EOL API URL and initializes an empty list of products.
         """
 
         super().__init__(target=EOL_API_URL)
@@ -29,7 +31,7 @@ class EndOfLifeConnector(Connector):
 
     def get_products(self) -> List[str]:
         """
-        Getter for list of products
+        Return a list of products.
 
         Returns:
             List[str]: A list containing the names of available products.
@@ -39,8 +41,7 @@ class EndOfLifeConnector(Connector):
 
     def connect(self) -> None:
         """
-        This method attempts to establish a connection to the API endpoint and retrieves product information if successful.
-        It sets up the connection status and loads the product list from the API response.
+        Attempt to establish a connection to the API endpoint and retrieves product information if successful. It sets up the connection status and loads the product list from the API response.
 
         Raises:
             ConnectionError: If unable to connect to the API endpoint or retrieve data.
@@ -60,7 +61,7 @@ class EndOfLifeConnector(Connector):
 
     def search(self, search_filter: str, attributes: Union[str, List[str]] = None) -> List[Dict]:
         """
-        Searches the API for product infos
+        Search the API for product infos.
 
         Args:
             search_filter (str)                        : The specific product to search for.
@@ -102,7 +103,7 @@ class EndOfLifeConnector(Connector):
 
     def get_windows_rel(self, target: str = "windows") -> List[Dict]:
         """
-        Specific method to retrieve Windows releases
+        Retrieve Windows releases.
 
         Args:
             target (str, optional): The product name to search for. Defaults to "windows".
