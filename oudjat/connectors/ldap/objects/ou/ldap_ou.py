@@ -1,3 +1,5 @@
+"""Main module to handle LDAP Organizational Unit stuff."""
+
 import re
 from typing import TYPE_CHECKING, Dict, List
 
@@ -10,14 +12,16 @@ if TYPE_CHECKING:
 
 
 class LDAPOrganizationalUnit(LDAPObject):
-    """A class to handle LDAP Organizational Units"""
+    """
+    A class to handle LDAP Organizational Units.
+    """
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self, ldap_entry: "LDAPEntry") -> None:
         """
-        Initializes a new instance of LDAP OU
+        Initialize a new instance of LDAP OU.
 
         Args:
             ldap_entry (LDAPEntry) : ldap entry instance to be used to populate object data
@@ -30,7 +34,7 @@ class LDAPOrganizationalUnit(LDAPObject):
 
     def get_gplink(self) -> str:
         """
-        Returns the gpLink property of the OU
+        Return the gpLink property of the OU.
 
         Returns:
             str : gpLink attribute containing links to group policy objects
@@ -42,10 +46,11 @@ class LDAPOrganizationalUnit(LDAPObject):
         self, ldap_connector: "LDAPConnector", object_types: List[str] = None
     ) -> List["LDAPEntry"]:
         """
-        Returns the objects contained in the current OU
+        Return the objects contained in the current OU.
 
         Args:
             ldap_connector (LDAPConnector) : connector used for the query
+            object_types (List[str]): specific object types to include in the result
 
         Returns:
             List[LDAPEntry] : entries of the objects contained in the OU
@@ -55,7 +60,7 @@ class LDAPOrganizationalUnit(LDAPObject):
 
     def get_sub_ous(self, ldap_connector: "LDAPConnector") -> List["LDAPEntry"]:
         """
-        Returns only sub OUs from the ou objects
+        Return only sub OUs from the ou objects.
 
         Args:
             ldap_connector (LDAPConnector): connector used for the query
@@ -66,11 +71,9 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return ldap_connector.get_ou(search_base=self.dn)
 
-    # TODO: Get GPOs that applies on current OU
     def get_gpo_from_gplink(self, ldap_connector: "LDAPConnector") -> List["LDAPObject"]:
         """
-        This method extracts the GPO references (UUIDs) present in the current OU gpLink
-        It then uses it to retrieve corresponding LDAP GPO instances
+        Extract the GPO references (UUIDs) present in the current OU gpLink. It then uses it to retrieve corresponding LDAP GPO instances.
 
         Args:
             ldap_connector (LDAPConnector): the LDAP connector used to retrieve the GPOs
@@ -80,11 +83,11 @@ class LDAPOrganizationalUnit(LDAPObject):
         """
 
         gpo_refs = re.search(UUID_REG, self.get_gplink())
-        return list(map(lambda link: ldap_connector.get_gpo(name=link) , gpo_refs))
+        return list(map(lambda link: ldap_connector.get_gpo(name=link), gpo_refs))
 
     def to_dict(self) -> Dict:
         """
-        Converts the current instance into a dictionary.
+        Convert the current instance into a dictionary.
 
         Returns:
             dict: A dictionary containing the attributes of the LDAP ou in a structured format
