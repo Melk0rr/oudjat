@@ -1,3 +1,5 @@
+"""Temporary (or not) module to define some base LDAP account types."""
+
 from enum import Enum
 from typing import Dict
 
@@ -7,11 +9,20 @@ from .definitions import PERSON_REG
 
 
 class LDAPUserType:
+    """An experimental class to describe an LDAP user type."""
+
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, name: str, description: str, tree_dict: Dict = None):
-        """Constructor"""
+    def __init__(self, name: str, description: str, tree_dict: Dict = None) -> None:
+        """
+        Create a new instance of LDAPUserType.
+
+        Args:
+            name (str)       : the name of the new type
+            description (str): a description of the new type
+            tree_dict (Dict) : a decision tree as a dictionary to describe what values in an LDAPUser will match the type
+        """
 
         self.name = name
         self.description = description
@@ -23,18 +34,39 @@ class LDAPUserType:
     # Methods
 
     def get_name(self) -> str:
-        """Getter for user type name"""
+        """
+        Return the user type name.
+
+        Returns:
+            str: name of the type
+        """
+
         return self.name
 
     def get_description(self) -> str:
-        """Getter for user type description"""
+        """
+        Return the user type description.
+
+        Returns:
+            str: description of the type
+        """
 
     def get_decision_tree(self) -> DecisionTree:
-        """Getter for user type decision tree"""
+        """
+        Return the type decision tree.
+
+        Returns:
+            DecisionTree: decision tree instance bound to the current type
+        """
         return self.decision_tree
 
     def set_decision_tree(self, new_decision_tree: DecisionTree) -> None:
-        """Setter for user type decision tree"""
+        """
+        Set the user type decision tree.
+
+        Args:
+            new_decision_tree (DecisionTree): new decision tree to use for the current type
+        """
 
         if isinstance(new_decision_tree, DecisionTree):
             self.decision_tree = new_decision_tree
@@ -42,6 +74,8 @@ class LDAPUserType:
 
 
 class BaseLDAPUserType(Enum):
+    """An enumeration to define some base user types."""
+
     PERSON = LDAPUserType(
         name="PERSON",
         description="User account binded to a physical person",

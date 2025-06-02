@@ -1,4 +1,6 @@
-from typing import Dict, List
+"""A module to handle manipulation of LDAP computer objects."""
+
+from typing import TYPE_CHECKING, Dict, List
 
 from oudjat.model.assets.computer import Computer
 from oudjat.model.assets.software.os import OperatingSystem, OSOption
@@ -7,15 +9,22 @@ from oudjat.model.assets.software.software_release import SoftwareReleaseDict
 
 from .ldap_account import LDAPAccount
 
+if TYPE_CHECKING:
+    from ..ldap_entry import LDAPEntry
 
 class LDAPComputer(LDAPAccount, Computer):
-    """A class to describe LDAP computer objects"""
+    """A class to describe LDAP computer objects."""
 
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
-        """Construcotr"""
+    def __init__(self, ldap_entry: "LDAPEntry"):
+        """
+        Create a new instance of LDAPComputer.
+
+        Args:
+            ldap_entry (LDAPEntry): base dictionary entry
+        """
 
         super().__init__(ldap_entry=ldap_entry)
 
@@ -62,7 +71,8 @@ class LDAPComputer(LDAPAccount, Computer):
     # Methods
 
     def to_dict(self) -> Dict:
-        """Converts the current instance into a dictionary"""
+        """Convert the current instance into a dictionary."""
+
         base_dict = super().to_dict()
         cpt_dict = Computer.to_dict(self)
 

@@ -1,3 +1,5 @@
+"""A module to describe generic properties shared by more specific account objects like user or computer."""
+
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Set
 
@@ -12,7 +14,7 @@ if TYPE_CHECKING:
 
 def acc_date_str(date: datetime) -> str:
     """
-    Converts an account date into a readable string
+    Convert an account date into a readable string.
 
     Args:
         date (datetime): date to convert into a readable string
@@ -25,14 +27,14 @@ def acc_date_str(date: datetime) -> str:
 
 
 class LDAPAccount(LDAPObject):
-    """A class to describe generic LDAP account objects"""
+    """A class to describe generic LDAP account objects."""
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self, ldap_entry: "LDAPEntry"):
         """
-        Constructor for initializing an LDAP Entry-based object with specific handling for user accounts.
+        Initialize an LDAP Entry-based object with specific handling for user accounts.
 
         This method initializes the object using data from an `LDAPEntry` instance and performs additional checks to determine account status based on the presence of certain properties like 'userAccountControl'. Additional flags are derived from the 'userAccountControl' property or its Microsoft equivalent (controlled by MS_ACCOUNT_CTL_PROPERTY).
 
@@ -73,7 +75,8 @@ class LDAPAccount(LDAPObject):
     # Methods
 
     def get_san(self) -> str:
-        """Getter for account sAMAccountName
+        """
+        Return the sAMAccountName attribute of the current account.
 
         Returns:
             str: The value of the sAMAccountName attribute from the entry dictionary.
@@ -82,7 +85,8 @@ class LDAPAccount(LDAPObject):
         return self.entry.get("sAMAccountName")
 
     def is_enabled(self) -> bool:
-        """Returns whether the account is enabled or not
+        """
+        Return whether the account is enabled or not.
 
         Returns:
             bool: True if the account is enabled, False otherwise.
@@ -91,7 +95,8 @@ class LDAPAccount(LDAPObject):
         return self.enabled
 
     def get_status(self) -> str:
-        """Getter to retrieve account status
+        """
+        Return the account status.
 
         Returns:
             str: "Enabled" if the account is enabled, otherwise "Disabled".
@@ -100,7 +105,8 @@ class LDAPAccount(LDAPObject):
         return "Enabled" if self.enabled else "Disabled"
 
     def get_account_expiration(self) -> datetime:
-        """Getter for account expire property
+        """
+        Return wheither the account is expired or not.
 
         Returns:
             datetime: The expiration date of the account as a datetime object, or a fixed year 9999 if it does not have an expiration.
@@ -109,7 +115,8 @@ class LDAPAccount(LDAPObject):
         return self.entry.get("accountExpires", datetime(9999, 12, 31))
 
     def get_last_logon(self) -> datetime:
-        """Getter for account last logon datetime
+        """
+        Return the last logon datetime of the current account.
 
         Returns:
             datetime: The timestamp of the last logon as a datetime object.
@@ -118,7 +125,8 @@ class LDAPAccount(LDAPObject):
         return self.entry.get("lastLogonTimestamp")
 
     def get_last_logon_days(self) -> int:
-        """Getter for account last logon in days
+        """
+        Return the number of days since the current account last logged in.
 
         Returns:
             int: The difference in days between the current date and the last logon date.
@@ -127,7 +135,8 @@ class LDAPAccount(LDAPObject):
         return TimeConverter.days_diff(self.get_last_logon())
 
     def get_pwd_last_set(self) -> datetime:
-        """Getter for account password last set date
+        """
+        Return the account password last set date.
 
         Returns:
             datetime: The timestamp of when the password was last set as a datetime object.
@@ -136,7 +145,8 @@ class LDAPAccount(LDAPObject):
         return self.entry.get("pwdLastSet")
 
     def get_pwd_last_set_days(self) -> int:
-        """Getter for account password last set in days
+        """
+        Return account password last set in days.
 
         Returns:
             int: The difference in days between the current date and the date when the password was last set.
@@ -145,7 +155,8 @@ class LDAPAccount(LDAPObject):
         return TimeConverter.days_diff(self.get_pwd_last_set())
 
     def get_account_flags(self) -> List[str]:
-        """Getter to retrieve account flags
+        """
+        Retrieve account flags.
 
         Returns:
             List[str]: A list of strings representing the account flags.
@@ -154,7 +165,8 @@ class LDAPAccount(LDAPObject):
         return list(self.account_flags)
 
     def does_account_expires(self) -> bool:
-        """Checks whether the account expires
+        """
+        Check whether the account expires.
 
         Returns:
             bool: True if the account does not expire (not year 9999), False otherwise.
@@ -163,7 +175,8 @@ class LDAPAccount(LDAPObject):
         return not self.get_account_expiration().year == 9999
 
     def does_pwd_expires(self) -> bool:
-        """Getter to check if the account's password expires
+        """
+        Return weither the account's password expires.
 
         Returns:
             bool: True if the password is set to expire, False otherwise.
@@ -172,7 +185,8 @@ class LDAPAccount(LDAPObject):
         return self.pwd_expires
 
     def is_pwd_expired(self) -> bool:
-        """Getter to check if account password is expired
+        """
+        Return weither the account password is expired.
 
         Returns:
             bool: True if the password has expired, False otherwise.
@@ -181,7 +195,8 @@ class LDAPAccount(LDAPObject):
         return self.pwd_expired
 
     def to_dict(self) -> Dict:
-        """Converts the current instance into a dict
+        """
+        Convert the current instance into a dict.
 
         Returns:
             Dict: A dictionary containing various account details including sAMAccountName, status, expiration date, etc.

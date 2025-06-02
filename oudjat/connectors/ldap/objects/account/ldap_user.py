@@ -1,4 +1,6 @@
-from typing import Dict
+"""A module to handle LDAPUser manipulations."""
+
+from typing import TYPE_CHECKING, Dict
 
 from oudjat.model.assets.user import User
 
@@ -6,15 +8,23 @@ from .definitions import MS_ACCOUNT_CTL_PROPERTY
 from .ldap_account import LDAPAccount
 from .ldap_account_flags import LDAPAccountFlag
 
+if TYPE_CHECKING:
+    from ..ldap_entry import LDAPEntry
+
 
 class LDAPUser(LDAPAccount, User):
-    """A class to describe LDAP user objects"""
+    """A class to describe LDAP user objects."""
 
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry"):  # noqa: F821
-        """Constructor"""
+    def __init__(self, ldap_entry: "LDAPEntry") -> None:
+        """
+        Create a new instance of LDAPUser.
+
+        Args:
+            ldap_entry (LDAPEntry): base dictionary entry
+        """
 
         super().__init__(ldap_entry=ldap_entry)
 
@@ -51,15 +61,30 @@ class LDAPUser(LDAPAccount, User):
     # Methods
 
     def get_employee_id(self) -> str:
-        """Getter for the employee id"""
+        """
+        Return the employee id.
+
+        Returns:
+            str: employee id
+        """
         return self.entry.get("employeeID", None)
 
     def get_manager(self) -> str:
-        """Getter for the user's manager"""
+        """
+        Return the user's manager.
+
+        Returns:
+            str: a ref to the user's manager
+        """
         return self.entry.get("manager", None)
 
     def is_admin(self) -> bool:
-        """Checks if the current user is an admin"""
+        """
+        Check if the current user is an admin.
+
+        Returns:
+            bool: True if the current user is admin. False otherwise
+        """
         is_admin = False
         adm_count = self.entry.get("adminCount", None)
 
@@ -69,7 +94,12 @@ class LDAPUser(LDAPAccount, User):
         return is_admin
 
     def to_dict(self) -> Dict:
-        """Converts the current instance into a dictionary"""
+        """
+        Convert the current instance into a dictionary.
+
+        Returns:
+            Dict: the current user represented as a dictionary
+        """
         base_dict = super().to_dict()
         base_dict.pop("san")
 

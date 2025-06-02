@@ -1,10 +1,9 @@
+"""A simple module to declare account control values as a bit flag."""
 from oudjat.utils.bit_flag import BitFlag
 
 
 class LDAPAccountFlag(BitFlag):
-    """
-    Bit flag to exploit user account control
-    """
+    """Bit flag to exploit user account control."""
 
     SCRIPT = 1
     ACCOUNT_DISABLE = 2
@@ -33,7 +32,7 @@ class LDAPAccountFlag(BitFlag):
     @staticmethod
     def is_disabled(account_control: int) -> bool:
         """
-        Checks if an account is disabled based on its account control.
+        Check if an account is disabled based on its account control.
 
         Args:
             account_control (int): The integer representation of account control flags.
@@ -50,7 +49,7 @@ class LDAPAccountFlag(BitFlag):
     @staticmethod
     def pwd_expires(account_control: int) -> bool:
         """
-        Checks if the account's password expires.
+        Check if the account's password expires.
 
         Args:
             account_control (int): The integer representation of account control flags.
@@ -66,7 +65,7 @@ class LDAPAccountFlag(BitFlag):
     @staticmethod
     def pwd_expired(account_control: int) -> bool:
         """
-        Checks if the account's password is expired.
+        Check if the account's password is expired.
 
         Args:
             account_control (int): The integer representation of account control flags.
@@ -83,7 +82,7 @@ class LDAPAccountFlag(BitFlag):
     @staticmethod
     def pwd_required(account_control: int) -> bool:
         """
-        Checks if the account requires a password.
+        Check if the account requires a password.
 
         Args:
             account_control (int): The integer representation of account control flags.
@@ -99,7 +98,7 @@ class LDAPAccountFlag(BitFlag):
     @staticmethod
     def is_locked(account_control: int) -> bool:
         """
-        Checks if the account is locked.
+        Check if the account is locked.
 
         Args:
             account_control (int): The integer representation of account control flags.

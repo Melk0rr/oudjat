@@ -1,8 +1,9 @@
+"""A simple module to declare exchange account types as a bit flag."""
 from oudjat.utils.bit_flag import BitFlag
 
 
 class MSExchFlag(BitFlag):
-    """Flags to exploit user account control"""
+    """Flags to exploit user account control."""
 
     USERMAILBOX = 1
     LINKEDMAILBOX = 2
