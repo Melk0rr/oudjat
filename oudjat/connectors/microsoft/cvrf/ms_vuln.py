@@ -16,14 +16,17 @@ class MSVuln:
 
     def __init__(self, cve: str) -> None:
         """
-        Creates a new instance of MSVuln based on the provided CVE ref
+        Creates a new instance of MSVuln
 
         Args:
-            cve (str): the cve reference this instance will be based on
+            cve (str): The Common Vulnerabilities and Exposures identifier for the vulnerability.
+
+        Raises:
+            ValueError: If the provided CVE does not match the expected regex pattern.
         """
 
         if not re.match(CVE_REGEX, cve):
-            raise (f"{__class__.__name__}::Invalid CVE provided: {cve}")
+            raise ValueError(f"{__class__.__name__}::Invalid CVE provided: {cve}")
 
         self.cve = cve
         self.kbs: Dict[str, MSRemed] = {}
@@ -62,22 +65,27 @@ class MSVuln:
 
         return self.products
 
-    def add_kb(self, kb: MSRemed) -> None:
+    def add_kb(self, kb_num: int, kb: MSRemed) -> None:
         """
-        Adds a new MSRemed instance to vuln KB list
+        Adds a KB to vuln KB list
 
         Args:
-            kb (MSRemed): MSRemed instance to add
+            kb_num (int): The number of the knowledge base article related to the vulnerability.
+            kb (MSRemed): The remediation data for the given KB number.
+
+        Raises:
+            ValueError: If the provided KB number does not match the expected regex pattern.
         """
 
-        self.kbs[kb.get_number()] = kb
+        if re.match(KB_NUM_REGEX, str(kb_num)) or re.match(r"(\w+)$", str(kb_num)):
+            self.kbs[str(kb_num)] = kb
 
     def to_flat_dict(self) -> List[Dict]:
         """
         Converts kbs into dictionaries
 
         Returns:
-            List[Dict]: a list of MSRemed dictionary representations
+            List[Dict]: A list of flattened dictionaries, each representing a KB and its related CVE.
         """
 
         return [
@@ -90,8 +98,9 @@ class MSVuln:
         Converts current vuln into a dict
 
         Returns:
-            Dict: a dictionary representing the current instance
+            Dict[str, Any]: A dictionary representation of the MSVuln object containing CVE and its associated KBs.
         """
+
         return {
             "cve": self.cve,
             "kbs": list(map(any_to_dict, self.kbs.values())),

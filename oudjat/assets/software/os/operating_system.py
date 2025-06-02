@@ -2,7 +2,7 @@ import re
 from enum import Enum
 from typing import Dict, List, Union
 
-from oudjat.model.assets.computer.computer_type import ComputerType
+from oudjat.assets.computer.computer_type import ComputerType
 from oudjat.utils.color_print import ColorPrint
 
 from ..software import Software, SoftwareType
@@ -224,4 +224,3 @@ class OSRelease(SoftwareRelease):
         os_name = base_dict.pop("software")
 
         return {"os": os_name, **base_dict}
-

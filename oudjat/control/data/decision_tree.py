@@ -205,7 +205,7 @@ class DecisionTree:
 
         return self.nodes
 
-    def get_operator(self) -> str:
+    def get_operator(self) -> "LogicalOperator":
         """
         Getter for decision tree operator
 
@@ -313,7 +313,7 @@ class DecisionTree:
 
         # TODO: See if all logical operators can be used
         sub_values = [n.get_value(element) for n in self.nodes]
-        tree_value = all(sub_values) if self.operator.ope_name == "and" else any(sub_values)
+        tree_value = all(sub_values) if self.operator == LogicalOperator.AND else any(sub_values)
 
         self.value = tree_value
 

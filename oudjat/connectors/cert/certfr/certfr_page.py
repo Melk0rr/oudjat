@@ -6,7 +6,7 @@ from typing import Dict, List, Set
 import requests
 from bs4 import BeautifulSoup, element
 
-from oudjat.model.vulnerability.cve import CVE, CVE_REGEX
+from oudjat.control.vulnerability.cve import CVE, CVE_REGEX
 from oudjat.utils.color_print import ColorPrint
 
 from ..risk_types import RiskType
@@ -128,7 +128,9 @@ class CERTFRPage:
 
         except ConnectionError:
             ColorPrint.red(
-                f"{__class__.__name__}.connect::Error while requesting {self.ref}. Make sure it is accessible"
+                f"{__class__.__name__}.connect::Error while requesting {
+                    self.ref
+                }. Make sure it is accessible"
             )
 
     def disconnect(self) -> None:

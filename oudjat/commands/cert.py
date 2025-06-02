@@ -2,7 +2,7 @@ from multiprocessing import Pool
 from typing import Dict, List
 
 from oudjat.connectors.cert.certfr import CERTFRConnector, CERTFRPage
-from oudjat.model.vulnerability import CVE
+from oudjat.control.vulnerability import CVE
 from oudjat.utils.color_print import ColorPrint
 
 from .target import Target
@@ -13,6 +13,7 @@ class Cert(Target):
 
     def __init__(self, options: Dict):
         """Constructor"""
+
         super().__init__(options)
 
         self.connector = CERTFRConnector()
@@ -47,6 +48,7 @@ class Cert(Target):
 
     def keyword_check(self, target: "CERTFRPage") -> List[str]:
         """Look for provided keywords in the results"""
+
         matched = [k for k in self.options["--keywords"] if k.lower() in target.get_title().lower()]
 
         msg = f"No match for {target.get_ref()}..."

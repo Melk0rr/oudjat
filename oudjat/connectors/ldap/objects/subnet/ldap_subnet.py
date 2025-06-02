@@ -1,12 +1,13 @@
 """A module to handle subnet objects in LDAP."""
 from typing import TYPE_CHECKING
 
-from oudjat.model.assets.network.subnet import Subnet
+from oudjat.assets.network.subnet import Subnet
 
 from ..ldap_object import LDAPObject
 
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
+
 
 class LDAPSubnet(LDAPObject, Subnet):
     """A class to describe LDAP subnet objects."""

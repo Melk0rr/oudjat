@@ -1,13 +1,13 @@
 from typing import Dict, List, Union
 
-from oudjat.model.assets import Asset, AssetType
-from oudjat.model.assets.network.ipv4 import IPv4
-from oudjat.model.assets.software import (
+from oudjat.assets import Asset, AssetType
+from oudjat.assets.network.ipv4 import IPv4
+from oudjat.assets.software import (
     SoftwareEdition,
     SoftwareRelease,
     SoftwareReleaseSupport,
 )
-from oudjat.model.assets.software.os import OSRelease
+from oudjat.assets.software.os import OSRelease
 
 from .computer_type import ComputerType
 
@@ -45,7 +45,11 @@ class Computer(Asset):
         """
 
         super().__init__(
-            asset_id=computer_id, name=name, label=label, description=description, asset_type=AssetType.COMPUTER
+            asset_id=computer_id,
+            name=name,
+            label=label,
+            description=description,
+            asset_type=AssetType.COMPUTER,
         )
 
         self.os_release = None
@@ -204,7 +208,9 @@ class Computer(Asset):
 
         if edition is not None:
             if not isinstance(edition, SoftwareEdition):
-                raise ValueError(f"{__class__.__name__}.set_os::Invalid edition provided for {self.name}")
+                raise ValueError(
+                    f"{__class__.__name__}.set_os::Invalid edition provided for {self.name}"
+                )
 
             self.os_edition = edition
 

@@ -1,7 +1,7 @@
 from multiprocessing import Pool
 from typing import Dict, List
 
-from oudjat.model.vulnerability import CVE
+from oudjat.control.vulnerability import CVE
 from oudjat.utils import ColorPrint, FileHandler
 
 from .base import Base

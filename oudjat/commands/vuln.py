@@ -1,7 +1,7 @@
 from multiprocessing import Pool
 from typing import Dict
 
-from oudjat.model.vulnerability import CVE
+from oudjat.control.vulnerability import CVE
 from oudjat.utils import ColorPrint
 
 from .target import Target
@@ -12,6 +12,7 @@ class Vuln(Target):
 
     def __init__(self, options: Dict):
         """Constructor"""
+
         super().__init__(options)
 
         self.unique_cves = set()
@@ -29,6 +30,7 @@ class Vuln(Target):
 
     def cve_process(self, cve: "CVE") -> Dict:
         """Process to be run on each cve"""
+
         cve.parse_nist()
         return cve.to_dict(minimal=False)
 
@@ -41,4 +43,3 @@ class Vuln(Target):
 
         if self.options["--export-csv"]:
             super().res_2_csv()
-

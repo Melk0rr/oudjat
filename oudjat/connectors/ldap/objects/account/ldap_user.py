@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING, Dict
 
-from oudjat.model.assets.user import User
+from oudjat.assets.user import User
 
 from .definitions import MS_ACCOUNT_CTL_PROPERTY
 from .ldap_account import LDAPAccount

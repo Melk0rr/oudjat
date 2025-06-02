@@ -1,6 +1,6 @@
 from enum import Enum
 
-from oudjat.model.assets.computer.computer_type import ComputerType
+from oudjat.assets.computer.computer_type import ComputerType
 
 from .windows.windows import MicrosoftOperatingSystem
 
@@ -23,4 +23,3 @@ class OSOption(Enum):
         computer_type=ComputerType.SERVER,
         description="Microsoft operating system for servers",
     )
-
