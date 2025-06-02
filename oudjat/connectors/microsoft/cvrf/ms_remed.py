@@ -1,3 +1,5 @@
+"""A module to handle MS remediations mentionned in a CVRF document."""
+
 import re
 from enum import IntEnum
 from typing import Any, Dict, List
@@ -9,23 +11,21 @@ from .ms_product import MSProduct
 
 
 class MSRemedType(IntEnum):
-    """
-    An enumeration of remediation types
-    """
+    """An enumeration of remediation types."""
 
     KB = 0
     PATCH = 1
 
 
 class MSRemed:
-    """Class to manipulate MS KBs"""
+    """Class to manipulate MS KBs."""
 
     # ****************************************************************
     # Attributes & Constructor
 
     def __init__(self, num: int):
         """
-        Constructor for the MSRemed class.
+        Create a new instance of the MSRemed class.
 
         Args:
             num (int): The number of the Microsoft Knowledge Base article.
@@ -67,7 +67,7 @@ class MSRemed:
 
     def to_flat_dict(self) -> List[Dict]:
         """
-        Converts patched products into dictionaries.
+        Convert patched products into dictionaries.
 
         Returns:
             List[Dict]: A list of dictionaries where each dictionary contains the remed number, type, and product details flattened from the MSProduct instances.
@@ -80,7 +80,7 @@ class MSRemed:
 
     def to_dict(self) -> Dict[str, Any]:
         """
-        Converts the current kb into a dict.
+        Convert the current kb into a dict.
 
         Returns:
             Dict[str, Any]: A dictionary containing the remed number and a list of dictionaries representing the patched products, each converted from their MSProduct instances using `to_dict`.

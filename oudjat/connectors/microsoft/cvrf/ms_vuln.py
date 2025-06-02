@@ -1,22 +1,24 @@
+"""A module to describe Vulnerabilities mentionned in a CVRF document."""
+
 import re
 from typing import Any, Dict, List
 
 from oudjat.utils.mappers import any_to_dict
 
-from .definitions import CVE_REGEX
+from .definitions import CVE_REGEX, KB_NUM_REGEX
 from .ms_product import MSProduct
 from .ms_remed import MSRemed
 
 
 class MSVuln:
-    """Class to manipulate CVE data related to MS products"""
+    """Class to manipulate CVE data related to MS products in a CVRF document."""
 
     # ****************************************************************
     # Attributes & Constructor
 
     def __init__(self, cve: str) -> None:
         """
-        Creates a new instance of MSVuln
+        Create a new instance of MSVuln.
 
         Args:
             cve (str): The Common Vulnerabilities and Exposures identifier for the vulnerability.
@@ -37,7 +39,7 @@ class MSVuln:
 
     def get_cve(self) -> str:
         """
-        Returns the CVE tied to the current vuln
+        Return the CVE tied to the current vuln.
 
         Returns:
             str: CVE reference
@@ -47,7 +49,7 @@ class MSVuln:
 
     def get_remediations(self) -> Dict[str, MSRemed]:
         """
-        Returns the remediations for the current vuln
+        Return the remediations for the current vuln.
 
         Returns:
             Dict: a dictionary of MSRemed instances
@@ -57,7 +59,7 @@ class MSVuln:
 
     def get_impacted_products(self) -> Dict[str, MSProduct]:
         """
-        Returns the products impacted by the current vuln
+        Return the products impacted by the current vuln.
 
         Returns:
             Dict: a dictionary of MSProduct instances
@@ -67,7 +69,7 @@ class MSVuln:
 
     def add_kb(self, kb_num: int, kb: MSRemed) -> None:
         """
-        Adds a KB to vuln KB list
+        Add a KB to vuln KB list.
 
         Args:
             kb_num (int): The number of the knowledge base article related to the vulnerability.
@@ -82,7 +84,7 @@ class MSVuln:
 
     def to_flat_dict(self) -> List[Dict]:
         """
-        Converts kbs into dictionaries
+        Convert kbs into dictionaries.
 
         Returns:
             List[Dict]: A list of flattened dictionaries, each representing a KB and its related CVE.
@@ -95,7 +97,7 @@ class MSVuln:
 
     def to_dict(self) -> Dict[str, Any]:
         """
-        Converts current vuln into a dict
+        Convert current vuln into a dict.
 
         Returns:
             Dict[str, Any]: A dictionary representation of the MSVuln object containing CVE and its associated KBs.

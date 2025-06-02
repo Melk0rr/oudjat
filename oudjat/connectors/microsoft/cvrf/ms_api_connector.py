@@ -1,3 +1,5 @@
+"""Main module of the MS CVRF package that inits connection to a CVRF document."""
+
 import json
 import re
 from datetime import datetime
@@ -13,14 +15,14 @@ from .ms_cvrf_document import MSCVRFDocument
 
 
 class MSCVRFConnector(Connector):
-    """Connector to interact with Microsoft API"""
+    """Connector to interact with Microsoft API."""
 
     # ****************************************************************
     # Attributes & Constructor
 
     def __init__(self):
         """
-        Initializes a new instance of MSAPIConnector.
+        Initialize a new instance of MSAPIConnector.
 
         This method sets up the connector by initializing the current date and version,
         setting up the connection using superclass methods, and marking it as not connected.
@@ -37,7 +39,7 @@ class MSCVRFConnector(Connector):
 
     def get_cvrf_id_from_cve(self, cve: str) -> str:
         """
-        Retrieves a CVRF ID based on a provided CVE reference.
+        Retrieve a CVRF ID based on a provided CVE reference.
 
         Args:
             cve (str): The CVE identifier to search for.
@@ -72,7 +74,7 @@ class MSCVRFConnector(Connector):
 
     def connect(self, cvrf_id: str) -> "MSCVRFDocument":
         """
-        Retrieves an existing document instance or creates a new one based on the CVRF ID.
+        Retrieve an existing document instance or creates a new one based on the CVRF ID.
 
         Args:
             cvrf_id (str): The identifier of the CVRF document to connect to.
@@ -100,7 +102,7 @@ class MSCVRFConnector(Connector):
 
     def add_target(self, doc: "MSCVRFDocument") -> None:
         """
-        Adds a CVRF document to the internal target dictionary.
+        Add a CVRF document to the internal target dictionary.
 
         Args:
             doc (MSCVRFDocument): The CVRF document instance to be added.
@@ -114,7 +116,7 @@ class MSCVRFConnector(Connector):
         search_filter: Union[str, List[str]],
     ) -> List[Dict]:
         """
-        Searches for information about CVEs based on the provided filter.
+        Search for information about CVEs based on the provided filter.
 
         Args:
             search_filter (Union[str, List[str]]): The CVE identifier or list of identifiers to search for.

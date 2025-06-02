@@ -1,3 +1,5 @@
+"""A module that handles MS products concerned by one or more vulnerabilities."""
+
 import re
 from typing import Dict
 
@@ -5,14 +7,14 @@ from .definitions import MS_PRODUCT_REGEX
 
 
 class MSProduct:
-    """Class to manipulate MS product"""
+    """Class to manipulate MS product."""
 
     # ****************************************************************
     # Attributes & Constructor
 
     def __init__(self, pid: str, name: str, product_type: str) -> None:
         """
-        Constructor for the MSProduct class.
+        Create a new instance of the MSProduct.
 
         Args:
             pid (str)         : The unique identifier of the product.
@@ -62,7 +64,7 @@ class MSProduct:
 
     def __str__(self) -> str:
         """
-        Converts instance to string.
+        Convert instance to string.
 
         Returns:
             str: A string representation of the product in the format "pid: name".
@@ -72,7 +74,7 @@ class MSProduct:
 
     def to_dict(self) -> Dict[str, str]:
         """
-        Converts instance to dict.
+        Convert instance to dict.
 
         Returns:
             Dict[str, str]: A dictionary representation of the product with keys "product_id", "product_name", "product_type", and "product_subtype".

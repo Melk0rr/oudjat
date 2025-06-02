@@ -1,3 +1,5 @@
+"""Module that handles CVRF document manipulation."""
+
 import json
 import re
 from typing import Dict
@@ -13,17 +15,17 @@ from .ms_vuln import MSVuln
 
 
 class MSCVRFDocument:
-    """Class to manipulate MS CVRF documents"""
+    """Class to manipulate MS CVRF documents."""
 
     # ****************************************************************
     # Attributes & Constructor
 
     def __init__(self, doc_id: str) -> None:
         """
-        Constructor for the MSCVRFDocument class.
+        Create a new instance of MSCVRFDocument.
 
         Args:
-            id (str): The ID of the CVRF document, must follow the 'YYYY-MMM' format.
+            doc_id (str): The ID of the CVRF document, must follow the 'YYYY-MMM' format.
 
         Raises:
             ValueError: If the provided ID does not match the required regex pattern.
@@ -62,8 +64,7 @@ class MSCVRFDocument:
 
     def get_products(self) -> Dict[str, "MSProduct"]:
         """
-        Returns the MS products mentioned in the document.
-        If the product list is not already parsed, this method will trigger a parsing of the products from the document content.
+        Return the MS products mentioned in the document. If the product list is not already parsed, this method will trigger a parsing of the products from the document content.
 
         Returns:
             Dict[str, MSProduct]: A dictionary containing the products keyed by their IDs.
@@ -76,8 +77,7 @@ class MSCVRFDocument:
 
     def get_vulnerabilities(self) -> Dict[str, "MSVuln"]:
         """
-        Returns the vulnerabilities mentioned in the document.
-        If the vulnerability list is not already parsed, this method will trigger a parsing of the vulnerabilities from the document content.
+        Return the vulnerabilities mentioned in the document. If the vulnerability list is not already parsed, this method will trigger a parsing of the vulnerabilities from the document content.
 
         Returns:
             Dict[str, MSVuln]: A dictionary containing the vulnerabilities keyed by their CVE IDs.
@@ -90,7 +90,7 @@ class MSCVRFDocument:
 
     def get_kbs(self) -> Dict[str, "MSRemed"]:
         """
-        Returns the MS KBs mentioned in the document.
+        Return the MS KBs mentioned in the document.
 
         If the KB list is not already parsed, this method will trigger a parsing of the KBs from the document content.
         Note that this method indirectly calls parse_vulnerabilities to ensure products are parsed before KBs.
@@ -106,7 +106,7 @@ class MSCVRFDocument:
 
     def add_product(self, product: "MSProduct") -> None:
         """
-        Adds a product to the list of products in the document.
+        Add a product to the list of products in the document.
 
         Args:
             product (MSProduct): The product to be added.
@@ -117,7 +117,7 @@ class MSCVRFDocument:
 
     def add_vuln(self, vuln: "MSVuln") -> None:
         """
-        Adds a vulnerability to the list of vulnerabilities in the document.
+        Add a vulnerability to the list of vulnerabilities in the document.
 
         Args:
             vuln (MSVuln): The vulnerability to be added.
@@ -128,7 +128,7 @@ class MSCVRFDocument:
 
     def add_kb(self, kb: "MSRemed") -> None:
         """
-        Adds a KB to the list of KBs in the document.
+        Add a KB to the list of KBs in the document.
 
         Args:
             kb (MSRemed): The KB to be added.
@@ -139,7 +139,7 @@ class MSCVRFDocument:
 
     def parse_products(self) -> None:
         """
-        Parses the products from the document content and adds them to the internal product list
+        Parse the products from the document content and adds them to the internal product list.
         """
 
         prod_tree = self.content["ProductTree"]["Branch"][0]["Items"]
@@ -151,7 +151,7 @@ class MSCVRFDocument:
 
     def parse_vulnerabilities(self) -> None:
         """
-        Parses the vulnerabilities from the document content and adds them to the internal vulnerability list
+        Parse the vulnerabilities from the document content and adds them to the internal vulnerability list.
         """
 
         if not self.products:

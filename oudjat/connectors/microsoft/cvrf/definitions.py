@@ -1,4 +1,4 @@
-"""MS API useful variables"""
+"""A module to centralize package global variables."""
 
 CVE_REGEX = r"CVE-\d{4}-\d{4,7}"
 
