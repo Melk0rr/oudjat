@@ -1,8 +1,10 @@
-from enum import IntEnum
+"""A simple module to define LDAP group types as a bit flag."""
+
+from oudjat.utils.bit_flag import BitFlag
 
 
-class LDAPGroupType(IntEnum):
-    """LDAP group type values"""
+class LDAPGroupType(BitFlag):
+    """LDAP group type values."""
 
     GLOBAL_DISTRIB = 2
     DOMAIN_DISTRIB = 4
