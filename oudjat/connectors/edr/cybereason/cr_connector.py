@@ -1,3 +1,5 @@
+"""A module to handle connection to Cybereason API."""
+
 import json
 import math
 import re
@@ -16,8 +18,7 @@ from .cr_sensor_actions import CybereasonSensorAction
 
 class CybereasonEntry(dict):
     """
-    Cybereason entry inherits from dict
-    Handles some data transformations for ease of read
+    Handles some data transformations for ease of read. Cybereason entry inherits from dict.
     """
 
     # ****************************************************************
@@ -25,10 +26,11 @@ class CybereasonEntry(dict):
 
     def __init__(self, entry_type: "CybereasonEndpoint", **kwargs) -> None:
         """
-        Creates a new instance of CybereasonEntry
+        Create a new instance of CybereasonEntry.
 
         Args:
             entry_type (CybereasonEndpoint): type of the CybereasonEntry and which endpoint to assign to it
+            kwargs (Dict): keys and values of the base entry
         """
 
         self.type = entry_type
@@ -63,7 +65,7 @@ class CybereasonEntry(dict):
     @staticmethod
     def from_search_result(res_elem: Dict, entry_type: "CybereasonEndpoint") -> "CybereasonEntry":
         """
-        Creates a new instance of CybereasonEntry from a search result
+        Create a new instance of CybereasonEntry from a search result.
 
         Args:
             res_elem (Dict)                : search result element as a dictionary
@@ -78,8 +80,7 @@ class CybereasonEntry(dict):
 
 class CybereasonConnector(Connector):
     """
-    Cybereason connector inherinting from base Connector
-    Handles interactions and queries to Cybereason API
+    Cybereason connector inherinting from base Connector. Handles interactions and queries to Cybereason API.
     """
 
     # ****************************************************************
@@ -89,7 +90,7 @@ class CybereasonConnector(Connector):
 
     def __init__(self, target: str, service_name: str = "OudjatCybereasonAPI", port: int = 443):
         """
-        Creates a new instance of CybereasonConnector
+        Create a new instance of CybereasonConnector.
 
         Args:
             target (str)      : Cybereason URL
@@ -114,7 +115,7 @@ class CybereasonConnector(Connector):
 
     def connect(self) -> None:
         """
-        Connects to Cybereason API using connector parameters
+        Connect to Cybereason API using connector parameters.
         """
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -136,7 +137,7 @@ class CybereasonConnector(Connector):
 
     def disconnect(self) -> None:
         """
-        Closes the session to Cybereason API
+        Close the session to Cybereason API.
         """
 
         self.connection.close()
@@ -144,7 +145,7 @@ class CybereasonConnector(Connector):
 
     def get_complete_url(self, endpoint: CybereasonEndpoint) -> str:
         """
-        Concatenates the base URL set to initialize the connector and the specified endpoint URL
+        Concatenate the base URL set to initialize the connector and the specified endpoint URL.
 
         Args:
             endpoint (CybereasonEndpoint): the endpoint the path will be concatenated to the main URL
@@ -157,7 +158,7 @@ class CybereasonConnector(Connector):
 
     def request(self, method: str, url: str, query: str = None) -> requests.models.Response:
         """
-        Performs a request to the given URL using established connection
+        Perform a request to the given URL using established connection.
 
         Args:
             method (str): HTTP method used for the query (usually: GET, POST, PUT)
@@ -183,12 +184,13 @@ class CybereasonConnector(Connector):
         self, search_type: str, query: Dict = None, limit: int = None, **kwargs
     ) -> List["CybereasonEntry"]:
         """
-        Runs search in API
+        Run search in API.
 
         Args:
-            endpoint (str)            : endpoint the search will be performed on
-            search_filter (List[Dict]): filter to narrow down the search results
-            limit (int)               : limit the search result number
+            search_type (str) : endpoint the search will be performed on
+            query (List[Dict]): filter to narrow down the search results
+            limit (int)       : limit the search result number
+            kwargs (Dict)     : additional arguments to pass to the final function
 
         Returns:
             List[CybereasonEntry]: search results
@@ -210,8 +212,7 @@ class CybereasonConnector(Connector):
         self, endpoint: "CybereasonEndpoint", query: str = None
     ) -> List["CybereasonEntry"]:
         """
-        Searches for entries in the specified Cybereason API endpoint.
-        It processes the API response, handling Cybereason-specific data structures not uniformly aligned across responses.
+        Search for entries in the specified Cybereason API endpoint. It processes the API response, handling Cybereason-specific data structures not uniformly aligned across responses.
 
         Args:
             endpoint (CybereasonEndpoint): The endpoint to which the query will be sent.
@@ -253,11 +254,11 @@ class CybereasonConnector(Connector):
 
     def sensor_search(self, query: Dict = None, limit: int = None) -> List["CybereasonEntry"]:
         """
-        Searches for sensors using Cybereason API and based on search filter(s) and limit
+        Search for sensors using Cybereason API and based on search filter(s) and limit.
 
         Args:
-            search_filter (Dict): search filter(s) as a dictionary
-            limit (int)         : max number of search results
+            query (Dict): query to run as a dictionary
+            limit (int) : max number of search results
 
         Returns:
             List[CybereasonEntry]: search results
@@ -287,7 +288,7 @@ class CybereasonConnector(Connector):
         self, file_name: Union[str, List[str]], query: Dict = None, limit: int = None
     ) -> List["CybereasonEntry"]:
         """
-        Searches for specific file(s)
+        Search for specific file(s).
 
         Args:
             file_name (str | List[str]): files to search
@@ -331,7 +332,7 @@ class CybereasonConnector(Connector):
 
     def edit_policy(self, sensor_ids: Union[str, List[str]], policy_id: str) -> Dict:
         """
-        Edit policy for the given sensors
+        Edit policy for the given sensors.
 
         Args:
             sensor_ids (str | List[str]): list of sensors on which edit the policy
@@ -362,7 +363,7 @@ class CybereasonConnector(Connector):
         **kwargs,
     ) -> Dict:
         """
-        Do a custom action on a list of sensors
+        Do a custom action on a list of sensors.
 
         Args:
             action (CybereasonSensorAction): action to perform
@@ -391,7 +392,7 @@ class CybereasonConnector(Connector):
 
     def sensor_remove_group(self, sensor_ids: Union[str, List[str]]) -> Dict:
         """
-        Removes given sensors from group optionally specified
+        Remove given sensors from group optionally specified.
 
         Args:
             sensor_ids (str | List[str]): list of sensors to remove the group from
@@ -408,7 +409,7 @@ class CybereasonConnector(Connector):
 
     def sensor_assign_group(self, sensor_ids: Union[str, List[str]], group_id: str) -> Dict:
         """
-        Assigns given sensors to a group
+        Assign given sensors to a group.
 
         Args:
             sensor_ids (str | List[str]): list of sensors the action will be performed on
@@ -426,10 +427,11 @@ class CybereasonConnector(Connector):
 
     def sensor_restart(self, sensor_ids: Union[str, List[str]] = None, query: Dict = None) -> Dict:
         """
-        Restarts given sensors
+        Restart given sensors.
 
         Args:
             sensor_ids (str | List[str]): IDs of the sensors to restart
+            query (Dict)                : query to run
 
         Returns:
             Dict: API query response

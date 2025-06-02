@@ -1,8 +1,9 @@
+"""A module to gather Cybereason sensor actions infos."""
 from enum import Enum
 
 
 class CybereasonSensorAction(Enum):
-    """An enumeration of Cybereason available sensor actions"""
+    """An enumeration of Cybereason available sensor actions."""
 
     ARCHIVE = "archive"
     UNARCHIVE = "unarchive"

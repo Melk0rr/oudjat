@@ -1,9 +1,11 @@
+"""A module to handle Cybereason API endpoints."""
+
 from enum import Enum
 from typing import List
 
 
 class CybereasonEndpoint(Enum):
-    """Cybereason API endpoint attributes"""
+    """Cybereason API endpoint attributes."""
 
     SENSORS = {
         "path": "/rest/sensors/query",
@@ -32,10 +34,7 @@ class CybereasonEndpoint(Enum):
         ],
     }
 
-    SENSORS_ACTION = {
-        "path": "/rest/sensors/action",
-        "method": "POST"
-    }
+    SENSORS_ACTION = {"path": "/rest/sensors/action", "method": "POST"}
 
     MALWARES = {
         "path": "/rest/malware/query",
@@ -83,7 +82,7 @@ class CybereasonEndpoint(Enum):
     @property
     def path(self) -> str:
         """
-        Returns a CybereasonEndpoint element path
+        Return a CybereasonEndpoint element path.
 
         Returns:
             str: the path of the endpoint
@@ -94,7 +93,7 @@ class CybereasonEndpoint(Enum):
     @property
     def method(self) -> str:
         """
-        Returns a CybereasonEndpoint element HTTP method
+        Return a CybereasonEndpoint element HTTP method.
 
         Returns:
             str: the HTTP method to use for the endpoint
@@ -105,7 +104,7 @@ class CybereasonEndpoint(Enum):
     @property
     def limit(self) -> int:
         """
-        Returns a CybereasonEndpoint element search results limit
+        Return a CybereasonEndpoint element search results limit.
 
         Returns:
             int: the limit number of search results
@@ -116,7 +115,7 @@ class CybereasonEndpoint(Enum):
     @property
     def attributes(self) -> List[str]:
         """
-        Returns a CybereasonEndpoint element search result attributes
+        Return a CybereasonEndpoint element search result attributes.
 
         Returns:
             List[str]: the list of attributes to return from requesting the endpoint if relevent
