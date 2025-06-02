@@ -1,3 +1,4 @@
+"""A module to handle subnet objects in LDAP."""
 from typing import TYPE_CHECKING
 
 from oudjat.model.assets.network.subnet import Subnet
@@ -8,13 +9,19 @@ if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
 
 class LDAPSubnet(LDAPObject, Subnet):
-    """A class to describe LDAP subnet objects"""
+    """A class to describe LDAP subnet objects."""
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self, ldap_entry: "LDAPEntry"):
-        """Constructor"""
+        """
+        Create a new instance of LDAPSubnet.
+
+        Args:
+            ldap_entry (LDAPEntry): base dictionary entry
+        """
+
         super().__init__(ldap_entry=ldap_entry)
         Subnet.__init__(
             self,
