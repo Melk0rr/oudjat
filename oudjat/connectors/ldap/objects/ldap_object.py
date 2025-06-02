@@ -1,3 +1,5 @@
+"""A generic module to describe shared behavior of more specific LDAP objects."""
+
 from typing import TYPE_CHECKING, Dict, List
 
 from oudjat.utils.time_utils import DateFlag, DateFormat
@@ -13,7 +15,7 @@ if TYPE_CHECKING:
 
 def parse_dn(dn: str) -> Dict:
     """
-    Parses a DN into pieces
+    Parse a DN into pieces.
 
     Args:
         dn (str) : distinguished name to parse
@@ -22,11 +24,11 @@ def parse_dn(dn: str) -> Dict:
         Dict : dictionary of dn pieces (CN, OU, DN)
     """
 
-    split = dn.split(',')
+    split = dn.split(",")
     pieces = {}
 
     for p in split:
-        p_split = p.split('=')
+        p_split = p.split("=")
 
         if p_split[0] not in pieces.keys():
             pieces[p_split[0]] = []
@@ -37,16 +39,14 @@ def parse_dn(dn: str) -> Dict:
 
 
 class LDAPObject:
-    """Generic LDAP object"""
+    """Generic LDAP object."""
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self, ldap_entry: "LDAPEntry") -> None:
         """
-        Constructor for initializing an LDAP Entry-based object.
-
-        This method initializes the object with data from an LDAP entry.
+        Initialize an LDAP Entry-based object. This method initializes the object with data from an LDAP entry.
 
         Args:
             ldap_entry (LDAPEntry) : ldap entry instance to be used to populate object data
@@ -62,7 +62,7 @@ class LDAPObject:
         self.classes = self.entry.get("objectClass", [])
 
         self.dn_pieces = parse_dn(self.dn)
-        self.domain = '.'.join(self.dn_pieces.get("DC")).lower()
+        self.domain = ".".join(self.dn_pieces.get("DC")).lower()
 
         self.creation_date = self.entry.get("whenCreated")
         self.change_date = self.entry.get("whenChanged")
@@ -204,10 +204,10 @@ class LDAPObject:
 
     def is_in_ou(self, ou_name: str, recursive: bool = True) -> bool:
         """
-        Checks whether the current object is contained directly or indirectly in the given OU
+        Check whether the current object is contained directly or indirectly in the given OU.
 
-        Args
-            ou (str)        : the LDAP OU name the object is supposed to be contained in
+        Args:
+            ou_name (str)   : the LDAP OU name the object is supposed to be contained in
             recursive (bool): True to check if the object is indirectly inside the OU; False to check only a direct belonging
 
         Returns:
@@ -220,7 +220,7 @@ class LDAPObject:
         self, ldap_connector: "LDAPConnector", ldap_group: "LDAPGroup", extended: bool = False
     ) -> bool:
         """
-        Checks whether the current object is a member of the provided group.
+        Check whether the current object is a member of the provided group.
 
         Args:
             ldap_connector (LDAPConnector): The LDAP connection object used to perform the membership check.
@@ -237,7 +237,7 @@ class LDAPObject:
 
     def __str__(self) -> str:
         """
-        Converts the current instance into a string
+        Convert the current instance into a string.
 
         Returns:
             str : string representing the LDAP object instance (basically its DN)
@@ -247,7 +247,7 @@ class LDAPObject:
 
     def to_dict(self) -> Dict:
         """
-        Converts the current instance into a dictionary.
+        Convert the current instance into a dictionary.
 
         Returns:
             dict: A dictionary containing the attributes of the LDAP object in a structured format

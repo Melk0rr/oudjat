@@ -1,3 +1,5 @@
+"""A module to list some attributes and infos related to different LDAP object types."""
+
 from enum import Enum
 from typing import List
 
@@ -11,7 +13,7 @@ from .subnet.ldap_subnet import LDAPSubnet
 
 
 class LDAPObjectType(Enum):
-    """These are the default LDAP search parameters per object type"""
+    """These are the default LDAP search parameters per object type."""
 
     DEFAULT = {"objectClass": "*", "filter": "(objectClass=*)", "attributes": "*"}
 
@@ -150,8 +152,7 @@ class LDAPObjectType(Enum):
     @property
     def python_cls(self) -> "LDAPObject":
         """
-        Returns the pythonClass property of an LDAPObjectType
-        This property is used to dynamically instanciate any class that inherits from LDAPObject
+        Return the pythonClass property of an LDAPObjectType. This property is used to dynamically instanciate any class that inherits from LDAPObject.
 
         Returns:
             LDAPObject: an LDAPObject inheriting class
@@ -162,8 +163,7 @@ class LDAPObjectType(Enum):
     @property
     def object_cls(self) -> str:
         """
-        Returns the objectClass property of an LDAPObjectType
-        This function is used to make LDAP queries
+        Return the objectClass property of an LDAPObjectType. This function is used to make LDAP queries.
 
         Returns:
             str: the LDAP object class tide to this type
@@ -174,8 +174,7 @@ class LDAPObjectType(Enum):
     @property
     def filter(self) -> str:
         """
-        Returns the filter property of an LDAPObjectType
-        This property is used to make LDAP queries
+        Return the filter property of an LDAPObjectType. This property is used to make LDAP queries.
 
         Returns:
             str: LDAP filter matching this type
@@ -186,7 +185,7 @@ class LDAPObjectType(Enum):
     @property
     def attributes(self) -> List[str]:
         """
-        Returns the attributes property of an LDAPObjectType
+        Return the attributes property of an LDAPObjectType.
 
         Returns:
             List[atr]: a list of attributes to include in the results when searching for this type
@@ -200,8 +199,7 @@ class LDAPObjectType(Enum):
     @staticmethod
     def object_cls_is(object_type: str, value: str) -> bool:
         """
-        Checks if the provided LDAPObjectType objectClass attribute is equal to the given value
-        This method is used as a filter function for LDAPObjectType.from_object_cls method
+        Check if the provided LDAPObjectType objectClass attribute is equal to the given value. This method is used as a filter function for LDAPObjectType.from_object_cls method.
 
         Args:
             object_type (str): element of the LDAPObjectType enumearation
@@ -215,6 +213,16 @@ class LDAPObjectType(Enum):
 
     @staticmethod
     def from_object_cls(object_cls: str) -> "LDAPObjectType":
+        """
+        Return an LDAPObjectType based on a given python class name.
+
+        Args:
+            object_cls (str): python LDAP class name of an object type
+
+        Returns:
+            LDAPObjectType: object type that corresponds to the provided object class, if any
+        """
+
         return next(
             filter(
                 LDAPObjectType.object_cls_is,
@@ -226,7 +234,7 @@ class LDAPObjectType(Enum):
     @staticmethod
     def get_ldap_class(object_type: str) -> LDAPObject:
         """
-        Returns an LDAPObject derivated class matching the provided type
+        Return an LDAPObject derivated class matching the provided type.
 
         Args:
             object_type (str): object type to search

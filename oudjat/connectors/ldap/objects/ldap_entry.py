@@ -1,14 +1,16 @@
+"""A module to handle LDAP query results: LDAP entries."""
+
 from typing import Any
 
 from .ldap_object_types import LDAPObjectType
 
 
 class LDAPEntry(dict):
-    """LDAP entry dict"""
+    """A class that describe a result of an LDAP query."""
 
     def get_dn(self) -> str:
         """
-        Returns the Distinguished Name (DN) of the LDAP entry. The DN is retrieved from the "dn" key in the dictionary representation of the LDAP entry.
+        Return the Distinguished Name (DN) of the LDAP entry. The DN is retrieved from the "dn" key in the dictionary representation of the LDAP entry.
 
         Returns:
             str: The DN of the LDAP entry.
@@ -17,8 +19,7 @@ class LDAPEntry(dict):
 
     def get(self, key: str, default_value: Any = None) -> Any:
         """
-        Retrieves the value of the specified attribute.
-        If the attribute is not present in the "attributes" dictionary, or if it is a list with no elements, returns the provided default value.
+        Retrieve the value of the specified attribute. If the attribute is not present in the "attributes" dictionary, or if it is a list with no elements, returns the provided default value.
 
         Args:
             key (str)                    : The attribute key to retrieve.
@@ -39,7 +40,7 @@ class LDAPEntry(dict):
 
     def set(self, key: str, value: Any) -> Any:
         """
-        Sets the specified attribute to the given value in the "attributes" dictionary.
+        Set the specified attribute to the given value in the "attributes" dictionary.
 
         Args:
             key (str)   : The attribute key to set.
@@ -52,7 +53,7 @@ class LDAPEntry(dict):
 
     def get_raw(self, key: str) -> Any:
         """
-        Retrieves the value of the specified raw attribute. If the attribute is not present in the "raw_attributes" dictionary, returns None.
+        Retrieve the value of the specified raw attribute. If the attribute is not present in the "raw_attributes" dictionary, returns None.
 
         Args:
             key (str): The raw attribute key to retrieve.
@@ -67,7 +68,7 @@ class LDAPEntry(dict):
 
     def attr(self):
         """
-        Returns the "attributes" dictionary of the LDAP entry.
+        Return the "attributes" dictionary of the LDAP entry.
 
         Returns:
             dict: The "attributes" dictionary containing all the attributes of the LDAP entry.
@@ -76,7 +77,7 @@ class LDAPEntry(dict):
 
     def is_of_class(self, obj_cls: str) -> bool:
         """
-        Checks whether the "objectClass" attribute in the "attributes" dictionary contains with the provided class.
+        Check whether the "objectClass" attribute in the "attributes" dictionary contains with the provided class.
 
         Args:
             obj_cls (str): The class to check against the "objectClass" attribute.
@@ -88,23 +89,19 @@ class LDAPEntry(dict):
 
     def get_type(self) -> str:
         """
-        Determines the object type of the LDAP entry based on its "objectClass" attribute.
+        Determine the object type of the LDAP entry based on its "objectClass" attribute.
 
         Returns:
             str: The name of the object class, or None if no matching class is found.
         """
 
-        obj_type: LDAPObjectType = next(
-            filter(
-                self.compare_to_obj_type_cls, list(LDAPObjectType)
-            )
-        )
+        obj_type: LDAPObjectType = next(filter(self.compare_to_obj_type_cls, list(LDAPObjectType)))
 
         return obj_type.name if obj_type is not None else None
 
     def compare_to_obj_type_cls(self, object_type: LDAPObjectType) -> bool:
         """
-        Compares current entry objectClass and the provided LDAPObjectType objectClass attribute
+        Compare current entry objectClass and the provided LDAPObjectType objectClass attribute.
 
         Args:
             object_type (LDAPObjectType): element containing the objectClass attribute to compare

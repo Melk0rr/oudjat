@@ -1,3 +1,5 @@
+"""A package to gather LDAP connection and object manipulation operations."""
+
 from .account import LDAPComputer, LDAPGroup, LDAPUser
 from .gpo import LDAPGroupPolicyObject
 from .ou import LDAPOrganizationalUnit

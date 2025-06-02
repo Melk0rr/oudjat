@@ -418,6 +418,7 @@ class LDAPConnector(Connector):
 
     def get_ou(
         self,
+        dn: str = None,
         search_filter: str = None,
         search_base: str = None,
         attributes: Union[str, List[str]] = None,
@@ -426,6 +427,7 @@ class LDAPConnector(Connector):
         Specific method to retrieve LDAP organizational unit objects
 
         Args:
+            dn (str):                   : optional distinguished name to search
             search_filter (str)         : filter to reduce search results
             attributes (str | List[str]): attrbutes to include in result
             search_base (str)           : where to base the search on in terms of directory location
