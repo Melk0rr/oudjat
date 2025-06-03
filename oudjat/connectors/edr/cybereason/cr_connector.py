@@ -80,7 +80,7 @@ class CybereasonEntry(dict):
 
 class CybereasonConnector(Connector):
     """
-    Cybereason connector inherinting from base Connector. Handles interactions and queries to Cybereason API.
+    Handles interactions and queries to Cybereason API. Inherits from base Connector.
     """
 
     # ****************************************************************
@@ -212,7 +212,9 @@ class CybereasonConnector(Connector):
         self, endpoint: "CybereasonEndpoint", query: str = None
     ) -> List["CybereasonEntry"]:
         """
-        Search for entries in the specified Cybereason API endpoint. It processes the API response, handling Cybereason-specific data structures not uniformly aligned across responses.
+        Search for entries in the specified Cybereason API endpoint.
+
+        It processes the API response, handling Cybereason-specific data structures not uniformly aligned across responses.
 
         Args:
             endpoint (CybereasonEndpoint): The endpoint to which the query will be sent.

@@ -24,7 +24,7 @@ class Connector:
         self.target = target
         self.service_name = service_name
 
-        # Retreive credentials for the service
+        # Retrieve credentials for the service
         self.credentials = CredentialHelper.get_credentials(self.service_name) if use_credentials else None
         self.connection = None
 

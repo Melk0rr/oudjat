@@ -55,12 +55,12 @@ class MSCVRFConnector(Connector):
         if not re.match(CVE_REGEX, cve):
             raise (f"{__class__.__name__}.get_cvrf_id_from_cve::Invalid CVE provided: {cve}")
 
-        # API URL to retreive CVRF id from CVE
+        # API URL to retrieve CVRF id from CVE
         id_url = f"{API_BASE_URL}Updates('{cve}')"
 
         cvrf_id = None
 
-        # Retreive CVRF ID
+        # Retrieve CVRF ID
         id_resp = requests.get(id_url, headers=API_REQ_HEADERS)
         if id_resp.status_code != 200:
             raise ConnectionError(
