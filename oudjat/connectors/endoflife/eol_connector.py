@@ -41,7 +41,9 @@ class EndOfLifeConnector(Connector):
 
     def connect(self) -> None:
         """
-        Attempt to establish a connection to the API endpoint and retrieves product information if successful. It sets up the connection status and loads the product list from the API response.
+        Attempt to establish a connection to the API endpoint and retrieves product information if successful.
+
+        It sets up the connection status and loads the product list from the API response.
 
         Raises:
             ConnectionError: If unable to connect to the API endpoint or retrieve data.
@@ -97,7 +99,7 @@ class EndOfLifeConnector(Connector):
                     res = [{k: v for k, v in e.items() if k in attributes} for e in res]
 
         except ConnectionError as e:
-            raise ConnectionError(f"{__class__.__name__}.search::Could not retreive {search_filter} infos:\n{e}")
+            raise ConnectionError(f"{__class__.__name__}.search::Could not retrieve {search_filter} infos:\n{e}")
 
         return res
 
