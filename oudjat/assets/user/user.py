@@ -1,3 +1,5 @@
+"""A module that defines the user asset type."""
+
 import re
 from typing import Dict, Union
 
@@ -7,7 +9,7 @@ from .definitions import EMAIL_REG
 
 
 class User(Asset):
-    """A common class for users"""
+    """A common class for users."""
 
     # ****************************************************************
     # Attributes & Constructor
@@ -23,22 +25,26 @@ class User(Asset):
         description: str = None,
     ) -> None:
         """
-        Constructor for the User class.
+        Create a new instance of User.
 
         Initializes a new instance of the User class with the provided parameters.
 
         Args:
-            id (Union[int, str]): The unique identifier for the user.
-            name (str): The full name of the user.
-            firstname (str): The first name of the user.
-            lastname (str): The last name of the user.
-            login (str): The login username for the user.
-            email (str, optional): The email address of the user. Defaults to None.
-            description (str, optional): A description or bio for the user. Defaults to None.
+            user_id (Union[int, str])  : the unique identifier for the user.
+            name (str)                 : the full name of the user.
+            firstname (str)            : the first name of the user.
+            lastname (str)             : the last name of the user.
+            login (str)                : the login username for the user.
+            email (str, optional)      : the email address of the user. Defaults to None.
+            description (str, optional): a description or bio for the user. Defaults to None.
         """
 
         super().__init__(
-            asset_id=user_id, name=name, label=login, description=description, asset_type=AssetType.USER
+            asset_id=user_id,
+            name=name,
+            label=login,
+            description=description,
+            asset_type=AssetType.USER,
         )
 
         self.firstname = firstname
@@ -109,7 +115,7 @@ class User(Asset):
 
     def to_dict(self) -> Dict:
         """
-        Converts the current instance into a dictionary.
+        Convert the current instance into a dictionary.
 
         Returns:
             Dict: A dictionary representation of the User instance.
