@@ -1,3 +1,5 @@
+"""An OS sub package dedicated to Windows."""
+
 from .config.win_rel import WINDOWS_RELEASES
 from .windows import MicrosoftOperatingSystem, WindowsEdition
 

@@ -1,3 +1,5 @@
+"""A module that defines Windows releases."""
+
 WINDOWS_RELEASES = {
     # Windows releases
     "windows": [
