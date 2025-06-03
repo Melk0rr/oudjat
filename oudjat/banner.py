@@ -1,6 +1,6 @@
-# INFO: Project banner
+"""Project banner."""
 
-banner = """
+banner = r"""
    .-=*#%@@%%%%%%%%#*+-:
  *#*+=:.           ..-=*%%*=-.
                           .-=*#****+++==
