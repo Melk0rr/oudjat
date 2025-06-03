@@ -1,9 +1,11 @@
+"""A module that centralize package global variables."""
+
 from oudjat.utils.logical_operations import LogicalOperation
 
 
 def ip_str_to_int(ip: str) -> int:
     """
-    Converts an IP address string into an integer.
+    Convert an IP address string into an integer.
 
     Args:
         ip (str): A string representing the IP address in dot-decimal notation.
@@ -17,7 +19,7 @@ def ip_str_to_int(ip: str) -> int:
 
 def ip_int_to_str(ip: int) -> str:
     """
-    Converts an IP address integer into a string.
+    Convert an IP address integer into a string.
 
     Args:
         ip (int): An integer representing the IP address.
@@ -31,7 +33,7 @@ def ip_int_to_str(ip: int) -> str:
 
 def cidr_to_int(cidr: int) -> int:
     """
-    Returns a mask integer value based on the given network length.
+    Return a mask integer value based on the given network length.
 
     Args:
         cidr (int): The network prefix length from which to calculate the netmask.
@@ -45,7 +47,7 @@ def cidr_to_int(cidr: int) -> int:
 
 def ip_not(ip: int) -> int:
     """
-    Does a NOT operation on an IP address
+    Do a NOT operation on an IP address.
 
     Args:
         ip (int): the IP address represented by an integer
@@ -59,7 +61,7 @@ def ip_not(ip: int) -> int:
 
 def count_1_bits(val: int) -> int:
     """
-    Counts the number of bits set to 1 in the binary representation of an integer.
+    Count the number of bits set to 1 in the binary representation of an integer.
 
     This function takes an integer `val` and returns the count of bits that are set to 1 using its binary representation.
 

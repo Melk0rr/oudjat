@@ -1,3 +1,5 @@
+"""A module that describes IP addresses."""
+
 import re
 import socket
 from enum import Enum
@@ -13,9 +15,7 @@ if TYPE_CHECKING:
 
 
 class IPVersion(Enum):
-    """
-    Enumeration representing different versions of IP addresses based on a regex pattern
-    """
+    """Enumeration representing different versions of IP addresses based on a regex pattern."""
 
     IPV4 = {
         "pattern": r"^(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$"
@@ -27,7 +27,7 @@ class IPVersion(Enum):
     @property
     def pattern(self) -> str:
         """
-        Get the regex pattern for the IP version
+        Get the regex pattern for the IP version.
 
         Returns:
             str: The regex pattern as a string.
@@ -38,14 +38,14 @@ class IPVersion(Enum):
 # TODO: Handle IP version properly
 # TODO: Centralize some static functions
 class IPv4:
-    """Simple Class providing tools to manipulate IPv4 addresses"""
+    """Simple Class providing tools to manipulate IPv4 addresses."""
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self, address: Union[int, str]) -> None:
         """
-        Constructor for the IPAddress class.
+        Create a new instance of IP address.
 
         Args:
             address (Union[int, str]): The IP address to be initialized. Can be either an integer or a string.
@@ -104,7 +104,7 @@ class IPv4:
 
     def clear_ports(self) -> None:
         """
-        Clears the ports.
+        Clear the ports.
 
         This method removes all entries from the `ports` dictionary.
         """
@@ -149,7 +149,8 @@ class IPv4:
         return port_number in self.ports.keys()
 
     def append_open_port(self, port: Union[int, Port], force: bool = False):
-        """Append the port to the list of open ports.
+        """
+        Append the port to the list of open ports.
 
         Args:
             port (Union[int, Port]) : The port to be appended. It can be either an integer representing a port number or an instance of the Port class.
@@ -177,7 +178,8 @@ class IPv4:
             print(f"{port} is already in the list of open ports")
 
     def remove_port(self, port: int) -> None:
-        """Remove the port from the list of open ports.
+        """
+        Remove the port from the list of open ports.
 
         Args:
             port (int): The port number to be removed from the list.
@@ -186,7 +188,8 @@ class IPv4:
         del self.ports[port]
 
     def is_in_subnet(self, net: "Subnet") -> bool:
-        """Checks if the current IP address is in the provided subnet.
+        """
+        Check if the current IP address is in the provided subnet.
 
         Args:
             net (Subnet): The subnet to check against.
@@ -201,7 +204,7 @@ class IPv4:
 
     def __int__(self) -> int:
         """
-        Converts the current IP address into an integer.
+        Convert the current IP address into an integer.
 
         Returns:
             int: The integer representation of the IP address.
@@ -211,7 +214,7 @@ class IPv4:
 
     def __str__(self) -> str:
         """
-        Converts the current IP address into a string.
+        Convert the current IP address into a string.
 
         Returns:
             str: The string representation of the IP address.
@@ -222,7 +225,7 @@ class IPv4:
     @staticmethod
     def resolve_from_hostname(hostname: str) -> str:
         """
-        Resolves the IP address for the given hostname.
+        Resolve the IP address for the given hostname.
 
         Args:
             hostname (str): The hostname to be resolved.
@@ -242,14 +245,14 @@ class IPv4:
 
 
 class IPv4Mask(IPv4):
-    """Simple Class providing tools to manipulate IPv4 mask"""
+    """Simple Class providing tools to manipulate IPv4 mask."""
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self, mask: Union[int, str] = None, cidr: int = None):
         """
-        Constructor for initializing a network mask.
+        Create a new instance of IPMask.
 
         This method initializes the object with either a CIDR notation value or an integer/string representation of a netmask.
 
@@ -285,7 +288,8 @@ class IPv4Mask(IPv4):
 
     def get_cidr(self) -> int:
         """
-        Getter for mask CIDR.
+        Return mask CIDR.
+
         Returns the current netmask's CIDR notation value
         """
 
@@ -293,7 +297,8 @@ class IPv4Mask(IPv4):
 
     def cidr_to_int(self) -> int:
         """
-        Returns the current mask as an integer.
+        Return the current mask as an integer.
+
         This method converts the network mask in CIDR notation to its integer representation.
 
         Returns:
@@ -304,7 +309,8 @@ class IPv4Mask(IPv4):
 
     def get_wildcard(self) -> IPv4:
         """
-        Returns mask wildcard.
+        Return mask wildcard.
+
         This method calculates and returns the wildcard address for the current network mask.
 
         Returns:
@@ -315,7 +321,7 @@ class IPv4Mask(IPv4):
 
     def __str__(self, as_cidr: bool = False) -> str:
         """
-        Converts the current instance into a string.
+        Convert the current instance into a string.
 
         Args:
             as_cidr (bool): Determines whether to return the CIDR notation or the default string representation of the netmask.
@@ -335,7 +341,7 @@ class IPv4Mask(IPv4):
     @staticmethod
     def get_netcidr(mask: str) -> int:
         """
-        Static method to return CIDR notation for a given mask.
+        Return CIDR notation for a given mask.
 
         Args:
             mask (str): The netmask in string format.
@@ -356,7 +362,7 @@ class IPv4Mask(IPv4):
     @staticmethod
     def get_valid_mask():
         """
-        Static method to list all valid netmask strings for CIDR notation from 1 to 32.
+        List all valid netmask strings for CIDR notation from 1 to 32.
 
         Returns:
             List[str]: A list of valid netmask strings
@@ -367,7 +373,7 @@ class IPv4Mask(IPv4):
     @staticmethod
     def get_netmask(network_length: int) -> str:
         """
-        Static method to return an ipv4 mask based on a network length.
+        Return an ipv4 mask based on a network length.
 
         Args:
             network_length (int): The length of the network in CIDR notation.

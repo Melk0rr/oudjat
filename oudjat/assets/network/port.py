@@ -1,18 +1,18 @@
+"""A module that describe TCP/UDP ports."""
+
 from enum import IntEnum
 from typing import Dict
 
 
 class PortState(IntEnum):
-    """State of a port"""
+    """State of a port."""
 
     CLOSED = 0
     OPENED = 1
 
 
 class Port:
-    """
-    A class to handle TCP/UDP ports
-    """
+    """A class to handle TCP/UDP ports."""
 
     # ****************************************************************
     # Attributes & Constructor
@@ -24,12 +24,12 @@ class Port:
         state: PortState = PortState.OPENED,
     ):
         """
-        Constructor for the Port class.
+        Create a new instance of Port.
 
         Args:
-            port_number (int): The number of the port. Default is 80.
-            application (str): The name of the application using the port. Default is "Unknown".
-            state (PortState): The current state of the port. Default is PortState.OPENED.
+            port_number (int): the number of the port. Default is 80.
+            application (str): the name of the application using the port. Default is "Unknown".
+            state (PortState): the current state of the port. Default is PortState.OPENED.
 
         Raises:
             ValueError: If the provided `port_number` is not an integer.
@@ -104,7 +104,7 @@ class Port:
 
     def __str__(self) -> str:
         """
-        Returns a string based on port number and application.
+        Return a string based on port number and application.
 
         Returns:
             str: A formatted string showing the port number and application name.
@@ -114,7 +114,7 @@ class Port:
 
     def to_dict(self) -> Dict:
         """
-        Returns a dictionary based on port number and application.
+        Return a dictionary based on port number and application.
 
         Returns:
             Dict: A dictionary containing the port number and application name.
