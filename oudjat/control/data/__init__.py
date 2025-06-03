@@ -1,3 +1,5 @@
+"""A package providing data manipulation utilities."""
+
 from .data_filter import DataFilter
 from .data_set import DataSet
 from .data_source import DataSource

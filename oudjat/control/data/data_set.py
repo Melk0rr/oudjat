@@ -1,10 +1,12 @@
+"""A module that describes data sets and provides tools to manipulate them."""
+
 from typing import Dict, List, Union
 
 from .data_filter import DataFilter
 
 
 class DataSet:
-    """DataSet class : handling data unfiltered and filtered state"""
+    """DataSet class : handling data unfiltered and filtered state."""
 
     # ****************************************************************
     # Attributes & Constructors
@@ -16,16 +18,16 @@ class DataSet:
         initial_set: Union[List[Dict], "DataSet"] = None,
         filters: Union[List[Dict], List["DataFilter"]] = [],
         description: str = None,
-    ):
+    ) -> None:
         """
-        Constructor for DataSet class.
+        Create a new DataSet instance.
 
         Args:
-            name (str)                                               : The name of the dataset.
-            perimeter (str)                                          : The perimeter or boundary of the dataset.
-            scope (Union[List[Dict], "DataSet"], optional)           : Initial data set or list of dictionaries representing data. Defaults to None.
-            filters (Union[List[Dict], List["DataFilter"]], optional): Filters applied to the data. Defaults to an empty list.
-            description (str, optional)                              : A brief description of the dataset. Defaults to None.
+            name (str)                                               : the name of the dataset.
+            perimeter (str)                                          : the perimeter or boundary of the dataset.
+            initial_set (Union[List[Dict], "DataSet"], optional)     : initial data set or list of dictionaries representing data. Defaults to None.
+            filters (Union[List[Dict], List["DataFilter"]], optional): filters applied to the data. Defaults to an empty list.
+            description (str, optional)                              : a brief description of the dataset. Defaults to None.
         """
 
         self.name = name
@@ -51,7 +53,7 @@ class DataSet:
 
     def get_initial_scope(self) -> Union[List[Dict], "DataSet"]:
         """
-        Retrieves the initial scope dataset or a list of dictionaries that define the starting point for this dataset.
+        Retrieve the initial scope dataset or a list of dictionaries that define the starting point for this dataset.
 
         Returns:
             Union[List[Dict], "DataSet"]: The initial scope data set or list of dictionaries.
@@ -142,7 +144,7 @@ class DataSet:
     @staticmethod
     def get_dataset_data(dataset: "DataSet") -> str:
         """
-        Returns the data of the provided DataSet instance
+        Return the data of the provided DataSet instance.
 
         Args:
             dataset (DataSet): DataSet instance the data will be returned
@@ -156,11 +158,11 @@ class DataSet:
     @staticmethod
     def merge_sets(name: str, sets: List["DataSet"]) -> "DataSet":
         """
-        Static method to merge multiple DataSet instances into one.
+        Merge multiple DataSet instances into one.
 
         Args:
-            name (str)              : The name of the merged dataset.
-            scopes (List["DataSet"]): A list of DataSet instances to be merged.
+            name (str)            : The name of the merged dataset.
+            sets (List["DataSet"]): A list of DataSet instances to be merged.
 
         Returns:
             DataSet: A new DataSet instance containing the merged data from all provided scopes.

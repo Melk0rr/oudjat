@@ -1,3 +1,5 @@
+"""A module to handle data filters."""
+
 from typing import Any, Callable, Dict, List, Tuple, Union
 
 from oudjat.utils.color_print import ColorPrint
@@ -6,8 +8,9 @@ from oudjat.utils.operations import Operation
 
 class DataFilter:
     """
-    A class to handle data filtering operations
-    Once created, a filter can be run against one or multiple elements to check if they are as expected
+    A class to handle data filtering operations.
+
+    Once created, a filter can be run against one or multiple elements to check if they are as expected.
 
     Exemple 1:
         my_filter = DataFilter(fieldname="anything", operator="=", value=9)
@@ -28,7 +31,7 @@ class DataFilter:
         self, fieldname: str, value: Any, operator: str = "in", negate: bool = False
     ) -> None:
         """
-        Returs a new instance of data filter
+        Return a new instance of data filter.
 
         Args:
             fieldname (str): name of the field to filter
@@ -50,7 +53,7 @@ class DataFilter:
 
     def get_fieldname(self) -> str:
         """
-        Returns the filter fieldname
+        Return the filter fieldname.
 
         Returns:
             str: fieldname of the instance that will be used to filter a dictionary
@@ -60,7 +63,7 @@ class DataFilter:
 
     def get_operator(self) -> str:
         """
-        Returns the filter operator
+        Return the filter operator.
 
         Returns
             str: operator used to determine which function will be used to filter
@@ -70,7 +73,7 @@ class DataFilter:
 
     def get_operation(self) -> Callable:
         """
-        Returns a DataFilterOperation based on current parameters
+        Return a DataFilterOperation based on current parameters.
 
         Returns:
             Callable: DataFilterOperation function
@@ -80,7 +83,7 @@ class DataFilter:
 
     def get_value(self) -> Any:
         """
-        Returns the filter value
+        Return the filter value.
 
         Returns:
             Any: the value the filtered element must have
@@ -89,7 +92,7 @@ class DataFilter:
 
     def set_negate(self, new_negate: bool) -> None:
         """
-        Setter for filter negate
+        Set the filter negation.
 
 
         """
@@ -97,7 +100,7 @@ class DataFilter:
 
     def filter_dict(self, element: Dict) -> bool:
         """
-        Runs the current filter against a dictionary
+        Run the current filter against a dictionary.
 
         Args:
             element (Dict): element to run the filter against
@@ -111,7 +114,7 @@ class DataFilter:
 
     def filter_value(self, value: Any) -> bool:
         """
-        Runs the current filter against the provided value
+        Run the current filter against the provided value.
 
         Args:
             value (Any): value to run the filter against
@@ -125,7 +128,7 @@ class DataFilter:
 
     def __str__(self) -> str:
         """
-        Converts the current instance into a string
+        Convert the current instance into a string.
 
         Returns:
             str: current filter converted into a string
@@ -142,7 +145,7 @@ class DataFilter:
     @staticmethod
     def from_dict(filter_dict: Dict) -> "DataFilter":
         """
-        Creates a datafilter instance from a dictionary
+        Create a datafilter instance from a dictionary.
 
         Args:
             filter_dict (Dict): dictionary used to create DataFilter instance
@@ -163,7 +166,7 @@ class DataFilter:
     @staticmethod
     def from_tuple(filter_tuple: Tuple[str, str, Any]) -> "DataFilter":
         """
-        Creates a datafilter instance from a tuple
+        Create a datafilter instance from a tuple.
 
         Args:
             filter_tuple (Tuple): tuple used to create DataFilter instance
@@ -191,10 +194,10 @@ class DataFilter:
         filters_list: Union[List[Dict], List["DataFilter"]],
     ) -> List["DataFilter"]:
         """
-        Check filters type and format them into DataFilter instances if needed
+        Check filters type and format them into DataFilter instances if needed.
 
         Args:
-            filter_list (List[Dict] | List[DataFilter]): filter list to check / format
+            filters_list (List[Dict] | List[DataFilter]): filter list to check / format
 
         Returns:
             List[DataFilter]: formated list of data filter instances
@@ -218,7 +221,7 @@ class DataFilter:
     @staticmethod
     def gen_from_dict(filters: List[Dict]) -> List["DataFilter"]:
         """
-        Generates multiple DataFitler instances based on dictionnaries
+        Generate multiple DataFitler instances based on dictionnaries.
 
         Args:
             filters (List[Dict]): list of dictionaries used to generated instances
@@ -232,7 +235,7 @@ class DataFilter:
     @staticmethod
     def gen_from_tuple(filters: List[Tuple]) -> List["DataFilter"]:
         """
-        Generates DataFitler instances based on tuples
+        Generate DataFitler instances based on tuples.
 
         Args:
             filters (List[Tuple]): list of tuples used to generated instances
@@ -246,7 +249,7 @@ class DataFilter:
     @staticmethod
     def get_conditions(element: Any, filters: Union[List["DataFilter"], List[Dict]]) -> bool:
         """
-        Runs all given filters against a single provided element
+        Run all given filters against a single provided element.
 
         Args:
             element (Any)                          : element to check
@@ -275,7 +278,7 @@ class DataFilter:
         data_to_filter: List[Dict], filters: Union["DataFilter", List["DataFilter"]] = None
     ) -> List[Dict]:
         """
-        Filters data based on given filters
+        Filter data based on given filters.
 
         Args:
             data_to_filter (List[Dict])            : well... the data to be filtered duh
