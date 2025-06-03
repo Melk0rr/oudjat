@@ -1,8 +1,9 @@
+"""A simple module to list Tenable.sc asset list types."""
 from enum import Enum
 
 
 class TSCAssetListType(Enum):
-    """Enumerate asset list types"""
+    """Enumerate asset list types."""
 
     COMBINATION = "combination"
     DNSNAME = "dnsname"

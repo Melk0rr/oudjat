@@ -1,8 +1,10 @@
+"""A simple module to list Tenable.sc vulnerability tools."""
+
 from enum import Enum
 
 
 class TSCVulnTool(Enum):
-    """Enumeration of Tenable SC vulnerability tools"""
+    """Enumeration of Tenable SC vulnerability tools."""
 
     CCEIPDETAIL           = "cceipdetail"
     CVEIPDETAIL           = "cveipdetail"

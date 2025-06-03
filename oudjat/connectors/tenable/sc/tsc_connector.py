@@ -1,3 +1,5 @@
+"""A module handling Tenable.sc API connection."""
+
 import re
 from typing import Dict, List, Tuple, Union
 from urllib.parse import urlparse
@@ -15,8 +17,9 @@ from .tsc_vuln_tools import TSCVulnTool
 
 class TenableSCConnector(Connector):
     """
-    A class to handle Tenable.sc API interactions (inherits from Connector)
-    For details, see : https://pytenable.readthedocs.io/en/stable/index.html
+    A class to handle Tenable.sc API interactions (inherits from Connector).
+
+    For details, see : https://pytenable.readthedocs.io/en/stable/index.html.
     """
 
     # ****************************************************************
@@ -28,7 +31,7 @@ class TenableSCConnector(Connector):
         self, target: str, service_name: str = "OudjatTenableSCAPI", port: int = 443
     ) -> None:
         """
-        Constructor
+        Create a new instance of TenableSCConnector.
 
         Args:
             target (str)      : Tenable.sc appliance URL
@@ -54,7 +57,7 @@ class TenableSCConnector(Connector):
     # INFO: Getters
     def get_repos(self) -> List:
         """
-        Returns repositories list
+        Return repositories list.
 
         Returns:
             List : list of repos defined on security center
@@ -64,7 +67,7 @@ class TenableSCConnector(Connector):
     # INFO: Base connector methods
     def connect(self) -> None:
         """
-        Connects to API using connector parameters
+        Connect to API using connector parameters.
         """
         connection = None
         try:
@@ -83,7 +86,7 @@ class TenableSCConnector(Connector):
 
     def check_connection(self) -> None:
         """
-        Checks if the connection is initialized
+        Check if the connection is initialized.
 
         Raises:
             ConnectionError: if connector connection is not initialized
@@ -96,7 +99,7 @@ class TenableSCConnector(Connector):
 
     def disconnect(self) -> None:
         """
-        Disconnect from API
+        Disconnect from API.
         """
         del self.connection
         self.connection = None
@@ -104,14 +107,14 @@ class TenableSCConnector(Connector):
 
     def search(self, search_type: str, *args, **kwargs) -> List:
         """
-        Searches the API for elements
+        Search the API for elements.
 
         Args:
             search_type (str): search type (VULNS | ASSETS | SCANS)
             *args (List)     : anything to pass to further search method
             **kwargs (Dict)  : anything to pass to further search method
 
-        Returns
+        Returns:
             List: search result depending on search type
 
         Raises:
@@ -147,11 +150,12 @@ class TenableSCConnector(Connector):
         exploitable: bool = True,
     ) -> Dict:
         """
-        Retrieve the current vulnerabilities
+        Retrieve the current vulnerabilities.
 
         Args:
-            severities (List[str])  : vuln severities to include
-            tool (TSCVulnTool)      : tool to use for the search
+            severities (List[str]): vuln severities to include
+            tool (TSCVulnTool)    : tool to use for the search
+            exploitable (bool)    : wheither to search only for exploitable vulnerabilities or not
 
         Returns:
             Dict : vulnerabilities matching arguments
@@ -171,7 +175,7 @@ class TenableSCConnector(Connector):
 
     def build_severity_filter(self, *severities: List[int]) -> Tuple:
         """
-        Returns a severity filter based on the provided severities
+        Return a severity filter based on the provided severities.
 
         Args:
             severities (List[str]) : severities to include in the filter (see cve.py)
@@ -192,14 +196,16 @@ class TenableSCConnector(Connector):
         **kwargs,
     ) -> None:
         """
-        Creates a new asset list
+        Create a new asset list.
 
         Args:
-            name (str)                   : name of the asset list
-            list_type (TSCAssetListType) : type of the asset list (see tsc_asset_list_types.py for details)
-            description (str)            : asset list description
-            ips: (List[str])             : a list of ip addresses to associate with the list
-            dns_names: (List[str])       : a list of dns names to associate with the list
+            name (str)                  : name of the asset list
+            list_type (TSCAssetListType): type of the asset list (see tsc_asset_list_types.py for details)
+            description (str)           : asset list description
+            ips: (List[str])            : a list of ip addresses to associate with the list
+            dns_names: (List[str])      : a list of dns names to associate with the list
+            args (List)                 : list of additional arguments to pass to the new asset list
+            kwargs (Dict)               : key-value couples to pass to the new asset list
 
         Raises:
             Exception: if something goes wrong while creating the asset list
@@ -223,7 +229,7 @@ class TenableSCConnector(Connector):
 
     def delete_asset_list(self, list_id: Union[int, List[int]]) -> None:
         """
-        Deletes an asset list based on given id
+        Delete an asset list based on given id.
 
         Args:
             list_id (int | List[int]) : list of ids of the asset lists to delete
@@ -246,7 +252,7 @@ class TenableSCConnector(Connector):
 
     def list_asset_lists(self, list_filter: Union[Tuple, List[Tuple]] = None) -> List[Dict]:
         """
-        Retrieves a list of asset lists with minimal informations like list ids
+        Retrieve a list of asset lists with minimal informations like list ids.
 
         Args:
             list_filter (Tuple[str, str, any]): filter to apply to the listing
@@ -278,10 +284,10 @@ class TenableSCConnector(Connector):
 
     def get_asset_list_details(self, list_id: Union[int, List[int]]) -> List[Dict]:
         """
-        Returns the details of one or more asset lists
+        Return the details of one or more asset lists.
 
         Args:
-            list_id (int | List[int]): list of ids matching the asset lists to retreive
+            list_id (int | List[int]): list of ids matching the asset lists to retrieve
 
         Returns:
             List[Dict]: list of asset list details
@@ -309,7 +315,7 @@ class TenableSCConnector(Connector):
     # INFO: Scans
     def list_scans(self, scan_filter: Union[Tuple, List[Tuple]] = None) -> List[Dict]:
         """
-        Retrieves a list of scans with minimal information like scan ids
+        Retrieve a list of scans with minimal information like scan ids.
 
         Args:
             scan_filter (Tuple[str, str, any]) : filter to apply to the listing
@@ -341,7 +347,7 @@ class TenableSCConnector(Connector):
 
     def get_scan_details(self, scan_id: Union[int, List[int]]) -> List[Dict]:
         """
-        Returns the details of one or more scans
+        Return the details of one or more scans.
 
         Args:
             scan_id (int | List[int]) : one or more scan id to retrieve
@@ -370,7 +376,7 @@ class TenableSCConnector(Connector):
 
     def delete_scan(self, scan_id: Union[int, List[int]]) -> None:
         """
-        Deletes an asset list based on given id
+        Delete an asset list based on given id.
 
         Args:
             scan_id (int | List[int]) : one or more scan id to delete
@@ -402,14 +408,16 @@ class TenableSCConnector(Connector):
         **kwargs,
     ) -> None:
         """
-        Creates a new scan
+        Create a new scan.
 
         Args:
-            name (str)              : name of the scan
-            repo_id (int)           : repository id for the scan
-            asset_lists (List[int]) : the asset lists ids to run the scan against
-            description (str)       : scan description
-            schedule (Dict)         : schedule dictionary
+            name (str)             : name of the scan
+            repo_id (int)          : repository id for the scan
+            asset_lists (List[int]): the asset lists ids to run the scan against
+            description (str)      : scan description
+            schedule (Dict)        : schedule dictionary
+            args (List)            : a list of additional arguments to pass to the new scan
+            kwargs (Dict)          : key-value couples to pass to the new scan
 
         Raises:
             Exception: if something goes wrong while creating scan
