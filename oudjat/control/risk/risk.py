@@ -1,10 +1,12 @@
+"""A module to describe the notion of risk."""
+
 from typing import Union
 
 from .risk_measure import RiskMeasure
 
 
 class Risk:
-    """A class to modelise security risks"""
+    """A class to modelise security risks."""
 
     # ****************************************************************
     # Attributes & Constructors
@@ -26,7 +28,7 @@ class Risk:
         impact: Union[RiskMeasure, int] = None,
     ):
         """
-        Returns a new instance of Risk
+        Return a new instance of Risk.
 
         Args:
             risk_id (str)                 : the id used to identify the new risk
@@ -58,7 +60,7 @@ class Risk:
 
     def get_severity(self) -> int:
         """
-        Getter for the risk score
+        Getter for the risk score.
 
         Returns:
             int: severity of the risk (value between 1 and 16)
@@ -76,7 +78,7 @@ class Risk:
 
     def set_likelihood(self, likelihood: Union[int, RiskMeasure]) -> None:
         """
-        Change the likelihood of the current risk
+        Change the likelihood of the current risk.
 
         Args:
             likelihood (int | RiskMeasure): new likelihood value
@@ -89,7 +91,7 @@ class Risk:
 
     def set_impact(self, impact: Union[int, RiskMeasure]) -> None:
         """
-        Change the impact of the current risk
+        Change the impact of the current risk.
 
         Args:
             impact (int | RiskMeasure): new impact value
@@ -103,7 +105,7 @@ class Risk:
 
     def __str__(self) -> str:
         """
-        Converts the current instance into a string
+        Convert the current instance into a string.
 
         Returns:
             str: a string representation of the current risk containing its name, severity name and value
