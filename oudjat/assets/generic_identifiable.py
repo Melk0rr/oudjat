@@ -1,8 +1,10 @@
+"""A module to describe a generic class that includes common properties among multiple asset types."""
+
 from typing import Any, Dict, Union
 
 
 class GenericIdentifiable:
-    """Generic class for objects with common attributes like id, name, description and label"""
+    """Generic class for objects with common attributes like id, name, description and label."""
 
     # ****************************************************************
     # Attributes & Constructors
@@ -14,7 +16,8 @@ class GenericIdentifiable:
         label: str = None,
         description: str = None,
     ):
-        """Constructor for GenericIdentifiable class.
+        """
+        Create a new instance of GenericIdentifiable.
 
         Args:
             gid (Union[int, str]): The identifier of the object. Can be an integer or a string.
@@ -113,7 +116,7 @@ class GenericIdentifiable:
 
     def add_custom_attr(self, key: str, value: Any) -> None:
         """
-        Adds a new custom attribute.
+        Add a new custom attribute.
 
         Args:
             key (str): The key for the new custom attribute.
@@ -124,7 +127,7 @@ class GenericIdentifiable:
 
     def add_multiple_custom_attr(self, new_custom_attr: Dict[str, Any]) -> None:
         """
-        Adds multiple new custom attributes.
+        Add multiple new custom attributes.
 
         Args:
             new_custom_attr (Dict[str, Any]): A dictionary of new custom attributes to be added.
@@ -134,7 +137,7 @@ class GenericIdentifiable:
 
     def del_custom_attr(self, key: str) -> None:
         """
-        Deletes a custom attribute by key.
+        Delete a custom attribute by key.
 
         Args:
             key (str): The key of the custom attribute to delete.
@@ -144,14 +147,14 @@ class GenericIdentifiable:
 
     def clear_custom_attr(self) -> None:
         """
-        Clears all custom attributes
+        Clear all custom attributes.
         """
 
         self.custom_attributes = {}
 
     def __str__(self) -> str:
         """
-        Converts the current instance into a string.
+        Convert the current instance into a string.
 
         Raises:
             NotImplementedError: This method must be implemented by the overloading class.
@@ -166,7 +169,7 @@ class GenericIdentifiable:
 
     def to_dict(self) -> Dict:
         """
-        Converts the current instance into a dictionary.
+        Convert the current instance into a dictionary.
 
         Returns:
             Dict: A dictionary representation of the object, including id, name, label, description, and custom attributes.

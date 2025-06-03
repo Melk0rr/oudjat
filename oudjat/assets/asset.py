@@ -1,3 +1,5 @@
+"""A module that defines base Asset properties."""
+
 from typing import TYPE_CHECKING, Dict, List, Union
 
 from oudjat.model import GenericIdentifiable
@@ -10,7 +12,8 @@ if TYPE_CHECKING:
 
 class Asset(GenericIdentifiable):
     """
-    Generic asset class. Must be inherited by asset types
+    Generic asset class. Must be inherited by asset types.
+
     This class serves as a base for any asset type may it be equipment hardware or software, users, etc.
     """
 
@@ -27,13 +30,13 @@ class Asset(GenericIdentifiable):
         location: Union["Location", List["Location"]] = None,
     ) -> None:
         """
-        Constructor for the Asset class.
+        Create a new instance of Asset.
 
         Initializes an instance of the Asset class with the provided id, name, asset type, label, and description.
         Also initializes the location attribute as an empty list and sets the given locations using the set_location method.
 
         Args:
-            id (Union[int, str])                                    : The unique identifier for the asset.
+            asset_id (Union[int, str])                              : The unique identifier for the asset.
             name (str)                                              : The name of the asset.
             asset_type (AssetType)                                  : The type of the asset.
             label (str, optional)                                   : A short description or label for the asset. Defaults to None.
@@ -62,7 +65,8 @@ class Asset(GenericIdentifiable):
         return self.location
 
     def get_asset_type(self) -> AssetType:
-        """Getter for asset type.
+        """
+        Return asset type.
 
         Returns:
             AssetType: The type of the asset.
@@ -91,7 +95,8 @@ class Asset(GenericIdentifiable):
         self.location = new_location
 
     def to_dict(self) -> Dict:
-        """Converts current asset into a dict.
+        """
+        Convert current asset into a dict.
 
         Returns:
             Dict: A dictionary representation of the Asset object including its id, name, label, description, asset type, and location.

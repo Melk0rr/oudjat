@@ -1,3 +1,5 @@
+"""A module that defines the notion of location."""
+
 from typing import Dict, Union
 
 from oudjat.model import GenericIdentifiable
@@ -7,7 +9,7 @@ from ..assets.network.subnet import Subnet
 
 
 class Location(GenericIdentifiable):
-    """A class to describe generic location with subnets, assets, users"""
+    """A class to describe generic location with subnets, assets, users."""
 
     # ****************************************************************
     # Attributes & Constructors
@@ -22,13 +24,13 @@ class Location(GenericIdentifiable):
         subnet: Union[Subnet, Dict[str, Subnet]] = None,
     ):
         """
-        Constructor for the Location class.
+        Create a new instance of Location.
 
         Initializes a new location with an ID, name, optional description, city, and label.
         The subnet can be provided as either a single Subnet instance or a dictionary of subnets.
 
         Args:
-            id (Union[int, str])                                : A unique identifier for the location.
+            location_id (Union[int, str])                       : A unique identifier for the location.
             name (str)                                          : The name of the location.
             description (str, optional)                         : A description of the location. Defaults to None.
             city (str, optional)                                : The city where the location is situated. Defaults to None.
@@ -52,7 +54,7 @@ class Location(GenericIdentifiable):
 
     def get_id(self) -> Union[int, str]:
         """
-        Returns the current location id
+        Return the current location id.
 
         Returns:
             Union[int, str]: unique location id
@@ -70,6 +72,7 @@ class Location(GenericIdentifiable):
         Returns:
             Subnet: The subnet instance associated with the given name or all subnets if none specified.
         """
+
         if self.subnet is None or (subnet is not None and subnet not in self.subnet.keys()):
             return self.subnet
 
@@ -77,7 +80,7 @@ class Location(GenericIdentifiable):
 
     def add_subnet(self, subnet: Subnet) -> None:
         """
-        Adds a new subnet to the location.
+        Add a new subnet to the location.
 
         Args:
             subnet (Subnet): The subnet instance to be added to the location.
@@ -93,7 +96,7 @@ class Location(GenericIdentifiable):
 
     def get_asset(self, asset_type: AssetType, asset_id: Union[int, str]) -> Asset:
         """
-        Looks for an asset based on asset type and id.
+        Look for an asset based on asset type and id.
 
         Args:
             asset_type (AssetType)      : The type of the asset to search for.
@@ -106,7 +109,7 @@ class Location(GenericIdentifiable):
 
     def get_asset_per_type(self, asset_type: AssetType) -> Dict:
         """
-        Returns a dictionary of assets for the given type.
+        Return a dictionary of assets for the given type.
 
         Args:
             asset_type (AssetType): The type of assets to retrieve.
@@ -122,10 +125,10 @@ class Location(GenericIdentifiable):
 
     def add_asset(self, asset: Asset, asset_type: AssetType) -> None:
         """
-        Adds a new asset to the current location.
+        Add a new asset to the current location.
 
         Args:
-            asset (Asset): The asset instance to be added.
+            asset (Asset)         : The asset instance to be added.
             asset_type (AssetType): The type of the asset to which the provided asset belongs.
 
         Raises:
@@ -140,15 +143,16 @@ class Location(GenericIdentifiable):
 
     def is_ip_in_subnet(self, ip: str, subnet: str = None) -> bool:
         """
-        Checks if the provided computer is in the location subnet.
+        Check if the provided computer is in the location subnet.
 
         Args:
-            ip (str)                : The IP address to check against the subnets.
-            subnet (str, optional)  : The specific subnet name to check against. Defaults to None.
+            ip (str)              : The IP address to check against the subnets.
+            subnet (str, optional): The specific subnet name to check against. Defaults to None.
 
         Returns:
             bool: True if the IP is within the specified subnet or any subnet if none is specified, False otherwise.
         """
+
         if self.subnet is None or (subnet is not None and subnet not in self.subnet.keys()):
             return False
 

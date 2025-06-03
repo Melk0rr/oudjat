@@ -1,3 +1,5 @@
+"""A package that gathers definitions of various assets."""
+
 from .asset import Asset
 from .asset_type import AssetType
 from .generic_identifiable import GenericIdentifiable
