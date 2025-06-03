@@ -1,3 +1,4 @@
+"""A module that handles the connection to Nist API."""
 import json
 import re
 from typing import Dict, List, Union
@@ -12,14 +13,14 @@ NIST_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 
 
 class NistConnector(Connector):
-    """NIST API Connector class"""
+    """NIST API Connector class."""
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self):
         """
-        Constructor
+        Create a new instance of NistConnector.
 
         Initializes a new instance of the `NistConnector` class, inheriting from `Connector`.
         It sets the target URL to the NIST API URL.
@@ -32,7 +33,7 @@ class NistConnector(Connector):
 
     def connect(self, target: str) -> None:
         """
-        Test connection to NIST API
+        Test connection to NIST API.
 
         Sends a GET request to the specified target URL with an Accept header set to application/json.
         If the response status code is 200, it parses the JSON content and stores it in `self.connection`. Raises a ConnectionError if the connection cannot be established.
@@ -59,7 +60,7 @@ class NistConnector(Connector):
         self, search_filter: Union[str, List[str]], attributes: Union[str, List[str]] = None
     ) -> List[Dict]:
         """
-        Searches the API for CVEs
+        Search the API for CVEs.
 
         Retrieves vulnerability information from the NIST API based on the provided CVE IDs.
         If `search_filter` is not a list, it converts it to one. Similarly, if `attributes` is provided but not a list, it converts it to a list.
