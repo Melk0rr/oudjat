@@ -1,9 +1,11 @@
+"""A module that defines common command behaviors."""
+
 class Base(object):
     """A base command."""
 
     def __init__(self, options, *args, **kwargs):
         """
-        Constructor
+        Create a new Base command instance.
 
         Args:
             options (dict): A dictionary of configuration options for the command.
@@ -19,7 +21,7 @@ class Base(object):
 
     def run(self) -> None:
         """
-        Base run method to be implemented by subclasses.
+        Run method to be implemented by subclasses.
 
         Raises:
             NotImplementedError: Indicates that the `run` method must be overridden in any subclass.

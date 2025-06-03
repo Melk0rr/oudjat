@@ -1,3 +1,5 @@
+"""A module to define common target command behavior."""
+
 from multiprocessing import Pool
 from typing import Dict, List
 
@@ -8,10 +10,15 @@ from .base import Base
 
 
 class Target(Base):
-    """Main enumeration module"""
+    """A class that describes common target command."""
 
-    def __init__(self, options: Dict):
-        """Initialization function"""
+    def __init__(self, options: Dict) -> None:
+        """
+        Create a new instance of Target command.
+
+        Args:
+            options (Dict): options passed to the command
+        """
         super().__init__(options)
         self.results: List[Dict] = []
 
@@ -35,7 +42,8 @@ class Target(Base):
 
     def str_file_option_handle(self, string_option: str, file_option: str) -> None:
         """
-        This function handles the initialization of a list-based option by checking if an existing option is provided as a file path.
+        Handle the initialization of a list-based option by checking if an existing option is provided as a file path.
+
         If the `file_option` exists in the `self.options` dictionary, it reads the content of the specified file and splits it into lines,
         filtering out any empty lines to create a list which is then assigned to the `string_option`.
 
@@ -43,7 +51,6 @@ class Target(Base):
         and filters out any empty entries to create a list, which is then assigned to the `string_option`.
 
         Args:
-            self (object)      : The instance of the class containing the options dictionary.
             string_option (str): The key in the `self.options` dictionary where the resulting list should be stored.
             file_option (str)  : The key in the `self.options` dictionary that, if exists, points to a file path.
         """
@@ -57,7 +64,13 @@ class Target(Base):
         self.options[string_option] = list(filter(None, args))
 
     def handle_exception(self, e: Exception, message: str = "") -> None:
-        """Function handling exception for the current class"""
+        """
+        Handle exception for the current class.
+
+        Args:
+            e (Exception): exception tu raise
+            message (str): exception message
+        """
         if self.options["--verbose"]:
             print(e)
 
@@ -65,13 +78,13 @@ class Target(Base):
             ColorPrint.red(message)
 
     def res_2_csv(self) -> None:
-        """Write the results into a CSV file"""
+        """Write the results into a CSV file."""
 
         print("\nExporting results to csv...")
         FileHandler.export_csv(self.results, self.options["--export-csv"], "|")
 
     def run(self) -> None:
-        """Main function called from the cli module"""
+        """Run from the cli module."""
 
         # Retrieve IP of target and run initial configuration
         self.init()

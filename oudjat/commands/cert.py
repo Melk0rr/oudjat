@@ -1,3 +1,5 @@
+"""A module dedicated to the cert command."""
+
 from multiprocessing import Pool
 from typing import Dict, List
 
@@ -9,10 +11,15 @@ from .target import Target
 
 
 class Cert(Target):
-    """CVE Target"""
+    """A class to handle Cert command."""
 
     def __init__(self, options: Dict):
-        """Constructor"""
+        """
+        Create a new instance of Cert command.
+
+        Args:
+            options (Dict): options passed to the command.
+        """
 
         super().__init__(options)
 
@@ -47,7 +54,12 @@ class Cert(Target):
                 )
 
     def keyword_check(self, target: "CERTFRPage") -> List[str]:
-        """Look for provided keywords in the results"""
+        """
+        Look for provided keywords in the results.
+
+        Args:
+            target (CERTFRPage): page to search the keywords in.
+        """
 
         matched = [k for k in self.options["--keywords"] if k.lower() in target.get_title().lower()]
 
@@ -58,8 +70,13 @@ class Cert(Target):
         print(msg)
         return matched
 
-    def cert_process(self, target) -> Dict:
-        """CERT process method to deal with cert data"""
+    def cert_process(self, target: str) -> Dict:
+        """
+        CERT process method to deal with cert data.
+
+        Args:
+            target (str): url to run the process on
+        """
         cert_data = {}
 
         try:
@@ -94,7 +111,7 @@ class Cert(Target):
         return cert_data
 
     def run(self) -> None:
-        """Main method called from the cli module"""
+        """Run the Cert command from the cli module."""
 
         with Pool(processes=5) as pool:
             for cert_data in pool.imap_unordered(self.cert_process, self.unique_targets):

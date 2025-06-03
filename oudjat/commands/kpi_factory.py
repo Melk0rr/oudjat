@@ -1,3 +1,5 @@
+"""A module to handle KPI command."""
+
 import json
 from multiprocessing import Pool
 from typing import Dict, List, Tuple
@@ -10,10 +12,15 @@ from .base import Base
 
 
 class KPIFactory(Base):
-    """Main enumeration module"""
+    """A class to handle KPI command."""
 
     def __init__(self, options: Dict):
-        """Constructor"""
+        """
+        Create a new instance of KPIFactory command.
+
+        Args:
+            options (Dict): options passed to the command
+        """
 
         super().__init__(options)
 
@@ -44,7 +51,7 @@ class KPIFactory(Base):
         self.results = []
 
     def assign_sources(self) -> Dict:
-        """Assigns data sources filenames to matching kpi types"""
+        """Assign data sources filenames to matching kpi types."""
 
         sources = {}
 
@@ -57,7 +64,13 @@ class KPIFactory(Base):
         return sources
 
     def handle_exception(self, e: Exception, message: str = "") -> None:
-        """Function handling exception for the current class"""
+        """
+        Handle exception for the current class.
+
+        Args:
+            e (Exception): exception tu raise
+            message (str): exception message
+        """
 
         if self.options["--verbose"]:
             print(e)
@@ -66,7 +79,12 @@ class KPIFactory(Base):
             ColorPrint.red(message)
 
     def import_kpi_sources(self, index: int = 0) -> Dict:
-        """Import specified index of kpi sources"""
+        """
+        Import specified index of kpi sources.
+
+        Args:
+            index (int): index of sources
+        """
 
         print(f"Importing {', '.join([s[0] for s in self.data_sources.values()])}...")
 
@@ -84,7 +102,12 @@ class KPIFactory(Base):
         return current_data
 
     def build_source_environment(self, index: int = 0) -> None:
-        """Imports data sources and build scopes based on these sources"""
+        """
+        Import data sources and build scopes based on these sources.
+
+        Args:
+            index (int): index of source env
+        """
 
         self.current_sources = self.import_kpi_sources(index)
 
@@ -105,7 +128,12 @@ class KPIFactory(Base):
         self.scopes = current_scopes
 
     def kpi_process(self, kpi: Dict) -> Tuple[int, List[Dict]]:
-        """Target process to deal with url data"""
+        """
+        Target process to deal with url data.
+
+        Args:
+            kpi (Dict): the kpi the process will be ran on
+        """
 
         kpi_data = []
 
@@ -117,9 +145,7 @@ class KPIFactory(Base):
 
         for s in kpi["scopes"]:
             # Build the scope to pass to the kpi
-            sd = DataSet.merge_sets(
-                f"Build - {s['name']}", [self.scopes[b] for b in s["build"]]
-            )
+            sd = DataSet.merge_sets(f"Build - {s['name']}", [self.scopes[b] for b in s["build"]])
             scope_i = DataSet(name=s["name"], perimeter=kpi_i.get_perimeter(), scope=sd)
 
             # Pass the scope to the kpi and get conformity data
@@ -130,7 +156,7 @@ class KPIFactory(Base):
         return (kpi_i, kpi_data)
 
     def kpi_thread_loop(self) -> None:
-        """Run kpi thread loop"""
+        """Run kpi thread loop."""
 
         print("Generating KPIs...")
         with Pool(processes=5) as pool:
@@ -138,7 +164,7 @@ class KPIFactory(Base):
                 self.results.extend(kpi_res[1])
 
     def run(self) -> None:
-        """Run command method"""
+        """Run the command."""
 
         for i in range(self.iteration_count):
             self.build_source_environment(i)
@@ -146,4 +172,6 @@ class KPIFactory(Base):
 
         if self.options["--export-csv"] and len(self.results) > 0:
             append = True if self.options["--append"] else False
-            FileHandler.export_csv(self.results, self.options["--export-csv"], delimiter="|", append=append)
+            FileHandler.export_csv(
+                self.results, self.options["--export-csv"], delimiter="|", append=append
+            )
