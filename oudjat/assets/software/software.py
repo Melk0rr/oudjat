@@ -1,3 +1,5 @@
+"""Main module of the software package that defines the notion of software."""
+
 from enum import IntEnum
 from typing import Any, Dict, List, Union
 
@@ -8,14 +10,14 @@ from .software_release import SoftwareRelease, SoftwareReleaseDict
 
 
 class SoftwareType(IntEnum):
-    """An enumeration to list software types"""
+    """An enumeration to list software types."""
 
     OS = 0
     APPLICATION = 1
 
 
 class Software(Asset):
-    """A class to describe softwares"""
+    """A class to describe softwares."""
 
     # ****************************************************************
     # Attributes & Constructors
@@ -36,12 +38,11 @@ class Software(Asset):
         editor(s), and optional description. The software type defaults to an application unless specified otherwise.
 
         Args:
-            id (Union[int, str])                    : A unique identifier for the software, which can be either an integer or a string.
+            software_id (Union[int, str])           : A unique identifier for the software, which can be either an integer or a string.
             name (str)                              : The name of the software.
             label (str)                             : A brief label that describes the software.
             software_type (SoftwareType, optional)  : Specifies the type of the software. Defaults to SoftwareType.APPLICATION.
-            editor (Union[str, List[str]], optional): The editor(s) responsible for the development or maintenance
-                of the software
+            editor (Union[str, List[str]], optional): The editor(s) responsible for the development or maintenance of the software
             description (str, optional)             : A detailed description of the software. Defaults to None.
         """
 
@@ -63,7 +64,7 @@ class Software(Asset):
 
     def get_editor(self) -> str:
         """
-        Getter for software editor
+        Return software editor.
 
         Returns:
             str: software editor's name
@@ -113,7 +114,7 @@ class Software(Asset):
 
     def has_release(self, rel_ver: str, rel_label: str) -> bool:
         """
-        Checks if the current software has a release with the given version and label.
+        Check if the current software has a release with the given version and label.
 
         Args:
             rel_ver (str)   : The version of the release to check for.
@@ -127,7 +128,7 @@ class Software(Asset):
 
     def add_release(self, new_release: SoftwareRelease) -> None:
         """
-        Adds a release to the list of software releases.
+        Add a release to the list of software releases.
 
         Args:
             new_release (SoftwareRelease): The release object to be added.
@@ -149,7 +150,7 @@ class Software(Asset):
 
     def find_release(self, rel_ver: str, rel_label: str = None) -> SoftwareRelease:
         """
-        Finds a release by its version and optionally label.
+        Find a release by its version and optionally label.
 
         Args:
             rel_ver (str): The version of the release to search for.
@@ -163,7 +164,7 @@ class Software(Asset):
 
     def retired_releases(self) -> List[SoftwareRelease]:
         """
-        Gets a list of retired releases.
+        Get a list of retired releases.
 
         Returns:
             List[SoftwareRelease]: A list of SoftwareRelease objects that are not supported.
@@ -173,7 +174,7 @@ class Software(Asset):
 
     def supported_releases(self) -> List[SoftwareRelease]:
         """
-        Gets a list of released that are currently supported.
+        Get a list of released that are currently supported.
 
         Returns:
             List[SoftwareRelease]: A list of SoftwareRelease objects that are supported.
@@ -183,7 +184,7 @@ class Software(Asset):
 
     def get_matching_editions(self, test_str: str) -> SoftwareEditionDict:
         """
-        Returns the editions which pattern matches the given string.
+        Return the editions which pattern matches the given string.
 
         Args:
             test_str (str): The string to match against edition names or other patterns.
@@ -196,7 +197,7 @@ class Software(Asset):
 
     def to_dict(self) -> Dict[str, Any]:
         """
-        Converts the current instance into a dictionary representation.
+        Convert the current instance into a dictionary representation.
 
         Returns:
             Dict: A dictionary containing basic class information and lists of releases.

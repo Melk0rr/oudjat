@@ -1,3 +1,5 @@
+"""An asset sub package that focuses on software."""
+
 from .software import Software, SoftwareType
 from .software_edition import SoftwareEdition, SoftwareEditionDict
 from .software_release import SoftwareRelease, SoftwareReleaseDict

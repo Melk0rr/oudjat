@@ -1,3 +1,5 @@
+"""A module that defines the notion of software release."""
+
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Union
 
@@ -10,8 +12,7 @@ if TYPE_CHECKING:
 
 
 class SoftwareRelease:
-    """
-    A class to describe software releases"""
+    """A class to describe software releases."""
 
     # ****************************************************************
     # Attributes & Constructors
@@ -24,7 +25,7 @@ class SoftwareRelease:
         release_label: str,
     ) -> None:
         """
-        Constructor for the SoftwareRelease class.
+        Create a new instance of SoftwareRelease.
 
         Args:
             software (Software)                 : The software instance to which this release belongs.
@@ -60,7 +61,7 @@ class SoftwareRelease:
     # Methods
     def get_software(self) -> "Software":
         """
-        Getter for release software
+        Return the release software.
 
         Returns:
             Software: The software associated with the release.
@@ -70,7 +71,7 @@ class SoftwareRelease:
 
     def get_label(self) -> str:
         """
-        Getter for release label
+        Return the release label.
 
         Returns:
             str: The label of the software release.
@@ -80,7 +81,7 @@ class SoftwareRelease:
 
     def get_version(self) -> Union[int, str]:
         """
-        Getter for release version
+        Return the release version.
 
         Returns:
             Union[int, str]: The version number or identifier of the software release.
@@ -90,7 +91,7 @@ class SoftwareRelease:
 
     def is_supported(self, edition: Union[str, List[str]] = None) -> bool:
         """
-        Checks if the current release has an ongoing support
+        Check if the current release has an ongoing support.
 
         Args:
             edition (Union[str, List[str]], optional): The specific edition to check for support. Defaults to None.
@@ -108,7 +109,7 @@ class SoftwareRelease:
 
     def get_support(self) -> "SoftwareReleaseSupportList":
         """
-        Getter for support list
+        Return support list.
 
         Returns:
             SoftwareReleaseSupportList: The list of support details for the software release.
@@ -120,7 +121,7 @@ class SoftwareRelease:
         self, edition: Union[str, List[str]], lts: bool = False
     ) -> "SoftwareReleaseSupportList":
         """
-        Returns support for given edition
+        Return support for given edition.
 
         Args:
             edition (Union[str, List[str]]) : The specific edition to retrieve support for.
@@ -134,7 +135,7 @@ class SoftwareRelease:
 
     def get_ongoing_support(self) -> List["SoftwareReleaseSupport"]:
         """
-        Returns ongoing support instances
+        Return ongoing support instances.
 
         Returns:
             List[SoftwareReleaseSupport]: A list of support details that are currently ongoing.
@@ -144,7 +145,7 @@ class SoftwareRelease:
 
     def get_retired_support(self) -> List["SoftwareReleaseSupport"]:
         """
-        Returns retired support instances
+        Return retired support instances.
 
         Returns:
             List[SoftwareReleaseSupport]: A list of support details that are no longer ongoing.
@@ -154,7 +155,7 @@ class SoftwareRelease:
 
     def get_name(self) -> None:
         """
-        Method to generate releases
+        Return the name of the release.
 
         Raises:
             NotImplementedError: This method must be implemented by the overloading class.
@@ -166,7 +167,7 @@ class SoftwareRelease:
 
     def get_full_name(self) -> None:
         """
-        Method to generate releases
+        Return the release full name.
 
         Returns:
             str: The full name of the software release, combining the software name and its label.
@@ -176,7 +177,7 @@ class SoftwareRelease:
 
     def add_support(self, support: SoftwareReleaseSupport) -> None:
         """
-        Adds a support instance to the current release
+        Add a support instance to the current release.
 
         Args:
             support (SoftwareReleaseSupport): The support instance to be added.
@@ -195,7 +196,7 @@ class SoftwareRelease:
 
     def has_vulnerability(self, vuln: Union[str, List[str]] = None) -> List[str]:
         """
-        Check if the release is concerned by any or specific vulnerability
+        Check if the release is concerned by any or specific vulnerability.
 
         Args:
             vuln (Union[str, List[str], optional): The vulnerability to check. Can be a single string or a list of strings. Defaults to None.
@@ -214,7 +215,7 @@ class SoftwareRelease:
 
     def add_vuln(self, vuln: str) -> None:
         """
-        Adds a vulnerability to the current release
+        Add a vulnerability to the current release.
 
         Args:
             vuln (str): The vulnerability string to be added.
@@ -224,7 +225,7 @@ class SoftwareRelease:
 
     def __str__(self, show_version: bool = False) -> str:
         """
-        Converts current release to a string
+        Convert current release to a string.
 
         Args:
             show_version (bool, optional): Whether to include the version in the string representation. Defaults to False.
@@ -242,7 +243,7 @@ class SoftwareRelease:
 
     def os_info_dict(self) -> Dict:
         """
-        Returns a dictionary with OS infos
+        Return a dictionary with OS infos.
 
         Returns:
             Dict: A dictionary containing information about the operating system, including software name, release name, version, full name, and support status.
@@ -258,7 +259,7 @@ class SoftwareRelease:
 
     def to_dict(self) -> Dict:
         """
-        Converts current release into a dict
+        Convert current release into a dict.
 
         Returns:
             Dict: A dictionary representation of the software release, including its label, release date, and OS information.
@@ -273,21 +274,19 @@ class SoftwareRelease:
 
 
 class SoftwareReleaseDict(dict):
-    """Software release dictionary"""
+    """Software release dictionary."""
 
     # ****************************************************************
     # Methods
 
     def find_rel_matching_label(self, val: str) -> "SoftwareReleaseDict":
-        """Try to find release with a label matching the given string.
+        """
+        Try to find release with a label matching the given string.
 
-        This method searches through the dictionary and returns a new
-        dictionary containing only those key-value pairs where the
-        keys match the provided string `val`. The resulting dictionary
-        is of type SoftwareReleaseDict, preserving the structure of
-        the original dictionary for potential further processing.
+        This method searches through the dictionary and returns a new dictionary containing only those key-value pairs where the keys match the provided string `val`.
+        The resulting dictionary is of type SoftwareReleaseDict, preserving the structure of the original dictionary for potential further processing.
 
-        Parameters:
+        Args:
             val (str): The string to search for in the dictionary keys.
 
         Returns:
@@ -297,16 +296,14 @@ class SoftwareReleaseDict(dict):
         return {k: v for k, v in self.items() if k in val}
 
     def find_rel(self, rel_ver: str, rel_label: str = None) -> "SoftwareReleaseDict":
-        """Finds the given release.
+        """
+        Find the given release.
 
-        This method searches through the dictionary to locate a specific
-        software release by version and optionally by label. It returns
-        either the entire release information if only the version is
-        specified, or it narrows down the search to a specific label
-        within that version if both are provided.
+        This method searches through the dictionary to locate a specific software release by version and optionally by label.
+        It returns either the entire release information if only the version is specified, or it narrows down the search to a specific label within that version if both are provided.
 
-        Parameters:
-            rel_ver (str): The version of the software release to find.
+        Args:
+            rel_ver (str)            : The version of the software release to find.
             rel_label (str, optional): The label associated with the release. Defaults to None.
 
         Returns:

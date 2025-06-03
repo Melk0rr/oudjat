@@ -1,3 +1,5 @@
+"""A module that describes the notion of software support."""
+
 from datetime import datetime
 from typing import Dict, List, Union
 
@@ -7,7 +9,7 @@ from .software_edition import SoftwareEditionDict
 
 
 class SoftwareReleaseSupport:
-    """A class to handle software release support concept"""
+    """A class to handle software release support concept."""
 
     # ****************************************************************
     # Attributes & Constructors
@@ -20,13 +22,13 @@ class SoftwareReleaseSupport:
         long_term_support: bool = False,
     ) -> None:
         """
-        Constructor for the SoftwareReleaseSupport class.
+        Create a new instance SoftwareReleaseSupport.
 
         Args:
-            active_support (Union[str, datetime], optional) : The date when support starts or a string in 'YYYY-MM-DD' format.
-            end_of_life (Union[str, datetime], optional)    : The date when support ends or a string in 'YYYY-MM-DD' format.
-            edition (List[str], optional)                   : A list of software editions supported by the release.
-            long_term_support (bool, optional)              : Whether the release has long term support.
+            active_support (Union[str, datetime], optional): The date when support starts or a string in 'YYYY-MM-DD' format.
+            end_of_life (Union[str, datetime], optional)   : The date when support ends or a string in 'YYYY-MM-DD' format.
+            edition (List[str], optional)                  : A list of software editions supported by the release.
+            long_term_support (bool, optional)             : Whether the release has long term support.
         """
 
         if not isinstance(edition, list):
@@ -74,7 +76,7 @@ class SoftwareReleaseSupport:
 
     def is_ongoing(self) -> bool:
         """
-        Checks if the current support period is ongoing.
+        Check if the current support period is ongoing.
 
         Returns:
             bool: True if the support period is ongoing, False otherwise.
@@ -87,7 +89,7 @@ class SoftwareReleaseSupport:
 
     def status(self) -> str:
         """
-        Returns a string representing the current support status.
+        Return a string representing the current support status.
 
         Returns:
             str: "Ongoing" if support is ongoing, otherwise "Retired".
@@ -97,7 +99,7 @@ class SoftwareReleaseSupport:
 
     def support_details(self) -> str:
         """
-        Returns a detailed string about the supported status.
+        Return a detailed string about the supported status.
 
         Returns:
             str: A string indicating how many days are left in support or whether support has ended already.
@@ -116,7 +118,7 @@ class SoftwareReleaseSupport:
 
     def has_long_term_support(self) -> bool:
         """
-        Checks if the release has long term support.
+        Check if the release has long term support.
 
         Returns:
             bool: True if the release has long term support, False otherwise.
@@ -126,7 +128,7 @@ class SoftwareReleaseSupport:
 
     def supports_edition(self, edition: Union[str, List[str]], lts: bool = False) -> bool:
         """
-        Checks if current support concerns the provided edition
+        Check if current support concerns the provided edition.
 
         Args:
             edition (Union[str, List[str]]): edition to check support for
@@ -149,7 +151,7 @@ class SoftwareReleaseSupport:
 
     def __str__(self) -> str:
         """
-        Converts the current support instance into a string
+        Convert the current support instance into a string.
 
         Returns:
             str: a string representing the software support
@@ -159,7 +161,7 @@ class SoftwareReleaseSupport:
 
     def to_dict(self) -> Dict:
         """
-        Converts the current support instance into a dict
+        Convert the current support instance into a dict.
 
         Returns:
             Dict : dictionary containing software support key attributes
@@ -179,7 +181,7 @@ class SoftwareReleaseSupport:
 
 
 class SoftwareReleaseSupportList(list):
-    """A class to manage lists of software releases"""
+    """A class to manage lists of software releases."""
 
     # ****************************************************************
     # Methods
@@ -210,7 +212,7 @@ class SoftwareReleaseSupportList(list):
         lts: bool = False,
     ) -> List[SoftwareReleaseSupport]:
         """
-        Returns releases matching arguments.
+        Return releases matching arguments.
 
         This method filters and returns a list of `SoftwareReleaseSupport` objects that match the specified criteria for edition and LTS status. It uses the `supports_edition` method to filter the releases based on the provided parameters.
 
@@ -226,7 +228,7 @@ class SoftwareReleaseSupportList(list):
 
     def append(self, support: SoftwareReleaseSupport) -> None:
         """
-        Appends a new support to the list.
+        Append a new support to the list.
 
         This method allows you to add a `SoftwareReleaseSupport` object to the end of the list. It ensures that only instances of `SoftwareReleaseSupport` can be appended by checking the type of the provided argument.
 
@@ -242,7 +244,7 @@ class SoftwareReleaseSupportList(list):
 
     def __str__(self) -> str:
         """
-        Converts the current support list into a string.
+        Convert the current support list into a string.
 
         This method returns a string representation of the list where each element is converted to its string form and joined with commas. It provides a readable format when printing or converting the list to a string.
 

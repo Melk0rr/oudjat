@@ -1,3 +1,5 @@
+"""A module that describes the notion of software edition."""
+
 import re
 from typing import List
 
@@ -11,7 +13,7 @@ class SoftwareEdition:
 
     def __init__(self, label: str, category: str = None, pattern: str = None):
         """
-        Constructor for SoftwareEdition class.
+        Create a new SoftwareEdition.
 
         Args:
             label (str): The name or identifier of the software edition.
@@ -55,7 +57,7 @@ class SoftwareEdition:
 
     def match_str(self, test_str: str) -> bool:
         """
-        Checks if provided string matches edition pattern.
+        Check if provided string matches edition pattern.
 
         Args:
             test_str (str): The string to be matched against the edition pattern.
@@ -68,7 +70,7 @@ class SoftwareEdition:
 
     def __str__(self) -> str:
         """
-        Converts the current instance into a string representation.
+        Convert the current instance into a string representation.
 
         Returns:
             str: The label of the software edition as its string representation.
@@ -84,7 +86,7 @@ class SoftwareEditionDict(dict):
 
     def get_matching_editions(self, label: str) -> List[SoftwareEdition]:
         """
-        Returns software editions for which the given label matches the pattern.
+        Return software editions for which the given label matches the pattern.
 
         Args:
             label (str): The label to match against the edition patterns.
@@ -101,7 +103,7 @@ class SoftwareEditionDict(dict):
 
     def get_edition_labels(self) -> List[str]:
         """
-        Returns a list of edition labels.
+        Return a list of edition labels.
 
         Returns:
             List[str]: A list of the labels of all software editions in the dictionary.
@@ -111,7 +113,7 @@ class SoftwareEditionDict(dict):
 
     def get_editions_per_ctg(self, category: str) -> "SoftwareEditionDict":
         """
-        Returns a sub-dictionary of software editions based on category value.
+        Return a sub-dictionary of software editions based on category value.
 
         Args:
             category (str): The category to filter the software editions by.
