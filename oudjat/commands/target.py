@@ -73,5 +73,5 @@ class Target(Base):
     def run(self) -> None:
         """Main function called from the cli module"""
 
-        # Retreive IP of target and run initial configuration
+        # Retrieve IP of target and run initial configuration
         self.init()

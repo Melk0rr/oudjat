@@ -25,7 +25,7 @@ class Cert(Target):
         if self.options["--keywords"] or self.options["--keywordfile"]:
             super().str_file_option_handle("--keywords", "--keywordfile")
 
-        # If option is provided: retreive alerts from RSS feed
+        # If option is provided: retrieve alerts from RSS feed
         if self.options["--feed"]:
             print("Parsing CERT pages from feed...")
 
