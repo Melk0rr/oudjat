@@ -1,14 +1,19 @@
+"""A module that provide credential utilities."""
+
 import getpass
 
 import keyring
 
 
 class CredentialHelper:
+    """A class that helps with credentials."""
+
     @staticmethod
     def save_credentials(service: str, username: str, password: str) -> None:
         """
-        This function uses the `keyring` library to securely store the provided credentials (username and password) for a specified service in an encrypted
-        vault. If the operation is successful, no value is returned. Otherwise, it will raise a `keyring.errors.PasswordSetError` if there's an issue setting the password.
+        Use the `keyring` library to securely store the provided credentials (username and password) for a specified service in an encrypted vault.
+
+        If the operation is successful, no value is returned. Otherwise, it will raise a `keyring.errors.PasswordSetError` if there's an issue setting the password.
 
         Args:
             service (str) : The identifier for the service or application where the credentials are being stored.
@@ -30,8 +35,9 @@ class CredentialHelper:
     @staticmethod
     def get_credentials(service: str) -> keyring.credentials.SimpleCredential:
         """
-        This function attempts to retrieve stored credentials from the `keyring` using the provided service name. If no credentials are found, it prompts the
-        user to enter their username and password manually, which are then saved in the keyring before being returned. It also handles errors that may occur during
+        Attempt to retrieve stored credentials from the `keyring` using the provided service name.
+
+        If no credentials are found, it prompts the user to enter their username and password manually, which are then saved in the keyring before being returned. It also handles errors that may occur during
         retrieval or if there's an issue with the keyring itself by raising a `keyring.errors.KeyringError`.
 
         Args:
@@ -68,8 +74,9 @@ class CredentialHelper:
     @staticmethod
     def del_credentials(service: str, username: str) -> None:
         """
-        This function removes stored credentials from the `keyring` using both the service identifier and the specified username. If the operation is successful,
-        no value is returned. Otherwise, it will raise a `keyring.errors.PasswordDeleteError` if there's an issue deleting the password.
+        Remove stored credentials from the `keyring` using both the service identifier and the specified username.
+
+        If the operation is successful, no value is returned. Otherwise, it will raise a `keyring.errors.PasswordDeleteError` if there's an issue deleting the password.
 
         Args:
             service (str) : The identifier for the service from which to delete credentials.
@@ -83,5 +90,6 @@ class CredentialHelper:
             keyring.delete_password(service, username)
 
         except keyring.errors.PasswordDeleteError as e:
-            raise (f"{__class__.__name__}.del_credentials::Error while deleting password for {service}:{username}\n{e}")
-
+            raise (
+                f"{__class__.__name__}.del_credentials::Error while deleting password for {service}:{username}\n{e}"
+            )

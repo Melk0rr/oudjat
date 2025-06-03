@@ -1,9 +1,11 @@
+"""Some globaly useful mapper functions."""
+
 from typing import Any, Dict
 
 
 def any_to_dict(element: Any) -> Dict:
     """
-    Calls the to_dict method on the provided element
+    Call the to_dict method on the provided element.
 
     Args:
         element (Any) : element to convert into a dict using 'to_dict' method

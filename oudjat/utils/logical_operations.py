@@ -1,10 +1,12 @@
+"""A module that provides logical operation utilities."""
+
 from enum import Enum
 from typing import Callable
 
 
 class LogicalOperation:
     """
-    A class to handle logical operations
+    A class to handle logical operations.
 
     > But what's the point ?
     The point is typically to work with configuration files, and to call a specific logical function from an operator name.
@@ -14,7 +16,7 @@ class LogicalOperation:
     @staticmethod
     def from_str(operator: str, *args) -> int | bool:
         """
-        Runs a logical operation based on a given operator
+        Run a logical operation based on a given operator.
 
         Args:
             operator (str): the logical operator used to run a specific logical operation
@@ -39,7 +41,7 @@ class LogicalOperation:
     @staticmethod
     def logical_or(a: int | bool, b: int | bool) -> int | bool:
         """
-        Does an OR operation on provided values.
+        Do an OR operation on provided values.
 
         Args:
             a (int | bool): The first operand to be compared.
@@ -54,7 +56,7 @@ class LogicalOperation:
     @staticmethod
     def logical_and(a: int | bool, b: int | bool) -> int | bool:
         """
-        Does an AND operation on provided values.
+        Do an AND operation on provided values.
 
         Args:
             a (int | bool): The first operand to be compared.
@@ -69,7 +71,7 @@ class LogicalOperation:
     @staticmethod
     def logical_xor(a: int | bool, b: int | bool) -> int | bool:
         """
-        Does a XOR operation on provided values.
+        Do a XOR operation on provided values.
 
         Args:
             a (int | bool): The first operand to be compared.
@@ -84,7 +86,8 @@ class LogicalOperation:
     @staticmethod
     def logical_xand(a: int | bool, b: int | bool) -> int | bool:
         """
-        Does a XAND operation on provided values.
+        Do a XAND operation on provided values.
+
         This is defined as the XOR operation between the result of AND between `a` and `b`, and the result of OR between `a` and `b`.
 
         Args:
@@ -102,7 +105,7 @@ class LogicalOperation:
     @staticmethod
     def logical_not(a: int | bool) -> int | bool:
         """
-        Does a NOT operation on provided value.
+        Do a NOT operation on provided value.
 
         Args:
             a (int | bool): The operand to be negated.
@@ -116,7 +119,8 @@ class LogicalOperation:
     @staticmethod
     def logical_nor(a: int | bool, b: int | bool) -> int | bool:
         """
-        Does a NOR operation on provided values.
+        Do a NOR operation on provided values.
+
         This is defined as the NOT of the result of ORing `a` and `b`.
 
         Args:
@@ -132,7 +136,8 @@ class LogicalOperation:
     @staticmethod
     def logical_nand(a: int | bool, b: int | bool) -> int | bool:
         """
-        Does a NAND operation on provided values.
+        Do a NAND operation on provided values.
+
         This is defined as the NOT of the result of ANDing `a` and `b`.
 
         Args:
@@ -147,7 +152,7 @@ class LogicalOperation:
 
 
 class LogicalOperator(Enum):
-    """And enumeration of possible logical operators"""
+    """AND enumeration of possible logical operators."""
 
     OR = {"ope_name": "or", "operation": LogicalOperation.logical_or}
     AND = {"ope_name": "and", "operation": LogicalOperation.logical_and}
@@ -160,7 +165,7 @@ class LogicalOperator(Enum):
     @property
     def ope_name(self) -> str:
         """
-        Returns a logical operator name
+        Return a logical operator name.
 
         Returns:
             str: name of the operator
@@ -171,7 +176,7 @@ class LogicalOperator(Enum):
     @property
     def operation(self) -> Callable:
         """
-        Returns a logical operator name
+        Return a logical operator name.
 
         Returns:
             Callable: the logical operation tied to this operator

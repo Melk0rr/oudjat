@@ -1,3 +1,5 @@
+"""A module that provides various comparison operations."""
+
 import re
 from enum import Enum
 from typing import Any, Callable, List, Union
@@ -5,7 +7,7 @@ from typing import Any, Callable, List, Union
 
 class Operation:
     """
-    A class to handle comparison operations
+    A class to handle comparison operations.
 
     > But what's the point ?
     The point is typically to work with configuration files, and to call a specific function from an operator name.
@@ -15,7 +17,7 @@ class Operation:
     @staticmethod
     def from_str(operator: str, *args) -> bool:
         """
-        Runs an operation based on a given operator
+        Run an operation based on a given operator.
 
         Args:
             operator (str): the logical operator used to run a specific operation
@@ -58,7 +60,7 @@ class Operation:
     @staticmethod
     def ope_equals(a: Any, b: Any) -> bool:
         """
-        Checks if a equals b.
+        Check if a equals b.
 
         Args:
             a (Any): The first object to compare.
@@ -73,7 +75,7 @@ class Operation:
     @staticmethod
     def ope_contains(a: Union[str, List], b: Any) -> bool:
         """
-        Checks if a contains b.
+        Check if a contains b.
 
         Args:
             a (Union[str, List]): The container object to search within.
@@ -91,7 +93,7 @@ class Operation:
     @staticmethod
     def ope_in(a: Any, b: Union[List, str]) -> bool:
         """
-        Checks if a is in b.
+        Check if a is in b.
 
         Args:
             a (Any): The item to search for.
@@ -106,7 +108,7 @@ class Operation:
     @staticmethod
     def ope_greater_than(a: Union[int, float], b: Union[int, float]) -> bool:
         """
-        Checks if a is greater than b.
+        Check if a is greater than b.
 
         Args:
             a (Union[int, float]): The first number to compare.
@@ -121,7 +123,7 @@ class Operation:
     @staticmethod
     def ope_greater_equal_than(a: Union[int, float], b: Union[int, float]) -> bool:
         """
-        Checks if a is greater than or equal to b.
+        Check if a is greater than or equal to b.
 
         Args:
             a (Union[int, float]): The first number to compare.
@@ -136,7 +138,7 @@ class Operation:
     @staticmethod
     def ope_lower_than(a: Union[int, float], b: Union[int, float]) -> bool:
         """
-        Checks if a is less than b.
+        Check if a is less than b.
 
         Args:
             a (Union[int, float]): The first number to compare.
@@ -151,7 +153,7 @@ class Operation:
     @staticmethod
     def ope_lower_equal_than(a: Union[int, float], b: Union[int, float]) -> bool:
         """
-        Checks if a is less than or equal to b.
+        Check if a is less than or equal to b.
 
         Args:
             a (Union[int, float]): The first number to compare.
@@ -166,7 +168,7 @@ class Operation:
     @staticmethod
     def ope_is(a: Any, b: Any) -> bool:
         """
-        Checks if a is the same object as b.
+        Check if a is the same object as b.
 
         Args:
             a (Any): The first object to compare.
@@ -181,7 +183,7 @@ class Operation:
     @staticmethod
     def ope_is_not(a: Any, b: Any) -> bool:
         """
-        Checks if a is not the same object as b.
+        Check if a is not the same object as b.
 
         Args:
             a (Any): The first object to compare.
@@ -196,7 +198,7 @@ class Operation:
     @staticmethod
     def ope_reg_match(value: str, pattern: str) -> bool:
         """
-        Checks if the value matches the provided regular expression pattern.
+        Check if the value matches the provided regular expression pattern.
 
         Args:
             value (str): The string to search for a match with the pattern.
@@ -214,7 +216,7 @@ class Operation:
     @staticmethod
     def ope_reg_search(value: str, pattern: str) -> bool:
         """
-        Searches for the provided pattern in the value string using a regular expression.
+        Search for the provided pattern in the value string using a regular expression.
 
         Args:
             value (str): The string to search within.
@@ -231,7 +233,7 @@ class Operation:
 
 
 class Operator(Enum):
-    """And enumeration of possible operators"""
+    """An enumeration of possible operators."""
 
     EQ = {"ope_name": "eq", "operation": Operation.ope_equals}
     CONTAINS = {"ope_name": "contains", "operation": Operation.ope_contains}
@@ -248,7 +250,7 @@ class Operator(Enum):
     @property
     def ope_name(self) -> str:
         """
-        Returns a logical operator name
+        Return a logical operator name.
 
         Returns:
             str: name of the operator
@@ -259,7 +261,7 @@ class Operator(Enum):
     @property
     def operation(self) -> Callable:
         """
-        Returns a logical operator name
+        Return a logical operator name.
 
         Returns:
             Callable: the logical operation tied to this operator

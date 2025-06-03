@@ -1,3 +1,5 @@
+"""A package to gather various utility functions."""
+
 from .bit_flag import BitFlag
 from .color_print import ColorPrint
 from .credentials import CredentialHelper

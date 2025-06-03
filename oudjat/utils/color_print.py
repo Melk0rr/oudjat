@@ -1,3 +1,5 @@
+"""A module that provide simple ways to change output color."""
+
 class ColorPrint:
     """A utility class to provide colored text output in the terminal."""
 
@@ -11,7 +13,7 @@ class ColorPrint:
     @classmethod
     def white(self, s: str, **kwargs) -> None:
         """
-        Prints the string `s` in default color (white).
+        Print the string `s` in default color (white).
 
         Args:
             s (str) : The string to be printed.
@@ -23,7 +25,7 @@ class ColorPrint:
     @classmethod
     def red(self, s: str, **kwargs) -> None:
         """
-        Prints the string `s` in red color.
+        Print the string `s` in red color.
 
         Args:
             s (str) : The string to be printed.
@@ -35,7 +37,7 @@ class ColorPrint:
     @classmethod
     def green(self, s: str, **kwargs) -> None:
         """
-        Prints the string `s` in green color.
+        Print the string `s` in green color.
 
         Args:
             s (str) : The string to be printed.
@@ -47,7 +49,7 @@ class ColorPrint:
     @classmethod
     def yellow(self, s: str, **kwargs) -> None:
         """
-        Prints the string `s` in yellow color.
+        Print the string `s` in yellow color.
 
         Args:
             s (str) : The string to be printed.
@@ -59,7 +61,7 @@ class ColorPrint:
     @classmethod
     def blue(self, s: str, **kwargs) -> None:
         """
-        Prints the string `s` in blue color.
+        Print the string `s` in blue color.
 
         Args:
             s (str) : The string to be printed.
@@ -71,7 +73,7 @@ class ColorPrint:
     @classmethod
     def purple(self, s: str, **kwargs) -> None:
         """
-        Prints the string `s` in purple color.
+        Print the string `s` in purple color.
 
         Args:
             s (str) : The string to be printed.

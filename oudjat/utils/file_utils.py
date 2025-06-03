@@ -1,3 +1,5 @@
+"""A module that gathers file utilities."""
+
 import csv
 import json
 import os
@@ -9,6 +11,8 @@ from .color_print import ColorPrint
 
 
 class FileHandler:
+    """A class that provides file operations."""
+
     @staticmethod
     def check_path(path: str) -> None:
         """
@@ -28,10 +32,11 @@ class FileHandler:
     @staticmethod
     def import_json(file_path: str, callback: Callable = None) -> Union[Dict, List]:
         """
-        Helper function to import json data from a specified file.
+        Import json data from a specified file.
 
         Args:
-            file_path (str): The path to the JSON file.
+            file_path (str)    : the path to the JSON file.
+            callback (Callable): optional function to run to change final result.
 
         Returns:
             dict or list: The content of the imported JSON file.
@@ -57,7 +62,7 @@ class FileHandler:
     @staticmethod
     def export_json(data: Union[List[Dict], Dict], file_path: str) -> None:
         """
-        Exports data to a JSON file.
+        Export data to a JSON file.
 
         Args:
             data (dict or list): The data to be exported.
@@ -81,7 +86,7 @@ class FileHandler:
     @staticmethod
     def import_csv(file_path: str, callback: Callable = None, delimiter: str = None) -> List[Dict]:
         """
-        Helper function to import CSV content into a list of dictionaries.
+        Import CSV content into a list of dictionaries.
 
         Args:
             file_path (str)              : The path to the CSV file.
@@ -123,7 +128,7 @@ class FileHandler:
         data: List[Dict], file_path: str, delimiter: str = ",", append: bool = False
     ) -> None:
         """
-        Helper function to export data into a CSV file.
+        Export data into a CSV file.
 
         Args:
             data (list of dicts)     : The data to be exported.
@@ -160,11 +165,12 @@ class FileHandler:
         file_path: str, delete_duplicates: bool = False, callback: Callable = None
     ) -> List[Any]:
         """
-        Helper function to import a text file and optionally remove duplicates.
+        Import a text file and optionally remove duplicates.
 
         Args:
             file_path (str)                   : The path to the text file.
             delete_duplicates (bool, optional): Whether to remove duplicate lines from the file.
+            callback (callable, optional)     : A callable function to process the data after reading.
 
         Returns:
             list: The content of the text file as a list of strings.
@@ -194,7 +200,7 @@ class FileHandler:
     @staticmethod
     def export_txt(data: List[str], file_path: str, append: bool = False) -> None:
         """
-        Helper function to export data into a text file.
+        Export data into a text file.
 
         Args:
             data (list)             : The data to be exported as strings.
@@ -221,7 +227,7 @@ class FileHandler:
 
 
 class FileType(Enum):
-    """Enumeration of file types to be used by file connector"""
+    """Enumeration of file types to be used by file connector."""
 
     CSV = {"import": FileHandler.import_csv, "export": FileHandler.export_csv}
 
@@ -231,7 +237,8 @@ class FileType(Enum):
 
     @property
     def f_import(self) -> Callable:
-        """Get the import function for the file type.
+        """
+        Get the import function for the file type.
 
         Returns:
             Callable: The import function as a callable object.
@@ -241,7 +248,8 @@ class FileType(Enum):
 
     @property
     def f_export(self) -> Callable:
-        """Get the export function for the file type.
+        """
+        Get the export function for the file type.
 
         Returns:
             Callable: The export function as a callable object.

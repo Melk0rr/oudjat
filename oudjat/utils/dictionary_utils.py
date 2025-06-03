@@ -1,10 +1,10 @@
+"""A module that gather dictionary utilities."""
+
 from typing import Dict, List, Tuple
 
 
 class CustomDict(dict):
-    """
-    Custom overload of the base dictionary
-    """
+    """Custom overload of the base dictionary."""
 
     # ****************************************************************
     # Methods
@@ -57,7 +57,7 @@ class CustomDict(dict):
 
         Args:
             dictionary (Dict): The input dictionary containing key-value pairs.
-            char (str): The character to use for joining the keys and values.
+            char (str)       : The character to use for joining the keys and values.
 
         Returns:
             str: A string where each item in the dictionary is joined by the specified character, formatted as "key: value".
@@ -76,7 +76,7 @@ class CustomDict(dict):
 
         Args:
             dictionary (Dict): The input dictionary containing key-value pairs.
-            char (str): The character to use for joining the values.
+            char (str)       : The character to use for joining the values.
 
         Returns:
             str: A string where each value in the dictionary is joined by the specified character.
@@ -91,7 +91,7 @@ class CustomDict(dict):
     @staticmethod
     def map_list_to_dict(list_to_map: List, key: str) -> Dict:
         """
-        Maps a list into a dictionary using the provided key.
+        Map a list into a dictionary using the provided key.
 
         Args:
             list_to_map (List): The input list of dictionaries or objects that have the specified key.
@@ -110,11 +110,11 @@ class CustomDict(dict):
     @staticmethod
     def from_tuple(input_tuple: Tuple, parent: Tuple, res: Dict = {}) -> Dict:
         """
-        Converts a nested tuple into a dictionary recursively.
+        Convert a nested tuple into a dictionary recursively.
 
         Args:
-            input_tuple (Tuple): The input tuple to be converted into a dictionary.
-            parent (Tuple): The parent tuple from which the current element is taken.
+            input_tuple (Tuple) : The input tuple to be converted into a dictionary.
+            parent (Tuple)      : The parent tuple from which the current element is taken.
             res (Dict, optional): A dictionary to store intermediate results. Defaults to an empty dictionary.
 
         Returns:
