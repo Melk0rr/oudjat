@@ -1,3 +1,5 @@
+"""A module that defines the Computer asset type."""
+
 from typing import Dict, List, Union
 
 from oudjat.assets import Asset, AssetType
@@ -13,7 +15,7 @@ from .computer_type import ComputerType
 
 
 class Computer(Asset):
-    """A common class for computers"""
+    """A common class for computers."""
 
     # ****************************************************************
     # Attributes & Constructor
@@ -30,11 +32,20 @@ class Computer(Asset):
         ip: Union[str, IPv4] = None,
     ):
         """
-        Initializes a new instance of the class. This constructor sets up the basic properties and initializes various attributes
-        related to the computer asset including its type, operating system release and edition, IP address, software list, protection agent, etc.
+        Initialize a new instance of the class.
+
+        This constructor sets up the basic properties and initializes various attributes related to the computer asset including:
+        - type
+        - operating system
+        - release
+        - edition
+        - IP address
+        - software list
+        - protection agent
+        - etc.
 
         Args:
-            id (Union[int, str])                    : A unique identifier for the computer, which can be either an integer or a string.
+            computer_id (Union[int, str])           : A unique identifier for the computer, which can be either an integer or a string.
             name (str)                              : The name of the computer.
             label (str, optional)                   : A short description or tag for the computer.
             description (str, optional)             : A detailed description of the computer and its purpose.
@@ -157,7 +168,7 @@ class Computer(Asset):
 
     def set_computer_type(self, cpt_type: Union[str, ComputerType]) -> None:
         """
-        Sets the type of the current computer.
+        Set the type of the current computer.
 
         Args:
             cpt_type (Union[str, ComputerType]): The type to be assigned to the computer.
@@ -170,7 +181,7 @@ class Computer(Asset):
 
     def set_ip(self, ip: Union[str, IPv4]) -> None:
         """
-        Sets the current computer IP address.
+        Set the current computer IP address.
 
         Args:
             ip (Union[str, IPv4]): The IP address to be set for the computer.
@@ -183,7 +194,7 @@ class Computer(Asset):
 
     def resolve_ip(self) -> None:
         """
-        Attempts to resolve the IP address from the hostname.
+        Attempt to resolve the IP address from the hostname.
 
         """
 
@@ -216,7 +227,7 @@ class Computer(Asset):
 
     def is_os_supported(self) -> bool:
         """
-        Checks if the operating system of the computer is supported.
+        Check if the operating system of the computer is supported.
 
         Returns:
             bool: True if the OS is supported, False otherwise.
@@ -229,7 +240,7 @@ class Computer(Asset):
 
     def to_dict(self) -> Dict:
         """
-        Converts the current instance into a dictionary representation.
+        Convert the current instance into a dictionary representation.
 
         Returns:
             Dict: A dictionary containing information about the computer, including OS release and edition details.
