@@ -10,7 +10,9 @@ class LDAPEntry(dict):
 
     def get_dn(self) -> str:
         """
-        Return the Distinguished Name (DN) of the LDAP entry. The DN is retrieved from the "dn" key in the dictionary representation of the LDAP entry.
+        Return the Distinguished Name (DN) of the LDAP entry.
+
+        The DN is retrieved from the "dn" key in the dictionary representation of the LDAP entry.
 
         Returns:
             str: The DN of the LDAP entry.
@@ -19,7 +21,9 @@ class LDAPEntry(dict):
 
     def get(self, key: str, default_value: Any = None) -> Any:
         """
-        Retrieve the value of the specified attribute. If the attribute is not present in the "attributes" dictionary, or if it is a list with no elements, returns the provided default value.
+        Retrieve the value of the specified attribute.
+
+        If the attribute is not present in the "attributes" dictionary, or if it is a list with no elements, returns the provided default value.
 
         Args:
             key (str)                    : The attribute key to retrieve.
@@ -53,7 +57,9 @@ class LDAPEntry(dict):
 
     def get_raw(self, key: str) -> Any:
         """
-        Retrieve the value of the specified raw attribute. If the attribute is not present in the "raw_attributes" dictionary, returns None.
+        Retrieve the value of the specified raw attribute.
+
+        If the attribute is not present in the "raw_attributes" dictionary, returns None.
 
         Args:
             key (str): The raw attribute key to retrieve.

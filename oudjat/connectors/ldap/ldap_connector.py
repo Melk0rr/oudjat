@@ -1,3 +1,5 @@
+"""Main module of the LDAP package. Handles connection to an LDAP server and data retrieving operations."""
+
 import socket
 import ssl
 from typing import TYPE_CHECKING, Dict, List, Union
@@ -21,9 +23,7 @@ if TYPE_CHECKING:
 
 
 class LDAPConnector(Connector):
-    """
-    LDAP connector to interact and query LDAP servers
-    """
+    """LDAP connector to interact and query LDAP servers."""
 
     # ****************************************************************
     # Attributes & Constructors
@@ -32,7 +32,7 @@ class LDAPConnector(Connector):
         self, server: str, service_name: str = "OudjatLDAPConnection", use_tls: bool = False
     ) -> None:
         """
-        Constructor
+        Create a new LDAPConnector.
 
         Args:
             server (str)      : server name
@@ -55,7 +55,7 @@ class LDAPConnector(Connector):
 
     def get_domain(self) -> str:
         """
-        Getter for AD domain
+        Return the domain name.
 
         Returns:
             str: domain name
@@ -65,7 +65,7 @@ class LDAPConnector(Connector):
 
     def get_connection(self) -> ldap3.Connection:
         """
-        Getter for the server connection
+        Return the server connection.
 
         Returns:
             ldap3.Connection: active connection
@@ -75,7 +75,7 @@ class LDAPConnector(Connector):
 
     def get_default_search_base(self) -> str:
         """
-        Getter for the default search base
+        Return the default search base.
 
         Returns:
             str: default domain search base
@@ -85,7 +85,7 @@ class LDAPConnector(Connector):
 
     def set_tls_usage(self, use_tls: bool = True) -> None:
         """
-        Setter for connector tls usage
+        Set the TLS usage.
 
         Args:
             use_tls (bool): should the connector use TLS
@@ -96,7 +96,7 @@ class LDAPConnector(Connector):
 
     def connect(self, version: ssl._SSLMethod = None) -> None:
         """
-        Initiate connection to target server
+        Initiate connection to target server.
 
         Args:
             version (ssl._SSLMethod): SSL/TLS version
@@ -188,7 +188,7 @@ class LDAPConnector(Connector):
         **kwargs,
     ) -> List[LDAPEntry]:
         """
-        Runs an LDAP search based on the provided parameters
+        Run an LDAP search based on the provided parameters.
 
         Args:
             search_type (str)           : search type (see ldap_object_type.py for details)
@@ -240,12 +240,13 @@ class LDAPConnector(Connector):
         attributes: Union[str, List[str]] = None,
     ) -> List["LDAPObject"]:
         """
-        Generitc method to generate LDAPObject instances based on an LDAP entry search result
+        Generitc method to generate LDAPObject instances based on an LDAP entry search result.
 
         Args:
+            search_type (LDAPObjectType): ldap object type used to map the results
+            search_base (str)           : where to base the search on in terms of directory location
             search_filter (str)         : filter to reduce search results
             attributes (str | List[str]): attributes to include in result
-            search_base (str)           : where to base the search on in terms of directory location
 
         Returns:
             List[LDAPComputer]: list of computers
@@ -265,7 +266,7 @@ class LDAPConnector(Connector):
         self, displayName: str = "*", name: str = "*", attributes: Union[str, List[str]] = None
     ) -> List["LDAPGroupPolicyObject"]:
         """
-        Specific method to retreive LDAP GPO instances
+        Specific method to retrieve LDAP GPO instances.
 
         Args:
             displayName (str)           : GPO display name
@@ -287,7 +288,7 @@ class LDAPConnector(Connector):
         self, search_filter: str = None, attributes: Union[str, List[str]] = None
     ) -> List["LDAPSubnet"]:
         """
-        Specific method to retreive LDAP subnet instances
+        Specific method to retrieve LDAP subnet instances.
 
         Args:
             search_filter (str)         : filter to reduce search results
@@ -313,7 +314,7 @@ class LDAPConnector(Connector):
         search_base: str = None,
     ) -> List["LDAPComputer"]:
         """
-        Specific method to retreive LDAP Computer instances
+        Specific method to retrieve LDAP Computer instances.
 
         Args:
             search_filter (str)         : filter to reduce search results
@@ -338,7 +339,7 @@ class LDAPConnector(Connector):
         search_base: str = None,
     ) -> List["LDAPUser"]:
         """
-        Specific method to retreive LDAP User instances
+        Specific method to retrieve LDAP User instances.
 
         Args:
             search_filter (str)         : filter to reduce search results
@@ -360,10 +361,10 @@ class LDAPConnector(Connector):
         self, ldap_group: "LDAPGroup", recursive: bool = False
     ) -> List["LDAPObject"]:
         """
-        Retreives and returns the members of the given group
+        Retrieve and returns the members of the given group.
 
         Args:
-            ldap_group (LDAPGroup): group to retreive members from
+            ldap_group (LDAPGroup): group to retrieve members from
             recursive (bool)      : wheither to retrieve members recursively or not
 
         Returns:
@@ -396,11 +397,12 @@ class LDAPConnector(Connector):
         self, ldap_object: "LDAPObject", ldap_group: "LDAPGroup", extended: bool = False
     ) -> bool:
         """
-        Checks wheither the given object is member of the giver group
+        Check wheither the given object is member of the giver group.
 
         Args:
             ldap_object (LDAPObject): object to check membership of
             ldap_group (LDAPGroup)  : group to check object membership
+            extended (bool)         : wheither to extend the search to sub group or not
 
         Returns:
             bool: wheither the object is a member of the group or not
@@ -424,7 +426,7 @@ class LDAPConnector(Connector):
         attributes: Union[str, List[str]] = None,
     ) -> List["LDAPOrganizationalUnit"]:
         """
-        Specific method to retrieve LDAP organizational unit objects
+        Specific method to retrieve LDAP organizational unit objects.
 
         Args:
             dn (str):                   : optional distinguished name to search
@@ -450,7 +452,8 @@ class LDAPConnector(Connector):
         recursive: bool = False,
     ) -> List["LDAPEntry"]:
         """
-        Retrieves the members of a given organizational unit (OU).
+        Retrieve the members of a given organizational unit (OU).
+
         This method fetches all LDAP entries that are direct children or descendants of the specified organizational unit.
         It supports filtering by object types and can recursively search through all sub-OUs if requested.
 
@@ -498,7 +501,7 @@ class LDAPConnector(Connector):
     @staticmethod
     def map_entries(entries: List["LDAPEntry"], ldap_cls: "LDAPObject") -> List["LDAPObject"]:
         """
-        Maps a list of ldap entries to a list of the provided LDAP class
+        Map a list of ldap entries to a list of the provided LDAP class.
 
         Args:
             entries (List[LDAPEntry]): list of entries to map
@@ -518,11 +521,10 @@ class LDAPConnector(Connector):
     @staticmethod
     def check_entry_type(entry: Dict) -> bool:
         """
-        Checks if the provided entry is a searchResEntry
+        Check if the provided entry is a searchResEntry.
 
         Args:
             entry (Dict): entry to check
-
 
         Returns:
             bool: True if the entry is a searchResEntry. False otherwise
@@ -532,7 +534,7 @@ class LDAPConnector(Connector):
 
     def ldap_entry_from_dict(entry: Dict) -> "LDAPEntry":
         """
-        Creates an LDAPEntry from the provided dictionary
+        Create an LDAPEntry from the provided dictionary.
 
         Args:
             entry (Dict): entry to convert into an LDAPEntry

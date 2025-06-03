@@ -31,7 +31,7 @@ class LDAPComputer(LDAPAccount, Computer):
         raw_os = self.entry.get("operatingSystem")
         raw_os_version = self.entry.get("operatingSystemVersion")
 
-        # Retreive OS and OS edition informations
+        # Retrieve OS and OS edition informations
         os_family_infos: str = OperatingSystem.get_matching_os_family(raw_os)
         os_release = None
         os_edition = None

@@ -46,7 +46,9 @@ class LDAPObject:
 
     def __init__(self, ldap_entry: "LDAPEntry") -> None:
         """
-        Initialize an LDAP Entry-based object. This method initializes the object with data from an LDAP entry.
+        Initialize an LDAP Entry-based object.
+
+        This method initializes the object with data from an LDAP entry.
 
         Args:
             ldap_entry (LDAPEntry) : ldap entry instance to be used to populate object data

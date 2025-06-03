@@ -98,7 +98,9 @@ class LDAPGroupPolicyObject(LDAPObject):
         ou: str = "*",
     ) -> List["LDAPObject"]:
         """
-        Get the GPO linked objects. This method searches for LDAP entries that are linked to the current group policy object (GPO).
+        Get the GPO linked objects.
+
+        This method searches for LDAP entries that are linked to the current group policy object (GPO).
 
         Args:
             ldap_connector (LDAPConnector)              : An instance of an LDAP connector used to perform the search operation.
@@ -115,7 +117,9 @@ class LDAPGroupPolicyObject(LDAPObject):
 
     def to_dict(self) -> Dict:
         """
-        Convert the current instance into a dict. This method converts the group policy object (GPO) and its related information into a dictionary format for easier serialization or transmission.
+        Convert the current instance into a dict.
+
+        This method converts the group policy object (GPO) and its related information into a dictionary format for easier serialization or transmission.
 
         Returns:
             Dict: A dictionary containing the GPO's display name, scope, state, and linked GUIDs.
