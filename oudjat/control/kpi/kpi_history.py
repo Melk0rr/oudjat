@@ -1,3 +1,5 @@
+"""A module to track KPI history."""
+
 from datetime import datetime
 from typing import List
 
@@ -8,11 +10,11 @@ from .kpi_comparator import KPIComparator
 
 
 class KPIHistory:
-    """KPIEvolution class to handle"""
+    """KPIEvolution class to handle."""
 
-    def __init__(self, name: str, kpis: List[KPI] = []):
+    def __init__(self, name: str, kpis: List[KPI] = []) -> None:
         """
-        Constructor for the KPIHistory class.
+        Create a new instance of KPIHistory.
 
         Args:
             name (str)                : The name of the object instance.
@@ -47,7 +49,7 @@ class KPIHistory:
 
     def add_kpi(self, kpi: "KPI") -> None:
         """
-        Adds a KPI object to the list of KPIs if their names match.
+        Add a KPI object to the list of KPIs if their names match.
 
         Args:
             kpi (KPI): The KPI object to be added.
@@ -64,9 +66,7 @@ class KPIHistory:
         self.kpis.append(kpi)
 
     def build_history(self) -> None:
-        """
-        Builds the history of KPIs by comparing each pair in order based on their dates.
-        """
+        """Build the history of KPIs by comparing each pair in order based on their dates."""
 
         def kpi_date(kpi: "KPI") -> datetime:
             return kpi.get_date()
@@ -79,9 +79,7 @@ class KPIHistory:
         ]
 
     def print_history(self) -> None:
-        """
-        Prints the history of KPIs by calling each comparator's print method to display their comparison results.
-        """
+        """Print the history of KPIs by calling each comparator's print method to display their comparison results."""
 
         comparator_len = len(self.comparators)
         if comparator_len == 0:

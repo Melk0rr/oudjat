@@ -1,13 +1,15 @@
+"""A module to handle KPIs."""
+
 from datetime import datetime
 from enum import Enum
 from typing import Callable, Dict, List, Union
 
 from oudjat.control.data import DataFilter, DataSet
-from oudjat.utils import ColorPrint, DateFlag, DateFormat, TimeConverter
+from oudjat.utils import ColorPrint, DateFormat, TimeConverter
 
 
 class ConformityLevel(Enum):
-    """Defines the levels of conformity for a KPI or any other related element"""
+    """Defines the levels of conformity for a KPI or any other related element."""
 
     NOTCONFORM = {"min": 0, "max": 70, "color": ColorPrint.red}
     PARTIALLYCONFORM = {"min": 70, "max": 95, "color": ColorPrint.yellow}
@@ -16,7 +18,7 @@ class ConformityLevel(Enum):
     @property
     def min(self) -> float:
         """
-        Returns a ConformityLevel minimum value
+        Return a ConformityLevel minimum value.
 
         Returns:
             float: minimum value of the conforimty level
@@ -27,7 +29,7 @@ class ConformityLevel(Enum):
     @property
     def max(self) -> float:
         """
-        Returns a ConformityLevel maximum value
+        Return a ConformityLevel maximum value.
 
         Returns:
             float: maximum value of the conforimty level
@@ -38,7 +40,7 @@ class ConformityLevel(Enum):
     @property
     def color(self) -> Callable:
         """
-        Returns a ConformityLevel color print function
+        Return a ConformityLevel color print function.
 
         Returns:
             Callable: conformity level function to print value in a certain color
@@ -48,7 +50,7 @@ class ConformityLevel(Enum):
 
 
 class KPI(DataSet):
-    """KPI class"""
+    """A class that aims to manipulate KPI and allow report of numbers and percentages regarding conformity of data sets."""
 
     # ****************************************************************
     # Attributes & Constructors
@@ -63,7 +65,7 @@ class KPI(DataSet):
         description: str = None,
     ) -> None:
         """
-        Returns a new instance of KPI
+        Return a new instance of KPI.
 
         Args:
             name (str)                             : name to assign to the new KPI
@@ -93,7 +95,7 @@ class KPI(DataSet):
 
     def get_id(self) -> str:
         """
-        Returns the KPI id
+        Return the KPI id.
 
         Returns:
             str: generated ID of the current KPI
@@ -103,7 +105,7 @@ class KPI(DataSet):
 
     def get_date(self) -> datetime:
         """
-        Returns the generation date of the KPI
+        Return the generation date of the KPI.
 
         Returns:
             datetime: the date the KPI was generated
@@ -113,7 +115,7 @@ class KPI(DataSet):
 
     def get_conformity_level(self, value: float = None) -> "ConformityLevel":
         """
-        Returns the conformity level of the KPI based on its value
+        Return the conformity level of the KPI based on its value.
 
         Args:
             value (float): the value of the KPI computed based on its scope and filters
@@ -131,7 +133,7 @@ class KPI(DataSet):
 
     def get_kpi_value(self) -> float:
         """
-        Returns the percentage of conform data based on kpi control
+        Return the percentage of conform data based on kpi control.
 
         Returs:
             float: final KPI value which represent the percentage of conform data based on the KPI scope and filters
@@ -141,7 +143,7 @@ class KPI(DataSet):
 
     def get_print_function(self) -> Callable:
         """
-        Defines and returns the print function to be used based on the KPI value and conformity level
+        Define and returns the print function to be used based on the KPI value and conformity level.
 
         Returns:
             Callable: print function to use with different color
@@ -153,7 +155,7 @@ class KPI(DataSet):
         self, prefix: str = None, suffix: str = "%\n", print_details: bool = True
     ) -> None:
         """
-        Prints value with color based on kpi level
+        Print value with color based on kpi level.
 
         Args:
             prefix (str)        : string to include as prefix to the printed infos
@@ -170,7 +172,7 @@ class KPI(DataSet):
 
     def get_date_str(self) -> str:
         """
-        Returns formated date string
+        Return formated date string.
 
         Returns:
             str: the generation date of the KPI formated as a string
@@ -180,7 +182,7 @@ class KPI(DataSet):
 
     def __str__(self) -> str:
         """
-        Converts the current instance into a string
+        Convert the current instance into a string.
 
         Returns:
             str: string representation of the current instance
@@ -190,7 +192,7 @@ class KPI(DataSet):
 
     def to_dict(self) -> Dict:
         """
-        Converts the current instance into a dictionary
+        Convert the current instance into a dictionary.
 
         Returns:
             Dict : dictionary representation of the current kpi
@@ -215,7 +217,7 @@ class KPI(DataSet):
 
     def conformity_value_level(lvl: "ConformityLevel", value: float) -> bool:
         """
-        Checks if the given value is between the provided conformity level min and max values
+        Check if the given value is between the provided conformity level min and max values.
 
         Args:
             lvl (ConformityLevel): conformity level to compare with provided value

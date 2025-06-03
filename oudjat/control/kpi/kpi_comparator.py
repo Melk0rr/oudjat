@@ -1,3 +1,5 @@
+"""A module to handle KPI comparisons."""
+
 from typing import Dict, Tuple, Union
 
 from oudjat.utils import ColorPrint
@@ -6,9 +8,7 @@ from .kpi import KPI
 
 
 class KPIComparator:
-    """
-    A class to compare the results of 2 KPIs
-    """
+    """A class to compare the results of 2 KPIs."""
 
     tendencies = {
         "+": {"icon": "", "print": ColorPrint.green},
@@ -21,7 +21,7 @@ class KPIComparator:
 
     def __init__(self, kpi_a: KPI, kpi_b: KPI) -> None:
         """
-        Returns a new instance of KPIComparator
+        Return a new instance of KPIComparator.
 
         Args:
             kpi_a (KPI): The first KPI object to compare.
@@ -67,6 +67,7 @@ class KPIComparator:
     def fetch_values(self) -> None:
         """
         Get the KPIs' different values and set the changes.
+
         This method retrieves the latest values of the provided KPIs and stores them in `self.values`.
         """
 
@@ -89,6 +90,7 @@ class KPIComparator:
     def compare(self) -> None:
         """
         Compare the values of the KPIs and set the tendency.
+
         This method compares the stored values of the KPIs, determines the tendency using `get_tendency_key`, and stores the result in `self.tendency`. If no values have been fetched yet, it calls `fetch_values` to do so.
         """
 
@@ -104,7 +106,7 @@ class KPIComparator:
 
         Args:
             print_first_value (bool): Whether to print the first value. Defaults to True.
-            sfx (str): The suffix to add after printing the second value and icon. Defaults to "\n".
+            sfx (str): The suffix to add after printing the second value and icon. Defaults to linebreak.
         """
 
         if print_first_value:
@@ -120,8 +122,7 @@ class KPIComparator:
     @staticmethod
     def compare_2_kpis(kpi_a: "KPI", kpi_b: "KPI") -> "KPIComparator":
         """
-        Creates a new instance of KPIComparator using the two provided KPI instances
-        Then runs the compare method of the comparator and returns it
+        Create a new instance of KPIComparator using the two provided KPI instances. It then runs the compare method of the comparator and returns it.
 
         Args:
             kpi_a (KPI): first KPI for the comparison
