@@ -1,3 +1,5 @@
+"""A simple module that lists operating system options."""
+
 from enum import Enum
 
 from oudjat.assets.computer.computer_type import ComputerType
@@ -6,7 +8,7 @@ from .windows.windows import MicrosoftOperatingSystem
 
 
 class OSOption(Enum):
-    """Agregation of oses"""
+    """An enumeration of OSes."""
 
     WINDOWS = MicrosoftOperatingSystem(
         msos_id="windows",

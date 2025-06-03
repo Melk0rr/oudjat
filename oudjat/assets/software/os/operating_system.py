@@ -1,3 +1,5 @@
+"""A module defining operating system behavior."""
+
 import re
 from enum import Enum
 from typing import Dict, List, Union
@@ -10,10 +12,7 @@ from ..software_release import SoftwareRelease
 
 
 class OSFamily(Enum):
-    """
-    OS family enumeration
-
-    """
+    """OS family enumeration."""
 
     ANDROID = {
         "name": "android",
@@ -55,7 +54,7 @@ class OSFamily(Enum):
 
 
 class OperatingSystem(Software):
-    """A class to describe operating systems"""
+    """A class to describe operating systems."""
 
     # ****************************************************************
     # Attributes & Constructors
@@ -71,7 +70,7 @@ class OperatingSystem(Software):
         description: str = None,
     ) -> None:
         """
-        Returns a new instance of OperatingSystem
+        Return a new instance of OperatingSystem.
 
         Args:
             os_id (int | str)                       : OS unique ID
@@ -114,7 +113,7 @@ class OperatingSystem(Software):
 
     def get_computer_type(self) -> List[ComputerType]:
         """
-        Returns the computer types related to the current OS
+        Return the computer types related to the current OS.
 
         Returns:
             List[ComputerType]: the list of computer types as ComputerType enumeration elements
@@ -124,7 +123,7 @@ class OperatingSystem(Software):
 
     def get_os_family(self) -> OSFamily:
         """
-        Returns the OS family of the current OS
+        Return the OS family of the current OS.
 
         Returns:
             OSFamily: the OS family represented by an OSFamily enumeration element
@@ -134,7 +133,8 @@ class OperatingSystem(Software):
 
     def gen_releases(self) -> None:
         """
-        This method must generate the list of releases of the current OS
+        Generate the list of releases of the current OS.
+
         It must be overwritten by the classes inheriting OperatingSystem
         """
 
@@ -148,7 +148,7 @@ class OperatingSystem(Software):
     @staticmethod
     def get_matching_os_family(test_str: str) -> str:
         """
-        Tries to retrieve a substring of the provided string matching an OSFamily element
+        Try to retrieve a substring of the provided string matching an OSFamily element.
 
         Args:
             test_str (str): provided string that possibly matches an OSFamily element
@@ -168,8 +168,7 @@ class OperatingSystem(Software):
     @staticmethod
     def get_matching_version(test_str: str) -> str:
         """
-        This static method uses a regular expression to find and return a version number from the input string.
-        It must be implemented by the class inheriting OperatingSystem
+        Use a regular expression to find and return a version number from the input string. It must be implemented by the class inheriting OperatingSystem.
 
         Args:
             test_str (str): The string to search for a version match.
@@ -184,15 +183,14 @@ class OperatingSystem(Software):
 
 
 class OSRelease(SoftwareRelease):
-    """Specific software release for OperatingSystem"""
+    """Specific software release for OperatingSystem."""
 
     # ****************************************************************
     # Methods
 
     def get_name(self) -> str:
         """
-        Returns the OS release name
-        Must be implemented by overloading classes
+        Return the OS release name. Must be implemented by overloading classes.
 
         Returns:
             str: forged name of the OS release
@@ -204,7 +202,7 @@ class OSRelease(SoftwareRelease):
 
     def get_os(self) -> OperatingSystem:
         """
-        Returns the operating system instance tide to the current release
+        Return the operating system instance tide to the current release.
 
         Returns:
             OperatingSystem: operating system instance of the current release
@@ -214,7 +212,7 @@ class OSRelease(SoftwareRelease):
 
     def to_dict(self) -> Dict:
         """
-        Converts the current instance into a dictionary
+        Convert the current instance into a dictionary.
 
         Returns:
             Dict: dictionary representation of the current instance
