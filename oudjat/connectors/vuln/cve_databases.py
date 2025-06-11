@@ -12,8 +12,8 @@ if TYPE_CHECKING:
 class CVEDatabase(Enum):
     """An enumeration of CVE connectors."""
 
-    NIST = { "connector": NistConnector }
-    CVEORG = { "connector": CVEorgConnector }
+    NIST = { "db_name": "Nist" , "connector": NistConnector }
+    CVEORG = { "db_name": "CVE.org", "connector": CVEorgConnector }
 
     @property
     def connector(self) -> "CVEConnector":
