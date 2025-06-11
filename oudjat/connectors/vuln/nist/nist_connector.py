@@ -1,60 +1,24 @@
-"""A module that handles the connection to Nist API."""
-import json
-import re
-from typing import Dict, List, Union
+"""A module that handles the connection to Nist and Nist API."""
 
-import requests
+import re
+from typing import Dict, List, Tuple, Union
 
 from oudjat.utils.color_print import ColorPrint
 
-from ..connector import Connector
-
-NIST_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
+from ..cve_connector import CVEConnector
 
 
-class NistConnector(Connector):
-    """NIST API Connector class."""
+class NistConnector(CVEConnector):
+    """A class that handles connection with Nist API to retrieve CVE informations."""
 
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self):
-        """
-        Create a new instance of NistConnector.
-
-        Initializes a new instance of the `NistConnector` class, inheriting from `Connector`.
-        It sets the target URL to the NIST API URL.
-        """
-
-        super().__init__(target=NIST_API_URL)
+    URL = "https://nvd.nist.gov/"
+    API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 
     # ****************************************************************
     # Methods
-
-    def connect(self, target: str) -> None:
-        """
-        Test connection to NIST API.
-
-        Sends a GET request to the specified target URL with an Accept header set to application/json.
-        If the response status code is 200, it parses the JSON content and stores it in `self.connection`. Raises a ConnectionError if the connection cannot be established.
-
-        Args:
-            target (str): The URL to which the GET request will be sent.
-        """
-
-        self.connection = None
-
-        try:
-            headers = {"Accept": "application/json"}
-            req = requests.get(target, headers=headers)
-
-            if req.status_code == 200:
-                self.connection = json.loads(req.content.decode("utf-8"))
-
-        except ConnectionError as e:
-            raise ConnectionError(
-                f"{__class__.__name__}.connect::Could not connect to {self.target}\n{e}"
-            )
 
     def search(
         self, search_filter: Union[str, List[str]], attributes: Union[str, List[str]] = None
@@ -83,11 +47,15 @@ class NistConnector(Connector):
         if attributes is not None and not isinstance(attributes, list):
             attributes = [attributes]
 
+        # Vuln filter function
+        def key_in_attr(item: Tuple) -> bool:
+            return item[0] in attributes
+
         for cve in search_filter:
             if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
                 continue
 
-            cve_target = f"{self.target}?cveId={cve}"
+            cve_target = NistConnector.get_cve_api_url(cve)
             self.connect(cve_target)
 
             if self.connection is not None:
@@ -101,8 +69,39 @@ class NistConnector(Connector):
                     continue
 
                 if attributes is not None:
-                    vuln = {k: v for k, v in vuln.items() if k in attributes}
+                    vuln = dict(filter(key_in_attr, vuln.items()))
 
                 res.append(vuln)
 
         return res
+
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def get_cve_url(cve: str) -> str:
+        """
+        Return the Nist website URL of the given CVE.
+
+        Args:
+            cve (str): the ref string of the CVE
+
+        Returns:
+            str: Nist vuln detail URL based on the provided CVE
+        """
+
+        return f"{NistConnector.URL}vuln/detail/{cve}"
+
+    @staticmethod
+    def get_cve_api_url(cve: str) -> str:
+        """
+        Return the Nist website URL of the given CVE.
+
+        Args:
+            cve (str): the ref string of the CVE
+
+        Returns:
+            str: Nist vuln detail URL based on the provided CVE
+        """
+
+        return f"{NistConnector.API_URL}?cveId={cve}"
