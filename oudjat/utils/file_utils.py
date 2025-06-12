@@ -52,7 +52,7 @@ class FileHandler:
             if callback is not None:
                 json_data = callback(json_data)
 
-            ColorPrint.green(f"Successfully imported JSON data from {file_path}")
+            ColorPrint.green(f"Successfully imported JSON data from {full_path}")
 
         except Exception as e:
             raise e
@@ -74,10 +74,12 @@ class FileHandler:
             return
 
         try:
-            with open(file_path, "w", encoding="utf-8") as f:
+            full_path = os.path.join(os.getcwd(), file_path)
+
+            with open(full_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
 
-            ColorPrint.green(f"Successfully exported JSON data to {file_path}")
+            ColorPrint.green(f"Successfully exported JSON data to {full_path}")
 
         except Exception as e:
             raise e
@@ -97,10 +99,11 @@ class FileHandler:
             list of dicts: The content of the CSV file parsed into a list of dictionaries.
         """
 
-        full_path = os.path.join(os.getcwd(), file_path)
         data = None
 
         try:
+            full_path = os.path.join(os.getcwd(), file_path)
+
             with open(full_path, "r", encoding="utf-8", newline="") as f:
                 # WARN: Try to guess the delimiter if none was specified
                 if not delimiter:
@@ -141,9 +144,9 @@ class FileHandler:
             print("No data to export !")
             return
 
-        full_path = os.path.join(os.getcwd(), file_path)
-
         try:
+            full_path = os.path.join(os.getcwd(), file_path)
+
             mode = "a" if append else "w"
             with open(full_path, mode, encoding="utf-8", newline="") as f:
                 writer = csv.DictWriter(f, fieldnames=data[0].keys(), delimiter=delimiter)
@@ -212,9 +215,10 @@ class FileHandler:
             print("No data to export !")
             return
 
-        full_path = os.path.join(os.getcwd(), file_path)
 
         try:
+            full_path = os.path.join(os.getcwd(), file_path)
+
             mode = "a" if append else "w"
             with open(full_path, mode, encoding="utf-8", newline="") as f:
                 for line in data:
