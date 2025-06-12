@@ -1,6 +1,7 @@
 """A module that describes common CVE connector behaviors."""
 
 import json
+from datetime import datetime
 from typing import Dict, List, Union
 
 import requests
@@ -16,6 +17,24 @@ class CVEConnector(Connector):
 
     URL = None
     API_URL = None
+
+    UNIFIED_FORMAT = {
+        "id": str,
+        "published": Union[str, datetime],
+        "updated": Union[str, datetime],
+        "source": str,
+        "status": str,
+        "description": str,
+        "metrics": {
+            "score": float,
+            "version": float,
+            "vectorString": str,
+            "attackVector": str,
+            "privilegesRequired": str,
+            "attackRequirements": str,
+            "severity": str,
+        }
+    }
 
     def __init__(self):
         """
@@ -76,6 +95,21 @@ class CVEConnector(Connector):
 
         raise NotImplementedError(
             f"{__class__.__name__}.search::Method must be implemented by the overloading class"
+        )
+
+    def unify_cve_data(self, cve: Dict) -> Dict:
+        """
+        Filter and reorganize cve data properties in order to obtain a unified format accross CVE connectors.
+
+        Args:
+            cve (Dict): cve data as a dictionary
+
+        Returns:
+            Dict: formated dictionary
+        """
+
+        raise NotImplementedError(
+            f"{__class__.__name__}.unify_cve_data::Method must be implemented by the overloading class"
         )
 
     # ****************************************************************
