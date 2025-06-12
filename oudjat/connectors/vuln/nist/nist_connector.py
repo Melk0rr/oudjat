@@ -75,6 +75,23 @@ class NistConnector(CVEConnector):
 
         return res
 
+
+    def unify_cve_data(self, cve: Dict) -> Dict:
+        """
+        Filter and reorganize cve data properties in order to obtain a unified format accross CVE connectors.
+
+        Args:
+            cve (Dict): cve data as a dictionary
+
+        Returns:
+            Dict: formated dictionary
+        """
+
+        base_format = self.UNIFIED_FORMAT
+        base_format["id"] = cve.get("id")
+        base_format["published"] = cve.get("published")
+        base_format["updated"] = cve.get("updated")
+
     # ****************************************************************
     # Static methods
 
