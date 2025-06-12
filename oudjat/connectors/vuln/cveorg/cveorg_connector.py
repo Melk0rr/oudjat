@@ -52,7 +52,23 @@ class CVEorgConnector(CVEConnector):
             cve_target = CVEorgConnector.get_cve_api_url(cve)
             self.connect(cve_target)
 
+            if self.connection is not None:
+                res.append(self.connection)
+
         return res
+
+    def unify_cve_data(self, cve: Dict) -> Dict:
+        """
+        Filter and reorganize cve data properties in order to obtain a unified format accross CVE connectors.
+
+        Args:
+            cve (Dict): cve data as a dictionary
+
+        Returns:
+            Dict: formated dictionary
+        """
+
+        return {}
 
     # ****************************************************************
     # Static methods
