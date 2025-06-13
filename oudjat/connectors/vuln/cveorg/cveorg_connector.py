@@ -19,7 +19,8 @@ class CVEorgConnector(CVEConnector):
     # Methods
 
     def search(
-        self, search_filter: Union[str, List[str]], attributes: Union[str, List[str]] = None
+        self, search_filter: Union[str, List[str]], attributes: Union[str, List[str]] = None, raw: bool = False
+
     ) -> List[Dict]:
         """
         Search the API for CVEs.
@@ -30,8 +31,9 @@ class CVEorgConnector(CVEConnector):
         If a valid response is received, it extracts vulnerability information and filters it based on the specified attributes before appending it to the result list.
 
         Args:
-            search_filter (Union[str, List[str]]): A single CVE ID or a list of CVE IDs to be searched.
+            search_filter (Union[str, List[str]])       : A single CVE ID or a list of CVE IDs to be searched.
             attributes (Union[str, List[str]], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
+            raw (bool)                                  : Weither to return the raw result or the unified one
 
         Returns:
             List[Dict]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
@@ -52,8 +54,12 @@ class CVEorgConnector(CVEConnector):
             cve_target = CVEorgConnector.get_cve_api_url(cve)
             self.connect(cve_target)
 
-            if self.connection is not None:
-                res.append(self.connection)
+            vuln = self.connection
+            if vuln is not None:
+                if not raw:
+                    vuln = self.unify_cve_data(vuln)
+
+                res.append(vuln)
 
         return res
 
@@ -68,7 +74,35 @@ class CVEorgConnector(CVEConnector):
             Dict: formated dictionary
         """
 
-        return {}
+        base_format = self.UNIFIED_FORMAT
+
+        try:
+            base_format["id"] = cve["cveMetadata"].get("cveId")
+            base_format["published"] = cve["cveMetadata"].get("datePublished", None)
+            base_format["updated"] = cve["cveMetadata"].get("dateUpdated", None)
+            base_format["status"] = cve["cveMetadata"].get("state", None)
+
+            containers = cve.get("containers", {}).get("cna", {})
+            base_format["source"] = containers["providerMetadata"].get("shortName", None)
+
+            metrics: List = containers.get("metrics", [])
+
+            if len(metrics) > 0:
+                base_format["description"] =  containers.get("descriptions", [])[0].get("value", None)
+                metric_data = metrics[0].get(list(metrics[0].keys())[0], {})
+
+                base_format["metrics"]["score"] = metric_data.get("baseScore", 0)
+                base_format["metrics"]["version"] = float(metric_data.get("version", 4.0))
+                base_format["metrics"]["vectorstring"] = metric_data.get("vectorString", "")
+                base_format["metrics"]["attackvector"] = metric_data.get("attackVector", None)
+                base_format["metrics"]["privilegesrequired"] = metric_data.get("privilegesRequired", None)
+                base_format["metrics"]["attackrequirements"] = metric_data.get("attackRequirements", "NONE")
+                base_format["metrics"]["severity"] = metric_data.get("baseSeverity", "INFO")
+
+        except ValueError as e:
+            raise ValueError(f"{__class__.__name__}.unify_cve_data::An error occured while unifying cve data...\n{e}")
+
+        return base_format
 
     # ****************************************************************
     # Static methods
