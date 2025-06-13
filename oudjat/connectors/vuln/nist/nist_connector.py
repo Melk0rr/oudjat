@@ -21,7 +21,7 @@ class NistConnector(CVEConnector):
     # Methods
 
     def search(
-        self, search_filter: Union[str, List[str]], attributes: Union[str, List[str]] = None
+        self, search_filter: Union[str, List[str]], attributes: Union[str, List[str]] = None, raw: bool = False
     ) -> List[Dict]:
         """
         Search the API for CVEs.
@@ -32,8 +32,9 @@ class NistConnector(CVEConnector):
         If a valid response is received, it extracts vulnerability information and filters it based on the specified attributes before appending it to the result list.
 
         Args:
-            search_filter (Union[str, List[str]]): A single CVE ID or a list of CVE IDs to be searched.
+            search_filter (Union[str, List[str]])       : A single CVE ID or a list of CVE IDs to be searched.
             attributes (Union[str, List[str]], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
+            raw (bool)                                  : Weither to return the raw result or the unified one
 
         Returns:
             List[Dict]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
@@ -68,6 +69,9 @@ class NistConnector(CVEConnector):
                     ColorPrint.yellow(f"No data for vulnerability {cve}")
                     continue
 
+                if not raw:
+                    vuln = self.unify_cve_data(vuln)
+
                 if attributes is not None:
                     vuln = dict(filter(key_in_attr, vuln.items()))
 
@@ -88,9 +92,34 @@ class NistConnector(CVEConnector):
         """
 
         base_format = self.UNIFIED_FORMAT
-        base_format["id"] = cve.get("id")
-        base_format["published"] = cve.get("published")
-        base_format["updated"] = cve.get("updated")
+
+        try:
+            base_format["id"] = cve.get("id")
+            base_format["published"] = cve.get("published", None)
+            base_format["updated"] = cve.get("lastModified", None)
+            base_format["source"] = cve.get("sourceIdentifier", None)
+            base_format["status"] = cve.get("vulnStatus", None)
+            base_format["description"] = cve.get("descriptions", None)[0].get("value", None)
+            base_format["references"] = [r["url"] for r in cve.get("references", [])]
+
+            metrics = cve.get("metrics", {})
+
+            if len(list(metrics)) > 0:
+                metric_data = metrics.get(list(metrics.keys())[0], [])[0]
+                cvss_data = metric_data.get("cvssData", {})
+
+                base_format["metrics"]["score"] = cvss_data.get("baseScore", 0)
+                base_format["metrics"]["version"] = float(cvss_data.get("version", 4.0))
+                base_format["metrics"]["vectorString"] = cvss_data.get("vectorString", "")
+                base_format["metrics"]["attackVector"] = cvss_data.get("attackVector", None)
+                base_format["metrics"]["privilegesRequired"] = cvss_data.get("privilegesRequired", None)
+                base_format["metrics"]["attackRequirements"] = cvss_data.get("attackRequirements", "NONE")
+                base_format["metrics"]["severity"] = cvss_data.get("baseSeverity", "INFO")
+
+        except ValueError as e:
+            raise ValueError(f"{__class__.__name__}.unify_cve_data::An error occured while unifying cve data...\n{e}")
+
+        return base_format
 
     # ****************************************************************
     # Static methods
