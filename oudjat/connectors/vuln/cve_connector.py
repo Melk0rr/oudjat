@@ -25,6 +25,7 @@ class CVEConnector(Connector):
         "source": str,
         "status": str,
         "description": str,
+        "references": List[str],
         "metrics": {
             "score": float,
             "version": float,
@@ -75,19 +76,21 @@ class CVEConnector(Connector):
             )
 
     def search(
-        self, search_filter: Union[str, List[str]], attributes: Union[str, List[str]] = None
+        self, search_filter: Union[str, List[str]], attributes: Union[str, List[str]] = None, raw: bool = False
+
     ) -> List[Dict]:
         """
         Search the API for CVEs.
 
-        Retrieves vulnerability information from the NIST API based on the provided CVE IDs.
+        Retrieves vulnerability information from the CVE.org API based on the provided CVE refs.
         If `search_filter` is not a list, it converts it to one. Similarly, if `attributes` is provided but not a list, it converts it to a list.
         It iterates over each CVE ID in `search_filter`, constructs the API endpoint URL for that CVE, and connects to retrieve data.
         If a valid response is received, it extracts vulnerability information and filters it based on the specified attributes before appending it to the result list.
 
         Args:
-            search_filter (Union[str, List[str]]): A single CVE ID or a list of CVE IDs to be searched.
+            search_filter (Union[str, List[str]])       : A single CVE ID or a list of CVE IDs to be searched.
             attributes (Union[str, List[str]], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
+            raw (bool)                                  : Weither to return the raw result or the unified one
 
         Returns:
             List[Dict]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
