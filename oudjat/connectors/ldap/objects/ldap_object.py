@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING, Dict, List
 
-from oudjat.utils.time_utils import DateFlag, DateFormat
+from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
 
 if TYPE_CHECKING:
     from ..ldap_connector import LDAPConnector
@@ -263,7 +263,7 @@ class LDAPObject:
             "classes": self.classes,
             "description": self.description,
             "domain": self.domain,
-            "creation_date": self.creation_date.strftime(DateFormat.from_flag(DateFlag.YMD_HMS)),
-            "change_date": self.change_date.strftime(DateFormat.from_flag(DateFlag.YMD_HMS)),
+            "creation_date": TimeConverter.date_to_str(self.creation_date, DateFormat.from_flag(DateFlag.YMD_HMS)),
+            "change_date": TimeConverter.date_to_str(self.change_date, DateFormat.from_flag(DateFlag.YMD_HMS)),
             "oudjat_flags": self.oudjat_flags,
         }
