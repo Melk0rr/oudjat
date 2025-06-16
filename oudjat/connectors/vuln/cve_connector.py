@@ -55,7 +55,7 @@ class CVEConnector(Connector):
     # ****************************************************************
     # Methods
 
-    def connect(self, target: str) -> None:
+    def connect(self, target: str, **kwargs) -> None:
         """
         Test connection to NIST API.
 
@@ -63,14 +63,15 @@ class CVEConnector(Connector):
         If the response status code is 200, it parses the JSON content and stores it in `self.connection`. Raises a ConnectionError if the connection cannot be established.
 
         Args:
-            target (str): The URL to which the GET request will be sent.
+            target (str) : The URL to which the GET request will be sent.
+            kwargs (Dict): Additional arguments to pass into requests.get
         """
 
         self.connection = None
 
         try:
             headers = {"Accept": "application/json"}
-            req = requests.get(target, headers=headers)
+            req = requests.get(target, headers=headers, **kwargs)
 
             if req.status_code == 200:
                 self.connection = json.loads(req.content.decode("utf-8"))
@@ -81,8 +82,11 @@ class CVEConnector(Connector):
             )
 
     def search(
-        self, search_filter: Union[str, List[str]], attributes: Union[str, List[str]] = None, raw: bool = False
-
+        self,
+        search_filter: Union[str, List[str]],
+        attributes: Union[str, List[str]] = None,
+        raw: bool = False,
+        **kwargs,
     ) -> List[Dict]:
         """
         Search the API for CVEs.
@@ -96,6 +100,7 @@ class CVEConnector(Connector):
             search_filter (Union[str, List[str]])       : A single CVE ID or a list of CVE IDs to be searched.
             attributes (Union[str, List[str]], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
             raw (bool)                                  : Weither to return the raw result or the unified one
+            kwargs (Dict)                               : Additional arguments that will be passed to connect method
 
         Returns:
             List[Dict]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
