@@ -19,8 +19,11 @@ class CVEorgConnector(CVEConnector):
     # Methods
 
     def search(
-        self, search_filter: Union[str, List[str]], attributes: Union[str, List[str]] = None, raw: bool = False
-
+        self,
+        search_filter: Union[str, List[str]],
+        attributes: Union[str, List[str]] = None,
+        raw: bool = False,
+        **kwargs,
     ) -> List[Dict]:
         """
         Search the API for CVEs.
@@ -34,6 +37,7 @@ class CVEorgConnector(CVEConnector):
             search_filter (Union[str, List[str]])       : A single CVE ID or a list of CVE IDs to be searched.
             attributes (Union[str, List[str]], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
             raw (bool)                                  : Weither to return the raw result or the unified one
+            kwargs (Dict)                               : Additional arguments that will be passed to connect method
 
         Returns:
             List[Dict]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
@@ -52,14 +56,11 @@ class CVEorgConnector(CVEConnector):
                 continue
 
             cve_target = CVEorgConnector.get_cve_api_url(cve)
-            self.connect(cve_target)
+            self.connect(cve_target, **kwargs)
 
             vuln = self.connection
             if vuln is not None:
-                if not raw:
-                    vuln = self.unify_cve_data(vuln)
-
-                res.append(vuln)
+                res.append(self.unify_cve_data(vuln) if not raw else vuln)
 
         return res
 
