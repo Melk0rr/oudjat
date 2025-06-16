@@ -20,21 +20,26 @@ class CVEConnector(Connector):
 
     UNIFIED_FORMAT = {
         "id": str,
-        "published": Union[str, datetime],
-        "updated": Union[str, datetime],
-        "source": str,
+        "dates": {
+            "published": Union[str, datetime],
+            "updated": Union[str, datetime],
+        },
+        "source": List[str],
         "status": str,
         "description": str,
-        "references": List[str],
+        "vectors": {
+            "vectorString": str,
+            "attackVector": str,
+        },
+        "requirements": {
+            "privilegesRequired": str,
+            "attackRequirements": str,
+        },
         "metrics": {
             "score": float,
             "version": float,
-            "vectorString": str,
-            "attackVector": str,
-            "privilegesRequired": str,
-            "attackRequirements": str,
             "severity": str,
-        }
+        },
     }
 
     def __init__(self):
