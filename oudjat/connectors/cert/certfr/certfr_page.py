@@ -6,12 +6,13 @@ from typing import Dict, List, Set
 import requests
 from bs4 import BeautifulSoup, element
 
+from oudjat.assets.network import URL_REGEX
 from oudjat.control.vulnerability.cve import CVE, CVE_REGEX
 from oudjat.utils.color_print import ColorPrint
 
 from ..risk_types import RiskType
 from .certfr_page_types import CERTFRPageType
-from .definitions import CERTFR_LINK_REGEX, CERTFR_REF_REGEX, REF_TYPES, URL_REGEX
+from .definitions import CERTFR_LINK_REGEX, CERTFR_REF_REGEX, REF_TYPES
 
 
 def clean_str(str_to_clean: str) -> str:
@@ -76,6 +77,7 @@ class CERTFRPage:
         Returns:
             str: The reference string associated with the CERTFRPage instance.
         """
+
         return self.ref
 
     def get_title(self) -> str:
@@ -85,6 +87,7 @@ class CERTFRPage:
         Returns:
             str: The title string of the page.
         """
+
         return self.title
 
     def get_cves(self) -> List["CVE"]:
@@ -94,6 +97,7 @@ class CERTFRPage:
         Returns:
             List["CVE"]: A list of CVE objects if available, otherwise an empty list.
         """
+
         cves = self.content.get_cves()
 
         if cves is not None:
@@ -360,6 +364,7 @@ class CERTFRPageMeta:
         Returns:
             Dict: A dictionary containing the parsed metadata or an empty dictionary if no data is available.
         """
+
         meta_dict = {}
 
         if self.data is not None:
@@ -385,6 +390,7 @@ class CERTFRPageContent:
         Args:
             content_section (element): The HTML content section to be parsed and used within the class instance.
         """
+
         self.content = content_section
         self.data = None
 
