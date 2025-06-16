@@ -79,29 +79,40 @@ class CVEorgConnector(CVEConnector):
 
         try:
             base_format["id"] = cve["cveMetadata"].get("cveId")
-            base_format["published"] = cve["cveMetadata"].get("datePublished", None)
-            base_format["updated"] = cve["cveMetadata"].get("dateUpdated", None)
             base_format["status"] = cve["cveMetadata"].get("state", None)
 
+            base_format["dates"]["published"] = cve["cveMetadata"].get("datePublished", None)
+            base_format["dates"]["updated"] = cve["cveMetadata"].get("dateUpdated", None)
+
             containers = cve.get("containers", {}).get("cna", {})
-            base_format["source"] = containers["providerMetadata"].get("shortName", None)
+            base_format["source"] = [r["url"] for r in containers.get("references", [])]
 
             metrics: List = containers.get("metrics", [])
 
             if len(metrics) > 0:
-                base_format["description"] =  containers.get("descriptions", [])[0].get("value", None)
+                base_format["description"] = containers.get("descriptions", [])[0].get(
+                    "value", None
+                )
                 metric_data = metrics[0].get(list(metrics[0].keys())[0], {})
 
                 base_format["metrics"]["score"] = metric_data.get("baseScore", 0)
                 base_format["metrics"]["version"] = float(metric_data.get("version", 4.0))
-                base_format["metrics"]["vectorstring"] = metric_data.get("vectorString", "")
-                base_format["metrics"]["attackvector"] = metric_data.get("attackVector", None)
-                base_format["metrics"]["privilegesrequired"] = metric_data.get("privilegesRequired", None)
-                base_format["metrics"]["attackrequirements"] = metric_data.get("attackRequirements", "NONE")
                 base_format["metrics"]["severity"] = metric_data.get("baseSeverity", "INFO")
 
+                base_format["vectors"]["vectorString"] = metric_data.get("vectorString", "")
+                base_format["vectors"]["attackVector"] = metric_data.get("attackVector", None)
+
+                base_format["requirements"]["privilegesRequired"] = metric_data.get(
+                    "privilegesRequired", None
+                )
+                base_format["requirements"]["attackRequirements"] = metric_data.get(
+                    "attackRequirements", "NONE"
+                )
+
         except ValueError as e:
-            raise ValueError(f"{__class__.__name__}.unify_cve_data::An error occured while unifying cve data...\n{e}")
+            raise ValueError(
+                f"{__class__.__name__}.unify_cve_data::An error occured while unifying cve data...\n{e}"
+            )
 
         return base_format
 
