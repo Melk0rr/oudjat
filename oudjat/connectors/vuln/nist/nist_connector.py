@@ -84,7 +84,6 @@ class NistConnector(CVEConnector):
 
         return res
 
-
     def unify_cve_data(self, cve: Dict) -> Dict:
         """
         Filter and reorganize cve data properties in order to obtain a unified format accross CVE connectors.
@@ -100,12 +99,13 @@ class NistConnector(CVEConnector):
 
         try:
             base_format["id"] = cve.get("id")
-            base_format["published"] = cve.get("published", None)
-            base_format["updated"] = cve.get("lastModified", None)
-            base_format["source"] = cve.get("sourceIdentifier", None)
             base_format["status"] = cve.get("vulnStatus", None)
+
+            base_format["dates"]["published"] = cve.get("published", None)
+            base_format["dates"]["updated"] = cve.get("lastModified", None)
+
             base_format["description"] = cve.get("descriptions", None)[0].get("value", None)
-            base_format["references"] = [r["url"] for r in cve.get("references", [])]
+            base_format["source"] = [r["url"] for r in cve.get("references", [])]
 
             metrics = cve.get("metrics", {})
 
@@ -115,14 +115,22 @@ class NistConnector(CVEConnector):
 
                 base_format["metrics"]["score"] = cvss_data.get("baseScore", 0)
                 base_format["metrics"]["version"] = float(cvss_data.get("version", 4.0))
-                base_format["metrics"]["vectorString"] = cvss_data.get("vectorString", "")
-                base_format["metrics"]["attackVector"] = cvss_data.get("attackVector", None)
-                base_format["metrics"]["privilegesRequired"] = cvss_data.get("privilegesRequired", None)
-                base_format["metrics"]["attackRequirements"] = cvss_data.get("attackRequirements", "NONE")
                 base_format["metrics"]["severity"] = cvss_data.get("baseSeverity", "INFO")
 
+                base_format["vectors"]["vectorString"] = cvss_data.get("vectorString", "")
+                base_format["vectors"]["attackVector"] = cvss_data.get("attackVector", None)
+
+                base_format["requirements"]["privilegesRequired"] = cvss_data.get(
+                    "privilegesRequired", None
+                )
+                base_format["requirements"]["attackRequirements"] = cvss_data.get(
+                    "attackRequirements", "NONE"
+                )
+
         except ValueError as e:
-            raise ValueError(f"{__class__.__name__}.unify_cve_data::An error occured while unifying cve data...\n{e}")
+            raise ValueError(
+                f"{__class__.__name__}.unify_cve_data::An error occured while unifying cve data...\n{e}"
+            )
 
         return base_format
 
