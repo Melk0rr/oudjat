@@ -2,6 +2,7 @@
 
 from oudjat.utils.logical_operations import LogicalOperation
 
+URL_REGEX = r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
 
 def ip_str_to_int(ip: str) -> int:
     """
