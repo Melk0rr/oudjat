@@ -159,3 +159,17 @@ class CVEConnector(Connector):
         raise NotImplementedError(
             f"{__class__.__name__}.get_cve_api_url::Method must be implemented by the overloading class"
         )
+
+    @staticmethod
+    def format_date_str(date_str: str) -> str:
+        """
+        Format a date string like YYYY-mm-dd HH:MM:SS.
+
+        Args:
+            date_str (str): Date string to format
+
+        Returns:
+            str: date string formated
+        """
+
+        return date_str[:-5].replace("T", " ")
