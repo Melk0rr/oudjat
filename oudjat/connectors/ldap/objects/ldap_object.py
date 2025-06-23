@@ -69,7 +69,7 @@ class LDAPObject:
         self.creation_date = self.entry.get("whenCreated")
         self.change_date = self.entry.get("whenChanged")
 
-        self.oudjat_flags: List[str] = []
+        self.ldap_obj_flags: List[str] = []
 
     # ****************************************************************
     # Methods
@@ -265,5 +265,5 @@ class LDAPObject:
             "domain": self.domain,
             "creation_date": TimeConverter.date_to_str(self.creation_date, DateFormat.from_flag(DateFlag.YMD_HMS)),
             "change_date": TimeConverter.date_to_str(self.change_date, DateFormat.from_flag(DateFlag.YMD_HMS)),
-            "oudjat_flags": self.oudjat_flags,
+            "oudjat_flags": self.ldap_obj_flags,
         }

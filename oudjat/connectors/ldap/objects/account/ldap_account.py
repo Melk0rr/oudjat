@@ -74,7 +74,7 @@ class LDAPAccount(LDAPObject):
                     self.account_flags.add(flag.name)
 
         else:
-            self.followup_flags.append("MISSING-USR-ACC-CTL")
+            self.ldap_obj_flags.append("MISSING-USR-ACC-CTL")
 
     # ****************************************************************
     # Methods
