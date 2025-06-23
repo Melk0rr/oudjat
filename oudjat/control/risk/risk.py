@@ -38,7 +38,7 @@ class Risk:
             impact (int | RiskMeasure)    : the impact if the risk is concretized (value between 1 and 4)
         """
 
-        self.rid = risk_id
+        self._id = risk_id
         self.name = name
         self.description = description
 

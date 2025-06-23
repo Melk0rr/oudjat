@@ -83,7 +83,7 @@ class OperatingSystem(Software):
         """
 
         super().__init__(
-            software_id=id,
+            software_id=os_id,
             name=name,
             label=label,
             software_type=SoftwareType.OS,
