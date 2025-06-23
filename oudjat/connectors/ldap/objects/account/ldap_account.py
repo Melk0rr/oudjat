@@ -47,7 +47,12 @@ class LDAPAccount(LDAPObject):
 
         super().__init__(ldap_entry=ldap_entry)
 
-        self.pwd_last_set_timestp = self.get_pwd_last_set().timestamp()
+        pwd_last_set = self.get_pwd_last_set()
+        self.pwd_last_set_timestp = (
+            pwd_last_set.timestamp()
+            if pwd_last_set is not None else None
+        )
+
         self.account_control = self.entry.get("userAccountControl", None)
 
         self.enabled = True
@@ -142,7 +147,7 @@ class LDAPAccount(LDAPObject):
             datetime: The timestamp of when the password was last set as a datetime object.
         """
 
-        return self.entry.get("pwdLastSet")
+        return self.entry.get("pwdLastSet", None)
 
     def get_pwd_last_set_days(self) -> int:
         """
