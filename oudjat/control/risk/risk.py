@@ -38,7 +38,7 @@ class Risk:
             impact (int | RiskMeasure)    : the impact if the risk is concretized (value between 1 and 4)
         """
 
-        self.id = risk_id
+        self._id = risk_id
         self.name = name
         self.description = description
 
@@ -58,6 +58,14 @@ class Risk:
     # ****************************************************************
     # Methods
 
+    def get_id(self) -> str:
+        """
+        Return the risk ID.
+
+        Returns:
+            str: unique id of the current risk
+        """
+
     def get_severity(self) -> int:
         """
         Getter for the risk score.
@@ -67,7 +75,9 @@ class Risk:
         """
 
         if self.likelihood is None or self.impact is None:
-            raise ValueError(f"{__class__.__name__}.get_severity::You need to set risk likelihood and impact to get its score !")
+            raise ValueError(
+                f"{__class__.__name__}.get_severity::You need to set risk likelihood and impact to get its score !"
+            )
 
         self.value = self.likelihood * self.impact
 

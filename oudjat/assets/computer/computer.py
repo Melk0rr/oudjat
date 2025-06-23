@@ -80,26 +80,6 @@ class Computer(Asset):
     # ****************************************************************
     # Methods
 
-    def get_id(self) -> str:
-        """
-        Getter for the computer id.
-
-        Returns:
-            str: The unique identifier for the computer.
-        """
-
-        return self.id
-
-    def get_name(self) -> str:
-        """
-        Getter for the computer name.
-
-        Returns:
-            str: The name of the computer.
-        """
-
-        return self.name
-
     def get_computer_type(self) -> ComputerType:
         """
         Getter for the current computer type.
