@@ -200,8 +200,9 @@ class MicrosoftOperatingSystem(OperatingSystem):
         This method iterates through predefined release data to create or update MSOSRelease instances
         based on the version and label found in the data. It also sets support details for each release.
         """
+        print(self.id)
 
-        for rel in WINDOWS_RELEASES[self.os_id]:
+        for rel in WINDOWS_RELEASES[self.id]:
             win_rel = self.find_release(rel["releaseLabel"])
 
             if win_rel is None:
