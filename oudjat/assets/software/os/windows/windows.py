@@ -201,7 +201,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
         based on the version and label found in the data. It also sets support details for each release.
         """
 
-        for rel in WINDOWS_RELEASES[self._id]:
+        for rel in WINDOWS_RELEASES[self.gid]:
             win_rel = self.find_release(rel["releaseLabel"])
 
             if win_rel is None:

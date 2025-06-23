@@ -34,8 +34,8 @@ class MSCVRFDocument:
         if not re.match(CVRF_ID_REGEX, doc_id):
             raise ValueError(f"{__class__.__name__}::CVRF ID must follow the 'YYYY-MMM' format !")
 
-        self._id = doc_id
-        self.url = f"{API_BASE_URL}cvrf/{self._id}"
+        self.doc_id = doc_id
+        self.url = f"{API_BASE_URL}cvrf/{self.doc_id}"
 
         url_resp = requests.get(self.url, headers=API_REQ_HEADERS)
 
@@ -60,7 +60,7 @@ class MSCVRFDocument:
             str: The ID of the CVRF document.
         """
 
-        return self._id
+        return self.doc_id
 
     def get_products(self) -> Dict[str, "MSProduct"]:
         """

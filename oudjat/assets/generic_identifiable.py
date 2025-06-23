@@ -26,7 +26,7 @@ class GenericIdentifiable:
             description (str, optional): A detailed description of the object, defaults to None.
         """
 
-        self._id = gid
+        self.gid = gid
         self.name = name
         self.label = label
         self.description = description
@@ -44,7 +44,7 @@ class GenericIdentifiable:
             Union[int, str]: The identifier of the object.
         """
 
-        return self._id
+        return self.gid
 
     def get_name(self) -> str:
         """
@@ -99,7 +99,7 @@ class GenericIdentifiable:
 
         if key is not None and key not in self.custom_attributes.keys():
             raise ValueError(
-                f"{__class__.__name__}.get_custom_attr::{self._id} does not have any custom attribute {key}"
+                f"{__class__.__name__}.get_custom_attr::{self.gid} does not have any custom attribute {key}"
             )
 
         return self.custom_attributes if key is None else self.custom_attributes[key]
@@ -176,7 +176,7 @@ class GenericIdentifiable:
         """
 
         return {
-            "id": self._id,
+            "id": self.gid,
             "name": self.name,
             "label": self.label,
             "description": self.description,

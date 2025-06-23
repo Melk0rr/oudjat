@@ -88,7 +88,7 @@ class KPI(DataSet):
             date = datetime.today()
 
         self.date: datetime = date
-        self._id = f"{perimeter.lower()}{TimeConverter.date_to_str(date, date_format=DateFormat.from_flag())}"
+        self.kid = f"{perimeter.lower()}{TimeConverter.date_to_str(date, date_format=DateFormat.from_flag())}"
 
     # ****************************************************************
     # Methods
@@ -101,7 +101,7 @@ class KPI(DataSet):
             str: generated ID of the current KPI
         """
 
-        return self._id
+        return self.kid
 
     def get_date(self) -> datetime:
         """
