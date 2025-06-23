@@ -2,9 +2,8 @@
 
 from typing import TYPE_CHECKING, Dict, List, Union
 
-from oudjat.assets import GenericIdentifiable
-
 from .asset_type import AssetType
+from .generic_identifiable import GenericIdentifiable
 
 if TYPE_CHECKING:
     from ..organization.location import Location

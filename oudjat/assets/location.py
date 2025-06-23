@@ -2,10 +2,9 @@
 
 from typing import Dict, Union
 
-from oudjat.assets import GenericIdentifiable
-
 from ..assets import Asset, AssetType
 from ..assets.network.subnet import Subnet
+from .generic_identifiable import GenericIdentifiable
 
 
 class Location(GenericIdentifiable):
