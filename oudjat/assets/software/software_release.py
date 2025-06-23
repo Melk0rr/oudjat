@@ -279,7 +279,7 @@ class SoftwareReleaseDict(dict):
     # ****************************************************************
     # Methods
 
-    def find_rel_matching_label(self, val: str) -> "SoftwareReleaseDict":
+    def find_release_per_label(self, val: str) -> "SoftwareReleaseDict":
         """
         Try to find release with a label matching the given string.
 
@@ -295,7 +295,7 @@ class SoftwareReleaseDict(dict):
 
         return {k: v for k, v in self.items() if k in val}
 
-    def find_rel(self, rel_ver: str, rel_label: str = None) -> "SoftwareReleaseDict":
+    def find_release(self, rel_ver: str, rel_label: str = None) -> "SoftwareRelease":
         """
         Find the given release.
 
@@ -310,13 +310,14 @@ class SoftwareReleaseDict(dict):
             SoftwareReleaseDict: A dictionary containing either the entire release information or a specific label's information based on the provided criteria.
         """
 
-        if rel_ver not in self.keys():
-            return None
+        res = None
+        if rel_ver in self.keys():
+            search: SoftwareReleaseDict = self.get(rel_ver)
 
-        search: SoftwareReleaseDict = self.get(rel_ver)
+            res = (
+                search.get(rel_label, None)
+                if rel_label is not None
+                else search.get(list(search.keys())[0], None)
+            )
 
-        if rel_label is not None and rel_label not in search.keys():
-            return search
-
-        search = search.get(rel_label)
-        return {search.get_label(): search}
+        return res

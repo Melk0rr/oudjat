@@ -124,7 +124,7 @@ class Software(Asset):
             bool: True if a matching release is found, otherwise False.
         """
 
-        return self.releases.find_rel(rel_ver, rel_label) is not None
+        return self.releases.find_release(rel_ver, rel_label) is not None
 
     def add_release(self, new_release: SoftwareRelease) -> None:
         """
@@ -160,7 +160,7 @@ class Software(Asset):
             SoftwareRelease: The found release object or None if not found.
         """
 
-        return self.releases.find_rel(rel_ver, rel_label)
+        return self.releases.find_release(rel_ver, rel_label)
 
     def retired_releases(self) -> List[SoftwareRelease]:
         """

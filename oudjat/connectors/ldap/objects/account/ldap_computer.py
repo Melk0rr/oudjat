@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, List
 from oudjat.assets.computer import Computer
 from oudjat.assets.software.os import OperatingSystem, OSOption
 from oudjat.assets.software.software_edition import SoftwareEdition
-from oudjat.assets.software.software_release import SoftwareReleaseDict
+from oudjat.assets.software.software_release import SoftwareRelease
 
 from .ldap_account import LDAPAccount
 
@@ -44,10 +44,10 @@ class LDAPComputer(LDAPAccount, Computer):
                     os.gen_releases()
 
                 os_ver = os.__class__.get_matching_version(raw_os_version)
-                rel_search: SoftwareReleaseDict = os.find_release(os_ver)
+                rel_search: SoftwareRelease = os.find_release(os_ver)
 
                 if len(rel_search) > 1:
-                    rel_search = rel_search.find_rel_matching_label(os.get_name())
+                    rel_search = rel_search.find_release_per_label(os.get_name())
 
                 os_release = next(iter(rel_search.values()))
                 os_edition: List[SoftwareEdition] = os.get_matching_editions(raw_os)
