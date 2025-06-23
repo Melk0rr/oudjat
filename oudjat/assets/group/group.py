@@ -1,9 +1,9 @@
 """A module that describes group of assets."""
 from typing import Dict, List, Union
 
-from ...generic_identifiable import GenericIdentifiable
 from ..asset import Asset
 from ..asset_type import AssetType
+from ..generic_identifiable import GenericIdentifiable
 
 
 class GroupMemberList(dict):
