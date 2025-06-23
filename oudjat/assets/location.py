@@ -2,7 +2,7 @@
 
 from typing import Dict, Union
 
-from oudjat.model import GenericIdentifiable
+from oudjat.assets import GenericIdentifiable
 
 from ..assets import Asset, AssetType
 from ..assets.network.subnet import Subnet

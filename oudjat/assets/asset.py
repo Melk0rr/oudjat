@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING, Dict, List, Union
 
-from oudjat.model import GenericIdentifiable
+from oudjat.assets import GenericIdentifiable
 
 from .asset_type import AssetType
 
