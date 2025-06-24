@@ -242,7 +242,7 @@ class Computer(Asset):
 
         # INFO: OS support information
         os_support_dict = {}
-        if len(self.get_os_support() > 0):
+        if len(self.get_os_support()) > 0:
             os_support_dict = self.get_os_support()[0].to_dict()
 
         return {
