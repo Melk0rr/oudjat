@@ -1,5 +1,6 @@
 """A generic module to describe shared behavior of more specific LDAP objects."""
 
+import re
 from typing import TYPE_CHECKING, Dict, List
 
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
@@ -24,9 +25,8 @@ def parse_dn(dn: str) -> Dict:
         Dict : dictionary of dn pieces (CN, OU, DN)
     """
 
-    split = dn.split(",")
+    split = re.split(r",(?! )", dn)
     pieces = {}
-    # TODO: Handle split specific cases where a comma may be in a dn part
 
     for p in split:
         p_split = p.split("=")
