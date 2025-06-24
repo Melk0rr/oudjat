@@ -48,10 +48,7 @@ class LDAPAccount(LDAPObject):
         super().__init__(ldap_entry=ldap_entry)
 
         pwd_last_set = self.get_pwd_last_set()
-        self.pwd_last_set_timestp = (
-            pwd_last_set.timestamp()
-            if pwd_last_set is not None else None
-        )
+        self.pwd_last_set_timestp = pwd_last_set.timestamp() if pwd_last_set is not None else None
 
         self.account_control = self.entry.get("userAccountControl", None)
 
@@ -111,13 +108,18 @@ class LDAPAccount(LDAPObject):
 
     def get_account_expiration(self) -> datetime:
         """
-        Return wheither the account is expired or not.
+        Return the account expiration date.
 
         Returns:
             datetime: The expiration date of the account as a datetime object, or a fixed year 9999 if it does not have an expiration.
         """
 
-        return self.entry.get("accountExpires", datetime(9999, 12, 31))
+        default_acc_exp = self.entry.get("accountExpires")
+        return (
+            datetime(9999, 12, 31)
+            if default_acc_exp is None or len(default_acc_exp) == 0
+            else default_acc_exp
+        )
 
     def get_last_logon(self) -> datetime:
         """
@@ -177,6 +179,8 @@ class LDAPAccount(LDAPObject):
             bool: True if the account does not expire (not year 9999), False otherwise.
         """
 
+        if self.get_account_expiration() is None:
+            print(self.entry.get("accountExpires", datetime(9999, 12, 31)))
         return not self.get_account_expiration().year == 9999
 
     def does_pwd_expires(self) -> bool:
