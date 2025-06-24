@@ -126,10 +126,10 @@ class TimeConverter:
             int: The absolute difference in days between today and the given past date, or -1 if an error occurs.
         """
 
-        date = date.replace(tzinfo=timezone.utc)
-
         if date is None:
             return -1
+
+        date = date.replace(tzinfo=timezone.utc)
 
         today = datetime.now(timezone.utc)
         diff = reverse and (date - today) or (today - date)
