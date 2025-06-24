@@ -117,7 +117,8 @@ class LDAPAccount(LDAPObject):
         default_acc_exp = self.entry.get("accountExpires")
         return (
             datetime(9999, 12, 31)
-            if default_acc_exp is None or len(default_acc_exp) == 0
+            if default_acc_exp is None
+            or (isinstance(default_acc_exp, list) and len(default_acc_exp) == 0)
             else default_acc_exp
         )
 
