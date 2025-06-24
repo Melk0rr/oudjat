@@ -134,6 +134,9 @@ class Computer(Asset):
             List[SoftwareReleaseSupport]: A list of SoftwareReleaseSupport instances representing the support for the current OS release and edition.
         """
 
+        if self.os_release is None:
+            return []
+
         return self.os_release.get_support_for_edition(str(self.os_edition))
 
     def get_ip(self) -> IPv4:
