@@ -241,7 +241,9 @@ class Computer(Asset):
             release_dict.pop("support")
 
         # INFO: OS support information
-        os_support_dict = self.get_os_support()[0].to_dict()
+        os_support_dict = {}
+        if len(self.get_os_support() > 0):
+            os_support_dict = self.get_os_support()[0].to_dict()
 
         return {
             **asset_dict,
