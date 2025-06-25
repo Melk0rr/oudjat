@@ -21,9 +21,17 @@ if TYPE_CHECKING:
     from .objects.ou.ldap_ou import LDAPOrganizationalUnit
     from .objects.subnet.ldap_subnet import LDAPSubnet
 
-
 class LDAPConnector(Connector):
-    """LDAP connector to interact and query LDAP servers."""
+    """
+    LDAP connector to interact and query LDAP servers.
+
+    Provides a centralized way to connect to an LDAP server and run queries to retrieve informations on different kind of objects
+    - Users
+    - Computers
+    - Organizational Units
+    - Group Policy Objects
+    - More...
+    """
 
     # ****************************************************************
     # Attributes & Constructors
