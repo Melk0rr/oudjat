@@ -195,6 +195,20 @@ class Software(Asset):
 
         return self.editions.get_matching_editions(test_str)
 
+    def __str__(self):
+        """
+        Convert the current instance into a string.
+
+        Returns:
+            str: current software instance represented as a string
+
+        Example:
+            soft: Software = Software(...)
+            print(soft)
+        """
+
+        return self.name
+
     def to_dict(self) -> Dict[str, Any]:
         """
         Convert the current instance into a dictionary representation.
