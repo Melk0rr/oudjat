@@ -247,7 +247,7 @@ class Computer(Asset):
 
         return {
             **asset_dict,
-            "computer_type": self.computer_type,
+            "computer_type": self.get_computer_type(),
             "os_release": release_dict.pop("name", None),
             "os_release_label": release_dict.pop("label", None),
             "os_release_full_name": release_dict.pop("full_name", None),
