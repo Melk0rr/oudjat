@@ -63,8 +63,8 @@ class Computer(Asset):
             asset_type=AssetType.COMPUTER,
         )
 
-        self.os_release = None
-        self.os_edition = None
+        self.os_release: OSRelease = None
+        self.os_edition: SoftwareEdition = None
         if os_release is not None:
             self.set_os(os_release=os_release, edition=os_edition)
 
