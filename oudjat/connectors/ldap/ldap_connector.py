@@ -540,6 +540,7 @@ class LDAPConnector(Connector):
 
         return entry["type"] == "searchResEntry"
 
+    @staticmethod
     def ldap_entry_from_dict(entry: Dict) -> "LDAPEntry":
         """
         Create an LDAPEntry from the provided dictionary.
