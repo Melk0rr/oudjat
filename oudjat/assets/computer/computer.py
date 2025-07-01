@@ -94,7 +94,7 @@ class Computer(Asset):
         if self.os_release is not None:
             cpt_type = self.os_release.get_os().get_computer_type()
 
-        return cpt_type
+        return next(iter(cpt_type))
 
     def get_os_release(self) -> OSRelease:
         """
