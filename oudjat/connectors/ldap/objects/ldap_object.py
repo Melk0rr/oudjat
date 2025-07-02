@@ -38,7 +38,9 @@ def parse_dn(dn: str) -> Dict:
 
 
 class LDAPObject:
-    """Generic LDAP object."""
+    """
+    Defines common properties and behavior accross LDAP objects.
+    """
 
     # ****************************************************************
     # Attributes & Constructors
@@ -81,7 +83,7 @@ class LDAPObject:
             str: The distinguished name (DN) of the LDAP object.
         """
 
-        return self.dn
+        return self.entry.get_dn()
 
     def get_name(self) -> str:
         """
