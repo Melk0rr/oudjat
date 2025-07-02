@@ -51,7 +51,7 @@ class SoftwareRelease:
                 f"{__class__.__name__}::Please provide dates with %Y-%m-%d format\n{e}"
             )
 
-        self.release_date = release_date
+        self.release_date: datetime = release_date
         self.support = SoftwareReleaseSupportList()
 
         # NOTE: maybe convert vulnerabilities into a dictionary (CVE instances ?) if needed
@@ -267,9 +267,9 @@ class SoftwareRelease:
 
         return {
             "label": self.label,
-            "release_date": SoftwareReleaseSupport.soft_date_str(self.release_date),
+            "release_date": TimeConverter.date_to_str(self.release_date),
             **self.os_info_dict(),
-            "support": ", ".join([str(s) for s in self.support]),
+            "support": ", ".join(list(map(str, self.support))),
         }
 
 

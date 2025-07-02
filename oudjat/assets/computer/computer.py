@@ -63,8 +63,8 @@ class Computer(Asset):
             asset_type=AssetType.COMPUTER,
         )
 
-        self.os_release = None
-        self.os_edition = None
+        self.os_release: OSRelease = None
+        self.os_edition: SoftwareEdition = None
         if os_release is not None:
             self.set_os(os_release=os_release, edition=os_edition)
 
@@ -94,7 +94,7 @@ class Computer(Asset):
         if self.os_release is not None:
             cpt_type = self.os_release.get_os().get_computer_type()
 
-        return cpt_type
+        return next(iter(cpt_type))
 
     def get_os_release(self) -> OSRelease:
         """
@@ -247,7 +247,7 @@ class Computer(Asset):
 
         return {
             **asset_dict,
-            "computer_type": self.computer_type,
+            "computer_type": self.get_computer_type(),
             "os_release": release_dict.pop("name", None),
             "os_release_label": release_dict.pop("label", None),
             "os_release_full_name": release_dict.pop("full_name", None),

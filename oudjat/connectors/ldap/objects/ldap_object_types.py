@@ -22,6 +22,7 @@ class LDAPObjectType(Enum):
         "objectClass": "computer",
         "filter": "(objectClass=computer)",
         "attributes": [
+            "accountExpires",
             "cn",
             "description",
             "distinguishedName",

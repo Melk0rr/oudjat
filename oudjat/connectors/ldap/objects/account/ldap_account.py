@@ -180,8 +180,6 @@ class LDAPAccount(LDAPObject):
             bool: True if the account does not expire (not year 9999), False otherwise.
         """
 
-        if self.get_account_expiration() is None:
-            print(self.entry.get("accountExpires", datetime(9999, 12, 31)))
         return not self.get_account_expiration().year == 9999
 
     def does_pwd_expires(self) -> bool:

@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from .objects.ou.ldap_ou import LDAPOrganizationalUnit
     from .objects.subnet.ldap_subnet import LDAPSubnet
 
+
 class LDAPConnector(Connector):
     """
     LDAP connector to interact and query LDAP servers.
@@ -127,7 +128,9 @@ class LDAPConnector(Connector):
         target_ip = socket.gethostbyname(self.target)
 
         if not target_ip:
-            raise Exception(f"{__class__.__name__}.connect::The target {self.target} is unreachable")
+            raise Exception(
+                f"{__class__.__name__}.connect::The target {self.target} is unreachable"
+            )
 
         tls_option = {"use_ssl": self.use_tls}
         if self.use_tls:
@@ -503,6 +506,19 @@ class LDAPConnector(Connector):
             search_filter=f"(distinguishedName={ldap_entry.get_dn()})",
         )
 
+    def get_domain_admins(self) -> List[LDAPEntry]:
+        """
+        Return a list of the domain and enterprise admins.
+
+        Returns:
+            List[LDAPEntry]: a list of LDAPEntry instances representing the domain admins
+        """
+
+        return self.search(
+            search_type=LDAPObjectType.USER,
+            search_filter="(&(objectClass=user)(objectCategory=Person)(adminCount=1))",
+        )
+
     # ****************************************************************
     # Static methods
 
@@ -540,6 +556,7 @@ class LDAPConnector(Connector):
 
         return entry["type"] == "searchResEntry"
 
+    @staticmethod
     def ldap_entry_from_dict(entry: Dict) -> "LDAPEntry":
         """
         Create an LDAPEntry from the provided dictionary.

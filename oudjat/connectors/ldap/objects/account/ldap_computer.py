@@ -44,7 +44,7 @@ class LDAPComputer(LDAPAccount, Computer):
                     os.gen_releases()
 
                 os_ver = os.__class__.get_matching_version(raw_os_version)
-                os_release: SoftwareRelease = os.find_release(os_ver, os.get_name())
+                os_release: SoftwareRelease = os.find_release(os_ver)
                 os_edition: List[SoftwareEdition] = os.get_matching_editions(raw_os)
 
                 if os_edition is not None and len(os_edition) != 0:
