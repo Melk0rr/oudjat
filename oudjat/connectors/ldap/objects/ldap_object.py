@@ -22,19 +22,17 @@ def parse_dn(dn: str) -> Dict:
         dn (str) : distinguished name to parse
 
     Returns:
-        Dict : dictionary of dn pieces (CN, OU, DN)
+        Dict : dictionary of dn pieces (CN, OU, DC)
     """
 
-    split = re.split(r",(?! )", dn)
     pieces = {}
+    for dn_part in re.split(r",(?! )", dn):
+        part_type, part_value = dn_part.split("=")
 
-    for p in split:
-        p_split = p.split("=")
+        if part_type not in pieces.keys():
+            pieces[part_type] = list()
 
-        if p_split[0] not in pieces.keys():
-            pieces[p_split[0]] = []
-
-        pieces[p_split[0]].append(p_split[1])
+        pieces[part_type].append(part_value)
 
     return pieces
 
