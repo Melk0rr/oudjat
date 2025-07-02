@@ -67,6 +67,7 @@ class LDAPUser(LDAPAccount, User):
         Returns:
             str: employee id
         """
+
         return self.entry.get("employeeID", None)
 
     def get_manager(self) -> str:
@@ -76,6 +77,7 @@ class LDAPUser(LDAPAccount, User):
         Returns:
             str: a ref to the user's manager
         """
+
         return self.entry.get("manager", None)
 
     def is_admin(self) -> bool:
@@ -85,6 +87,7 @@ class LDAPUser(LDAPAccount, User):
         Returns:
             bool: True if the current user is admin. False otherwise
         """
+
         is_admin = False
         adm_count = self.entry.get("adminCount", None)
 
@@ -100,6 +103,7 @@ class LDAPUser(LDAPAccount, User):
         Returns:
             Dict: the current user represented as a dictionary
         """
+
         base_dict = super().to_dict()
         base_dict.pop("san")
 
