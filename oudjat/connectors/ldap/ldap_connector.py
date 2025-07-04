@@ -234,14 +234,12 @@ class LDAPConnector(Connector):
             **kwargs,
         )
 
-        entries = list(
+        return list(
             map(
                 LDAPConnector.ldap_entry_from_dict,
                 filter(LDAPConnector.check_entry_type, results),
             )
         )
-
-        return entries
 
     def get_mapped_object(
         self,
@@ -270,8 +268,7 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        ldap_obj_cls = search_type.value.get("pythonClass")
-        return self.map_entries(entries, ldap_cls=ldap_obj_cls)
+        return self.map_entries(entries, ldap_cls=search_type.python_cls)
 
     def get_gpo(
         self, displayName: str = "*", name: str = "*", attributes: Union[str, List[str]] = None
@@ -419,14 +416,7 @@ class LDAPConnector(Connector):
             bool: wheither the object is a member of the group or not
         """
 
-        member_ref_list = None
-
-        if extended:
-            member_ref_list = ldap_group.get_members_flat(ldap_connector=self)
-
-        else:
-            member_ref_list = ldap_group.members.values()
-
+        member_ref_list = ldap_group.get_members_flat(ldap_connector=self) if extended else ldap_group.members.values()
         return ldap_object.get_uuid() in [m.get_id() for m in member_ref_list]
 
     def get_ou(
