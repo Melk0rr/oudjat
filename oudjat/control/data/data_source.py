@@ -11,17 +11,19 @@ class DataSource:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, name: str, description: str = None) -> None:
+    def __init__(self, name: str, data_source_type: str = None, description: str = None) -> None:
         """
         Initialize a new instance of DataSource.
 
         Args:
-            name (str)       : the name of the data source
-            description (str): a description for the new data source
+            name (str)            : the name of the data source
+            data_source_type (str): a string that may help to classify the data source
+            description (str)     : a description for the new data source
         """
 
         self.name = name
         self.description = description
+        self.type = data_source_type
 
         self.connectors: Dict[str, Connector] = {}
 
@@ -74,6 +76,21 @@ class DataSource:
 
         return self.connectors[connector_key]
 
+    def set_connectors(self, connectors: Dict[str, Connector]) -> None:
+        """
+        Set the connectors of the current data source.
+
+        A dictionary of connectors must be provided in parameter.
+
+        Args:
+            connectors (Dict): a dictionary of connectors with string keys
+        """
+
+        if not isinstance(connectors, Dict):
+            raise ValueError(f"{__class__.__name__}.set_connectors::Invalid connectors provided")
+
+        self.connectors = connectors
+
     def add_connector(self, connector_key: str, new_connector: "Connector") -> None:
         """
         Add a new connector to the current data source.
@@ -84,7 +101,9 @@ class DataSource:
         """
 
         if not isinstance(new_connector, Connector):
-            raise ValueError(f"{__class__.__name__}.add_connector::Invalid new connector provided. Please provide a valid Connector instance")
+            raise ValueError(
+                f"{__class__.__name__}.add_connector::Invalid new connector provided. Please provide a valid Connector instance"
+            )
 
         self.connectors[connector_key] = new_connector
 
