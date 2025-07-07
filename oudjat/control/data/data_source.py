@@ -132,3 +132,48 @@ class DataSource:
 
         del self.connectors
         self.connectors = {}
+
+    def connect(self, connection_opts: Dict[str, Dict]) -> bool:
+        """
+        Initiate the connection for current data source connectors based on the provided parameters.
+
+        The method uses the provided connection options to initiate connection to the current data source connectors through their connect method.
+        Each key of the connection options must match one connector key of the current data source.
+        With each key, comes a parameter dictionary passed to the connector connect method.
+
+        You can specify one, multiple or all connectors of the source.
+        If one connector's key is not in the connection options, the connection will not be initialized for this connector.
+
+        Args:
+            connection_opts (Dict): a dictionary of connection options.
+
+        Returns:
+            bool: True if no error occured in the process. False otherwise.
+
+        Example:
+            connectors = {
+                "api": MyCompanyAVAPIConnector(...),
+                "file": FileConnector(...)
+            }
+            my_source = DataSource(name="my_company_antivirus", connectors=connectors)
+            my_source.connect(connection_opts={ "api": { whatever_option="", ... } })
+        """
+
+        res = True
+        try:
+            for connector_key, connect_params in connection_opts.items():
+                if connector_key not in self.connectors.keys():
+                    continue
+
+                if not isinstance(connect_params, dict):
+                    raise ValueError(
+                        "You must provide a dicitonary for each connector key in your connection options!"
+                    )
+
+                self.get_connector(connector_key).connect(**connect_params)
+
+        except Exception as e:
+            res = False
+            raise f"{__class__.__name__}.connect::{e}"
+
+        return res
