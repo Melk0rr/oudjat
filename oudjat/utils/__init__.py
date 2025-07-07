@@ -1,5 +1,7 @@
 """A package to gather various utility functions."""
 
+# TODO: Mail class to handle email send
+
 from .bit_flag import BitFlag
 from .color_print import ColorPrint
 from .credentials import CredentialHelper
