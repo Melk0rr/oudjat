@@ -45,7 +45,6 @@ class FileHandler:
         json_data = None
         try:
             full_path = os.path.join(os.getcwd(), file_path)
-
             with open(full_path, "r", encoding="utf-8") as json_file:
                 json_data = json.load(json_file)
 
@@ -103,7 +102,6 @@ class FileHandler:
 
         try:
             full_path = os.path.join(os.getcwd(), file_path)
-
             with open(full_path, "r", encoding="utf-8", newline="") as f:
                 # WARN: Try to guess the delimiter if none was specified
                 if not delimiter:
@@ -183,7 +181,6 @@ class FileHandler:
 
         try:
             full_path = os.path.join(os.getcwd(), file_path)
-
             with open(full_path, encoding="utf-8") as f:
                 data = list(filter(None, f.read().split("\n")))
 
@@ -215,7 +212,6 @@ class FileHandler:
             print("No data to export !")
             return
 
-
         try:
             full_path = os.path.join(os.getcwd(), file_path)
 
@@ -234,9 +230,7 @@ class FileType(Enum):
     """Enumeration of file types to be used by file connector."""
 
     CSV = {"import": FileHandler.import_csv, "export": FileHandler.export_csv}
-
     JSON = {"import": FileHandler.import_json, "export": FileHandler.export_json}
-
     TXT = {"import": FileHandler.import_txt, "export": FileHandler.export_txt}
 
     @property
