@@ -1,3 +1,5 @@
+"""A module to centralize common behavior accross all connectors."""
+
 from typing import Any, List
 
 from oudjat.utils import CredentialHelper
@@ -5,15 +7,16 @@ from oudjat.utils import CredentialHelper
 
 class Connector:
     """
-    This class serves as a base for any type of connector
-    A connector can be seen as a hook to a data source that is used to pull/extract data from it
+    A class serves as a base for any type of connector.
+
+    A connector can be seen as a hook to a data source that is used to pull/extract data from it.
     """
 
     def __init__(
         self, target: Any, service_name: str = None, use_credentials: bool = False
     ) -> None:
         """
-        Creates a new instance of Connector
+        Create a new instance of Connector.
 
         Args:
             target (any)            : connector target
@@ -25,12 +28,14 @@ class Connector:
         self.service_name = service_name
 
         # Retrieve credentials for the service
-        self.credentials = CredentialHelper.get_credentials(self.service_name) if use_credentials else None
+        self.credentials = (
+            CredentialHelper.get_credentials(self.service_name) if use_credentials else None
+        )
         self.connection = None
 
     def get_connection(self) -> Any:
         """
-        Returns the current connection
+        Return the current connection.
 
         Args:
             None
@@ -43,7 +48,7 @@ class Connector:
 
     def set_target(self, target: Any) -> None:
         """
-        Setter for connector target
+        Set the connection target.
 
         Args:
             target (any) : new target of the connector
@@ -53,7 +58,7 @@ class Connector:
 
     def set_service_name(self, new_service_name: str, use_credentials: bool) -> None:
         """
-        Setter for service name
+        Set the service name bound to the current connector.
 
         Args:
             new_service_name (str) : new service name for the connector
@@ -70,7 +75,7 @@ class Connector:
 
     def connect(self) -> None:
         """
-        Connects to the target
+        Connect to the target.
 
         Args:
             None
@@ -85,7 +90,7 @@ class Connector:
 
     def search(self) -> List[Any]:
         """
-        Connects to the target
+        Retrieve data from the target.
 
         Args:
             None
