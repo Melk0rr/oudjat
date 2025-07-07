@@ -125,8 +125,8 @@ class KPI(DataSet):
         """
 
         value = value or self.get_kpi_value()
-
         conformity_lvls = list(ConformityLevel)
+
         return next(
             filter(KPI.conformity_value_level, conformity_lvls, [value] * len(conformity_lvls))
         )
@@ -162,6 +162,7 @@ class KPI(DataSet):
             suffix (str)        : string to include as suffix to the printed infos
             print_details (bool): include additional details to the printed infos
         """
+
         scope_str = str(self)
 
         print(prefix, end="")
@@ -178,7 +179,7 @@ class KPI(DataSet):
             str: the generation date of the KPI formated as a string
         """
 
-        return self.date.strftime("%Y-%m-%d")
+        return TimeConverter.date_to_str(self.date)
 
     def __str__(self) -> str:
         """
@@ -215,6 +216,7 @@ class KPI(DataSet):
     # ****************************************************************
     # Static methods
 
+    @staticmethod
     def conformity_value_level(lvl: "ConformityLevel", value: float) -> bool:
         """
         Check if the given value is between the provided conformity level min and max values.
