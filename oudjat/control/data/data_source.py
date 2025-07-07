@@ -11,7 +11,13 @@ class DataSource:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, name: str, data_source_type: str = None, description: str = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        data_source_type: str = None,
+        description: str = None,
+        connectors: Dict[str, Connector] = None,
+    ) -> None:
         """
         Initialize a new instance of DataSource.
 
@@ -19,6 +25,7 @@ class DataSource:
             name (str)            : the name of the data source
             data_source_type (str): a string that may help to classify the data source
             description (str)     : a description for the new data source
+            connectors (Dict)     : dictionary of connectors to assign to the data source
         """
 
         self.name = name
@@ -26,6 +33,9 @@ class DataSource:
         self.type = data_source_type
 
         self.connectors: Dict[str, Connector] = {}
+
+        if connectors is not None:
+            self.set_connectors(connectors)
 
     # ****************************************************************
     # Methods
