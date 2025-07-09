@@ -1,6 +1,6 @@
 """A module to centralize common behavior accross all connectors."""
 
-from typing import Any, List
+from keyring.credentials import Credential, SimpleCredential
 
 from oudjat.utils import CredentialHelper
 
@@ -13,7 +13,7 @@ class Connector:
     """
 
     def __init__(
-        self, target: Any, service_name: str = None, use_credentials: bool = False
+        self, target: str | object, service_name: str | None = None, use_credentials: bool = False
     ) -> None:
         """
         Create a new instance of Connector.
@@ -24,16 +24,17 @@ class Connector:
             use_credentials (bool)  : wheither the connector should use credentials
         """
 
-        self.target = target
-        self.service_name = service_name
+        self.target: str | object = target
+        self.service_name: str | None = service_name
 
         # Retrieve credentials for the service
-        self.credentials = (
-            CredentialHelper.get_credentials(self.service_name) if use_credentials else None
-        )
-        self.connection = None
+        self.credentials: SimpleCredential | Credential | None = None
+        if use_credentials and self.service_name is not None:
+            self.credentials = CredentialHelper.get_credentials(self.service_name)
 
-    def get_connection(self) -> Any:
+        self.connection: object = None
+
+    def get_connection(self) -> object:
         """
         Return the current connection.
 
@@ -46,7 +47,7 @@ class Connector:
 
         return self.connection
 
-    def set_target(self, target: Any) -> None:
+    def set_target(self, target: str | object) -> None:
         """
         Set the connection target.
 
@@ -73,32 +74,34 @@ class Connector:
         if use_credentials:
             self.credentials = CredentialHelper.get_credentials(self.service_name)
 
-    def connect(self) -> None:
+    def connect(self, *args: tuple[object], **kwargs: dict[str, object]) -> None:
         """
         Connect to the target.
 
         Args:
-            None
+            *args (tuple)  : any args the overriding method provides
+            **kwargs (dict): any kwargs the overriding method provides
 
         Return:
             None
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.connect::Method must be implemented by the overloading class"
+            f"{__class__.__name__}.connect({args}, {kwargs})::Method must be implemented by the overloading class"
         )
 
-    def search(self) -> List[Any]:
+    def search(self, *args: tuple[object], **kwargs: dict[str, object]) -> list[str | object]:
         """
         Retrieve data from the target.
 
         Args:
-            None
+            *args (tuple)  : any args the overriding method provides
+            **kwargs (dict): any kwargs the overriding method provides
 
         Return:
-            List[any] : list of results
+            list[any] : list of results
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.search::Method must be implemented by the overloading class"
+            f"{__class__.__name__}.search({args}, {kwargs})::Method must be implemented by the overloading class"
         )

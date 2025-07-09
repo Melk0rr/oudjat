@@ -3,6 +3,8 @@
 import getpass
 
 import keyring
+from keyring.credentials import Credential, SimpleCredential
+from keyring.errors import KeyringError, PasswordDeleteError, PasswordSetError
 
 
 class CredentialHelper:
@@ -27,13 +29,13 @@ class CredentialHelper:
         try:
             keyring.set_password(service, username, password)
 
-        except keyring.errors.PasswordSetError as e:
-            raise (
+        except PasswordSetError as e:
+            raise PasswordSetError(
                 f"{__class__.__name__}.save_credentials::Error while saving credentials for {service}:{username}\n{e}"
             )
 
     @staticmethod
-    def get_credentials(service: str) -> keyring.credentials.SimpleCredential:
+    def get_credentials(service: str) -> Credential | SimpleCredential:
         """
         Attempt to retrieve stored credentials from the `keyring` using the provided service name.
 
@@ -62,10 +64,10 @@ class CredentialHelper:
 
                 # Saving credentials
                 CredentialHelper.save_credentials(service, username, password)
-                cred = keyring.credentials.SimpleCredential(username, password)
+                cred = SimpleCredential(username, password)
 
-        except keyring.errors.KeyringError as e:
-            raise (
+        except KeyringError as e:
+            raise KeyringError(
                 f"{__class__.__name__}.get_credentials::An error occured while retreiving credentials for {service}\n{e}"
             )
 
@@ -89,7 +91,7 @@ class CredentialHelper:
         try:
             keyring.delete_password(service, username)
 
-        except keyring.errors.PasswordDeleteError as e:
-            raise (
+        except PasswordDeleteError as e:
+            raise PasswordDeleteError(
                 f"{__class__.__name__}.del_credentials::Error while deleting password for {service}:{username}\n{e}"
             )

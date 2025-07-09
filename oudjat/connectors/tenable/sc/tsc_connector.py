@@ -1,14 +1,14 @@
 """A module handling Tenable.sc API connection."""
 
 import re
-from typing import Dict, List, Tuple, Union
-from urllib.parse import urlparse
+from typing import Any, Literal, override
+from urllib.parse import ParseResult, urlparse
 
 from tenable.sc import TenableSC
 
 from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
-from oudjat.control.vulnerability.cve import Severity
+from oudjat.control.vulnerability.severity import Severity
 from oudjat.utils.color_print import ColorPrint
 
 from .tsc_asset_list_types import TSCAssetListType
@@ -25,7 +25,7 @@ class TenableSCConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
 
-    BUILTIN_FILTERS = {"exploitable": ("exploitAvailable", "=", "true")}
+    BUILTIN_FILTERS: dict[str, tuple[str, str, str]]= {"exploitable": ("exploitAvailable", "=", "true")}
 
     def __init__(
         self, target: str, service_name: str = "OudjatTenableSCAPI", port: int = 443
@@ -46,38 +46,44 @@ class TenableSCConnector(Connector):
         if not re.match(r"http(s?):", target):
             target = f"{scheme}://{target}"
 
-        super().__init__(target=urlparse(target), service_name=service_name, use_credentials=True)
-        self.target = urlparse(f"{self.target.scheme}://{self.target.netloc}")
+        super().__init__(target=target, service_name=service_name, use_credentials=True)
+        self.parsed_target: ParseResult = urlparse(target)
+        self.parsed_target = urlparse(f"{self.parsed_target.scheme}://{self.parsed_target.netloc}")
+
         self.connection: TenableSC = None
-        self.repos: List = None
+        self.repos: list[str] | None = None
 
     # ****************************************************************
     # Methods
 
     # INFO: Getters
-    def get_repos(self) -> List:
+    def get_repos(self) -> list[str] | None:
         """
         Return repositories list.
 
         Returns:
             List : list of repos defined on security center
         """
+
         return self.repos
 
     # INFO: Base connector methods
+    @override
     def connect(self) -> None:
         """
         Connect to API using connector parameters.
         """
-        connection = None
-        try:
-            connection = TenableSC(
-                host=self.target.netloc,
-                access_key=self.credentials.username,
-                secret_key=self.credentials.password,
-            )
 
-            ColorPrint.green(f"Connected to {self.target.netloc}")
+        connection: TenableSC | None = None
+        try:
+            if self.credentials is not None:
+                connection = TenableSC(
+                    host=self.parsed_target.netloc,
+                    access_key=self.credentials.username,
+                    secret_key=self.credentials.password,
+                )
+
+            ColorPrint.green(f"Connected to {self.parsed_target.netloc}")
             self.connection = connection
             self.repos = self.connection.repositories.list()
 
@@ -101,11 +107,13 @@ class TenableSCConnector(Connector):
         """
         Disconnect from API.
         """
+
         del self.connection
         self.connection = None
         self.repos = None
 
-    def search(self, search_type: str, *args, **kwargs) -> List:
+    @override
+    def search(self, search_type: str, *args: tuple[Any], **kwargs: dict[str, Any]) -> list[object]:
         """
         Search the API for elements.
 
@@ -145,10 +153,10 @@ class TenableSCConnector(Connector):
     # INFO: Vulns
     def search_vulns(
         self,
-        *severities: List[int],
+        *severities: list[int],
         tool: TSCVulnTool = TSCVulnTool.VULNDETAILS,
         exploitable: bool = True,
-    ) -> Dict:
+    ) -> list[dict[str, object]]:
         """
         Retrieve the current vulnerabilities.
 
@@ -166,14 +174,12 @@ class TenableSCConnector(Connector):
         if exploitable:
             filters.append(self.BUILTIN_FILTERS["exploitable"])
 
-        if severities is not None:
-            filters.append(self.build_severity_filter(severities))
-
+        filters.append(self.build_severity_filter(*severities))
         search = self.connection.analysis.vulns(*filters, tool=tool.value)
 
         return list(search)
 
-    def build_severity_filter(self, *severities: List[int]) -> Tuple:
+    def build_severity_filter(self, *severities: list[int]) -> tuple[Literal["severity"], Literal["="], str]:
         """
         Return a severity filter based on the provided severities.
 
@@ -189,11 +195,11 @@ class TenableSCConnector(Connector):
         self,
         name: str,
         list_type: TSCAssetListType = TSCAssetListType.COMBINATION,
-        description: str = None,
-        ips: List[str] = None,
-        dns_names: List[str] = None,
-        *args,
-        **kwargs,
+        description: str | None = None,
+        ips: list[str] | None = None,
+        dns_names: list[str] | None = None,
+        *args: tuple,
+        **kwargs: dict,
     ) -> None:
         """
         Create a new asset list.
@@ -227,7 +233,7 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    def delete_asset_list(self, list_id: Union[int, List[int]]) -> None:
+    def delete_asset_list(self, list_id: int | list[int]) -> None:
         """
         Delete an asset list based on given id.
 
@@ -250,7 +256,7 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    def list_asset_lists(self, list_filter: Union[Tuple, List[Tuple]] = None) -> List[Dict]:
+    def list_asset_lists(self, list_filter: tuple[str] | list[tuple[str]] | None = None) -> list[dict]:
         """
         Retrieve a list of asset lists with minimal informations like list ids.
 
@@ -266,7 +272,7 @@ class TenableSCConnector(Connector):
 
         self.check_connection()
 
-        asset_lists = []
+        asset_lists: list[dict[str, object]] = []
         try:
             asset_lists = self.connection.asset_lists.list()
 
@@ -313,7 +319,7 @@ class TenableSCConnector(Connector):
 
     # TODO: Edit asset list
     # INFO: Scans
-    def list_scans(self, scan_filter: Union[Tuple, List[Tuple]] = None) -> List[Dict]:
+    def list_scans(self, scan_filter: tuple[str] | list[tuple[str]] | None = None) -> list[dict[str, object]]:
         """
         Retrieve a list of scans with minimal information like scan ids.
 
@@ -329,12 +335,12 @@ class TenableSCConnector(Connector):
 
         self.check_connection()
 
-        scan_list = []
+        scan_list: list[dict[str, object]] = []
         try:
-            scan_list = self.connection.scans.list()
+            raw_scan_list: dict[str, object] = self.connection.scans.list()
 
-            if scan_list is not None:
-                scan_list = scan_list.get("usable", [])
+            if raw_scan_list is not None:
+                scan_list = raw_scan_list.get("usable", [])
 
             scan_list = DataFilter.filter_data(
                 data_to_filter=scan_list, filters=DataFilter.gen_from_tuple(scan_filter)
@@ -345,7 +351,7 @@ class TenableSCConnector(Connector):
 
         return scan_list
 
-    def get_scan_details(self, scan_id: Union[int, List[int]]) -> List[Dict]:
+    def get_scan_details(self, scan_id: int | list[int]) -> list[dict[str, object]]:
         """
         Return the details of one or more scans.
 
@@ -364,7 +370,7 @@ class TenableSCConnector(Connector):
         if not isinstance(scan_id, list):
             scan_id = [scan_id]
 
-        scan_details = []
+        scan_details: list[dict[str, object]] = []
         try:
             for sid in scan_id:
                 scan_details.append(self.connection.scans.details(id=sid))
@@ -374,7 +380,7 @@ class TenableSCConnector(Connector):
 
         return scan_details
 
-    def delete_scan(self, scan_id: Union[int, List[int]]) -> None:
+    def delete_scan(self, scan_id: int | list[int]) -> None:
         """
         Delete an asset list based on given id.
 
@@ -401,11 +407,11 @@ class TenableSCConnector(Connector):
         self,
         name: str,
         repo_id: int,
-        asset_lists: List[int] = None,
-        description: str = None,
-        schedule: Dict = None,
-        *args,
-        **kwargs,
+        asset_lists: list[int] | None = None,
+        description: str | None = None,
+        schedule: dict[str, str] | None = None,
+        *args: tuple[object],
+        **kwargs: dict[str, object],
     ) -> None:
         """
         Create a new scan.
