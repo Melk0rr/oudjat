@@ -2,7 +2,7 @@
 
 import re
 from enum import Enum
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, NamedTuple
 
 
 class Operation:
@@ -15,7 +15,7 @@ class Operation:
     """
 
     @staticmethod
-    def from_str(operator: str, *args) -> bool:
+    def from_str(operator: str, *args: Any) -> bool:
         """
         Run an operation based on a given operator.
 
@@ -30,7 +30,6 @@ class Operation:
         options = {
             # INFO: Symbols options
             "=": Operation.ope_equals,
-            "∋": Operation.ope_contains,
             "∈": Operation.ope_in,
             ">": Operation.ope_greater_than,
             ">=": Operation.ope_greater_equal_than,
@@ -40,10 +39,8 @@ class Operation:
             "!:": Operation.ope_is_not,
             "~": Operation.ope_reg_match,
             "?": Operation.ope_reg_search,
-
             # INFO: Full name options
             "eq": Operation.ope_equals,
-            "contains": Operation.ope_contains,
             "in": Operation.ope_in,
             "gt": Operation.ope_greater_than,
             "ge": Operation.ope_greater_equal_than,
@@ -73,25 +70,7 @@ class Operation:
         return a == b
 
     @staticmethod
-    def ope_contains(a: Union[str, List], b: Any) -> bool:
-        """
-        Check if a contains b.
-
-        Args:
-            a (Union[str, List]): The container object to search within.
-            b (Any): The item to find in the container.
-
-        Returns:
-            bool: True if b is found within a, False otherwise.
-
-        Raises:
-            AttributeError: If the type of `a` does not support the 'contains' method.
-        """
-
-        return a.contains(b)
-
-    @staticmethod
-    def ope_in(a: Any, b: Union[List, str]) -> bool:
+    def ope_in(a: Any, b: str | list[Any]) -> bool:
         """
         Check if a is in b.
 
@@ -106,7 +85,7 @@ class Operation:
         return a in b
 
     @staticmethod
-    def ope_greater_than(a: Union[int, float], b: Union[int, float]) -> bool:
+    def ope_greater_than(a: int | float, b: int | float) -> bool:
         """
         Check if a is greater than b.
 
@@ -121,7 +100,7 @@ class Operation:
         return a > b
 
     @staticmethod
-    def ope_greater_equal_than(a: Union[int, float], b: Union[int, float]) -> bool:
+    def ope_greater_equal_than(a: int | float, b: int | float) -> bool:
         """
         Check if a is greater than or equal to b.
 
@@ -136,7 +115,7 @@ class Operation:
         return a >= b
 
     @staticmethod
-    def ope_lower_than(a: Union[int, float], b: Union[int, float]) -> bool:
+    def ope_lower_than(a: int | float, b: int | float) -> bool:
         """
         Check if a is less than b.
 
@@ -151,7 +130,7 @@ class Operation:
         return a < b
 
     @staticmethod
-    def ope_lower_equal_than(a: Union[int, float], b: Union[int, float]) -> bool:
+    def ope_lower_equal_than(a: int | float, b: int | float) -> bool:
         """
         Check if a is less than or equal to b.
 
@@ -166,7 +145,7 @@ class Operation:
         return a <= b
 
     @staticmethod
-    def ope_is(a: Any, b: Any) -> bool:
+    def ope_is(a: object | None, b: object | None) -> bool:
         """
         Check if a is the same object as b.
 
@@ -208,9 +187,6 @@ class Operation:
             bool: True if the value matches the pattern, False otherwise.
         """
 
-        if value is None or pattern is None:
-            return False
-
         return bool(re.match(pattern, value))
 
     @staticmethod
@@ -226,26 +202,35 @@ class Operation:
             bool: True if the pattern is found within the value, False otherwise.
         """
 
-        if value is None or pattern is None:
-            return False
-
         return re.search(pattern, value) is not None
+
+
+class OperatorProps(NamedTuple):
+    """
+    A helper class to properly handle LogicalOperator property types.
+
+    Args:
+        ope_name (str): operator name
+        operation (Callable): operation function
+    """
+
+    ope_name: str
+    operation: Callable[..., bool]
 
 
 class Operator(Enum):
     """An enumeration of possible operators."""
 
-    EQ = {"ope_name": "eq", "operation": Operation.ope_equals}
-    CONTAINS = {"ope_name": "contains", "operation": Operation.ope_contains}
-    IN = {"ope_name": "in", "operation": Operation.ope_in}
-    GT = {"ope_name": "gt", "operation": Operation.ope_greater_than}
-    GE = {"ope_name": "ge", "operaion": Operation.ope_greater_equal_than}
-    LT = {"ope_name": "lt", "operation": Operation.ope_lower_than}
-    LE = {"ope_name": "le", "operation": Operation.ope_greater_equal_than}
-    IS = {"ope_name": "is", "operation": Operation.ope_is}
-    ISNT = {"ope_name": "isnt", "operation": Operation.ope_is_not}
-    MATCH = {"ope_name": "match", "operation": Operation.ope_reg_match}
-    SEARCH = {"ope_name": "search", "operation": Operation.ope_reg_search}
+    IN = OperatorProps("in", Operation.ope_in)
+    EQ = OperatorProps("eq", Operation.ope_equals)
+    GT = OperatorProps("gt", Operation.ope_greater_than)
+    GE = OperatorProps("ge", Operation.ope_greater_equal_than)
+    LT = OperatorProps("lt", Operation.ope_lower_than)
+    LE = OperatorProps("le", Operation.ope_greater_equal_than)
+    IS = OperatorProps("is", Operation.ope_is)
+    ISNT = OperatorProps("isnt", Operation.ope_is_not)
+    MATCH = OperatorProps("match", Operation.ope_reg_match)
+    SEARCH = OperatorProps("search", Operation.ope_reg_search)
 
     @property
     def ope_name(self) -> str:
@@ -256,10 +241,10 @@ class Operator(Enum):
             str: name of the operator
         """
 
-        return self._value_["ope_name"]
+        return self._value_.ope_name
 
     @property
-    def operation(self) -> Callable:
+    def operation(self) -> Callable[..., bool]:
         """
         Return a logical operator name.
 
@@ -267,4 +252,4 @@ class Operator(Enum):
             Callable: the logical operation tied to this operator
         """
 
-        return self._value_["operation"]
+        return self._value_.operation

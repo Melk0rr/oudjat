@@ -1,17 +1,20 @@
 """A module that provide simple ways to change output color."""
 
+from typing import Any
+
+
 class ColorPrint:
     """A utility class to provide colored text output in the terminal."""
 
-    RED = "\033[91m"
-    GREEN = "\033[92m"
-    YELLOW = "\033[93m"
-    BLUE = "\033[94m"
-    PURPLE = "\033[95m"
-    END = "\033[0m"
+    RED: str = "\033[91m"
+    GREEN: str = "\033[92m"
+    YELLOW: str = "\033[93m"
+    BLUE: str = "\033[94m"
+    PURPLE: str = "\033[95m"
+    END: str = "\033[0m"
 
     @classmethod
-    def white(self, s: str, **kwargs) -> None:
+    def white(cls, s: str, **kwargs: Any) -> None:
         """
         Print the string `s` in default color (white).
 
@@ -23,7 +26,7 @@ class ColorPrint:
         print(s, **kwargs)
 
     @classmethod
-    def red(self, s: str, **kwargs) -> None:
+    def red(cls, s: str, **kwargs: Any) -> None:
         """
         Print the string `s` in red color.
 
@@ -32,10 +35,10 @@ class ColorPrint:
             **kwargs: Additional keyword arguments to pass to the built-in print function.
         """
 
-        print(self.RED + s + self.END, **kwargs)
+        print(cls.RED + s + cls.END, **kwargs)
 
     @classmethod
-    def green(self, s: str, **kwargs) -> None:
+    def green(cls, s: str, **kwargs: Any) -> None:
         """
         Print the string `s` in green color.
 
@@ -44,10 +47,10 @@ class ColorPrint:
             **kwargs: Additional keyword arguments to pass to the built-in print function.
         """
 
-        print(self.GREEN + s + self.END, **kwargs)
+        print(cls.GREEN + s + cls.END, **kwargs)
 
     @classmethod
-    def yellow(self, s: str, **kwargs) -> None:
+    def yellow(cls, s: str, **kwargs: Any) -> None:
         """
         Print the string `s` in yellow color.
 
@@ -56,10 +59,10 @@ class ColorPrint:
             **kwargs: Additional keyword arguments to pass to the built-in print function.
         """
 
-        print(self.YELLOW + s + self.END, **kwargs)
+        print(cls.YELLOW + s + cls.END, **kwargs)
 
     @classmethod
-    def blue(self, s: str, **kwargs) -> None:
+    def blue(cls, s: str, **kwargs: Any) -> None:
         """
         Print the string `s` in blue color.
 
@@ -68,10 +71,10 @@ class ColorPrint:
             **kwargs: Additional keyword arguments to pass to the built-in print function.
         """
 
-        print(self.BLUE + s + self.END, **kwargs)
+        print(cls.BLUE + s + cls.END, **kwargs)
 
     @classmethod
-    def purple(self, s: str, **kwargs) -> None:
+    def purple(cls, s: str, **kwargs: Any) -> None:
         """
         Print the string `s` in purple color.
 
@@ -80,5 +83,4 @@ class ColorPrint:
             **kwargs: Additional keyword arguments to pass to the built-in print function.
         """
 
-        print(self.PURPLE + s + self.END, **kwargs)
-
+        print(cls.PURPLE + s + cls.END, **kwargs)

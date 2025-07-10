@@ -5,7 +5,7 @@ import json
 import os
 import re
 from enum import Enum
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, NamedTuple
 
 from .color_print import ColorPrint
 
@@ -26,11 +26,15 @@ class FileHandler:
         """
 
         if not os.path.isfile(path):
-            raise (f"{__class__.__name__}.check_path::Invalid file path provided: {path}")
+            raise FileExistsError(
+                f"{__class__.__name__}.check_path::Invalid file path provided: {path}"
+            )
 
     # INFO: JSON file functions
     @staticmethod
-    def import_json(file_path: str, callback: Callable = None) -> Union[Dict, List]:
+    def import_json(
+        file_path: str, callback: Callable[..., Any] | None = None
+    ) -> list[Any]:
         """
         Import json data from a specified file.
 
@@ -59,7 +63,7 @@ class FileHandler:
         return json_data
 
     @staticmethod
-    def export_json(data: Union[List[Dict], Dict], file_path: str) -> None:
+    def export_json(data: list[Any], file_path: str) -> None:
         """
         Export data to a JSON file.
 
@@ -85,7 +89,37 @@ class FileHandler:
 
     # INFO: CSV file functions
     @staticmethod
-    def import_csv(file_path: str, callback: Callable = None, delimiter: str = None) -> List[Dict]:
+    def guess_csv_delimiter(csv_first_line: str) -> str:
+        """
+        Guess the CSV delimiter based on the provided first line.
+
+        Helper function that tries to determine the delimiter used in a CSV file. It does so by parsing special characters in the header line and returning the character with the highest count
+
+        Args:
+            csv_first_line (str): the CSV header line (in theory). The user can provide any other line if he whishes
+
+        Returns:
+            str: the delimiter used (?) in the CSV file based on the provided line. Or ',' if no delimiter are found
+        """
+        delimiter = ","
+        delimiter_list: list[str] = re.findall(r"\W", csv_first_line)
+
+        if len(delimiter_list) > 0:
+            delimiter_counts: dict[str, int] = {}
+            for c in delimiter_list:
+                if c not in delimiter_counts:
+                    delimiter_counts[c] = 1
+
+                delimiter_counts[c] += 1
+
+            delimiter: str = max(delimiter_counts, key=lambda d: delimiter_counts[d])
+
+        return delimiter
+
+    @staticmethod
+    def import_csv(
+        file_path: str, callback: Callable | None = None, delimiter: str | None = None
+    ) -> list[Any]:
         """
         Import CSV content into a list of dictionaries.
 
@@ -98,24 +132,27 @@ class FileHandler:
             list of dicts: The content of the CSV file parsed into a list of dictionaries.
         """
 
-        data = None
-
+        data: list[Any] = []
         try:
             full_path = os.path.join(os.getcwd(), file_path)
             with open(full_path, "r", encoding="utf-8", newline="") as f:
                 # WARN: Try to guess the delimiter if none was specified
-                if not delimiter:
+                if delimiter is None:
                     first_line = f.readline().strip("\n")
-                    f.seek(0)
-                    delimiter = re.findall(r"\W", first_line)[0]
+                    _ = f.seek(0)
+
+                    if delimiter is None:
+                        delimiter = FileHandler.guess_csv_delimiter(first_line)
 
                     print(f"\nNo delimiter specified, guessed '{delimiter}' as a delimiter")
 
                 reader = csv.DictReader(f, delimiter=delimiter, skipinitialspace=True)
 
-                data = list(reader)
+                raw_data = list(reader)
                 if callback is not None:
-                    data = callback(data)
+                    raw_data: list[Any] = callback(raw_data)
+
+                data = raw_data
 
             ColorPrint.green(f"Successfully imported CSV data from {file_path}")
 
@@ -126,7 +163,7 @@ class FileHandler:
 
     @staticmethod
     def export_csv(
-        data: List[Dict], file_path: str, delimiter: str = ",", append: bool = False
+        data: list[Any], file_path: str, delimiter: str = ",", append: bool = False
     ) -> None:
         """
         Export data into a CSV file.
@@ -163,8 +200,8 @@ class FileHandler:
     # INFO: TXT file functions
     @staticmethod
     def import_txt(
-        file_path: str, delete_duplicates: bool = False, callback: Callable = None
-    ) -> List[Any]:
+        file_path: str, delete_duplicates: bool = False, callback: Callable | None = None
+    ) -> list[Any]:
         """
         Import a text file and optionally remove duplicates.
 
@@ -198,7 +235,7 @@ class FileHandler:
         return data
 
     @staticmethod
-    def export_txt(data: List[str], file_path: str, append: bool = False) -> None:
+    def export_txt(data: list[Any], file_path: str, append: bool = False) -> None:
         """
         Export data into a text file.
 
@@ -218,7 +255,7 @@ class FileHandler:
             mode = "a" if append else "w"
             with open(full_path, mode, encoding="utf-8", newline="") as f:
                 for line in data:
-                    f.write(line + "\n")
+                    _ = f.write(f"{line}" + "\n")
 
             ColorPrint.green(f"Successfully exported TXT data to {file_path}")
 
@@ -226,15 +263,28 @@ class FileHandler:
             raise e
 
 
+class FileTypeProps(NamedTuple):
+    """
+    A helper class to properly handle FileType properties.
+
+    Args:
+        f_import (Callabe): function to import data for a specific file type
+        f_export (Callabe): function to export data for a specific file type
+    """
+
+    f_import: Callable[..., list[Any]]
+    f_export: Callable[..., None]
+
+
 class FileType(Enum):
     """Enumeration of file types to be used by file connector."""
 
-    CSV = {"import": FileHandler.import_csv, "export": FileHandler.export_csv}
-    JSON = {"import": FileHandler.import_json, "export": FileHandler.export_json}
-    TXT = {"import": FileHandler.import_txt, "export": FileHandler.export_txt}
+    CSV = FileTypeProps(FileHandler.import_csv, FileHandler.export_csv)
+    JSON = FileTypeProps(FileHandler.import_json, FileHandler.export_json)
+    TXT = FileTypeProps(FileHandler.import_txt, FileHandler.export_txt)
 
     @property
-    def f_import(self) -> Callable:
+    def f_import(self) -> Callable[..., list[Any]]:
         """
         Get the import function for the file type.
 
@@ -242,10 +292,10 @@ class FileType(Enum):
             Callable: The import function as a callable object.
         """
 
-        return self._value_["import"]
+        return self._value_.f_import
 
     @property
-    def f_export(self) -> Callable:
+    def f_export(self) -> Callable[..., None]:
         """
         Get the export function for the file type.
 
@@ -253,4 +303,4 @@ class FileType(Enum):
             Callable: The export function as a callable object.
         """
 
-        return self._value_["export"]
+        return self._value_.f_export

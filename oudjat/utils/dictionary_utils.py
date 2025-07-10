@@ -1,8 +1,5 @@
 """A module that gather dictionary utilities."""
 
-from typing import Dict, List, Tuple
-
-
 class CustomDict(dict):
     """Custom overload of the base dictionary."""
 
@@ -51,7 +48,7 @@ class CustomDict(dict):
     # Static methods
 
     @staticmethod
-    def join_dictionary_items(dictionary: Dict, char: str) -> str:
+    def join_dictionary_items(dictionary: dict[str, object], char: str) -> str:
         """
         Join dictionary items with the provided character.
 
@@ -70,7 +67,7 @@ class CustomDict(dict):
         return char.join(f"{k}: {v}" for k, v in dictionary.items())
 
     @staticmethod
-    def join_dictionary_values(dictionary: Dict, char: str) -> str:
+    def join_dictionary_values(dictionary: dict[str, object], char: str) -> str:
         """
         Join dictionary values with the provided character.
 
@@ -89,7 +86,7 @@ class CustomDict(dict):
         return char.join(map(str, dictionary.values()))
 
     @staticmethod
-    def map_list_to_dict(list_to_map: List, key: str) -> Dict:
+    def map_list_to_dict(list_to_map: list[dict[str, object]], key: str) -> dict[object, dict[str, object]]:
         """
         Map a list into a dictionary using the provided key.
 
@@ -108,7 +105,7 @@ class CustomDict(dict):
         return {el[key]: el for el in list_to_map}
 
     @staticmethod
-    def from_tuple(input_tuple: Tuple, parent: Tuple, res: Dict = {}) -> Dict:
+    def from_tuple(input_tuple: tuple[str], parent: tuple[str], res: dict[str, object] | None = None) -> dict[str, object]:
         """
         Convert a nested tuple into a dictionary recursively.
 
@@ -120,6 +117,9 @@ class CustomDict(dict):
         Returns:
             Dict: A nested dictionary where each key-value pair represents an element and its corresponding parent index.
         """
+
+        if res is None:
+            res = {}
 
         for el in input_tuple:
             if isinstance(el, tuple):

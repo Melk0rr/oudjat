@@ -12,9 +12,6 @@ class StdOutHook:
         filename (str): The name of the file where the output will be saved.
     """
 
-    lines = []
-    filename = ""
-
     def __init__(self, filename: str, silent: bool = False, output: bool = True) -> None:
         """
         Initialize a new instance of StdOutHook.
@@ -25,9 +22,10 @@ class StdOutHook:
             output (bool, optional): whether to write to the specified file. Defaults to True.
         """
 
-        self.filename = filename
-        self.silent = silent
-        self.output = output
+        self.lines: list[str] = []
+        self.filename: str = filename
+        self.silent: bool = silent
+        self.output: bool = output
 
     def write(self, text: str, override: bool = False) -> None:
         """
@@ -40,7 +38,8 @@ class StdOutHook:
         """
 
         if not self.silent or override:
-            sys.__stdout__.write(text)
+            if sys.__stdout__ is not None:
+                _ = sys.__stdout__.write(text)
 
         self.lines.append(text)
 
@@ -65,7 +64,7 @@ class StdOutHook:
                     .replace("\033[95m", "")
                     .replace("\033[0m", "")
                 )
-                file.write(clean_line)
+                _ = file.write(clean_line)
 
     def flush(self):
         """

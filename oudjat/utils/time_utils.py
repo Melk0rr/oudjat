@@ -2,8 +2,6 @@
 
 from datetime import datetime, timedelta, timezone
 from enum import Enum
-from functools import reduce
-from typing import List, Union
 
 from .bit_flag import BitFlag
 
@@ -33,7 +31,7 @@ class DateFormat(Enum):
     SEC = "%S"
 
     @staticmethod
-    def map_from_formats(formats: List["DateFormat"], flag: "DateFlag") -> List[str]:
+    def map_from_formats(formats: list["DateFormat"], flag: int | DateFlag) -> list[str]:
         """
         Map date formats to a list of strings based on the given flag.
 
@@ -89,12 +87,18 @@ class TimeConverter:
             str: A string formatted as "D:HH:MM:SS.mmm" representing the input time.
         """
 
-        return "%d:%02d:%02d.%03d" % reduce(
-            lambda ll, b: divmod(ll[0], b) + ll[1:], [(t * 1000,), 1000, 60, 60]
-        )
+        ms = round(t * 1000)
+        days, rem = divmod(ms, 86400000)
+        hours, rem = divmod(rem, 3600000)
+        minutes, rem = divmod(rem, 60000)
+        seconds, milliseconds = divmod(rem, 1000)
+
+        return f"{days}:{hours:02d}:{minutes:02d}:{seconds:02d}.{milliseconds:03d}"
 
     @staticmethod
-    def unixtime_to_str(unix_time: Union[int, str], delta: int = 1, date_flag: int = DateFlag.YMD_HMS) -> str:
+    def unixtime_to_str(
+        unix_time: int | str, delta: int = 1, date_flag: int = DateFlag.YMD_HMS
+    ) -> str:
         """
         Convert a Unix time (either as an integer or string) to a readable date and time string.
 
@@ -107,11 +111,14 @@ class TimeConverter:
             str: A formatted string representing the date and time from the given Unix timestamp.
         """
 
-        if type(unix_time) is not int:
+        if not isinstance(unix_time, int):
             unix_time = int(unix_time)
 
-        date = datetime.utcfromtimestamp(unix_time / 1000) + timedelta(hours=delta)
-        return date.strftime(DateFormat.from_flag(date_flag))
+        date_utc = datetime.fromtimestamp(unix_time / 1000, tz=timezone.utc)
+        target_tz = timezone(timedelta(hours=delta))
+        target_date = date_utc.astimezone(target_tz)
+
+        return target_date.strftime(DateFormat.from_flag(date_flag))
 
     @staticmethod
     def days_diff(date: datetime, reverse: bool = False) -> int:
@@ -126,9 +133,6 @@ class TimeConverter:
             int: The absolute difference in days between today and the given past date, or -1 if an error occurs.
         """
 
-        if date is None:
-            return -1
-
         date = date.replace(tzinfo=timezone.utc)
 
         today = datetime.now(timezone.utc)
@@ -137,7 +141,7 @@ class TimeConverter:
         return diff.days
 
     @staticmethod
-    def str_to_date(date_str: str, date_format: str = DateFormat.from_flag(DateFlag.YMD)) -> datetime:
+    def str_to_date(date_str: str, date_format: str | None = None) -> datetime:
         """
         Convert the given date string into a proper datetime.
 
@@ -149,10 +153,13 @@ class TimeConverter:
             datetime: datetime object based on provided date string and format
         """
 
+        if date_format is None:
+            date_format = DateFormat.from_flag(DateFlag.YMD)
+
         return datetime.strptime(date_str, date_format)
 
     @staticmethod
-    def date_to_str(date: datetime, date_format: str = DateFormat.from_flag(DateFlag.YMD)) -> datetime:
+    def date_to_str(date: datetime, date_format: str | None = None) -> str:
         """
         Convert the given datetime object into a string.
 
@@ -164,5 +171,7 @@ class TimeConverter:
             str: the provided date as a string based on the given format
         """
 
-        return date is not None and date.strftime(date_format) or date
+        if date_format is None:
+            date_format = DateFormat.from_flag(DateFlag.YMD)
 
+        return date.strftime(date_format)
