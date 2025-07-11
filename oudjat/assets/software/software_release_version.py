@@ -1,5 +1,6 @@
 """Module to describe software release versions."""
 
+import re
 from enum import Enum
 from typing import override
 
@@ -24,6 +25,8 @@ class SoftwareReleaseVersion:
     The class handles version stage and version semantic parts major, minor and build.
     """
 
+    PATTERN: str = r"^(\d+)(a|b|rc)(\d+)$"
+
     def __init__(
         self,
         version: int | str,
@@ -47,14 +50,26 @@ class SoftwareReleaseVersion:
         self._minor: int = 0
         self._build: int = 0
 
+        self._stage: SoftwareReleaseStage = stage[0]
+        self._stage_version: int = stage[1]
+
         if isinstance(version, int):
             self._major = version
 
         else:
-            self._major, self._minor, self._build = map(int, version.split("."))
+            # TODO: Try-except + improve this part
+            version_split = version.split(".")
+            match = re.match(self.PATTERN, version_split[-1])
+            if match:
+                self._build = int(match.groups()[0])
+                self._stage = SoftwareReleaseStage(match.groups()[1])
+                self._stage_version = int(match.groups()[2])
 
-        self._stage: SoftwareReleaseStage = stage[0]
-        self._stage_version: int = stage[1]
+            else:
+                self._build = int(version_split[2])
+
+            self._major = int(version_split[0])
+            self._minor = int(version_split[1])
 
     @property
     def major(self) -> int:
