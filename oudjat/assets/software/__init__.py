@@ -3,6 +3,7 @@
 from .software import Software, SoftwareType
 from .software_edition import SoftwareEdition, SoftwareEditionDict
 from .software_release import SoftwareRelease, SoftwareReleaseDict
+from .software_release_version import SoftwareReleaseVersion, SoftwareReleaseStage
 from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList
 
 __all__ = [

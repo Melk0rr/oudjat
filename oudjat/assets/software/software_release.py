@@ -1,14 +1,17 @@
 """A module that defines the notion of software release."""
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, List, Union
+from enum import Enum
+from typing import TYPE_CHECKING
 
 from oudjat.utils.time_utils import TimeConverter
 
 from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList
+from .software_release_version import SoftwareReleaseVersion
 
 if TYPE_CHECKING:
     from .software import Software
+
 
 
 class SoftwareRelease:
@@ -20,8 +23,8 @@ class SoftwareRelease:
     def __init__(
         self,
         software: "Software",
-        version: Union[int, str],
-        release_date: Union[str, datetime],
+        version: int | str,
+        release_date: str | datetime,
         release_label: str,
     ) -> None:
         """
@@ -38,8 +41,9 @@ class SoftwareRelease:
             ValueError: If `release_date` is provided as a string and does not match the expected date format.
         """
 
-        self.software = software
-        self.version = version
+        # TODO: fully implement SoftwareReleaseVersion
+        self.software: "Software" = software
+        self.version = SoftwareReleaseVersion(version)
         self.label = release_label
 
         try:

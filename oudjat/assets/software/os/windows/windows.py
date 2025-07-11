@@ -3,7 +3,7 @@
 import re
 from datetime import datetime
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING
 
 from oudjat.assets.computer.computer_type import ComputerType
 from oudjat.assets.software import (
@@ -28,8 +28,8 @@ class MSOSRelease(OSRelease):
     def __init__(
         self,
         software: "Software",
-        version: Union[int, str],
-        release_date: Union[str, datetime],
+        version: int | str,
+        release_date: str | datetime,
         release_label: str,
     ) -> None:
         """
@@ -146,6 +146,11 @@ class WindowsEdition(Enum):
         "Datacenter": SoftwareEdition(label="Datacenter", pattern=r"[Dd]atacenter"),
     }
 
+    @property
+    def editions(self):
+        """The editions property."""
+        return self._value_.values()
+
 
 class MicrosoftOperatingSystem(OperatingSystem):
     """A child class of operating system describing Microsoft OSes."""
@@ -153,15 +158,15 @@ class MicrosoftOperatingSystem(OperatingSystem):
     # ****************************************************************
     # Attributes & Constructors
 
-    VERSION_REG = r"(\d{1,2}\.\d)\W*(\d{4,5})\W*"
+    VERSION_REG: str = r"(\d{1,2}\.\d)\W*(\d{4,5})\W*"
 
     def __init__(
         self,
-        msos_id: Union[int, str],
+        msos_id: int | str,
         name: str,
         label: str,
-        computer_type: Union[ComputerType, List[ComputerType]],
-        description: str = None,
+        computer_type: ComputerType | list[ComputerType],
+        description: str | None = None,
     ) -> None:
         """
         Create a new instance of MicrosoftOperatingSystem.
@@ -230,7 +235,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
     # Static methods
 
     @staticmethod
-    def get_matching_version(test_str: str) -> str:
+    def get_matching_version(test_str: str) -> str | None:
         """
         Return a version matching the given string.
 
