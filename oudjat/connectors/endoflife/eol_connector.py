@@ -2,7 +2,7 @@
 
 import json
 import re
-from typing import Dict, List, Union
+from typing import Any, override
 
 import requests
 
@@ -24,12 +24,13 @@ class EndOfLifeConnector(Connector):
         """
 
         super().__init__(target=EOL_API_URL)
-        self.products = []
+        self.products: list[str] = []
+        self.connection: bool = False
 
     # ****************************************************************
     # Methods
 
-    def get_products(self) -> List[str]:
+    def get_products(self) -> list[str]:
         """
         Return a list of products.
 
@@ -39,6 +40,7 @@ class EndOfLifeConnector(Connector):
 
         return self.products
 
+    @override
     def connect(self) -> None:
         """
         Attempt to establish a connection to the API endpoint and retrieves product information if successful.
@@ -48,7 +50,8 @@ class EndOfLifeConnector(Connector):
         Raises:
             ConnectionError: If unable to connect to the API endpoint or retrieve data.
         """
-        self.connection = None
+
+        self.connection = False
 
         try:
             headers = {"Accept": "application/json"}
@@ -59,15 +62,22 @@ class EndOfLifeConnector(Connector):
                 self.products = json.loads(req.content.decode("utf-8"))
 
         except ConnectionError as e:
-            raise ConnectionError(f"{__class__.__name__}.connect::Could not connect to {self.target}\n{e}")
+            raise ConnectionError(
+                f"{__class__.__name__}.connect::Could not connect to {self.target}\n{e}"
+            )
 
-    def search(self, search_filter: str, attributes: Union[str, List[str]] = None) -> List[Dict]:
+    @override
+    def search(
+        self, search_filter: str, attributes: list[str] | None = None, *args: Any, **kwargs: Any
+    ) -> list[Any]:
         """
         Search the API for product infos.
 
         Args:
-            search_filter (str)                        : The specific product to search for.
-            attributes (Union[str, List[str], optional): Specify which attributes of the product to retrieve. Can be a single string or a list of strings. Defaults to None.
+            search_filter (str)   : The specific product to search for.
+            attributes (list[str]): Specify which attributes of the product to retrieve. Can be a single string or a list of strings. Defaults to None.
+            *args (Any)           : any args the overriding method provides
+            **kwargs (Any)        : any kwargs the overriding method provides
 
         Returns:
             List[Dict]: A list of dictionaries containing information about the products that match the search criteria.
@@ -79,14 +89,15 @@ class EndOfLifeConnector(Connector):
 
         res = []
 
-        if self.connection is None or len(self.products) == 0:
-            raise ConnectionError(f"{__class__.__name__}.search::Please run connect to initialize endoflife connection")
+        if not self.connection or len(self.products) == 0:
+            raise ConnectionError(
+                f"{__class__.__name__}.search::Please run connect to initialize endoflife connection"
+            )
 
         if search_filter not in self.products:
-            raise ValueError(f"{__class__.__name__}.search::{search_filter} is not a valid product:\n{self.products}")
-
-        if attributes is not None and not isinstance(attributes, list):
-            attributes = [attributes]
+            raise ValueError(
+                f"{__class__.__name__}.search::{search_filter} is not a valid product:\n{self.products}"
+            )
 
         try:
             headers = {"Accept": "application/json"}
@@ -99,11 +110,13 @@ class EndOfLifeConnector(Connector):
                     res = [{k: v for k, v in e.items() if k in attributes} for e in res]
 
         except ConnectionError as e:
-            raise ConnectionError(f"{__class__.__name__}.search::Could not retrieve {search_filter} infos:\n{e}")
+            raise ConnectionError(
+                f"{__class__.__name__}.search::Could not retrieve {search_filter} infos:\n{e}"
+            )
 
         return res
 
-    def get_windows_rel(self, target: str = "windows") -> List[Dict]:
+    def get_windows_rel(self, target: str = "windows") -> list[dict[str, str]]:
         """
         Retrieve Windows releases.
 
@@ -121,8 +134,10 @@ class EndOfLifeConnector(Connector):
 
         for rel in win_eol:
             if target == "windows":
-                win_editions = list(set([e.get_category() for e in WindowsEdition.WINDOWS.value]))
-                r_edition = win_editions[:-1]
+                win_editions = list(
+                    set([e.get_category() for e in WindowsEdition.WINDOWS.editions])
+                )
+                r_edition: list[str] = win_editions[:-1]
 
                 edi_search = re.search(
                     rf"^.+ \(?({'|'.join(win_editions)})\)?$", rel["releaseLabel"].upper()

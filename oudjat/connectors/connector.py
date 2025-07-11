@@ -1,5 +1,7 @@
 """A module to centralize common behavior accross all connectors."""
 
+from typing import Any
+
 from keyring.credentials import Credential, SimpleCredential
 
 from oudjat.utils import CredentialHelper
@@ -32,7 +34,7 @@ class Connector:
         if use_credentials and self.service_name is not None:
             self.credentials = CredentialHelper.get_credentials(self.service_name)
 
-        self.connection: object = None
+        self.connection: Any = None
 
     def get_connection(self) -> object:
         """
@@ -74,7 +76,7 @@ class Connector:
         if use_credentials:
             self.credentials = CredentialHelper.get_credentials(self.service_name)
 
-    def connect(self, *args: tuple[object], **kwargs: dict[str, object]) -> None:
+    def connect(self) -> None:
         """
         Connect to the target.
 
@@ -87,21 +89,29 @@ class Connector:
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.connect({args}, {kwargs})::Method must be implemented by the overloading class"
+            f"{__class__.__name__}.connect()::Method must be implemented by the overloading class"
         )
 
-    def search(self, *args: tuple[object], **kwargs: dict[str, object]) -> list[str | object]:
+    def search(
+        self,
+        search_filter: Any,
+        attributes: list[str] | None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> list[Any]:
         """
         Retrieve data from the target.
 
         Args:
-            *args (tuple)  : any args the overriding method provides
-            **kwargs (dict): any kwargs the overriding method provides
+            search_filter (Any)   : a way to narrow search scope or search results. It may be a string, a tuple, or even a callback function
+            attributes (list[str]): a list of attributes to keep in the search results
+            *args (tuple)         : any args the overriding method provides
+            **kwargs (dict)       : any kwargs the overriding method provides
 
         Return:
             list[any] : list of results
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.search({args}, {kwargs})::Method must be implemented by the overloading class"
+            f"{__class__.__name__}.search({search_filter}, {attributes}, {args}, {kwargs})::Method must be implemented by the overloading class"
         )

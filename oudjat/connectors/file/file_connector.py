@@ -1,6 +1,6 @@
 """A module to perform connection to various types of file."""
 
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, override
 
 from oudjat.connectors.connector import Connector
 from oudjat.utils.file_utils import FileHandler, FileType
@@ -12,36 +12,36 @@ class FileConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, path: str, source: str) -> None:
+    def __init__(self, file: str, source: str) -> None:
         """
         Create a new instance of FileConnector.
 
         Args:
-            path (str)  : The path to the file.
+            file (str)  : The path to the file.
             source (str): The source identifier or description of the file.
         """
 
-        FileHandler.check_path(path)
-        file_ext = path.split(".")[-1]
+        FileHandler.check_path(file)
+        file_ext = file.split(".")[-1]
 
-        self.source = source
+        self.source: str = source
         try:
-            self.filetype = FileType[file_ext.upper()]
+            self.filetype: FileType = FileType[file_ext.upper()]
 
         except ValueError:
-            raise (
+            raise ValueError(
                 f"{__class__.__name__}.__init__::{file_ext.upper()} files are not supported by {__class__.__name__}"
             )
 
-        self.connection = False
-        self.data = None
+        self.connection: bool = False
+        self.data: list[Any] | None = None
 
-        super().__init__(path, service_name=None, use_credentials=False)
+        super().__init__(file, service_name=None, use_credentials=False)
 
     # ****************************************************************
     # Methods
 
-    def get_data(self) -> List[Any]:
+    def get_data(self) -> list[Any] | None:
         """
         Getter for file data.
 
@@ -63,14 +63,15 @@ class FileConnector(Connector):
         """
 
         FileHandler.check_path(new_path)
-        self.target = new_path
+        self.set_target(new_path)
 
-    def connect(self, callback: Callable) -> List[Any]:
+    @override
+    def connect(self, file_connection_opts: dict[str, Any] | None = None) -> None:
         """
         'Connect' to the file and import data from it.
 
         Args:
-            callback (object): Callback function for additional processing after file import.
+            file_connection_opts (dict): options to pass to the file import function
 
         Returns:
             List[Any]: The list of data imported from the file.
@@ -79,14 +80,17 @@ class FileConnector(Connector):
             Exception: if the file does not exist, can't be reached or if there is any error while importing its data
         """
 
+        if file_connection_opts is None:
+            file_connection_opts = {}
+
         try:
             self.data = self.filetype.f_import(
-                file_path=self.target, delimiter=self.delimiter, callback=callback
+                file_path=self.target, **file_connection_opts
             )
             self.connection = True
 
-        except Exception as e:
-            raise (f"{__class__.__name__}.connect::Error connecting to file {self.target}\n{e}")
+        except FileExistsError as e:
+            raise FileExistsError(f"{__class__.__name__}.connect::Error connecting to file {self.target}\n{e}")
 
     def disconnect(self) -> None:
         """
@@ -96,17 +100,22 @@ class FileConnector(Connector):
         self.data = None
         self.connection = False
 
+    @override
     def search(
         self,
-        search_filter_cb: Callable,
-        attributes: Union[str, List[str]] = None,
-    ) -> List[Any]:
+        search_filter: Callable[[Any], bool],
+        attributes: list[str] | None = None,
+        *args: Any,
+        **kwargs: Any
+    ) -> list[Any]:
         """
         Search into the imported data based on given filters and attributes.
 
         Args:
-            search_filter_cb (Callable)                : A callback function that provides a predicate
-            attributes (Union[str, List[str], optional): Specific attributes to retrieve from filtered results.
+            search_filter (Callable)        : A callback function that provides a predicate
+            attributes (list[str], optional): Specific attributes to retrieve from filtered results.
+            *args (tuple)                   : any args the overriding method provides
+            **kwargs (dict)                 : any kwargs the overriding method provides
 
         Returns:
             List[Any]: The list of elements that match the search criteria.
@@ -115,9 +124,12 @@ class FileConnector(Connector):
         if not self.connection:
             self.connect()
 
+        if self.data is None:
+            return []
+
         return [
             {k: v for k, v in el.items() if k in attributes}
             for el in self.data
-            if search_filter_cb(el)
+            if search_filter(el)
         ]
 

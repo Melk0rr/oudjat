@@ -113,7 +113,7 @@ class TenableSCConnector(Connector):
         self.repos = None
 
     @override
-    def search(self, search_type: str, *args: tuple[Any], **kwargs: dict[str, Any]) -> list[object]:
+    def search(self, search_type: str = "VULNS", *args: tuple, **kwargs: dict) -> list[object]:
         """
         Search the API for elements.
 
