@@ -50,7 +50,7 @@ Help:
 
 import sys
 import time
-from typing import Any, Dict
+from typing import Any
 
 from docopt import docopt
 
@@ -68,7 +68,7 @@ COMMAND_OPTIONS = {
 }
 
 
-def command_switch(options: Dict) -> Any:
+def command_switch(options: dict[str, str]) -> Any:
     """
     Script command switch case.
     """
@@ -88,8 +88,9 @@ def main() -> None:
             sys.exit(1)
 
         start_time = time.time()
-
         options = docopt(__doc__, version=VERSION)
+
+        original_stdout = sys.stdout
 
         if options["--output"] or options["--silent"]:
             sys.stdout = StdOutHook(options["FILENAME"], options["--silent"], options["--output"])
@@ -102,6 +103,7 @@ def main() -> None:
             ColorPrint.red("Please only supply one target method - either -f or -t.")
             return
 
+
         ColorPrint.blue(banner)
 
         command = command_switch(options)
@@ -113,8 +115,7 @@ def main() -> None:
             }s"
         )
 
-        if options["--output"]:
-            sys.stdout.write_out()
+        sys.stdout = original_stdout
 
     except KeyboardInterrupt:
         print("\nQuitting...")
