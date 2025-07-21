@@ -1,7 +1,5 @@
 """A module that defines the Computer asset type."""
 
-from typing import Dict, List, Union
-
 from oudjat.assets import Asset, AssetType
 from oudjat.assets.network.ipv4 import IPv4
 from oudjat.assets.software import (
@@ -13,7 +11,6 @@ from oudjat.assets.software.os import OSRelease
 
 from .computer_type import ComputerType
 
-
 class Computer(Asset):
     """A common class for computers."""
 
@@ -22,15 +19,15 @@ class Computer(Asset):
 
     def __init__(
         self,
-        computer_id: Union[int, str],
+        computer_id: int | str,
         name: str,
-        label: str = None,
-        description: str = None,
-        computer_type: Union[str, ComputerType] = None,
-        os_release: OSRelease = None,
-        os_edition: SoftwareEdition = None,
-        ip: Union[str, IPv4] = None,
-    ):
+        label: str | None = None,
+        description: str | None = None,
+        computer_type: str | ComputerType | None = None,
+        os_release: OSRelease | None = None,
+        os_edition: SoftwareEdition | None = None,
+        ip: str | IPv4 | None = None,
+    ) -> None:
         """
         Initialize a new instance of the class.
 
@@ -63,19 +60,25 @@ class Computer(Asset):
             asset_type=AssetType.COMPUTER,
         )
 
-        self.os_release: OSRelease = None
-        self.os_edition: SoftwareEdition = None
-        if os_release is not None:
+        self._os: dict[str, OSRelease | SoftwareRelease] = {
+            "release": None,
+            "edition": None
+        }
+
+        self._os_release: OSRelease | None = None
+        self._os_edition: SoftwareEdition | None = None
+
+        if os_release is not None and os_edition is not None:
             self.set_os(os_release=os_release, edition=os_edition)
 
-        self.computer_type: ComputerType = None
-        self.ip: IPv4 = None
+        self.computer_type: ComputerType | None = None
 
+        self._ip: IPv4 | None = None
         if ip is not None:
             self.set_ip(ip)
 
-        self.softwares: List[SoftwareRelease] = []
-        self.protection_agent = None
+        self.softwares: list[SoftwareRelease] = []
+        self.protection_agent: SoftwareRelease | None = None
 
     # ****************************************************************
     # Methods
@@ -196,14 +199,14 @@ class Computer(Asset):
         """
 
         if not isinstance(os_release, OSRelease):
-            raise ValueError(f"{__class__.__name__}.set_os::Invalid OS provided for {self.name}")
+            raise ValueError(f"{__class__.__name__}.set_os::Invalid OS provided for {self._name}")
 
         self.os_release = os_release
 
         if edition is not None:
             if not isinstance(edition, SoftwareEdition):
                 raise ValueError(
-                    f"{__class__.__name__}.set_os::Invalid edition provided for {self.name}"
+                    f"{__class__.__name__}.set_os::Invalid edition provided for {self._name}"
                 )
 
             self.os_edition = edition
