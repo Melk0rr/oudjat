@@ -1,5 +1,6 @@
 """A module that describes group of assets."""
-from typing import Dict, List, Union
+
+from typing import override
 
 from ..asset import Asset
 from ..asset_type import AssetType
@@ -18,11 +19,11 @@ class Group(Asset):
 
     def __init__(
         self,
-        group_id: Union[int, str],
+        group_id: int | str,
         name: str,
-        label: str = None,
-        description: str = None,
-    ):
+        label: str | None = None,
+        description: str | None = None,
+    ) -> None:
         """
         Create a new Group of assets.
 
@@ -34,15 +35,19 @@ class Group(Asset):
         """
 
         super().__init__(
-            asset_id=group_id, name=name, label=label, description=description, asset_type=AssetType.GROUP
+            asset_id=group_id,
+            name=name,
+            label=label,
+            description=description,
+            asset_type=AssetType.GROUP,
         )
 
-        self.members = GroupMemberList()
+        self.members: GroupMemberList = GroupMemberList()
 
     # ****************************************************************
     # Methods
 
-    def get_members(self) -> Dict[str, Asset]:
+    def get_members(self) -> dict[str, Asset]:
         """
         Return the members of the group.
 
@@ -50,9 +55,9 @@ class Group(Asset):
             Dict[str, Asset]: A dictionary containing all members by their identifier.
         """
 
-        return self.members.values()
+        return self.members
 
-    def get_member_names(self) -> List[str]:
+    def get_member_names(self) -> list[str]:
         """
         Return the list of member names in the group.
 
@@ -70,8 +75,7 @@ class Group(Asset):
             member (GenericIdentifiable): The asset to be added as a member.
         """
 
-        if isinstance(member, GenericIdentifiable):
-            self.members[member.get_id()] = member
+        self.members[member.id] = member
 
     def clear_members(self) -> None:
         """
@@ -85,6 +89,7 @@ class Group(Asset):
         ):  # Using list to avoid RuntimeError during modification
             del self.members[member_id]
 
+    @override
     def __str__(self) -> str:
         """
         Convert the current instance into a string representation.
@@ -93,4 +98,4 @@ class Group(Asset):
             str: A string that represents the group's name.
         """
 
-        return f"{self.name}"
+        return f"{self._name}"
