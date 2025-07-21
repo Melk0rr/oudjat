@@ -1,6 +1,6 @@
 """A module to handle LDAPUser manipulations."""
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
 
 from oudjat.assets.user import User
 
@@ -36,11 +36,11 @@ class LDAPUser(LDAPAccount, User):
         ms_acc_ctl = self.entry.get(MS_ACCOUNT_CTL_PROPERTY, None)
 
         if ms_acc_ctl is not None:
-            self.enabled = not LDAPAccountFlag.is_disabled(ms_acc_ctl)
-            self.pwd_expires = LDAPAccountFlag.pwd_expires(ms_acc_ctl)
-            self.pwd_expired = LDAPAccountFlag.pwd_expired(ms_acc_ctl)
-            self.pwd_required = LDAPAccountFlag.pwd_required(ms_acc_ctl)
-            self.is_locked = LDAPAccountFlag.is_locked(ms_acc_ctl)
+            self.enabled: bool = not LDAPAccountFlag.is_disabled(ms_acc_ctl)
+            self.pwd_expires: bool = LDAPAccountFlag.pwd_expires(ms_acc_ctl)
+            self.pwd_expired: bool = LDAPAccountFlag.pwd_expired(ms_acc_ctl)
+            self.pwd_required: bool = LDAPAccountFlag.pwd_required(ms_acc_ctl)
+            self.is_locked: bool = LDAPAccountFlag.is_locked(ms_acc_ctl)
 
             for flag in list(LDAPAccountFlag):
                 if LDAPAccountFlag.check_flag(ms_acc_ctl, flag):
@@ -49,7 +49,7 @@ class LDAPUser(LDAPAccount, User):
         User.__init__(
             self,
             user_id=self.uuid,
-            name=self.name,
+            name=self._name,
             firstname=self.entry.get("givenName"),
             lastname=self.entry.get("sn"),
             email=email,
