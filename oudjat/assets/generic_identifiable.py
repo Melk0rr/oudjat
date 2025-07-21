@@ -1,6 +1,6 @@
 """A module to describe a generic class that includes common properties among multiple asset types."""
 
-from typing import Any, Dict, Union
+from typing import Any, override
 
 
 class GenericIdentifiable:
@@ -11,10 +11,10 @@ class GenericIdentifiable:
 
     def __init__(
         self,
-        gid: Union[int, str],
+        gid: int | str,
         name: str,
-        label: str = None,
-        description: str = None,
+        label: str | None = None,
+        description: str | None = None,
     ):
         """
         Create a new instance of GenericIdentifiable.
@@ -26,37 +26,40 @@ class GenericIdentifiable:
             description (str, optional): A detailed description of the object, defaults to None.
         """
 
-        self._id = gid
-        self.name = name
-        self.label = label
-        self.description = description
+        self._id: int | str = gid
+        self._name: str = name
+        self._label: str | None = label
+        self._description: str | None = description
 
-        self.custom_attributes = {}
+        self._custom_attributes: dict[str, Any] = {}
 
     # ****************************************************************
     # Methods
 
-    def get_id(self) -> Union[int, str]:
+    @property
+    def id(self) -> int | str:
         """
-        Getter for instance id.
+        Return the id of the current object.
 
         Returns:
-            Union[int, str]: The identifier of the object.
+            int | str: the identifier of the object.
         """
 
         return self._id
 
-    def get_name(self) -> str:
+    @property
+    def name(self) -> str:
         """
-        Getter for instance name.
+        Return the name of the generic identifiable object.
 
         Returns:
             str: The name of the object.
         """
 
-        return self.name
+        return self._name
 
-    def get_label(self) -> str:
+    @property
+    def label(self) -> str | None:
         """
         Getter for instance label.
 
@@ -64,55 +67,59 @@ class GenericIdentifiable:
             str: A short text label for the object.
         """
 
-        return self.label
+        return self._label
 
-    def get_description(self) -> str:
+    @property
+    def description(self) -> str | None:
         """
-        Getter for instance description.
+        Return the description of the current object.
 
         Returns:
-            str: The detailed description of the object.
+            str: a string that describe the current genereic identifiable object
         """
 
-        return self.description
+        return self._description
 
-    def set_description(self, new_description: str) -> None:
+    @description.setter
+    def description(self, new_description: str) -> None:
         """
-        Setter for instance description.
+        Set a new value for the object description.
 
         Args:
-            new_description (str): The new description to be set.
+            new_description (str): new description value
         """
 
-        self.description = new_description
+        self._description = new_description
 
-    def get_custom_attr(self, key: str = None) -> Any:
+    @property
+    def custom_attributes(self, key: str | None = None) -> dict[str, Any]:
         """
-        Getter for custom attributes.
-
-        Args:
-            key (str, optional): The key of the custom attribute to retrieve, defaults to None.
+        Return the object custom attributes dictionary.
 
         Returns:
-            Any: The value of the custom attribute if key is provided; otherwise, returns all custom attributes as a dictionary.
+            dict[str, Any]: a dictionary that contains custom attributes of the current object
         """
 
-        if key is not None and key not in self.custom_attributes.keys():
+        if key is None:
+            return self._custom_attributes
+
+        if key not in self.custom_attributes.keys():
             raise ValueError(
                 f"{__class__.__name__}.get_custom_attr::{self._id} does not have any custom attribute {key}"
             )
 
-        return self.custom_attributes if key is None else self.custom_attributes[key]
+        return self.custom_attributes[key]
 
-    def set_custom_attr(self, new_custom_attr: Dict[str, Any]) -> None:
+    @custom_attributes.setter
+    def custom_attributes(self, new_custom_attr: dict[str, Any]) -> None:
         """
-        Setter for custom attributes.
+        Set the custom attributes of the current object.
 
         Args:
-            new_custom_attr (Dict[str, Any]): A dictionary of new custom attributes to be set.
+            new_custom_attr (dict[str, Any]): a dictionary of custom attributes
         """
 
-        self.custom_attributes = new_custom_attr
+        self._custom_attributes = new_custom_attr
 
     def add_custom_attr(self, key: str, value: Any) -> None:
         """
@@ -125,7 +132,7 @@ class GenericIdentifiable:
 
         self.custom_attributes[key] = value
 
-    def add_multiple_custom_attr(self, new_custom_attr: Dict[str, Any]) -> None:
+    def add_multiple_custom_attr(self, new_custom_attr: dict[str, Any]) -> None:
         """
         Add multiple new custom attributes.
 
@@ -152,6 +159,7 @@ class GenericIdentifiable:
 
         self.custom_attributes = {}
 
+    @override
     def __str__(self) -> str:
         """
         Convert the current instance into a string.
@@ -167,7 +175,7 @@ class GenericIdentifiable:
             f"{__class__.__name__}.__str__::This method must be implemented by the overloading class"
         )
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
 

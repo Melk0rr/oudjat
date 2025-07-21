@@ -1,12 +1,12 @@
 """A module that defines base Asset properties."""
 
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, override
 
 from .asset_type import AssetType
 from .generic_identifiable import GenericIdentifiable
 
 if TYPE_CHECKING:
-    from ..organization.location import Location
+    from .location import Location
 
 
 class Asset(GenericIdentifiable):
@@ -21,12 +21,12 @@ class Asset(GenericIdentifiable):
 
     def __init__(
         self,
-        asset_id: Union[int, str],
+        asset_id: int | str,
         name: str,
         asset_type: AssetType,
-        label: str = None,
-        description: str = None,
-        location: Union["Location", List["Location"]] = None,
+        label: str | None = None,
+        description: str | None = None,
+        location: Location | list[Location] | None = None,
     ) -> None:
         """
         Create a new instance of Asset.
@@ -43,36 +43,46 @@ class Asset(GenericIdentifiable):
             location (Union["Location", List["Location"]], optional): The location(s) where the asset is situated. Defaults to None.
         """
 
-        super().__init__(gid=asset_id, name=name, label=label, description=description)
+        super().__init__(gid=asset_id, name=name, label=label or "", description=description or "")
 
-        self.location = []
-        self.set_location(location)
+        self._asset_type: AssetType = asset_type
+        self._location: dict[int | str, Location] = {}
 
-        self.asset_type = asset_type
-        self.location = location
+        if location is not None:
+            self.set_location_from_instance(location)
 
     # ****************************************************************
     # Methods
 
-    def get_location(self) -> Union["Location", List["Location"]]:
+    @property
+    def location(self) -> dict[int | str, Location]:
+        """The location property."""
+
+        return self._location
+
+    @location.setter
+    def location(self, new_location: dict[int | str, Location]) -> None:
         """
-        Getter for the asset location.
+        Set the location of the current asset.
+
+        Args:
+            new_location (Location | list[Location]): new location to associate to the asset
+        """
+
+        self._location = new_location
+
+    @property
+    def asset_type(self) -> AssetType:
+        """
+        Return the asset type of the current object.
 
         Returns:
-            Union["Location", List["Location"]]: The location(s) of the asset.
+            AssetType: asset type associated with the current asset
         """
-        return self.location
 
-    def get_asset_type(self) -> AssetType:
-        """
-        Return asset type.
+        return self._asset_type
 
-        Returns:
-            AssetType: The type of the asset.
-        """
-        return self.asset_type
-
-    def set_location(self, location: Union["Location", List["Location"]]) -> None:
+    def set_location_from_instance(self, new_location: Location | list[Location]) -> None:
         """
         Setter for asset location.
 
@@ -80,20 +90,16 @@ class Asset(GenericIdentifiable):
         Ensures that only instances of Location are added to the asset's locations.
 
         Args:
-            location (Union["Location", List["Location"]]): The location(s) to set for the asset.
+            new_location (Location | list[Location]): The location(s) to set for the asset.
         """
-        if not isinstance(location, list):
-            location = [location]
 
-        new_location = []
+        if not isinstance(new_location, list):
+            new_location = [new_location]
 
-        for loc in location:
-            if type(loc).__name__ == "Location":
-                new_location.append(loc)
+        self.location = { loc.id: loc for loc in new_location }
 
-        self.location = new_location
-
-    def to_dict(self) -> Dict:
+    @override
+    def to_dict(self) -> dict:
         """
         Convert current asset into a dict.
 
