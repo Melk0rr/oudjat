@@ -1,6 +1,6 @@
 """A module to handle manipulation of LDAP computer objects."""
 
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING
 
 from oudjat.assets.computer import Computer
 from oudjat.assets.software.os import OperatingSystem, OSOption
@@ -33,7 +33,7 @@ class LDAPComputer(LDAPAccount, Computer):
 
         # Retrieve OS and OS edition informations
         os_family_infos: str = OperatingSystem.get_matching_os_family(raw_os)
-        os_release = None
+        os_release: SoftwareRelease | None = None
         os_edition = None
 
         if os_family_infos is not None and raw_os_version is not None:
@@ -44,7 +44,7 @@ class LDAPComputer(LDAPAccount, Computer):
                     os.gen_releases()
 
                 os_ver = os.__class__.get_matching_version(raw_os_version)
-                os_release: SoftwareRelease = os.find_release(os_ver)
+                os_release = os.find_release(os_ver)
                 os_edition: List[SoftwareEdition] = os.get_matching_editions(raw_os)
 
                 if os_edition is not None and len(os_edition) != 0:
@@ -55,7 +55,7 @@ class LDAPComputer(LDAPAccount, Computer):
         Computer.__init__(
             self,
             computer_id=self.uuid,
-            name=self.name,
+            name=self._name,
             label=self.hostname,
             description=self.description,
             os_release=os_release,

@@ -1,6 +1,6 @@
 """Main module of the LDAP group package that implement LDAP group object manipulations tools."""
 
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING
 
 from oudjat.assets.group import Group
 
@@ -19,7 +19,7 @@ class LDAPGroup(LDAPObject, Group):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry", ldap_parent_group: "LDAPGroup" = None):
+    def __init__(self, ldap_entry: "LDAPEntry", ldap_parent_group: "LDAPGroup | None" = None):
         """
         Create a new instance of LDAPGroup.
 
@@ -31,7 +31,7 @@ class LDAPGroup(LDAPObject, Group):
         super().__init__(ldap_entry=ldap_entry)
 
         Group.__init__(
-            self, group_id=self.uuid, name=self.name, label=self.dn, description=self.description
+            self, group_id=self.uuid, name=self._name, label=self.dn, description=self.description
         )
 
     # ****************************************************************
