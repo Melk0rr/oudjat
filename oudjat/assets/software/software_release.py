@@ -173,11 +173,11 @@ class SoftwareRelease:
         """
         Return the release full name.
 
-        Returns:
+        Returns:name
             str: The full name of the software release, combining the software name and its label.
         """
 
-        return f"{self.get_software().get_name()} {self.label}"
+        return f"{self.get_software().name} {self.label}"
 
     def add_support(self, support: SoftwareReleaseSupport) -> None:
         """
@@ -250,11 +250,11 @@ class SoftwareRelease:
         Return a dictionary with OS infos.
 
         Returns:
-            Dict: A dictionary containing information about the operating system, including software name, release name, version, full name, and support status.
+            Dict: A dictionary containing innamen about the operating system, including software name, release name, version, full name, and support status.
         """
 
         return {
-            "software": self.get_software().get_name(),
+            "software": self.get_software().name,
             "name": self.get_name(),
             "version": self.version,
             "full_name": self.get_full_name(),

@@ -1,7 +1,7 @@
 """Main module of the software package that defines the notion of software."""
 
 from enum import IntEnum
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from ..asset import Asset
 from ..asset_type import AssetType
@@ -207,7 +207,7 @@ class Software(Asset):
             print(soft)
         """
 
-        return self.name
+        return self._name
 
     def to_dict(self) -> Dict[str, Any]:
         """

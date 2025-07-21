@@ -87,7 +87,7 @@ class MSOSRelease(OSRelease):
             str: A combined name based on the software's name and part of its label.
         """
 
-        return f"{self.get_software().get_name()} {self.label.split(' ')[0]}"
+        return f"{self.get_software()._name()} {self.label.split(' ')[0]}"
 
     def os_info_dict(self) -> Dict:
         """
@@ -192,7 +192,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
         )
 
         self.editions = SoftwareEditionDict(
-            **WindowsEdition[self.name.replace(" ", "").upper()].value
+            **WindowsEdition[self._name.replace(" ", "").upper()].value
         )
 
     # ****************************************************************
@@ -206,7 +206,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
         based on the version and label found in the data. It also sets support details for each release.
         """
 
-        for rel in WINDOWS_RELEASES[self._id]:
+        for rel in WINDOWS_RELEASES[f"{self._id}"]:
             win_rel = self.find_release(rel["releaseLabel"])
 
             if win_rel is None:
