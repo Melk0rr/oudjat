@@ -1,7 +1,7 @@
 """A module that defines the user asset type."""
 
 import re
-from typing import Dict, Union
+from typing import Any, override
 
 from ..asset import Asset
 from ..asset_type import AssetType
@@ -16,13 +16,13 @@ class User(Asset):
 
     def __init__(
         self,
-        user_id: Union[int, str],
+        user_id: int | str,
         name: str,
         firstname: str,
         lastname: str,
         login: str,
-        email: str = None,
-        description: str = None,
+        email: str | None = None,
+        description: str | None = None,
     ) -> None:
         """
         Create a new instance of User.
@@ -47,14 +47,14 @@ class User(Asset):
             asset_type=AssetType.USER,
         )
 
-        self.firstname = firstname
-        self.lastname = lastname
+        self.firstname: str = firstname
+        self.lastname: str = lastname
 
-        self.email = None
-        self.set_email(email)
+        self.email: str | None = None
+        if email is not None:
+            self.set_email(email)
 
-        self.login = login
-        self.user_type = None
+        self.login: str = login
 
     # ****************************************************************
     # Methods
@@ -79,7 +79,7 @@ class User(Asset):
 
         return self.lastname
 
-    def get_email(self) -> str:
+    def get_email(self) -> str | None:
         """
         Getter for the user's email address.
 
@@ -107,13 +107,11 @@ class User(Asset):
             email (str): The new email address to be set.
         """
 
-        if email is None:
-            return
-
         if re.match(EMAIL_REG, email):
             self.email = email
 
-    def to_dict(self) -> Dict:
+    @override
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
 
@@ -130,5 +128,5 @@ class User(Asset):
             "lastname": self.lastname,
             "email": self.email,
             "login": self.login,
-            "type": self.user_type,
+            # "type": self.user_type,
         }
