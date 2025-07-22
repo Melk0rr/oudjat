@@ -46,8 +46,6 @@ class Computer(Asset):
         This constructor sets up the basic properties and initializes various attributes related to the computer asset including:
         - type
         - operating system
-        - release
-        - edition
         - IP address
         - software list
         - protection agent
