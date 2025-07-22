@@ -35,65 +35,89 @@ class Port:
             ValueError: If the provided `port_number` is not an integer.
         """
 
-        self.number: int = port_number
-        self.application: str = application
-        self.state: PortState = state
+        self._number: int = port_number
+        self._application: str = application
+        self._state: PortState = state
 
     # ****************************************************************
     # Methods
 
-    def get_number(self) -> int:
+    @property
+    def number(self) -> int:
         """
-        Getter for port number.
+        Return the number of the current port.
 
         Returns:
-            int: The number of the port.
+            int: number associated with this port instance
         """
 
-        return self.number
+        return self._number
 
-    def get_application(self) -> str:
+    @number.setter
+    def number(self, new_port_number: int) -> None:
         """
-        Getter for application.
-
-        Returns:
-            str: The name of the application using the port.
-        """
-
-        return self.application
-
-    def get_state(self) -> PortState:
-        """
-        Getter for port open state.
-
-        Returns:
-            PortState: The current state of the port.
-        """
-
-        return self.state
-
-    def set_number(self, number: int) -> None:
-        """
-        Setter for port number.
+        Change the current port number based on the provided value.
 
         Args:
-            number (int): The new number for the port.
-
-        Raises:
-            ValueError: If the provided `number` is not an integer.
+            new_port_number (int): new port number that will be associated with this instance
         """
 
-        self.number = number
+        self._number = new_port_number
 
-    def set_state(self, new_state: PortState = PortState.OPENED) -> None:
+    @property
+    def application(self) -> str:
         """
-        Setter for port open state.
+        Return the application that listens on this port.
+
+        Returns:
+            str: the application behind the port
+        """
+
+        return self._application
+
+    @application.setter
+    def application(self, new_application: str) -> None:
+        """
+        Change the application bound to this port.
 
         Args:
-            new_state (PortState): The new state for the port. Default is PortState.OPENED.
+            new_application (str): new application listening on this port
         """
 
-        self.state = new_state
+        self._application = new_application
+
+    @property
+    def state(self) -> PortState:
+        """
+        Return the current state of the port.
+
+        Returns:
+            PortState: state of the port as a PortState enum object (OPENED or CLOSED)
+
+        Example:
+            exemple_port = Port(42)
+            print(exemple_port.state) -> OPENED
+        """
+
+        return self._state
+
+    @state.setter
+    def state(self, new_state: PortState = PortState.OPENED) -> None:
+        """
+        Set the state of the current port.
+
+        Args:
+            new_state (PortState): new state of the port
+
+        Example:
+            exemple_port = Port(42)
+            print(exemple_port.state) -> OPENED
+
+            exemple_port.state = PortState.CLOSED
+            print(exemple_port.state) -> CLOSED
+        """
+
+        self._state = new_state
 
     def __int__(self) -> int:
         """
@@ -128,8 +152,4 @@ class Port:
             Dict: A dictionary containing the port number and application name.
         """
 
-        return {
-            "number": self.number,
-            "application": self.application,
-            "status": self.state.name
-        }
+        return {"number": self.number, "application": self.application, "status": self.state.name}
