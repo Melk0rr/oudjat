@@ -1,5 +1,7 @@
 """A module that defines the Computer asset type."""
 
+from typing import NamedTuple, override
+
 from oudjat.assets import Asset, AssetType
 from oudjat.assets.network.ipv4 import IPv4
 from oudjat.assets.software import (
@@ -75,65 +77,134 @@ class Computer(Asset):
         if os_release is not None:
             self.os = ComputerOSProps(os_release, os_edition)
 
-        self.computer_type: ComputerType | None = None
+        self._computer_type: ComputerType | None = None
 
         self._ip: IPv4 | None = None
         if ip is not None:
-            self.set_ip(ip)
+            self.ip = IPv4(ip) if not isinstance(ip, IPv4) else ip
 
-        self.softwares: list[SoftwareRelease] = []
-        self.protection_agent: SoftwareRelease | None = None
+        self._softwares: dict[str, SoftwareRelease] = {}
+        self._protection_agent: SoftwareRelease | None = None
 
     # ****************************************************************
     # Methods
 
-    def get_computer_type(self) -> ComputerType:
+    @property
+    def computer_type(self) -> ComputerType | None:
         """
-        Getter for the current computer type.
-
-        If no specific type is set, it defaults to ComputerType.OTHER. Otherwise, it tries to determine the type based on the os_release.
+        Return the computer type associated with the current computer.
 
         Returns:
-            ComputerType: The type of the computer.
+            ComputerType | None: the current computer type
         """
 
-        cpt_type = ComputerType.OTHER
-        if self.os_release is not None:
-            cpt_type = self.os_release.get_os().get_computer_type()
+        return self._computer_type
 
-        return next(iter(cpt_type))
-
-    def get_os_release(self) -> OSRelease:
+    @computer_type.setter
+    def computer_type(self, new_computer_type: ComputerType) -> None:
         """
-        Getter for the computer operating system.
+        Set the computer type of this computer.
+
+        Args:
+            new_computer_type (ComputerType): new computer type
+        """
+
+        self._computer_type = new_computer_type
+
+    @property
+    def os_release(self) -> OSRelease | None:
+        """
+        Return the os release of the current computer.
 
         Returns:
-            OSRelease: The OSRelease instance representing the operating system of the computer.
+            OSRelease: the os release instance associate with this computer
         """
 
-        return self.os_release
+        return self._os.release
 
-    def get_os_edition(self) -> SoftwareEdition:
+    @os_release.setter
+    def os_release(self, new_os_release: OSRelease) -> None:
         """
-        Getter for OS edition instance.
+        Set the os release of the current computer instance.
+
+        Args:
+            new_os_release (OSRelease): os release instance to set to this computer
+        """
+
+        self.computer_type = next(iter(new_os_release.get_os().get_computer_type()))
+        self._os = ComputerOSProps(new_os_release, self._os.edition)
+
+    @property
+    def os_edition(self) -> SoftwareEdition | None:
+        """
+        Return the os edition of the current computer.
 
         Returns:
-            SoftwareEdition: The SoftwareEdition instance representing the edition of the operating system.
+            type and description of the returned object.
         """
 
-        return self.os_edition
+        return self._os.edition
 
-    def get_software_list(self) -> List[SoftwareRelease]:
+    @os_edition.setter
+    def os_edition(self, new_edition: SoftwareEdition) -> None:
         """
-        Getter for the computer software release list.
+        Set the os edition of the current computer instance.
+
+        Args:
+            new_edition (SoftwareEdition): software edition to set as the os edition for this computer
+        """
+
+        self._os = ComputerOSProps(self._os.release, new_edition)
+
+    @property
+    def os(self) -> ComputerOSProps:
+        """
+        Return the os informations for this computer.
 
         Returns:
-            List[SoftwareRelease]: A list of SoftwareRelease instances representing the software installed on the computer.
+            ComputerOSProps: os informations as a ComputerOSProps instance
         """
 
-        return self.softwares
+        return self._os
 
-    def get_os_support(self) -> List[SoftwareReleaseSupport]:
+    @os.setter
+    def os(self, new_os: ComputerOSProps) -> None:
+        """
+        Set the os informations for the current computer object.
+
+        Args:
+            new_os (ComputerOSProps): new os informations represented as a ComputerOSProps instance
+        """
+
+        if new_os.release is not None:
+            self.computer_type = next(iter(new_os.release.get_os().get_computer_type()))
+
+        self._os = new_os
+
+    @property
+    def ip(self) -> IPv4 | None:
+        """
+        Return the current IP address of this computer.
+
+        Returns:
+            IPv4 | None: IPv4 instance associated with the current computer instance. Or none if no address is set
+        """
+
+        return self._ip
+
+    @ip.setter
+    def ip(self, new_ip: IPv4) -> None:
+        """
+        Set a new ip address for this computer.
+
+        Args:
+            new_ip (IPv4): new ip address for the current computer instance
+        """
+
+        self._ip = new_ip
+
+    @property
+    def os_support(self) -> list[SoftwareReleaseSupport]:
         """
         Get support for current computer os release and edition.
 
@@ -141,79 +212,42 @@ class Computer(Asset):
             List[SoftwareReleaseSupport]: A list of SoftwareReleaseSupport instances representing the support for the current OS release and edition.
         """
 
-        if self.os_release is None:
+        if self._os.release is None:
             return []
 
-        return self.os_release.get_support_for_edition(str(self.os_edition))
+        return self._os.release.get_support_for_edition(str(self._os.edition))
 
-    def get_ip(self) -> IPv4:
+    def set_ip_from_str(self, new_ip_str: str) -> None:
         """
-        Getter for computer IP address.
-
-        Returns:
-            IPv4: The IPv4 instance representing the IP address of the computer.
-        """
-
-        return self.ip
-
-    def set_computer_type(self, cpt_type: Union[str, ComputerType]) -> None:
-        """
-        Set the type of the current computer.
+        Set a new ip address for this computer based on a string.
 
         Args:
-            cpt_type (Union[str, ComputerType]): The type to be assigned to the computer.
+            new_ip_str (str): The IPv4 instance representing the IP address of the computer.
         """
 
-        if not isinstance(cpt_type, ComputerType):
-            cpt_type = ComputerType[cpt_type]
-
-        self.computer_type = cpt_type
-
-    def set_ip(self, ip: Union[str, IPv4]) -> None:
-        """
-        Set the current computer IP address.
-
-        Args:
-            ip (Union[str, IPv4]): The IP address to be set for the computer.
-        """
-
-        if not isinstance(ip, IPv4):
-            ip = IPv4(ip)
-
-        self.ip: IPv4 = ip
+        self._ip = IPv4(new_ip_str)
 
     def resolve_ip(self) -> None:
         """
         Attempt to resolve the IP address from the hostname.
-
         """
 
-        self.ip = IPv4.resolve_from_hostname(hostname=self.label)
+        resolved_ip: str | None = None
+        if self.label is not None:
+            resolved_ip = IPv4.resolve_from_hostname(hostname=self.label)
 
-    def set_os(self, os_release: OSRelease, edition: SoftwareEdition = None) -> None:
+        if resolved_ip is not None:
+            self._ip = IPv4(resolved_ip)
+
+    def get_softwares(self) -> dict[str, SoftwareRelease]:
         """
-        Setter for the operating system of the computer.
+        Getter for the computer software release list.
 
-        Args:
-            os_release (OSRelease)              : The OSRelease instance representing the operating system release.
-            edition (Optional[SoftwareEdition]) : The software edition, optional.
-
-        Raises:
-            ValueError: If an invalid OS is provided for the computer.
+        Returns:
+            dict[str, SoftwareRelease]: A dictionary of SoftwareRelease instances representing the software installed on the computer.
         """
 
-        if not isinstance(os_release, OSRelease):
-            raise ValueError(f"{__class__.__name__}.set_os::Invalid OS provided for {self._name}")
-
-        self.os_release = os_release
-
-        if edition is not None:
-            if not isinstance(edition, SoftwareEdition):
-                raise ValueError(
-                    f"{__class__.__name__}.set_os::Invalid edition provided for {self._name}"
-                )
-
-            self.os_edition = edition
+        return self._softwares
 
     def is_os_supported(self) -> bool:
         """
@@ -223,12 +257,13 @@ class Computer(Asset):
             bool: True if the OS is supported, False otherwise.
         """
 
-        if self.os_release is None:
+        if self._os.release is None:
             return False
 
-        return self.os_release.is_supported(str(self.os_edition))
+        return self._os.release.is_supported(str(self._os.edition))
 
-    def to_dict(self) -> Dict:
+    @override
+    def to_dict(self) -> dict:
         """
         Convert the current instance into a dictionary representation.
 
@@ -241,20 +276,20 @@ class Computer(Asset):
         # INFO: OS Release informations
         release_dict = {}
 
-        if self.os_release is not None:
-            release_dict = self.os_release.to_dict()
+        if self._os.release is not None:
+            release_dict = self._os.release.to_dict()
             release_dict.pop("is_supported")
             release_dict.pop("software")
             release_dict.pop("support")
 
         # INFO: OS support information
         os_support_dict = {}
-        if len(self.get_os_support()) > 0:
-            os_support_dict = self.get_os_support()[0].to_dict()
+        if len(self.os_support) > 0:
+            os_support_dict = self.os_support[0].to_dict()
 
         return {
             **asset_dict,
-            "computer_type": self.get_computer_type(),
+            "computer_type": self.computer_type,
             "os_release": release_dict.pop("name", None),
             "os_release_label": release_dict.pop("label", None),
             "os_release_full_name": release_dict.pop("full_name", None),
@@ -262,7 +297,7 @@ class Computer(Asset):
             "os_release_date": release_dict.pop("release_date", None),
             "os_release_main_version": release_dict.pop("version_main", None),
             "os_release_build": release_dict.pop("version_build", None),
-            "os_edition": str(self.os_edition),
+            "os_edition": str(self._os.edition),
             "os_active_support": os_support_dict.pop("active_support", None),
             "os_end_of_life": os_support_dict.pop("end_of_life", None),
             "os_support_details": os_support_dict.pop("details", None),
