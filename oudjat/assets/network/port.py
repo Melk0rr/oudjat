@@ -1,7 +1,7 @@
 """A module that describe TCP/UDP ports."""
 
 from enum import IntEnum
-from typing import Dict
+from typing import override
 
 
 class PortState(IntEnum):
@@ -22,7 +22,7 @@ class Port:
         port_number: int = 80,
         application: str = "Unknown",
         state: PortState = PortState.OPENED,
-    ):
+    ) -> None:
         """
         Create a new instance of Port.
 
@@ -35,12 +35,9 @@ class Port:
             ValueError: If the provided `port_number` is not an integer.
         """
 
-        if not isinstance(port_number, int):
-            raise ValueError(f"{__class__.__name__}::Invalid port number: {port_number} !")
-
-        self.number = port_number
-        self.application = application
-        self.state = state
+        self.number: int = port_number
+        self.application: str = application
+        self.state: PortState = state
 
     # ****************************************************************
     # Methods
@@ -86,11 +83,7 @@ class Port:
             ValueError: If the provided `number` is not an integer.
         """
 
-        if isinstance(number, int):
-            self.number = number
-
-        else:
-            raise ValueError(f"{__class__.__name__}.set_number::Invalid port number: {number} !")
+        self.number = number
 
     def set_state(self, new_state: PortState = PortState.OPENED) -> None:
         """
@@ -102,6 +95,21 @@ class Port:
 
         self.state = new_state
 
+    def __int__(self) -> int:
+        """
+        Convert the current instance into an integer.
+
+        Returns:
+            int: current port instance as an integer
+
+        Example:
+            http_port = Port(80, "HTTP")
+            print(int(http_port)) -> 80
+        """
+
+        return self.number
+
+    @override
     def __str__(self) -> str:
         """
         Return a string based on port number and application.
@@ -112,7 +120,7 @@ class Port:
 
         return f"{self.application}({self.number})"
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """
         Return a dictionary based on port number and application.
 
@@ -120,4 +128,8 @@ class Port:
             Dict: A dictionary containing the port number and application name.
         """
 
-        return {"number": self.number, "application": self.application}
+        return {
+            "number": self.number,
+            "application": self.application,
+            "status": self.state.name
+        }
