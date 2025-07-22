@@ -33,7 +33,7 @@ class Subnet:
             hosts (Union[List[IPv4], List[str]], optional): An optional list of IP addresses or strings representing host IPs that are part of this subnet. Each element can be an IPv4 object or a string representation of an IP address.
         """
 
-        self.mask: IPv4Mask
+        self._mask: IPv4Mask
 
         # NOTE: Try to extract mask if provided as CIDR notation along with the address as a string
         cidr: int
@@ -50,16 +50,16 @@ class Subnet:
                 f"{__class__.__name__}.__init__::Provided net address has no mask set: {address.address}"
             )
 
-        self.set_mask(mask)
+        self.mask = mask
 
         # NOTE: Assures the address is a valid subnet address
-        self.address: IPv4 = IPv4(
-            address=LogicalOperation.logical_and(int(address), int(self.mask))
+        self._address: IPv4 = IPv4(
+            address=LogicalOperation.logical_and(int(address), int(self._mask))
         )
 
-        self.name: str = name
-        self.description: str | None = description
-        self.hosts: dict[str, IPv4] = {}
+        self._name: str = name
+        self._description: str | None = description
+        self._hosts: dict[str, IPv4] = {}
 
         if hosts is not None:
             for ip in hosts:
@@ -68,27 +68,52 @@ class Subnet:
     # ****************************************************************
     # Methods
 
-    def get_name(self) -> str:
+    @property
+    def name(self) -> str:
         """
-        Return the subnet name.
+        Return the name of this subnet instance.
 
         Returns:
-            str: The name of the subnet (not implemented in this example).
+             str: name of the subnet as a string
         """
 
-        return self.name
+        return self._name
 
-    def get_description(self) -> str | None:
+    @name.setter
+    def name(self, new_name: str) -> None:
         """
-        Return the subnet description.
+        Set a new name for the current subnet.
+
+        Args:
+            new_name (str): new name for the subnet
+        """
+
+        self._name = new_name
+
+    @property
+    def description(self) -> str | None:
+        """
+        Return the name of this subnet instance.
 
         Returns:
-            str: A brief description of the subnet (not implemented in this example).
+             str: name of the subnet as a string
         """
 
-        return self.description
+        return self._description
 
-    def get_address(self) -> IPv4:
+    @description.setter
+    def description(self, new_description: str) -> None:
+        """
+        Set a new description for the current subnet.
+
+        Args:
+            new_description (str): new description for the subnet
+        """
+
+        self._description = new_description
+
+    @property
+    def address(self) -> IPv4:
         """
         Return subnet address.
 
@@ -96,9 +121,10 @@ class Subnet:
             IPv4: The IP address of the subnet.
         """
 
-        return self.address
+        return self._address
 
-    def get_mask(self) -> IPv4Mask:
+    @property
+    def mask(self) -> IPv4Mask:
         """
         Return ip mask instance.
 
@@ -106,7 +132,18 @@ class Subnet:
             IPv4Mask: The netmask or CIDR notation of the subnet.
         """
 
-        return self.mask
+        return self._mask
+
+    @mask.setter
+    def mask(self, new_mask: IPv4Mask) -> None:
+        """
+        Set the ip mask.
+
+        Args:
+            new_mask (IPv4Mask): The new subnet mask or CIDR notation to set.
+        """
+
+        self._mask = new_mask
 
     @property
     def broadcast(self) -> IPv4:
@@ -123,16 +160,6 @@ class Subnet:
 
         return IPv4(ip_int_to_str(broadcast_int))
 
-    def set_mask(self, mask: IPv4Mask) -> None:
-        """
-        Set the ip mask.
-
-        Args:
-            mask (Union[int, str, IPv4Mask]): The new subnet mask or CIDR notation to set.
-        """
-
-        self.mask = mask
-
     def contains(self, ip: IPv4) -> bool:
         """
         Check whether the provided IP is in the current subnet.
@@ -144,7 +171,7 @@ class Subnet:
             bool: True if the IP is within the subnet, False otherwise.
         """
 
-        mask_address = int(self.mask)
+        mask_address: int = int(self.mask)
         return LogicalOperation.logical_and(int(ip), mask_address) == LogicalOperation.logical_and(
             int(self.address), mask_address
         )
@@ -174,7 +201,7 @@ class Subnet:
             and int(host) != int(self.address)
             and int(host) != int(self.broadcast)
         ):
-            self.hosts[str(host)] = host
+            self._hosts[str(host)] = host
 
     @override
     def __str__(self) -> str:
@@ -191,12 +218,13 @@ class Subnet:
         Convert the current subnet instance into a dictionary.
 
         Returns:
-            Dict: A dictionary representation of the subnet
+            dict: A dictionary representation of the subnet
         """
+
         return {
-            "net_address": str(self.get_address()),
-            "net_mask": str(self.get_mask()),
-            "net_mask_cidr": self.get_mask().__str__(cidr=True),
-            "hosts": self.hosts,
+            "net_address": str(self.address),
+            "net_mask": str(self.mask),
+            "net_mask_cidr": self.mask.__str__(cidr=True),
+            "hosts": self._hosts,
             "broadcast_address": str(self.broadcast),
         }
