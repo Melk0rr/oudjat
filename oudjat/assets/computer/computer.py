@@ -11,6 +11,16 @@ from oudjat.assets.software.os import OSRelease
 
 from .computer_type import ComputerType
 
+
+class ComputerOSProps(NamedTuple):
+    """
+    A helper class to properly and conveniently handle computer os attributes types.
+    """
+
+    release: OSRelease | None
+    edition: SoftwareEdition | None
+
+
 class Computer(Asset):
     """A common class for computers."""
 
@@ -60,16 +70,10 @@ class Computer(Asset):
             asset_type=AssetType.COMPUTER,
         )
 
-        self._os: dict[str, OSRelease | SoftwareRelease] = {
-            "release": None,
-            "edition": None
-        }
+        self._os: ComputerOSProps = ComputerOSProps(os_release, os_edition)
 
-        self._os_release: OSRelease | None = None
-        self._os_edition: SoftwareEdition | None = None
-
-        if os_release is not None and os_edition is not None:
-            self.set_os(os_release=os_release, edition=os_edition)
+        if os_release is not None:
+            self.os = ComputerOSProps(os_release, os_edition)
 
         self.computer_type: ComputerType | None = None
 
