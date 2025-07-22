@@ -388,7 +388,7 @@ class IPv4Mask(IPv4):
     @staticmethod
     def get_netmask(network_length: int) -> str:
         """
-        Return an ipv4 mask based on a network length.
+        Return an ipv4 mask string based on a network length.
 
         Args:
             network_length (int): The length of the network in CIDR notation.
@@ -400,12 +400,4 @@ class IPv4Mask(IPv4):
             ValueError: If the provided network length is not an integer or outside the range 1 to 32
         """
 
-        if type(network_length) is not int:
-            raise ValueError(f"{__class__.__name__}.get_netmask::Network length must be an integer")
-
-        if not IPv4Mask.check_cidr(network_length):
-            raise ValueError(
-                f"{__class__.__name__}.get_netmask::Network length value must be between 1 and 32!"
-            )
-
-        return ip_int_to_str(cidr_to_int(network_length))
+        return ip_int_to_str(int(IPv4Mask.from_cidr(network_length)))
