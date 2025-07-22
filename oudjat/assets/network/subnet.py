@@ -57,7 +57,6 @@ class Subnet:
             address=LogicalOperation.logical_and(int(address), int(self.mask))
         )
 
-        self.broadcast: IPv4 = self.get_broadcast_address()
         self.name: str = name
         self.description: str | None = description
         self.hosts: dict[str, IPv4] = {}
@@ -109,7 +108,8 @@ class Subnet:
 
         return self.mask
 
-    def get_broadcast_address(self) -> IPv4:
+    @property
+    def broadcast(self) -> IPv4:
         """
         Return the broadcast address of the current subnet.
 
@@ -198,5 +198,5 @@ class Subnet:
             "net_mask": str(self.get_mask()),
             "net_mask_cidr": self.get_mask().__str__(cidr=True),
             "hosts": self.hosts,
-            "broadcast_address": str(self.get_broadcast_address()),
+            "broadcast_address": str(self.broadcast),
         }
