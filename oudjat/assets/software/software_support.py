@@ -1,11 +1,11 @@
 """A module that describes the notion of software support."""
 
 from datetime import datetime
-from typing import Dict, List, Union
+from typing import Any, override
 
 from oudjat.utils.time_utils import TimeConverter
 
-from .software_edition import SoftwareEditionDict
+from .software_edition import SoftwareEdition, SoftwareEditionDict
 
 
 class SoftwareReleaseSupport:
@@ -16,50 +16,50 @@ class SoftwareReleaseSupport:
 
     def __init__(
         self,
-        active_support: Union[str, datetime] = None,
-        end_of_life: Union[str, datetime] = None,
-        edition: List[str] = None,
+        edition: dict[str, SoftwareEdition],
+        active_support: str | datetime | None = None,
+        end_of_life: str | datetime | None = None,
         long_term_support: bool = False,
     ) -> None:
         """
         Create a new instance SoftwareReleaseSupport.
 
         Args:
-            active_support (Union[str, datetime], optional): The date when support starts or a string in 'YYYY-MM-DD' format.
-            end_of_life (Union[str, datetime], optional)   : The date when support ends or a string in 'YYYY-MM-DD' format.
-            edition (List[str], optional)                  : A list of software editions supported by the release.
-            long_term_support (bool, optional)             : Whether the release has long term support.
+            active_support (str | datetime)       : The date when support starts or a string in 'YYYY-MM-DD' format.
+            end_of_life (str | datetime, optional): The date when support ends or a string in 'YYYY-MM-DD' format.
+            edition (list[str], optional)         : A list of software editions supported by the release.
+            long_term_support (bool, optional)    : Whether the release has long term support.
         """
 
-        if not isinstance(edition, list):
-            edition = [edition]
+        self.edition: SoftwareEditionDict = SoftwareEditionDict(**edition)
 
-        self.edition = edition
-
-        # Handling none support values
-        if active_support is not None and end_of_life is None:
-            end_of_life = active_support
-
-        if active_support is None and end_of_life is not None:
-            active_support = end_of_life
-
-        # Datetime conversion
-        try:
-            if end_of_life is not None and not isinstance(end_of_life, datetime):
-                end_of_life = TimeConverter.str_to_date(end_of_life)
-
-            if active_support is not None and not isinstance(active_support, datetime):
-                active_support = TimeConverter.str_to_date(active_support)
-
-        except ValueError as e:
+        if active_support is None and end_of_life is None:
             raise ValueError(
-                f"{__class__.__name__}::Please provide dates with %Y-%m-%d format\n{e}"
+                f"{__class__.__name__}::Please provide either an active support or end of life date."
             )
 
-        self.active_support = active_support
-        self.end_of_life = end_of_life
+        # Handling none support values
+        self.active_support: datetime
+        self.end_of_life: datetime
+        if active_support is not None and end_of_life is None:
+            self.end_of_life = (
+                TimeConverter.str_to_date(active_support)
+                if not isinstance(active_support, datetime)
+                else active_support
+            )
 
-        self.lts = long_term_support
+            self.active_support = self.end_of_life
+
+        if active_support is None and end_of_life is not None:
+            self.active_support = (
+                TimeConverter.str_to_date(end_of_life)
+                if not isinstance(end_of_life, datetime)
+                else end_of_life
+            )
+
+            self.end_of_life = self.active_support
+
+        self.lts: bool = long_term_support
 
     # ****************************************************************
     # Methods
@@ -69,7 +69,7 @@ class SoftwareReleaseSupport:
         Getter for the release edition.
 
         Returns:
-            List[str]: The list of software editions supported by this release.
+            list[str]: The list of software editions supported by this release.
         """
 
         return self.edition
@@ -81,9 +81,6 @@ class SoftwareReleaseSupport:
         Returns:
             bool: True if the support period is ongoing, False otherwise.
         """
-
-        if self.end_of_life is None:
-            return True
 
         return TimeConverter.days_diff(self.end_of_life, reverse=True) > 0
 
@@ -126,29 +123,24 @@ class SoftwareReleaseSupport:
 
         return self.lts
 
-    def supports_edition(self, edition: Union[str, List[str]], lts: bool = False) -> bool:
+    def supports_edition(self, edition: str | list[str], lts: bool = False) -> bool:
         """
         Check if current support concerns the provided edition.
 
         Args:
-            edition (Union[str, List[str]]): edition to check support for
-            lts (bool) : whether to look for lts support
+            edition (str | list[str]): edition to check support for
+            lts (bool)               : whether to look for lts support
 
         Returns:
             bool: whether the edition is supported or not
         """
 
-        if edition is None:
-            return False
-
         if not isinstance(edition, list):
             edition = [edition]
 
-        if self.edition is None:
-            return True
-
         return any([((e in self.edition) and (lts == self.lts)) for e in edition])
 
+    @override
     def __str__(self) -> str:
         """
         Convert the current support instance into a string.
@@ -159,12 +151,12 @@ class SoftwareReleaseSupport:
 
         return f"({';'.join(self.edition)}) : {self.status()}{' - LTS' if self.lts else ''}"
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current support instance into a dict.
 
         Returns:
-            Dict : dictionary containing software support key attributes
+            dict : dictionary containing software support key attributes
         """
 
         return {
@@ -188,7 +180,7 @@ class SoftwareReleaseSupportList(list):
 
     def contains(
         self,
-        edition: Union[str, List[str]] = None,
+        edition: str | list[str],
         lts: bool = False,
     ) -> bool:
         """
@@ -197,8 +189,8 @@ class SoftwareReleaseSupportList(list):
         This method checks whether any of the software releases in the list support the specified edition and/or are LTS (Long Term Support) based on the given criteria. It returns True if at least one release supports the given conditions, otherwise it returns False.
 
         Args:
-            edition (Union[str, List[str]]) : The edition or a list of editions to check for support.
-            lts (bool)                      : Whether to look for LTS releases.
+            edition (str | list[str]): The edition or a list of editions to check for support.
+            lts (bool)               : Whether to look for LTS releases.
 
         Returns:
             bool: True if there's a match, otherwise False.
@@ -208,24 +200,28 @@ class SoftwareReleaseSupportList(list):
 
     def get(
         self,
-        edition: Union[str, List[str]] = None,
+        edition: str | list[str],
         lts: bool = False,
-    ) -> List[SoftwareReleaseSupport]:
+    ) -> list[SoftwareReleaseSupport]:
         """
         Return releases matching arguments.
 
         This method filters and returns a list of `SoftwareReleaseSupport` objects that match the specified criteria for edition and LTS status. It uses the `supports_edition` method to filter the releases based on the provided parameters.
 
         Args:
-            edition (Union[str, List[str]]): The edition or a list of editions to look for in the software releases.
-            lts (bool)                     : Whether to include only LTS releases in the result. Defaults to False.
+            edition (str | list[str]): The edition or a list of editions to look for in the software releases.
+            lts (bool)               : Whether to include only LTS releases in the result. Defaults to False.
 
         Returns:
-            List[SoftwareReleaseSupport]: A list of `SoftwareReleaseSupport` objects that meet the specified conditions.
+            list[SoftwareReleaseSupport]: A list of `SoftwareReleaseSupport` objects that meet the specified conditions.
         """
 
-        return list(filter(lambda s: s.supports_edition(edition, lts), self))
+        def support_edition(sup: SoftwareReleaseSupport) -> bool:
+            return sup.supports_edition(edition, lts)
 
+        return list(filter(support_edition, self))
+
+    @override
     def append(self, support: SoftwareReleaseSupport) -> None:
         """
         Append a new support to the list.
@@ -239,9 +235,9 @@ class SoftwareReleaseSupportList(list):
             TypeError: If the provided argument is not an instance of `SoftwareReleaseSupport`.
         """
 
-        if isinstance(support, SoftwareReleaseSupport):
-            super().append(support)
+        super().append(support)
 
+    @override
     def __str__(self) -> str:
         """
         Convert the current support list into a string.

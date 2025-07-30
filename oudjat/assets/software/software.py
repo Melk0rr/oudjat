@@ -1,12 +1,17 @@
 """Main module of the software package that defines the notion of software."""
 
 from enum import IntEnum
-from typing import Any
+from typing import TYPE_CHECKING, Any, override
+
+from oudjat.assets.software.software_release_version import SoftwareReleaseVersion
 
 from ..asset import Asset
 from ..asset_type import AssetType
-from .software_edition import SoftwareEditionDict
-from .software_release import SoftwareRelease, SoftwareReleaseDict
+from .software_edition import SoftwareEdition, SoftwareEditionDict
+from .software_release import SoftwareReleaseDict
+
+if TYPE_CHECKING:
+    from .software_release import SoftwareRelease
 
 
 class SoftwareType(IntEnum):
@@ -24,12 +29,12 @@ class Software(Asset):
 
     def __init__(
         self,
-        software_id: Union[int, str],
+        software_id: int | str,
         name: str,
         label: str,
         software_type: SoftwareType = SoftwareType.APPLICATION,
-        editor: Union[str, List[str]] = None,
-        description: str = None,
+        editor: str | list[str] | None = None,
+        description: str | None = None,
     ) -> None:
         """
         Initialize a new instance of the Software class.
@@ -38,12 +43,12 @@ class Software(Asset):
         editor(s), and optional description. The software type defaults to an application unless specified otherwise.
 
         Args:
-            software_id (Union[int, str])           : A unique identifier for the software, which can be either an integer or a string.
-            name (str)                              : The name of the software.
-            label (str)                             : A brief label that describes the software.
-            software_type (SoftwareType, optional)  : Specifies the type of the software. Defaults to SoftwareType.APPLICATION.
-            editor (Union[str, List[str]], optional): The editor(s) responsible for the development or maintenance of the software
-            description (str, optional)             : A detailed description of the software. Defaults to None.
+            software_id (int | str)               : A unique identifier for the software, which can be either an integer or a string.
+            name (str)                            : The name of the software.
+            label (str)                           : A brief label that describes the software.
+            software_type (SoftwareType, optional): Specifies the type of the software. Defaults to SoftwareType.APPLICATION.
+            editor (str | list[str], optional)    : The editor(s) responsible for the development or maintenance of the software
+            description (str, optional)           : A detailed description of the software. Defaults to None.
         """
 
         super().__init__(
@@ -54,15 +59,18 @@ class Software(Asset):
             description=description,
         )
 
-        self.editor = editor
-        self.type = software_type
-        self.releases = SoftwareReleaseDict()
-        self.editions = SoftwareEditionDict()
+        if editor is not None and not isinstance(editor, list):
+            editor = [editor]
+
+        self.editor: list[str] | None = editor
+        self.type: SoftwareType = software_type
+        self.releases: "SoftwareReleaseDict" = SoftwareReleaseDict()
+        self.editions: SoftwareEditionDict = SoftwareEditionDict()
 
     # ****************************************************************
     # Methods
 
-    def get_editor(self) -> str:
+    def get_editor(self) -> list[str] | None:
         """
         Return software editor.
 
@@ -102,13 +110,16 @@ class Software(Asset):
 
         return self.editions
 
-    def set_editor(self, editor: Union[str, List[str]]) -> None:
+    def set_editor(self, editor: str | list[str]) -> None:
         """
         Setter for software editor.
 
         Args:
-            editor (Union[str, List[str]]): The new editor to be assigned to the software instance. Can be a single string or a list of strings.
+            editor (str | list[str]): The new editor to be assigned to the software instance. Can be a single string or a list of strings.
         """
+
+        if not isinstance(editor, list):
+            editor = [editor]
 
         self.editor = editor
 
@@ -126,7 +137,7 @@ class Software(Asset):
 
         return self.releases.find_release(rel_ver, rel_label) is not None
 
-    def add_release(self, new_release: SoftwareRelease) -> None:
+    def add_release(self, new_release: "SoftwareRelease") -> None:
         """
         Add a release to the list of software releases.
 
@@ -137,18 +148,15 @@ class Software(Asset):
             This method does not allow adding non-SoftwareRelease objects and returns silently if so.
         """
 
-        if not isinstance(new_release, SoftwareRelease):
-            return
-
-        new_rel_ver = new_release.get_version()
-        if new_rel_ver not in self.releases.keys():
+        new_rel_ver: SoftwareReleaseVersion = new_release.get_version()
+        if str(new_rel_ver) not in self.releases.keys():
             self.releases[new_rel_ver] = SoftwareReleaseDict()
 
-        new_rel_label = new_release.get_label()
+        new_rel_label: str = new_release.get_label()
         if new_rel_label not in self.releases[new_rel_ver].keys():
-            self.releases[new_rel_ver][new_release.get_label()] = new_release
+            self.releases[new_rel_ver][new_rel_label] = new_release
 
-    def find_release(self, rel_ver: str, rel_label: str = None) -> SoftwareRelease:
+    def find_release(self, rel_ver: str, rel_label: str | None = None) -> "SoftwareRelease | None":
         """
         Find a release by its version and optionally label.
 
@@ -162,27 +170,27 @@ class Software(Asset):
 
         return self.releases.find_release(rel_ver, rel_label)
 
-    def retired_releases(self) -> List[SoftwareRelease]:
+    def retired_releases(self) -> list["SoftwareRelease"]:
         """
         Get a list of retired releases.
 
         Returns:
-            List[SoftwareRelease]: A list of SoftwareRelease objects that are not supported.
+            list[SoftwareRelease]: A list of SoftwareRelease objects that are not supported.
         """
 
-        return [str(r) for r in self.releases.values() if not r.is_supported()]
+        return [r for r in self.releases.values() if not r.is_supported()]
 
-    def supported_releases(self) -> List[SoftwareRelease]:
+    def supported_releases(self) -> list["SoftwareRelease"]:
         """
         Get a list of released that are currently supported.
 
         Returns:
-            List[SoftwareRelease]: A list of SoftwareRelease objects that are supported.
+            list[SoftwareRelease]: A list of SoftwareRelease objects that are supported.
         """
 
-        return [str(r) for r in self.releases.values() if r.is_supported()]
+        return [r for r in self.releases.values() if r.is_supported()]
 
-    def get_matching_editions(self, test_str: str) -> SoftwareEditionDict:
+    def get_matching_editions(self, test_str: str) -> list[SoftwareEdition]:
         """
         Return the editions which pattern matches the given string.
 
@@ -195,7 +203,8 @@ class Software(Asset):
 
         return self.editions.get_matching_editions(test_str)
 
-    def __str__(self):
+    @override
+    def __str__(self) -> str:
         """
         Convert the current instance into a string.
 
@@ -209,12 +218,13 @@ class Software(Asset):
 
         return self._name
 
-    def to_dict(self) -> Dict[str, Any]:
+    @override
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary representation.
 
         Returns:
-            Dict: A dictionary containing basic class information and lists of releases.
+            dict: A dictionary containing basic class information and lists of releases.
         """
 
         base_dict = super().to_dict()
@@ -222,6 +232,6 @@ class Software(Asset):
             **base_dict,
             "editor": self.editor,
             "releases": ",".join(map(str, self.releases)),
-            "supported_releases": ",".join(self.supported_releases()),
-            "retired_releases": ",".join(self.retired_releases()),
+            "supported_releases": ",".join(list(map(str, self.supported_releases()))),
+            "retired_releases": ",".join(list(map(str, self.retired_releases()))),
         }

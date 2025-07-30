@@ -1,17 +1,15 @@
 """A module that defines the notion of software release."""
 
 from datetime import datetime
-from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, override
 
 from oudjat.utils.time_utils import TimeConverter
 
-from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList
 from .software_release_version import SoftwareReleaseVersion
+from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList
 
 if TYPE_CHECKING:
     from .software import Software
-
 
 
 class SoftwareRelease:
@@ -31,11 +29,11 @@ class SoftwareRelease:
         Create a new instance of SoftwareRelease.
 
         Args:
-            software (Software)                 : The software instance to which this release belongs.
-            version (Union[int, str])           : The version of the software, can be either an integer or a string representation of a number.
-            release_date (Union[str, datetime]) : The date when the software was released. Can be provided as a string formatted according to `%Y-%m-%d`
+            software (Software)          : The software instance to which this release belongs.
+            version (int | str)          : The version of the software, can be either an integer or a string representation of a number.
+            release_date (str | datetime): The date when the software was released. Can be provided as a string formatted according to `%Y-%m-%d`
                                                 or as a datetime object. If provided as a string, it will be parsed using the format specified by DateStrFlag.YMD.
-            release_label (str)                 : A label describing the nature of this release, such as "stable" or "beta".
+            release_label (str)          : A label describing the nature of this release, such as "stable" or "beta".
 
         Raises:
             ValueError: If `release_date` is provided as a string and does not match the expected date format.
@@ -43,8 +41,8 @@ class SoftwareRelease:
 
         # TODO: fully implement SoftwareReleaseVersion
         self.software: "Software" = software
-        self.version = SoftwareReleaseVersion(version)
-        self.label = release_label
+        self.version: SoftwareReleaseVersion = SoftwareReleaseVersion(version)
+        self.label: str = release_label
 
         try:
             if not isinstance(release_date, datetime):
@@ -56,10 +54,10 @@ class SoftwareRelease:
             )
 
         self.release_date: datetime = release_date
-        self.support = SoftwareReleaseSupportList()
+        self.support: SoftwareReleaseSupportList = SoftwareReleaseSupportList()
 
         # NOTE: maybe convert vulnerabilities into a dictionary (CVE instances ?) if needed
-        self.vulnerabilities = set()
+        self.vulnerabilities: set[str] = set()
 
     # ****************************************************************
     # Methods
@@ -83,22 +81,22 @@ class SoftwareRelease:
 
         return self.label
 
-    def get_version(self) -> Union[int, str]:
+    def get_version(self) -> SoftwareReleaseVersion:
         """
         Return the release version.
 
         Returns:
-            Union[int, str]: The version number or identifier of the software release.
+            int | str: The version number or identifier of the software release.
         """
 
         return self.version
 
-    def is_supported(self, edition: Union[str, List[str]] = None) -> bool:
+    def is_supported(self, edition: str | list[str] | None = None) -> bool:
         """
         Check if the current release has an ongoing support.
 
         Args:
-            edition (Union[str, List[str]], optional): The specific edition to check for support. Defaults to None.
+            edition (str | list[str], optional): The specific edition to check for support. Defaults to None.
 
         Returns:
             bool: True if the release is supported, otherwise False.
@@ -122,37 +120,37 @@ class SoftwareRelease:
         return self.support
 
     def get_support_for_edition(
-        self, edition: Union[str, List[str]], lts: bool = False
+        self, edition: str | list[str], lts: bool = False
     ) -> "SoftwareReleaseSupportList":
         """
         Return support for given edition.
 
         Args:
-            edition (Union[str, List[str]]) : The specific edition to retrieve support for.
-            lts (bool, optional)            : Whether to filter for LTS (Long Term Support) editions. Defaults to False.
+            edition (str | list[str]): The specific edition to retrieve support for.
+            lts (bool, optional)     : Whether to filter for LTS (Long Term Support) editions. Defaults to False.
 
         Returns:
             SoftwareReleaseSupportList : The list of support details filtered by the specified edition or LTS status.
         """
 
-        return self.support.get(edition, lts=lts) if edition is not None else None
+        return SoftwareReleaseSupportList(*self.support.get(edition, lts=lts))
 
-    def get_ongoing_support(self) -> List["SoftwareReleaseSupport"]:
+    def get_ongoing_support(self) -> list[SoftwareReleaseSupport]:
         """
         Return ongoing support instances.
 
         Returns:
-            List[SoftwareReleaseSupport]: A list of support details that are currently ongoing.
+            list[SoftwareReleaseSupport]: A list of support details that are currently ongoing.
         """
 
         return [s for s in self.support if s.is_ongoing()]
 
-    def get_retired_support(self) -> List["SoftwareReleaseSupport"]:
+    def get_retired_support(self) -> list[SoftwareReleaseSupport]:
         """
         Return retired support instances.
 
         Returns:
-            List[SoftwareReleaseSupport]: A list of support details that are no longer ongoing.
+            list[SoftwareReleaseSupport]: A list of support details that are no longer ongoing.
         """
 
         return [s for s in self.support if not s.is_ongoing()]
@@ -169,7 +167,7 @@ class SoftwareRelease:
             f"{__class__.__name__}.get_name::Method must be implemented by the overloading class"
         )
 
-    def get_full_name(self) -> None:
+    def get_full_name(self) -> str:
         """
         Return the release full name.
 
@@ -190,23 +188,20 @@ class SoftwareRelease:
             None
         """
 
-        if not isinstance(support, SoftwareReleaseSupport):
-            return
-
         if not self.support.contains(
-            edition=support.get_edition(), lts=support.has_long_term_support()
+            edition=list(support.get_edition().keys()), lts=support.has_long_term_support()
         ):
             self.support.append(support)
 
-    def has_vulnerability(self, vuln: Union[str, List[str]] = None) -> List[str]:
+    def has_vulnerability(self, vuln: str | list[str] | None = None) -> list[str]:
         """
         Check if the release is concerned by any or specific vulnerability.
 
         Args:
-            vuln (Union[str, List[str], optional): The vulnerability to check. Can be a single string or a list of strings. Defaults to None.
+            vuln (str | list[str], optional): The vulnerability to check. Can be a single string or a list of strings. Defaults to None.
 
         Returns:
-            List[str]: A list of vulnerabilities that the release is concerned by. If `vuln` is provided, returns only those in `vuln`.
+            list[str]: A list of vulnerabilities that the release is concerned with. If `vuln` is provided, returns only those in `vuln`.
         """
 
         if vuln is None:
@@ -215,7 +210,7 @@ class SoftwareRelease:
         if not isinstance(vuln, list):
             vuln = [vuln]
 
-        return [v in self.vulnerabilities for v in vuln]
+        return [v for v in vuln if v in self.vulnerabilities]
 
     def add_vuln(self, vuln: str) -> None:
         """
@@ -227,6 +222,7 @@ class SoftwareRelease:
 
         self.vulnerabilities.add(vuln)
 
+    @override
     def __str__(self, show_version: bool = False) -> str:
         """
         Convert current release to a string.
@@ -245,12 +241,12 @@ class SoftwareRelease:
 
         return name.strip()
 
-    def os_info_dict(self) -> Dict:
+    def os_info_dict(self) -> dict[str, Any]:
         """
         Return a dictionary with OS infos.
 
         Returns:
-            Dict: A dictionary containing innamen about the operating system, including software name, release name, version, full name, and support status.
+            dict: A dictionary containing innamen about the operating system, including software name, release name, version, full name, and support status.
         """
 
         return {
@@ -261,12 +257,12 @@ class SoftwareRelease:
             "is_supported": self.is_supported(),
         }
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """
         Convert current release into a dict.
 
         Returns:
-            Dict: A dictionary representation of the software release, including its label, release date, and OS information.
+            dict: A dictionary representation of the software release, including its label, release date, and OS information.
         """
 
         return {
@@ -297,9 +293,9 @@ class SoftwareReleaseDict(dict):
             SoftwareReleaseDict: A new dictionary containing only the key-value pairs where the keys match `val`.
         """
 
-        return {k: v for k, v in self.items() if k in val}
+        return SoftwareReleaseDict(**{k: v for k, v in self.items() if k in val})
 
-    def find_release(self, rel_ver: str, rel_label: str = None) -> "SoftwareRelease":
+    def find_release(self, rel_ver: str, rel_label: str | None = None) -> SoftwareRelease | None:
         """
         Find the given release.
 
@@ -316,7 +312,7 @@ class SoftwareReleaseDict(dict):
 
         res = None
         if rel_ver in self.keys():
-            search: SoftwareReleaseDict = self.get(rel_ver)
+            search: SoftwareReleaseDict = self.get(rel_ver, SoftwareReleaseDict())
 
             res = (
                 search.get(rel_label, None)

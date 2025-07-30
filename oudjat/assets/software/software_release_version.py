@@ -52,6 +52,7 @@ class SoftwareReleaseVersion:
 
         self._stage: SoftwareReleaseStage = stage[0]
         self._stage_version: int = stage[1]
+        self._raw: int | str = version
 
         if isinstance(version, int):
             self._major = version
@@ -138,6 +139,17 @@ class SoftwareReleaseVersion:
         self._build = new_build
 
     @property
+    def raw(self) -> int | str:
+        """
+        Return the raw version value.
+
+        Returns:
+            int | str: raw version value
+        """
+
+        return self._raw
+
+    @property
     def stage(self) -> tuple[SoftwareReleaseStage, int]:
         """
         Return the stage version number.
@@ -179,6 +191,7 @@ class SoftwareReleaseVersion:
         """
 
         return {
+            "raw": self.raw,
             "major": self._major,
             "minor": self._minor,
             "build": self._build,
