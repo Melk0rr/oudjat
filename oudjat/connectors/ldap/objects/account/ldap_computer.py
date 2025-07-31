@@ -3,9 +3,8 @@
 from typing import TYPE_CHECKING
 
 from oudjat.assets.computer import Computer
+from oudjat.assets.software import SoftwareEdition, SoftwareRelease
 from oudjat.assets.software.os import OperatingSystem, OSOption
-from oudjat.assets.software.software_edition import SoftwareEdition
-from oudjat.assets.software.software_release import SoftwareRelease
 
 from .ldap_account import LDAPAccount
 
