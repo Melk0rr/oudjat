@@ -172,7 +172,7 @@ class SoftwareReleaseSupport:
     # Static methods
 
 
-class SoftwareReleaseSupportList(list):
+class SoftwareReleaseSupportList(list[SoftwareReleaseSupport]):
     """A class to manage lists of software releases."""
 
     # ****************************************************************
