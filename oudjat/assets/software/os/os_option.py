@@ -11,17 +11,17 @@ class OSOption(Enum):
     """An enumeration of OSes."""
 
     WINDOWS = MicrosoftOperatingSystem(
-        msos_id="windows",
+        msos_id="ms-windows",
         name="Windows",
-        label="ms-windows",
+        label="windows",
         computer_type=ComputerType.WORKSTATION,
         description="Microsoft operating system for workstations",
     )
 
     WINDOWSSERVER = MicrosoftOperatingSystem(
-        msos_id="windows-server",
+        msos_id="ms-windows-server",
         name="Windows Server",
-        label="ms-windows-server",
+        label="windows-server",
         computer_type=ComputerType.SERVER,
         description="Microsoft operating system for servers",
     )
