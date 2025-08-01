@@ -272,7 +272,7 @@ class SoftwareRelease:
 
         return name.strip()
 
-    def os_info_dict(self) -> dict[str, Any]:
+    def software_dict(self) -> dict[str, Any]:
         """
         Return a dictionary with OS infos.
 
@@ -302,7 +302,7 @@ class SoftwareRelease:
         return {
             "label": self.label,
             "release_date": TimeConverter.date_to_str(self._release_date),
-            **self.os_info_dict(),
+            **self.software_dict(),
             "support": ", ".join(list(map(str, self.support))),
         }
 
