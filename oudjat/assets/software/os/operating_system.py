@@ -2,44 +2,29 @@
 
 import re
 from enum import Enum
-from typing import Dict, List, Union
+from typing import override
 
 from oudjat.assets.computer.computer_type import ComputerType
-from oudjat.utils.color_print import ColorPrint
 
-from ..software import Software, SoftwareType
-from ..software_release import SoftwareRelease
+from ..software import Software, SoftwareRelease, SoftwareType
 
 
 class OSFamily(Enum):
     """OS family enumeration."""
 
     ANDROID = {
-        "name": "android",
         "pattern": r"[Aa]ndroid|[Aa][Oo][Ss][Pp]|[Gg]raphene[Oo][Ss]|[Ll]ineage[Oo][Ss]|\/e\/[Oo][Ss]|[Cc]alyx[Oo][Ss]",
     }
 
-    BSD = {"name": "bsd", "pattern": r"[Bb][Ss][Dd]"}
+    BSD = {"pattern": r"[Bb][Ss][Dd]"}
 
     LINUX = {
-        "name": "linux",
         "pattern": r"[Dd]ebian|[Uu]buntu|[Mm]int|[Nn]ix[Oo][Ss]|(?:[Oo]pen)?[Ss][Uu][Ss][Ee]|[Ff]edora|[Rr](?:ed )?[Hh](?:at )?[Ee](?:nterprise )?[Ll](?:inux)?|[Oo]racle(?: Linux)?",
     }
 
-    MAC = {"name": "mac", "pattern": r"[Mm][Aa][Cc](?:[Oo][Ss])?"}
+    MAC = {"pattern": r"[Mm][Aa][Cc](?:[Oo][Ss])?"}
 
-    WINDOWS = {"name": "windows", "pattern": r"[Ww]indows(?: [Ss]erver)?"}
-
-    @property
-    def name(self) -> str:
-        """
-        Get the name of the operating system family.
-
-        Returns:
-            str: The name of the OS family as a string.
-        """
-
-        return self._value_["name"]
+    WINDOWS = {"pattern": r"[Ww]indows(?: [Ss]erver)?"}
 
     @property
     def pattern(self) -> str:
@@ -61,13 +46,13 @@ class OperatingSystem(Software):
 
     def __init__(
         self,
-        os_id: Union[int, str],
+        os_id: int | str,
         name: str,
         label: str,
         os_family: OSFamily,
-        computer_type: Union[Union[str, ComputerType], List[Union[str, ComputerType]]],
-        editor: Union[str, List[str]] = None,
-        description: str = None,
+        computer_type: ComputerType | list[ComputerType],
+        editor: str | list[str] | None = None,
+        description: str | None = None,
     ) -> None:
         """
         Return a new instance of OperatingSystem.
@@ -94,24 +79,14 @@ class OperatingSystem(Software):
         if not isinstance(computer_type, list):
             computer_type = [computer_type]
 
-        self.computer_type = []
-        for t in computer_type:
-            if not isinstance(t, ComputerType):
-                try:
-                    self.computer_type.append(ComputerType[t.upper()])
+        self.computer_type: list[ComputerType] = computer_type
 
-                except ValueError:
-                    ColorPrint.red(f"Could not add {t} as computer type")
-
-            else:
-                self.computer_type.append(t)
-
-        self.os_family = os_family
+        self.os_family: OSFamily = os_family
 
     # ****************************************************************
     # Methods
 
-    def get_computer_type(self) -> List[ComputerType]:
+    def get_computer_type(self) -> list[ComputerType]:
         """
         Return the computer types related to the current OS.
 
@@ -146,7 +121,7 @@ class OperatingSystem(Software):
     # Static methods
 
     @staticmethod
-    def get_matching_os_family(test_str: str) -> str:
+    def get_matching_os_family(test_str: str) -> str | None:
         """
         Try to retrieve a substring of the provided string matching an OSFamily element.
 
@@ -157,16 +132,15 @@ class OperatingSystem(Software):
             str: substring that match an OSFamily element
         """
 
-        if test_str is None:
-            return None
-
         for f in OSFamily:
             search = re.search(f.pattern, test_str)
             if search is not None:
                 return search.group(0)
 
+        return None
+
     @staticmethod
-    def get_matching_version(test_str: str) -> str:
+    def get_matching_version(_: str) -> str | None:
         """
         Use a regular expression to find and return a version number from the input string. It must be implemented by the class inheriting OperatingSystem.
 
@@ -200,7 +174,7 @@ class OSRelease(SoftwareRelease):
             f"{__class__.__name__}.get_name()::Method must be implemented by the overloading class"
         )
 
-    def get_os(self) -> OperatingSystem:
+    def get_os(self) -> Software:
         """
         Return the operating system instance tide to the current release.
 
@@ -208,9 +182,10 @@ class OSRelease(SoftwareRelease):
             OperatingSystem: operating system instance of the current release
         """
 
-        return self.software
+        return self._software
 
-    def to_dict(self) -> Dict:
+    @override
+    def to_dict(self) -> dict:
         """
         Convert the current instance into a dictionary.
 
