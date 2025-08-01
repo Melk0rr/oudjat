@@ -79,14 +79,14 @@ class OperatingSystem(Software):
         if not isinstance(computer_type, list):
             computer_type = [computer_type]
 
-        self.computer_type: list[ComputerType] = computer_type
-
-        self.os_family: OSFamily = os_family
+        self._computer_type: list[ComputerType] = computer_type
+        self._os_family: OSFamily = os_family
 
     # ****************************************************************
     # Methods
 
-    def get_computer_type(self) -> list[ComputerType]:
+    @property
+    def computer_type(self) -> list[ComputerType]:
         """
         Return the computer types related to the current OS.
 
@@ -94,9 +94,10 @@ class OperatingSystem(Software):
             List[ComputerType]: the list of computer types as ComputerType enumeration elements
         """
 
-        return self.computer_type
+        return self._computer_type
 
-    def get_os_family(self) -> OSFamily:
+    @property
+    def os_family(self) -> OSFamily:
         """
         Return the OS family of the current OS.
 
@@ -104,7 +105,7 @@ class OperatingSystem(Software):
             OSFamily: the OS family represented by an OSFamily enumeration element
         """
 
-        return self.os_family
+        return self._os_family
 
     def gen_releases(self) -> None:
         """
