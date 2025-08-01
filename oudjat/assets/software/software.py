@@ -296,6 +296,9 @@ class SoftwareRelease:
             dict: A dictionary representation of the software release, including its label, release date, and OS information.
         """
 
+        # TODO: add version dictionary and rename keys
+        # version_dict = self.version.to_dict()
+
         return {
             "label": self.label,
             "release_date": TimeConverter.date_to_str(self._release_date),
