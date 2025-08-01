@@ -108,7 +108,7 @@ class SoftwareRelease:
         return self._support
 
     @property
-    def name(self) -> None:
+    def name(self) -> str:
         """
         Return the name of the release.
 
