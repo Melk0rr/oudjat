@@ -3,7 +3,7 @@
 import re
 from datetime import datetime
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from oudjat.assets.computer.computer_type import ComputerType
 from oudjat.assets.software import (
@@ -49,34 +49,12 @@ class MSOSRelease(OSRelease):
             release_label=release_label,
         )
 
-        version_split = self.version.split(".")
-        self.version_build = version_split[-1]
-        self.version_main = ".".join(version_split[:-1])
-
     # ****************************************************************
     # Methods
 
-    def get_version_build(self) -> int:
-        """
-        Get the build number from release version.
-
-        Returns:
-            int: build number of the release
-        """
-
-        return self.version_build
-
-    def get_version_main(self) -> str:
-        """
-        Get the version main release number from release version.
-
-        Returns:
-            str: The main version of the software release.
-        """
-
-        return self.version_main
-
-    def get_name(self) -> str:
+    @property
+    @override
+    def name(self) -> str:
         """
         Return a forged name of the release.
 
@@ -87,9 +65,9 @@ class MSOSRelease(OSRelease):
             str: A combined name based on the software's name and part of its label.
         """
 
-        return f"{self.get_software()._name()} {self.label.split(' ')[0]}"
+        return f"{self.software.name} {self.label.split(' ')[0]}"
 
-    def os_info_dict(self) -> Dict:
+    def os_dict(self) -> dict:
         """
         Return a dictionary with os infos.
 
@@ -99,15 +77,14 @@ class MSOSRelease(OSRelease):
             Dict: A dictionary containing OS-specific information including the software name and versions.
         """
 
-        base_dict = super().os_info_dict()  # Assuming superclass has an os_info_dict method
+        base_dict = super().software_dict()  # Assuming superclass has an os_info_dict method
         return {
             **base_dict,
-            "name": self.get_name(),
-            "version_main": self.version_main,
-            "version_build": self.version_build,
+            "name": self.name,
         }
 
-    def to_dict(self) -> Dict:
+    @override
+    def to_dict(self) -> dict:
         """
         Convert the current instance into a dictionary.
 
@@ -118,7 +95,7 @@ class MSOSRelease(OSRelease):
         """
 
         base_dict = super().to_dict()  # Assuming superclass has a to_dict method
-        return {**base_dict, **self.os_info_dict()}
+        return {**base_dict, **self.os_dict()}
 
 
 class WindowsEdition(Enum):
@@ -191,13 +168,14 @@ class MicrosoftOperatingSystem(OperatingSystem):
             os_family=OSFamily.WINDOWS,
         )
 
-        self.editions = SoftwareEditionDict(
+        self.editions: SoftwareEditionDict = SoftwareEditionDict(
             **WindowsEdition[self._name.replace(" ", "").upper()].value
         )
 
     # ****************************************************************
     # Methods
 
+    @override
     def gen_releases(self) -> None:
         """
         Generate Windows releases for the Microsoft operating system.
@@ -206,6 +184,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
         based on the version and label found in the data. It also sets support details for each release.
         """
 
+        # TODO: Use NamedTuple to handle releases types properly or convert to JSON
         for rel in WINDOWS_RELEASES[f"{self._label}"]:
             win_rel = self.find_release(rel["releaseLabel"])
 
@@ -235,6 +214,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
     # Static methods
 
     @staticmethod
+    @override
     def get_matching_version(test_str: str) -> str | None:
         """
         Return a version matching the given string.
