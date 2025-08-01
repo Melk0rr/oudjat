@@ -163,7 +163,9 @@ class OSRelease(SoftwareRelease):
     # ****************************************************************
     # Methods
 
-    def get_name(self) -> str:
+    @property
+    @override
+    def name(self) -> str:
         """
         Return the OS release name. Must be implemented by overloading classes.
 
@@ -175,7 +177,8 @@ class OSRelease(SoftwareRelease):
             f"{__class__.__name__}.get_name()::Method must be implemented by the overloading class"
         )
 
-    def get_os(self) -> Software:
+    @property
+    def os(self) -> Software:
         """
         Return the operating system instance tide to the current release.
 
@@ -198,3 +201,4 @@ class OSRelease(SoftwareRelease):
         os_name = base_dict.pop("software")
 
         return {"os": os_name, **base_dict}
+
