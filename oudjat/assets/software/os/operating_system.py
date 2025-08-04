@@ -154,7 +154,7 @@ class OperatingSystem(Software):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.get_matching_version::Method must be implemented by the overloading class"
+            f"{__class__.__name__}.find_version_in_str({search_str})::Method must be implemented by the overloading class"
         )
 
 
