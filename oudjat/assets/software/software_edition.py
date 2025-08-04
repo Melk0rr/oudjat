@@ -89,6 +89,17 @@ class SoftwareEditionDict(dict):
     """
 
     def get_matching_editions(self, label: str) -> list[SoftwareEdition]:
+    @property
+    def labels(self) -> list[str]:
+        """
+        Return a list of edition labels.
+
+        Returns:
+            list[str]: A list of the labels of all software editions in the dictionary.
+        """
+
+        return list(map(str, self.values()))
+
         """
         Return software editions for which the given label matches the pattern.
 
