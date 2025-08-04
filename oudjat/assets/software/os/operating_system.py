@@ -179,7 +179,7 @@ class OSRelease(SoftwareRelease):
         )
 
     @property
-    def os(self) -> Software:
+    def os(self) -> str:
         """
         Return the operating system instance tide to the current release.
 
