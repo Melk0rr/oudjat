@@ -115,16 +115,6 @@ class SoftwareEditionDict(dict):
 
         return list(filter(filter_values, self.values()))
 
-    def get_edition_labels(self) -> list[str]:
-        """
-        Return a list of edition labels.
-
-        Returns:
-            list[str]: A list of the labels of all software editions in the dictionary.
-        """
-
-        return list(map(str, self.values()))
-
     def get_by_category(self, category: str) -> list[str]:
         """
         Return a sub-dictionary of software editions based on category value.
