@@ -34,7 +34,7 @@ class FileHandler:
     @staticmethod
     def import_json(
         file_path: str, callback: Callable[..., Any] | None = None
-    ) -> list[Any]:
+    ) -> list[Any] | dict[str, Any]:
         """
         Import json data from a specified file.
 
