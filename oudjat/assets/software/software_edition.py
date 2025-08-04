@@ -88,7 +88,6 @@ class SoftwareEditionDict(dict):
     A dictionary-like class to handle multiple software editions.
     """
 
-    def get_matching_editions(self, label: str) -> list[SoftwareEdition]:
     @property
     def labels(self) -> list[str]:
         """
@@ -100,6 +99,7 @@ class SoftwareEditionDict(dict):
 
         return list(map(str, self.values()))
 
+    def get_by_label(self, label: str) -> list[SoftwareEdition]:
         """
         Return software editions for which the given label matches the pattern.
 
