@@ -131,3 +131,19 @@ class SoftwareEditionDict(dict):
 
         return list(map(str, filter(filter_values, self.values())))
 
+    def filter_by_category(self, category: str | list[str]) -> "SoftwareEditionDict":
+        """
+        Filter the current dictionary based on provided category.
+
+        Return a new software edition dictionary with only editions matching the provided category
+
+        Args:
+            category (str | list[str]): category of the final editions
+
+        Returns:
+            SoftwareEditionDict: new software edition dictionary that contains only editions with the provided category
+        """
+
+        return SoftwareEditionDict(
+            **{edi_k: edi for edi_k, edi in self.items() if edi.category in category}
+        )
