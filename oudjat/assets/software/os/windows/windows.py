@@ -3,7 +3,7 @@
 import re
 from datetime import datetime
 from enum import Enum
-from typing import TYPE_CHECKING, override
+from typing import Any, override
 
 from oudjat.assets.computer.computer_type import ComputerType
 from oudjat.assets.software import (
@@ -13,10 +13,7 @@ from oudjat.assets.software import (
 )
 
 from ..operating_system import OperatingSystem, OSFamily, OSRelease
-from .config.win_rel import WINDOWS_RELEASES
-
-if TYPE_CHECKING:
-    from ...software import Software
+from .config.releases import WINDOWS_RELEASES
 
 
 class MSOSRelease(OSRelease):
@@ -105,7 +102,7 @@ class WindowsEdition(Enum):
     Tries to handle edition types (E,W,IOT).
     """
 
-    WINDOWS = {
+    WINDOWS = SoftwareEditionDict({
         "Enterprise": SoftwareEdition(label="Enterprise", category="E", pattern=r"Ent[er]{2}prise"),
         "Education": SoftwareEdition(label="Education", category="E", pattern=r"[EÉeé]ducation"),
         "IoT Enterprise": SoftwareEdition(
@@ -117,16 +114,18 @@ class WindowsEdition(Enum):
             label="Pro Education", category="W", pattern=r"Pro(?:fession[n]?[ae]l)? [EÉeé]ducation"
         ),
         "IOT": SoftwareEdition(label="IOT", category="IOT", pattern=r"[Ii][Oo][Tt]"),
-    }
-    WINDOWSSERVER = {
+    })
+
+    WINDOWSSERVER = SoftwareEditionDict({
         "Standard": SoftwareEdition(label="Standard", pattern=r"[Ss]tandard"),
         "Datacenter": SoftwareEdition(label="Datacenter", pattern=r"[Dd]atacenter"),
-    }
+    })
 
     @property
-    def editions(self):
+    def editions(self) -> list[SoftwareEdition]:
         """The editions property."""
-        return self._value_.values()
+
+        return list(self._value_.values())
 
 
 class MicrosoftOperatingSystem(OperatingSystem):
@@ -168,7 +167,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
             os_family=OSFamily.WINDOWS,
         )
 
-        self.editions: SoftwareEditionDict = SoftwareEditionDict(
+        self._editions: SoftwareEditionDict = SoftwareEditionDict(
             **WindowsEdition[self._name.replace(" ", "").upper()].value
         )
 
@@ -186,52 +185,44 @@ class MicrosoftOperatingSystem(OperatingSystem):
 
         # TODO: Use NamedTuple to handle releases types properly or convert to JSON
         for rel in WINDOWS_RELEASES[f"{self._label}"]:
-            win_rel = self.find_release(rel["releaseLabel"])
+            win_rel = self.find_release(rel.release_label)
 
             if win_rel is None:
                 win_rel = MSOSRelease(
-                    version=rel["latest"],
-                    release_date=rel["releaseDate"],
-                    release_label=rel["releaseLabel"],
                     os_name=self.name,
+                    version=rel.latest,
+                    release_date=rel.release_date,
+                    release_label=rel.release_label,
                 )
 
-            editions = []
-            for ctg in rel.get("edition", []):
-                editions.extend(win_rel.get_software().get_editions().get_editions_per_ctg(ctg))
-
-            win_sup = SoftwareReleaseSupport(
-                active_support=rel["support"],
-                end_of_life=rel["eol"],
-                long_term_support=rel["lts"],
-                edition=editions,
+            win_sup: SoftwareReleaseSupport = SoftwareReleaseSupport(
+                active_support=rel.support,
+                end_of_life=rel.eol,
+                long_term_support=rel.lts,
+                edition=self._editions.filter_by_category(rel.edition),
             )
 
             self.add_release(win_rel)
-            self.releases[win_rel.get_version()][win_rel.get_label()].add_support(win_sup)
+            self.releases[str(win_rel.version)][win_rel.label].add_support(win_sup)
 
     # ****************************************************************
     # Static methods
 
     @staticmethod
     @override
-    def get_matching_version(test_str: str) -> str | None:
+    def find_version_in_str(search_str: str) -> str | None:
         """
-        Return a version matching the given string.
+        Try to find a version in the provided string based on the class VERSION_REG.
 
         This static method uses a regular expression to find and return a version number from the input string.
 
         Args:
-            test_str (str): The string to search for a version match.
+            search_str (str): The string to search for a version match.
 
         Returns:
             str: A string representing the matched version, or None if no match is found.
         """
 
-        res = None
-        search = re.search(MicrosoftOperatingSystem.VERSION_REG, test_str)
+        search = re.search(MicrosoftOperatingSystem.VERSION_REG, search_str)
+        return search is not None and ".".join([search.group(1), search.group(2)]) or None
 
-        if search is not None:
-            res = ".".join([search.group(1), search.group(2)])
-
-        return res
