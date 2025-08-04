@@ -65,7 +65,7 @@ class MSOSRelease(OSRelease):
             str: A combined name based on the software's name and part of its label.
         """
 
-        return f"{self.software.name} {self.label.split(' ')[0]}"
+        return f"{self.software} {self.label.split(' ')[0]}"
 
     def os_dict(self) -> dict:
         """
@@ -190,10 +190,10 @@ class MicrosoftOperatingSystem(OperatingSystem):
 
             if win_rel is None:
                 win_rel = MSOSRelease(
-                    software=self,
                     version=rel["latest"],
                     release_date=rel["releaseDate"],
                     release_label=rel["releaseLabel"],
+                    os_name=self.name,
                 )
 
             editions = []
