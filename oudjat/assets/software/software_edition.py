@@ -137,7 +137,7 @@ class SoftwareEditionDict(dict):
         """
 
         def filter_values(edition: "SoftwareEdition") -> bool:
-            return edition.get_category() == category
+            return edition.category == category
 
         return list(map(str, filter(filter_values, self.values())))
 
