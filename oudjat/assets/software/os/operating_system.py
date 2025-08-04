@@ -6,7 +6,8 @@ from typing import override
 
 from oudjat.assets.computer.computer_type import ComputerType
 
-from ..software import Software, SoftwareRelease, SoftwareType
+from ..software import Software, SoftwareType
+from ..software_release import SoftwareRelease
 
 
 class OSFamily(Enum):
