@@ -125,7 +125,7 @@ class SoftwareEditionDict(dict):
 
         return list(map(str, self.values()))
 
-    def get_editions_per_ctg(self, category: str) -> list[str]:
+    def get_by_category(self, category: str) -> list[str]:
         """
         Return a sub-dictionary of software editions based on category value.
 
