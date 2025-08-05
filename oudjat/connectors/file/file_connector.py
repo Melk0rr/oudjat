@@ -26,35 +26,38 @@ class FileConnector(Connector):
                 f"{__class__.__name__}.__init__::Invalid file path provided: {file}"
             )
 
-        self.source: str = source
+        file_ext: str = file.split(".")[-1]
+
+        self._source: str = source
         try:
-            self.filetype: FileType = FileType[file_ext.upper()]
+            self._filetype: FileType = FileType[file_ext.upper()]
 
         except ValueError:
             raise ValueError(
                 f"{__class__.__name__}.__init__::{file_ext.upper()} files are not supported by {__class__.__name__}"
             )
 
-        self.connection: bool = False
-        self.data: list[Any] | None = None
+        self._connection: bool = False
+        self._data: list[Any] | None = None
 
         super().__init__(file, service_name=None, use_credentials=False)
 
     # ****************************************************************
     # Methods
 
-    def get_data(self) -> list[Any] | None:
+    @property
+    def data(self) -> list[Any] | None:
         """
         Getter for file data.
 
         Returns:
-            List[Any]: The stored data from the file.
+            list[Any]: The stored data from the file.
         """
 
         if not self.connection:
             self.connect()
 
-        return self.data
+        return self._data
 
     @Connector.target.setter
     @override
@@ -85,7 +88,7 @@ class FileConnector(Connector):
             file_connection_opts (dict): options to pass to the file import function
 
         Returns:
-            List[Any]: The list of data imported from the file.
+            list[Any]: The list of data imported from the file.
 
         Raises:
             Exception: if the file does not exist, can't be reached or if there is any error while importing its data
@@ -95,21 +98,21 @@ class FileConnector(Connector):
             file_connection_opts = {}
 
         try:
-            self.data = self.filetype.f_import(
-                file_path=self.target, **file_connection_opts
-            )
-            self.connection = True
+            self._data = self._filetype.f_import(file_path=self._target, **file_connection_opts)
+            self._connection = True
 
         except FileExistsError as e:
-            raise FileExistsError(f"{__class__.__name__}.connect::Error connecting to file {self.target}\n{e}")
+            raise FileExistsError(
+                f"{__class__.__name__}.connect::Error connecting to file {self.target}\n{e}"
+            )
 
     def disconnect(self) -> None:
         """
         'Disconnects' from the targeted file by resetting data and connection status.
         """
 
-        self.data = None
-        self.connection = False
+        self._data = None
+        self._connection = False
 
     @override
     def search(
@@ -117,7 +120,7 @@ class FileConnector(Connector):
         search_filter: Callable[[Any], bool],
         attributes: list[str] | None = None,
         *args: Any,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> list[Any]:
         """
         Search into the imported data based on given filters and attributes.
@@ -143,4 +146,3 @@ class FileConnector(Connector):
             for el in self.data
             if search_filter(el)
         ]
-
