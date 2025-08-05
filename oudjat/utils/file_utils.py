@@ -32,9 +32,7 @@ class FileHandler:
 
     # INFO: JSON file functions
     @staticmethod
-    def import_json(
-        file_path: str, callback: Callable[..., Any] | None = None
-    ) -> list[Any] | dict[str, Any]:
+    def import_json(file_path: str, callback: Callable[..., Any] | None = None) -> list[Any]:
         """
         Import json data from a specified file.
 
@@ -59,6 +57,9 @@ class FileHandler:
 
         except Exception as e:
             raise e
+
+        if isinstance(json_data, dict):
+            json_data = [json_data]
 
         return json_data
 

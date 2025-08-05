@@ -39,11 +39,11 @@ class MSRealeaseProps(NamedTuple):
             lts=rel_dictionary["lts"],
             latest=rel_dictionary["latest"],
             link=rel_dictionary.get("link", ""),
-            edition=rel_dictionary.get("edition", [])
+            edition=rel_dictionary.get("edition", []),
         )
 
 
-release_import: list[Any] | dict[str, Any] = FileHandler.import_json("./releases.jsonc")
+release_import: list[dict[str, Any]] = FileHandler.import_json("./releases.jsonc")[0]
 
 if not isinstance(release_import, dict):
     raise ValueError("Releases import must be a dictionary")
