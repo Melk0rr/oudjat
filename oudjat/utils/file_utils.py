@@ -14,7 +14,7 @@ class FileHandler:
     """A class that provides file operations."""
 
     @staticmethod
-    def check_path(path: str) -> None:
+    def check_path(path: str) -> bool:
         """
         Check if the provided path is valid.
 
@@ -25,10 +25,7 @@ class FileHandler:
             FileNotFoundError: If the provided path does not point to a valid file.
         """
 
-        if not os.path.isfile(path):
-            raise FileExistsError(
-                f"{__class__.__name__}.check_path::Invalid file path provided: {path}"
-            )
+        return os.path.isfile(path)
 
     # INFO: JSON file functions
     @staticmethod
