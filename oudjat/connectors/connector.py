@@ -59,15 +59,15 @@ class Connector:
         return self._target
 
     @target.setter
-    def target(self, target: str | object) -> None:
+    def target(self, new_target: str | object) -> None:
         """
         Set the connection target.
 
         Args:
-            target (any) : new target of the connector
+            new_target (any) : new target of the connector
         """
 
-        self._target = target
+        self._target = new_target
 
     @property
     def service_name(self) -> str | None:
