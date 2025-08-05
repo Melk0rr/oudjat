@@ -3,7 +3,7 @@
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Any, override
+from typing import override
 
 from oudjat.assets.computer.computer_type import ComputerType
 from oudjat.assets.software import (
