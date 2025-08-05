@@ -47,19 +47,20 @@ class User(Asset):
             asset_type=AssetType.USER,
         )
 
-        self.firstname: str = firstname
-        self.lastname: str = lastname
+        self._firstname: str = firstname
+        self._lastname: str = lastname
 
-        self.email: str | None = None
+        self._email: str | None = None
         if email is not None:
-            self.set_email(email)
+            self.email = email
 
-        self.login: str = login
+        self._login: str = login
 
     # ****************************************************************
     # Methods
 
-    def get_firstname(self) -> str:
+    @property
+    def firstname(self) -> str:
         """
         Getter for the user's firstname.
 
@@ -67,9 +68,10 @@ class User(Asset):
             str: The first name of the user.
         """
 
-        return self.firstname
+        return self._firstname
 
-    def get_lastname(self) -> str:
+    @property
+    def lastname(self) -> str:
         """
         Getter for the user's lastname.
 
@@ -77,9 +79,10 @@ class User(Asset):
             str: The last name of the user.
         """
 
-        return self.lastname
+        return self._lastname
 
-    def get_email(self) -> str | None:
+    @property
+    def email(self) -> str | None:
         """
         Getter for the user's email address.
 
@@ -87,19 +90,10 @@ class User(Asset):
             str: The email address of the user.
         """
 
-        return self.email
+        return self._email
 
-    def get_login(self) -> str:
-        """
-        Getter for the user's login.
-
-        Returns:
-            str: The login username for the user.
-        """
-
-        return self.login
-
-    def set_email(self, email: str) -> None:
+    @email.setter
+    def email(self, email: str) -> None:
         """
         Setter for the user's email address.
 
@@ -108,7 +102,18 @@ class User(Asset):
         """
 
         if re.match(EMAIL_REG, email):
-            self.email = email
+            self._email = email
+
+    @property
+    def login(self) -> str:
+        """
+        Getter for the user's login.
+
+        Returns:
+            str: The login username for the user.
+        """
+
+        return self._login
 
     @override
     def to_dict(self) -> dict[str, Any]:
@@ -124,9 +129,9 @@ class User(Asset):
 
         return {
             **asset_dict,
-            "firstname": self.firstname,
-            "lastname": self.lastname,
-            "email": self.email,
-            "login": self.login,
+            "firstname": self._firstname,
+            "lastname": self._lastname,
+            "email": self._email,
+            "login": self._login,
             # "type": self.user_type,
         }
