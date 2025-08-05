@@ -288,10 +288,6 @@ class CERTFRPageMeta:
         self.meta_table = meta_section.find_all("table")[0]
         self.data = None
 
-        self.date_initial: str = None
-        self.date_last: str = None
-        self.sources: List[str] = None
-
     # ****************************************************************
     # Methods
 
