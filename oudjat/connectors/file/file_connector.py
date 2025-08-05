@@ -56,12 +56,14 @@ class FileConnector(Connector):
 
         return self.data
 
-    def set_path(self, new_path: str) -> None:
+    @Connector.target.setter
+    @override
+    def target(self, new_target: str | object) -> None:
         """
         Setter for connector path.
 
         Args:
-            new_path (str): The new file path to be set.
+            new_target (str): The new file path to be set.
         """
 
         if not isinstance(new_target, str):
@@ -71,6 +73,7 @@ class FileConnector(Connector):
             raise FileExistsError(
                 f"{__class__.__name__}.check_path::Invalid file path provided: {new_target}"
             )
+
 
     @override
     def connect(self, file_connection_opts: dict[str, Any] | None = None) -> None:
