@@ -26,27 +26,40 @@ class Connector:
             use_credentials (bool)  : wheither the connector should use credentials
         """
 
-        self.target: str | object = target
-        self.service_name: str | None = service_name
+        self._target: str | object = target
+        self._service_name: str | None = service_name
 
         # Retrieve credentials for the service
-        self.credentials: SimpleCredential | Credential | None = None
-        if use_credentials and self.service_name is not None:
-            self.credentials = CredentialHelper.get_credentials(self.service_name)
+        self._credentials: SimpleCredential | Credential | None = None
+        if use_credentials and self._service_name is not None:
+            self._credentials = CredentialHelper.get_credentials(self._service_name)
 
-        self.connection: Any = None
+        self._connection: Any = None
 
-    def get_connection(self) -> object:
+    @property
+    def connection(self) -> object:
         """
-        Return the current connection.
+        Return the current connection object.
 
-        Return:
-            any : active connection
+        Returns:
+            object : active connection object
         """
 
         return self.connection
 
-    def set_target(self, target: str | object) -> None:
+    @property
+    def target(self) -> str | object:
+        """
+        Return the current connector target.
+
+        Returns:
+            str | object: the target element the connector will connect to
+        """
+
+        return self._target
+
+    @target.setter
+    def target(self, target: str | object) -> None:
         """
         Set the connection target.
 
@@ -54,9 +67,21 @@ class Connector:
             target (any) : new target of the connector
         """
 
-        self.target = target
+        self._target = target
 
-    def set_service_name(self, new_service_name: str, use_credentials: bool) -> None:
+    @property
+    def service_name(self) -> str | None:
+        """
+        Return the service name the connector will use to store credentials.
+
+        Returns:
+            str | None: service name used by the connector
+        """
+
+        return self._service_name
+
+    @service_name.setter
+    def service_name(self, new_service_name: str, use_credentials: bool) -> None:
         """
         Set the service name bound to the current connector.
 
@@ -68,7 +93,7 @@ class Connector:
         self.service_name = new_service_name
 
         if use_credentials:
-            self.credentials = CredentialHelper.get_credentials(self.service_name)
+            self._credentials = CredentialHelper.get_credentials(new_service_name)
 
     def connect(self) -> None:
         """
