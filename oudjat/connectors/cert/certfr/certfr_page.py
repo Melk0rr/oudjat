@@ -394,12 +394,6 @@ class CERTFRPageContent:
         self.content = content_section
         self.data = None
 
-        self.solutions = None
-        self.description = None
-        self.risks: Set[str] = None
-        self.cves: Dict["CVE"] = None
-        self.documentations: List[str] = None
-        self.affected_products: List[str] = None
 
     # ****************************************************************
     # Methods
