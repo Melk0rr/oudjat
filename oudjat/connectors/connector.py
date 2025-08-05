@@ -40,9 +40,6 @@ class Connector:
         """
         Return the current connection.
 
-        Args:
-            None
-
         Return:
             any : active connection
         """
@@ -66,9 +63,6 @@ class Connector:
         Args:
             new_service_name (str) : new service name for the connector
             use_credentials (bool) : wheither the connector should use credentials
-
-        Return:
-            None
         """
 
         self.service_name = new_service_name
@@ -83,9 +77,6 @@ class Connector:
         Args:
             *args (tuple)  : any args the overriding method provides
             **kwargs (dict): any kwargs the overriding method provides
-
-        Return:
-            None
         """
 
         raise NotImplementedError(
@@ -108,7 +99,7 @@ class Connector:
             *args (tuple)         : any args the overriding method provides
             **kwargs (dict)       : any kwargs the overriding method provides
 
-        Return:
+        Returns:
             list[any] : list of results
         """
 
