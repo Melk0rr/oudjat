@@ -21,8 +21,10 @@ class FileConnector(Connector):
             source (str): The source identifier or description of the file.
         """
 
-        FileHandler.check_path(file)
-        file_ext = file.split(".")[-1]
+        if not FileHandler.check_path(file):
+            raise FileExistsError(
+                f"{__class__.__name__}.__init__::Invalid file path provided: {file}"
+            )
 
         self.source: str = source
         try:
@@ -62,8 +64,13 @@ class FileConnector(Connector):
             new_path (str): The new file path to be set.
         """
 
-        FileHandler.check_path(new_path)
-        self.set_target(new_path)
+        if not isinstance(new_target, str):
+            raise ValueError(f"{__class__.__name__}.check_path::Please provide a string")
+
+        if not FileHandler.check_path(new_target):
+            raise FileExistsError(
+                f"{__class__.__name__}.check_path::Invalid file path provided: {new_target}"
+            )
 
     @override
     def connect(self, file_connection_opts: dict[str, Any] | None = None) -> None:
