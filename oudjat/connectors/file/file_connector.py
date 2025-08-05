@@ -74,6 +74,7 @@ class FileConnector(Connector):
                 f"{__class__.__name__}.check_path::Invalid file path provided: {new_target}"
             )
 
+        super()._target = new_target
 
     @override
     def connect(self, file_connection_opts: dict[str, Any] | None = None) -> None:
