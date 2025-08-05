@@ -160,7 +160,7 @@ class Subnet:
 
         return IPv4(ip_int_to_str(broadcast_int))
 
-    def contains(self, ip: IPv4) -> bool:
+    def contains(self, ip: int | str | IPv4) -> bool:
         """
         Check whether the provided IP is in the current subnet.
 
@@ -170,6 +170,9 @@ class Subnet:
         Returns:
             bool: True if the IP is within the subnet, False otherwise.
         """
+
+        if not isinstance(ip, IPv4):
+            ip = IPv4(ip)
 
         mask_address: int = int(self.mask)
         return LogicalOperation.logical_and(int(ip), mask_address) == LogicalOperation.logical_and(
