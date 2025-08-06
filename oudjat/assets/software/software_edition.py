@@ -21,11 +21,12 @@ class SoftwareEdition:
             pattern (str, optional) : A regex pattern used for matching strings against this edition. Defaults to None.
         """
 
-        self.label: str = label
-        self.category: str | None = category
-        self.pattern: str | None = pattern
+        self._label: str = label
+        self._category: str | None = category
+        self._pattern: str | None = pattern
 
-    def get_label(self) -> str:
+    @property
+    def label(self) -> str:
         """
         Getter for edition label.
 
@@ -33,9 +34,10 @@ class SoftwareEdition:
             str: The label of the software edition.
         """
 
-        return self.label
+        return self._label
 
-    def get_category(self) -> str | None:
+    @property
+    def category(self) -> str | None:
         """
         Getter for edition category.
 
@@ -43,9 +45,10 @@ class SoftwareEdition:
             str: The category of the software edition.
         """
 
-        return self.category
+        return self._category
 
-    def get_pattern(self) -> str | None:
+    @property
+    def pattern(self) -> str | None:
         """
         Getter for edition pattern.
 
@@ -53,7 +56,7 @@ class SoftwareEdition:
             str: The regex pattern used for matching strings against this edition.
         """
 
-        return self.pattern
+        return self._pattern
 
     def match_str(self, test_str: str) -> bool:
         """
@@ -66,10 +69,10 @@ class SoftwareEdition:
             bool: True if the string matches the pattern or if no pattern is set, False otherwise.
         """
 
-        if self.pattern is None:
+        if self._pattern is None:
             return False
 
-        return re.search(self.pattern, test_str) is not None
+        return re.search(self._pattern, test_str) is not None
 
     @override
     def __str__(self) -> str:
@@ -80,7 +83,7 @@ class SoftwareEdition:
             str: The label of the software edition as its string representation.
         """
 
-        return self.label
+        return self._label
 
 
 class SoftwareEditionDict(dict):
