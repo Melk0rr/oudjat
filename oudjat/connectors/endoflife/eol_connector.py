@@ -24,13 +24,14 @@ class EndOfLifeConnector(Connector):
         """
 
         super().__init__(target=EOL_API_URL)
-        self.products: list[str] = []
-        self.connection: bool = False
+        self._products: list[str] = []
+        self._connection: bool = False
 
     # ****************************************************************
     # Methods
 
-    def get_products(self) -> list[str]:
+    @property
+    def products(self) -> list[str]:
         """
         Return a list of products.
 
@@ -38,7 +39,7 @@ class EndOfLifeConnector(Connector):
             List[str]: A list containing the names of available products.
         """
 
-        return self.products
+        return self._products
 
     @override
     def connect(self) -> None:
@@ -51,15 +52,15 @@ class EndOfLifeConnector(Connector):
             ConnectionError: If unable to connect to the API endpoint or retrieve data.
         """
 
-        self.connection = False
+        self._connection = False
 
         try:
             headers = {"Accept": "application/json"}
             req = requests.get(f"{self.target}all.json", headers=headers)
 
             if req.status_code == 200:
-                self.connection = True
-                self.products = json.loads(req.content.decode("utf-8"))
+                self._connection = True
+                self._products = json.loads(req.content.decode("utf-8"))
 
         except ConnectionError as e:
             raise ConnectionError(
@@ -89,19 +90,19 @@ class EndOfLifeConnector(Connector):
 
         res = []
 
-        if not self.connection or len(self.products) == 0:
+        if not self._connection or len(self._products) == 0:
             raise ConnectionError(
                 f"{__class__.__name__}.search::Please run connect to initialize endoflife connection"
             )
 
-        if search_filter not in self.products:
+        if search_filter not in self._products:
             raise ValueError(
-                f"{__class__.__name__}.search::{search_filter} is not a valid product:\n{self.products}"
+                f"{__class__.__name__}.search::{search_filter} is not a valid product:\n{self._products}"
             )
 
         try:
             headers = {"Accept": "application/json"}
-            req = requests.get(f"{self.target}{search_filter}.json", headers=headers)
+            req = requests.get(f"{self._target}{search_filter}.json", headers=headers)
 
             if req.status_code == 200:
                 res = json.loads(req.content.decode("utf-8"))
