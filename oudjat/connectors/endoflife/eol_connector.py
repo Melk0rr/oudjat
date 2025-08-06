@@ -135,13 +135,18 @@ class EndOfLifeConnector(Connector):
 
         for rel in win_eol:
             if target == "windows":
-                win_editions = list(
-                    set([e.get_category() for e in WindowsEdition.WINDOWS.editions])
-                )
-                r_edition: list[str] = win_editions[:-1]
+                win_editions_ctg: list[str] = []
+                for e in WindowsEdition.WINDOWS.editions:
+                    ctg = e.get_category()
+                    if ctg:
+                        win_editions_ctg.append(ctg)
+
+                win_editions_ctg = list(set(win_editions_ctg))
+
+                r_edition: list[str] = win_editions_ctg[:-1]
 
                 edi_search = re.search(
-                    rf"^.+ \(?({'|'.join(win_editions)})\)?$", rel["releaseLabel"].upper()
+                    rf"^.+ \(?({'|'.join(win_editions_ctg)})\)?$", rel["releaseLabel"].upper()
                 )
                 if edi_search:
                     r_edition = [edi_search.group(1)]
