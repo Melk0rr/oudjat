@@ -31,7 +31,7 @@ class SoftwareReleaseSupport:
             long_term_support (bool, optional)    : Whether the release has long term support.
         """
 
-        self.edition: SoftwareEditionDict = SoftwareEditionDict(**edition)
+        self._edition: SoftwareEditionDict = SoftwareEditionDict(**edition)
 
         if active_support is None and end_of_life is None:
             raise ValueError(
@@ -39,32 +39,33 @@ class SoftwareReleaseSupport:
             )
 
         # Handling none support values
-        self.active_support: datetime
-        self.end_of_life: datetime
+        self._active_support: datetime
+        self._end_of_life: datetime
         if active_support is not None and end_of_life is None:
-            self.end_of_life = (
+            self._end_of_life = (
                 TimeConverter.str_to_date(active_support)
                 if not isinstance(active_support, datetime)
                 else active_support
             )
 
-            self.active_support = self.end_of_life
+            self._active_support = self._end_of_life
 
         if active_support is None and end_of_life is not None:
-            self.active_support = (
+            self._active_support = (
                 TimeConverter.str_to_date(end_of_life)
                 if not isinstance(end_of_life, datetime)
                 else end_of_life
             )
 
-            self.end_of_life = self.active_support
+            self._end_of_life = self._active_support
 
-        self.lts: bool = long_term_support
+        self._lts: bool = long_term_support
 
     # ****************************************************************
     # Methods
 
-    def get_edition(self) -> SoftwareEditionDict:
+    @property
+    def edition(self) -> SoftwareEditionDict:
         """
         Getter for the release edition.
 
@@ -72,18 +73,9 @@ class SoftwareReleaseSupport:
             list[str]: The list of software editions supported by this release.
         """
 
-        return self.edition
+        return self._edition
 
-    def is_ongoing(self) -> bool:
-        """
-        Check if the current support period is ongoing.
-
-        Returns:
-            bool: True if the support period is ongoing, False otherwise.
-        """
-
-        return TimeConverter.days_diff(self.end_of_life, reverse=True) > 0
-
+    @property
     def status(self) -> str:
         """
         Return a string representing the current support status.
@@ -92,8 +84,21 @@ class SoftwareReleaseSupport:
             str: "Ongoing" if support is ongoing, otherwise "Retired".
         """
 
-        return "Ongoing" if self.is_ongoing() else "Retired"
+        return "Ongoing" if self.is_ongoing else "Retired"
 
+
+    @property
+    def is_ongoing(self) -> bool:
+        """
+        Check if the current support period is ongoing.
+
+        Returns:
+            bool: True if the support period is ongoing, False otherwise.
+        """
+
+        return TimeConverter.days_diff(self._end_of_life, reverse=True) > 0
+
+    @property
     def support_details(self) -> str:
         """
         Return a detailed string about the supported status.
@@ -102,7 +107,7 @@ class SoftwareReleaseSupport:
             str: A string indicating how many days are left in support or whether support has ended already.
         """
 
-        support_days = TimeConverter.days_diff(self.end_of_life, reverse=True)
+        support_days = TimeConverter.days_diff(self._end_of_life, reverse=True)
         state = f"{abs(support_days)} days"
 
         if support_days > 0:
@@ -113,6 +118,7 @@ class SoftwareReleaseSupport:
 
         return state
 
+    @property
     def has_long_term_support(self) -> bool:
         """
         Check if the release has long term support.
@@ -121,7 +127,7 @@ class SoftwareReleaseSupport:
             bool: True if the release has long term support, False otherwise.
         """
 
-        return self.lts
+        return self._lts
 
     def supports_edition(self, edition: str | list[str], lts: bool = False) -> bool:
         """
@@ -138,7 +144,7 @@ class SoftwareReleaseSupport:
         if not isinstance(edition, list):
             edition = [edition]
 
-        return any([((e in self.edition) and (lts == self.lts)) for e in edition])
+        return any([((e in self.edition) and (lts == self._lts)) for e in edition])
 
     @override
     def __str__(self) -> str:
@@ -149,7 +155,7 @@ class SoftwareReleaseSupport:
             str: a string representing the software support
         """
 
-        return f"({';'.join(self.edition)}) : {self.status()}{' - LTS' if self.lts else ''}"
+        return f"({';'.join(self._edition)}) : {self.status}{' - LTS' if self._lts else ''}"
 
     def to_dict(self) -> dict[str, Any]:
         """
@@ -161,11 +167,11 @@ class SoftwareReleaseSupport:
 
         return {
             "edition": self.edition,
-            "active_support": TimeConverter.date_to_str(self.active_support),
-            "end_of_life": TimeConverter.date_to_str(self.end_of_life),
-            "status": self.status(),
-            "lts": self.lts,
-            "details": self.support_details(),
+            "active_support": TimeConverter.date_to_str(self._active_support),
+            "end_of_life": TimeConverter.date_to_str(self._end_of_life),
+            "status": self.status,
+            "lts": self._lts,
+            "details": self.support_details,
         }
 
     # ****************************************************************
