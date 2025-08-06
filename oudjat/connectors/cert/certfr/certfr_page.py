@@ -52,32 +52,31 @@ class CERTFRPage:
         if not self.is_valid_ref(ref) and not self.is_valid_link(ref):
             raise ValueError(f"{__class__.__name__}::Invalid CERTFR ref provided : {ref}")
 
-        self.ref: str = ref if self.is_valid_ref(ref) else self.get_ref_from_link(ref)
+        self._ref: str = ref if self.is_valid_ref(ref) else self.get_ref_from_link(ref)
 
-        self.raw_content: BeautifulSoup | None = None
-        self.title: str | None = None
+        self._raw_content: BeautifulSoup | None = None
+        self._title: str | None = None
 
-        self.meta: CERTFRPageMeta | None = None
-        self.content: CERTFRPageContent | None = None
-
-        self.CVE_RESOLVED: bool = False
+        self._meta: CERTFRPageMeta | None = None
+        self._content: CERTFRPageContent | None = None
 
         # Set page type
-        ref_search = re.search(rf"(?:{REF_TYPES})", self.ref)
+        ref_search = re.search(rf"(?:{REF_TYPES})", self._ref)
 
         if not ref_search:
             raise ValueError(
-                f"{__class__.__name__}.__init__::Could not match any reference type to {self.ref}"
+                f"{__class__.__name__}.__init__::Could not match any reference type to {self._ref}"
             )
 
         ref_type: str = ref_search.group(0)
 
-        self.link: str = f"{self.BASE_LINK}/{CERTFRPageType[ref_type].value}/{self.ref}/"
+        self._link: str = f"{self.BASE_LINK}/{CERTFRPageType[ref_type].value}/{self._ref}/"
 
     # ****************************************************************
     # Methods
 
-    def get_ref(self) -> str:
+    @property
+    def ref(self) -> str:
         """
         Getter for the reference of the CERTFRPage instance.
 
@@ -85,9 +84,10 @@ class CERTFRPage:
             str: The reference string associated with the CERTFRPage instance.
         """
 
-        return self.ref
+        return self._ref
 
-    def get_title(self) -> str | None:
+    @property
+    def title(self) -> str | None:
         """
         Getter for the page title of the CERTFRPage instance.
 
@@ -95,9 +95,10 @@ class CERTFRPage:
             str: The title string of the page.
         """
 
-        return self.title
+        return self._title
 
-    def get_cves(self) -> list["CVE"]:
+    @property
+    def cves(self) -> list["CVE"]:
         """
         Retrieve the CVEs from the content section and returns them as a list. If no CVEs are found, it returns an empty list.
 
@@ -105,7 +106,7 @@ class CERTFRPage:
             List["CVE"]: A list of CVE objects if available, otherwise an empty list.
         """
 
-        return list(self.content.get_cves().values()) if self.content else []
+        return list(self._content.cves.values()) if self._content else []
 
     def connect(self) -> None:
         """
@@ -120,26 +121,26 @@ class CERTFRPage:
 
         # Handle possible connection error
         try:
-            req = requests.get(self.link)
+            req = requests.get(self._link)
 
             if req.status_code != 200:
                 raise ConnectionError(
                     f"{__class__.__name__}.connect::Error while trying to connect to {self.ref}"
                 )
 
-            self.raw_content = BeautifulSoup(req.content, "html.parser")
+            self._raw_content = BeautifulSoup(req.content, "html.parser")
 
-            title = self.raw_content.find_next("title")
+            title = self._raw_content.find_next("title")
 
             if title:
-                self.title = title.text
+                self._title = title.text
 
-            print(self.title)
+            print(self._title)
 
         except ConnectionError:
             ColorPrint.red(
                 f"{__class__.__name__}.connect::Error while requesting {
-                    self.ref
+                    self._ref
                 }. Make sure it is accessible"
             )
 
@@ -148,9 +149,9 @@ class CERTFRPage:
         Reset the parsing state of the CERTFRPage instance by setting raw_content, meta, and content to None.
         """
 
-        self.raw_content = None
-        self.meta = None
-        self.content = None
+        self._raw_content = None
+        self._meta = None
+        self._content = None
 
     def parse(self) -> None:
         """
@@ -163,25 +164,25 @@ class CERTFRPage:
             Exception : An error message is printed in case of any parsing errors.
         """
 
-        if self.raw_content is None:
+        if self._raw_content is None:
             self.connect()
 
-        if self.raw_content:
+        if self._raw_content:
             try:
-                sections: ResultSet = self.raw_content.find_all("section")
+                sections: ResultSet = self._raw_content.find_all("section")
 
                 if len(sections) >= 2:
                     # Meta parsing
-                    self.meta= CERTFRPageMeta(meta_section=sections[0])
-                    self.meta.parse()
+                    self._meta = CERTFRPageMeta(meta_section=sections[0])
+                    self._meta.parse()
 
                     # Content parsing
-                    self.content = CERTFRPageContent(content_section=sections[1])
-                    self.content.parse()
+                    self._content = CERTFRPageContent(content_section=sections[1])
+                    self._content.parse()
 
             except Exception as e:
                 ColorPrint.red(
-                    f"{__class__.__name__}.parse::A parsing error occured for {self.ref}\n{e}"
+                    f"{__class__.__name__}.parse::A parsing error occured for {self._ref}\n{e}"
                 )
 
     @override
@@ -193,7 +194,7 @@ class CERTFRPage:
             str: A formatted string representing the CERTFRPage instance.
         """
 
-        return f"{self.ref}: {self.title}"
+        return f"{self._ref}: {self._title}"
 
     def to_dict(self) -> dict:
         """
@@ -203,12 +204,12 @@ class CERTFRPage:
             Dict: A dictionary containing the page information.
         """
 
-        content_dict: dict[str, Any] = self.content.to_dict() if self.content else {}
-        meta_dict: dict[str, Any] = self.meta.to_dict() if self.meta else {}
+        content_dict: dict[str, Any] = self._content.to_dict() if self._content else {}
+        meta_dict: dict[str, Any] = self._meta.to_dict() if self._meta else {}
 
         page_dict: dict[str, Any] = {
-            "ref": self.ref,
-            "title": self.title,
+            "ref": self._ref,
+            "title": self._title,
             **meta_dict,
             **content_dict,
         }
@@ -294,28 +295,14 @@ class CERTFRPageMeta:
             meta_section (element): A BeautifulSoup4 element containing the meta data in a table format.
         """
 
-        self.meta_table: PageElement = meta_section.find_all("table")[0]
-        self.data: dict[str, Any] = {}
+        self._meta_table: PageElement = meta_section.find_all("table")[0]
+        self._data: dict[str, Any] = {}
 
     # ****************************************************************
     # Methods
 
-    def parse(self) -> None:
-        """
-        Parse the meta table to extract key-value pairs and store them in `data`. This method populates the `data` attribute with a dictionary of cleaned metadata keys and values.
-        """
-
-        meta = {}
-        for row in self.meta_table.find_all_next("tr"):
-            cells = row.find_all_next("td")
-            c_name = cells[0].text.strip()
-            c_value = cells[-1].text.strip()
-
-            meta[clean_str(c_name)] = clean_str(c_value)
-
-        self.data = meta
-
-    def get_date_initial(self) -> str | None:
+    @property
+    def date_initial(self) -> str | None:
         """
         Retrieve the initial release date from meta table, if not already set, and returns it.
 
@@ -323,9 +310,10 @@ class CERTFRPageMeta:
             str: The initial date of the page or None if not available.
         """
 
-        return self.data.get("Date de la première version", None)
+        return self._data.get("Date de la première version", None)
 
-    def get_date_last(self) -> str | None:
+    @property
+    def date_last(self) -> str | None:
         """
         Retrieve the last change date from meta table, if not already set, and returns it.
 
@@ -333,9 +321,10 @@ class CERTFRPageMeta:
             str: The last change date of the page or None if not available.
         """
 
-        return self.data.get("Date de la dernière version", None)
+        return self._data.get("Date de la dernière version", None)
 
-    def get_sources(self) -> list[str]:
+    @property
+    def sources(self) -> list[str]:
         """
         Retrieve the sources from metadata, if not already set, and returns them as a list of cleaned strings.
 
@@ -343,7 +332,7 @@ class CERTFRPageMeta:
             List[str]: A list of sources or None if not available.
         """
 
-        clean_sources: list[str] = self.data.get("Source(s)", "").split("\n")
+        clean_sources: list[str] = self._data.get("Source(s)", "").split("\n")
         clean_sources = [
             re.sub(r"\s+", " ", line).strip()
             for line in clean_sources
@@ -351,6 +340,21 @@ class CERTFRPageMeta:
         ]
 
         return clean_sources
+
+    def parse(self) -> None:
+        """
+        Parse the meta table to extract key-value pairs and store them in `data`. This method populates the `data` attribute with a dictionary of cleaned metadata keys and values.
+        """
+
+        meta = {}
+        for row in self._meta_table.find_all_next("tr"):
+            cells = row.find_all_next("td")
+            c_name = cells[0].text.strip()
+            c_value = cells[-1].text.strip()
+
+            meta[clean_str(c_name)] = clean_str(c_value)
+
+        self._data = meta
 
     def to_dict(self) -> dict[str, Any]:
         """
@@ -361,9 +365,9 @@ class CERTFRPageMeta:
         """
 
         meta_dict: dict[str, Any] = {
-            "date_initial": self.get_date_initial(),
-            "date_last": self.get_date_last(),
-            "sources": self.get_sources(),
+            "date_initial": self.date_initial,
+            "date_last": self.date_last,
+            "sources": self.sources,
         }
 
         return meta_dict
@@ -383,13 +387,14 @@ class CERTFRPageContent:
             content_section (element): The HTML content section to be parsed and used within the class instance.
         """
 
-        self.content: BeautifulSoup = content_section
-        self.data: dict[str, Any] = {}
+        self._content: BeautifulSoup = content_section
+        self._data: dict[str, Any] = {}
 
     # ****************************************************************
     # Methods
 
-    def get_risks(self) -> set[RiskType]:
+    @property
+    def risks(self) -> set[RiskType]:
         """
         Getter / parser for the list of risks.
 
@@ -403,12 +408,13 @@ class CERTFRPageContent:
         risk_set: set[RiskType] = set()
 
         for risk in RiskType:
-            if risk.value["fr"].lower() in [r.lower() for r in self.data.get("Risques", [])]:
+            if risk.value["fr"].lower() in [r.lower() for r in self._data.get("Risques", [])]:
                 risk_set.add(risk)
 
         return risk_set
 
-    def get_products(self) -> list[str]:
+    @property
+    def products(self) -> list[str]:
         """
         Getter / parser for affected products.
 
@@ -416,9 +422,10 @@ class CERTFRPageContent:
             list: A list of product names identified as affected by the issues in the content.
         """
 
-        return self.data.get("Systèmes affectés", [])
+        return self._data.get("Systèmes affectés", [])
 
-    def get_description(self) -> str | None:
+    @property
+    def description(self) -> str | None:
         """
         Getter / parser for description.
 
@@ -426,9 +433,10 @@ class CERTFRPageContent:
             str: A detailed description extracted from the content, or None if not available.
         """
 
-        return self.data.get("Résumé", None)
+        return self._data.get("Résumé", None)
 
-    def get_solutions(self) -> list[str]:
+    @property
+    def solutions(self) -> list[str]:
         """
         Getter / parser for solutions.
 
@@ -436,9 +444,10 @@ class CERTFRPageContent:
             str: Solutions to the issues discussed in the content, or None if not available.
         """
 
-        return self.data.get("Solutions", [])
+        return self._data.get("Solutions", [])
 
-    def get_cves(self) -> dict[str, CVE]:
+    @property
+    def cves(self) -> dict[str, CVE]:
         """
         Return the refs of all the related CVEs.
 
@@ -448,13 +457,14 @@ class CERTFRPageContent:
 
         cves = {}
 
-        for cve in self.data.get("CVEs", []):
+        for cve in self._data.get("CVEs", []):
             if cve not in cves.keys():
                 cves[cve] = CVE(ref=cve)
 
         return cves
 
-    def get_documentations(self, doc_filter: str | None = None) -> list[str]:
+    @property
+    def documentations(self) -> list[str]:
         """
         Return the documentation section of a CERTFR page.
 
@@ -465,9 +475,22 @@ class CERTFRPageContent:
             list: A filtered or unfiltered list of URLs pointing to documentation from the content.
         """
 
-        docs = self.data.get("Documentation", [])
+        return self._data.get("Documentation", [])
 
-        if doc_filter is not None and doc_filter != "":
+    def filter_documentations(self, doc_filter: str) -> list[str]:
+        """
+        Return the documentation section of a CERTFR page.
+
+        Args:
+            doc_filter (str): A string to filter out certain documentation URLs. Default is None.
+
+        Returns:
+            list: A filtered or unfiltered list of URLs pointing to documentation from the content.
+        """
+
+        docs = self.documentations
+
+        if doc_filter != "":
             docs = [d for d in docs if doc_filter not in d]
 
         return docs
@@ -480,7 +503,7 @@ class CERTFRPageContent:
         """
 
         data: dict[str, Any] = {}
-        titles = self.content.find_all("h2")
+        titles = self._content.find_all("h2")
 
         for t in titles:
             next_el = t.find_next_sibling()
@@ -492,10 +515,10 @@ class CERTFRPageContent:
                 else:
                     data[t.text] = next_el.text
 
-        data["CVEs"] = set(re.findall(CVE_REGEX, self.content.text))
-        data["Documentation"] = re.findall(URL_REGEX, self.content.text)
+        data["CVEs"] = set(re.findall(CVE_REGEX, self._content.text))
+        data["Documentation"] = re.findall(URL_REGEX, self._content.text)
 
-        self.data = data
+        self._data = data
 
     def to_dict(self) -> dict:
         """
@@ -506,12 +529,12 @@ class CERTFRPageContent:
         """
 
         content_dict: dict[str, Any] = {
-            "risks": list(map(RiskType.risk_name, self.get_risks())),
-            "products": self.get_products(),
-            "description": self.get_description(),
-            "cves": [cve.get_ref() for cve in self.get_cves().values()],
-            "solutions": self.get_solutions(),
-            "documentations": self.get_documentations(doc_filter="cve.org"),
+            "risks": list(map(RiskType.risk_name, self.risks)),
+            "products": self.products,
+            "description": self.description,
+            "cves": [cve.get_ref() for cve in self.cves.values()],
+            "solutions": self.solutions,
+            "documentations": self.filter_documentations(doc_filter="cve.org"),
         }
 
         return content_dict
