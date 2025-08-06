@@ -137,7 +137,7 @@ class EndOfLifeConnector(Connector):
             if target == "windows":
                 win_editions_ctg: list[str] = []
                 for e in WindowsEdition.WINDOWS.editions:
-                    ctg = e.get_category()
+                    ctg = e.category
                     if ctg:
                         win_editions_ctg.append(ctg)
 
