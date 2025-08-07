@@ -1,48 +1,26 @@
 """A module that describes common CVE connector behaviors."""
 
 import json
-from datetime import datetime
-from typing import Dict, List, Union
+from abc import ABC, abstractmethod
+from typing import Any, override
 
 import requests
 
 from oudjat.connectors.connector import Connector
 
+from .cve_formats import CVEDataFormat
 
-class CVEConnector(Connector):
+
+class CVEConnector(Connector, ABC):
     """A class that handles connection with Nist API to retrieve CVE informations."""
 
     # ****************************************************************
     # Attributes & Constructors
 
-    URL = None
-    API_URL = None
+    URL: str = ""
+    API_URL: str = ""
 
-    UNIFIED_FORMAT = {
-        "id": str,
-        "dates": {
-            "published": Union[str, datetime],
-            "updated": Union[str, datetime],
-        },
-        "source": List[str],
-        "status": str,
-        "description": str,
-        "vectors": {
-            "vectorString": str,
-            "attackVector": str,
-        },
-        "requirements": {
-            "privilegesRequired": str,
-            "attackRequirements": str,
-        },
-        "metrics": {
-            "score": float,
-            "version": float,
-            "severity": str,
-        },
-    }
-
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Create a new instance of NistConnector.
 
@@ -52,10 +30,13 @@ class CVEConnector(Connector):
 
         super().__init__(target=CVEConnector.API_URL)
 
+        self._connection: dict[str, Any] | None = None
+
     # ****************************************************************
     # Methods
 
-    def connect(self, target: str, **kwargs) -> None:
+    @override
+    def connect(self, target: str, **kwargs: Any) -> None:
         """
         Test connection to NIST API.
 
@@ -67,27 +48,29 @@ class CVEConnector(Connector):
             kwargs (Dict): Additional arguments to pass into requests.get
         """
 
-        self.connection = None
+        self._connection = None
 
         try:
             headers = {"Accept": "application/json"}
             req = requests.get(target, headers=headers, **kwargs)
 
             if req.status_code == 200:
-                self.connection = json.loads(req.content.decode("utf-8"))
+                self._connection = json.loads(req.content.decode("utf-8"))
 
         except ConnectionError as e:
             raise ConnectionError(
                 f"{__class__.__name__}.connect::Could not connect to {self.target}\n{e}"
             )
 
+    @override
+    @abstractmethod
     def search(
         self,
-        search_filter: Union[str, List[str]],
-        attributes: Union[str, List[str]] = None,
+        search_filter: str | list[str],
+        attributes: str | list[str] | None = None,
         raw: bool = False,
-        **kwargs,
-    ) -> List[Dict]:
+        **kwargs: Any,
+    ) -> list[dict]:
         """
         Search the API for CVEs.
 
@@ -110,12 +93,13 @@ class CVEConnector(Connector):
             f"{__class__.__name__}.search::Method must be implemented by the overloading class"
         )
 
-    def unify_cve_data(self, cve: Dict) -> Dict:
+    @abstractmethod
+    def unify_cve_data(self, cve: dict[str, Any]) -> CVEDataFormat:
         """
         Filter and reorganize cve data properties in order to obtain a unified format accross CVE connectors.
 
         Args:
-            cve (Dict): cve data as a dictionary
+            cve (dict[str, Any]): cve data as a dictionary
 
         Returns:
             Dict: formated dictionary
@@ -129,6 +113,7 @@ class CVEConnector(Connector):
     # Static methods
 
     @staticmethod
+    @abstractmethod
     def get_cve_url(cve: str) -> str:
         """
         Return the Nist website URL of the given CVE.
@@ -145,6 +130,7 @@ class CVEConnector(Connector):
         )
 
     @staticmethod
+    @abstractmethod
     def get_cve_api_url(cve: str) -> str:
         """
         Return the Nist website URL of the given CVE.
