@@ -10,6 +10,7 @@ from .file_utils import FileHandler, FileType
 from .logical_operations import LogicalOperation, LogicalOperator
 from .stdouthook import StdOutHook
 from .time_utils import DateFlag, DateFormat, TimeConverter
+from .types import DataType, NumberType
 
 __all__ = [
     "BitFlag",
@@ -24,4 +25,6 @@ __all__ = [
     "DateFlag",
     "DateFormat",
     "TimeConverter",
+    "DataType",
+    "NumberType",
 ]
