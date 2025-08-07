@@ -1,5 +1,6 @@
 """A module that defines base Asset properties."""
 
+from abc import ABC
 from typing import TYPE_CHECKING, override
 
 from .asset_type import AssetType
@@ -9,7 +10,7 @@ if TYPE_CHECKING:
     from .location import Location
 
 
-class Asset(GenericIdentifiable):
+class Asset(GenericIdentifiable, ABC):
     """
     Generic asset class. Must be inherited by asset types.
 
