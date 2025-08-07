@@ -1,5 +1,6 @@
 """A module to centralize common behavior accross all connectors."""
 
+from abc import ABC, abstractmethod
 from typing import Any
 
 from keyring.credentials import Credential, SimpleCredential
@@ -7,7 +8,7 @@ from keyring.credentials import Credential, SimpleCredential
 from oudjat.utils import CredentialHelper
 
 
-class Connector:
+class Connector(ABC):
     """
     A class serves as a base for any type of connector.
 
@@ -95,7 +96,8 @@ class Connector:
         if use_credentials:
             self._credentials = CredentialHelper.get_credentials(new_service_name)
 
-    def connect(self) -> None:
+    @abstractmethod
+    def connect(self, *args: Any, **kwargs: Any) -> None:
         """
         Connect to the target.
 
@@ -105,9 +107,10 @@ class Connector:
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.connect()::Method must be implemented by the overloading class"
+            f"{__class__.__name__}.connect::Method must be implemented by the overloading class"
         )
 
+    @abstractmethod
     def search(
         self,
         search_filter: Any,
@@ -129,5 +132,5 @@ class Connector:
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.search({search_filter}, {attributes}, {args}, {kwargs})::Method must be implemented by the overloading class"
+            f"{__class__.__name__}.search::Method must be implemented by the overloading class"
         )
