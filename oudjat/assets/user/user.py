@@ -116,6 +116,21 @@ class User(Asset):
         return self._login
 
     @override
+    def __str__(self) -> str:
+        """
+        Return a string representation of the instance.
+
+        Returns:
+            str: the current user represented by a string
+
+        Example:
+            rick = User(firstname="Roy", lastname="Batty", login="r.batty"...)
+            print(rick) -> "r.batty"
+        """
+
+        return self._login
+
+    @override
     def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
