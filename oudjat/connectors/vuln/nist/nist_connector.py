@@ -1,11 +1,12 @@
 """A module that handles the connection to Nist and Nist API."""
 
 import re
-from typing import Dict, List, Tuple, Union
+from typing import Any, override
 
 from oudjat.utils.color_print import ColorPrint
 
 from ..cve_connector import CVEConnector
+from ..cve_formats import CVEDataFormat
 
 
 class NistConnector(CVEConnector):
@@ -14,19 +15,20 @@ class NistConnector(CVEConnector):
     # ****************************************************************
     # Attributes & Constructors
 
-    URL = "https://nvd.nist.gov/"
-    API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
+    URL: str = "https://nvd.nist.gov/"
+    API_URL: str = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 
     # ****************************************************************
     # Methods
 
+    @override
     def search(
         self,
-        search_filter: Union[str, List[str]],
-        attributes: Union[str, List[str]] = None,
+        search_filter: str | list[str],
+        attributes: str | list[str] | None = None,
         raw: bool = False,
-        **kwargs,
-    ) -> List[Dict]:
+        **kwargs: Any,
+    ) -> list[dict[str, Any]]:
         """
         Search the API for CVEs.
 
@@ -54,7 +56,7 @@ class NistConnector(CVEConnector):
             attributes = [attributes]
 
         # Vuln filter function
-        def key_in_attr(item: Tuple) -> bool:
+        def key_in_attr(item: tuple) -> bool:
             return item[0] in attributes
 
         for cve in search_filter:
@@ -64,8 +66,8 @@ class NistConnector(CVEConnector):
             cve_target = NistConnector.get_cve_api_url(cve)
             self.connect(cve_target, **kwargs)
 
-            if self.connection is not None:
-                vuln = self.connection.get("vulnerabilities", [])
+            if self._connection:
+                vuln = self._connection.get("vulnerabilities", [])
 
                 if len(vuln) > 0:
                     vuln = vuln[0].get("cve", {})
@@ -84,7 +86,8 @@ class NistConnector(CVEConnector):
 
         return res
 
-    def unify_cve_data(self, cve: Dict) -> Dict:
+    @override
+    def unify_cve_data(self, cve: dict[str, Any]) -> CVEDataFormat:
         """
         Filter and reorganize cve data properties in order to obtain a unified format accross CVE connectors.
 
@@ -95,49 +98,50 @@ class NistConnector(CVEConnector):
             Dict: formated dictionary
         """
 
-        base_format = self.UNIFIED_FORMAT
+        cve_id: str | None = cve.get("id")
 
-        try:
-            base_format["id"] = cve.get("id")
-            base_format["status"] = cve.get("vulnStatus", None)
+        published_date: str | None = cve.get("published")
 
-            base_format["dates"]["published"] = cve.get("published", None)
-            base_format["dates"]["updated"] = cve.get("lastModified", None)
+        if cve_id is None or published_date is None:
+            raise ValueError(f"{__class__.__name__}.unify_cve_data::Invalid CVE provided {cve} missing mendatory informaitons")
 
-            base_format["description"] = cve.get("descriptions", None)[0].get("value", None)
-            base_format["source"] = [r["url"] for r in cve.get("references", [])]
+        updated_date: str = cve.get("lastModified", published_date)
 
-            metrics = cve.get("metrics", {})
+        metrics = cve.get("metrics", {})
+        metric_data = metrics.get(list(metrics.keys())[0], [])[0]
+        cvss_data = metric_data.get("cvssData", {})
 
-            if len(list(metrics)) > 0:
-                metric_data = metrics.get(list(metrics.keys())[0], [])[0]
-                cvss_data = metric_data.get("cvssData", {})
+        unified_fmt: CVEDataFormat = {
+            "id": cve_id,
+            "status": cve.get("vulnStatus", ""),
+            "dates": {
+                "published": published_date,
+                "updated": updated_date,
+            },
+            "description": cve.get("descriptions", [])[0].get("value", ""),
+            "sources": [r["url"] for r in cve.get("references", [])],
+            "vectors": {
+                "vector_str": cvss_data.get("vectorString", ""),
+                "attack_vector": cvss_data.get("attackVector", ""),
+            },
+            "metrics": {
+                "score": cvss_data.get("baseScore", 0),
+                "version": float(cvss_data.get("version", 4.0)),
+                "severity": cvss_data.get("baseSeverity", "INFO")
+            },
+            "requirements": {
+                "privileges_required": cvss_data.get("privilegesRequired", "NONE"),
+                "attack_requirements": cvss_data.get("attackRequirements", "NONE"),
+            },
+        }
 
-                base_format["metrics"]["score"] = cvss_data.get("baseScore", 0)
-                base_format["metrics"]["version"] = float(cvss_data.get("version", 4.0))
-                base_format["metrics"]["severity"] = cvss_data.get("baseSeverity", "INFO")
-
-                base_format["vectors"]["vectorString"] = cvss_data.get("vectorString", "")
-                base_format["vectors"]["attackVector"] = cvss_data.get("attackVector", None)
-
-                base_format["requirements"]["privilegesRequired"] = cvss_data.get(
-                    "privilegesRequired", None
-                )
-                base_format["requirements"]["attackRequirements"] = cvss_data.get(
-                    "attackRequirements", "NONE"
-                )
-
-        except ValueError as e:
-            raise ValueError(
-                f"{__class__.__name__}.unify_cve_data::An error occured while unifying cve data...\n{e}"
-            )
-
-        return base_format
+        return unified_fmt
 
     # ****************************************************************
     # Static methods
 
     @staticmethod
+    @override
     def get_cve_url(cve: str) -> str:
         """
         Return the Nist website URL of the given CVE.
@@ -152,6 +156,7 @@ class NistConnector(CVEConnector):
         return f"{NistConnector.URL}vuln/detail/{cve}"
 
     @staticmethod
+    @override
     def get_cve_api_url(cve: str) -> str:
         """
         Return the Nist website URL of the given CVE.
