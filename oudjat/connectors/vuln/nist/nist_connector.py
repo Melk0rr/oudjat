@@ -4,6 +4,7 @@ import re
 from typing import Any, override
 
 from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.types import StrType
 
 from ..cve_connector import CVEConnector
 from ..cve_formats import CVEDataFormat
@@ -24,8 +25,8 @@ class NistConnector(CVEConnector):
     @override
     def search(
         self,
-        search_filter: str | list[str],
-        attributes: str | list[str] | None = None,
+        search_filter: StrType,
+        attributes: StrType | None = None,
         raw: bool = False,
         **kwargs: Any,
     ) -> list[dict[str, Any]]:
