@@ -1,9 +1,12 @@
 """A module that handles the connection to CVE.org and CVE.org API."""
 
 import re
-from typing import Dict, List, Union
+from typing import Any, override
+
+from oudjat.utils.types import StrType
 
 from ..cve_connector import CVEConnector
+from ..cve_formats import CVEDataFormat
 
 
 class CVEorgConnector(CVEConnector):
@@ -12,19 +15,20 @@ class CVEorgConnector(CVEConnector):
     # ****************************************************************
     # Attributes & Constructors
 
-    URL = "https://www.cve.org/"
-    API_URL = "https://cveawg.mitre.org/api/cve/"
+    URL: str = "https://www.cve.org/"
+    API_URL: str = "https://cveawg.mitre.org/api/cve/"
 
     # ****************************************************************
     # Methods
 
+    @override
     def search(
         self,
-        search_filter: Union[str, List[str]],
-        attributes: Union[str, List[str]] = None,
+        search_filter: StrType,
+        attributes: StrType | None = None,
         raw: bool = False,
-        **kwargs,
-    ) -> List[Dict]:
+        **kwargs: Any,
+    ) -> list[dict[str, Any]]:
         """
         Search the API for CVEs.
 
@@ -34,13 +38,13 @@ class CVEorgConnector(CVEConnector):
         If a valid response is received, it extracts vulnerability information and filters it based on the specified attributes before appending it to the result list.
 
         Args:
-            search_filter (Union[str, List[str]])       : A single CVE ID or a list of CVE IDs to be searched.
-            attributes (Union[str, List[str]], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
-            raw (bool)                                  : Weither to return the raw result or the unified one
-            kwargs (Dict)                               : Additional arguments that will be passed to connect method
+            search_filter (str | list[str])       : A single CVE ID or a list of CVE IDs to be searched.
+            attributes (str | list[str], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
+            raw (bool)                            : Weither to return the raw result or the unified one
+            kwargs (Any)                          : Additional arguments that will be passed to connect method
 
         Returns:
-            List[Dict]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
+            list[dict[str, Any]]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
         """
 
         res = []
@@ -58,68 +62,70 @@ class CVEorgConnector(CVEConnector):
             cve_target = CVEorgConnector.get_cve_api_url(cve)
             self.connect(cve_target, **kwargs)
 
-            vuln = self.connection
+            vuln = self._connection
             if vuln is not None:
                 res.append(self.unify_cve_data(vuln) if not raw else vuln)
 
         return res
 
-    def unify_cve_data(self, cve: Dict) -> Dict:
+    @override
+    def unify_cve_data(self, cve: dict[str, Any]) -> CVEDataFormat:
         """
         Filter and reorganize cve data properties in order to obtain a unified format accross CVE connectors.
 
         Args:
-            cve (Dict): cve data as a dictionary
+            cve (dict[str, Any]): cve data as a dictionary
 
         Returns:
-            Dict: formated dictionary
+            CVEDataFormat: unified formated CVE dictionary
         """
 
-        base_format = self.UNIFIED_FORMAT
+        cve_metadata: dict[str, Any] = cve.get("cveMetadata", {})
+        cve_id: str | None = cve_metadata.get("cveId")
+        published_date: str | None = cve_metadata.get("datePublished")
 
-        try:
-            base_format["id"] = cve["cveMetadata"].get("cveId")
-            base_format["status"] = cve["cveMetadata"].get("state", None)
-
-            base_format["dates"]["published"] = cve["cveMetadata"].get("datePublished", None)
-            base_format["dates"]["updated"] = cve["cveMetadata"].get("dateUpdated", None)
-
-            containers = cve.get("containers", {}).get("cna", {})
-            base_format["source"] = [r["url"] for r in containers.get("references", [])]
-
-            metrics: List = containers.get("metrics", [])
-
-            if len(metrics) > 0:
-                base_format["description"] = containers.get("descriptions", [])[0].get(
-                    "value", None
-                )
-                metric_data = metrics[0].get(list(metrics[0].keys())[0], {})
-
-                base_format["metrics"]["score"] = metric_data.get("baseScore", 0)
-                base_format["metrics"]["version"] = float(metric_data.get("version", 4.0))
-                base_format["metrics"]["severity"] = metric_data.get("baseSeverity", "INFO")
-
-                base_format["vectors"]["vectorString"] = metric_data.get("vectorString", "")
-                base_format["vectors"]["attackVector"] = metric_data.get("attackVector", None)
-
-                base_format["requirements"]["privilegesRequired"] = metric_data.get(
-                    "privilegesRequired", None
-                )
-                base_format["requirements"]["attackRequirements"] = metric_data.get(
-                    "attackRequirements", "NONE"
-                )
-
-        except ValueError as e:
+        if cve_id is None or published_date is None:
             raise ValueError(
-                f"{__class__.__name__}.unify_cve_data::An error occured while unifying cve data...\n{e}"
+                f"{__class__.__name__}.unify_cve_data::Invalid CVE provided {cve} missing mandatory informations"
             )
 
-        return base_format
+        containers = cve.get("containers", {}).get("cna", {})
+        metrics: list[dict[str, Any]] = containers.get("metrics", [])
+        metric_data: dict[str, Any] = metrics[0].get(list(metrics[0].keys())[0], {})
+
+        raw_description = containers.get("descriptions", [])
+
+        unified_fmt: CVEDataFormat = {
+            "id": cve_id,
+            "status": cve_metadata.get("state", ""),
+            "dates": {
+                "published": published_date,
+                "updated": cve_metadata.get("dateUpdated", published_date),
+            },
+            "description": raw_description[0].get("value", "") if len(raw_description) > 0 else "",
+            "sources": [r["url"] for r in containers.get("references", [])],
+            "vectors": {
+                "vector_str": metric_data.get("vectorString", ""),
+                "attack_vector": metric_data.get("attackVector", ""),
+            },
+            "metrics": {
+                "score": metric_data.get("baseScore", 0),
+                "version": float(metric_data.get("version", 4.0)),
+                "severity": metric_data.get("baseSeverity", "INFO"),
+            },
+            "requirements": {
+                "privileges_required": metric_data.get("privilegesRequired", "NONE"),
+                "attack_requirements": metric_data.get("attackRequirements", "NONE"),
+            },
+        }
+
+        return unified_fmt
 
     # ****************************************************************
     # Static methods
 
     @staticmethod
+    @override
     def get_cve_url(cve: str) -> str:
         """
         Return the Nist website URL of the given CVE.
@@ -134,6 +140,7 @@ class CVEorgConnector(CVEConnector):
         return f"{CVEorgConnector.URL}CVERecord?id={cve}"
 
     @staticmethod
+    @override
     def get_cve_api_url(cve: str) -> str:
         """
         Return the Nist website URL of the given CVE.
