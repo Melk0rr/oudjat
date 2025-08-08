@@ -7,6 +7,7 @@ from typing import Any, override
 import requests
 
 from oudjat.connectors.connector import Connector
+from oudjat.utils.types import StrType
 
 from .cve_formats import CVEDataFormat
 
@@ -66,8 +67,8 @@ class CVEConnector(Connector, ABC):
     @abstractmethod
     def search(
         self,
-        search_filter: str | list[str],
-        attributes: str | list[str] | None = None,
+        search_filter: StrType,
+        attributes: StrType | None = None,
         raw: bool = False,
         **kwargs: Any,
     ) -> list[dict]:
