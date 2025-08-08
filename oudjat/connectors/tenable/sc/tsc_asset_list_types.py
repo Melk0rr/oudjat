@@ -1,4 +1,5 @@
 """A simple module to list Tenable.sc asset list types."""
+
 from enum import Enum
 
 
