@@ -39,13 +39,13 @@ class NistConnector(CVEConnector):
         If a valid response is received, it extracts vulnerability information and filters it based on the specified attributes before appending it to the result list.
 
         Args:
-            search_filter (Union[str, List[str]])       : A single CVE ID or a list of CVE IDs to be searched.
-            attributes (Union[str, List[str]], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
-            raw (bool)                                  : Weither to return the raw result or the unified one
-            kwargs (Dict)                               : Additional arguments that will be passed to connect method
+            search_filter (str | list[str])       : A single CVE ID or a list of CVE IDs to be searched.
+            attributes (str | list[str], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
+            raw (bool)                            : Weither to return the raw result or the unified one
+            kwargs (Any)                          : Additional arguments that will be passed to connect method
 
         Returns:
-            List[Dict]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
+            list[dict[str, Any]]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
         """
 
         res = []
@@ -93,10 +93,10 @@ class NistConnector(CVEConnector):
         Filter and reorganize cve data properties in order to obtain a unified format accross CVE connectors.
 
         Args:
-            cve (Dict): cve data as a dictionary
+            cve (dict[str, Any]): cve data as a dictionary
 
         Returns:
-            Dict: formated dictionary
+            CVEDataFormat: unified formated CVE dictionary
         """
 
         cve_id: str | None = cve.get("id")
@@ -104,7 +104,7 @@ class NistConnector(CVEConnector):
         published_date: str | None = cve.get("published")
 
         if cve_id is None or published_date is None:
-            raise ValueError(f"{__class__.__name__}.unify_cve_data::Invalid CVE provided {cve} missing mendatory informaitons")
+            raise ValueError(f"{__class__.__name__}.unify_cve_data::Invalid CVE provided {cve} missing mandatory informations")
 
         updated_date: str = cve.get("lastModified", published_date)
 
