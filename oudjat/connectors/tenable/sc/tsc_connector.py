@@ -1,7 +1,7 @@
 """A module handling Tenable.sc API connection."""
 
 import re
-from typing import Any, Literal, override
+from typing import Any, Callable, Literal, override
 from urllib.parse import ParseResult, urlparse
 
 from tenable.sc import TenableSC
@@ -10,6 +10,7 @@ from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
 from oudjat.control.vulnerability.severity import Severity
 from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.types import FilterTupleExtType
 
 from .tsc_asset_list_types import TSCAssetListType
 from .tsc_vuln_tools import TSCVulnTool
@@ -25,7 +26,9 @@ class TenableSCConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
 
-    BUILTIN_FILTERS: dict[str, tuple[str, str, str]]= {"exploitable": ("exploitAvailable", "=", "true")}
+    BUILTIN_FILTERS: dict[str, tuple[str, str, str]] = {
+        "exploitable": ("exploitAvailable", "=", "true")
+    }
 
     def __init__(
         self, target: str, service_name: str = "OudjatTenableSCAPI", port: int = 443
@@ -76,11 +79,11 @@ class TenableSCConnector(Connector):
 
         connection: TenableSC | None = None
         try:
-            if self.credentials is not None:
+            if self._credentials is not None:
                 connection = TenableSC(
                     host=self.parsed_target.netloc,
-                    access_key=self.credentials.username,
-                    secret_key=self.credentials.password,
+                    access_key=self._credentials.username,
+                    secret_key=self._credentials.password,
                 )
 
             ColorPrint.green(f"Connected to {self.parsed_target.netloc}")
@@ -113,7 +116,7 @@ class TenableSCConnector(Connector):
         self.repos = None
 
     @override
-    def search(self, search_type: str = "VULNS", *args: tuple, **kwargs: dict) -> list[object]:
+    def search(self, search_type: str = "VULNS", *args: Any, **kwargs: Any) -> list[object]:
         """
         Search the API for elements.
 
@@ -132,7 +135,7 @@ class TenableSCConnector(Connector):
         self.check_connection()
 
         search_type = search_type.upper()
-        search_options = {
+        search_options: dict[str, Callable] = {
             "ASSETS": self.list_asset_lists,
             "SCANS": self.list_scans,
             "VULNS": self.search_vulns,
@@ -141,7 +144,7 @@ class TenableSCConnector(Connector):
         if search_type not in search_options.keys():
             raise ValueError(f"{__class__.__name__}.search::Invalid search type {search_type}")
 
-        search = None
+        search: list[dict[str, Any]]
         try:
             search = search_options[search_type](*args, **kwargs)
 
@@ -156,7 +159,7 @@ class TenableSCConnector(Connector):
         *severities: list[int],
         tool: TSCVulnTool = TSCVulnTool.VULNDETAILS,
         exploitable: bool = True,
-    ) -> list[dict[str, object]]:
+    ) -> list[dict[str, Any]]:
         """
         Retrieve the current vulnerabilities.
 
@@ -169,7 +172,7 @@ class TenableSCConnector(Connector):
             Dict : vulnerabilities matching arguments
         """
 
-        filters = []
+        filters: list[tuple[str, str, str]] = []
 
         if exploitable:
             filters.append(self.BUILTIN_FILTERS["exploitable"])
@@ -179,7 +182,9 @@ class TenableSCConnector(Connector):
 
         return list(search)
 
-    def build_severity_filter(self, *severities: list[int]) -> tuple[Literal["severity"], Literal["="], str]:
+    def build_severity_filter(
+        self, *severities: list[int]
+    ) -> tuple[Literal["severity"], Literal["="], str]:
         """
         Return a severity filter based on the provided severities.
 
@@ -256,7 +261,9 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    def list_asset_lists(self, list_filter: tuple[str] | list[tuple[str]] | None = None) -> list[dict]:
+    def list_asset_lists(
+        self, list_filter: FilterTupleExtType | None = None
+    ) -> list[dict[str, Any]]:
         """
         Retrieve a list of asset lists with minimal informations like list ids.
 
@@ -272,23 +279,24 @@ class TenableSCConnector(Connector):
 
         self.check_connection()
 
-        asset_lists: list[dict[str, object]] = []
+        asset_lists: list[dict[str, Any]] = []
         try:
-            asset_lists = self.connection.asset_lists.list()
+            asset_lists_from_api: dict[str, Any] = self._connection.asset_lists.list()
 
-            if asset_lists is not None:
-                asset_lists = asset_lists.get("usable", [])
+            if asset_lists_from_api:
+                asset_lists = asset_lists_from_api.get("usable", [])
 
-            asset_lists = DataFilter.filter_data(
-                data_to_filter=asset_lists, filters=DataFilter.gen_from_tuple(list_filter)
-            )
+            if list_filter:
+                asset_lists = DataFilter.filter_data(
+                    data_to_filter=asset_lists, filters=DataFilter.gen_from_tuple(list_filter)
+                )
 
         except Exception as e:
             raise e
 
         return asset_lists
 
-    def get_asset_list_details(self, list_id: Union[int, List[int]]) -> List[Dict]:
+    def get_asset_list_details(self, list_id: int | list[int]) -> list[dict[str, Any]]:
         """
         Return the details of one or more asset lists.
 
@@ -319,7 +327,7 @@ class TenableSCConnector(Connector):
 
     # TODO: Edit asset list
     # INFO: Scans
-    def list_scans(self, scan_filter: tuple[str] | list[tuple[str]] | None = None) -> list[dict[str, object]]:
+    def list_scans(self, scan_filter: FilterTupleExtType | None = None) -> list[dict[str, Any]]:
         """
         Retrieve a list of scans with minimal information like scan ids.
 
@@ -335,16 +343,17 @@ class TenableSCConnector(Connector):
 
         self.check_connection()
 
-        scan_list: list[dict[str, object]] = []
+        scan_list: list[dict[str, Any]] = []
         try:
-            raw_scan_list: dict[str, object] = self.connection.scans.list()
+            raw_scan_list: dict[str, Any] = self.connection.scans.list()
 
             if raw_scan_list is not None:
                 scan_list = raw_scan_list.get("usable", [])
 
-            scan_list = DataFilter.filter_data(
-                data_to_filter=scan_list, filters=DataFilter.gen_from_tuple(scan_filter)
-            )
+            if scan_filter:
+                scan_list = DataFilter.filter_data(
+                    data_to_filter=scan_list, filters=DataFilter.gen_from_tuple(scan_filter)
+                )
 
         except Exception as e:
             raise e
@@ -410,8 +419,8 @@ class TenableSCConnector(Connector):
         asset_lists: list[int] | None = None,
         description: str | None = None,
         schedule: dict[str, str] | None = None,
-        *args: tuple[object],
-        **kwargs: dict[str, object],
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """
         Create a new scan.
