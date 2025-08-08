@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, List, Tuple, Union
 
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.operations import Operation
+from oudjat.utils.types import FilterTupleExtType
 
 
 class DataFilter:
@@ -164,7 +165,7 @@ class DataFilter:
         )
 
     @staticmethod
-    def from_tuple(filter_tuple: Tuple[str, str, Any]) -> "DataFilter":
+    def from_tuple(filter_tuple: tuple[str, str, Any]) -> "DataFilter":
         """
         Create a datafilter instance from a tuple.
 
@@ -219,7 +220,7 @@ class DataFilter:
         return filters
 
     @staticmethod
-    def gen_from_dict(filters: List[Dict]) -> List["DataFilter"]:
+    def gen_from_dict(filters: list[dict[str, Any]]) -> list["DataFilter"]:
         """
         Generate multiple DataFitler instances based on dictionnaries.
 
@@ -233,7 +234,7 @@ class DataFilter:
         return list(map(DataFilter.from_dict, filters))
 
     @staticmethod
-    def gen_from_tuple(filters: List[Tuple]) -> List["DataFilter"]:
+    def gen_from_tuple(filters: FilterTupleExtType) -> list["DataFilter"]:
         """
         Generate DataFitler instances based on tuples.
 
@@ -243,6 +244,9 @@ class DataFilter:
         Returns:
             List[DataFilter]: data filter instances
         """
+
+        if not isinstance(filters, list):
+            filters= [filters]
 
         return list(map(DataFilter.from_tuple, filters))
 
