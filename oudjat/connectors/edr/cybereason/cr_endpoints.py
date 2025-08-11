@@ -1,17 +1,41 @@
 """A module to handle Cybereason API endpoints."""
 
 from enum import Enum
-from typing import List
+from typing import NamedTuple
+
+
+class CybereasonEndpointMethod(Enum):
+    """An enumeration of valid CybereasonEndpoint method values."""
+
+    POST = "POST"
+    GET = "GET"
+
+
+class CybereasonEndpointProps(NamedTuple):
+    """
+    A helper class to properly handle CybereasonEndpoint types.
+
+    Attributes:
+        path (str): the path to the endpoint
+        method (CybereasonEndpointMethod): HTTP method used to access the endpoint
+        limit (int | None): default result limit number
+        attributes (list[str] | None): list of default attributes to retrieve from endpoint
+    """
+
+    path: str
+    method: CybereasonEndpointMethod
+    limit: int | None
+    attributes: list[str]
 
 
 class CybereasonEndpoint(Enum):
     """Cybereason API endpoint attributes."""
 
-    SENSORS = {
-        "path": "/rest/sensors/query",
-        "method": "POST",
-        "limit": 30000,
-        "attributes": [
+    SENSORS = CybereasonEndpointProps(
+        path="/rest/sensors/query",
+        method=CybereasonEndpointMethod.POST,
+        limit=30000,
+        attributes=[
             "amStatus",
             "avDbLastUpdateTime",
             "avDbVersion",
@@ -32,15 +56,20 @@ class CybereasonEndpoint(Enum):
             "upTime",
             "version",
         ],
-    }
+    )
 
-    SENSORS_ACTION = {"path": "/rest/sensors/action", "method": "POST"}
+    SENSORS_ACTION = CybereasonEndpointProps(
+        path="/rest/sensors/action",
+        method=CybereasonEndpointMethod.POST,
+        limit=1000,
+        attributes=[],
+    )
 
-    MALWARES = {
-        "path": "/rest/malware/query",
-        "method": "POST",
-        "limit": 1000,
-        "attributes": [
+    MALWARES = CybereasonEndpointProps(
+        path="/rest/malware/query",
+        method=CybereasonEndpointMethod.POST,
+        limit=1000,
+        attributes=[
             "timestamp",
             "name",
             "type",
@@ -51,33 +80,32 @@ class CybereasonEndpoint(Enum):
             "detectionEngine",
             "malwareDataModel",
         ],
-    }
+    )
 
-    POLICIES = {
-        "path": "rest/policies",
-        "method": "POST",
-    }
+    POLICIES = CybereasonEndpointProps(
+        path="rest/policies", method=CybereasonEndpointMethod.POST, limit=1000, attributes=[]
+    )
 
-    FILES = {
-        "path": "/rest/sensors/action/fileSearch",
-        "method": "POST",
-        "limit": 30000,
-        "attributes": [],
-    }
+    FILES = CybereasonEndpointProps(
+        path="/rest/sensors/action/fileSearch",
+        method=CybereasonEndpointMethod.POST,
+        limit=30000,
+        attributes=[],
+    )
 
-    USERS = {
-        "path": "/rest/users",
-        "method": "GET",
-        "limit": 200,
-        "attributes": ["creationTime", "groups", "lastUpdateTime", "locked", "roles", "username"],
-    }
+    USERS = CybereasonEndpointProps(
+        path="/rest/users",
+        method=CybereasonEndpointMethod.GET,
+        limit=200,
+        attributes=["creationTime", "groups", "lastUpdateTime", "locked", "roles", "username"],
+    )
 
-    GROUPS = {
-        "path": "/rest/groups",
-        "method": "GET",
-        "limit": 300,
-        "attributes": ["creationTime", "description", "id", "lastUpdate", "name"],
-    }
+    GROUPS = CybereasonEndpointProps(
+        path="/rest/groups",
+        method=CybereasonEndpointMethod.GET,
+        limit=300,
+        attributes=["creationTime", "description", "id", "lastUpdate", "name"],
+    )
 
     @property
     def path(self) -> str:
@@ -88,7 +116,7 @@ class CybereasonEndpoint(Enum):
             str: the path of the endpoint
         """
 
-        return self._value_["path"]
+        return self._value_.path
 
     @property
     def method(self) -> str:
@@ -99,7 +127,7 @@ class CybereasonEndpoint(Enum):
             str: the HTTP method to use for the endpoint
         """
 
-        return self._value_["method"]
+        return self._value_.method.name
 
     @property
     def limit(self) -> int:
@@ -110,10 +138,10 @@ class CybereasonEndpoint(Enum):
             int: the limit number of search results
         """
 
-        return self._value_["limit"]
+        return self._value_.limit or 1000
 
     @property
-    def attributes(self) -> List[str]:
+    def attributes(self) -> list[str]:
         """
         Return a CybereasonEndpoint element search result attributes.
 
@@ -121,4 +149,4 @@ class CybereasonEndpoint(Enum):
             List[str]: the list of attributes to return from requesting the endpoint if relevent
         """
 
-        return self._value_["attributes"]
+        return self._value_.attributes
