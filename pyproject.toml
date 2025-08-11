@@ -25,4 +25,4 @@ dependencies = {
 }
 
 [project.optional-dependencies]
-tenable = ["python-tenable"]
+tenable = ["pytenable"]
