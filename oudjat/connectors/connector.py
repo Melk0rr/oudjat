@@ -27,7 +27,7 @@ class Connector(ABC):
             use_credentials (bool)  : wheither the connector should use credentials
         """
 
-        self._target: str | object = target
+        self._target: Any = target
         self._service_name: str | None = service_name
 
         # Retrieve credentials for the service
