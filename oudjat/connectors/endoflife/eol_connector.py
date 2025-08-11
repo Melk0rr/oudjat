@@ -131,7 +131,7 @@ class EndOfLifeConnector(Connector):
             ConnectionError: If unable to connect to the API endpoint or retrieve data.
         """
 
-        win_eol = self.search(search_filter=target)
+        win_eol: list[dict[str, Any]] = self.search(search_filter=target)
 
         for rel in win_eol:
             if target == "windows":
