@@ -3,12 +3,13 @@
 import json
 import re
 from datetime import datetime
-from typing import Dict, List, Union
+from typing import Any, override
 
 import requests
 
 from oudjat.connectors import Connector
 from oudjat.utils import ColorPrint
+from oudjat.utils.types import StrType
 
 from .definitions import API_BASE_URL, API_REQ_HEADERS, CVE_REGEX
 from .ms_cvrf_document import MSCVRFDocument
@@ -111,10 +112,11 @@ class MSCVRFConnector(Connector):
         if doc.get_doc_id() not in self.target.keys():
             self.target[doc.get_doc_id()] = doc
 
+    @override
     def search(
         self,
-        search_filter: Union[str, List[str]],
-    ) -> List[Dict]:
+        search_filter: StrType,
+    ) -> list[dict[str, Any]]:
         """
         Search for information about CVEs based on the provided filter.
 
