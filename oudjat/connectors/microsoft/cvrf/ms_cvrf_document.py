@@ -35,24 +35,25 @@ class MSCVRFDocument:
             raise ValueError(f"{__class__.__name__}::CVRF ID must follow the 'YYYY-MMM' format !")
 
         self._id: str = doc_id
-        self.url: str = f"{API_BASE_URL}cvrf/{self._id}"
+        self._url: str = f"{API_BASE_URL}cvrf/{self._id}"
 
-        url_resp = requests.get(self.url, headers=API_REQ_HEADERS)
+        url_resp = requests.get(self._url, headers=API_REQ_HEADERS)
 
         if url_resp.status_code != 200:
-            raise ConnectionError(f"{__class__.__name__}::Could not connect to {self.url}")
+            raise ConnectionError(f"{__class__.__name__}::Could not connect to {self._url}")
 
-        ColorPrint.green(f"{self.url}")
-        self.content: dict[str, Any] = json.loads(url_resp.content)
+        ColorPrint.green(f"{self._url}")
+        self._content: dict[str, Any] = json.loads(url_resp.content)
 
-        self.products: dict[str, MSProduct] = {}
-        self.vulns: dict[str, MSVuln] = {}
-        self.kbs: dict[int, MSRemed] = {}
+        self._products: dict[str, MSProduct] = {}
+        self._vulns: dict[str, MSVuln] = {}
+        self._kbs: dict[int, MSRemed] = {}
 
     # ****************************************************************
     # Methods
 
-    def get_doc_id(self) -> str:
+    @property
+    def id(self) -> str:
         """
         Getter for the document ID.
 
@@ -62,7 +63,8 @@ class MSCVRFDocument:
 
         return self._id
 
-    def get_products(self) -> dict[str, MSProduct]:
+    @property
+    def products(self) -> dict[str, MSProduct]:
         """
         Return the MS products mentioned in the document. If the product list is not already parsed, this method will trigger a parsing of the products from the document content.
 
@@ -70,12 +72,13 @@ class MSCVRFDocument:
             Dict[str, MSProduct]: A dictionary containing the products keyed by their IDs.
         """
 
-        if not self.products:
+        if not self._products:
             self.parse_products()
 
-        return self.products
+        return self._products
 
-    def get_vulnerabilities(self) -> dict[str, MSVuln]:
+    @property
+    def vulnerabilities(self) -> dict[str, MSVuln]:
         """
         Return the vulnerabilities mentioned in the document. If the vulnerability list is not already parsed, this method will trigger a parsing of the vulnerabilities from the document content.
 
@@ -83,12 +86,13 @@ class MSCVRFDocument:
             Dict[str, MSVuln]: A dictionary containing the vulnerabilities keyed by their CVE IDs.
         """
 
-        if not self.vulns:
+        if not self._vulns:
             self.parse_vulnerabilities()
 
-        return self.vulns
+        return self._vulns
 
-    def get_kbs(self) -> dict[int, "MSRemed"]:
+    @property
+    def remediations(self) -> dict[int, MSRemed]:
         """
         Return the MS KBs mentioned in the document.
 
@@ -99,12 +103,12 @@ class MSCVRFDocument:
             Dict[str, MSRemed]: A dictionary containing the KBs keyed by their numbers.
         """
 
-        if not self.kbs:
+        if not self._kbs:
             self.parse_vulnerabilities()
 
-        return self.kbs
+        return self._kbs
 
-    def add_product(self, product: "MSProduct") -> None:
+    def add_product(self, product: MSProduct) -> None:
         """
         Add a product to the list of products in the document.
 
@@ -112,10 +116,10 @@ class MSCVRFDocument:
             product (MSProduct): The product to be added.
         """
 
-        if product.get_id() not in self.products.keys():
-            self.products[product.get_id()] = product
+        if product.pid not in self._products.keys():
+            self._products[product.pid] = product
 
-    def add_vuln(self, vuln: "MSVuln") -> None:
+    def add_vuln(self, vuln: MSVuln) -> None:
         """
         Add a vulnerability to the list of vulnerabilities in the document.
 
@@ -123,10 +127,10 @@ class MSCVRFDocument:
             vuln (MSVuln): The vulnerability to be added.
         """
 
-        if vuln.get_cve() not in self.vulns.keys():
-            self.vulns[vuln.get_cve()] = vuln
+        if vuln.cve not in self._vulns.keys():
+            self._vulns[vuln.cve] = vuln
 
-    def add_kb(self, kb: "MSRemed") -> None:
+    def add_kb(self, kb: MSRemed) -> None:
         """
         Add a KB to the list of KBs in the document.
 
@@ -134,15 +138,15 @@ class MSCVRFDocument:
             kb (MSRemed): The KB to be added.
         """
 
-        if kb.get_number() not in self.kbs.keys():
-            self.kbs[kb.get_number()] = kb
+        if kb.number not in self._kbs.keys():
+            self._kbs[kb.number] = kb
 
     def parse_products(self) -> None:
         """
         Parse the products from the document content and adds them to the internal product list.
         """
 
-        prod_tree = self.content["ProductTree"]["Branch"][0]["Items"]
+        prod_tree = self._content["ProductTree"]["Branch"][0]["Items"]
         for branch in prod_tree:
             for p in branch["Items"]:
                 pid = p["ProductID"]
@@ -154,17 +158,17 @@ class MSCVRFDocument:
         Parse the vulnerabilities from the document content and adds them to the internal vulnerability list.
         """
 
-        if not self.products:
+        if not self._products:
             self.parse_products()
 
-        for v in self.content["Vulnerability"]:
+        for v in self._content["Vulnerability"]:
             vuln = MSVuln(cve=v["CVE"])
 
             for kb in v["Remediations"]:
                 kb_id = kb["Description"]["Value"]
 
                 mskb = MSRemed(num=kb_id)
-                mskb.set_products([self.products[pid] for pid in kb.get("ProductID", [])])
+                mskb.set_products_from_list([self._products[pid] for pid in kb.get("ProductID", [])])
 
                 self.add_kb(mskb)
                 vuln.add_kb(kb_id, mskb)

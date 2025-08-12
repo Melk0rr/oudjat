@@ -33,16 +33,27 @@ class MSRemed:
 
         self._number: int = num
 
-        self.type: MSRemedType = MSRemedType.KB
+        self._type: MSRemedType = MSRemedType.KB
         if not re.match(KB_NUM_REGEX, f"{self._number}"):
-            self.type = MSRemedType.PATCH
+            self._type = MSRemedType.PATCH
 
-        self.products: dict[str, MSProduct] = {}
+        self._products: dict[str, MSProduct] = {}
 
     # ****************************************************************
     # Methods
 
-    def set_products(self, products: list[MSProduct]) -> None:
+    @property
+    def products(self)-> dict[str, MSProduct]:
+        """
+        Return the products impacted by this remediation.
+
+        Returns:
+            dict[str, MSProduct]: dictionary of products
+        """
+
+        return self._products
+
+    def set_products_from_list(self, products: list[MSProduct]) -> None:
         """
         Setter for kb products.
 
@@ -53,9 +64,10 @@ class MSRemed:
             self.products (Dict[str, MSProduct]): Adds or updates entries in the product dictionary with the provided products, ensuring no duplicates based on product ID.
         """
 
-        self.products = {p.get_id(): p for p in products if p.get_id() not in self.products.keys()}
+        self._products = {p.pid: p for p in products if p.pid not in self._products.keys()}
 
-    def get_number(self) -> int:
+    @property
+    def number(self) -> int:
         """
         Getter for kb number.
 
@@ -63,7 +75,7 @@ class MSRemed:
             int: The number of the KB article.
         """
 
-        return self.number
+        return self._number
 
     def to_flat_dict(self) -> list[dict[str, Any]]:
         """
@@ -74,8 +86,8 @@ class MSRemed:
         """
 
         return [
-            {"remed": self.number, "remed_type": self.type, **p.to_dict()}
-            for p in self.products.values()
+            {"remed": self._number, "remed_type": self._type, **p.to_dict()}
+            for p in self._products.values()
         ]
 
     def to_dict(self) -> dict[str, Any]:
@@ -87,6 +99,6 @@ class MSRemed:
         """
 
         return {
-            "remed": self.number,
-            "patched_products": list(map(any_to_dict, self.products.values())),
+            "remed": self._number,
+            "patched_products": list(map(any_to_dict, self._products.values())),
         }

@@ -28,21 +28,22 @@ class MSProduct:
         if not re.match(MS_PRODUCT_REGEX, pid):
             raise ValueError(f"{__class__.__name__}::Invalid MS product ID: {pid}")
 
-        self.pid : str = pid
-        self.name: str = name
-        self.type: str = product_type
-        self.sub_type: str = self.type
+        self._pid : str = pid
+        self._name: str = name
+        self._type: str = product_type
+        self._sub_type: str = self._type
 
-        if self.type == "ESU" or self.type == "Windows":
-            self.sub_type = "Workstation"
+        if self._type == "ESU" or self._type == "Windows":
+            self._sub_type = "Workstation"
 
-            if "Server" in self.name:
-                self.sub_type = "Server"
+            if "Server" in self._name:
+                self._sub_type = "Server"
 
     # ****************************************************************
     # Methods
 
-    def get_id(self) -> str:
+    @property
+    def pid(self) -> str:
         """
         Getter for product id.
 
@@ -50,9 +51,10 @@ class MSProduct:
             str: The unique identifier of the product.
         """
 
-        return self.pid
+        return self._pid
 
-    def get_name(self) -> str:
+    @property
+    def name(self) -> str:
         """
         Getter for product name.
 
@@ -60,7 +62,7 @@ class MSProduct:
             str: The name of the product.
         """
 
-        return self.name
+        return self._name
 
     @override
     def __str__(self) -> str:
@@ -71,7 +73,7 @@ class MSProduct:
             str: A string representation of the product in the format "pid: name".
         """
 
-        return f"{self.pid}: {self.name}"
+        return f"{self._pid}: {self._name}"
 
     def to_dict(self) -> dict[str, str]:
         """
@@ -82,8 +84,8 @@ class MSProduct:
         """
 
         return {
-            "product_id": self.pid,
-            "product_name": self.name,
-            "product_type": self.type,
-            "product_subtype": self.sub_type,
+            "product_id": self._pid,
+            "product_name": self._name,
+            "product_type": self._type,
+            "product_subtype": self._sub_type,
         }

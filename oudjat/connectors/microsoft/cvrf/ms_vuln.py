@@ -30,14 +30,15 @@ class MSVuln:
         if not re.match(CVE_REGEX, cve):
             raise ValueError(f"{__class__.__name__}::Invalid CVE provided: {cve}")
 
-        self.cve: str = cve
-        self.kbs: dict[int, MSRemed] = {}
-        self.products: dict[str, MSProduct] = {}
+        self._cve: str = cve
+        self._kbs: dict[int, MSRemed] = {}
+        self._products: dict[str, MSProduct] = {}
 
     # ****************************************************************
     # Methods
 
-    def get_cve(self) -> str:
+    @property
+    def cve(self) -> str:
         """
         Return the CVE tied to the current vuln.
 
@@ -45,9 +46,10 @@ class MSVuln:
             str: CVE reference
         """
 
-        return self.cve
+        return self._cve
 
-    def get_remediations(self) -> dict[int, MSRemed]:
+    @property
+    def remediations(self) -> dict[int, MSRemed]:
         """
         Return the remediations for the current vuln.
 
@@ -55,9 +57,10 @@ class MSVuln:
             Dict: a dictionary of MSRemed instances
         """
 
-        return self.kbs
+        return self._kbs
 
-    def get_impacted_products(self) -> dict[str, MSProduct]:
+    @property
+    def impacted_products(self) -> dict[str, MSProduct]:
         """
         Return the products impacted by the current vuln.
 
@@ -65,7 +68,7 @@ class MSVuln:
             Dict: a dictionary of MSProduct instances
         """
 
-        return self.products
+        return self._products
 
     def add_kb(self, kb_num: int, kb: MSRemed) -> None:
         """
@@ -80,7 +83,7 @@ class MSVuln:
         """
 
         if re.match(KB_NUM_REGEX, str(kb_num)) or re.match(r"(\w+)$", str(kb_num)):
-            self.kbs[kb_num] = kb
+            self._kbs[kb_num] = kb
 
     def to_flat_dict(self) -> list[dict[str, Any]]:
         """
@@ -91,7 +94,7 @@ class MSVuln:
         """
 
         kb_dictionaries: list[dict[str, Any]] = []
-        for k in self.kbs.values():
+        for k in self._kbs.values():
             kb_dictionaries.extend(k.to_flat_dict())
 
         return [{"cve": self.cve, **kb_dict} for kb_dict in kb_dictionaries]
@@ -106,5 +109,5 @@ class MSVuln:
 
         return {
             "cve": self.cve,
-            "kbs": list(map(any_to_dict, self.kbs.values())),
+            "kbs": list(map(any_to_dict, self._kbs.values())),
         }
