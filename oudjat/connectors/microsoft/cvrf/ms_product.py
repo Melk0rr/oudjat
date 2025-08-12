@@ -1,7 +1,7 @@
 """A module that handles MS products concerned by one or more vulnerabilities."""
 
 import re
-from typing import Dict
+from typing import override
 
 from .definitions import MS_PRODUCT_REGEX
 
@@ -62,6 +62,7 @@ class MSProduct:
 
         return self.name
 
+    @override
     def __str__(self) -> str:
         """
         Convert instance to string.
@@ -72,7 +73,7 @@ class MSProduct:
 
         return f"{self.pid}: {self.name}"
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         """
         Convert instance to dict.
 
