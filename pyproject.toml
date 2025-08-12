@@ -1,28 +1,39 @@
 [build-system]
 requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "oudjat"
 version = "0.7.2a1"
 description = "Oudjat is a SOC toolbox and maybe more if I have the time"
 readme = "README.md"
-requires-python = ">=3.0"
+requires-python = ">=3.9"
 
 authors = [
   { name = "me1k0r", email = "runner-me1k0r@proton.me" }
 ]
 
-licence = { file = "LICENSE" }
+maintainers = [
+  { name = "me1k0r", email = "runner-me1k0r@proton.me" }
+]
 
-dependencies = {
-  "setuptools"
-  "docopt"
-  "lxml"
-  "ldap3"
-  "beautifulsoup4"
-  "requests"
+license = { file = "LICENSE" }
+
+dependencies = [
+  "docopt",
+  "lxml",
+  "beautifulsoup4",
+  "requests",
   "keyring"
-}
+]
+
+[project.urls]
+homepage = "https://github.com/Melk0rr/Oudjat"
+repository = "https://github.com/Melk0rr/Oudjat"
 
 [project.optional-dependencies]
 tenable = ["pytenable"]
+ldap = ["ldap3"]
+
+[project.scripts]
+oudjat = "oudjat.cli:main"
