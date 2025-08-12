@@ -1,7 +1,7 @@
 """A module to describe Vulnerabilities mentionned in a CVRF document."""
 
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 from oudjat.utils.mappers import any_to_dict
 
@@ -30,9 +30,9 @@ class MSVuln:
         if not re.match(CVE_REGEX, cve):
             raise ValueError(f"{__class__.__name__}::Invalid CVE provided: {cve}")
 
-        self.cve = cve
-        self.kbs: Dict[str, MSRemed] = {}
-        self.products: Dict[str, MSProduct] = {}
+        self.cve: str = cve
+        self.kbs: dict[int, MSRemed] = {}
+        self.products: dict[str, MSProduct] = {}
 
     # ****************************************************************
     # Methods
@@ -47,7 +47,7 @@ class MSVuln:
 
         return self.cve
 
-    def get_remediations(self) -> Dict[str, MSRemed]:
+    def get_remediations(self) -> dict[int, MSRemed]:
         """
         Return the remediations for the current vuln.
 
@@ -57,7 +57,7 @@ class MSVuln:
 
         return self.kbs
 
-    def get_impacted_products(self) -> Dict[str, MSProduct]:
+    def get_impacted_products(self) -> dict[str, MSProduct]:
         """
         Return the products impacted by the current vuln.
 
@@ -82,7 +82,7 @@ class MSVuln:
         if re.match(KB_NUM_REGEX, str(kb_num)) or re.match(r"(\w+)$", str(kb_num)):
             self.kbs[str(kb_num)] = kb
 
-    def to_flat_dict(self) -> List[Dict]:
+    def to_flat_dict(self) -> list[dict[str, Any]]:
         """
         Convert kbs into dictionaries.
 
@@ -95,7 +95,9 @@ class MSVuln:
             for kb_dict in [k.to_flat_dict() for k in self.kbs.values()]
         ]
 
-    def to_dict(self) -> Dict[str, Any]:
+        return [{"cve": self.cve, **kb_dict} for kb_dict in kb_dictionaries]
+
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert current vuln into a dict.
 
