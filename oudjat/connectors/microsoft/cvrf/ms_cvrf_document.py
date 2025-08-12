@@ -34,8 +34,8 @@ class MSCVRFDocument:
         if not re.match(CVRF_ID_REGEX, doc_id):
             raise ValueError(f"{__class__.__name__}::CVRF ID must follow the 'YYYY-MMM' format !")
 
-        self._id = doc_id
-        self.url = f"{API_BASE_URL}cvrf/{self._id}"
+        self._id: str = doc_id
+        self.url: str = f"{API_BASE_URL}cvrf/{self._id}"
 
         url_resp = requests.get(self.url, headers=API_REQ_HEADERS)
 
@@ -43,11 +43,11 @@ class MSCVRFDocument:
             raise ConnectionError(f"{__class__.__name__}::Could not connect to {self.url}")
 
         ColorPrint.green(f"{self.url}")
-        self.content = json.loads(url_resp.content)
+        self.content: dict[str, Any] = json.loads(url_resp.content)
 
-        self.products = {}
-        self.vulns = {}
-        self.kbs = {}
+        self.products: dict[str, MSProduct] = {}
+        self.vulns: dict[str, MSVuln] = {}
+        self.kbs: dict[int, MSRemed] = {}
 
     # ****************************************************************
     # Methods
