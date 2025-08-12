@@ -2,7 +2,7 @@
 
 import re
 from enum import IntEnum
-from typing import Any, Dict, List
+from typing import Any
 
 from oudjat.utils.mappers import any_to_dict
 
@@ -37,12 +37,12 @@ class MSRemed:
         if not re.match(KB_NUM_REGEX, self.number):
             self.type = MSRemedType.PATCH
 
-        self.products: Dict[str, MSProduct] = {}
+        self.products: dict[str, MSProduct] = {}
 
     # ****************************************************************
     # Methods
 
-    def set_products(self, products: List[MSProduct]) -> None:
+    def set_products(self, products: list[MSProduct]) -> None:
         """
         Setter for kb products.
 
@@ -65,7 +65,7 @@ class MSRemed:
 
         return self.number
 
-    def to_flat_dict(self) -> List[Dict]:
+    def to_flat_dict(self) -> list[dict[str, Any]]:
         """
         Convert patched products into dictionaries.
 
@@ -78,7 +78,7 @@ class MSRemed:
             for p in self.products.values()
         ]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current kb into a dict.
 
