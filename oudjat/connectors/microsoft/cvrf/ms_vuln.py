@@ -90,10 +90,9 @@ class MSVuln:
             List[Dict]: A list of flattened dictionaries, each representing a KB and its related CVE.
         """
 
-        return [
-            {"cve": self.cve, **kb_dict}
-            for kb_dict in [k.to_flat_dict() for k in self.kbs.values()]
-        ]
+        kb_dictionaries: list[dict[str, Any]] = []
+        for k in self.kbs.values():
+            kb_dictionaries.extend(k.to_flat_dict())
 
         return [{"cve": self.cve, **kb_dict} for kb_dict in kb_dictionaries]
 
