@@ -29,11 +29,11 @@ class MSCVRFConnector(Connector):
         setting up the connection using superclass methods, and marking it as not connected.
         """
 
-        self.date = datetime.now()
-        self.api_version = str(self.date.year)
+        self._date: datetime = datetime.now()
+        self._api_version: str = str(self._date.year)
 
         super().__init__(target={}, service_name="OudjatMSAPI", use_credentials=False)
-        self.connection = False
+        self._connection: bool = False
 
     # ****************************************************************
     # Methods
