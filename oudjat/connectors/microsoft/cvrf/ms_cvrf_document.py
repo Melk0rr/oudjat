@@ -161,12 +161,12 @@ class MSCVRFDocument:
             vuln = MSVuln(cve=v["CVE"])
 
             for kb in v["Remediations"]:
-                kb_num = kb["Description"]["Value"]
+                kb_id = kb["Description"]["Value"]
 
-                mskb = MSRemed(num=kb_num)
+                mskb = MSRemed(num=kb_id)
                 mskb.set_products([self.products[pid] for pid in kb.get("ProductID", [])])
 
                 self.add_kb(mskb)
-                vuln.add_kb(kb=mskb)
+                vuln.add_kb(kb_id, mskb)
 
             self.add_vuln(vuln)
