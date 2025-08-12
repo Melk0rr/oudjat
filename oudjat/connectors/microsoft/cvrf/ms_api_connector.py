@@ -65,7 +65,7 @@ class MSCVRFConnector(Connector):
         id_resp = requests.get(id_url, headers=API_REQ_HEADERS)
         if id_resp.status_code != 200:
             raise ConnectionError(
-                f"{__class__.__name__}.get_cvrf_id_from_cve::Could not connect to {self.id_url}"
+                f"{__class__.__name__}.get_cvrf_id_from_cve::Could not connect to {id_url}"
             )
 
         data = json.loads(id_resp.content)
