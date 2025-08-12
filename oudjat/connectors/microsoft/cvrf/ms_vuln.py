@@ -80,7 +80,7 @@ class MSVuln:
         """
 
         if re.match(KB_NUM_REGEX, str(kb_num)) or re.match(r"(\w+)$", str(kb_num)):
-            self.kbs[str(kb_num)] = kb
+            self.kbs[kb_num] = kb
 
     def to_flat_dict(self) -> list[dict[str, Any]]:
         """
