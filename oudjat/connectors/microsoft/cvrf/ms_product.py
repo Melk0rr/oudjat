@@ -28,10 +28,10 @@ class MSProduct:
         if not re.match(MS_PRODUCT_REGEX, pid):
             raise ValueError(f"{__class__.__name__}::Invalid MS product ID: {pid}")
 
-        self.pid = pid
-        self.name = name
-        self.type = product_type
-        self.sub_type = self.type
+        self.pid : str = pid
+        self.name: str = name
+        self.type: str = product_type
+        self.sub_type: str = self.type
 
         if self.type == "ESU" or self.type == "Windows":
             self.sub_type = "Workstation"
