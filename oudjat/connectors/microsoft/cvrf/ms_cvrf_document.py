@@ -2,7 +2,7 @@
 
 import json
 import re
-from typing import Dict
+from typing import Any
 
 import requests
 
@@ -62,7 +62,7 @@ class MSCVRFDocument:
 
         return self._id
 
-    def get_products(self) -> Dict[str, "MSProduct"]:
+    def get_products(self) -> dict[str, MSProduct]:
         """
         Return the MS products mentioned in the document. If the product list is not already parsed, this method will trigger a parsing of the products from the document content.
 
@@ -75,7 +75,7 @@ class MSCVRFDocument:
 
         return self.products
 
-    def get_vulnerabilities(self) -> Dict[str, "MSVuln"]:
+    def get_vulnerabilities(self) -> dict[str, MSVuln]:
         """
         Return the vulnerabilities mentioned in the document. If the vulnerability list is not already parsed, this method will trigger a parsing of the vulnerabilities from the document content.
 
@@ -88,7 +88,7 @@ class MSCVRFDocument:
 
         return self.vulns
 
-    def get_kbs(self) -> Dict[str, "MSRemed"]:
+    def get_kbs(self) -> dict[int, "MSRemed"]:
         """
         Return the MS KBs mentioned in the document.
 
