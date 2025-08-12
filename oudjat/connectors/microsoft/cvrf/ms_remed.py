@@ -31,10 +31,10 @@ class MSRemed:
             num (int): The number of the Microsoft Knowledge Base article.
         """
 
-        self.number = num
+        self._number: int = num
 
         self.type: MSRemedType = MSRemedType.KB
-        if not re.match(KB_NUM_REGEX, self.number):
+        if not re.match(KB_NUM_REGEX, f"{self._number}"):
             self.type = MSRemedType.PATCH
 
         self.products: dict[str, MSProduct] = {}
