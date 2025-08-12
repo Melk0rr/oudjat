@@ -73,7 +73,8 @@ class MSCVRFConnector(Connector):
 
         return cvrf_id
 
-    def connect(self, cvrf_id: str) -> "MSCVRFDocument":
+    @override
+    def connect(self, cvrf_id: str) -> None:
         """
         Retrieve an existing document instance or creates a new one based on the CVRF ID.
 
@@ -84,22 +85,20 @@ class MSCVRFConnector(Connector):
             MSCVRFDocument: An instance of the CVRF document corresponding to the provided CVRF ID.
         """
 
-        self.connection = False
+        self._connection = False
 
-        cvrf = self.target.get(cvrf_id, None)
+        cvrf = self._target.get(cvrf_id, None)
         if cvrf is None:
             try:
                 cvrf = MSCVRFDocument(cvrf_id)
                 self.add_target(cvrf)
-                self.connection = True
+                self._connection = True
 
             except ConnectionError as e:
-                ColorPrint.red(e)
+                ColorPrint.red(f"{__class__.__name__}.connect::Could not connect to the provided CVRF document {e}")
 
         else:
-            self.connection = True
-
-        return self.target[cvrf_id]
+            self._connection = True
 
     def add_target(self, doc: "MSCVRFDocument") -> None:
         """
@@ -109,8 +108,8 @@ class MSCVRFConnector(Connector):
             doc (MSCVRFDocument): The CVRF document instance to be added.
         """
 
-        if doc.get_doc_id() not in self.target.keys():
-            self.target[doc.get_doc_id()] = doc
+        if doc.get_doc_id() not in self._target.keys():
+            self._target[doc.get_doc_id()] = doc
 
     @override
     def search(
@@ -134,10 +133,12 @@ class MSCVRFConnector(Connector):
 
         for cve in search_filter:
             cvrf_id = self.get_cvrf_id_from_cve(cve)
-            cvrf = self.connect(cvrf_id)
+            _ = self.connect(cvrf_id)
+            cvrf = self._target.get(cvrf_id, None)
 
             if self.connection:
                 cvrf.parse_vulnerabilities()
                 res.append(cvrf.get_vulnerabilities()[cve])
 
         return res
+
