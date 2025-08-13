@@ -288,3 +288,18 @@ class Operator(Enum):
         """
 
         return self._value_.operation
+
+    @staticmethod
+    def list_operators_keys() -> list[str]:
+        """
+        Return a list of all operator symbols and verbose values.
+
+        Returns:
+            list[str]: a list that contains symbol and verbose values
+
+        Example:
+            >>> Operator.list_operators_keys()
+            ["∈", "in", "=", "eq", ...]
+        """
+
+        return [x for op in Operator for x in (op.symbol, op.verbose)]
