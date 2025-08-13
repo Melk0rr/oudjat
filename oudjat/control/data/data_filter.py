@@ -269,7 +269,8 @@ class DataFilter:
 
     @staticmethod
     def filter_data(
-        data_to_filter: list[dict[str, Any]], filters: "DataFilter" | list["DataFilter"] | None = None
+        data_to_filter: list[dict[str, Any]],
+        filters: "DataFilter" | list["DataFilter"] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Filter data based on given filters.
