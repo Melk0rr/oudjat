@@ -109,7 +109,7 @@ class DataFilter:
             bool: wheither or not the dictionary matches the filter
         """
 
-        check = self.get_operation()(element[self.fieldname], self.value)
+        check: bool = self.get_operation()(element[self.fieldname], self.value)
         return not check if self.negate else check
 
     def filter_value(self, value: Any) -> bool:
@@ -179,11 +179,6 @@ class DataFilter:
             my_filter = DataFilter.from_tuple(( "name", "=", "Rick Deckard" ))
         """
 
-        if len(filter_tuple) < 3:
-            raise ValueError(
-                f"{__class__.__name__}.from_tuple::3 parameters needed to create a DataFilter instance"
-            )
-
         return DataFilter(
             fieldname=filter_tuple[0],
             operator=filter_tuple[1],
@@ -203,21 +198,8 @@ class DataFilter:
         Returns:
             list[DataFilter]: formated list of data filter instances
         """
-        filters = []
 
-        for f in filters_list:
-            # Checks if the current filter is either a dictionary or a DataFilter instance
-            if not isinstance(f, DataFilter) and not isinstance(f, dict):
-                ColorPrint.yellow(f"Invalid filter: {f}")
-                continue
-
-            filter_i = f
-            if isinstance(f, dict):
-                filter_i = DataFilter.from_dict(f)
-
-            filters.append(filter_i)
-
-        return filters
+        return [f if isinstance(f, DataFilter) else DataFilter.from_dict(f) for f in filters_list]
 
     @staticmethod
     def gen_from_dict(filters: list[dict[str, Any]]) -> list["DataFilter"]:
@@ -246,7 +228,7 @@ class DataFilter:
         """
 
         if not isinstance(filters, list):
-            filters= [filters]
+            filters = [filters]
 
         return list(map(DataFilter.from_tuple, filters))
 
@@ -262,18 +244,12 @@ class DataFilter:
         Returns:
             bool: filter results
         """
+
         checks = []
 
         for f in filters:
-            check = None
-            if isinstance(f, DataFilter):
-                check = f.filter_dict(element)
-
-            else:
-                operation = Operation[f["operator"]]
-                check = operation(element[f["fieldname"]], f["value"])
-
-            checks.append(check)
+            datafilter = f if isinstance(f, DataFilter) else DataFilter.from_dict(f)
+            checks.append(datafilter.filter_dict(element))
 
         return all(checks)
 
