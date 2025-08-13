@@ -8,6 +8,7 @@ from .credentials import CredentialHelper
 from .dictionary_utils import CustomDict
 from .file_utils import FileHandler, FileType
 from .logical_operations import LogicalOperation, LogicalOperator
+from .operations import Operator
 from .stdouthook import StdOutHook
 from .time_utils import DateFlag, DateFormat, TimeConverter
 from .types import DataType, NumberType
@@ -21,6 +22,7 @@ __all__ = [
     "FileType",
     "LogicalOperation",
     "LogicalOperator",
+    "Operator",
     "StdOutHook",
     "DateFlag",
     "DateFormat",
