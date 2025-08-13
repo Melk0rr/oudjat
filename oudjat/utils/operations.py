@@ -205,6 +205,19 @@ class Operation:
         return re.search(pattern, value) is not None
 
 
+class OperatorKeysProps(TypedDict):
+    """
+    A helper class to ensure that operator mentiones keys with right type.
+
+    Attributes:
+        symbol (str) : a symbol representing the operator
+        verbose (str): a more verbose way of representing the operator
+    """
+
+    symbol: str
+    verbose: str
+
+
 class OperatorProps(NamedTuple):
     """
     A helper class to properly handle LogicalOperator property types.
@@ -214,26 +227,26 @@ class OperatorProps(NamedTuple):
         operation (Callable): operation function
     """
 
-    ope_name: str
+    keys: OperatorKeysProps
     operation: Callable[..., bool]
 
 
 class Operator(Enum):
     """An enumeration of possible operators."""
 
-    IN = OperatorProps("in", Operation.ope_in)
-    EQ = OperatorProps("eq", Operation.ope_equals)
-    GT = OperatorProps("gt", Operation.ope_greater_than)
-    GE = OperatorProps("ge", Operation.ope_greater_equal_than)
-    LT = OperatorProps("lt", Operation.ope_lower_than)
-    LE = OperatorProps("le", Operation.ope_greater_equal_than)
-    IS = OperatorProps("is", Operation.ope_is)
-    ISNT = OperatorProps("isnt", Operation.ope_is_not)
-    MATCH = OperatorProps("match", Operation.ope_reg_match)
-    SEARCH = OperatorProps("search", Operation.ope_reg_search)
+    IN = OperatorProps({"symbol": "∈", "verbose": "in"}, Operation.ope_in)
+    EQ = OperatorProps({"symbol": "=", "verbose": "eq"}, Operation.ope_equals)
+    GT = OperatorProps({"symbol": ">", "verbose": "gt"}, Operation.ope_greater_than)
+    GE = OperatorProps({"symbol": ">=", "verbose": "ge"}, Operation.ope_greater_equal_than)
+    LT = OperatorProps({"symbol": "<", "verbose": "lt"}, Operation.ope_lower_than)
+    LE = OperatorProps({"symbol": "<=", "verbose": "le"}, Operation.ope_greater_equal_than)
+    IS = OperatorProps({"symbol": ":", "verbose": "is"}, Operation.ope_is)
+    ISNT = OperatorProps({"symbol": "!:", "verbose": "isnt"}, Operation.ope_is_not)
+    MATCH = OperatorProps({"symbol": "~", "verbose": "match"}, Operation.ope_reg_match)
+    SEARCH = OperatorProps({"symbol": "?", "verbose": "search"}, Operation.ope_reg_search)
 
     @property
-    def ope_name(self) -> str:
+    def keys(self) -> OperatorKeysProps:
         """
         Return a logical operator name.
 
