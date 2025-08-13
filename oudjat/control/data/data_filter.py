@@ -1,8 +1,7 @@
 """A module to handle data filters."""
 
-from typing import Any, Callable, Dict, List, Tuple, Union
+from typing import Any, Callable, override
 
-from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.operations import Operator
 from oudjat.utils.types import FilterTupleExtType
 
@@ -44,10 +43,10 @@ class DataFilter:
         if operator not in Operator.list_operators_keys():
             raise ValueError(f"{__class__.__name__}::Invalid operator provided: {operator}")
 
-        self.fieldname = fieldname
-        self.value = value
-        self.negate = negate
+        self.fieldname: str = fieldname
         self.operator: Operator = Operator.find_by_key(operator)
+        self.value: Any = value
+        self.negate: bool = negate
 
     # ****************************************************************
     # Methods
@@ -99,7 +98,7 @@ class DataFilter:
         """
         self.negate = new_negate
 
-    def filter_dict(self, element: Dict) -> bool:
+    def filter_dict(self, element: dict[str, Any]) -> bool:
         """
         Run the current filter against a dictionary.
 
@@ -127,6 +126,7 @@ class DataFilter:
         check = self.get_operation()(value, self.value)
         return not check if self.negate else check
 
+    @override
     def __str__(self) -> str:
         """
         Convert the current instance into a string.
@@ -144,7 +144,7 @@ class DataFilter:
     # Static methods
 
     @staticmethod
-    def from_dict(filter_dict: Dict) -> "DataFilter":
+    def from_dict(filter_dict: dict[str, Any]) -> "DataFilter":
         """
         Create a datafilter instance from a dictionary.
 
@@ -192,16 +192,16 @@ class DataFilter:
 
     @staticmethod
     def get_valid_filters_list(
-        filters_list: Union[List[Dict], List["DataFilter"]],
-    ) -> List["DataFilter"]:
+        filters_list: list[dict[str, Any]] | list["DataFilter"],
+    ) -> list["DataFilter"]:
         """
         Check filters type and format them into DataFilter instances if needed.
 
         Args:
-            filters_list (List[Dict] | List[DataFilter]): filter list to check / format
+            filters_list (list[Dict] | list[DataFilter]): filter list to check / format
 
         Returns:
-            List[DataFilter]: formated list of data filter instances
+            list[DataFilter]: formated list of data filter instances
         """
         filters = []
 
@@ -251,7 +251,7 @@ class DataFilter:
         return list(map(DataFilter.from_tuple, filters))
 
     @staticmethod
-    def get_conditions(element: Any, filters: Union[List["DataFilter"], List[Dict]]) -> bool:
+    def get_conditions(element: Any, filters: list["DataFilter"] | list[dict[str, Any]]) -> bool:
         """
         Run all given filters against a single provided element.
 
@@ -279,8 +279,8 @@ class DataFilter:
 
     @staticmethod
     def filter_data(
-        data_to_filter: List[Dict], filters: Union["DataFilter", List["DataFilter"]] = None
-    ) -> List[Dict]:
+        data_to_filter: list[dict[str, Any]], filters: "DataFilter" | list["DataFilter"] | None = None
+    ) -> list[dict[str, Any]]:
         """
         Filter data based on given filters.
 
