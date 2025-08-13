@@ -2,7 +2,9 @@
 
 import re
 from enum import Enum
-from typing import Any, Callable, NamedTuple
+from typing import Any, Callable, NamedTuple, TypedDict
+
+from oudjat.utils.types import NumberType
 
 
 class Operation:
@@ -39,7 +41,7 @@ class Operation:
             "!:": Operation.ope_is_not,
             "~": Operation.ope_reg_match,
             "?": Operation.ope_reg_search,
-            # INFO: Full name options
+            # INFO: Verbose option
             "eq": Operation.ope_equals,
             "in": Operation.ope_in,
             "gt": Operation.ope_greater_than,
@@ -55,7 +57,7 @@ class Operation:
         return options[operator](*args)
 
     @staticmethod
-    def ope_equals(a: Any, b: Any) -> bool:
+    def ope_equals(a: NumberType | str | bool, b: NumberType | str | bool) -> bool:
         """
         Check if a equals b.
 
@@ -70,7 +72,7 @@ class Operation:
         return a == b
 
     @staticmethod
-    def ope_in(a: Any, b: str | list[Any]) -> bool:
+    def ope_in(a: Any, b: str | list[NumberType | str | bool]) -> bool:
         """
         Check if a is in b.
 
@@ -85,13 +87,13 @@ class Operation:
         return a in b
 
     @staticmethod
-    def ope_greater_than(a: int | float, b: int | float) -> bool:
+    def ope_greater_than(a: NumberType, b: NumberType) -> bool:
         """
         Check if a is greater than b.
 
         Args:
-            a (Union[int, float]): The first number to compare.
-            b (Union[int, float]): The second number to compare.
+            a (NumberType): The first number to compare.
+            b (NumberType): The second number to compare.
 
         Returns:
             bool: True if a is greater than b, False otherwise.
@@ -100,13 +102,13 @@ class Operation:
         return a > b
 
     @staticmethod
-    def ope_greater_equal_than(a: int | float, b: int | float) -> bool:
+    def ope_greater_equal_than(a: NumberType, b: NumberType) -> bool:
         """
         Check if a is greater than or equal to b.
 
         Args:
-            a (Union[int, float]): The first number to compare.
-            b (Union[int, float]): The second number to compare.
+            a (NumberType): The first number to compare.
+            b (NumberType): The second number to compare.
 
         Returns:
             bool: True if a is greater than or equal to b, False otherwise.
@@ -115,13 +117,13 @@ class Operation:
         return a >= b
 
     @staticmethod
-    def ope_lower_than(a: int | float, b: int | float) -> bool:
+    def ope_lower_than(a: NumberType, b: NumberType) -> bool:
         """
         Check if a is less than b.
 
         Args:
-            a (Union[int, float]): The first number to compare.
-            b (Union[int, float]): The second number to compare.
+            a (NumberType): The first number to compare.
+            b (NumberType): The second number to compare.
 
         Returns:
             bool: True if a is less than b, False otherwise.
@@ -130,13 +132,13 @@ class Operation:
         return a < b
 
     @staticmethod
-    def ope_lower_equal_than(a: int | float, b: int | float) -> bool:
+    def ope_lower_equal_than(a: NumberType, b: NumberType) -> bool:
         """
         Check if a is less than or equal to b.
 
         Args:
-            a (Union[int, float]): The first number to compare.
-            b (Union[int, float]): The second number to compare.
+            a (NumberType): The first number to compare.
+            b (NumberType): The second number to compare.
 
         Returns:
             bool: True if a is less than or equal to b, False otherwise.
@@ -145,13 +147,13 @@ class Operation:
         return a <= b
 
     @staticmethod
-    def ope_is(a: object | None, b: object | None) -> bool:
+    def ope_is(a: Any, b: NumberType | bool | None) -> bool:
         """
         Check if a is the same object as b.
 
         Args:
-            a (Any): The first object to compare.
-            b (Any): The second object to compare.
+            a (Any)                           : The first object to compare.
+            b (str | NumberType | bool | None): The second object to compare.
 
         Returns:
             bool: True if a and b are the same object, False otherwise.
@@ -160,13 +162,13 @@ class Operation:
         return a is b
 
     @staticmethod
-    def ope_is_not(a: Any, b: Any) -> bool:
+    def ope_is_not(a: Any, b: NumberType | bool | None) -> bool:
         """
         Check if a is not the same object as b.
 
         Args:
-            a (Any): The first object to compare.
-            b (Any): The second object to compare.
+            a (Any)                           : The first object to compare.
+            b (str | NumberType | bool | None): The second object to compare.
 
         Returns:
             bool: True if a and b are not the same object, False otherwise.
