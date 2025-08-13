@@ -303,3 +303,20 @@ class Operator(Enum):
         """
 
         return [x for op in Operator for x in (op.symbol, op.verbose)]
+
+    @staticmethod
+    def find_by_key(key: str) -> "Operator":
+        """
+        Return a single Operator which one of the keys matches the provided string.
+
+        Args:
+            key (str): string to search in operators keys
+
+        Returns:
+            Operator: the operator which keys contain the provided key string
+        """
+
+        def operator_matches_key(operator: Operator) -> bool:
+            return key in [operator.symbol, operator.verbose]
+
+        return next(filter(operator_matches_key, Operator))
