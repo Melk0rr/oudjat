@@ -3,7 +3,7 @@
 from typing import Any, Callable, Dict, List, Tuple, Union
 
 from oudjat.utils.color_print import ColorPrint
-from oudjat.utils.operations import Operation
+from oudjat.utils.operations import Operator
 from oudjat.utils.types import FilterTupleExtType
 
 
@@ -41,13 +41,13 @@ class DataFilter:
             negate (bool)  : if you want to negate the filter result or not (True -> False; False -> True)
         """
 
-        if operator not in Operation.keys():
+        if operator not in Operator.list_operators_keys():
             raise ValueError(f"{__class__.__name__}::Invalid operator provided: {operator}")
 
         self.fieldname = fieldname
-        self.operator = operator
         self.value = value
         self.negate = negate
+        self.operator: Operator = Operator.find_by_key(operator)
 
     # ****************************************************************
     # Methods
@@ -62,7 +62,7 @@ class DataFilter:
 
         return self.fieldname
 
-    def get_operator(self) -> str:
+    def get_operator(self) -> Operator:
         """
         Return the filter operator.
 
@@ -80,7 +80,7 @@ class DataFilter:
             Callable: DataFilterOperation function
         """
 
-        return Operation[self.operator]
+        return self.operator.operation
 
     def get_value(self) -> Any:
         """
