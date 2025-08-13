@@ -139,6 +139,20 @@ class DataFilter:
             print(my_filter) -> name = Roy Batty
         """
         return f"{self.fieldname} {self.operator} {self.value}"
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the current instance into a dictionary.
+
+        Returns:
+            dict[str, Any]: dictionary representation of the current data filter
+        """
+
+        return {
+            "fieldname": self._fieldname,
+            "operator": self._operator.name,
+            "value": self._value,
+            "negate": self._negate,
+        }
 
     # ****************************************************************
     # Static methods
