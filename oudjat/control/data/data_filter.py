@@ -160,7 +160,7 @@ class DataFilter:
 
         return DataFilter(
             fieldname=filter_dict["fieldname"],
-            operator=filter_dict.get("operator", "in"),
+            operator=filter_dict.get("operator", "is"),
             value=filter_dict.get("value", None),
         )
 
