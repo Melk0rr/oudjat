@@ -254,7 +254,8 @@ class Operator(Enum):
             str: name of the operator
         """
 
-        return self._value_.ope_name
+        return self._value_.keys
+
 
     @property
     def operation(self) -> Callable[..., bool]:
