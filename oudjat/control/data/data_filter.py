@@ -43,15 +43,16 @@ class DataFilter:
         if operator not in Operator.list_operators_keys():
             raise ValueError(f"{__class__.__name__}::Invalid operator provided: {operator}")
 
-        self.fieldname: str = fieldname
-        self.operator: Operator = Operator.find_by_key(operator)
-        self.value: Any = value
-        self.negate: bool = negate
+        self._fieldname: str = fieldname
+        self._operator: Operator = Operator.find_by_key(operator)
+        self._value: Any = value
+        self._negate: bool = negate
 
     # ****************************************************************
     # Methods
 
-    def get_fieldname(self) -> str:
+    @property
+    def fieldname(self) -> str:
         """
         Return the filter fieldname.
 
@@ -59,9 +60,10 @@ class DataFilter:
             str: fieldname of the instance that will be used to filter a dictionary
         """
 
-        return self.fieldname
+        return self._fieldname
 
-    def get_operator(self) -> Operator:
+    @property
+    def operator(self) -> Operator:
         """
         Return the filter operator.
 
@@ -69,9 +71,10 @@ class DataFilter:
             str: operator used to determine which function will be used to filter
         """
 
-        return self.operator
+        return self._operator
 
-    def get_operation(self) -> Callable:
+    @property
+    def operation(self) -> Callable:
         """
         Return a DataFilterOperation based on current parameters.
 
@@ -79,24 +82,42 @@ class DataFilter:
             Callable: DataFilterOperation function
         """
 
-        return self.operator.operation
+        return self._operator.operation
 
-    def get_value(self) -> Any:
+    @property
+    def value(self) -> Any:
         """
         Return the filter value.
 
         Returns:
             Any: the value the filtered element must have
         """
-        return self.value
+        return self._value
 
-    def set_negate(self, new_negate: bool) -> None:
+    @property
+    def negate(self) -> bool:
         """
-        Set the filter negation.
+        Return the current data filter negation value.
 
+        The negation value is used to 'negate' the data filter value.
+        Meaning, whatever value the filter will return, it will be negated / reversed
 
+        Returns:
+            bool: True if the data filter value will be negated. False otherwise.
         """
-        self.negate = new_negate
+
+        return self._negate
+
+    @negate.setter
+    def negate(self, new_negate_value: bool) -> None:
+        """
+        Set a new value for the negate attribute.
+
+        Args:
+            new_negate_value (bool): new value of the negate attribute
+        """
+
+        self._negate = new_negate_value
 
     def filter_dict(self, element: dict[str, Any]) -> bool:
         """
@@ -109,7 +130,7 @@ class DataFilter:
             bool: wheither or not the dictionary matches the filter
         """
 
-        check: bool = self.get_operation()(element[self.fieldname], self.value)
+        check: bool = self.operation(element[self.fieldname], self.value)
         return not check if self.negate else check
 
     def filter_value(self, value: Any) -> bool:
@@ -123,7 +144,7 @@ class DataFilter:
             bool: wheither or not the given value matches the filter
         """
 
-        check = self.get_operation()(value, self.value)
+        check: bool = self.operation(value, self.value)
         return not check if self.negate else check
 
     @override
@@ -138,7 +159,9 @@ class DataFilter:
             my_filter = DataFilter(fieldname="name", operator="=", value="Roy Batty")
             print(my_filter) -> name = Roy Batty
         """
-        return f"{self.fieldname} {self.operator} {self.value}"
+
+        return f"{self._fieldname} {self._operator} {self._value}"
+
     def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
