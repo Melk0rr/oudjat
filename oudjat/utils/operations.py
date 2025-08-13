@@ -256,6 +256,27 @@ class Operator(Enum):
 
         return self._value_.keys
 
+    @property
+    def symbol(self) -> str:
+        """
+        Return the symbol representation of the operator.
+
+        Returns:
+            str: a string symbol that represents the operator
+        """
+
+        return self._value_.keys["symbol"]
+
+    @property
+    def verbose(self) -> str:
+        """
+        Return the symbol representation of the operator.
+
+        Returns:
+            str: a string symbol that represents the operator
+        """
+
+        return self._value_.keys["verbose"]
 
     @property
     def operation(self) -> Callable[..., bool]:
