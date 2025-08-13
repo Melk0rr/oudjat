@@ -1,7 +1,5 @@
 """A module that describes data sets and provides tools to manipulate them."""
 
-from typing import Dict, List, Union
-
 from .data_filter import DataFilter
 
 
