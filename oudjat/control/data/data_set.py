@@ -131,12 +131,12 @@ class DataSet:
             ValueError: If no parent scope is defined.
         """
 
-        if self.initial_scope is None:
-            raise ValueError(
-                f"{__class__.__name__}.get_data::No parent scope defined for the current scope {self.name}"
-            )
-
         data = self.get_input_data()
+
+        if self.initial_scope is None or data is None:
+            raise ValueError(
+                f"{__class__.__name__}.get_data::No initial data set defined for the current set {self.name}"
+            )
 
         if len(self.filters) > 0:
             data = DataFilter.filter_data(data, self.filters)
