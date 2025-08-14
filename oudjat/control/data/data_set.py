@@ -189,6 +189,8 @@ class DataSet:
         return DataSet(
             name=name,
             perimeter=list(perimeters)[0],
-            initial_set=list(map(DataSet.get_dataset_data, sets)),
+            initial_set=[
+                item for set_data in map(DataSet.get_dataset_data, sets) for item in set_data
+            ],
             filters=[],
         )
