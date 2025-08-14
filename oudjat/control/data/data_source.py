@@ -18,15 +18,16 @@ class DataSource:
             description (str): a description for the new data source
         """
 
-        self.name: str = name
-        self.description: str | None = description
+        self._name: str = name
+        self._description: str | None = description
 
-        self.connectors: dict[str, Connector] = {}
+        self._connectors: dict[str, Connector] = {}
 
     # ****************************************************************
     # Methods
 
-    def get_name(self) -> str:
+    @property
+    def name(self) -> str:
         """
         Return the name of the data source.
 
@@ -34,9 +35,10 @@ class DataSource:
             str: current name of the data source
         """
 
-        return self.name
+        return self._name
 
-    def get_description(self) -> str | None:
+    @property
+    def description(self) -> str | None:
         """
         Return the description of the data source.
 
@@ -44,9 +46,10 @@ class DataSource:
             str: current description of the data source
         """
 
-        return self.description
+        return self._description
 
-    def get_connectors(self) -> dict[str, Connector]:
+    @property
+    def connectors(self) -> dict[str, Connector]:
         """
         Return the current data source connectors.
 
@@ -54,9 +57,9 @@ class DataSource:
             Dict: the connectors attached to this data source
         """
 
-        return self.connectors
+        return self._connectors
 
-    def get_connector(self, connector_key: str = "") -> "Connector":
+    def get_connector(self, connector_key: str) -> "Connector":
         """
         Return one of the data source connector based on its key.
 
@@ -96,5 +99,6 @@ class DataSource:
     def clear_connectors(self) -> None:
         """Clear the connectors of the data source."""
 
-        del self.connectors
-        self.connectors = {}
+        del self._connectors
+        self._connectors = {}
+
