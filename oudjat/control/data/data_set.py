@@ -2,6 +2,8 @@
 
 from .data_filter import DataFilter
 
+DataSetType: TypeAlias = list[dict[str, Any]] | "DataSet"
+
 
 class DataSet:
     """DataSet class : handling data unfiltered and filtered state."""
