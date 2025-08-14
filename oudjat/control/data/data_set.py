@@ -1,5 +1,7 @@
 """A module that describes data sets and provides tools to manipulate them."""
 
+from typing import Any, TypeAlias
+
 from .data_filter import DataFilter
 
 DataSetType: TypeAlias = list[dict[str, Any]] | "DataSet"
@@ -15,9 +17,9 @@ class DataSet:
         self,
         name: str,
         perimeter: str,
-        initial_set: Union[List[Dict], "DataSet"] = None,
-        filters: Union[List[Dict], List["DataFilter"]] = [],
-        description: str = None,
+        initial_set: DataSetType | None = None,
+        filters: list[dict[str, Any]] | list["DataFilter"] | None = None,
+        description: str | None = None,
     ) -> None:
         """
         Create a new DataSet instance.
@@ -30,13 +32,16 @@ class DataSet:
             description (str, optional)                              : a brief description of the dataset. Defaults to None.
         """
 
-        self.name = name
-        self.description = description
-        self.perimeter = perimeter
+        if filters is None:
+            filters = []
 
-        self.initial_scope = initial_set
+        self.name: str = name
+        self.description: str | None = description
+        self.perimeter: str = perimeter
 
-        self.filters = DataFilter.get_valid_filters_list(filters)
+        self.initial_scope: DataSetType | None = initial_set
+
+        self.filters: list[DataFilter] = DataFilter.get_valid_filters_list(filters)
 
     # ****************************************************************
     # Methods
@@ -51,7 +56,7 @@ class DataSet:
 
         return self.name
 
-    def get_initial_scope(self) -> Union[List[Dict], "DataSet"]:
+    def get_initial_scope(self) -> DataSetType | None:
         """
         Retrieve the initial scope dataset or a list of dictionaries that define the starting point for this dataset.
 
@@ -61,7 +66,7 @@ class DataSet:
 
         return self.initial_scope
 
-    def get_initial_scope_name(self) -> str:
+    def get_initial_scope_name(self) -> str | None:
         """
         Getter for the name of the initial scope data set.
 
@@ -71,7 +76,7 @@ class DataSet:
 
         return self.initial_scope.get_name() if isinstance(self.initial_scope, DataSet) else None
 
-    def get_input_data(self) -> List[Dict]:
+    def get_input_data(self) -> list[dict[str, Any]] | None:
         """
         Getter for input data.
 
@@ -95,7 +100,7 @@ class DataSet:
 
         return self.perimeter
 
-    def set_initial_scope(self, scope: Union[List[Dict], "DataSet"]) -> None:
+    def set_initial_scope(self, scope: DataSetType) -> None:
         """
         Setter for the initial scope data set or list of dictionaries.
 
@@ -105,7 +110,7 @@ class DataSet:
 
         self.initial_scope = scope
 
-    def set_filters(self, filters: Union[List[Dict], List["DataFilter"]] = []) -> None:
+    def set_filters(self, filters: list["DataFilter"]) -> None:
         """
         Setter for the list of data filters.
 
@@ -115,7 +120,7 @@ class DataSet:
 
         self.filters = DataFilter.get_valid_filters_list(filters)
 
-    def get_data(self) -> List[Dict]:
+    def get_data(self) -> list[dict[str, Any]]:
         """
         Getter for the filtered data in the dataset's perimeter.
 
@@ -142,7 +147,7 @@ class DataSet:
     # Static methods
 
     @staticmethod
-    def get_dataset_data(dataset: "DataSet") -> str:
+    def get_dataset_data(dataset: "DataSet") -> list[dict[str, Any]]:
         """
         Return the data of the provided DataSet instance.
 
@@ -156,7 +161,7 @@ class DataSet:
         return dataset.get_data()
 
     @staticmethod
-    def merge_sets(name: str, sets: List["DataSet"]) -> "DataSet":
+    def merge_sets(name: str, sets: list["DataSet"]) -> "DataSet":
         """
         Merge multiple DataSet instances into one.
 
