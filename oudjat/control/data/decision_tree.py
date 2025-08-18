@@ -395,6 +395,7 @@ class DecisionTree:
             "value": self.value,
             "negate": self.negate,
             "operator": self.operator,
+            "flags": self.nodes.get_flags_list(),
             "details": list(map(any_to_dict, self.nodes)),
         }
 
