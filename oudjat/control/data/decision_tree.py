@@ -12,6 +12,7 @@ from .data_filter import DataFilter
 
 DecisionNodeFlagType: TypeAlias = NumberType | str | None
 
+# TODO: Property usage
 
 class DecisionTreeNode:
     """
@@ -26,6 +27,7 @@ class DecisionTreeNode:
     # ****************************************************************
     # Attributes & Constructors
 
+    # TODO: Properly handle types in the input node dict (TypedDict or NamedTuple)
     def __init__(self, node_dict: dict[str, Any]) -> None:
         """
         Create a new DecisionTree node.
