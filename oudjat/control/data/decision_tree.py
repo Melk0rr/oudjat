@@ -384,7 +384,7 @@ class DecisionTree:
             str: the current instance represented as a string which contains nodes own str representation joined by operators
         """
 
-        sep = f" {self.operator.upper()} "
+        sep = f" {self.operator} "
         return f"({sep.join(list(map(str, self.nodes)))})"
 
     def to_dict(self) -> dict[str, Any]:
