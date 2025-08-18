@@ -302,14 +302,11 @@ class DecisionTree:
         """
 
         # If the provided node contains subnodes : it is a decision tree else: it is a simple node
-        if node.get("nodes", None) is not None:
-            node = DecisionTree(tree_dict=node)
-            node.build()
+        new_node: DecisionTree | DecisionTreeNode = (
+            DecisionTree(node) if node.get("nodes", None) else DecisionTreeNode(node)
+        )
 
-        else:
-            node = DecisionTreeNode(node_dict=node)
-
-        self.nodes.append(node)
+        self.nodes.append(new_node)
 
     def build(self, tree_dict: dict[str, Any]) -> None:
         """
