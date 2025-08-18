@@ -14,17 +14,29 @@ DecisionNodeFlagType: TypeAlias = NumberType | str | None
 
 
 class DecisionTreeNode:
-    """Decision tree node."""
+    """
+    A class that describes the behavior of a DecisionTree node.
+
+    A DecisionTree node is essentially composed of a data filter.
+    It also keeps a value computed for a particular element based on the node data filter result for that particular element.
+    It can also be affected a flag that will be valid if the node value is true.
+    You can then get a list of flags for the input element in the final result of the tree.
+    """
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(self, node_dict: dict[str, Any]) -> None:
         """
-        Create a new decision tree node instance.
+        Create a new DecisionTree node.
 
         Args:
             node_dict (dict[str, Any]): A dictionary containing the initialization data for the node.
+
+        Attributes:
+            flag (DecisionNodeFlagType): flag associated with this node in case the result value is true
+            node_filter (DataFilter)   : data filter of this node that will be used to compute node value for a particular input element
+            value (bool)               : the current value of the node for a given element
         """
 
         self.flag: DecisionNodeFlagType = node_dict.get("flag", None)
@@ -60,7 +72,7 @@ class DecisionTreeNode:
         Return the node value.
 
         Args:
-            element (Dict, optional): A dictionary representing an element to be filtered. Defaults to None.
+            element (dict[str, Any], optional): A dictionary representing an element to be filtered. Defaults to None.
 
         Returns:
             bool: The value of the node after applying its filter if necessary.
@@ -170,7 +182,14 @@ class DecisionTreeNodeList(list):
 
 
 class DecisionTree:
-    """A binary tree to handle complex condition checks from dicts or JSON."""
+    """
+    A binary tree to handle complex condition checks from dicts and config files.
+
+    It can contain sub decision trees and / or decision tree nodes.
+    Sub trees and nodes are all contained in the tree nodes list.
+    When parsing input dictionary to build the tree node type(sub tree or tree node) is determine based on wheither or not there is sub nodes.
+    It joins node values with a given operator.
+    """
 
     # ****************************************************************
     # Attributes & Constructors
@@ -183,8 +202,13 @@ class DecisionTree:
             tree_dict (dict[str, Any]): A dictionary representing the decision tree.
 
         self.raw = tree_dict
+        Attributes:
+            negate (bool)               : if True, the final value of the tree will be inverted
+            operator (LogicalOperator)  : logical operator that joins node values
+            nodes (DecisionTreeNodeList): a list of DecisionTree nodes that will determine the result of the tree
+            value (bool)                : final value of the decision tree for an input element
+        """
 
-        # If negate is true : the tree value will be reversed (e.g. value=True => False)
         self.negate: bool = tree_dict.get("negate", False)
 
         # Allows to map the tree raw boolean value to a customized value (e.g. {True: "YES", False: "NO"})
