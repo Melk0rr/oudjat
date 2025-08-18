@@ -188,6 +188,16 @@ class DecisionTreeNodeList(list):
 
         return list(map(DecisionTreeNode.node_flag, self))
 
+    def is_empty(self) -> bool:
+        """
+        Return wheither or not the list is empty.
+
+        Returns:
+            bool: True if the list is empty. False otherwise.
+        """
+
+        return len(self) == 0
+
 
 class DecisionTree:
     """
@@ -346,8 +356,8 @@ class DecisionTree:
             List: A list of values representing the leaf nodes of the decision tree.
         """
 
-        if self.nodes is None:
-            return None
+        if self.nodes.is_empty():
+            return self.nodes
 
         leaves = DecisionTreeNodeList()
         for n in self.nodes:
