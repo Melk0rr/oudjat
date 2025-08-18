@@ -78,8 +78,13 @@ class DecisionTreeNode:
             bool: The value of the node after applying its filter if necessary.
         """
 
-        if self.value is None and element is not None:
+        if element:
             self.init(element)
+
+        if self.value is None:
+            raise ValueError(
+                f"{__class__.__name__}.get_value::An error occured while computing tree value"
+            )
 
         return self.value
 
@@ -201,7 +206,6 @@ class DecisionTree:
         Args:
             tree_dict (dict[str, Any]): A dictionary representing the decision tree.
 
-        self.raw = tree_dict
         Attributes:
             negate (bool)               : if True, the final value of the tree will be inverted
             operator (LogicalOperator)  : logical operator that joins node values
@@ -210,9 +214,6 @@ class DecisionTree:
         """
 
         self.negate: bool = tree_dict.get("negate", False)
-
-        # Allows to map the tree raw boolean value to a customized value (e.g. {True: "YES", False: "NO"})
-        self.value_map: Dict = tree_dict.get("value_map", {True: True, False: False})
 
         # TODO: Check other references of operator (in DecisionTreeNode to)
         self.operator: LogicalOperator = tree_dict.get("operator", LogicalOperator.AND)
@@ -260,34 +261,13 @@ class DecisionTree:
             bool: The computed boolean value of the tree based on the conditions, or None if not yet computed.
         """
 
-        if clear:
-            self.clear()
-
-        if self.value is None and element is not None:
+        if element:
             self.init(element)
 
         if self.value is None:
             return False
 
         return self.value if not self.negate else not self.value
-
-    def get_mapped_value(self, element: Dict = None) -> Any:
-        """
-        Get mapped value based on value, negate and value map.
-
-        Args:
-            element (Dict, optional): A dictionary representing the data to evaluate against the tree conditions.
-
-        Returns:
-            Any: The mapped value based on the current value, negate, and value_map attributes.
-        """
-
-        default_value = self.get_value(element)
-
-        if default_value is None:
-            return None
-
-        return self.value_map[default_value]
 
     def set_operator(self, new_operator: str) -> None:
         """
@@ -327,12 +307,11 @@ class DecisionTree:
         """
 
         try:
-            self.nodes = []
-            for n in self.raw.get("nodes", []):
+            self.nodes.clear()
+            for n in tree_dict.get("nodes", []):
                 self.add_node(n)
 
         except Exception as e:
-            self.nodes = None
             ColorPrint.red(f"{__class__.__name__}.build::An error occured while building tree\n{e}")
 
     def init(self, element: dict[str, Any]) -> None:
@@ -342,10 +321,6 @@ class DecisionTree:
         Args:
             element (dict[str, Any]): the dictionary to use for initialization
         """
-
-        # If nods have not yet been built -> build
-        if self.nodes is None:
-            self.build()
 
         # TODO: See if all logical operators can be used
         sub_values = [n.get_value(element) for n in self.nodes]
@@ -411,7 +386,6 @@ class DecisionTree:
             "value": self.value,
             "negate": self.negate,
             "operator": self.operator,
-            "mapped_value": self.get_mapped_value(),
             "details": list(map(any_to_dict, self.nodes)),
         }
 
