@@ -342,8 +342,7 @@ class DecisionTree:
         """Clear the tree."""
 
         self.value = None
-        for n in self.nodes:
-            del n
+        self.nodes.clear()
 
     def get_leaves(self, leaves_value: bool | None = None) -> DecisionTreeNodeList:
         """
