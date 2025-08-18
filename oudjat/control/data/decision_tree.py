@@ -163,7 +163,10 @@ class DecisionTreeNodeList(list):
             DecisionTreeNodeList: A list of nodes with the specified value.
         """
 
-        return DecisionTreeNodeList(filter(lambda node: node.get_value() == value, self))
+        def node_value_eq_value(node: DecisionTreeNode) -> bool:
+            return node.get_value() == value
+
+        return DecisionTreeNodeList(filter(node_value_eq_value, self))
 
     def get_details_list(self) -> list[str]:
         """
