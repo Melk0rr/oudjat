@@ -7,8 +7,7 @@ from .color_print import ColorPrint
 from .credentials import CredentialHelper
 from .dictionary_utils import CustomDict
 from .file_utils import FileHandler, FileType
-from .logical_operations import LogicalOperation, LogicalOperator
-from .operations import Operator
+from .operators import CompareOperator, LogicalOperator
 from .stdouthook import StdOutHook
 from .time_utils import DateFlag, DateFormat, TimeConverter
 from .types import DataType, NumberType
@@ -20,9 +19,8 @@ __all__ = [
     "CustomDict",
     "FileHandler",
     "FileType",
-    "LogicalOperation",
     "LogicalOperator",
-    "Operator",
+    "CompareOperator",
     "StdOutHook",
     "DateFlag",
     "DateFormat",
