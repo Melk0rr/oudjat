@@ -14,6 +14,7 @@ DecisionNodeFlagType: TypeAlias = NumberType | str | None
 
 # TODO: Property usage
 
+
 class DecisionTreeNode:
     """
     A class that describes the behavior of a DecisionTree node.
@@ -41,15 +42,16 @@ class DecisionTreeNode:
             value (bool)               : the current value of the node for a given element
         """
 
-        self.flag: DecisionNodeFlagType = node_dict.get("flag", None)
-        self.node_filter: DataFilter = DataFilter.from_dict(node_dict)
-        self.node_filter.negate = node_dict.get("negate", False)
-        self.value: bool | None = None
+        self._flag: DecisionNodeFlagType = node_dict.get("flag", None)
+        self._node_filter: DataFilter = DataFilter.from_dict(node_dict)
+        self._node_filter.negate = node_dict.get("negate", False)
+        self._value: bool | None = None
 
     # ****************************************************************
     # Methods
 
-    def get_flag(self) -> DecisionNodeFlagType:
+    @property
+    def flag(self) -> DecisionNodeFlagType:
         """
         Return node flag.
 
@@ -57,9 +59,10 @@ class DecisionTreeNode:
             DecisionNodeFlagType: The flag of the node.
         """
 
-        return self.flag
+        return self._flag
 
-    def get_node_filter(self) -> DataFilter:
+    @property
+    def node_filter(self) -> DataFilter:
         """
         Return the current node filter.
 
@@ -67,14 +70,26 @@ class DecisionTreeNode:
             DataFilter: The filter associated with the node.
         """
 
-        return self.node_filter
+        return self._node_filter
 
-    def get_value(self, element: dict[str, Any] | None = None) -> bool:
+
+    @property
+    def value(self) -> bool | None:
         """
         Return the node value.
 
+        Returns:
+            bool | None: True if the compared element passed the filter. False otherwise. And None if no element was passed yet.
+        """
+
+        return self._value
+
+    def compute_value(self, element: dict[str, Any] | None = None) -> bool:
+        """
+        Return the node value after init if value is not set.
+
         Args:
-            element (dict[str, Any], optional): A dictionary representing an element to be filtered. Defaults to None.
+            element (dict[str, Any], optional): an element to be filtered represented as a dictionary. Defaults to None.
 
         Returns:
             bool: The value of the node after applying its filter if necessary.
@@ -83,30 +98,19 @@ class DecisionTreeNode:
         if element:
             self.init(element)
 
-        if self.value is None:
+        if self._value is None:
             raise ValueError(
-                f"{__class__.__name__}.get_value::An error occured while computing tree value"
+                f"{__class__.__name__}.compute_value::An error occured while computing node value"
             )
 
-        return self.value
-
-    def to_dict(self) -> dict[str, Any]:
-        """
-        Convert the current instance into a dict.
-
-        Returns:
-            dict[str, Any]: A dictionary representation of the node containing its flag, value, and filter.
-        """
-
-        return {"flag": self.flag, "value": self.value, "filter": str(self.node_filter)}
+        return self._value
 
     def clear(self) -> None:
         """
         Clear current node.
         """
 
-        self.value = None
-        del self.node_filter
+        self._value = None
 
     def init(self, element: dict[str, Any]) -> None:
         """
@@ -116,7 +120,7 @@ class DecisionTreeNode:
             element (dict[str, Any]): A dictionary representing an element to be filtered.
         """
 
-        self.value = self.node_filter.filter_dict(element)
+        self._value = self._node_filter.filter_dict(element)
 
     @override
     def __str__(self) -> str:
@@ -128,27 +132,23 @@ class DecisionTreeNode:
         """
 
         res_str = ""
-        if self.value is not None:
-            res_str = f" => {self.get_value()}"
+        if self._value is not None:
+            res_str = f" => {self.compute_value()}"
 
-        return f"(({self.node_filter}){res_str})"
+        return f"(({self._node_filter}){res_str})"
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the current instance into a dict.
+
+        Returns:
+            dict[str, Any]: A dictionary representation of the node containing its flag, value, and filter.
+        """
+
+        return {"flag": self._flag, "value": self._value, "filter": str(self._node_filter)}
 
     # ****************************************************************
     # Static methods
-
-    @staticmethod
-    def node_flag(node: "DecisionTreeNode") -> DecisionNodeFlagType:
-        """
-        Return a node flag.
-
-        Args:
-            node (DecisionTreeNode): node to return the flag of
-
-        Returns:
-            str: node flag
-        """
-
-        return node.get_flag()
 
 
 class DecisionTreeNodeList(list):
@@ -166,7 +166,7 @@ class DecisionTreeNodeList(list):
         """
 
         def node_value_eq_value(node: DecisionTreeNode) -> bool:
-            return node.get_value() == value
+            return node.compute_value() == value
 
         return DecisionTreeNodeList(filter(node_value_eq_value, self))
 
@@ -188,7 +188,10 @@ class DecisionTreeNodeList(list):
             list[DecisionNodeFlagType]: A list of the nodes' flags.
         """
 
-        return list(map(DecisionTreeNode.node_flag, self))
+        def node_flag(node: "DecisionTreeNode") -> DecisionNodeFlagType:
+            return node.flag
+
+        return list(map(node_flag, self))
 
     def is_empty(self) -> bool:
         """
@@ -228,24 +231,25 @@ class DecisionTree:
             value (bool)                : final value of the decision tree for an input element
         """
 
-        self.negate: bool = tree_dict.get("negate", False)
+        self._negate: bool = tree_dict.get("negate", False)
 
         # TODO: Check other references of operator (in DecisionTreeNode to)
-        self.operator: LogicalOperator = tree_dict.get("operator", LogicalOperator.AND)
-        if self.operator.name not in LogicalOperator._member_names_:
+        self._operator: LogicalOperator = tree_dict.get("operator", LogicalOperator.AND)
+        if self._operator.name not in LogicalOperator._member_names_:
             raise ValueError(
-                f"{__class__.__name__}::Invalid operator provided {self.operator.ope_name}"
+                f"{__class__.__name__}::Invalid operator provided {self._operator.name}"
             )
 
-        self.nodes: DecisionTreeNodeList = DecisionTreeNodeList()
+        self._nodes: DecisionTreeNodeList = DecisionTreeNodeList()
         self.build(tree_dict)
 
-        self.value: bool | None = None
+        self._value: bool | None = None
 
     # ****************************************************************
     # Methods
 
-    def get_nodes(self) -> DecisionTreeNodeList:
+    @property
+    def nodes(self) -> DecisionTreeNodeList:
         """
         Return decision tree nodes.
 
@@ -253,9 +257,11 @@ class DecisionTree:
             DecisionTreeNodeList: A list of DecisionTreeNode instances representing the tree nodes.
         """
 
-        return self.nodes
+        return self._nodes
 
-    def get_operator(self) -> "LogicalOperator":
+
+    @property
+    def operator(self) -> "LogicalOperator":
         """
         Return decision tree operator.
 
@@ -263,9 +269,31 @@ class DecisionTree:
             str: The logical operator used in the tree ("and" or "or").
         """
 
-        return self.operator
+        return self._operator
 
-    def get_value(self, element: dict[str, Any] | None = None) -> bool:
+    @operator.setter
+    def operator(self, new_operator: LogicalOperator) -> None:
+        """
+        Return tree operator.
+
+        Args:
+            new_operator (str): new operator value as a string
+        """
+
+        self._operator = new_operator
+
+    def set_operator_from_str(self, new_operator: str) -> None:
+        """
+        Return tree operator.
+
+        Args:
+            new_operator (str): new operator value as a string
+        """
+
+        if new_operator.upper() in LogicalOperator._member_names_:
+            self._operator = LogicalOperator[new_operator.upper()]
+
+    def compute_value(self, element: dict[str, Any] | None = None) -> bool:
         """
         Return tree value.
 
@@ -279,21 +307,11 @@ class DecisionTree:
         if element:
             self.init(element)
 
-        if self.value is None:
+        if self._value is None:
             return False
 
-        return self.value if not self.negate else not self.value
+        return self._value if not self._negate else not self._value
 
-    def set_operator(self, new_operator: str) -> None:
-        """
-        Return tree operator.
-
-        Args:
-            new_operator (str): new operator value as a string
-        """
-
-        if new_operator.upper() in LogicalOperator._member_names_:
-            self.operator = LogicalOperator[new_operator.upper()]
 
     def add_node(self, node: dict[str, Any]) -> None:
         """
@@ -308,7 +326,7 @@ class DecisionTree:
             DecisionTree(node) if node.get("nodes", None) else DecisionTreeNode(node)
         )
 
-        self.nodes.append(new_node)
+        self._nodes.append(new_node)
 
     def build(self, tree_dict: dict[str, Any]) -> None:
         """
@@ -319,7 +337,7 @@ class DecisionTree:
         """
 
         try:
-            self.nodes.clear()
+            self._nodes.clear()
             for n in tree_dict.get("nodes", []):
                 self.add_node(n)
 
@@ -337,13 +355,13 @@ class DecisionTree:
         sub_values = [n.compute_value(element) for n in self._nodes]
         tree_value = self._operator.operation(*sub_values)
 
-        self.value = tree_value
+        self._value = tree_value
 
     def clear(self) -> None:
         """Clear the tree."""
 
-        self.value = None
-        self.nodes.clear()
+        self._value = None
+        self._nodes.clear()
 
     def get_leaves(self, leaves_value: bool | None = None) -> DecisionTreeNodeList:
         """
@@ -353,11 +371,11 @@ class DecisionTree:
             List: A list of values representing the leaf nodes of the decision tree.
         """
 
-        if self.nodes.is_empty():
-            return self.nodes
+        if self._nodes.is_empty():
+            return self._nodes
 
         leaves = DecisionTreeNodeList()
-        for n in self.nodes:
+        for n in self._nodes:
             if isinstance(n, DecisionTreeNode):
                 leaves.append(n)
 
@@ -381,8 +399,8 @@ class DecisionTree:
             str: the current instance represented as a string which contains nodes own str representation joined by operators
         """
 
-        sep = f" {self.operator} "
-        return f"({sep.join(list(map(str, self.nodes)))})"
+        sep = f" {self._operator} "
+        return f"({sep.join(list(map(str, self._nodes)))})"
 
     def to_dict(self) -> dict[str, Any]:
         """
@@ -393,11 +411,11 @@ class DecisionTree:
         """
 
         return {
-            "value": self.value,
-            "negate": self.negate,
-            "operator": self.operator,
-            "flags": self.nodes.get_flags_list(),
-            "details": list(map(any_to_dict, self.nodes)),
+            "value": self._value,
+            "negate": self._negate,
+            "operator": self._operator,
+            "flags": self._nodes.get_flags_list(),
+            "details": list(map(any_to_dict, self._nodes)),
         }
 
     # ****************************************************************
