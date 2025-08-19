@@ -334,9 +334,8 @@ class DecisionTree:
             element (dict[str, Any]): the dictionary to use for initialization
         """
 
-        # TODO: See if all logical operators can be used
-        sub_values = [n.get_value(element) for n in self.nodes]
-        tree_value = all(sub_values) if self.operator == LogicalOperator.AND else any(sub_values)
+        sub_values = [n.compute_value(element) for n in self._nodes]
+        tree_value = self._operator.operation(*sub_values)
 
         self.value = tree_value
 
