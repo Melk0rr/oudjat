@@ -2,7 +2,7 @@
 
 from typing import Any, Callable, override
 
-from oudjat.utils.operations import Operator
+from oudjat.utils.operators import CompareOperator
 from oudjat.utils.types import FilterTupleExtType
 
 
@@ -40,11 +40,11 @@ class DataFilter:
             negate (bool)  : if you want to negate the filter result or not (True -> False; False -> True)
         """
 
-        if operator not in Operator.list_operators_keys():
+        if operator not in CompareOperator.list_all_keys():
             raise ValueError(f"{__class__.__name__}::Invalid operator provided: {operator}")
 
         self._fieldname: str = fieldname
-        self._operator: Operator = Operator.find_by_key(operator)
+        self._operator: CompareOperator = CompareOperator.find_by_key(operator)
         self._value: Any = value
         self._negate: bool = negate
 
@@ -63,7 +63,7 @@ class DataFilter:
         return self._fieldname
 
     @property
-    def operator(self) -> Operator:
+    def operator(self) -> CompareOperator:
         """
         Return the filter operator.
 
