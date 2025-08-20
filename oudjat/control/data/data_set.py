@@ -2,7 +2,7 @@
 
 from typing import Any, TypeAlias
 
-from .data_filter import DataFilter
+from .data_filter import DataFilter, DataFilterDictionaryProps
 
 DataSetType: TypeAlias = list[dict[str, Any]] | "DataSet"
 
@@ -18,7 +18,7 @@ class DataSet:
         name: str,
         perimeter: str,
         initial_set: DataSetType | None = None,
-        filters: list[dict[str, Any]] | list["DataFilter"] | None = None,
+        filters: list[DataFilterDictionaryProps] | list["DataFilter"] | None = None,
         description: str | None = None,
     ) -> None:
         """
@@ -35,82 +35,96 @@ class DataSet:
         if filters is None:
             filters = []
 
-        self.name: str = name
-        self.description: str | None = description
-        self.perimeter: str = perimeter
+        self._name: str = name
+        self._description: str | None = description
+        self._perimeter: str = perimeter
 
-        self.initial_scope: DataSetType | None = initial_set
+        self._initial_set: DataSetType | None = initial_set
 
-        self.filters: list[DataFilter] = DataFilter.get_valid_filters_list(filters)
+        self._filters: list[DataFilter] = DataFilter.get_valid_filters_list(filters)
 
     # ****************************************************************
     # Methods
 
-    def get_name(self) -> str:
+    @property
+    def name(self) -> str:
         """
-        Getter for the dataset name.
+        Return the current DataSet name.
 
         Returns:
             str: The name of the dataset.
         """
 
-        return self.name
+        return self._name
 
-    def get_initial_scope(self) -> DataSetType | None:
+    @property
+    def initial_set(self) -> DataSetType | None:
         """
-        Retrieve the initial scope dataset or a list of dictionaries that define the starting point for this dataset.
+        Retrieve the initial dataset or a list of dictionaries that define the starting point for this dataset.
 
         Returns:
-            Union[List[Dict], "DataSet"]: The initial scope data set or list of dictionaries.
+            DataSetType: the initial data set data set or list of dictionaries.
         """
 
-        return self.initial_scope
+        return self._initial_set
 
-    def get_initial_scope_name(self) -> str | None:
+    @initial_set.setter
+    def initial_set(self, dataset: DataSetType) -> None:
         """
-        Getter for the name of the initial scope data set.
+        Setter for the initial data set.
+
+        Args:
+            dataset (DataSet): the new initial data set
+        """
+
+        self._initial_set = dataset
+
+    @property
+    def description(self) -> str | None:
+        """
+        Return the description for this DataSet.
 
         Returns:
-            str: The name of the initial scope data set, or None if not applicable.
+            str | None: a string that describe this data set. None if no description provided.
         """
 
-        return self.initial_scope.get_name() if isinstance(self.initial_scope, DataSet) else None
+        return self._description
 
-    def get_input_data(self) -> list[dict[str, Any]] | None:
+    @property
+    def perimeter(self) -> str:
         """
-        Getter for input data.
-
-        Returns:
-            List[Dict]: The input data either from the initial scope or directly if not a DataSet.
-        """
-
-        return (
-            self.initial_scope.get_data()
-            if isinstance(self.initial_scope, DataSet)
-            else self.initial_scope
-        )
-
-    def get_perimeter(self) -> str:
-        """
-        Getter for the perimeter of the dataset.
+        Return the current DataSet perimeter.
 
         Returns:
             str: The perimeter string.
         """
 
-        return self.perimeter
+        return self._perimeter
 
-    def set_initial_scope(self, scope: DataSetType) -> None:
+    @property
+    def initial_set_name(self) -> str | None:
         """
-        Setter for the initial scope data set or list of dictionaries.
+        Return the name of the initial data set.
 
-        Args:
-            scope (Union[List[Dict], "DataSet"]): The new initial scope to be set.
+        Returns:
+            str | None: the name of the initial data set, or None if not applicable.
         """
 
-        self.initial_scope = scope
+        return self._initial_set.name if isinstance(self._initial_set, DataSet) else None
 
-    def set_filters(self, filters: list["DataFilter"]) -> None:
+    @property
+    def filters(self) -> list["DataFilter"]:
+        """
+        Return the data filters associated to this DataSet.
+
+        Returns:
+            list[DataFilter]: list of data filters that will determine the data set output
+        """
+
+        return self._filters
+
+    @filters.setter
+    def filters(self, filters: list["DataFilter"]) -> None:
         """
         Setter for the list of data filters.
 
@@ -118,28 +132,42 @@ class DataSet:
             filters (Union[List[Dict], List["DataFilter"]], optional): The new list of filters to be set. Defaults to an empty list.
         """
 
-        self.filters = DataFilter.get_valid_filters_list(filters)
+        self._filters = DataFilter.get_valid_filters_list(filters)
+
+    def get_input_data(self) -> list[dict[str, Any]] | None:
+        """
+        Getter for input data.
+
+        Returns:
+            list[dict[str, Any]]: the input data either retrieved through initial DataSet.get_data or the initial_set directly
+        """
+
+        return (
+            self._initial_set.get_data()
+            if isinstance(self._initial_set, DataSet)
+            else self._initial_set
+        )
 
     def get_data(self) -> list[dict[str, Any]]:
         """
         Getter for the filtered data in the dataset's perimeter.
 
         Returns:
-            List[Dict]: The list of dictionaries representing the filtered data.
+            list[dict[str, Any]]: The list of dictionaries representing the filtered data.
 
         Raises:
-            ValueError: If no parent scope is defined.
+            ValueError: if no parent set is defined.
         """
 
         data = self.get_input_data()
 
-        if self.initial_scope is None or data is None:
+        if self._initial_set is None or data is None:
             raise ValueError(
-                f"{__class__.__name__}.get_data::No initial data set defined for the current set {self.name}"
+                f"{__class__.__name__}.get_data::No initial data set defined for the current set {self._name}"
             )
 
-        if len(self.filters) > 0:
-            data = DataFilter.filter_data(data, self.filters)
+        if len(self._filters) > 0:
+            data = DataFilter.filter_data(data, self._filters)
 
         return data
 
@@ -166,24 +194,24 @@ class DataSet:
         Merge multiple DataSet instances into one.
 
         Args:
-            name (str)            : The name of the merged dataset.
-            sets (List["DataSet"]): A list of DataSet instances to be merged.
+            name (str)          : the name of the merged dataset.
+            sets (list[DataSet]): a list of DataSet instances to be merged.
 
         Returns:
-            DataSet: A new DataSet instance containing the merged data from all provided scopes.
+            DataSet: a new DataSet instance containing the merged data from all provided data sets.
 
         Raises:
-            ValueError: If the scopes do not have the same perimeter.
+            ValueError: if the data sets do not have the same perimeter.
         """
 
         def map_ds_perim(dataset: "DataSet") -> str:
-            return dataset.get_perimeter()
+            return dataset.perimeter
 
-        # Check if all scopes are on the same perimeter
+        # Check if all sets are on the same perimeter
         perimeters = set(map(map_ds_perim, sets))
         if len(perimeters) > 1:
             raise ValueError(
-                f"{__class__.__name__}.merge_sets::Please provide scopes with the same perimeter"
+                f"{__class__.__name__}.merge_sets::Please provide data sets with the same perimeter"
             )
 
         return DataSet(
