@@ -232,9 +232,8 @@ class DecisionTree:
         """
 
         self._negate: bool = tree_dict.get("negate", False) or False
-
-        # TODO: Check other references of operator (in DecisionTreeNode to)
         self._operator: LogicalOperator = LogicalOperator.find_by_key(tree_dict.get("operator", "and")) or LogicalOperator.AND
+
         if self._operator.name not in LogicalOperator._member_names_:
             raise ValueError(
                 f"{__class__.__name__}::Invalid operator provided {self._operator.name}"
