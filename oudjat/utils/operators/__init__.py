@@ -2,8 +2,10 @@
 
 from .compare_operators import CompareOperator
 from .logical_operators import LogicalOperator
+from .operators import Operator
 
 __all__ = [
     "CompareOperator",
-    "LogicalOperator"
+    "LogicalOperator",
+    "Operator",
 ]
