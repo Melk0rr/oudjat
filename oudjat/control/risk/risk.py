@@ -1,6 +1,6 @@
 """A module to describe the notion of risk."""
 
-from typing import Union
+from typing import override
 
 from .risk_measure import RiskMeasure
 
@@ -12,7 +12,7 @@ class Risk:
     # Attributes & Constructors
 
     # Risk 2D table
-    risk_table = [
+    risk_table: list[list[int]] = [
         [1, 1, 1, 2],
         [1, 2, 2, 3],
         [2, 2, 3, 4],
@@ -24,8 +24,8 @@ class Risk:
         risk_id: str,
         name: str,
         description: str,
-        likelihood: Union[RiskMeasure, int] = None,
-        impact: Union[RiskMeasure, int] = None,
+        likelihood: RiskMeasure | int = 0,
+        impact: RiskMeasure | int = 0,
     ):
         """
         Return a new instance of Risk.
@@ -38,19 +38,12 @@ class Risk:
             impact (int | RiskMeasure)    : the impact if the risk is concretized (value between 1 and 4)
         """
 
-        self._id = risk_id
-        self.name = name
-        self.description = description
+        self._id: str = risk_id
+        self.name: str = name
+        self.description: str = description
 
-        # Handle risk parameters type
-        if isinstance(likelihood, int):
-            likelihood = RiskMeasure(min(max(1, likelihood), 4))
-
-        if isinstance(impact, int):
-            impact = RiskMeasure(min(max(1, impact), 4))
-
-        self.likelihood = likelihood
-        self.impact = impact
+        self.likelihood: RiskMeasure = RiskMeasure(likelihood)
+        self.impact: RiskMeasure = RiskMeasure(impact)
 
         self.severity = None
         self.value = None
@@ -66,18 +59,15 @@ class Risk:
             str: unique id of the current risk
         """
 
-    def get_severity(self) -> int:
+        return self._id
+
+    def get_severity(self) -> RiskMeasure:
         """
         Getter for the risk score.
 
         Returns:
             int: severity of the risk (value between 1 and 16)
         """
-
-        if self.likelihood is None or self.impact is None:
-            raise ValueError(
-                f"{__class__.__name__}.get_severity::You need to set risk likelihood and impact to get its score !"
-            )
 
         self.value = self.likelihood * self.impact
 
@@ -86,7 +76,7 @@ class Risk:
 
         return self.severity
 
-    def set_likelihood(self, likelihood: Union[int, RiskMeasure]) -> None:
+    def set_likelihood(self, likelihood: int | RiskMeasure) -> None:
         """
         Change the likelihood of the current risk.
 
@@ -94,12 +84,9 @@ class Risk:
             likelihood (int | RiskMeasure): new likelihood value
         """
 
-        if isinstance(likelihood, int):
-            likelihood = RiskMeasure(min(max(1, likelihood), 4))
+        self.likelihood = RiskMeasure(min(max(1, likelihood), 4))
 
-        self.likelihood = likelihood
-
-    def set_impact(self, impact: Union[int, RiskMeasure]) -> None:
+    def set_impact(self, impact: int | RiskMeasure) -> None:
         """
         Change the impact of the current risk.
 
@@ -107,12 +94,9 @@ class Risk:
             impact (int | RiskMeasure): new impact value
         """
 
-        if isinstance(impact, int):
-            impact = min(max(1, impact), 4)
-            impact = RiskMeasure(impact)
+        self.impact = RiskMeasure(min(max(1, impact), 4))
 
-        self.impact = impact
-
+    @override
     def __str__(self) -> str:
         """
         Convert the current instance into a string.
