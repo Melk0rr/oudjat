@@ -2,17 +2,35 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Callable, Dict, List, Union
+from typing import Any, Callable, NamedTuple
 
 from oudjat.control.data import DataFilter, DataSet
+from oudjat.control.data.data_filter import DataFilterDictionaryProps
 from oudjat.utils import ColorPrint, DateFormat, TimeConverter
+from oudjat.utils.time_utils import DateFlag
+from oudjat.utils.types import DateInputType, NumberType
+
+
+class ConformityLevelProps(NamedTuple):
+    """
+    A helper class to properly handle ConformityLevel types.
+
+    Attributes:
+        min: the minimum value for a level of conformity
+        max: the maximum value for a level of conformity
+        print_color: the print function used to print the KPI value
+    """
+
+    min: NumberType
+    max: NumberType
+    print_color: Callable[[str], None]
 
 
 class ConformityLevel(Enum):
     """Defines the levels of conformity for a KPI or any other related element."""
 
-    NOTCONFORM = {"min": 0, "max": 70, "color": ColorPrint.red}
-    PARTIALLYCONFORM = {"min": 70, "max": 95, "color": ColorPrint.yellow}
+    NOTCONFORM = ConformityLevelProps(min=0, max=70, print_color=ColorPrint.red)
+    PARTIALLYCONFORM = ConformityLevelProps(min=70, max=95, print_color=ColorPrint.yellow)
     CONFORM = {"min": 95, "max": 100.01, "color": ColorPrint.green}
 
     @property
@@ -59,36 +77,39 @@ class KPI(DataSet):
         self,
         name: str,
         perimeter: str,
-        date: datetime = None,
-        scope: Union[List[Dict], DataSet] = None,
-        filters: Union[List[Dict], List[DataFilter]] = [],
-        description: str = None,
+        date: DateInputType | None = None,
+        data_set: list[dict[str, Any]] | DataSet | None = None,
+        filters: list[DataFilterDictionaryProps] | list[DataFilter] | None = None,
+        description: str | None = None,
     ) -> None:
         """
         Return a new instance of KPI.
 
         Args:
-            name (str)                             : name to assign to the new KPI
-            perimeter (str)                        : perimeter of the new KPI
-            scope (List[Dict] | DataSet)           : the scope the KPI is based on
-            filters (List[Dict] | List[DataFilter]): the filters the KPI result is based on
-            description (str)                      : a description of the KPI
-            date (datetime)                        : the date the KPI is generated
+            name (str)                               : name to assign to the new KPI
+            perimeter (str)                          : perimeter of the new KPI
+            data_set (list[dict[str, Any]] | DataSet): the scope the KPI is based on
+            filters (List[Dict] | List[DataFilter])  : the filters the KPI result is based on
+            description (str)                        : a description of the KPI
+            date (datetime)                          : the date the KPI is generated
         """
 
         super().__init__(
             name=name,
             perimeter=perimeter,
-            scope=scope,
+            initial_set=data_set,
             filters=filters,
-            description=description
+            description=description,
         )
 
         if date is None:
             date = datetime.today()
 
+        if isinstance(date, str):
+            date = TimeConverter.str_to_date(date, DateFormat.from_flag(DateFlag.YMD))
+
         self.date: datetime = date
-        self._id = f"{perimeter.lower()}{TimeConverter.date_to_str(date, date_format=DateFormat.from_flag())}"
+        self._id: str = f"{perimeter.lower()}{TimeConverter.date_to_str(date, date_format=DateFormat.from_flag())}"
 
     # ****************************************************************
     # Methods
