@@ -8,5 +8,5 @@ NumberType: TypeAlias = int | float
 StrType: TypeAlias = str | list[str]
 FilterTupleType: TypeAlias = tuple[str, str, Any]
 FilterTupleExtType: TypeAlias = tuple[str, str, Any] | list[tuple[str, str, Any]]
-DataInputType: TypeAlias = str | datetime
+DateInputType: TypeAlias = str | datetime
 
