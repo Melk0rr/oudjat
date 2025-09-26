@@ -1,7 +1,5 @@
 """A module to handle KPI comparisons."""
 
-from typing import Dict, Tuple, Union
-
 from oudjat.utils import ColorPrint
 
 from .kpi import KPI
