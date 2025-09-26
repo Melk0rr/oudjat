@@ -107,13 +107,14 @@ class KPI(DataSet):
         if isinstance(date, str):
             date = TimeConverter.str_to_date(date)
 
-        self.date: datetime = date
-        self._id: str = f"{perimeter.lower()}{TimeConverter.date_to_str(self.date)}"
+        self._date: datetime = date
+        self._id: str = f"{perimeter.lower()}{TimeConverter.date_to_str(self._date)}"
 
     # ****************************************************************
     # Methods
 
-    def get_id(self) -> str:
+    @property
+    def id(self) -> str:
         """
         Return the KPI id.
 
@@ -123,7 +124,8 @@ class KPI(DataSet):
 
         return self._id
 
-    def get_date(self) -> datetime:
+    @property
+    def date(self) -> datetime:
         """
         Return the generation date of the KPI.
 
@@ -131,9 +133,21 @@ class KPI(DataSet):
             datetime: the date the KPI was generated
         """
 
-        return self.date
+        return self._date
 
-    def get_conformity_level(self, value: float | None = None) -> "ConformityLevel":
+    @date.setter
+    def date(self, new_date: datetime) -> None:
+        """
+        Set the date that the KPI was generated.
+
+        Args:
+            new_date(datetime): datetime object describing the date of the KPI generation
+        """
+
+        self.date = new_date
+
+    @property
+    def conformity_level(self) -> "ConformityLevel":
         """
         Return the conformity level of the KPI based on its value.
 
@@ -144,14 +158,13 @@ class KPI(DataSet):
             ConformityLevel: the computed level of conformity
         """
 
-        value = value or self.get_kpi_value()
-
         def conformity_value_level(lvl: "ConformityLevel") -> bool:
-            return lvl.min <= value <= lvl.max
+            return lvl.min <= self.value <= lvl.max
 
         return next(filter(conformity_value_level, list(ConformityLevel)))
 
-    def get_kpi_value(self) -> float:
+    @property
+    def value(self) -> float:
         """
         Return the percentage of conform data based on kpi control.
 
@@ -161,7 +174,8 @@ class KPI(DataSet):
 
         return round(len(self.output_data) / len(self.input_data) * 100, 2)
 
-    def get_print_function(self) -> Callable[..., None]:
+    @property
+    def print_function(self) -> Callable[..., None]:
         """
         Define and returns the print function to be used based on the KPI value and conformity level.
 
@@ -169,7 +183,7 @@ class KPI(DataSet):
             Callable: print function to use with different color
         """
 
-        return self.get_conformity_level().value.print_color
+        return self.conformity_level.value.print_color
 
     def print_value(
         self, prefix: str | None = None, suffix: str = "%\n", print_details: bool = True
@@ -189,7 +203,7 @@ class KPI(DataSet):
         if print_details:
             print(f"{scope_str[0]}", end=" = ")
 
-        self.get_print_function()(f"{scope_str[1]}", end=f"{suffix}")
+        self.print_function(f"{scope_str[1]}", end=f"{suffix}")
 
     def get_date_str(self) -> str:
         """
@@ -210,7 +224,7 @@ class KPI(DataSet):
             str: string representation of the current instance
         """
 
-        return f"{len(self.output_data)} / {len(self.input_data)} = {self.get_kpi_value()}"
+        return f"{len(self.output_data)} / {len(self.input_data)} = {self.value}"
 
     def to_dict(self) -> dict[str, Any]:
         """
@@ -220,17 +234,14 @@ class KPI(DataSet):
             Dict : dictionary representation of the current kpi
         """
 
-        k_value = self.get_kpi_value()
-        conformity = self.get_conformity_level(k_value)
-
         return {
             "name": self.name,
             "perimeter": self.perimeter,
             "scope": self.initial_set_name,
             "scope_size": len(self.input_data),
             "conform_elements": len(self.output_data),
-            "value": k_value,
-            "conformity": conformity.name,
+            "value": self.value,
+            "conformity": self.conformity_level.name,
             "date": self.get_date_str(),
         }
 
