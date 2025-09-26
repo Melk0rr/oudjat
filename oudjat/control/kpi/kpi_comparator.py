@@ -5,6 +5,7 @@ from oudjat.utils import ColorPrint
 from .kpi import KPI
 
 
+# TODO: replace tendencies dict by an enum and use TypedDict to handle properties
 class KPIComparator:
     """A class to compare the results of 2 KPIs."""
 
