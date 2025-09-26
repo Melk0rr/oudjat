@@ -236,18 +236,3 @@ class KPI(DataSet):
 
     # ****************************************************************
     # Static methods
-
-    @staticmethod
-    def conformity_value_level(lvl: "ConformityLevel", value: float) -> bool:
-        """
-        Check if the given value is between the provided conformity level min and max values.
-
-        Args:
-            lvl (ConformityLevel): conformity level to compare with provided value
-            value (flaot)        : value that will be compared to the provided conformity level
-
-        Returns:
-            bool: True if the provided value matches the given conforimty level, False otherwise
-        """
-
-        return lvl.min <= value <= lvl.max
