@@ -175,6 +175,24 @@ class DataSet:
 
         return data
 
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the current instance into a dictionary.
+
+        Returns:
+            dict[str, Any]: dictionary representation of the current instance.
+        """
+
+        return {
+            "name": self.name,
+            "description": self.description,
+            "perimeter": self.perimeter,
+            "initial_set_name": self.initial_set_name,
+            "filters": list(map(str, self.filters)),
+            "input_data_size": len(self.input_data),
+            "output_data_size": len(self.output_data)
+        }
+
     # ****************************************************************
     # Static methods
 
