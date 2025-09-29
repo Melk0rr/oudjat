@@ -39,7 +39,7 @@ class DataSet:
         self._description: str | None = description
         self._perimeter: str = perimeter
 
-        self._initial_set: DataSetType | None = initial_set
+        self._initial_set: DataSetType = initial_set if initial_set is not None else []
 
         self._filters: list[DataFilter] = DataFilter.get_valid_filters_list(filters)
 
@@ -134,7 +134,8 @@ class DataSet:
 
         self._filters = DataFilter.get_valid_filters_list(filters)
 
-    def get_input_data(self) -> list[dict[str, Any]] | None:
+    @property
+    def input_data(self) -> list[dict[str, Any]]:
         """
         Getter for input data.
 
@@ -143,30 +144,33 @@ class DataSet:
         """
 
         return (
-            self._initial_set.get_data()
+            self._initial_set.output_data
             if isinstance(self._initial_set, DataSet)
             else self._initial_set
         )
 
-    def get_data(self) -> list[dict[str, Any]]:
+    @property
+    def empty_input_data(self) -> bool:
+        """
+        Check if input data is null or empty.
+
+        Returns:
+            bool: True if input data is null or empty. False otherwise
+        """
+
+        return len(self.input_data) == 0
+
+    @property
+    def output_data(self) -> list[dict[str, Any]]:
         """
         Getter for the filtered data in the dataset's perimeter.
 
         Returns:
             list[dict[str, Any]]: The list of dictionaries representing the filtered data.
-
-        Raises:
-            ValueError: if no parent set is defined.
         """
 
-        data = self.get_input_data()
-
-        if self._initial_set is None or data is None:
-            raise ValueError(
-                f"{__class__.__name__}.get_data::No initial data set defined for the current set {self._name}"
-            )
-
-        if len(self._filters) > 0:
+        data = self.input_data
+        if not self.empty_input_data and len(self._filters) > 0:
             data = DataFilter.filter_data(data, self._filters)
 
         return data
@@ -186,7 +190,7 @@ class DataSet:
             str: the perimeter of the provided dataset
         """
 
-        return dataset.get_data()
+        return dataset.output_data
 
     @staticmethod
     def merge_sets(name: str, sets: list["DataSet"]) -> "DataSet":
