@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, NamedTuple, override
+from typing import Any, Callable, NamedTuple, TypedDict, override
 
 from oudjat.control.data import DataFilter, DataSet
 from oudjat.control.data.data_filter import DataFilterDictionaryProps
@@ -66,6 +66,22 @@ class ConformityLevel(Enum):
         return self._value_.print_color
 
 
+class KPIStaticProps(TypedDict):
+    """
+    A helper function to describe a KPI static attributes.
+
+    Attributes:
+        value (float)       : the value of the KPI
+        date (DateInputType): the date the KPI was generated on
+        scope_size (int)    : the input DataSet size
+        conform_count (int) : the number of conform elements
+    """
+
+    value: float
+    initial_set_size: int
+    conform_count: int
+
+
 class KPI(DataSet):
     """A class that aims to manipulate KPI and allow report of numbers and percentages regarding conformity of data sets."""
 
@@ -77,6 +93,7 @@ class KPI(DataSet):
         name: str,
         perimeter: str,
         date: DateInputType | None = None,
+        static: KPIStaticProps | None = None,
         data_set: list[dict[str, Any]] | DataSet | None = None,
         filters: list[DataFilterDictionaryProps] | list[DataFilter] | None = None,
         description: str | None = None,
@@ -87,10 +104,11 @@ class KPI(DataSet):
         Args:
             name (str)                               : name to assign to the new KPI
             perimeter (str)                          : perimeter of the new KPI
+            date (datetime)                          : the date the KPI is generated
+            static (KPIStaticProps)                  : KPI static values
             data_set (list[dict[str, Any]] | DataSet): the scope the KPI is based on
             filters (List[Dict] | List[DataFilter])  : the filters the KPI result is based on
             description (str)                        : a description of the KPI
-            date (datetime)                          : the date the KPI is generated
         """
 
         super().__init__(
@@ -101,6 +119,8 @@ class KPI(DataSet):
             description=description,
         )
 
+        self._static: KPIStaticProps | None = static
+
         if date is None:
             date = datetime.today()
 
@@ -109,6 +129,8 @@ class KPI(DataSet):
 
         self._date: datetime = date
         self._id: str = f"{perimeter.lower()}{TimeConverter.date_to_str(self._date)}"
+
+        self._value: float | None = None
 
     # ****************************************************************
     # Methods
@@ -172,7 +194,48 @@ class KPI(DataSet):
             float: final KPI value which represent the percentage of conform data based on the KPI scope and filters
         """
 
-        return round(len(self.output_data) / len(self.input_data) * 100, 2)
+        if self._static:
+            return self._static["value"]
+
+        if self._value is None:
+            self._value = round(len(self.conform_elements) / len(self.initial_set_data) * 100, 2)
+
+        return self._value
+
+    @property
+    def conform_elements(self) -> list[dict[str, Any]]:
+        """
+        Return the output elements.
+
+        More self-explanatory name for the super method "output_data" in the KPI context.
+
+        Returns:
+            list[dict[str, Any]]: list of conform elements that passed the instance filters.
+        """
+
+        return super().output_data
+
+    @property
+    def conform_count(self) -> int:
+        """
+        Return the number of conform elements.
+
+        Returns:
+            int: number of elements which passed the instance filters
+        """
+
+        return self._static["conform_count"] if self._static else len(self.conform_elements)
+
+    @property
+    def initial_set_size(self) -> int:
+        """
+        Return the number of initial elements.
+
+        Returns:
+            int: number of elements in the initial set data
+        """
+
+        return self._static["initial_set_size"] if self._static else len(self.initial_set_data)
 
     @property
     def print_function(self) -> Callable[..., None]:
@@ -184,6 +247,17 @@ class KPI(DataSet):
         """
 
         return self.conformity_level.value.print_color
+
+    @property
+    def date_str(self) -> str:
+        """
+        Return formated date string.
+
+        Returns:
+            str: the generation date of the KPI formated as a string
+        """
+
+        return TimeConverter.date_to_str(self.date)
 
     def print_value(
         self, prefix: str | None = None, suffix: str = "%\n", print_details: bool = True
@@ -197,23 +271,13 @@ class KPI(DataSet):
             print_details (bool): include additional details to the printed infos
         """
 
-        scope_str = str(self)
+        set_str = str(self)
 
         print(prefix, end="")
         if print_details:
-            print(f"{scope_str[0]}", end=" = ")
+            print(f"{set_str[0]}", end=" = ")
 
-        self.print_function(f"{scope_str[1]}", end=f"{suffix}")
-
-    def get_date_str(self) -> str:
-        """
-        Return formated date string.
-
-        Returns:
-            str: the generation date of the KPI formated as a string
-        """
-
-        return TimeConverter.date_to_str(self.date)
+        self.print_function(f"{set_str[1]}", end=f"{suffix}")
 
     @override
     def __str__(self) -> str:
@@ -224,8 +288,9 @@ class KPI(DataSet):
             str: string representation of the current instance
         """
 
-        return f"{len(self.output_data)} / {len(self.input_data)} = {self.value}"
+        return f"{self.conform_count} / {self.initial_set_size} => {self.value}"
 
+    @override
     def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
@@ -234,15 +299,16 @@ class KPI(DataSet):
             Dict : dictionary representation of the current kpi
         """
 
+        base = super().to_dict()
+        del base["output_data_size"]
+
         return {
-            "name": self.name,
-            "perimeter": self.perimeter,
-            "scope": self.initial_set_name,
-            "scope_size": len(self.input_data),
-            "conform_elements": len(self.output_data),
+            **base,
+            "initial_set_size": self.initial_set_size,
+            "conform_count": self.conform_count,
+            "date": self.date_str,
             "value": self.value,
             "conformity": self.conformity_level.name,
-            "date": self.get_date_str(),
         }
 
     # ****************************************************************
