@@ -1,7 +1,7 @@
 """A module to handle KPI comparisons."""
 
 from enum import Enum
-from typing import Callable, NamedTuple, override
+from typing import Any, Callable, NamedTuple, override
 
 from oudjat.utils import ColorPrint
 
@@ -68,7 +68,7 @@ class KPIComparator:
         Args:
             kpi_a (KPI)             : the first KPI object to compare.
             kpi_b (KPI)             : the second KPI object to compare.
-            dont_sort_by_date (bool): wether to use the KPI dates to order them.
+            dont_sort_by_date (bool): whether to use the KPI dates to order them.
 
         Raises:
             ValueError: If the provided KPIs do not share the same perimeter.
@@ -154,6 +154,21 @@ class KPIComparator:
         """
 
         return f"{self._kpis[0].value}% => {self._kpis[1].value}% {self.tendency.icon}"
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the current instance into a dictionary.
+
+        Returns:
+            dict[str, Any]: dictionary representation of the current instance
+        """
+
+        return {
+            "kpi_perimeter": self.kpis[0].perimeter,
+            "kpi_a_value": self.kpis[0].value,
+            "kpi_b_value": self.kpis[1].value,
+            "tendency": self.tendency.icon
+        }
 
     # ****************************************************************
     # Static methods
