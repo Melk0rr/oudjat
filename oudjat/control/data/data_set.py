@@ -135,7 +135,7 @@ class DataSet:
         self._filters = DataFilter.get_valid_filters_list(filters)
 
     @property
-    def input_data(self) -> list[dict[str, Any]]:
+    def initial_set_data(self) -> list[dict[str, Any]]:
         """
         Getter for input data.
 
@@ -150,7 +150,7 @@ class DataSet:
         )
 
     @property
-    def empty_input_data(self) -> bool:
+    def empty_initial_set_data(self) -> bool:
         """
         Check if input data is null or empty.
 
@@ -158,7 +158,7 @@ class DataSet:
             bool: True if input data is null or empty. False otherwise
         """
 
-        return len(self.input_data) == 0
+        return len(self.initial_set_data) == 0
 
     @property
     def output_data(self) -> list[dict[str, Any]]:
@@ -169,8 +169,8 @@ class DataSet:
             list[dict[str, Any]]: The list of dictionaries representing the filtered data.
         """
 
-        data = self.input_data
-        if not self.empty_input_data and len(self._filters) > 0:
+        data = self.initial_set_data
+        if not self.empty_initial_set_data and len(self._filters) > 0:
             data = DataFilter.filter_data(data, self._filters)
 
         return data
@@ -187,9 +187,9 @@ class DataSet:
             "name": self.name,
             "description": self.description,
             "perimeter": self.perimeter,
-            "initial_set_name": self.initial_set_name,
             "filters": list(map(str, self.filters)),
-            "input_data_size": len(self.input_data),
+            "initial_set_name": self.initial_set_name,
+            "initial_set_size": len(self.initial_set_data),
             "output_data_size": len(self.output_data)
         }
 
