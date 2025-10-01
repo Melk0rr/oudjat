@@ -1,7 +1,6 @@
 """A module to track KPI history."""
 
 from datetime import datetime
-from typing import List
 
 from oudjat.utils import ColorPrint
 
@@ -9,34 +8,131 @@ from .kpi import KPI
 from .kpi_comparator import KPIComparator
 
 
+class KPIHistoryNode:
+    """
+    A class that describes a node in a KPIHistory.
+    """
+
+    def __init__(self, kpi: KPI) -> None:
+        """
+        Return a new instance of KPIHistoryNode.
+
+        Args:
+            kpi (KPI)            : the KPI that compose the node
+            prev (KPIHistoryNode): previous node in the history
+            next (KPIHistoryNode): next node in the history
+        """
+
+        self._kpi: KPI = kpi
+        self._prev: KPIHistoryNode | None = None
+        self._next: KPIHistoryNode | None = None
+
+    @property
+    def kpi(self) -> KPI:
+        """
+        Return the node's KPI instance.
+
+        Returns:
+            kpi (KPI): kpi instance of the current node
+        """
+
+        return self._kpi
+
+    @property
+    def prev(self) -> "KPIHistoryNode | None":
+        """
+        Return the previous history node.
+
+        Returns:
+            KPIHistoryNode | None: previous node in the KPI history
+        """
+
+        return self._prev
+
+    @prev.setter
+    def prev(self, new_node: "KPIHistoryNode | None") -> None:
+        """
+        Change the reference to the previous history node.
+
+        Args:
+            new_node (KPIHistoryNode): new previous node ref
+        """
+
+        self._prev = new_node
+
+    @property
+    def next(self) -> "KPIHistoryNode | None":
+        """
+        Return the next history node.
+
+        Returns:
+            KPIHistoryNode | None: next node in the KPI history
+        """
+
+        return self._next
+
+    @next.setter
+    def next(self, new_node: "KPIHistoryNode | None") -> None:
+        """
+        Change the reference to the next history node.
+
+        Args:
+            new_node (KPIHistoryNode): new next node ref
+        """
+
+        self._next = new_node
+
+    def compare_next(self) -> KPIComparator:
+        """
+        Generate a KPIComparator instance with the next node.
+
+        Returns:
+            KPIComparator: KPI comparator instance for current node kpi and next node kpi
+        """
+
+        if self.next is None:
+            raise ValueError(f"{__class__.__name__}.compare_next::Next history node is None. Can't compare it !")
+
+        return KPIComparator(self.kpi, self.next.kpi)
+
+    def compare_prev(self) -> KPIComparator:
+        """
+        Generate a KPIComparator instance with the next node.
+
+        Returns:
+            KPIComparator: KPI comparator instance for current node kpi and next node kpi
+        """
+
+        if self.prev is None:
+            raise ValueError(f"{__class__.__name__}.compare_next::Previous history node is None. Can't compare it !")
+
+        return KPIComparator(self.prev.kpi, self.kpi)
+
+
 class KPIHistory:
     """KPIEvolution class to handle."""
 
-    def __init__(self, name: str, kpis: List[KPI] = []) -> None:
+    def __init__(self, name: str, kpis: list[KPI] | None = None) -> None:
         """
         Create a new instance of KPIHistory.
 
         Args:
             name (str)                : The name of the object instance.
-            kpis (List[KPI], optional): A list of KPI objects to initialize with. Defaults to an empty list.
+            kpis (list[KPI], optional): A list of KPI objects to initialize with. Defaults to an empty list.
         """
 
-        self.name = name
-        self.kpis = []
+        self.name: str = name
+        self._begin: KPIHistoryNode | None
+        self._end: KPIHistoryNode | None
+        self._size: int = 0
 
-        self.comparators = []
+        self._history: list[str] = []
 
-    def get_kpis(self):
-        """
-        Getter for the kpi list.
+        if kpis is not None:
+            for kpi in kpis:
+                self.insert_by_date(kpi)
 
-        Returns:
-            List[KPI]: The list of KPI objects associated with this instance.
-        """
-
-        return self.kpis
-
-    def set_kpis(self, kpis: List[KPI] = []) -> None:
+    def set_kpis(self, kpis: list[KPI]) -> None:
         """
         Setter for the kpi list. Updates the list of KPIs in the class.
 
@@ -44,39 +140,162 @@ class KPIHistory:
             kpis (List[KPI], optional): A list of KPI objects to set. Defaults to an empty list.
         """
 
-        for k in kpis:
-            self.add_kpi(k)
+        self.clear()
 
-    def add_kpi(self, kpi: "KPI") -> None:
+        for kpi in kpis:
+            self.insert_by_date(kpi)
+
+    @property
+    def is_empty(self) -> bool:
         """
-        Add a KPI object to the list of KPIs if their names match.
+        Return whether the history is empty or not.
+
+        Returns:
+            bool: True if the history is empty. False otherwise
+        """
+
+        return self._end is None
+
+    def append(self, kpi: KPI) -> None:
+        """
+        Append a new KPI into the history.
 
         Args:
-            kpi (KPI): The KPI object to be added.
-
-        Raises:
-            ValueError: If the name of the provided KPI does not match the instance's name.
+            kpi (KPI): new kpi to append
         """
 
-        if self.name != kpi.get_name():
-            raise ValueError(
-                f"{__class__.__name__}.add_kpi::KPI name and KPIHistory name must match !"
-            )
+        new_node = KPIHistoryNode(kpi)
 
-        self.kpis.append(kpi)
+        if self.is_empty:
+            self._begin = new_node
+            self._end = new_node
 
-    def build_history(self) -> None:
+        else:
+            assert self._end is not None
+
+            self._end.next = new_node
+            new_node.prev = self._end
+            self._end = new_node
+
+        self._size += 1
+
+    def prepend(self, kpi: KPI) -> None:
+        """
+        Prepend a new KPI into the history.
+
+        Args:
+            kpi (KPI): new kpi to prepend
+        """
+
+        new_node = KPIHistoryNode(kpi)
+
+        if self.is_empty:
+            self._begin = new_node
+            self._end = new_node
+
+        else:
+            assert self._begin is not None
+
+            self._begin.prev = new_node
+            new_node.next = self._begin
+            self._begin = new_node
+
+        self._size += 1
+
+    def insert_by_date(self, kpi: KPI) -> None:
+        """
+        Insert a new kpi in the history based on its date.
+
+        Args:
+            kpi (KPI): kpi to insert
+        """
+
+        if self.is_empty:
+            self.append(kpi)
+
+        else:
+            assert self._begin is not None
+            tmp = self._begin
+
+            while tmp is not None:
+                if kpi.date >= tmp.kpi.date:
+                    if tmp.next is None:
+                        self.append(kpi)
+
+                    elif tmp.prev is None:
+                        self.prepend(kpi)
+
+                    else:
+                        new_node = KPIHistoryNode(kpi)
+
+                        tmp.prev.next = new_node
+                        tmp.next.prev = new_node
+
+                        new_node.prev = tmp.prev
+                        new_node.next = tmp
+
+                        self._size += 1
+
+                else:
+                    tmp = tmp.next
+
+
+    def pop_back(self) -> None:
+        """
+        Remove the last history element.
+        """
+        if not self.is_empty:
+            assert self._end is not None
+
+            if self._begin is self._end:
+
+                self._end.prev = None
+                self._end.next = None
+                self._begin = None
+                self._end = None
+
+            else:
+                assert self._end.prev is not None
+
+                tmp = self._end
+
+                self._end = self._end.prev
+                self._end.next = None
+
+                tmp.prev = None
+                tmp.next = None
+                tmp = None
+
+            self._size -= 1
+
+    def clear(self) -> None:
+        """
+        Clear the current history list.
+        """
+
+        while not self.is_empty:
+            self.pop_back()
+
+    def build(self, detailed: bool = False) -> list[str]:
         """Build the history of KPIs by comparing each pair in order based on their dates."""
 
-        def kpi_date(kpi: "KPI") -> datetime:
-            return kpi.get_date()
+        hist: list [str]= []
 
-        sorted_kpis = sorted(self.kpis, kpi_date)
+        if not self.is_empty:
+            tmp = self._begin
+            while tmp is not None:
+                if self._begin is self._end:
+                    hist.append(str(tmp.kpi) if detailed else f"{tmp.kpi.value}%")
 
-        self.comparators = [
-            KPIComparator.compare_2_kpis(sorted_kpis[i], sorted_kpis[i + 1])
-            for i in range(len(self.kpis) - 1)
-        ]
+                else:
+                    compare: KPIComparator = tmp.compare_next()
+                    hist.append(str(compare) if detailed else f"{compare.tendency}")
+
+                tmp = tmp.next
+
+        return hist
+
+    # TODO: Global tendency method
 
     def print_history(self) -> None:
         """Print the history of KPIs by calling each comparator's print method to display their comparison results."""

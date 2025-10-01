@@ -135,7 +135,7 @@ class DataSet:
         self._filters = DataFilter.get_valid_filters_list(filters)
 
     @property
-    def input_data(self) -> list[dict[str, Any]]:
+    def initial_set_data(self) -> list[dict[str, Any]]:
         """
         Getter for input data.
 
@@ -150,28 +150,48 @@ class DataSet:
         )
 
     @property
+    def empty_initial_set_data(self) -> bool:
+        """
+        Check if input data is null or empty.
+
+        Returns:
+            bool: True if input data is null or empty. False otherwise
+        """
+
+        return len(self.initial_set_data) == 0
+
+    @property
     def output_data(self) -> list[dict[str, Any]]:
         """
         Getter for the filtered data in the dataset's perimeter.
 
         Returns:
             list[dict[str, Any]]: The list of dictionaries representing the filtered data.
-
-        Raises:
-            ValueError: if no parent set is defined.
         """
 
-        data = self.input_data
-
-        if self._initial_set is None or data is None:
-            raise ValueError(
-                f"{__class__.__name__}.get_data::No initial data set defined for the current set {self._name}"
-            )
-
-        if len(self._filters) > 0:
+        data = self.initial_set_data
+        if not self.empty_initial_set_data and len(self._filters) > 0:
             data = DataFilter.filter_data(data, self._filters)
 
         return data
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the current instance into a dictionary.
+
+        Returns:
+            dict[str, Any]: dictionary representation of the current instance.
+        """
+
+        return {
+            "name": self.name,
+            "description": self.description,
+            "perimeter": self.perimeter,
+            "filters": list(map(str, self.filters)),
+            "initial_set_name": self.initial_set_name,
+            "initial_set_size": len(self.initial_set_data),
+            "output_data_size": len(self.output_data)
+        }
 
     # ****************************************************************
     # Static methods
