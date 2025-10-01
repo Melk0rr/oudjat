@@ -5,7 +5,7 @@ from datetime import datetime
 from oudjat.utils import ColorPrint
 
 from .kpi import KPI
-from .kpi_comparator import KPIComparator
+from .kpi_comparator import KPIComparator, KPIComparatorTendency
 
 
 class KPIHistoryNode:
@@ -91,7 +91,9 @@ class KPIHistoryNode:
         """
 
         if self.next is None:
-            raise ValueError(f"{__class__.__name__}.compare_next::Next history node is None. Can't compare it !")
+            raise ValueError(
+                f"{__class__.__name__}.compare_next::Next history node is None. Can't compare it !"
+            )
 
         return KPIComparator(self.kpi, self.next.kpi)
 
@@ -104,7 +106,9 @@ class KPIHistoryNode:
         """
 
         if self.prev is None:
-            raise ValueError(f"{__class__.__name__}.compare_next::Previous history node is None. Can't compare it !")
+            raise ValueError(
+                f"{__class__.__name__}.compare_next::Previous history node is None. Can't compare it !"
+            )
 
         return KPIComparator(self.prev.kpi, self.kpi)
 
@@ -121,16 +125,71 @@ class KPIHistory:
             kpis (list[KPI], optional): A list of KPI objects to initialize with. Defaults to an empty list.
         """
 
-        self.name: str = name
+        self._name: str = name
         self._begin: KPIHistoryNode | None
         self._end: KPIHistoryNode | None
         self._size: int = 0
 
-        self._history: list[str] = []
+        self._logs: list[str] = []
 
         if kpis is not None:
             for kpi in kpis:
                 self.insert_by_date(kpi)
+
+    @property
+    def name(self):
+        """
+        Return the name of KPIHistory.
+
+        Returns:
+            str: name given to the current KPIHistory instance
+        """
+
+        return self._name
+
+    @name.setter
+    def name(self, new_name: str) -> None:
+        """
+        Set a new name for the current KPIHistory instance.
+
+        Args:
+            new_name (str): new value for the name of this KPIHistory
+        """
+
+        self._name = new_name
+
+    @property
+    def size(self) -> int:
+        """
+        Return the size of the current KPIHistory.
+
+        Returns:
+            int: the number of KPIHistoryNode in the current KPIHistory instance
+        """
+
+        return self._size
+
+    @property
+    def is_empty(self) -> bool:
+        """
+        Return whether the history is empty or not.
+
+        Returns:
+            bool: True if the history is empty. False otherwise
+        """
+
+        return self._end is None
+
+    @property
+    def logs(self) -> list[str]:
+        """
+        Return the logs of the current KPIHistory.
+
+        Returns:
+            list[str]: a list of log strings that describe comparisons between each KPIs of the history.
+        """
+
+        return self._logs
 
     def set_kpis(self, kpis: list[KPI]) -> None:
         """
@@ -144,17 +203,6 @@ class KPIHistory:
 
         for kpi in kpis:
             self.insert_by_date(kpi)
-
-    @property
-    def is_empty(self) -> bool:
-        """
-        Return whether the history is empty or not.
-
-        Returns:
-            bool: True if the history is empty. False otherwise
-        """
-
-        return self._end is None
 
     def append(self, kpi: KPI) -> None:
         """
@@ -239,7 +287,6 @@ class KPIHistory:
                 else:
                     tmp = tmp.next
 
-
     def pop_back(self) -> None:
         """
         Remove the last history element.
@@ -248,7 +295,6 @@ class KPIHistory:
             assert self._end is not None
 
             if self._begin is self._end:
-
                 self._end.prev = None
                 self._end.next = None
                 self._begin = None
@@ -266,6 +312,7 @@ class KPIHistory:
                 tmp.next = None
                 tmp = None
 
+            _ = self._logs.pop()
             self._size -= 1
 
     def clear(self) -> None:
@@ -276,26 +323,51 @@ class KPIHistory:
         while not self.is_empty:
             self.pop_back()
 
-    def build(self, detailed: bool = False) -> list[str]:
+    def build(self, detailed: bool = False) -> None:
         """Build the history of KPIs by comparing each pair in order based on their dates."""
 
-        hist: list [str]= []
-
+        self._logs.clear()
         if not self.is_empty:
             tmp = self._begin
             while tmp is not None:
                 if self._begin is self._end:
-                    hist.append(str(tmp.kpi) if detailed else f"{tmp.kpi.value}%")
+                    self._logs.append(str(tmp.kpi) if detailed else f"{tmp.kpi.value}%")
 
                 else:
                     compare: KPIComparator = tmp.compare_next()
-                    hist.append(str(compare) if detailed else f"{compare.tendency}")
+                    self._logs.append(str(compare) if detailed else f"{compare.tendency}")
 
                 tmp = tmp.next
 
-        return hist
+    def tendency(self) -> KPIComparatorTendency:
+        """
+        Return the tendency of the current KPIHistory.
 
-    # TODO: Global tendency method
+        Each KPIComparator gives a tendency from a KPI A to a KPI B.
+        A KPIHistory tendency results from the tendencies of all the comparisons of the KPIs in the history.
+
+        Args:
+            argument_name: type and description.
+
+        Returns:
+            KPIComparatorTendency: tendency computed out from the comparison of each KPI.
+        """
+
+        tendency = KPIComparatorTendency.EQ
+        if not self.is_empty:
+            tendency_counts: dict[str, int] = {"INC": 0, "DEC": 0, "EQ": 0}
+
+            tmp = self._begin
+            while tmp is not None:
+                if self._begin is not self._end:
+                    tendency_counts[f"{tmp.compare_next().tendency}"] += 1
+
+                tmp = tmp.next
+
+            tendency_str: str = max(tendency_counts, key=lambda t: tendency_counts[t])
+            tendency = KPIComparatorTendency[tendency_str]
+
+        return tendency
 
     def print_history(self) -> None:
         """Print the history of KPIs by calling each comparator's print method to display their comparison results."""
