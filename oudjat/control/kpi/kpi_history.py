@@ -402,15 +402,10 @@ class KPIHistory:
         return tendency
 
     def print_history(self) -> None:
-        """Print the history of KPIs by calling each comparator's print method to display their comparison results."""
-
-        comparator_len = len(self.comparators)
-        if comparator_len == 0:
-            self.build_history()
+        """
+        Print the history of KPIs based on the logs method result.
+        """
 
         ColorPrint.blue(f"\n {self.name} History")
-
-        for i in range(comparator_len):
-            self.comparators[i].print_tendency(
-                print_first_value=(i == 0), sfx=(i == comparator_len - 1) and "\n" or ""
-            )
+        for log in self.logs():
+            print(log)
