@@ -1,6 +1,6 @@
 """A module to track KPI history."""
 
-from datetime import datetime
+from typing import Callable
 
 from oudjat.utils import ColorPrint
 
@@ -326,6 +326,7 @@ class KPIHistory:
 
                 tmp = tmp.next
 
+    # TODO: Decide whether to set following methods as properties
     def logs(self, detailed: bool = False) -> list[str]:
         """
         Return a list of log strings based on the current history content.
@@ -389,26 +390,17 @@ class KPIHistory:
         Each KPIComparator gives a tendency from a KPI A to a KPI B.
         A KPIHistory tendency results from the tendencies of all the comparisons of the KPIs in the history.
 
-        Args:
-            argument_name: type and description.
-
         Returns:
             KPIComparatorTendency: tendency computed out from the comparison of each KPI.
         """
 
         tendency = KPIComparatorTendency.EQ
-        if not self.is_empty:
-            tendency_counts: dict[str, int] = {"INC": 0, "DEC": 0, "EQ": 0}
+        tendency_counts: dict[str, int] = {"INC": 0, "DEC": 0, "EQ": 0}
+        for comparator in self.comparators():
+            tendency_counts[comparator.tendency.name] += 1
 
-            tmp = self._begin
-            while tmp is not None:
-                if self._begin is not self._end:
-                    tendency_counts[f"{tmp.compare_next().tendency}"] += 1
-
-                tmp = tmp.next
-
-            tendency_str: str = max(tendency_counts, key=lambda t: tendency_counts[t])
-            tendency = KPIComparatorTendency[tendency_str]
+        tendency_str: str = max(tendency_counts, key=lambda t: tendency_counts[t])
+        tendency = KPIComparatorTendency[tendency_str]
 
         return tendency
 
