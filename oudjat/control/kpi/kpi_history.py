@@ -309,12 +309,23 @@ class KPIHistory:
         while not self.is_empty:
             self.pop_back()
 
-    def build(self, detailed: bool = False) -> None:
-        """Build the history of KPIs by comparing each pair in order based on their dates."""
+    def go_through(self, callback: Callable[[KPIHistoryNode | None], None]) -> None:
+        """
+        Go through the history by iterating over its nodes.
+
+        Accepts a callback function as argument that takes the current history node.
+
+        Args:
+            callback (Callable[[KPIHistoryNode], None]): callback to run on each iteration.
+        """
 
         if not self.is_empty:
             tmp = self._begin
             while tmp is not None:
+                callback(tmp)
+
+                tmp = tmp.next
+
     def logs(self, detailed: bool = False) -> list[str]:
         """
         Return a list of log strings based on the current history content.
