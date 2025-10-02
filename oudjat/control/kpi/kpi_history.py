@@ -354,6 +354,23 @@ class KPIHistory:
         self.go_through(kpis_cb)
         return kpis
 
+    def comparators(self) -> list[KPIComparator]:
+        """
+        Return a list of KPIComparator for each KPI in the history.
+
+        Returns:
+            list[KPIComparator]: list of KPIComparator instances
+        """
+
+        comparators: list[KPIComparator] = []
+
+        def comparators_cb(node: KPIHistoryNode | None) -> None:
+            if self._begin is not self._end and node is not None:
+                comparators.append(node.compare_next())
+
+        self.go_through(comparators_cb)
+        return comparators
+
     def tendency(self) -> KPIComparatorTendency:
         """
         Return the tendency of the current KPIHistory.
