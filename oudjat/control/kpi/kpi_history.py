@@ -337,6 +337,23 @@ class KPIHistory:
         self.go_through(logs_cb)
         return logs
 
+    def kpis(self) -> list[KPI]:
+        """
+        Return the KPI instances of the current history.
+
+        Returns:
+            list[KPI]: a list of the KPI instances that this KPIHistory contains
+        """
+
+        kpis: list[KPI] = []
+
+        def kpis_cb(node: KPIHistoryNode | None) -> None:
+            if node is not None:
+                kpis.append(node.kpi)
+
+        self.go_through(kpis_cb)
+        return kpis
+
     def tendency(self) -> KPIComparatorTendency:
         """
         Return the tendency of the current KPIHistory.
