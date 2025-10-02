@@ -130,8 +130,6 @@ class KPIHistory:
         self._end: KPIHistoryNode | None
         self._size: int = 0
 
-        self._logs: list[str] = []
-
         if kpis is not None:
             for kpi in kpis:
                 self.insert_by_date(kpi)
@@ -179,17 +177,6 @@ class KPIHistory:
         """
 
         return self._end is None
-
-    @property
-    def logs(self) -> list[str]:
-        """
-        Return the logs of the current KPIHistory.
-
-        Returns:
-            list[str]: a list of log strings that describe comparisons between each KPIs of the history.
-        """
-
-        return self._logs
 
     def set_kpis(self, kpis: list[KPI]) -> None:
         """
@@ -312,7 +299,6 @@ class KPIHistory:
                 tmp.next = None
                 tmp = None
 
-            _ = self._logs.pop()
             self._size -= 1
 
     def clear(self) -> None:
@@ -326,18 +312,30 @@ class KPIHistory:
     def build(self, detailed: bool = False) -> None:
         """Build the history of KPIs by comparing each pair in order based on their dates."""
 
-        self._logs.clear()
         if not self.is_empty:
             tmp = self._begin
             while tmp is not None:
+    def logs(self, detailed: bool = False) -> list[str]:
+        """
+        Return a list of log strings based on the current history content.
+
+        Returns:
+            list[str]: a list of strings representing comparison between each KPI
+        """
+
+        logs: list[str] = []
+
+        def logs_cb(node: KPIHistoryNode | None) -> None:
+            if node is not None:
                 if self._begin is self._end:
-                    self._logs.append(str(tmp.kpi) if detailed else f"{tmp.kpi.value}%")
+                    logs.append(str(node.kpi) if detailed else f"{node.kpi.value}%")
 
                 else:
-                    compare: KPIComparator = tmp.compare_next()
-                    self._logs.append(str(compare) if detailed else f"{compare.tendency}")
+                    compare: KPIComparator = node.compare_next()
+                    logs.append(str(compare) if detailed else f"{compare.tendency}")
 
-                tmp = tmp.next
+        self.go_through(logs_cb)
+        return logs
 
     def tendency(self) -> KPIComparatorTendency:
         """
