@@ -1,7 +1,9 @@
 """A module to list some attributes and infos related to different LDAP object types."""
 
 from enum import Enum
-from typing import List
+from typing import NamedTuple
+
+from oudjat.utils.types import StrType
 
 from .account.group.ldap_group import LDAPGroup
 from .account.ldap_computer import LDAPComputer
@@ -12,16 +14,35 @@ from .ou.ldap_ou import LDAPOrganizationalUnit
 from .subnet.ldap_subnet import LDAPSubnet
 
 
+class LDAPObjectTypeProps(NamedTuple):
+    """
+    A helper class to properly handle LDAPObjectType properties.
+
+    Attributes:
+        python_cls (type[LDAPObject]): the class associated with an LDAPObjectType
+        object_cls (str)             : the name of the LDAP object class used in and LDAP filter
+        filter (str)                 : the LDAP filter used to retrieve objects of this type
+        attributes (list[str])       : the object attributes to retrieve
+    """
+
+    python_cls: type[LDAPObject]
+    object_cls: str
+    filter: str
+    attributes: StrType
+
+
 class LDAPObjectType(Enum):
     """These are the default LDAP search parameters per object type."""
 
-    DEFAULT = {"objectClass": "*", "filter": "(objectClass=*)", "attributes": "*"}
+    DEFAULT = LDAPObjectTypeProps(
+        python_cls=LDAPObject, object_cls="*", filter="(objectClass=*)", attributes="*"
+    )
 
-    COMPUTER = {
-        "pythonClass": LDAPComputer,
-        "objectClass": "computer",
-        "filter": "(objectClass=computer)",
-        "attributes": [
+    COMPUTER = LDAPObjectTypeProps(
+        python_cls=LDAPComputer,
+        object_cls="computer",
+        filter="(objectClass=computer)",
+        attributes=[
             "accountExpires",
             "cn",
             "description",
@@ -42,13 +63,13 @@ class LDAPObjectType(Enum):
             "whenChanged",
             "whenCreated",
         ],
-    }
+    )
 
-    GPO = {
-        "pythonClass": LDAPGroupPolicyObject,
-        "objectClass": "groupPolicyContainer",
-        "filter": "(objectClass=groupPolicyContainer)",
-        "attributes": [
+    GPO = LDAPObjectTypeProps(
+        python_cls=LDAPGroupPolicyObject,
+        object_cls="groupPolicyContainer",
+        filter="(objectClass=groupPolicyContainer)",
+        attributes=[
             "displayName",
             "gPCFileSysPath",
             "gPCUserExtensionNames",
@@ -61,13 +82,13 @@ class LDAPObjectType(Enum):
             "whenChanged",
             "whenCreated",
         ],
-    }
+    )
 
-    GROUP = {
-        "pythonClass": LDAPGroup,
-        "objectClass": "group",
-        "filter": "(objectClass=group)",
-        "attributes": [
+    GROUP = LDAPObjectTypeProps(
+        python_cls=LDAPGroup,
+        object_cls="group",
+        filter="(objectClass=group)",
+        attributes=[
             "cn",
             "description",
             "groupType",
@@ -80,13 +101,13 @@ class LDAPObjectType(Enum):
             "whenChanged",
             "whenCreated",
         ],
-    }
+    )
 
-    OU = {
-        "pythonClass": LDAPOrganizationalUnit,
-        "objectClass": "organizationalUnit",
-        "filter": "(objectClass=organizationalUnit)",
-        "attributes": [
+    OU = LDAPObjectTypeProps(
+        python_cls=LDAPOrganizationalUnit,
+        object_cls="organizationalUnit",
+        filter="(objectClass=organizationalUnit)",
+        attributes=[
             "description",
             "gpLink",
             "name",
@@ -96,13 +117,13 @@ class LDAPObjectType(Enum):
             "whenChanged",
             "whenCreated",
         ],
-    }
+    )
 
-    SUBNET = {
-        "pythonClass": LDAPSubnet,
-        "objectClass": "subnet",
-        "filter": "(objectClass=subnet)",
-        "attributes": [
+    SUBNET = LDAPObjectTypeProps(
+        python_cls=LDAPSubnet,
+        object_cls="subnet",
+        filter="(objectClass=subnet)",
+        attributes=[
             "cn",
             "description",
             "distinguishedName",
@@ -112,13 +133,13 @@ class LDAPObjectType(Enum):
             "whenChanged",
             "whenCreated",
         ],
-    }
+    )
 
-    USER = {
-        "pythonClass": LDAPUser,
-        "objectClass": "user",
-        "filter": "(&(objectClass=user)(!(objectClass=computer)))",
-        "attributes": [
+    USER = LDAPObjectTypeProps(
+        python_cls=LDAPUser,
+        object_cls="user",
+        filter="(&(objectClass=user)(!(objectClass=computer)))",
+        attributes=[
             "accountExpires",
             "adminCount",
             "cn",
@@ -145,21 +166,23 @@ class LDAPObjectType(Enum):
             "whenChanged",
             "whenCreated",
         ],
-    }
+    )
 
     # ****************************************************************
     # Attributes
 
     @property
-    def python_cls(self) -> "LDAPObject":
+    def python_cls(self) -> type[LDAPObject]:
         """
-        Return the pythonClass property of an LDAPObjectType. This property is used to dynamically instanciate any class that inherits from LDAPObject.
+        Return the pythonClass property of an LDAPObjectType.
+
+        This property is used to dynamically instanciate any class that inherits from LDAPObject.
 
         Returns:
             LDAPObject: an LDAPObject inheriting class
         """
 
-        return self._value_["pythonClass"]
+        return self._value_.python_cls
 
     @property
     def object_cls(self) -> str:
@@ -170,7 +193,7 @@ class LDAPObjectType(Enum):
             str: the LDAP object class tide to this type
         """
 
-        return self._value_["objectClass"]
+        return self._value_.object_cls
 
     @property
     def filter(self) -> str:
@@ -181,10 +204,10 @@ class LDAPObjectType(Enum):
             str: LDAP filter matching this type
         """
 
-        return self._value_["filter"]
+        return self._value_.filter
 
     @property
-    def attributes(self) -> List[str]:
+    def attributes(self) -> StrType:
         """
         Return the attributes property of an LDAPObjectType.
 
@@ -192,7 +215,7 @@ class LDAPObjectType(Enum):
             List[atr]: a list of attributes to include in the results when searching for this type
         """
 
-        return self._value_.get("attributes", "*")
+        return self._value_.attributes
 
     # ****************************************************************
     # Static methods
@@ -224,16 +247,13 @@ class LDAPObjectType(Enum):
             LDAPObjectType: object type that corresponds to the provided object class, if any
         """
 
-        return next(
-            filter(
-                LDAPObjectType.object_cls_is,
-                LDAPObjectType._member_names_,
-                [object_cls] * len(LDAPObjectType._member_names_),
-            )
-        )
+        def object_cls_is(object_type: LDAPObjectType) -> bool:
+            return object_type.object_cls == object_cls
+
+        return next(filter(object_cls_is, LDAPObjectType))
 
     @staticmethod
-    def get_ldap_class(object_type: str) -> LDAPObject:
+    def get_ldap_class(object_type: str) -> type[LDAPObject]:
         """
         Return an LDAPObject derivated class matching the provided type.
 

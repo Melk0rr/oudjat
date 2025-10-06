@@ -1,7 +1,7 @@
 """A generic module to describe shared behavior of more specific LDAP objects."""
 
 import re
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING, Any, TypeVar, override
 
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
 
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 # Helper functions
 
 
-def parse_dn(dn: str) -> Dict:
+def parse_dn(dn: str) -> dict[str, str]:
     """
     Parse a DN into pieces.
 
@@ -55,22 +55,22 @@ class LDAPObject:
             ldap_entry (LDAPEntry) : ldap entry instance to be used to populate object data
         """
 
-        self.entry = ldap_entry
-        self.dn = self.entry.get_dn()
-        self.name = self.entry.get("name")
-        self.uuid = self.entry.get("objectGUID")
-        self.sid = self.entry.get("objectSid")
-        self.description = self.entry.get("description", [])
+        self.entry: LDAPEntry = ldap_entry
+        self.dn: str = self.entry.get_dn()
+        self.name: str = self.entry.get("name")
+        self.uuid: str = self.entry.get("objectGUID")
+        self.sid: str = self.entry.get("objectSid")
+        self.description: str = self.entry.get("description", [])
 
-        self.classes = self.entry.get("objectClass", [])
+        self.classes: list[str] = self.entry.get("objectClass", [])
 
-        self.dn_pieces = parse_dn(self.dn)
-        self.domain = ".".join(self.dn_pieces.get("DC")).lower()
+        self.dn_pieces: dict[str, str] = parse_dn(self.dn)
+        self.domain: str = ".".join(self.dn_pieces.get("DC", [])).lower()
 
-        self.creation_date = self.entry.get("whenCreated")
-        self.change_date = self.entry.get("whenChanged")
+        self.creation_date: str = self.entry.get("whenCreated")
+        self.change_date: str = self.entry.get("whenChanged")
 
-        self.ldap_obj_flags: List[str] = []
+        self.ldap_obj_flags: list[str] = []
 
     # ****************************************************************
     # Methods
@@ -115,7 +115,7 @@ class LDAPObject:
 
         return self.uuid
 
-    def get_entry(self) -> Dict:
+    def get_entry(self) -> dict[str, Any]:
         """
         Getter for entry attributes.
 
@@ -125,7 +125,7 @@ class LDAPObject:
 
         return self.entry
 
-    def get_classes(self) -> List[str]:
+    def get_classes(self) -> list[str]:
         """
         Getter for object classes.
 
@@ -145,7 +145,7 @@ class LDAPObject:
 
         return self.entry.get("type", "")
 
-    def get_dn_pieces(self) -> Dict:
+    def get_dn_pieces(self) -> dict[str, str]:
         """
         Getter for object dn pieces.
 
@@ -175,7 +175,7 @@ class LDAPObject:
 
         return self.domain
 
-    def get_account_groups(self) -> List[str]:
+    def get_account_groups(self) -> list[str]:
         """
         Getter for the account 'memberOf' property.
 
@@ -238,6 +238,7 @@ class LDAPObject:
             ldap_object=self, ldap_group=ldap_group, extended=extended
         )
 
+    @override
     def __str__(self) -> str:
         """
         Convert the current instance into a string.
@@ -248,7 +249,7 @@ class LDAPObject:
 
         return self.get_dn()
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
 
@@ -264,7 +265,14 @@ class LDAPObject:
             "classes": self.classes,
             "description": self.description,
             "domain": self.domain,
-            "creation_date": TimeConverter.date_to_str(self.creation_date, DateFormat.from_flag(DateFlag.YMD_HMS)),
-            "change_date": TimeConverter.date_to_str(self.change_date, DateFormat.from_flag(DateFlag.YMD_HMS)),
+            "creation_date": TimeConverter.date_to_str(
+                self.creation_date, DateFormat.from_flag(DateFlag.YMD_HMS)
+            ),
+            "change_date": TimeConverter.date_to_str(
+                self.change_date, DateFormat.from_flag(DateFlag.YMD_HMS)
+            ),
             "oudjat_flags": self.ldap_obj_flags,
         }
+
+
+LDAPObjectBoundType = TypeVar("LDAPObjectBoundType", bound=LDAPObject)

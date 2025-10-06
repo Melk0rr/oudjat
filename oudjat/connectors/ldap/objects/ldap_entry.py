@@ -1,6 +1,6 @@
 """A module to handle LDAP query results: LDAP entries."""
 
-from typing import Any
+from typing import Any, override
 
 from .ldap_object_types import LDAPObjectType
 
@@ -19,6 +19,7 @@ class LDAPEntry(dict):
         """
         return self.__getitem__("dn")
 
+    @override
     def get(self, key: str, default_value: Any = None) -> Any:
         """
         Retrieve the value of the specified attribute.
@@ -101,9 +102,8 @@ class LDAPEntry(dict):
             str: The name of the object class, or None if no matching class is found.
         """
 
-        obj_type: LDAPObjectType = next(filter(self.compare_to_obj_type_cls, list(LDAPObjectType)))
-
-        return obj_type.name if obj_type is not None else None
+        obj_type = next(filter(self.compare_to_obj_type_cls, list(LDAPObjectType)))
+        return obj_type.name or None
 
     def compare_to_obj_type_cls(self, object_type: LDAPObjectType) -> bool:
         """
