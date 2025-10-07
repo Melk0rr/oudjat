@@ -6,7 +6,6 @@ from typing import Any, Callable, NamedTuple, TypedDict, TypeVar
 # HACK: Generic type bound to Operator
 OperatorType = TypeVar("OperatorType", bound="Operator")
 
-
 class OperatorKeysProps(TypedDict):
     """
     A helper class to ensure that operator mentiones keys with right type.
