@@ -221,21 +221,6 @@ class LDAPObjectType(Enum):
     # Static methods
 
     @staticmethod
-    def object_cls_is(object_type: str, value: str) -> bool:
-        """
-        Check if the provided LDAPObjectType objectClass attribute is equal to the given value. This method is used as a filter function for LDAPObjectType.from_object_cls method.
-
-        Args:
-            object_type (str): element of the LDAPObjectType enumearation
-            value (str)      : value to compare to the objectClass attribute of the provided LDAPObjectType
-
-        Returns:
-            bool: True if the value is equal to the objectClass attribute of the provided LDAPObjectType
-        """
-
-        return LDAPObjectType[object_type.upper()].object_cls == value
-
-    @staticmethod
     def from_object_cls(object_cls: str) -> "LDAPObjectType":
         """
         Return an LDAPObjectType based on a given python class name.

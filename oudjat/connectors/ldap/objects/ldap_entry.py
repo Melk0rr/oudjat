@@ -8,7 +8,8 @@ from .ldap_object_types import LDAPObjectType
 class LDAPEntry(dict):
     """A class that describe a result of an LDAP query."""
 
-    def get_dn(self) -> str:
+    @property
+    def dn(self) -> str:
         """
         Return the Distinguished Name (DN) of the LDAP entry.
 
@@ -18,6 +19,28 @@ class LDAPEntry(dict):
             str: The DN of the LDAP entry.
         """
         return self.__getitem__("dn")
+
+    @property
+    def attr(self) -> dict[str, Any]:
+        """
+        Return the "attributes" dictionary of the LDAP entry.
+
+        Returns:
+            dict: The "attributes" dictionary containing all the attributes of the LDAP entry.
+        """
+        return self.__getitem__("attributes")
+
+    @property
+    def type(self) -> str:
+        """
+        Determine the object type of the LDAP entry based on its "objectClass" attribute.
+
+        Returns:
+            str: The name of the object class, or None if no matching class is found.
+        """
+
+        obj_type = next(filter(self.compare_to_obj_type_cls, list(LDAPObjectType)))
+        return obj_type.name or None
 
     @override
     def get(self, key: str, default_value: Any = None) -> Any:
@@ -73,15 +96,6 @@ class LDAPEntry(dict):
 
         return self.__getitem__("raw_attributes").__getitem__(key)
 
-    def attr(self):
-        """
-        Return the "attributes" dictionary of the LDAP entry.
-
-        Returns:
-            dict: The "attributes" dictionary containing all the attributes of the LDAP entry.
-        """
-        return self.__getitem__("attributes")
-
     def is_of_class(self, obj_cls: str) -> bool:
         """
         Check whether the "objectClass" attribute in the "attributes" dictionary contains with the provided class.
@@ -92,18 +106,8 @@ class LDAPEntry(dict):
         Returns:
             bool: True if the object is of the specified class, False otherwise.
         """
-        return obj_cls.lower() in self.attr().__getitem__("objectClass")
+        return obj_cls.lower() in self.attr.__getitem__("objectClass")
 
-    def get_type(self) -> str:
-        """
-        Determine the object type of the LDAP entry based on its "objectClass" attribute.
-
-        Returns:
-            str: The name of the object class, or None if no matching class is found.
-        """
-
-        obj_type = next(filter(self.compare_to_obj_type_cls, list(LDAPObjectType)))
-        return obj_type.name or None
 
     def compare_to_obj_type_cls(self, object_type: LDAPObjectType) -> bool:
         """
@@ -116,4 +120,4 @@ class LDAPEntry(dict):
             bool: True if both values are equals, False otherwise
         """
 
-        return self.attr().__getitem__("objectClass")[-1] == object_type.object_cls
+        return self.attr.__getitem__("objectClass")[-1] == object_type.object_cls

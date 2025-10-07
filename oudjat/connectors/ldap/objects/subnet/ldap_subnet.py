@@ -26,7 +26,7 @@ class LDAPSubnet(LDAPObject, Subnet):
         super().__init__(ldap_entry=ldap_entry)
         Subnet.__init__(
             self,
-            addr=ldap_entry.get("name"),
+            address=ldap_entry.get("name"),
             name=ldap_entry.get("location"),
             description=" ".join(ldap_entry.get("description")),
         )

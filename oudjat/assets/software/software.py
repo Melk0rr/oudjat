@@ -60,7 +60,7 @@ class Software(Asset):
 
         self._editor: list[str] | None = editor
         self._type: SoftwareType = software_type
-        self._releases: "SoftwareReleaseDict" = SoftwareReleaseDict()
+        self._releases: SoftwareReleaseDict = SoftwareReleaseDict()
         self._editions: SoftwareEditionDict = SoftwareEditionDict()
 
     # ****************************************************************
@@ -133,7 +133,7 @@ class Software(Asset):
             bool: True if a matching release is found, otherwise False.
         """
 
-        return self.releases.find_release(rel_ver, rel_label) is not None
+        return self.releases.find(rel_ver, rel_label) is not None
 
     def add_release(self, new_release: "SoftwareRelease") -> None:
         """
@@ -147,12 +147,8 @@ class Software(Asset):
         """
 
         new_rel_ver: SoftwareReleaseVersion = new_release.version
-        if str(new_rel_ver) not in self.releases.keys():
-            self.releases[str(new_rel_ver)] = SoftwareReleaseDict()
-
-        new_rel_label: str = new_release.label
-        if new_rel_label not in self.releases[str(new_rel_ver)].keys():
-            self.releases[str(new_rel_ver)][new_rel_label] = new_release
+        if f"{new_rel_ver} - {new_release.label}" not in self.releases.keys():
+            self.releases[str(new_rel_ver)] = new_release
 
     def find_release(self, rel_ver: str, rel_label: str | None = None) -> "SoftwareRelease | None":
         """
@@ -166,7 +162,7 @@ class Software(Asset):
             SoftwareRelease: The found release object or None if not found.
         """
 
-        return self.releases.find_release(rel_ver, rel_label)
+        return self.releases.find(rel_ver, rel_label)
 
     def retired_releases(self) -> list["SoftwareRelease"]:
         """

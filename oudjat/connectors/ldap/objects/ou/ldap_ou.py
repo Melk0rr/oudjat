@@ -1,15 +1,15 @@
 """Main module to handle LDAP Organizational Unit stuff."""
 
 import re
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING, Any, override
 
 from ..definitions import UUID_REG
 from ..ldap_object import LDAPObject
 
 if TYPE_CHECKING:
     from ...ldap_connector import LDAPConnector
+    from ..gpo import LDAPGroupPolicyObject
     from ..ldap_entry import LDAPEntry
-
 
 class LDAPOrganizationalUnit(LDAPObject):
     """
@@ -43,8 +43,8 @@ class LDAPOrganizationalUnit(LDAPObject):
         return self.entry.get("gPLink")
 
     def get_objects(
-        self, ldap_connector: "LDAPConnector", object_types: List[str] = None
-    ) -> List["LDAPEntry"]:
+        self, ldap_connector: "LDAPConnector", object_types: list[str] | None = None
+    ) -> list["LDAPEntry"]:
         """
         Return the objects contained in the current OU.
 
@@ -58,7 +58,7 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return ldap_connector.get_ou_objects(ldap_ou=self, object_types=object_types)
 
-    def get_sub_ous(self, ldap_connector: "LDAPConnector") -> List["LDAPEntry"]:
+    def get_sub_ous(self, ldap_connector: "LDAPConnector") -> list["LDAPOrganizationalUnit"]:
         """
         Return only sub OUs from the ou objects.
 
@@ -71,7 +71,7 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return ldap_connector.get_ou(search_base=self.dn)
 
-    def get_gpo_from_gplink(self, ldap_connector: "LDAPConnector") -> List["LDAPObject"]:
+    def get_gpo_from_gplink(self, ldap_connector: "LDAPConnector") -> list["LDAPGroupPolicyObject"]:
         """
         Extract the GPO references (UUIDs) present in the current OU gpLink.
 
@@ -85,9 +85,12 @@ class LDAPOrganizationalUnit(LDAPObject):
         """
 
         gpo_refs = re.search(UUID_REG, self.get_gplink())
-        return list(map(lambda link: ldap_connector.get_gpo(name=link), gpo_refs))
+        gpo_refs_str = gpo_refs.group() if gpo_refs is not None else []
 
-    def to_dict(self) -> Dict:
+        return list(map(lambda link: ldap_connector.get_gpo(name=link)[0], gpo_refs_str))
+
+    @override
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
 

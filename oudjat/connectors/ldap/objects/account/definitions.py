@@ -1,8 +1,8 @@
 """A module to gather package global variables."""
 
 # REGEXES
-PERSON_REG = r"^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð '-]+$"
+PERSON_REG: str = r"^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð '-]+$"
 
 # MS VARIABLES
-MS_ACCOUNT_CTL_PROPERTY = "msDS-User-Account-Control-Computed"
+MS_ACCOUNT_CTL_PROPERTY: str = "msDS-User-Account-Control-Computed"
 

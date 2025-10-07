@@ -1,6 +1,7 @@
 """A generic module to describe shared behavior of more specific LDAP objects."""
 
 import re
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, TypeVar, override
 
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 # Helper functions
 
 
-def parse_dn(dn: str) -> dict[str, str]:
+def parse_dn(dn: str) -> dict[str, list[str]]:
     """
     Parse a DN into pieces.
 
@@ -25,7 +26,7 @@ def parse_dn(dn: str) -> dict[str, str]:
         Dict : dictionary of dn pieces (CN, OU, DC)
     """
 
-    pieces = {}
+    pieces: dict[str, list[str]] = {}
     for dn_part in re.split(r",(?! )", dn):
         part_type, part_value = dn_part.split("=")
 
@@ -56,19 +57,19 @@ class LDAPObject:
         """
 
         self.entry: LDAPEntry = ldap_entry
-        self.dn: str = self.entry.get_dn()
+        self.dn: str = self.entry.dn
         self.name: str = self.entry.get("name")
         self.uuid: str = self.entry.get("objectGUID")
         self.sid: str = self.entry.get("objectSid")
-        self.description: str = self.entry.get("description", [])
+        self.description: str = self.entry.get("description", "")
 
         self.classes: list[str] = self.entry.get("objectClass", [])
 
-        self.dn_pieces: dict[str, str] = parse_dn(self.dn)
+        self.dn_pieces: dict[str, list[str]] = parse_dn(self.dn)
         self.domain: str = ".".join(self.dn_pieces.get("DC", [])).lower()
 
-        self.creation_date: str = self.entry.get("whenCreated")
-        self.change_date: str = self.entry.get("whenChanged")
+        self.creation_date: datetime = TimeConverter.str_to_date(self.entry.get("whenCreated"))
+        self.change_date: datetime = TimeConverter.str_to_date(self.entry.get("whenChanged"))
 
         self.ldap_obj_flags: list[str] = []
 
@@ -83,7 +84,7 @@ class LDAPObject:
             str: The distinguished name (DN) of the LDAP object.
         """
 
-        return self.entry.get_dn()
+        return self.entry.dn
 
     def get_name(self) -> str:
         """
@@ -145,7 +146,7 @@ class LDAPObject:
 
         return self.entry.get("type", "")
 
-    def get_dn_pieces(self) -> dict[str, str]:
+    def get_dn_pieces(self) -> dict[str, list[str]]:
         """
         Getter for object dn pieces.
 
@@ -185,7 +186,7 @@ class LDAPObject:
 
         return self.entry.get("memberOf", [])
 
-    def get_creation_date(self) -> str:
+    def get_creation_date(self) -> datetime:
         """
         Getter for ldap object creation date.
 
@@ -195,7 +196,7 @@ class LDAPObject:
 
         return self.creation_date
 
-    def get_change_date(self) -> str:
+    def get_change_date(self) -> datetime:
         """
         Getter for ldap object change date.
 

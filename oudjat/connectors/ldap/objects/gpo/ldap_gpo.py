@@ -2,7 +2,9 @@
 
 import re
 from enum import Enum, IntEnum
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, Any, override
+
+from oudjat.utils.types import StrType
 
 from ..definitions import UUID_REG
 from ..ldap_object import LDAPObject
@@ -11,6 +13,7 @@ from .ms_gppref import MS_GPPREF
 if TYPE_CHECKING:
     from ...ldap_connector import LDAPConnector
     from ..ldap_entry import LDAPEntry
+    from ..ou import LDAPOrganizationalUnit
 
 
 class LDAPGPOScope(Enum):
@@ -45,10 +48,10 @@ class LDAPGroupPolicyObject(LDAPObject):
 
         super().__init__(ldap_entry=ldap_entry)
 
-        self.display_name = self.entry.get("displayName")
+        self.display_name: str = self.entry.get("displayName")
 
-        self.scope = None
-        self.state = None
+        self.scope: LDAPGPOScope
+        self.state: LDAPGPOState
 
         wql = self.entry.get("gPCWQLFilter", None)
 
@@ -63,10 +66,10 @@ class LDAPGroupPolicyObject(LDAPObject):
             )
 
         except Exception as e:
-            raise (f"{__class__.__name__}::Error while trying to get group policy scope\n{e}")
+            raise ValueError(f"{__class__.__name__}::Error while trying to get group policy scope\n{e}")
 
-        guids = re.findall(UUID_REG, self.entry.get(self.scope.value))
-        self.infos = {guid: MS_GPPREF[guid] for guid in guids}
+        guids: list[str] = re.findall(UUID_REG, self.entry.get(self.scope.value))
+        self.infos: dict[str, str] = {guid: MS_GPPREF[guid] for guid in guids}
 
     # ****************************************************************
     # Methods
@@ -81,12 +84,12 @@ class LDAPGroupPolicyObject(LDAPObject):
 
         return self.display_name
 
-    def get_infos(self) -> List[str]:
+    def get_infos(self) -> dict[str, str]:
         """
         Getter for policy GUIDs.
 
         Returns:
-            List[str]: A list of GUIDs associated with the group policy preferences.
+            dict[str, str]: A list of GUIDs associated with the group policy preferences.
         """
 
         return self.infos
@@ -94,9 +97,9 @@ class LDAPGroupPolicyObject(LDAPObject):
     def get_linked_objects(
         self,
         ldap_connector: "LDAPConnector",
-        attributes: Union[str, List[str]] = None,
+        attributes: StrType | None = None,
         ou: str = "*",
-    ) -> List["LDAPObject"]:
+    ) -> list["LDAPOrganizationalUnit"]:
         """
         Get the GPO linked objects.
 
@@ -115,7 +118,8 @@ class LDAPGroupPolicyObject(LDAPObject):
             search_filter=f"(gPLink={f'*{self.name}*'})(name={ou})", attributes=attributes
         )
 
-    def to_dict(self) -> Dict:
+    @override
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dict.
 

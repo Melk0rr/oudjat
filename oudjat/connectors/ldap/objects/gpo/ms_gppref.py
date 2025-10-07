@@ -1,7 +1,7 @@
 """A simple module to define LDAP GPO types."""
 
 # HACK: https://github.com/zloeber/PSAD/blob/fcf2936b79b5e49c99f09cea96fbafd26e6ecbf2/src/other/CSEGUIDMap.csv
-MS_GPPREF = {
+MS_GPPREF: dict[str, str] = {
     "{00000000-0000-0000-0000-000000000000}": "Core GPO Engine",
     "{0ACDD40C-75AC-47AB-BAA0-BF6DE7E7FE63}": "Wireless Group Policy",
     "{0E28E245-9368-4853-AD84-6DA3BA35BB75}": "Group Policy Environment",

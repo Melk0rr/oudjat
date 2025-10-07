@@ -1,9 +1,10 @@
 """A module to describe generic properties shared by more specific account objects like user or computer."""
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, List, Set
+from typing import TYPE_CHECKING, Any, override
 
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
+from oudjat.utils.types import StrType
 
 from ..ldap_object import LDAPObject
 from .ldap_account_flags import LDAPAccountFlag
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
 
 
-def acc_date_str(date: datetime) -> str:
+def acc_date_str(date: datetime | None) -> str:
     """
     Convert an account date into a readable string.
 
@@ -23,6 +24,9 @@ def acc_date_str(date: datetime) -> str:
         str: readable formated string
     """
 
+    if date is None:
+        return ""
+
     return TimeConverter.date_to_str(date, date_format=DateFormat.from_flag(DateFlag.YMD_HMS))
 
 
@@ -32,7 +36,7 @@ class LDAPAccount(LDAPObject):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry"):
+    def __init__(self, ldap_entry: "LDAPEntry") -> None:
         """
         Initialize an LDAP Entry-based object with specific handling for user accounts.
 
@@ -48,16 +52,16 @@ class LDAPAccount(LDAPObject):
         super().__init__(ldap_entry=ldap_entry)
 
         pwd_last_set = self.get_pwd_last_set()
-        self.pwd_last_set_timestp = pwd_last_set.timestamp() if pwd_last_set is not None else None
+        self.pwd_last_set_timestp: float | None = pwd_last_set.timestamp() if pwd_last_set is not None else None
 
-        self.account_control = self.entry.get("userAccountControl", None)
+        self.account_control: int | None = self.entry.get("userAccountControl", None)
 
-        self.enabled = True
-        self.pwd_expires = True
-        self.pwd_expired = False
-        self.pwd_required = True
-        self.is_locked = False
-        self.account_flags: Set[str] = set()
+        self.enabled: bool = True
+        self.pwd_expires: bool = True
+        self.pwd_expired: bool = False
+        self.pwd_required: bool = True
+        self.is_locked: bool = False
+        self.account_flags: set[str] = set()
 
         if self.account_control is not None:
             self.enabled = not LDAPAccountFlag.is_disabled(self.account_control)
@@ -114,12 +118,19 @@ class LDAPAccount(LDAPObject):
             datetime: The expiration date of the account as a datetime object, or a fixed year 9999 if it does not have an expiration.
         """
 
-        default_acc_exp = self.entry.get("accountExpires")
+        default_acc_exp: StrType | None = self.entry.get("accountExpires")
+        unified_acc_exp: str
+
+        if isinstance(default_acc_exp, list):
+            unified_acc_exp = str(default_acc_exp[0]) if len(default_acc_exp) > 0 else ""
+
+        else:
+            unified_acc_exp = str(default_acc_exp)
+
         return (
             datetime(9999, 12, 31)
             if default_acc_exp is None
-            or (isinstance(default_acc_exp, list) and len(default_acc_exp) == 0)
-            else default_acc_exp
+            else TimeConverter.str_to_date(unified_acc_exp)
         )
 
     def get_last_logon(self) -> datetime:
@@ -142,7 +153,7 @@ class LDAPAccount(LDAPObject):
 
         return TimeConverter.days_diff(self.get_last_logon())
 
-    def get_pwd_last_set(self) -> datetime:
+    def get_pwd_last_set(self) -> datetime | None:
         """
         Return the account password last set date.
 
@@ -160,9 +171,10 @@ class LDAPAccount(LDAPObject):
             int: The difference in days between the current date and the date when the password was last set.
         """
 
-        return TimeConverter.days_diff(self.get_pwd_last_set())
+        pw_last_set = self.get_pwd_last_set()
+        return TimeConverter.days_diff(pw_last_set) if pw_last_set else -1
 
-    def get_account_flags(self) -> List[str]:
+    def get_account_flags(self) -> list[str]:
         """
         Retrieve account flags.
 
@@ -202,7 +214,8 @@ class LDAPAccount(LDAPObject):
 
         return self.pwd_expired
 
-    def to_dict(self) -> Dict:
+    @override
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dict.
 

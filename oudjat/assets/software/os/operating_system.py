@@ -2,7 +2,7 @@
 
 import re
 from enum import Enum
-from typing import override
+from typing import Any, override
 
 from oudjat.assets.computer.computer_type import ComputerType
 
@@ -190,7 +190,7 @@ class OSRelease(SoftwareRelease):
         return self._software
 
     @override
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
 

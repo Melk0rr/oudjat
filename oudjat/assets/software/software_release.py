@@ -1,5 +1,6 @@
 """A module that describe the concept of software release."""
 
+from collections.abc import Iterator
 from datetime import datetime
 from typing import Any, override
 
@@ -162,7 +163,7 @@ class SoftwareRelease:
 
         return any(
             [
-                s.is_ongoing() and (edition is None or s.supports_edition(edition))
+                s.is_ongoing and (edition is None or s.supports_edition(edition))
                 for s in self._support
             ]
         )
@@ -191,7 +192,7 @@ class SoftwareRelease:
             list[SoftwareReleaseSupport]: A list of support details that are currently ongoing.
         """
 
-        return [s for s in self._support if s.is_ongoing()]
+        return [s for s in self._support if s.is_ongoing]
 
     def get_retired_support(self) -> list[SoftwareReleaseSupport]:
         """
@@ -201,7 +202,7 @@ class SoftwareRelease:
             list[SoftwareReleaseSupport]: A list of support details that are no longer ongoing.
         """
 
-        return [s for s in self._support if not s.is_ongoing()]
+        return [s for s in self._support if not s.is_ongoing]
 
     def add_support(self, support: SoftwareReleaseSupport) -> None:
         """
@@ -215,7 +216,7 @@ class SoftwareRelease:
         """
 
         if not self._support.contains(
-            edition=list(support.get_edition().keys()), lts=support.has_long_term_support()
+            edition=list(support.edition.keys()), lts=support.has_long_term_support
         ):
             self._support.append(support)
 
@@ -302,29 +303,105 @@ class SoftwareRelease:
         }
 
 
-class SoftwareReleaseDict(dict[str, Any]):
+
+class SoftwareReleaseDict():
     """Software release dictionary."""
+
+    # ****************************************************************
+    # Constructor & Attributes
+
+    def __init__(self) -> None:
+        """
+        Create a new instance of SoftwareReleaseDict.
+        """
+
+        self._data: dict[str, SoftwareRelease] = {}
 
     # ****************************************************************
     # Methods
 
-    def find_release_per_label(self, release_label: str) -> "SoftwareReleaseDict":
+    def __getitem__(self, key: str) -> SoftwareRelease:
         """
-        Try to find release with a label matching the given string.
-
-        This method searches through the dictionary and returns a new dictionary containing only those key-value pairs where the keys match the provided string `val`.
-        The resulting dictionary is of type SoftwareReleaseDict, preserving the structure of the original dictionary for potential further processing.
+        Return a SoftwareReleaseBound element based on its key.
 
         Args:
-            release_label (str): The string to search for in the dictionary keys.
+            key (str): the key of the item to return
 
         Returns:
-            SoftwareReleaseDict: A new dictionary containing only the key-value pairs where the keys match `val`.
+            SoftwareReleaseBound_co: covariant element of SoftwareRelease
         """
 
-        return SoftwareReleaseDict(**{k: v for k, v in self.items() if k in release_label})
+        return self._data[key]
 
-    def find_release(self, rel_ver: str, rel_label: str | None = None) -> SoftwareRelease | None:
+    def __setitem__(self, key: str, value: SoftwareRelease) -> None:
+        """
+        Set the SoftwareRelease in the dictionary for the provided key.
+
+        Args:
+            key (str)                   : new element key
+            value (SoftwareReleaseBound): value of the new element
+        """
+
+        self._data[key] = value
+
+    def __iter__(self) -> Iterator[str]:
+        """
+        Return an iterator to go through the SoftwareReleases.
+
+        Returns:
+            Iterator[str]: iterator object
+        """
+
+        return iter(self._data)
+
+    def get(self, key: str, default_value: Any = None) -> SoftwareRelease | None:
+        """
+        Return a SoftwareReleaseBound element based on its key.
+
+        If the element cannot be found, return the default value.
+
+        Args:
+            key (str)          : key of the element to return
+            default_value (Any): default value in case the element cannot be found
+
+        Returns:
+            SoftwareReleaseBound | None: element associated with provided key or default value
+
+        """
+
+        return self._data.get(key, default_value)
+
+    def keys(self) :
+        """
+        Return the keys of the data dict.
+
+        Returns:
+            dict_keys[str, SoftwareReleaseBound_co]: the keys of the current dictionary
+        """
+
+        return self._data.keys()
+
+    def values(self):
+        """
+        Return the values of the data dict.
+
+        Returns:
+            dict_values[str, SoftwareReleaseBound_co]: the values of the current dictionary
+        """
+
+        return self._data.values()
+
+    def items(self):
+        """
+        Return the items of the data dict.
+
+        Returns:
+            dict_items[str, SoftwareReleaseBound_co]: the items of the current dictionary
+        """
+
+        return self._data.items()
+
+    def find(self, rel_ver: str, rel_label: str | None = None) -> SoftwareRelease | None:
         """
         Find the given release.
 
@@ -339,14 +416,19 @@ class SoftwareReleaseDict(dict[str, Any]):
             SoftwareReleaseDict: A dictionary containing either the entire release information or a specific label's information based on the provided criteria.
         """
 
-        res = None
-        if rel_ver in self.keys():
-            search: SoftwareReleaseDict = self.get(rel_ver, SoftwareReleaseDict())
+        key = f"{rel_ver}{f" - {rel_label}" if rel_label else ""}"
+        return self.get(key, None)
 
-            res = (
-                search.get(rel_label, None)
-                if rel_label is not None
-                else search.get(list(search.keys())[0], None)
-            )
 
-        return res
+    def find_by_str(self, search_str: str) -> list[SoftwareRelease]:
+        """
+        Search for elements with a key matching the provided search string.
+
+        Args:
+            search_str (str): search string to compare to the keys in the current dictionary
+
+        Returns:
+            list[SoftwareReleaseBound]: list of elements found
+        """
+
+        return [ release for key, release in self.items() if search_str in key ]
