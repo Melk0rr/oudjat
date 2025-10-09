@@ -1,25 +1,26 @@
 """Main module of the LDAP group package that implement LDAP group object manipulations tools."""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, override
 
 from oudjat.assets.group import Group
 
-from ...ldap_object import LDAPObject
 from .ldap_group_types import LDAPGroupType
 
 if TYPE_CHECKING:
-    from oudjat.connectors.ldap.ldap_connector import LDAPConnector
-
+    from ....ldap_connector import LDAPConnector
     from ...ldap_entry import LDAPEntry
+    from ...ldap_object import LDAPObject
 
 
-class LDAPGroup(LDAPObject, Group):
+class LDAPGroup(LDAPObject, Group[LDAPObject]):
     """A class to handle LDAP group objects."""
 
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry", ldap_parent_group: "LDAPGroup | None" = None):
+    def __init__(
+        self, ldap_entry: "LDAPEntry", ldap_parent_group: "LDAPGroup | None" = None
+    ) -> None:
         """
         Create a new instance of LDAPGroup.
 
@@ -28,11 +29,17 @@ class LDAPGroup(LDAPObject, Group):
             ldap_parent_group (LDAPGroup): to optionaly specify the parent group
         """
 
-        super().__init__(ldap_entry=ldap_entry)
-
-        Group.__init__(
-            self, group_id=self.uuid, name=self._name, label=self.dn, description=self.description
+        super().__init__(
+            ldap_entry=ldap_entry,
+            group_id=ldap_entry.get("objectGUID"),
+            name=ldap_entry.get("name"),
+            label=ldap_entry.dn,
+            description=ldap_entry.get("description"),
         )
+
+        # Group.__init__(
+        #     self, group_id=self.id, name=self._name, label=self.dn, description=self.description
+        # )
 
     # ****************************************************************
     # Methods
@@ -57,7 +64,7 @@ class LDAPGroup(LDAPObject, Group):
 
         return LDAPGroupType(self.get_group_type_raw())
 
-    def get_member_refs(self) -> List[str]:
+    def get_member_refs(self) -> list[str]:
         """
         Return member refs.
 
@@ -67,11 +74,11 @@ class LDAPGroup(LDAPObject, Group):
 
         return self.entry.get("member") or []
 
-    def get_members(
+    def fetch_members(
         self,
         ldap_connector: "LDAPConnector",
         recursive: bool = False,
-    ) -> List[LDAPObject]:
+    ) -> None:
         """
         Retrieve the group members.
 
@@ -83,19 +90,14 @@ class LDAPGroup(LDAPObject, Group):
             List[LDAPObject]: a list of the group members
         """
 
-        if len(self.members.keys()) > 0:
-            return super().get_members()
-
         direct_members = ldap_connector.get_group_members(ldap_group=self, recursive=recursive)
 
         for member in direct_members:
             self.add_member(member)
 
-        return self.members
-
     def get_sub_groups(
         self, ldap_connector: "LDAPConnector", recursive: bool = False
-    ) -> List["LDAPGroup"]:
+    ) -> list["LDAPGroup"]:
         """
         Return child group of the current group.
 
@@ -108,11 +110,12 @@ class LDAPGroup(LDAPObject, Group):
         """
 
         if len(self.members.keys()) == 0:
-            self.get_members(ldap_connector=ldap_connector, recursive=recursive)
+            self.fetch_members(ldap_connector=ldap_connector, recursive=recursive)
 
         sub_groups = []
         for member in self.members.values():
-            if member.get_type().lower() == "group":
+            if member.entry.type.lower() == "group":
+                assert isinstance(member, LDAPGroup)
                 sub_groups.append(member)
 
                 if recursive:
@@ -124,7 +127,7 @@ class LDAPGroup(LDAPObject, Group):
 
     def get_non_group_members(
         self, ldap_connector: "LDAPConnector", recursive: bool = False
-    ) -> List["LDAPObject"]:
+    ) -> list["LDAPObject"]:
         """
         Return non group members of the current group.
 
@@ -137,7 +140,7 @@ class LDAPGroup(LDAPObject, Group):
         """
 
         if len(self.members.keys()) == 0:
-            self.get_members(ldap_connector=ldap_connector, recursive=recursive)
+            self.fetch_members(ldap_connector=ldap_connector, recursive=recursive)
 
         members = []
         for member in self.members.values():
@@ -154,7 +157,7 @@ class LDAPGroup(LDAPObject, Group):
 
         return members
 
-    def get_members_flat(self, ldap_connector: "LDAPConnector") -> List["LDAPObject"]:
+    def get_members_flat(self, ldap_connector: "LDAPConnector") -> list["LDAPObject"]:
         """
         Return a flat list of the current group members.
 
@@ -167,7 +170,7 @@ class LDAPGroup(LDAPObject, Group):
         """
 
         if len(self.members.keys()) == 0:
-            self.get_members(ldap_connector=ldap_connector, recursive=True)
+            self.fetch_members(ldap_connector=ldap_connector, recursive=True)
 
         members = []
         for member in self.members.values():
@@ -198,7 +201,8 @@ class LDAPGroup(LDAPObject, Group):
             ldap_object=ldap_object, ldap_group=self, extended=extended
         )
 
-    def to_dict(self) -> Dict:
+    @override
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
 
@@ -208,7 +212,7 @@ class LDAPGroup(LDAPObject, Group):
         return {
             **super().to_dict(),
             "group_type": self.get_group_type().name,
-            "member_names": self.get_member_names(),
+            "member_names": self.member_names,
         }
 
 
