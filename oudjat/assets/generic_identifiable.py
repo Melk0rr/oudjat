@@ -16,15 +16,18 @@ class GenericIdentifiable(ABC):
         name: str,
         label: str | None = None,
         description: str | None = None,
-    ):
+        **kwargs: Any
+    ) -> None:
         """
         Create a new instance of GenericIdentifiable.
 
         Args:
-            gid (Union[int, str]): The identifier of the object. Can be an integer or a string.
-            name (str): The name of the object.
-            label (str, optional): A short text label for the object, defaults to None.
+            gid (Union[int, str])      : The identifier of the object. Can be an integer or a string.
+            name (str)                 : The name of the object.
+            label (str, optional)      : A short text label for the object, defaults to None.
             description (str, optional): A detailed description of the object, defaults to None.
+            kwargs (Any)               : Any further arguments
+
         """
 
         self._id: int | str = gid
@@ -32,7 +35,7 @@ class GenericIdentifiable(ABC):
         self._label: str | None = label
         self._description: str | None = description
 
-        self._custom_attributes: dict[str, Any] = {}
+        self._custom_attributes: dict[str, Any] = { **kwargs }
 
     # ****************************************************************
     # Methods
