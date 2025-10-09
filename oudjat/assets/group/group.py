@@ -23,6 +23,7 @@ class Group(Asset):
         name: str,
         label: str | None = None,
         description: str | None = None,
+        **kwargs: Any
     ) -> None:
         """
         Create a new Group of assets.
@@ -32,6 +33,7 @@ class Group(Asset):
             name (str)                 : The name of the group.
             label (str, optional)      : A short text label for the group. Defaults to None.
             description (str, optional): A detailed description of the group. Defaults to None.
+            kwargs (Any)               : Any further arguments
         """
 
         super().__init__(
@@ -40,6 +42,7 @@ class Group(Asset):
             label=label,
             description=description,
             asset_type=AssetType.GROUP,
+            **kwargs,
         )
 
         self.members: GroupMemberList = GroupMemberList()
