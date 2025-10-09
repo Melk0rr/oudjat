@@ -39,7 +39,7 @@ class OSFamily(Enum):
         return self._value_["pattern"]
 
 
-class OperatingSystem(Software):
+class OperatingSystem(Software["OSRelease"]):
     """A class to describe operating systems."""
 
     # ****************************************************************
@@ -60,12 +60,12 @@ class OperatingSystem(Software):
 
         Args:
             os_id (int | str)                       : OS unique ID
-            name (str)                              : the name of the operating system
-            label (str)                             : a short string to labelize the os
-            os_family (OSFamily)                    : family of operating system, usually (Linux, MAC, Windows)
-            computer_type (List[str | ComputerType]): the type(s) of computer the OS is tide to
-            editor (str | List[str])                : the editor in charge of the OS maintenance and/or development
-            description (str)                       : a string to describe the OS
+            name (str)                              : The name of the operating system
+            label (str)                             : A short string to labelize the os
+            os_family (OSFamily)                    : Family of operating system, usually (Linux, MAC, Windows)
+            computer_type (List[str | ComputerType]): The type(s) of computer the OS is tide to
+            editor (str | List[str])                : The editor in charge of the OS maintenance and/or development
+            description (str)                       : A string to describe the OS
         """
 
         super().__init__(
