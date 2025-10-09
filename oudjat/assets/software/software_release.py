@@ -2,13 +2,14 @@
 
 from collections.abc import Iterator
 from datetime import datetime
-from typing import Any, override
+from typing import Any, Generic, TypeVar, override
 
 from oudjat.utils.time_utils import TimeConverter
 
 from .software_release_version import SoftwareReleaseVersion
 from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList
 
+ReleaseType = TypeVar("ReleaseType", bound="SoftwareRelease")
 
 class SoftwareRelease:
     """A class to describe software releases."""
@@ -303,8 +304,7 @@ class SoftwareRelease:
         }
 
 
-
-class SoftwareReleaseDict():
+class SoftwareReleaseDict(Generic[ReleaseType]):
     """Software release dictionary."""
 
     # ****************************************************************
@@ -315,12 +315,12 @@ class SoftwareReleaseDict():
         Create a new instance of SoftwareReleaseDict.
         """
 
-        self._data: dict[str, SoftwareRelease] = {}
+        self._data: dict[str, ReleaseType] = {}
 
     # ****************************************************************
     # Methods
 
-    def __getitem__(self, key: str) -> SoftwareRelease:
+    def __getitem__(self, key: str) -> ReleaseType:
         """
         Return a SoftwareReleaseBound element based on its key.
 
@@ -333,7 +333,7 @@ class SoftwareReleaseDict():
 
         return self._data[key]
 
-    def __setitem__(self, key: str, value: SoftwareRelease) -> None:
+    def __setitem__(self, key: str, value: ReleaseType) -> None:
         """
         Set the SoftwareRelease in the dictionary for the provided key.
 
@@ -354,7 +354,7 @@ class SoftwareReleaseDict():
 
         return iter(self._data)
 
-    def get(self, key: str, default_value: Any = None) -> SoftwareRelease | None:
+    def get(self, key: str, default_value: Any = None) -> ReleaseType | None:
         """
         Return a SoftwareReleaseBound element based on its key.
 
@@ -371,7 +371,7 @@ class SoftwareReleaseDict():
 
         return self._data.get(key, default_value)
 
-    def keys(self) :
+    def keys(self):
         """
         Return the keys of the data dict.
 
@@ -401,7 +401,7 @@ class SoftwareReleaseDict():
 
         return self._data.items()
 
-    def find(self, rel_ver: str, rel_label: str | None = None) -> SoftwareRelease | None:
+    def find(self, rel_ver: str, rel_label: str | None = None) -> ReleaseType | None:
         """
         Find the given release.
 
@@ -416,11 +416,12 @@ class SoftwareReleaseDict():
             SoftwareReleaseDict: A dictionary containing either the entire release information or a specific label's information based on the provided criteria.
         """
 
-        key = f"{rel_ver}{f" - {rel_label}" if rel_label else ""}"
+        label_key = f" - {rel_label}"
+        key = f"{rel_ver}{label_key if rel_label else ''}"
+
         return self.get(key, None)
 
-
-    def find_by_str(self, search_str: str) -> list[SoftwareRelease]:
+    def find_by_str(self, search_str: str) -> list[ReleaseType]:
         """
         Search for elements with a key matching the provided search string.
 
@@ -431,4 +432,4 @@ class SoftwareReleaseDict():
             list[SoftwareReleaseBound]: list of elements found
         """
 
-        return [ release for key, release in self.items() if search_str in key ]
+        return [release for key, release in self.items() if search_str in key]

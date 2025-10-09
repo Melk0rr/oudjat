@@ -1,12 +1,12 @@
 """Main module of the software package that defines the notion of software."""
 
 from enum import IntEnum
-from typing import Any, override
+from typing import Any, Generic, override
 
 from ..asset import Asset
 from ..asset_type import AssetType
 from .software_edition import SoftwareEdition, SoftwareEditionDict
-from .software_release import SoftwareRelease, SoftwareReleaseDict
+from .software_release import ReleaseType, SoftwareReleaseDict
 from .software_release_version import SoftwareReleaseVersion
 
 
@@ -17,7 +17,7 @@ class SoftwareType(IntEnum):
     APPLICATION = 1
 
 
-class Software(Asset):
+class Software(Asset, Generic[ReleaseType]):
     """A class to describe softwares."""
 
     # ****************************************************************
@@ -60,7 +60,7 @@ class Software(Asset):
 
         self._editor: list[str] | None = editor
         self._type: SoftwareType = software_type
-        self._releases: SoftwareReleaseDict = SoftwareReleaseDict()
+        self._releases: SoftwareReleaseDict[ReleaseType] = SoftwareReleaseDict[ReleaseType]()
         self._editions: SoftwareEditionDict = SoftwareEditionDict()
 
     # ****************************************************************
@@ -89,7 +89,7 @@ class Software(Asset):
         self._editor = editor
 
     @property
-    def releases(self) -> SoftwareReleaseDict:
+    def releases(self) -> SoftwareReleaseDict[ReleaseType]:
         """
         Return the releases of this software.
 
@@ -135,7 +135,7 @@ class Software(Asset):
 
         return self.releases.find(rel_ver, rel_label) is not None
 
-    def add_release(self, new_release: "SoftwareRelease") -> None:
+    def add_release(self, new_release: ReleaseType) -> None:
         """
         Add a release to the list of software releases.
 
@@ -150,7 +150,7 @@ class Software(Asset):
         if f"{new_rel_ver} - {new_release.label}" not in self.releases.keys():
             self.releases[str(new_rel_ver)] = new_release
 
-    def find_release(self, rel_ver: str, rel_label: str | None = None) -> "SoftwareRelease | None":
+    def find_release(self, rel_ver: str, rel_label: str | None = None) -> "ReleaseType | None":
         """
         Find a release by its version and optionally label.
 
@@ -159,12 +159,12 @@ class Software(Asset):
             rel_label (str, optional): The label of the release to search for. Defaults to None.
 
         Returns:
-            SoftwareRelease: The found release object or None if not found.
+            ReleaseType: The found release object or None if not found.
         """
 
         return self.releases.find(rel_ver, rel_label)
 
-    def retired_releases(self) -> list["SoftwareRelease"]:
+    def retired_releases(self) -> list[ReleaseType]:
         """
         Get a list of retired releases.
 
@@ -174,7 +174,7 @@ class Software(Asset):
 
         return [r for r in self.releases.values() if not r.is_supported()]
 
-    def supported_releases(self) -> list["SoftwareRelease"]:
+    def supported_releases(self) -> list[ReleaseType]:
         """
         Get a list of released that are currently supported.
 
@@ -221,7 +221,7 @@ class Software(Asset):
             dict: A dictionary containing basic class information and lists of releases.
         """
 
-        base_dict = super().to_dict()
+        base_dict: dict[str, Any] = super().to_dict()
         return {
             **base_dict,
             "editor": self.editor,
