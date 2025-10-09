@@ -39,6 +39,7 @@ class Computer(Asset):
         os_release: OSRelease | None = None,
         os_edition: SoftwareEdition | None = None,
         ip: str | IPv4 | None = None,
+        **kwargs: Any,
     ) -> None:
         """
         Initialize a new instance of the class.
@@ -60,6 +61,7 @@ class Computer(Asset):
             os_release (OSRelease, optional)        : The release version of the operating system installed on the computer. Defaults to None.
             os_edition (SoftwareEdition, optional)  : The edition of the operating system for the given release. Defaults to None.
             ip (Union[str, IPv4], optional)         : The IP address assigned to the computer, which can be provided as either a string or an instance of IPv4 class. Defaults to None.
+            kwargs (Any)                            : Any further arguments
         """
 
         super().__init__(
@@ -68,6 +70,7 @@ class Computer(Asset):
             label=label,
             description=description,
             asset_type=AssetType.COMPUTER,
+            **kwargs
         )
 
         self._os: ComputerOSProps = ComputerOSProps(os_release, os_edition)
