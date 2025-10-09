@@ -1,6 +1,6 @@
 """A module that defines the Computer asset type."""
 
-from typing import NamedTuple, override
+from typing import Any, NamedTuple, override
 
 from oudjat.assets import Asset, AssetType
 from oudjat.assets.network.ipv4 import IPv4
@@ -10,6 +10,7 @@ from oudjat.assets.software import (
     SoftwareReleaseSupport,
 )
 from oudjat.assets.software.os import OSRelease
+from oudjat.assets.software.os.os_option import OSOption
 
 from .computer_type import ComputerType
 
@@ -123,6 +124,7 @@ class Computer(Asset):
 
         return self._os.release
 
+    # TODO: Better / simpler computer_type handling
     @os_release.setter
     def os_release(self, new_os_release: OSRelease) -> None:
         """
@@ -132,7 +134,7 @@ class Computer(Asset):
             new_os_release (OSRelease): os release instance to set to this computer
         """
 
-        self.computer_type = next(iter(new_os_release.get_os().get_computer_type()))
+        self.computer_type = next(iter(OSOption[new_os_release.os].value.computer_type))
         self._os = ComputerOSProps(new_os_release, self._os.edition)
 
     @property
@@ -178,7 +180,7 @@ class Computer(Asset):
         """
 
         if new_os.release is not None:
-            self.computer_type = next(iter(new_os.release.get_os().get_computer_type()))
+            self.computer_type = next(iter(OSOption[new_os.release.os].value.computer_type))
 
         self._os = new_os
 
