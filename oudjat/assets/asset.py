@@ -1,7 +1,7 @@
 """A module that defines base Asset properties."""
 
 from abc import ABC
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING, Any, override
 
 from .asset_type import AssetType
 from .generic_identifiable import GenericIdentifiable
@@ -28,6 +28,7 @@ class Asset(GenericIdentifiable, ABC):
         label: str | None = None,
         description: str | None = None,
         location: Location | list[Location] | None = None,
+        **kwargs: Any,
     ) -> None:
         """
         Create a new instance of Asset.
@@ -36,12 +37,13 @@ class Asset(GenericIdentifiable, ABC):
         Also initializes the location attribute as an empty list and sets the given locations using the set_location method.
 
         Args:
-            asset_id (Union[int, str])                              : The unique identifier for the asset.
-            name (str)                                              : The name of the asset.
-            asset_type (AssetType)                                  : The type of the asset.
-            label (str, optional)                                   : A short description or label for the asset. Defaults to None.
-            description (str, optional)                             : A detailed description of the asset. Defaults to None.
-            location (Union["Location", List["Location"]], optional): The location(s) where the asset is situated. Defaults to None.
+            asset_id (Union[int, str])                        : The unique identifier for the asset.
+            name (str)                                        : The name of the asset.
+            asset_type (AssetType)                            : The type of the asset.
+            label (str, optional)                             : A short description or label for the asset. Defaults to None.
+            description (str, optional)                       : A detailed description of the asset. Defaults to None.
+            location ("Location" | list["Location"], optional): The location(s) where the asset is situated. Defaults to None.
+            kwargs (Any)                                      : Any further arguments
         """
 
         super().__init__(gid=asset_id, name=name, label=label or "", description=description or "")
