@@ -10,8 +10,9 @@ from ..generic_identifiable import GenericIdentifiable
 class GroupMemberList(dict):
     """Dict override to handle member list."""
 
+MemberType = TypeVar("MemberType", bound=GenericIdentifiable)
 
-class Group(Asset):
+class Group(Asset, Generic[MemberType]):
     """A class to handle groups of assets."""
 
     # ****************************************************************
@@ -45,12 +46,13 @@ class Group(Asset):
             **kwargs,
         )
 
-        self.members: GroupMemberList = GroupMemberList()
+        self._members: dict[str, MemberType] = {}
 
     # ****************************************************************
     # Methods
 
-    def get_members(self) -> dict[str, Asset]:
+    @property
+    def members(self) -> dict[str, MemberType]:
         """
         Return the members of the group.
 
