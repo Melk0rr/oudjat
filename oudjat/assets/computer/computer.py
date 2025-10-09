@@ -261,6 +261,17 @@ class Computer(Asset):
         return self._os.release.is_supported(str(self._os.edition))
 
     @override
+    def __str__(self) -> str:
+        """
+        Convert the current computer instance into a string.
+
+        Returns:
+            str: a string representation of the current instance
+        """
+
+        return self.name
+
+    @override
     def to_dict(self) -> dict:
         """
         Convert the current instance into a dictionary representation.
