@@ -25,3 +25,4 @@ class OSOption(Enum):
         computer_type=ComputerType.SERVER,
         description="Microsoft operating system for servers",
     )
+

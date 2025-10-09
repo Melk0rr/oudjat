@@ -39,7 +39,7 @@ class LDAPComputer(LDAPAccount, Computer):
         if os_family_infos is not None and raw_os_version is not None:
             os: OperatingSystem = OSOption[os_family_infos.replace(" ", "").upper()].value
 
-            if len(os.releases) == 0:
+            if len(os.releases.values()) == 0:
                 os.gen_releases()
 
             os_ver = os.__class__.find_version_in_str(raw_os_version)
