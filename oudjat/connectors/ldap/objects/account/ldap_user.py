@@ -1,6 +1,6 @@
 """A module to handle LDAPUser manipulations."""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, override
 
 from oudjat.assets.user import User
 
@@ -96,7 +96,8 @@ class LDAPUser(LDAPAccount, User):
 
         return is_admin
 
-    def to_dict(self) -> Dict:
+    @override
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
 

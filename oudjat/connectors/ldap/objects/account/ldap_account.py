@@ -36,20 +36,20 @@ class LDAPAccount(LDAPObject):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry") -> None:
+    def __init__(self, ldap_entry: "LDAPEntry", **kwargs: Any) -> None:
         """
         Initialize an LDAP Entry-based object with specific handling for user accounts.
 
-        This method initializes the object using data from an `LDAPEntry` instance and performs additional checks to determine account status based on the presence of certain properties like 'userAccountControl'. Additional flags are derived from the 'userAccountControl' property or its Microsoft equivalent (controlled by MS_ACCOUNT_CTL_PROPERTY).
+        This method initializes the object using data from an `LDAPEntry` instance.
+        It performs additional checks to determine account status based on the presence of certain properties like 'userAccountControl'.
+        Additional flags are derived from the 'userAccountControl' property or its Microsoft equivalent (controlled by MS_ACCOUNT_CTL_PROPERTY).
 
         Args:
             ldap_entry (LDAPEntry): An instance of an LDAP entry containing relevant data for user accounts.
-
-        Returns:
-            None
+            kwargs (Any)          : Any further arguments
         """
 
-        super().__init__(ldap_entry=ldap_entry)
+        super().__init__(ldap_entry=ldap_entry, **kwargs)
 
         pwd_last_set = self.get_pwd_last_set()
         self.pwd_last_set_timestp: float | None = pwd_last_set.timestamp() if pwd_last_set is not None else None

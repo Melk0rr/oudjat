@@ -18,7 +18,42 @@ class LDAPEntry(dict):
         Returns:
             str: The DN of the LDAP entry.
         """
+
         return self.__getitem__("dn")
+
+    @property
+    def id(self) -> str:
+        """
+        Return the GUID of the current LDAP entry.
+
+        Returns:
+            str: object GUID string
+        """
+
+        return self.get("objectGUID")
+
+
+    @property
+    def name(self) -> str:
+        """
+        Return the name of the current LDAP entry.
+
+        Returns:
+            str: object name
+        """
+
+        return self.get("name")
+
+    @property
+    def description(self) -> str:
+        """
+        Return the description of the current LDAP entry.
+
+        Returns:
+            str: object description string
+        """
+
+        return self.get("description")
 
     @property
     def attr(self) -> dict[str, Any]:
@@ -28,6 +63,7 @@ class LDAPEntry(dict):
         Returns:
             dict: The "attributes" dictionary containing all the attributes of the LDAP entry.
         """
+
         return self.__getitem__("attributes")
 
     @property
@@ -56,6 +92,7 @@ class LDAPEntry(dict):
         Returns:
             Any: The value of the specified attribute or the default value if not found or empty.
         """
+
         if key not in self.__getitem__("attributes").keys():
             return default_value
 
@@ -77,6 +114,7 @@ class LDAPEntry(dict):
         Returns:
             Any: The value that was assigned to the attribute.
         """
+
         return self.__getitem__("attributes").__setitem__(key, value)
 
     def get_raw(self, key: str) -> Any:
@@ -91,6 +129,7 @@ class LDAPEntry(dict):
         Returns:
             Any: The value of the specified raw attribute or None if not found.
         """
+
         if key not in self.__getitem__("raw_attributes").keys():
             return None
 
@@ -106,6 +145,7 @@ class LDAPEntry(dict):
         Returns:
             bool: True if the object is of the specified class, False otherwise.
         """
+
         return obj_cls.lower() in self.attr.__getitem__("objectClass")
 
 
