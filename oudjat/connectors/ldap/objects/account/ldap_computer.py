@@ -1,18 +1,18 @@
 """A module to handle manipulation of LDAP computer objects."""
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, override
 
 from oudjat.assets.computer import Computer
-from oudjat.assets.software import SoftwareEdition, SoftwareRelease
+from oudjat.assets.software import SoftwareEdition
 from oudjat.assets.software.os import OperatingSystem, OSOption
-from oudjat.assets.software.os.operating_system import OSRelease
 
 from .ldap_account import LDAPAccount
 
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
 
-class LDAPComputer(LDAPAccount, Computer):
+
+class LDAPComputer(LDAPAccount):
     """A class to describe LDAP computer objects."""
 
     # ****************************************************************
@@ -51,14 +51,11 @@ class LDAPComputer(LDAPAccount, Computer):
 
         self.hostname: str = self.entry.get("dNSHostName")
 
-        # TODO: Handle SoftwareRelease and OSRelease
-
-        Computer.__init__(
-            self,
-            computer_id=self.uuid,
+        self.computer: Computer = Computer(
+            computer_id=self._id,
             name=self._name,
             label=self.hostname,
-            description=self.description,
+            description=self._description,
             os_release=os_release,
             os_edition=os_edition,
         )
@@ -66,10 +63,11 @@ class LDAPComputer(LDAPAccount, Computer):
     # ****************************************************************
     # Methods
 
+    @override
     def to_dict(self) -> dict[str, Any]:
         """Convert the current instance into a dictionary."""
 
         base_dict = super().to_dict()
-        cpt_dict = Computer.to_dict(self)
+        cpt_dict = self.computer.to_dict()
 
         return {**base_dict, "hostname": cpt_dict.pop("label"), **cpt_dict}
