@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, TypeVar, override
 
+from oudjat.assets.generic_identifiable import GenericIdentifiable
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
 
 if TYPE_CHECKING:
@@ -11,9 +12,10 @@ if TYPE_CHECKING:
     from .account.group.ldap_group import LDAPGroup
     from .ldap_entry import LDAPEntry
 
+# TODO: Use composition instead of multiple inheritance in different LDAP objects
+
 # ****************************************************************
 # Helper functions
-
 
 def parse_dn(dn: str) -> dict[str, list[str]]:
     """
@@ -23,7 +25,7 @@ def parse_dn(dn: str) -> dict[str, list[str]]:
         dn (str) : distinguished name to parse
 
     Returns:
-        Dict : dictionary of dn pieces (CN, OU, DC)
+        dict[str, list[str]] : dictionary of dn pieces (CN, OU, DC)
     """
 
     pieces: dict[str, list[str]] = {}
@@ -38,7 +40,7 @@ def parse_dn(dn: str) -> dict[str, list[str]]:
     return pieces
 
 
-class LDAPObject:
+class LDAPObject(GenericIdentifiable):
     """
     Defines common properties and behavior accross LDAP objects.
     """
@@ -46,7 +48,7 @@ class LDAPObject:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry") -> None:
+    def __init__(self, ldap_entry: "LDAPEntry", **kwargs: Any) -> None:
         """
         Initialize an LDAP Entry-based object.
 
@@ -54,14 +56,18 @@ class LDAPObject:
 
         Args:
             ldap_entry (LDAPEntry) : ldap entry instance to be used to populate object data
+            kwargs (Any)           : any further arguments
         """
 
         self.entry: LDAPEntry = ldap_entry
+        super().__init__(
+            gid=self.entry.id,
+            name=self.entry.name,
+            description=self.entry.description,
+        )
+
         self.dn: str = self.entry.dn
-        self.name: str = self.entry.get("name")
-        self.uuid: str = self.entry.get("objectGUID")
         self.sid: str = self.entry.get("objectSid")
-        self.description: str = self.entry.get("description", "")
 
         self.classes: list[str] = self.entry.get("objectClass", [])
 
@@ -86,16 +92,6 @@ class LDAPObject:
 
         return self.entry.dn
 
-    def get_name(self) -> str:
-        """
-        Getter for ldap object name.
-
-        Returns:
-            str: The name attribute of the LDAP object.
-        """
-
-        return self.name
-
     def get_sid(self) -> str:
         """
         Getter for ldap object sid.
@@ -105,16 +101,6 @@ class LDAPObject:
         """
 
         return self.sid
-
-    def get_uuid(self) -> str:
-        """
-        Getter for ldap object uuid.
-
-        Returns:
-            str: The universally unique identifier (UUID) of the LDAP object.
-        """
-
-        return self.uuid
 
     def get_entry(self) -> dict[str, Any]:
         """
@@ -155,16 +141,6 @@ class LDAPObject:
         """
 
         return self.dn_pieces
-
-    def get_description(self) -> str:
-        """
-        Getter for ldap object description.
-
-        Returns:
-            str: The description attribute of the LDAP object.
-        """
-
-        return self.description
 
     def get_domain(self) -> str:
         """
@@ -218,7 +194,7 @@ class LDAPObject:
             bool: True if the object is contained in the given OU; otherwise, False.
         """
 
-        return ou_name in self.dn if recursive else f"{self.get_name()}OU={ou_name}" in self.dn
+        return ou_name in self.dn if recursive else f"{self.name}OU={ou_name}" in self.dn
 
     def is_member_of(
         self, ldap_connector: "LDAPConnector", ldap_group: "LDAPGroup", extended: bool = False
@@ -250,6 +226,7 @@ class LDAPObject:
 
         return self.get_dn()
 
+    @override
     def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
@@ -259,12 +236,10 @@ class LDAPObject:
         """
 
         return {
+            **super().to_dict(),
             "dn": self.dn,
-            "name": self.name,
-            "guid": self.uuid,
             "sid": self.sid,
             "classes": self.classes,
-            "description": self.description,
             "domain": self.domain,
             "creation_date": TimeConverter.date_to_str(
                 self.creation_date, DateFormat.from_flag(DateFlag.YMD_HMS)
