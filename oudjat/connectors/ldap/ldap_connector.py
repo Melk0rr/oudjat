@@ -14,7 +14,6 @@ from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.types import StrType
 
 from .objects.ldap_entry import LDAPEntry
-from .objects.ldap_object import LDAPObject, LDAPObjectBoundType
 from .objects.ldap_object_types import LDAPObjectType
 
 if TYPE_CHECKING:
@@ -22,6 +21,7 @@ if TYPE_CHECKING:
     from .objects.account.ldap_computer import LDAPComputer
     from .objects.account.ldap_user import LDAPUser
     from .objects.gpo.ldap_gpo import LDAPGroupPolicyObject
+    from .objects.ldap_object import LDAPObject, LDAPObjectBoundType
     from .objects.ou.ldap_ou import LDAPOrganizationalUnit
     from .objects.subnet.ldap_subnet import LDAPSubnet
 
@@ -120,8 +120,9 @@ class LDAPConnector(Connector):
         self.use_tls = use_tls
         self.port = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
 
+    # TODO: Make a type alias for tls versions
     @override
-    def connect(self, version: ssl._SSLMethod | None = None) -> None:
+    def connect(self, version: "ssl._SSLMethod | None" = None) -> None:
         """
         Initiate connection to target server.
 
@@ -235,7 +236,7 @@ class LDAPConnector(Connector):
             **kwargs (Dict)             : any other argument to pass
 
         Returns:
-            List[LDAPEntry]: list of ldap entries
+            list[LDAPEntry]: list of ldap entries
         """
 
         if self.connection is None:
@@ -289,7 +290,7 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        return self.map_entries(entries, LDAPGroupPolicyObject)
+        return self.map_entries(entries, LDAPObjectType.GPO.value.python_cls)
 
     def get_subnet(
         self, search_filter: str | None = None, attributes: StrType | None = None
@@ -314,7 +315,7 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        return self.map_entries(entries, LDAPSubnet)
+        return self.map_entries(entries, LDAPObjectType.SUBNET.value.python_cls)
 
     def get_computer(
         self,
@@ -331,7 +332,7 @@ class LDAPConnector(Connector):
             search_base (str)           : where to base the search on in terms of directory location
 
         Returns:
-            List[LDAPComputer]: list of computers
+            list[LDAPComputer]: list of computers
         """
 
         entries = self.search(
@@ -358,7 +359,7 @@ class LDAPConnector(Connector):
             search_base (str)           : where to base the search on in terms of directory location
 
         Returns:
-            List[LDAPUser]: list of users
+            list[LDAPUser]: list of users
         """
 
         entries = self.search(
@@ -381,7 +382,7 @@ class LDAPConnector(Connector):
             recursive (bool)      : wheither to retrieve members recursively or not
 
         Returns:
-            List[LDAPObject]: list of members
+            list[LDAPObject]: list of members
         """
 
         members = []
@@ -395,12 +396,12 @@ class LDAPConnector(Connector):
 
             if len(ref_search) > 0:
                 search_entry: LDAPEntry = ref_search[0]
-                obj_type = search_entry.get_type()
+                obj_type = search_entry.type
 
-                new_member = LDAPObjectType.get_ldap_class(obj_type)(ldap_entry=search_entry)
+                new_member = LDAPObjectType.get_python_class(obj_type)(ldap_entry=search_entry)
 
                 if isinstance(new_member, LDAPGroup) and recursive:
-                    new_member.get_members(ldap_connector=self, recursive=recursive)
+                    new_member.fetch_members(ldap_connector=self, recursive=recursive)
 
                 members.append(new_member)
 
@@ -426,7 +427,7 @@ class LDAPConnector(Connector):
             if extended
             else ldap_group.members.values()
         )
-        return ldap_object.get_uuid() in [m.get_id() for m in member_ref_list]
+        return ldap_object.id in [m.id for m in member_ref_list]
 
     def get_ou(
         self,
@@ -444,7 +445,7 @@ class LDAPConnector(Connector):
             search_base (str)           : where to base the search on in terms of directory location
 
         Returns:
-            List[LDAPOrganizationalUnit]: list of OU matching filter
+            list[LDAPOrganizationalUnit]: list of OU matching filter
         """
 
         entries = self.search(
@@ -454,7 +455,7 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        return self.map_entries(entries, LDAPOrganizationalUnit)
+        return self.map_entries(entries, LDAPObjectType.OU.value.python_cls)
 
     def get_ou_objects(
         self,
@@ -486,7 +487,7 @@ class LDAPConnector(Connector):
         # TODO: handle recursieve arguments
         return self.search(attributes="*", **search_args)
 
-    def complete_partial_entry(self, ldap_entry: LDAPEntry) -> LDAPEntry:
+    def complete_partial_entry(self, ldap_entry: "LDAPEntry") -> "LDAPEntry":
         """
         Completes a partial LDAP entry by searching for the full details of the entry in the LDAP directory.
 
@@ -502,11 +503,11 @@ class LDAPConnector(Connector):
         """
 
         return self.search(
-            search_type=LDAPObjectType.from_object_cls(ldap_entry.get_type()),
-            search_filter=f"(distinguishedName={ldap_entry.get_dn()})",
+            search_type=LDAPObjectType.from_object_cls(ldap_entry.type),
+            search_filter=f"(distinguishedName={ldap_entry.dn})",
         )[0]
 
-    def get_domain_admins(self) -> list[LDAPEntry]:
+    def get_domain_admins(self) -> list["LDAPEntry"]:
         """
         Return a list of the domain and enterprise admins.
 
@@ -524,7 +525,7 @@ class LDAPConnector(Connector):
 
     @staticmethod
     def map_entries(
-        entries: list[LDAPEntry], ldap_cls: type[LDAPObjectBoundType]
+        entries: list["LDAPEntry"], ldap_cls: type["LDAPObjectBoundType"]
     ) -> list[LDAPObjectBoundType]:
         """
         Map a list of ldap entries to a list of the provided LDAP class.
