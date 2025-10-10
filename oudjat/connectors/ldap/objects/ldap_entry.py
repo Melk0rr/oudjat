@@ -66,6 +66,7 @@ class LDAPEntry(dict):
 
         return self.__getitem__("attributes")
 
+    # TODO: Remove the need to use LDAPObjectType (type should only return raw objectClass)
     @property
     def type(self) -> str:
         """
@@ -149,7 +150,7 @@ class LDAPEntry(dict):
         return obj_cls.lower() in self.attr.__getitem__("objectClass")
 
 
-    def compare_to_obj_type_cls(self, object_type: LDAPObjectType) -> bool:
+    def compare_to_obj_type_cls(self, object_type: "LDAPObjectType") -> bool:
         """
         Compare current entry objectClass and the provided LDAPObjectType objectClass attribute.
 
