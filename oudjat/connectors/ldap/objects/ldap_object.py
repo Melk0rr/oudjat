@@ -8,11 +8,7 @@ from oudjat.assets.generic_identifiable import GenericIdentifiable
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
 
 if TYPE_CHECKING:
-    from ..ldap_connector import LDAPConnector
-    from .account.group.ldap_group import LDAPGroup
     from .ldap_entry import LDAPEntry
-
-# TODO: Use composition instead of multiple inheritance in different LDAP objects
 
 # ****************************************************************
 # Helper functions
@@ -195,25 +191,6 @@ class LDAPObject(GenericIdentifiable):
         """
 
         return ou_name in self.dn if recursive else f"{self.name}OU={ou_name}" in self.dn
-
-    def is_member_of(
-        self, ldap_connector: "LDAPConnector", ldap_group: "LDAPGroup", extended: bool = False
-    ) -> bool:
-        """
-        Check whether the current object is a member of the provided group.
-
-        Args:
-            ldap_connector (LDAPConnector): The LDAP connection object used to perform the membership check.
-            ldap_group (LDAPGroup)        : The group to which the user's membership should be checked against.
-            extended (bool, optional)     : A flag indicating whether an extended search should be performed. Defaults to False.
-
-        Returns:
-            bool: True if the current user is a member of the provided LDAP group; otherwise, False.
-        """
-
-        return ldap_connector.is_object_member_of(
-            ldap_object=self, ldap_group=ldap_group, extended=extended
-        )
 
     @override
     def __str__(self) -> str:
