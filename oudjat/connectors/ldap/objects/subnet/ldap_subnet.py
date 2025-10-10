@@ -1,5 +1,6 @@
 """A module to handle subnet objects in LDAP."""
-from typing import TYPE_CHECKING
+
+from typing import TYPE_CHECKING, Any, override
 
 from oudjat.assets.network.subnet import Subnet
 
@@ -9,7 +10,7 @@ if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
 
 
-class LDAPSubnet(LDAPObject, Subnet):
+class LDAPSubnet(LDAPObject):
     """A class to describe LDAP subnet objects."""
 
     # ****************************************************************
@@ -24,8 +25,7 @@ class LDAPSubnet(LDAPObject, Subnet):
         """
 
         super().__init__(ldap_entry=ldap_entry)
-        Subnet.__init__(
-            self,
+        self.subnet: Subnet = Subnet(
             address=ldap_entry.get("name"),
             name=ldap_entry.get("location"),
             description=" ".join(ldap_entry.get("description")),
@@ -33,3 +33,25 @@ class LDAPSubnet(LDAPObject, Subnet):
 
     # ****************************************************************
     # Methods
+
+    @override
+    def __str__(self) -> str:
+        """
+        Convert the current instance into a string.
+
+        Returns:
+            str: string representation of the current instance
+        """
+
+        return str(self.subnet)
+
+    @override
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the current instance into a dictionary.
+
+        Returns:
+            dict[str, Any]: dictionary representation of the current instance
+        """
+
+        return self.subnet.to_dict()

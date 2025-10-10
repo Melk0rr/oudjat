@@ -4,12 +4,12 @@ import re
 from typing import TYPE_CHECKING, Any, override
 
 from ..definitions import UUID_REG
-from ..ldap_object import LDAPObject
 
 if TYPE_CHECKING:
     from ...ldap_connector import LDAPConnector
-    from ..gpo import LDAPGroupPolicyObject
+    from ..gpo.ldap_gpo import LDAPGroupPolicyObject
     from ..ldap_entry import LDAPEntry
+    from ..ldap_object import LDAPObject
 
 class LDAPOrganizationalUnit(LDAPObject):
     """

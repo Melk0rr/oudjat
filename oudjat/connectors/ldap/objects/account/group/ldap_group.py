@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from ...ldap_object import LDAPObject
 
 
-class LDAPGroup(LDAPObject, Group[LDAPObject]):
+class LDAPGroup(LDAPObject):
     """A class to handle LDAP group objects."""
 
     # ****************************************************************
@@ -29,20 +29,28 @@ class LDAPGroup(LDAPObject, Group[LDAPObject]):
             ldap_parent_group (LDAPGroup): to optionaly specify the parent group
         """
 
-        super().__init__(
-            ldap_entry=ldap_entry,
-            group_id=ldap_entry.get("objectGUID"),
-            name=ldap_entry.get("name"),
-            label=ldap_entry.dn,
-            description=ldap_entry.get("description"),
-        )
+        super().__init__(ldap_entry=ldap_entry)
 
-        # Group.__init__(
-        #     self, group_id=self.id, name=self._name, label=self.dn, description=self.description
-        # )
+        self.group: Group[LDAPObject] = Group[LDAPObject](
+            group_id=self.entry.get("objectGUID"),
+            name=self.entry.get("name"),
+            label=self.entry.dn,
+            description=self.entry.get("description"),
+        )
 
     # ****************************************************************
     # Methods
+
+    @property
+    def members(self) -> dict[str, LDAPObject]:
+        """
+        Return the members of the current LDAPGroup.
+
+        Returns:
+            dict[str, LDAPObject]: members as a dictionary of LDAPObject instances
+        """
+
+        return self.group.members
 
     def get_group_type_raw(self) -> int:
         """
@@ -69,10 +77,20 @@ class LDAPGroup(LDAPObject, Group[LDAPObject]):
         Return member refs.
 
         Returns:
-            List[str]: a list of group member refs
+            list[str]: a list of group member refs
         """
 
         return self.entry.get("member") or []
+
+    def add_member(self, member: LDAPObject) -> None:
+        """
+        Add a new member to th current LDAPGroup instance.
+
+        Args:
+            member (LDAPObject): member to add
+        """
+
+        self.group.add_member(member)
 
     def fetch_members(
         self,
@@ -87,7 +105,7 @@ class LDAPGroup(LDAPObject, Group[LDAPObject]):
             recursive (bool)              : either to retrieve the members recursively or not
 
         Returns:
-            List[LDAPObject]: a list of the group members
+            list[LDAPObject]: a list of the group members
         """
 
         direct_members = ldap_connector.get_group_members(ldap_group=self, recursive=recursive)
@@ -136,7 +154,7 @@ class LDAPGroup(LDAPObject, Group[LDAPObject]):
             recursive (bool)              : either to retrieve the members recursively or not
 
         Returns:
-            List[LDAPObject]: a list of the members with sub group excluded
+            list[LDAPObject]: a list of the members with sub group excluded
         """
 
         if len(self.members.keys()) == 0:
@@ -211,8 +229,9 @@ class LDAPGroup(LDAPObject, Group[LDAPObject]):
         """
         return {
             **super().to_dict(),
+            **self.group.to_dict(),
             "group_type": self.get_group_type().name,
-            "member_names": self.member_names,
+            "member_names": self.group.member_names,
         }
 
 

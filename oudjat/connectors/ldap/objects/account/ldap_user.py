@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
 
 
-class LDAPUser(LDAPAccount, User):
+class LDAPUser(LDAPAccount):
     """A class to describe LDAP user objects."""
 
     # ****************************************************************
@@ -46,15 +46,14 @@ class LDAPUser(LDAPAccount, User):
                 if LDAPAccountFlag.check_flag(ms_acc_ctl, flag):
                     self.account_flags.add(flag.name)
 
-        User.__init__(
-            self,
-            user_id=self.uuid,
+        self.user: User = User(
+            user_id=self._id,
             name=self._name,
             firstname=self.entry.get("givenName"),
             lastname=self.entry.get("sn"),
             email=email,
             login=self.get_san(),
-            description=self.description,
+            description=self._description,
         )
 
     # ****************************************************************
@@ -108,7 +107,7 @@ class LDAPUser(LDAPAccount, User):
         base_dict = super().to_dict()
         base_dict.pop("san")
 
-        user_dict = User.to_dict(self)
+        user_dict = self.user.to_dict()
 
         return {
             **base_dict,

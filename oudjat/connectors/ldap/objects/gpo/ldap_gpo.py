@@ -13,7 +13,7 @@ from .ms_gppref import MS_GPPREF
 if TYPE_CHECKING:
     from ...ldap_connector import LDAPConnector
     from ..ldap_entry import LDAPEntry
-    from ..ou import LDAPOrganizationalUnit
+    from ..ou.ldap_ou import LDAPOrganizationalUnit
 
 
 class LDAPGPOScope(Enum):
