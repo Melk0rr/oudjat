@@ -251,3 +251,17 @@ class LDAPObjectType(Enum):
         """
 
         return LDAPObjectType[object_type.upper()].python_cls
+
+    @staticmethod
+    def resolve_entry_type(entry_obj_cls: list[str]) -> str:
+        """
+        Determine the object type of an LDAP entry based on its "objectClass" attribute.
+
+        Returns:
+            str | None: The name of the object class, or None if no matching class is found.
+        """
+
+        return next(
+            (t.name for t in LDAPObjectType if entry_obj_cls and entry_obj_cls[-1] == t.object_cls),
+            "*",
+        )
