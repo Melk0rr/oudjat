@@ -1,6 +1,8 @@
 """Main module of the LDAP group package that implement LDAP group object manipulations tools."""
 
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, Any, Callable, override
+
+from ldap3.utils.conv import escape_filter_chars
 
 from oudjat.assets.group import Group
 
@@ -94,46 +96,62 @@ class LDAPGroup(LDAPObject):
 
     def fetch_members(
         self,
-        ldap_connector: "LDAPConnector",
+        ldap_get_member_func: Callable[..., list["LDAPObject"]],
         recursive: bool = False,
     ) -> None:
         """
         Retrieve the group members.
 
         Args:
-            ldap_connector (LDAPConnector): ldap connector instance to use for the request
-            recursive (bool)              : either to retrieve the members recursively or not
+            ldap_get_member_func (Callable[..., list[LDAPObject]]): LDAP
+            recursive (bool)                                      : Either to retrieve the members recursively or not
 
         Returns:
             list[LDAPObject]: a list of the group members
         """
 
-        direct_members = ldap_connector.get_group_members(ldap_group=self, recursive=recursive)
+        direct_members = []
+        for ref in self.get_member_refs():
+            # INFO: Search for the ref in LDAP server
+            # TODO: Must implement an LDAPFilter class to handle potential escape characters
+            escaped_ref = escape_filter_chars(ref)
+            ref_search: list["LDAPEntry"] = self.entry.ldap_search(
+                search_filter=f"(distinguishedName={escaped_ref})"
+            )
+
+            if len(ref_search) > 0:
+                search_entry: "LDAPEntry" = ref_search[0]
+                obj_type = LDAPObjectType.resolve_entry_type(search_entry)
+
+                new_member = LDAPObjectType.get_python_class(obj_type)(ldap_entry=search_entry)
+                if isinstance(new_member, LDAPGroupTypeAlias) and recursive:
+                    new_member.fetch_members(ldap_connector=self, recursive=recursive)
+
+                direct_members.append(new_member)
 
         for member in direct_members:
             self.add_member(member)
 
     def get_sub_groups(
-        self, ldap_connector: "LDAPConnector", recursive: bool = False
+        self, ldap_get_member_func: Callable[..., list["LDAPObject"]], recursive: bool = False
     ) -> list["LDAPGroup"]:
         """
         Return child group of the current group.
 
         Args:
-            ldap_connector (LDAPConnector): ldap connector instance to use for the request
-            recursive (bool)              : either to retrieve the sub groups recursively or not
+            ldap_connector (LDAPConnector): LDAP connector instance to use for the request
+            recursive (bool)              : Either to retrieve the sub groups recursively or not
 
         Returns:
-            List[LDAPGroup]: a list of sub groups
+            list[LDAPGroup]: a list of sub groups
         """
 
         if len(self.members.keys()) == 0:
             self.fetch_members(ldap_connector=ldap_connector, recursive=recursive)
 
-        sub_groups = []
+        sub_groups: list["LDAPGroup"] = []
         for member in self.members.values():
-            if member.entry.type.lower() == "group":
-                assert isinstance(member, LDAPGroup)
+            if isinstance(member, LDAPGroup):
                 sub_groups.append(member)
 
                 if recursive:

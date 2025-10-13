@@ -3,7 +3,7 @@
 import socket
 import ssl
 from enum import IntEnum
-from typing import TYPE_CHECKING, Any, TypedDict, override
+from typing import TYPE_CHECKING, Any, TypeAlias, TypedDict, override
 
 import ldap3
 from ldap3.core.exceptions import LDAPSocketOpenError
@@ -17,14 +17,17 @@ from .objects.ldap_entry import LDAPEntry
 from .objects.ldap_object_types import LDAPObjectType
 
 if TYPE_CHECKING:
-    from .objects.account.group.ldap_group import LDAPGroup
-    from .objects.account.ldap_computer import LDAPComputer
-    from .objects.account.ldap_user import LDAPUser
-    from .objects.gpo.ldap_gpo import LDAPGroupPolicyObject
-    from .objects.ldap_object import LDAPObject, LDAPObjectBoundType
-    from .objects.ou.ldap_ou import LDAPOrganizationalUnit
-    from .objects.subnet.ldap_subnet import LDAPSubnet
+    from .objects.ldap_object import LDAPObjectBoundType
 
+LDAPObjectTypeAlias = LDAPObjectType.DEFAULT.value.python_cls
+LDAPGroupTypeAlias = LDAPObjectType.GROUP.value.python_cls
+LDAPComputerTypeAlias = LDAPObjectType.COMPUTER.value.python_cls
+LDAPUserTypeAlias = LDAPObjectType.USER.value.python_cls
+LDAPGPOTypeAlias = LDAPObjectType.GPO.value.python_cls
+LDAPOUTypeAlias = LDAPObjectType.OU.value.python_cls
+LDAPSubnetTypeAlias = LDAPObjectType.SUBNET.value.python_cls
+
+LDAPObjListTypeAlias: TypeAlias = list[LDAPObjectTypeAlias | LDAPComputerTypeAlias | LDAPUserTypeAlias | LDAPOUTypeAlias | LDAPGPOTypeAlias]
 
 class LDAPPort(IntEnum):
     """
@@ -219,7 +222,7 @@ class LDAPConnector(Connector):
     @override
     def search(
         self,
-        search_type: "LDAPObjectType" = LDAPObjectType.DEFAULT,
+        search_type: "LDAPObjectType | str" = LDAPObjectType.DEFAULT,
         search_base: str | None = None,
         search_filter: str | None = None,
         attributes: StrType | None = None,
@@ -244,6 +247,9 @@ class LDAPConnector(Connector):
                 f"{__class__.__name__}.search::You must initiate connection to {self.target} before running search !"
             )
 
+        if isinstance(search_type, str):
+            search_type = LDAPObjectType[search_type]
+
         # INFO: If the search type is default : final filter is equal to provided search filter
         # Else final filter is a combination of filter matching search type + provided search filter
         formated_filter = search_type.filter
@@ -261,16 +267,27 @@ class LDAPConnector(Connector):
             **kwargs,
         )
 
+        def ldap_entry_from_dict(entry: dict[str, Any]) -> "LDAPEntry":
+
+            if entry.get("attributes", None) is None:
+                raise ValueError(f"{__class__.__name__}.ldap_entry_from_dict::Invalid entry provided")
+
+            entry["ldap_search"] = self.search
+            entry["ldap_map"] = LDAPConnector.map_entries_from_str
+            entry["ldap_obj_type"] = LDAPObjectType.resolve_entry_type(entry.get("attributes", {}).get("objectClass", []))
+
+            return LDAPEntry(**entry)
+
         return list(
             map(
-                LDAPConnector.ldap_entry_from_dict,
+                ldap_entry_from_dict,
                 filter(LDAPConnector.check_entry_type, results),
             )
         )
 
     def get_gpo(
         self, displayName: str = "*", name: str = "*", attributes: StrType | None = None
-    ) -> list["LDAPGroupPolicyObject"]:
+    ) -> list["LDAPGPOTypeAlias"]:
         """
         Specific method to retrieve LDAP GPO instances.
 
@@ -290,17 +307,17 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        return self.map_entries(entries, LDAPObjectType.GPO.value.python_cls)
+        return LDAPConnector.map_entries(entries, LDAPObjectType.GPO.value.python_cls)
 
     def get_subnet(
         self, search_filter: str | None = None, attributes: StrType | None = None
-    ) -> list["LDAPSubnet"]:
+    ) -> list["LDAPSubnetTypeAlias"]:
         """
         Specific method to retrieve LDAP subnet instances.
 
         Args:
             search_filter (str)         : filter to reduce search results
-            attributes (str | List[str]): attributes to include in result
+            attributes (str | list[str]): attributes to include in result
 
         Returns:
             List[LDAPSubnet]: list of subnets
@@ -315,14 +332,14 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        return self.map_entries(entries, LDAPObjectType.SUBNET.value.python_cls)
+        return LDAPConnector.map_entries(entries, LDAPSubnetTypeAlias)
 
     def get_computer(
         self,
         search_filter: str | None = None,
         attributes: StrType | None = None,
         search_base: str | None = None,
-    ) -> list["LDAPComputer"]:
+    ) -> list["LDAPComputerTypeAlias"]:
         """
         Specific method to retrieve LDAP Computer instances.
 
@@ -342,14 +359,14 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        return self.map_entries(entries, LDAPComputer)
+        return LDAPConnector.map_entries(entries, LDAPComputerTypeAlias)
 
     def get_users(
         self,
         search_filter: str | None = None,
         attributes: StrType | None = None,
         search_base: str | None = None,
-    ) -> list["LDAPUser"]:
+    ) -> list["LDAPUserTypeAlias"]:
         """
         Specific method to retrieve LDAP User instances.
 
@@ -359,7 +376,7 @@ class LDAPConnector(Connector):
             search_base (str)           : where to base the search on in terms of directory location
 
         Returns:
-            list[LDAPUser]: list of users
+            list[LDAPUserTypeAlias]: list of users
         """
 
         entries = self.search(
@@ -369,11 +386,11 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        return self.map_entries(entries, LDAPUser)
+        return LDAPConnector.map_entries(entries, LDAPUserTypeAlias)
 
     def get_group_members(
-        self, ldap_group: "LDAPGroup", recursive: bool = False
-    ) -> list["LDAPObject"]:
+        self, ldap_group: "LDAPGroupTypeAlias", recursive: bool = False
+    ) -> list["LDAPObjectTypeAlias"]:
         """
         Retrieve and returns the members of the given group.
 
@@ -396,11 +413,10 @@ class LDAPConnector(Connector):
 
             if len(ref_search) > 0:
                 search_entry: LDAPEntry = ref_search[0]
-                obj_type = search_entry.type
+                obj_type = LDAPObjectType.resolve_entry_type(search_entry.object_cls)
 
                 new_member = LDAPObjectType.get_python_class(obj_type)(ldap_entry=search_entry)
-
-                if isinstance(new_member, LDAPGroup) and recursive:
+                if isinstance(new_member, LDAPGroupTypeAlias) and recursive:
                     new_member.fetch_members(ldap_connector=self, recursive=recursive)
 
                 members.append(new_member)
@@ -408,7 +424,7 @@ class LDAPConnector(Connector):
         return members
 
     def is_object_member_of(
-        self, ldap_object: "LDAPObject", ldap_group: "LDAPGroup", extended: bool = False
+        self, ldap_object: "LDAPObjectTypeAlias", ldap_group: "LDAPGroupTypeAlias", extended: bool = False
     ) -> bool:
         """
         Check wheither the given object is member of the giver group.
@@ -434,7 +450,7 @@ class LDAPConnector(Connector):
         search_filter: str | None = None,
         search_base: str | None = None,
         attributes: StrType | None = None,
-    ) -> list["LDAPOrganizationalUnit"]:
+    ) -> list["LDAPOUTypeAlias"]:
         """
         Specific method to retrieve LDAP organizational unit objects.
 
@@ -455,11 +471,11 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        return self.map_entries(entries, LDAPObjectType.OU.value.python_cls)
+        return LDAPConnector.map_entries(entries, LDAPObjectType.OU.value.python_cls)
 
     def get_ou_objects(
         self,
-        ldap_ou: "LDAPOrganizationalUnit",
+        ldap_ou: "LDAPOUTypeAlias",
         object_types: list[str] | None = None,
         recursive: bool = False,
     ) -> list["LDAPEntry"]:
@@ -503,7 +519,7 @@ class LDAPConnector(Connector):
         """
 
         return self.search(
-            search_type=LDAPObjectType.from_object_cls(ldap_entry.type),
+            search_type=LDAPObjectType.from_object_cls(LDAPObjectType.resolve_entry_type(ldap_entry.object_cls)),
             search_filter=f"(distinguishedName={ldap_entry.dn})",
         )[0]
 
@@ -524,6 +540,21 @@ class LDAPConnector(Connector):
     # Static methods
 
     @staticmethod
+    def map_entries_from_str(entries: list["LDAPEntry"], ldap_obj_type: str) -> LDAPObjListTypeAlias:
+        """
+        Map a list of ldap entries to a list of an LDAPObject type matching the provided string.
+
+        Args:
+            entries (list[LDAPEntry]): List of entries to map
+            ldap_obj_type (str)      : LDAPObjectType name the python class will be used to map the provided entries
+
+        Returns:
+            LDAPObjListTypeAlias: mapped list of ldap object
+        """
+
+        return LDAPConnector.map_entries(entries, ldap_cls=LDAPObjectType[ldap_obj_type].value.python_cls)
+
+    @staticmethod
     def map_entries(
         entries: list["LDAPEntry"], ldap_cls: type["LDAPObjectBoundType"]
     ) -> list[LDAPObjectBoundType]:
@@ -531,8 +562,8 @@ class LDAPConnector(Connector):
         Map a list of ldap entries to a list of the provided LDAP class.
 
         Args:
-            entries (List[LDAPEntry]): list of entries to map
-            ldap_cls (LDAPObject)    : ldap class used to map
+            entries (list[LDAPEntry]): List of entries to map
+            ldap_cls (LDAPObject)    : LDAP class used to map
 
         Returns:
             list[LDAPObject]: mapped list of ldap object

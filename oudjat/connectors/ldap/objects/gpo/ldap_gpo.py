@@ -2,7 +2,7 @@
 
 import re
 from enum import Enum, IntEnum
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, Any, Callable, override
 
 from oudjat.utils.types import StrType
 
@@ -11,9 +11,7 @@ from ..ldap_object import LDAPObject
 from .ms_gppref import MS_GPPREF
 
 if TYPE_CHECKING:
-    from ...ldap_connector import LDAPConnector
     from ..ldap_entry import LDAPEntry
-    from ..ou.ldap_ou import LDAPOrganizationalUnit
 
 
 class LDAPGPOScope(Enum):
@@ -36,7 +34,7 @@ class LDAPGroupPolicyObject(LDAPObject):
 
     # ****************************************************************
     # Attributes & Constructors
-    def __init__(self, ldap_entry: "LDAPEntry"):
+    def __init__(self, ldap_entry: "LDAPEntry") -> None:
         """
         Initialize an instance of LDAPGPO.
 
@@ -96,25 +94,25 @@ class LDAPGroupPolicyObject(LDAPObject):
 
     def get_linked_objects(
         self,
-        ldap_connector: "LDAPConnector",
+        ldap_search_func: Callable[..., list["LDAPObject"]],
         attributes: StrType | None = None,
         ou: str = "*",
-    ) -> list["LDAPOrganizationalUnit"]:
+    ) -> list["LDAPObject"]:
         """
         Get the GPO linked objects.
 
         This method searches for LDAP entries that are linked to the current group policy object (GPO).
 
         Args:
-            ldap_connector (LDAPConnector)              : An instance of an LDAP connector used to perform the search operation.
-            attributes (Union[str, List[str], optional) : The attributes to retrieve from the linked LDAP entries.
-            ou (str, optional)                          : The organizational unit (OU) in which to search for linked objects.
+            ldap_search_func (Callable[..., list[LDAPOrganizationalUnit]]): A search function to retrieve LDAPOrganizationalUnit
+            attributes (str | list[str], optional)                        : The attributes to retrieve from the linked LDAP entries.
+            ou (str, optional)                                            : The organizational unit (OU) in which to search for linked objects.
 
         Returns:
-            List["LDAPObject"]: A list of LDAPOrganizationalUnit instances that are linked to the current GPO.
+            list["LDAPObject"]: A list of LDAPOrganizationalUnit instances that are linked to the current GPO.
         """
 
-        return ldap_connector.get_ou(
+        return ldap_search_func(
             search_filter=f"(gPLink={f'*{self.name}*'})(name={ou})", attributes=attributes
         )
 

@@ -1,11 +1,9 @@
 """A module to handle LDAP query results: LDAP entries."""
 
-from typing import Any, override
-
-from .ldap_object_types import LDAPObjectType
+from typing import Any, Callable, override
 
 
-class LDAPEntry(dict):
+class LDAPEntry(dict[str, Any]):
     """A class that describe a result of an LDAP query."""
 
     @property
@@ -31,7 +29,6 @@ class LDAPEntry(dict):
         """
 
         return self.get("objectGUID")
-
 
     @property
     def name(self) -> str:
@@ -66,18 +63,38 @@ class LDAPEntry(dict):
 
         return self.__getitem__("attributes")
 
-    # TODO: Remove the need to use LDAPObjectType (type should only return raw objectClass)
     @property
-    def type(self) -> str:
+    def object_cls(self) -> list[str]:
         """
-        Determine the object type of the LDAP entry based on its "objectClass" attribute.
+        Return current entry object classes.
 
         Returns:
-            str: The name of the object class, or None if no matching class is found.
+            list[str]: object classes represented by a list of strings
         """
 
-        obj_type = next(filter(self.compare_to_obj_type_cls, list(LDAPObjectType)))
-        return obj_type.name or None
+        return self.get("objectClass", [])
+
+    @property
+    def ldap_obj_type(self):
+        """
+        LDAPObjectType of the current entry.
+
+        Returns:
+            LDAPObjectType: ldap object type with all its properties
+        """
+
+        return self.__getitem__("ldap_obj_type")
+
+    @property
+    def ldap_search(self) -> Callable[..., "LDAPEntry"]:
+        """
+        Return the search function provided by an LDAPConnector.
+
+        Returns:
+            Callable[..., LDAPEntry]: a function to return
+        """
+
+        return self.__getitem__("ldap_search")
 
     @override
     def get(self, key: str, default_value: Any = None) -> Any:
@@ -148,17 +165,3 @@ class LDAPEntry(dict):
         """
 
         return obj_cls.lower() in self.attr.__getitem__("objectClass")
-
-
-    def compare_to_obj_type_cls(self, object_type: "LDAPObjectType") -> bool:
-        """
-        Compare current entry objectClass and the provided LDAPObjectType objectClass attribute.
-
-        Args:
-            object_type (LDAPObjectType): element containing the objectClass attribute to compare
-
-        Returns:
-            bool: True if both values are equals, False otherwise
-        """
-
-        return self.attr.__getitem__("objectClass")[-1] == object_type.object_cls
