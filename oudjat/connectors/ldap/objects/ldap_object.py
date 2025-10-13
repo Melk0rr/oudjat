@@ -55,7 +55,7 @@ class LDAPObject(GenericIdentifiable):
             kwargs (Any)           : any further arguments
         """
 
-        self.entry: LDAPEntry = ldap_entry
+        self.entry: "LDAPEntry" = ldap_entry
         super().__init__(
             gid=self.entry.id,
             name=self.entry.name,
