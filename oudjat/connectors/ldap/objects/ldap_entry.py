@@ -1,7 +1,10 @@
 """A module to handle LDAP query results: LDAP entries."""
 
-from typing import Any, Callable, override
+from typing import TYPE_CHECKING, Any, Callable, override
 
+if TYPE_CHECKING:
+    from .ldap_object_utilities import LDAPObjectBoundType
+    from .ldap_object_types import LDAPObjectType
 
 class LDAPEntry(dict[str, Any]):
     """A class that describe a result of an LDAP query."""
@@ -75,7 +78,7 @@ class LDAPEntry(dict[str, Any]):
         return self.get("objectClass", [])
 
     @property
-    def ldap_obj_type(self):
+    def ldap_obj_type(self) -> "LDAPObjectType":
         """
         LDAPObjectType of the current entry.
 
@@ -86,15 +89,26 @@ class LDAPEntry(dict[str, Any]):
         return self.__getitem__("ldap_obj_type")
 
     @property
-    def ldap_search(self) -> Callable[..., "LDAPEntry"]:
+    def ldap_search(self) -> Callable[..., list["LDAPEntry"]]:
         """
         Return the search function provided by an LDAPConnector.
 
         Returns:
-            Callable[..., LDAPEntry]: a function to return
+            Callable[..., list[LDAPEntry]]: a function to query an LDAP server through an LDAPConnector provider
         """
 
         return self.__getitem__("ldap_search")
+
+    @property
+    def ldap_python_cls(self) -> Callable[[str], "LDAPObjectBoundType"]:
+        """
+        Return a function that provides the mean for this entry to retrieve its matching LDAPObjectBoundType class.
+
+        Returns:
+            Callable[..., LDAPObjectBoundType]: A function to retrieve an LDAPObjectBoundType class matching the current entry type
+        """
+
+        return self.__getitem__("ldap_python_cls")
 
     @override
     def get(self, key: str, default_value: Any = None) -> Any:

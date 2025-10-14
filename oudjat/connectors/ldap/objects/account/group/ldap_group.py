@@ -96,7 +96,6 @@ class LDAPGroup(LDAPObject):
 
     def fetch_members(
         self,
-        ldap_get_member_func: Callable[..., list["LDAPObject"]],
         recursive: bool = False,
     ) -> None:
         """
@@ -121,11 +120,11 @@ class LDAPGroup(LDAPObject):
 
             if len(ref_search) > 0:
                 search_entry: "LDAPEntry" = ref_search[0]
-                obj_type = LDAPObjectType.resolve_entry_type(search_entry)
+                LDAPObjectCls = self.entry.ldap_python_cls(search_entry.ldap_obj_type.name)
 
-                new_member = LDAPObjectType.get_python_class(obj_type)(ldap_entry=search_entry)
-                if isinstance(new_member, LDAPGroupTypeAlias) and recursive:
-                    new_member.fetch_members(ldap_connector=self, recursive=recursive)
+                new_member = LDAPObjectCls(ldap_entry=search_entry)
+                if isinstance(new_member, LDAPGroup) and recursive:
+                    new_member.fetch_members(recursive=recursive)
 
                 direct_members.append(new_member)
 
