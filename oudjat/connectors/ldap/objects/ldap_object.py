@@ -51,7 +51,7 @@ class LDAPObject(GenericIdentifiable):
         This method initializes the object with data from an LDAP entry.
 
         Args:
-            ldap_entry (LDAPEntry) : ldap entry instance to be used to populate object data
+            ldap_entry (LDAPEntry) : LDAP entry instance to be used to populate object data
             kwargs (Any)           : any further arguments
         """
 
