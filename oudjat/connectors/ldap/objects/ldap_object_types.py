@@ -1,12 +1,24 @@
 """A module to list some attributes and infos related to different LDAP object types."""
 
 from enum import Enum
-from typing import Any
+from typing import Any, NamedTuple
 
 from oudjat.utils.types import StrType
 
-from .ldap_object_utilities import LDAPObjectTypeProps
 
+class LDAPObjectTypeProps(NamedTuple):
+    """
+    A helper class to properly handle LDAPObjectType properties.
+
+    Attributes:
+        object_cls (str)      : The name of the LDAP object class used in and LDAP filter
+        filter (str)          : The LDAP filter used to retrieve objects of this type
+        attributes (list[str]): The object attributes to retrieve
+    """
+
+    object_cls: str
+    filter: str
+    attributes: StrType
 
 class LDAPObjectType(Enum):
     """These are the default LDAP search parameters per object type."""
@@ -15,7 +27,7 @@ class LDAPObjectType(Enum):
         object_cls="*", filter="(objectClass=*)", attributes="*"
     )
 
-    COMPUTER = LDAPObjectTypeProps["LDAPComputer"](
+    COMPUTER = LDAPObjectTypeProps(
         object_cls="computer",
         filter="(objectClass=computer)",
         attributes=[
@@ -41,7 +53,7 @@ class LDAPObjectType(Enum):
         ],
     )
 
-    GPO = LDAPObjectTypeProps["LDAPGroupPolicyObject"](
+    GPO = LDAPObjectTypeProps(
         object_cls="groupPolicyContainer",
         filter="(objectClass=groupPolicyContainer)",
         attributes=[
@@ -59,7 +71,7 @@ class LDAPObjectType(Enum):
         ],
     )
 
-    GROUP = LDAPObjectTypeProps["LDAPGroup"](
+    GROUP = LDAPObjectTypeProps(
         object_cls="group",
         filter="(objectClass=group)",
         attributes=[
@@ -77,7 +89,7 @@ class LDAPObjectType(Enum):
         ],
     )
 
-    OU = LDAPObjectTypeProps["LDAPOrganizationalUnit"](
+    OU = LDAPObjectTypeProps(
         object_cls="organizationalUnit",
         filter="(objectClass=organizationalUnit)",
         attributes=[
@@ -92,7 +104,7 @@ class LDAPObjectType(Enum):
         ],
     )
 
-    SUBNET = LDAPObjectTypeProps["LDAPSubnet"](
+    SUBNET = LDAPObjectTypeProps(
         object_cls="subnet",
         filter="(objectClass=subnet)",
         attributes=[
@@ -107,7 +119,7 @@ class LDAPObjectType(Enum):
         ],
     )
 
-    USER = LDAPObjectTypeProps["LDAPUser"](
+    USER = LDAPObjectTypeProps(
         object_cls="user",
         filter="(&(objectClass=user)(!(objectClass=computer)))",
         attributes=[
