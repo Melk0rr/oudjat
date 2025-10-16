@@ -1,6 +1,6 @@
 """Main module of the LDAP group package that implement LDAP group object manipulations tools."""
 
-from typing import TYPE_CHECKING, Any, Callable, override
+from typing import TYPE_CHECKING, Any, override
 
 from ldap3.utils.conv import escape_filter_chars
 
@@ -9,7 +9,6 @@ from oudjat.assets.group import Group
 from .ldap_group_types import LDAPGroupType
 
 if TYPE_CHECKING:
-    from ....ldap_connector import LDAPConnector
     from ...ldap_entry import LDAPEntry
     from ...ldap_object import LDAPObject
 
@@ -114,13 +113,15 @@ class LDAPGroup(LDAPObject):
             # INFO: Search for the ref in LDAP server
             # TODO: Must implement an LDAPFilter class to handle potential escape characters
             escaped_ref = escape_filter_chars(ref)
-            ref_search: list["LDAPEntry"] = self.entry.ldap_search(
+            ref_search: list["LDAPEntry"] = self.entry.capabilities.ldap_search(
                 search_filter=f"(distinguishedName={escaped_ref})"
             )
 
             if len(ref_search) > 0:
-                search_entry: "LDAPEntry" = ref_search[0]
-                LDAPObjectCls = self.entry.ldap_python_cls(search_entry.ldap_obj_type.name)
+                search_entry = ref_search[0]
+                LDAPObjectCls = self.entry.capabilities.ldap_python_cls(
+                    search_entry.capabilities.ldap_object_type.name
+                )
 
                 new_member = LDAPObjectCls(ldap_entry=search_entry)
                 if isinstance(new_member, LDAPGroup) and recursive:
@@ -131,9 +132,7 @@ class LDAPGroup(LDAPObject):
         for member in direct_members:
             self.add_member(member)
 
-    def get_sub_groups(
-        self, ldap_get_member_func: Callable[..., list["LDAPObject"]], recursive: bool = False
-    ) -> list["LDAPGroup"]:
+    def get_sub_groups(self, recursive: bool = False) -> list["LDAPGroup"]:
         """
         Return child group of the current group.
 
@@ -146,7 +145,7 @@ class LDAPGroup(LDAPObject):
         """
 
         if len(self.members.keys()) == 0:
-            self.fetch_members(ldap_connector=ldap_connector, recursive=recursive)
+            self.fetch_members(recursive=recursive)
 
         sub_groups: list["LDAPGroup"] = []
         for member in self.members.values():
@@ -154,15 +153,11 @@ class LDAPGroup(LDAPObject):
                 sub_groups.append(member)
 
                 if recursive:
-                    sub_groups.extend(
-                        member.get_sub_groups(ldap_connector=ldap_connector, recursive=recursive)
-                    )
+                    sub_groups.extend(member.get_sub_groups(recursive=recursive))
 
         return sub_groups
 
-    def get_non_group_members(
-        self, ldap_connector: "LDAPConnector", recursive: bool = False
-    ) -> list["LDAPObject"]:
+    def get_non_group_members(self, recursive: bool = False) -> list["LDAPObject"]:
         """
         Return non group members of the current group.
 
@@ -175,7 +170,7 @@ class LDAPGroup(LDAPObject):
         """
 
         if len(self.members.keys()) == 0:
-            self.fetch_members(ldap_connector=ldap_connector, recursive=recursive)
+            self.fetch_members(recursive=recursive)
 
         members = []
         for member in self.members.values():
@@ -184,15 +179,11 @@ class LDAPGroup(LDAPObject):
 
             else:
                 if recursive:
-                    members.extend(
-                        member.get_non_group_members(
-                            ldap_connector=ldap_connector, recursive=recursive
-                        )
-                    )
+                    members.extend(member.get_non_group_members(recursive=recursive))
 
         return members
 
-    def get_members_flat(self, ldap_connector: "LDAPConnector") -> list["LDAPObject"]:
+    def get_members_flat(self) -> list["LDAPObject"]:
         """
         Return a flat list of the current group members.
 
@@ -200,17 +191,17 @@ class LDAPGroup(LDAPObject):
             ldap_connector (LDAPConnector): ldap connector instance to use for the request
 
         Returns:
-            List[LDAPObject]: a list of all the members found recursively but in a flattened list
+            list[LDAPObject]: a list of all the members found recursively but in a flattened list
 
         """
 
         if len(self.members.keys()) == 0:
-            self.fetch_members(ldap_connector=ldap_connector, recursive=True)
+            self.fetch_members(recursive=True)
 
         members = []
         for member in self.members.values():
             if isinstance(member, LDAPGroup):
-                members.extend(member.get_members_flat(ldap_connector=ldap_connector))
+                members.extend(member.get_members_flat())
 
             else:
                 members.append(member)
@@ -218,7 +209,7 @@ class LDAPGroup(LDAPObject):
         return members
 
     def has_member(
-        self, ldap_connector: "LDAPConnector", ldap_object: "LDAPObject", extended: bool = False
+        self, ldap_object: "LDAPObject", extended: bool = False
     ) -> bool:
         """
         Check if the provided object is a member of the current group.
@@ -232,9 +223,12 @@ class LDAPGroup(LDAPObject):
             bool: True if the group contains the given object. False otherwise
         """
 
-        return ldap_connector.is_object_member_of(
-            ldap_object=ldap_object, ldap_group=self, extended=extended
+        member_ref_list = (
+            self.get_members_flat()
+            if extended
+            else self.members.values()
         )
+        return ldap_object.id in [m.id for m in member_ref_list]
 
     @override
     def to_dict(self) -> dict[str, Any]:

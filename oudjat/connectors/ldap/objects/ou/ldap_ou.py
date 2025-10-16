@@ -3,13 +3,15 @@
 import re
 from typing import TYPE_CHECKING, Any, override
 
+from oudjat.utils.types import StrType
+
 from ..definitions import UUID_REG
 
 if TYPE_CHECKING:
-    from ...ldap_connector import LDAPConnector
     from ..gpo.ldap_gpo import LDAPGroupPolicyObject
     from ..ldap_entry import LDAPEntry
     from ..ldap_object import LDAPObject
+
 
 class LDAPOrganizationalUnit(LDAPObject):
     """
@@ -29,6 +31,8 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         super().__init__(ldap_entry=ldap_entry)
 
+        self.objects: dict[str, "LDAPObject"] = {}
+
     # ****************************************************************
     # Methods
 
@@ -42,36 +46,69 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return self.entry.get("gPLink")
 
-    def get_objects(
-        self, ldap_connector: "LDAPConnector", object_types: list[str] | None = None
-    ) -> list["LDAPEntry"]:
+    def fetch_objects(self, recursive: bool = False) -> None:
         """
         Return the objects contained in the current OU.
 
         Args:
-            ldap_connector (LDAPConnector) : connector used for the query
-            object_types (List[str]): specific object types to include in the result
+            recursive (bool): Whether to retrieve objects recursively or not
 
         Returns:
-            List[LDAPEntry] : entries of the objects contained in the OU
+            list[LDAPObject] : entries of the objects contained in the OU
         """
 
-        return ldap_connector.get_ou_objects(ldap_ou=self, object_types=object_types)
+        search_args: dict[str, Any] = {"search_base": self.get_dn()}
+        entries = self.entry.capabilities.ldap_search(attributes="*", **search_args)
 
-    def get_sub_ous(self, ldap_connector: "LDAPConnector") -> list["LDAPOrganizationalUnit"]:
+        for entry in entries:
+            new_object = entry.capabilities.ldap_python_cls(
+                entry.capabilities.ldap_object_type.name
+            )(ldap_entry=entry)
+
+            if isinstance(new_object, "LDAPOrganizationalUnit") and recursive:
+                new_object.fetch_objects(recursive)
+
+            self.objects[entry.id] = new_object
+
+    def get_sub_ous(self, recursive: bool = False) -> list["LDAPOrganizationalUnit"]:
         """
         Return only sub OUs from the ou objects.
 
         Args:
-            ldap_connector (LDAPConnector): connector used for the query
+            recursive (bool): Whether to retrieve objects recursively or not
 
         Returns:
-            List[LDAPEntry]: list of sub OUs
+            list[LDAPEntry]: list of sub OUs
         """
 
-        return ldap_connector.get_ou(search_base=self.dn)
+        if len(self.objects.keys()) == 0:
+            self.fetch_objects(recursive)
 
-    def get_gpo_from_gplink(self, ldap_connector: "LDAPConnector") -> list["LDAPGroupPolicyObject"]:
+        return [obj for obj in self.objects.values() if isinstance(obj, "LDAPOrganizationalUnit")]
+
+    def get_object_per_cls(self, object_cls: StrType | None) -> list["LDAPObject"]:
+        """
+        Return the current OU objects if they match the provided classes.
+
+        Args:
+            object_cls (StrType | None): Object classes the method should return
+
+        Returns:
+            list[LDAPObject]: A list of LDAPObject instances matching the provided classes
+        """
+
+        if len(self.objects.values()) == 0:
+            self.fetch_objects()
+
+        if object_cls is None:
+            return list(self.objects.values())
+
+        if not isinstance(object_cls, list):
+            object_cls = [object_cls]
+
+        return [obj for obj in self.objects.values() if set(obj.entry.object_cls) & set(object_cls)]
+
+    def get_gpo_from_gplink(self) -> list["LDAPGroupPolicyObject"]:
         """
         Extract the GPO references (UUIDs) present in the current OU gpLink.
 
@@ -81,13 +118,25 @@ class LDAPOrganizationalUnit(LDAPObject):
             ldap_connector (LDAPConnector): the LDAP connector used to retrieve the GPOs
 
         Returns:
-            List[LDAPObject]: a list of LDAPGroupPolicyObject instances based on the UUIDs in thecurrent OU gpLink attribute
+            list[LDAPObject]: a list of LDAPGroupPolicyObject instances based on the UUIDs in thecurrent OU gpLink attribute
         """
 
-        gpo_refs = re.search(UUID_REG, self.get_gplink())
-        gpo_refs_str = gpo_refs.group() if gpo_refs is not None else []
+        gpo_refs = re.findall(UUID_REG, self.get_gplink())
+        if len(gpo_refs) == 0:
+            return []
 
-        return list(map(lambda link: ldap_connector.get_gpo(name=link)[0], gpo_refs_str))
+        gplink_filter = (
+            f"(|{''.join([f'(name={link})' for link in gpo_refs])})"
+            if len(gpo_refs) > 1
+            else f"(name={gpo_refs[0]})"
+        )
+
+        gpo_entries = self.entry.capabilities.ldap_search(
+            search_type="GPO",
+            search_filter=f"(displayName=*){gplink_filter}",
+        )
+
+        return list(map(LDAPGroupPolicyObject, gpo_entries))
 
     @override
     def to_dict(self) -> dict[str, Any]:
