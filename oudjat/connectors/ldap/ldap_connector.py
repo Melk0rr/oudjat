@@ -13,7 +13,8 @@ from oudjat.connectors.connector import Connector
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.types import StrType
 
-from .objects.ldap_entry import LDAPEntry
+from .ldap_types import LDAPObjListTypeAlias, LDAPObjTypeAlias
+from .objects.ldap_entry import LDAPCapabilities, LDAPEntry
 from .objects.ldap_object_types import LDAPObjectType
 
 if TYPE_CHECKING:
@@ -22,11 +23,9 @@ if TYPE_CHECKING:
     from .objects.account.ldap_user import LDAPUser
     from .objects.gpo.ldap_gpo import LDAPGroupPolicyObject
     from .objects.ldap_object import LDAPObject
-    from .objects.ldap_object_utilities import LDAPObjectBoundType
     from .objects.ou.ldap_ou import LDAPOrganizationalUnit
     from .objects.subnet.ldap_subnet import LDAPSubnet
 
-LDAPObjListTypeAlias = list[LDAPObject | LDAPComputer | LDAPGroup | LDAPUser | LDAPOrganizationalUnit | LDAPGroupPolicyObject]
 
 class LDAPPort(IntEnum):
     """
@@ -56,7 +55,7 @@ class LDAPConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
 
-    LDAP_PYTHON_CLS: dict[str, LDAPObjectBoundType] = {
+    LDAP_PYTHON_CLS: dict[str, LDAPObjTypeAlias] = {
         f"{LDAPObjectType.DEFAULT}": LDAPObject,
         f"{LDAPObjectType.COMPUTER}": LDAPComputer,
         f"{LDAPObjectType.GPO}": LDAPGroupPolicyObject,
@@ -126,7 +125,7 @@ class LDAPConnector(Connector):
         Set the TLS usage.
 
         Args:
-            use_tls (bool): should the connector use TLS
+        use_tls (bool): should the connector use TLS
         """
 
         self.use_tls = use_tls
@@ -241,11 +240,11 @@ class LDAPConnector(Connector):
         Run an LDAP search based on the provided parameters.
 
         Args:
-            search_type (str)           : search type (see ldap_object_type.py for details)
-            search_base (str)           : search base (location in domain tree)
-            search_filter (str)         : search filter
-            attributes (str | list[str]): attributes to include in the result
-            **kwargs (Dict)             : any other argument to pass
+            search_type (str)          : search type (see ldap_object_type.py for details)
+            search_base (str)          : search base (location in domain tree)
+            search_filter (str)        : search filter
+            attributes (StrType | None): attributes to include in the result
+            **kwargs (Any)             : any other argument to pass
 
         Returns:
             list[LDAPEntry]: list of ldap entries
@@ -277,13 +276,18 @@ class LDAPConnector(Connector):
         )
 
         def ldap_entry_from_dict(entry: dict[str, Any]) -> "LDAPEntry":
-
             if entry.get("attributes", None) is None:
-                raise ValueError(f"{__class__.__name__}.ldap_entry_from_dict::Invalid entry provided")
+                raise ValueError(
+                    f"{__class__.__name__}.ldap_entry_from_dict::Invalid entry provided"
+                )
 
-            entry["ldap_obj_type"] = LDAPObjectType.from_object_cls(LDAPObjectType.resolve_entry_type(entry))
-            entry["ldap_search"] = self.search
-            entry["ldap_python_cls"] = LDAPConnector.ldap_python_cls_from_obj_type
+            entry["capabilities"] = LDAPCapabilities(
+                ldap_python_cls=LDAPConnector.ldap_python_cls_from_obj_type,
+                ldap_object_type=LDAPObjectType.from_object_cls(
+                    LDAPObjectType.resolve_entry_type(entry)
+                ),
+                ldap_search=self.search,
+            )
 
             return LDAPEntry(**entry)
 
@@ -295,28 +299,34 @@ class LDAPConnector(Connector):
         )
 
     def get_gpo(
-        self, displayName: str = "*", name: str = "*", attributes: StrType | None = None
+        self, displayName: str = "*", name: StrType = "*", attributes: StrType | None = None
     ) -> list["LDAPGroupPolicyObject"]:
         """
         Specific method to retrieve LDAP GPO instances.
 
         Args:
             displayName (str)           : GPO display name
-            name (str)                  : GPO name
+            name (StrType)              : GPO name
             attributes (str | list[str]): attributes to include in result
 
         Returns:
             list[LDAPGroupPolicyObject]: list of LDAPGroupPolicyObject instances
         """
 
+        name = (
+            f"(|{''.join([f'(name={link})' for link in name])})"
+            if isinstance(name, list)
+            else f"(name={name})"
+        )
+
         entries = self.search(
             search_type=LDAPObjectType.GPO,
             search_base=None,
-            search_filter=f"(displayName={displayName})(name={name})",
+            search_filter=f"(&(displayName={displayName}){name}",
             attributes=attributes,
         )
 
-        return LDAPConnector.map_entries(entries, LDAPObjectType.GPO.value.python_cls)
+        return list(map(LDAPGroupPolicyObject, entries))
 
     def get_subnet(
         self, search_filter: str | None = None, attributes: StrType | None = None
@@ -341,7 +351,7 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        return LDAPConnector.map_entries(entries, LDAPSubnet)
+        return list(map(LDAPSubnet, entries))
 
     def get_computer(
         self,
@@ -368,7 +378,7 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        return LDAPConnector.map_entries(entries, LDAPComputer)
+        return list(map(LDAPComputer, entries))
 
     def get_users(
         self,
@@ -395,64 +405,7 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        return LDAPConnector.map_entries(entries, LDAPUser)
-
-    def get_group_members(
-        self, ldap_group: "LDAPGroup", recursive: bool = False
-    ) -> list["LDAPObject"]:
-        """
-        Retrieve and returns the members of the given group.
-
-        Args:
-            ldap_group (LDAPGroup): group to retrieve members from
-            recursive (bool)      : wheither to retrieve members recursively or not
-
-        Returns:
-            list[LDAPObject]: list of members
-        """
-
-        members = []
-        for ref in ldap_group.get_member_refs():
-            # INFO: Search for the ref in LDAP server
-            # TODO: Must implement an LDAPFilter class to handle potential escape characters
-            escaped_ref = escape_filter_chars(ref)
-            ref_search: list[LDAPEntry] = self.search(
-                search_filter=f"(distinguishedName={escaped_ref})"
-            )
-
-            if len(ref_search) > 0:
-                search_entry: LDAPEntry = ref_search[0]
-                obj_type = LDAPObjectType.resolve_entry_type(search_entry)
-
-                new_member = LDAPObjectType.get_python_class(obj_type)(ldap_entry=search_entry)
-                if isinstance(new_member, LDAPGroup) and recursive:
-                    new_member.fetch_members(ldap_connector=self, recursive=recursive)
-
-                members.append(new_member)
-
-        return members
-
-    def is_object_member_of(
-        self, ldap_object: "LDAPObject", ldap_group: "LDAPGroup", extended: bool = False
-    ) -> bool:
-        """
-        Check wheither the given object is member of the giver group.
-
-        Args:
-            ldap_object (LDAPObject): object to check membership of
-            ldap_group (LDAPGroup)  : group to check object membership
-            extended (bool)         : wheither to extend the search to sub group or not
-
-        Returns:
-            bool: wheither the object is a member of the group or not
-        """
-
-        member_ref_list = (
-            ldap_group.get_members_flat(ldap_connector=self)
-            if extended
-            else ldap_group.members.values()
-        )
-        return ldap_object.id in [m.id for m in member_ref_list]
+        return list(map(LDAPUser, entries))
 
     def get_ou(
         self,
@@ -480,37 +433,7 @@ class LDAPConnector(Connector):
             attributes=attributes,
         )
 
-        return LDAPConnector.map_entries(entries, LDAPObjectType.OU.value.python_cls)
-
-    def get_ou_objects(
-        self,
-        ldap_ou: "LDAPOrganizationalUnit",
-        object_types: list[str] | None = None,
-        recursive: bool = False,
-    ) -> list["LDAPEntry"]:
-        """
-        Retrieve the members of a given organizational unit (OU).
-
-        This method fetches all LDAP entries that are direct children or descendants of the specified organizational unit.
-        It supports filtering by object types and can recursively search through all sub-OUs if requested.
-
-        Args:
-            ldap_ou (LDAPOrganizationalUnit)  : An object representing the organizational unit from which to retrieve members. It must have a method to get its distinguished name (`get_dn`).
-            object_types (List[str], optional): A list of strings representing the types of objects to filter by. If provided, only entries with these object classes will be returned. Defaults to None.
-            recursive (bool, optional)        : A boolean indicating whether to search recursively through all sub-OUs. If True, it will include descendants in the search results. Defaults to False.
-
-        Returns:
-            list[LDAPEntry]: A list of LDAP entries that are either direct children or descendants of the specified organizational unit. Each entry is represented by an `LDAPEntry` object.
-        """
-
-        search_args: dict[str, Any] = {"search_base": ldap_ou.get_dn()}
-
-        if object_types is not None:
-            types_filter_str = "".join([f"(objectClass={t})" for t in object_types])
-            search_args["search_filter"] = f"(|{types_filter_str})"
-
-        # TODO: handle recursieve arguments
-        return self.search(attributes="*", **search_args)
+        return list(map(LDAPOrganizationalUnit, entries))
 
     def complete_partial_entry(self, ldap_entry: "LDAPEntry") -> "LDAPEntry":
         """
@@ -528,7 +451,9 @@ class LDAPConnector(Connector):
         """
 
         return self.search(
-            search_type=LDAPObjectType.from_object_cls(LDAPObjectType.resolve_entry_type(ldap_entry)),
+            search_type=LDAPObjectType.from_object_cls(
+                LDAPObjectType.resolve_entry_type(ldap_entry)
+            ),
             search_filter=f"(distinguishedName={ldap_entry.dn})",
         )[0]
 
@@ -549,7 +474,9 @@ class LDAPConnector(Connector):
     # Static methods
 
     @staticmethod
-    def map_entries_from_str(entries: list["LDAPEntry"], ldap_obj_type: str) -> "LDAPObjListTypeAlias":
+    def map_entries_from_str(
+        entries: list["LDAPEntry"], ldap_obj_type: str
+    ) -> "LDAPObjListTypeAlias":
         """
         Map a list of ldap entries to a list of an LDAPObject type matching the provided string.
 
@@ -561,24 +488,7 @@ class LDAPConnector(Connector):
             LDAPObjListTypeAlias: mapped list of ldap object
         """
 
-        return LDAPConnector.map_entries(entries, ldap_cls=LDAPObjectType[ldap_obj_type].value.python_cls)
-
-    @staticmethod
-    def map_entries(
-        entries: list["LDAPEntry"], ldap_cls: type["LDAPObjectBoundType"]
-    ) -> list[LDAPObjectBoundType]:
-        """
-        Map a list of ldap entries to a list of the provided LDAP class.
-
-        Args:
-            entries (list[LDAPEntry]): List of entries to map
-            ldap_cls (LDAPObject)    : LDAP class used to map
-
-        Returns:
-            list[LDAPObject]: mapped list of ldap object
-        """
-
-        return list(map(ldap_cls, entries))
+        return list(map(LDAPConnector.LDAP_PYTHON_CLS[ldap_obj_type], entries))
 
     @staticmethod
     def check_entry_type(entry: dict[str, Any]) -> bool:
@@ -612,16 +522,15 @@ class LDAPConnector(Connector):
         return LDAPEntry(**entry)
 
     @staticmethod
-    def ldap_python_cls_from_obj_type(ldap_obj_type_name: str) -> "LDAPObjectBoundType":
+    def ldap_python_cls_from_obj_type(ldap_obj_type_name: str) -> "LDAPObjTypeAlias":
         """
-        Return an LDAPObjectBoundType based on a given LDAPEntry.
+        Return an LDAP object based on a given LDAPEntry.
 
         Args:
             ldap_obj_type_name (str): The LDAPObjectType element name
 
         Returns:
-            LDAPObjectBoundType: the python class matching the provided entry
+            LDAPObjTypeAlias: the python class matching the provided entry
         """
 
         return LDAPConnector.LDAP_PYTHON_CLS[ldap_obj_type_name]
-
