@@ -10,6 +10,8 @@ from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
 if TYPE_CHECKING:
     from .ldap_entry import LDAPEntry
 
+LDAPObjectBoundType = TypeVar("LDAPObjectBoundType", bound="LDAPObject")
+
 # ****************************************************************
 # Helper functions
 
@@ -65,7 +67,7 @@ class LDAPObject(GenericIdentifiable):
         self.dn: str = self.entry.dn
         self.sid: str = self.entry.get("objectSid")
 
-        self.classes: list[str] = self.entry.get("objectClass", [])
+        self.classes: list[str] = self.entry.object_cls
 
         self.dn_pieces: dict[str, list[str]] = parse_dn(self.dn)
         self.domain: str = ".".join(self.dn_pieces.get("DC", [])).lower()
@@ -227,5 +229,3 @@ class LDAPObject(GenericIdentifiable):
             "oudjat_flags": self.ldap_obj_flags,
         }
 
-
-LDAPObjectBoundType = TypeVar("LDAPObjectBoundType", bound=LDAPObject)
