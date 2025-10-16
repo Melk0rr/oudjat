@@ -94,7 +94,6 @@ class LDAPGroupPolicyObject(LDAPObject):
 
     def get_linked_objects(
         self,
-        ldap_search_func: Callable[..., list["LDAPObject"]],
         attributes: StrType | None = None,
         ou: str = "*",
     ) -> list["LDAPObject"]:
@@ -104,15 +103,14 @@ class LDAPGroupPolicyObject(LDAPObject):
         This method searches for LDAP entries that are linked to the current group policy object (GPO).
 
         Args:
-            ldap_search_func (Callable[..., list[LDAPOrganizationalUnit]]): A search function to retrieve LDAPOrganizationalUnit
-            attributes (str | list[str], optional)                        : The attributes to retrieve from the linked LDAP entries.
-            ou (str, optional)                                            : The organizational unit (OU) in which to search for linked objects.
+            attributes (str | list[str], optional): The attributes to retrieve from the linked LDAP entries.
+            ou (str, optional)                    : The organizational unit (OU) in which to search for linked objects.
 
         Returns:
             list["LDAPObject"]: A list of LDAPOrganizationalUnit instances that are linked to the current GPO.
         """
 
-        return ldap_search_func(
+        return self.entry.capabilities.ldap_search(
             search_filter=f"(gPLink={f'*{self.name}*'})(name={ou})", attributes=attributes
         )
 
