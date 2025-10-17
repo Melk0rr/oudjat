@@ -2,7 +2,7 @@
 
 import re
 from enum import Enum, IntEnum
-from typing import TYPE_CHECKING, Any, Callable, override
+from typing import TYPE_CHECKING, Any, override
 
 from oudjat.utils.types import StrType
 
@@ -110,9 +110,14 @@ class LDAPGroupPolicyObject(LDAPObject):
             list["LDAPObject"]: A list of LDAPOrganizationalUnit instances that are linked to the current GPO.
         """
 
-        return self.entry.capabilities.ldap_search(
+        entries =  self.entry.capabilities.ldap_search(
             search_filter=f"(gPLink={f'*{self.name}*'})(name={ou})", attributes=attributes
         )
+
+        return [
+            entry.capabilities.ldap_python_cls(entry.capabilities.ldap_object_type.name)(ldap_entry=entry)
+            for entry in entries
+        ]
 
     @override
     def to_dict(self) -> dict[str, Any]:
