@@ -1,42 +1,32 @@
 """A generic module to describe shared behavior of more specific LDAP objects."""
 
-import re
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, TypeVar, override
+from typing import TYPE_CHECKING, Any, Callable, Generic, NamedTuple, TypeVar, override
 
 from oudjat.assets.generic_identifiable import GenericIdentifiable
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
 
+from ..ldap_utils import parse_dn
+
 if TYPE_CHECKING:
     from .ldap_entry import LDAPEntry
+    from .ldap_object_types import LDAPObjectType
 
 LDAPObjectBoundType = TypeVar("LDAPObjectBoundType", bound="LDAPObject")
 
-# ****************************************************************
-# Helper functions
-
-def parse_dn(dn: str) -> dict[str, list[str]]:
+class LDAPCapabilities(NamedTuple, Generic[LDAPObjectBoundType]):
     """
-    Parse a DN into pieces.
+    A helper class that handle LDAP capabilities provided by an LDAPConnector to ldap entries.
 
-    Args:
-        dn (str) : distinguished name to parse
-
-    Returns:
-        dict[str, list[str]] : dictionary of dn pieces (CN, OU, DC)
+    Attributes:
+        ldap_search (Callable[..., list["LDAPEntry"]])       : A function to perform an LDAP search query
+        ldap_python_cls (Callable[[str], "LDAPObjTypeAlias"]): A function to retrieve a specific LDAPObject class from a string
+        ldap_object_type (LDAPObjectType)                    : The LDAPObjectType bound to an LDAPEntry
     """
 
-    pieces: dict[str, list[str]] = {}
-    for dn_part in re.split(r",(?! )", dn):
-        part_type, part_value = dn_part.split("=")
-
-        if part_type not in pieces.keys():
-            pieces[part_type] = list()
-
-        pieces[part_type].append(part_value)
-
-    return pieces
-
+    ldap_search: Callable[..., list["LDAPEntry"]]
+    ldap_python_cls: Callable[[str], type["LDAPObjectBoundType"]]
+    ldap_object_type: "LDAPObjectType"
 
 class LDAPObject(GenericIdentifiable):
     """
@@ -46,15 +36,16 @@ class LDAPObject(GenericIdentifiable):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry", **kwargs: Any) -> None:
+    def __init__(self, ldap_entry: "LDAPEntry", capabilities: "LDAPCapabilities", **kwargs: Any) -> None:
         """
         Initialize an LDAP Entry-based object.
 
         This method initializes the object with data from an LDAP entry.
 
         Args:
-            ldap_entry (LDAPEntry) : LDAP entry instance to be used to populate object data
-            kwargs (Any)           : any further arguments
+            ldap_entry (LDAPEntry)         : LDAP entry instance to be used to populate object data
+            capabilities (LDAPCapabilities): LDAP capabilities which provide ways for an LDAP object to interact with an LDAP server through an LDAPConnector
+            kwargs (Any)                   : any further arguments
         """
 
         self.entry: "LDAPEntry" = ldap_entry
@@ -76,6 +67,8 @@ class LDAPObject(GenericIdentifiable):
         self.change_date: datetime = TimeConverter.str_to_date(self.entry.get("whenChanged"))
 
         self.ldap_obj_flags: list[str] = []
+
+        self._capabilities: LDAPCapabilities = capabilities
 
     # ****************************************************************
     # Methods
@@ -129,6 +122,18 @@ class LDAPObject(GenericIdentifiable):
         """
 
         return self.entry.get("type", "")
+
+
+    @property
+    def capabilities(self) -> "LDAPCapabilities":
+        """
+        Return the LDAP capabilities provided by an LDAPConnector to the current entry.
+
+        Returns:
+            LDAPCapabilities: LDAP capabilities which provide ways for an LDAP entry to interact with an LDAP server through an LDAPConnector
+        """
+
+        return self._capabilities
 
     def get_dn_pieces(self) -> dict[str, list[str]]:
         """

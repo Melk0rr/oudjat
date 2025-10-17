@@ -1,23 +1,7 @@
 """A module to handle LDAP query results: LDAP entries."""
 
-from typing import TYPE_CHECKING, Any, Callable, NamedTuple, override
+from typing import Any, override
 
-if TYPE_CHECKING:
-    from .ldap_object_types import LDAPObjectType
-
-class LDAPCapabilities(NamedTuple):
-    """
-    A helper class that handle LDAP capabilities provided by an LDAPConnector to ldap entries.
-
-    Attributes:
-        ldap_search (Callable[..., list["LDAPEntry"]])       : A function to perform an LDAP search query
-        ldap_python_cls (Callable[[str], "LDAPObjTypeAlias"]): A function to retrieve a specific LDAPObject class from a string
-        ldap_object_type (LDAPObjectType)                    : The LDAPObjectType bound to an LDAPEntry
-    """
-
-    ldap_search: Callable[..., list["LDAPEntry"]]
-    ldap_python_cls: Callable[[str], "LDAPObjTypeAlias"]
-    ldap_object_type: "LDAPObjectType"
 
 class LDAPEntry(dict[str, Any]):
     """A class that describe a result of an LDAP query."""
@@ -89,17 +73,6 @@ class LDAPEntry(dict[str, Any]):
         """
 
         return self.get("objectClass", [])
-
-    @property
-    def capabilities(self) -> "LDAPCapabilities":
-        """
-        Return the LDAP capabilities provided by an LDAPConnector to the current entry.
-
-        Returns:
-            LDAPCapabilities: LDAP capabilities which provide ways for an LDAP entry to interact with an LDAP server through an LDAPConnector
-        """
-
-        return self.__getitem__("capabilities")
 
     @override
     def get(self, key: str, default_value: Any = None) -> Any:
