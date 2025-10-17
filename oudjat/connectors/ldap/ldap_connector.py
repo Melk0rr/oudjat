@@ -7,14 +7,13 @@ from typing import TYPE_CHECKING, Any, TypedDict, override
 
 import ldap3
 from ldap3.core.exceptions import LDAPSocketOpenError
-from ldap3.utils.conv import escape_filter_chars
 
 from oudjat.connectors.connector import Connector
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.types import StrType
 
-from .ldap_types import LDAPObjListTypeAlias, LDAPObjTypeAlias
-from .objects.ldap_entry import LDAPCapabilities, LDAPEntry
+from .ldap_types import LDAPObjTypeAlias
+from .objects.ldap_entry import LDAPEntry
 from .objects.ldap_object_types import LDAPObjectType
 
 if TYPE_CHECKING:
@@ -22,10 +21,18 @@ if TYPE_CHECKING:
     from .objects.account.ldap_computer import LDAPComputer
     from .objects.account.ldap_user import LDAPUser
     from .objects.gpo.ldap_gpo import LDAPGroupPolicyObject
-    from .objects.ldap_object import LDAPObject
+    from .objects.ldap_object import LDAPCapabilities, LDAPObject
     from .objects.ou.ldap_ou import LDAPOrganizationalUnit
     from .objects.subnet.ldap_subnet import LDAPSubnet
 
+class LDAPTLSVersion(IntEnum):
+    """
+    A helper enumeration to describe TLS versions.
+    """
+
+    TLSv1 = ssl.PROTOCOL_TLSv1
+    TLSv1_1 = ssl.PROTOCOL_TLSv1_1
+    TLSv1_2 = ssl.PROTOCOL_TLSv1_2
 
 class LDAPPort(IntEnum):
     """
@@ -133,7 +140,7 @@ class LDAPConnector(Connector):
 
     # TODO: Make a type alias for tls versions
     @override
-    def connect(self, version: "ssl._SSLMethod | None" = None) -> None:
+    def connect(self, version: "LDAPTLSVersion | None" = None) -> None:
         """
         Initiate connection to target server.
 
@@ -143,7 +150,7 @@ class LDAPConnector(Connector):
 
         if version is None:
             try:
-                self.connect(version=ssl.PROTOCOL_TLSv1_2)
+                self.connect(version=LDAPTLSVersion.TLSv1_2)
 
             except LDAPSocketOpenError as e:
                 if not self.use_tls:
@@ -151,7 +158,7 @@ class LDAPConnector(Connector):
                         f"{__class__.__name__}.connect::Error while trying to connect to LDAP: {e}"
                     )
 
-                self.connect(version=ssl.PROTOCOL_TLSv1)
+                self.connect(version=LDAPTLSVersion.TLSv1)
 
             return
 
@@ -281,14 +288,6 @@ class LDAPConnector(Connector):
                     f"{__class__.__name__}.ldap_entry_from_dict::Invalid entry provided"
                 )
 
-            entry["capabilities"] = LDAPCapabilities(
-                ldap_python_cls=LDAPConnector.ldap_python_cls_from_obj_type,
-                ldap_object_type=LDAPObjectType.from_object_cls(
-                    LDAPObjectType.resolve_entry_type(entry)
-                ),
-                ldap_search=self.search,
-            )
-
             return LDAPEntry(**entry)
 
         return list(
@@ -324,6 +323,12 @@ class LDAPConnector(Connector):
             search_base=None,
             search_filter=f"(&(displayName={displayName}){name}",
             attributes=attributes,
+        )
+
+        capabilities = LDAPCapabilities[LDAPGroupPolicyObject](
+            ldap_search=self.search,
+            ldap_object_type=LDAPObjectType.GPO,
+            ldap_python_cls=LDAPConnector.ldap_python_cls_from_obj_type
         )
 
         return list(map(LDAPGroupPolicyObject, entries))
@@ -472,23 +477,6 @@ class LDAPConnector(Connector):
 
     # ****************************************************************
     # Static methods
-
-    @staticmethod
-    def map_entries_from_str(
-        entries: list["LDAPEntry"], ldap_obj_type: str
-    ) -> "LDAPObjListTypeAlias":
-        """
-        Map a list of ldap entries to a list of an LDAPObject type matching the provided string.
-
-        Args:
-            entries (list[LDAPEntry]): List of entries to map
-            ldap_obj_type (str)      : LDAPObjectType name the python class will be used to map the provided entries
-
-        Returns:
-            LDAPObjListTypeAlias: mapped list of ldap object
-        """
-
-        return list(map(LDAPConnector.LDAP_PYTHON_CLS[ldap_obj_type], entries))
 
     @staticmethod
     def check_entry_type(entry: dict[str, Any]) -> bool:
