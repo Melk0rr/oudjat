@@ -46,7 +46,7 @@ class LDAPPort(IntEnum):
     DEFAULT = 389
     TLS = 636
 
-
+@final
 class LDAPConnector(Connector):
     """
     LDAP connector to interact and query LDAP servers.
