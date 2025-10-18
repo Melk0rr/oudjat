@@ -467,7 +467,7 @@ class LDAPConnector(Connector):
             search_filter=f"(distinguishedName={ldap_entry.dn})",
         )[0]
 
-    def get_domain_admins(self) -> list["LDAPEntry"]:
+    def get_domain_admins(self) -> list["LDAPUser"]:
         """
         Return a list of the domain and enterprise admins.
 
@@ -475,8 +475,7 @@ class LDAPConnector(Connector):
             List[LDAPEntry]: a list of LDAPEntry instances representing the domain admins
         """
 
-        return self.search(
-            search_type=LDAPObjectType.USER,
+        return self.get_users(
             search_filter="(&(objectClass=user)(objectCategory=Person)(adminCount=1))",
         )
 
