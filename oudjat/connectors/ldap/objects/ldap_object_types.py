@@ -191,29 +191,32 @@ class LDAPObjectType(Enum):
     # Static methods
 
     @staticmethod
-    def from_object_cls(object_cls: str) -> "LDAPObjectType":
+    def from_object_cls(entry: dict[str, Any]) -> "LDAPObjectType":
         """
-        Return an LDAPObjectType based on a given python class name.
+        Return an LDAPObjectType based on a given LDAP entry.
 
         Args:
-            object_cls (str): python LDAP class name of an object type
+            entry (dict[str, Any]): LDAP entry the LDAPObjectType will be deduced from
 
         Returns:
-            LDAPObjectType: object type that corresponds to the provided object class, if any
+            LDAPObjectType: object type that corresponds to the provided LDAP entry
         """
 
         def object_cls_is(object_type: "LDAPObjectType") -> bool:
-            return object_type.object_cls == object_cls
+            return object_type.object_cls == entry.get("attributes", {}).get("objectClass", [])[-1]
 
         return next(filter(object_cls_is, LDAPObjectType))
 
     @staticmethod
-    def resolve_entry_type(entry: dict[str, Any]) -> str:
+    def resolve_entry_cls(entry: dict[str, Any]) -> str:
         """
-        Determine the object type of an LDAP entry based on its "objectClass" attribute.
+        Determine the object class of an LDAP entry based on its "objectClass" attribute.
+
+        Args:
+            entry (dict[str, Any]): LDAP entry the LDAPObjectType will be deduced from
 
         Returns:
-            str | None: The name of the object class, or None if no matching class is found.
+            str: The name of the object class, or None if no matching class is found.
         """
 
         entry_obj_cls: list[str] = entry.get("attributes", {}).get("objectClass", [])
@@ -222,3 +225,4 @@ class LDAPObjectType(Enum):
             (t.name for t in LDAPObjectType if entry_obj_cls and entry_obj_cls[-1] == t.object_cls),
             "*",
         )
+

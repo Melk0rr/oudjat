@@ -1,12 +1,13 @@
 """A module to describe generic properties shared by more specific account objects like user or computer."""
 
+from abc import ABC
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, override
 
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
 from oudjat.utils.types import StrType
 
-from ..ldap_object import LDAPObject
+from ..ldap_object import LDAPCapabilities, LDAPObject
 from .ldap_account_flags import LDAPAccountFlag
 
 if TYPE_CHECKING:
@@ -30,13 +31,13 @@ def acc_date_str(date: datetime | None) -> str:
     return TimeConverter.date_to_str(date, date_format=DateFormat.from_flag(DateFlag.YMD_HMS))
 
 
-class LDAPAccount(LDAPObject):
+class LDAPAccount(LDAPObject, ABC):
     """A class to describe generic LDAP account objects."""
 
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry", **kwargs: Any) -> None:
+    def __init__(self, ldap_entry: "LDAPEntry", capabilities: "LDAPCapabilities", **kwargs: Any) -> None:
         """
         Initialize an LDAP Entry-based object with specific handling for user accounts.
 
@@ -45,11 +46,12 @@ class LDAPAccount(LDAPObject):
         Additional flags are derived from the 'userAccountControl' property or its Microsoft equivalent (controlled by MS_ACCOUNT_CTL_PROPERTY).
 
         Args:
-            ldap_entry (LDAPEntry): An instance of an LDAP entry containing relevant data for user accounts.
-            kwargs (Any)          : Any further arguments
+            ldap_entry (LDAPEntry)         : An instance of an LDAP entry containing relevant data for user accounts.
+            capabilities (LDAPCapabilities): LDAP capabilities which provide ways for an LDAP object to interact with an LDAP server through an LDAPConnector
+            kwargs (Any)                   : Any further arguments
         """
 
-        super().__init__(ldap_entry=ldap_entry, **kwargs)
+        super().__init__(ldap_entry=ldap_entry, capabilities=capabilities, **kwargs)
 
         pwd_last_set = self.get_pwd_last_set()
         self.pwd_last_set_timestp: float | None = pwd_last_set.timestamp() if pwd_last_set is not None else None

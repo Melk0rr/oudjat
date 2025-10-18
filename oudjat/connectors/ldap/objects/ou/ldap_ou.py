@@ -6,11 +6,11 @@ from typing import TYPE_CHECKING, Any, override
 from oudjat.utils.types import StrType
 
 from ..definitions import UUID_REG
+from ..ldap_object_types import LDAPObjectType
 
 if TYPE_CHECKING:
-    from ..gpo.ldap_gpo import LDAPGroupPolicyObject
     from ..ldap_entry import LDAPEntry
-    from ..ldap_object import LDAPObject
+    from ..ldap_object import LDAPCapabilities, LDAPObject
 
 
 class LDAPOrganizationalUnit(LDAPObject):
@@ -21,15 +21,16 @@ class LDAPOrganizationalUnit(LDAPObject):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry") -> None:
+    def __init__(self, ldap_entry: "LDAPEntry", capabilities: "LDAPCapabilities") -> None:
         """
         Initialize a new instance of LDAP OU.
 
         Args:
-            ldap_entry (LDAPEntry) : ldap entry instance to be used to populate object data
+            ldap_entry (LDAPEntry)         : ldap entry instance to be used to populate object data
+            capabilities (LDAPCapabilities): LDAP capabilities which provide ways for an LDAP object to interact with an LDAP server through an LDAPConnector
         """
 
-        super().__init__(ldap_entry=ldap_entry)
+        super().__init__(ldap_entry, capabilities)
 
         self.objects: dict[str, "LDAPObject"] = {}
 
@@ -58,12 +59,13 @@ class LDAPOrganizationalUnit(LDAPObject):
         """
 
         search_args: dict[str, Any] = {"search_base": self.get_dn()}
-        entries = self.entry.capabilities.ldap_search(attributes="*", **search_args)
+        entries = self.capabilities.ldap_search(attributes="*", **search_args)
 
         for entry in entries:
-            new_object = entry.capabilities.ldap_python_cls(
-                entry.capabilities.ldap_object_type.name
-            )(ldap_entry=entry)
+            LDAPObjectCls = self.capabilities.ldap_python_cls(
+                LDAPObjectType.from_object_cls(entry).name
+            )
+            new_object = LDAPObjectCls(entry, self.capabilities)
 
             if isinstance(new_object, "LDAPOrganizationalUnit") and recursive:
                 new_object.fetch_objects(recursive)
@@ -108,7 +110,7 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return [obj for obj in self.objects.values() if set(obj.entry.object_cls) & set(object_cls)]
 
-    def get_gpo_from_gplink(self) -> list["LDAPGroupPolicyObject"]:
+    def get_gpo_from_gplink(self) -> list["LDAPObject"]:
         """
         Extract the GPO references (UUIDs) present in the current OU gpLink.
 
@@ -131,12 +133,16 @@ class LDAPOrganizationalUnit(LDAPObject):
             else f"(name={gpo_refs[0]})"
         )
 
-        gpo_entries = self.entry.capabilities.ldap_search(
+        gpo_entries = self.capabilities.ldap_search(
             search_type="GPO",
             search_filter=f"(displayName=*){gplink_filter}",
         )
 
-        return list(map(LDAPGroupPolicyObject, gpo_entries))
+        LDAPGPOType = self.capabilities.ldap_python_cls("GPO")
+        def map_gpo(entry: "LDAPEntry"):
+            return LDAPGPOType(entry, self.capabilities)
+
+        return list(map(map_gpo, gpo_entries))
 
     @override
     def to_dict(self) -> dict[str, Any]:

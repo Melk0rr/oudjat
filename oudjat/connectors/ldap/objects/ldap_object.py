@@ -1,7 +1,7 @@
 """A generic module to describe shared behavior of more specific LDAP objects."""
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Callable, Generic, NamedTuple, TypeVar, override
+from typing import TYPE_CHECKING, Any, Callable, NamedTuple, TypeVar, override
 
 from oudjat.assets.generic_identifiable import GenericIdentifiable
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
@@ -10,23 +10,21 @@ from ..ldap_utils import parse_dn
 
 if TYPE_CHECKING:
     from .ldap_entry import LDAPEntry
-    from .ldap_object_types import LDAPObjectType
 
 LDAPObjectBoundType = TypeVar("LDAPObjectBoundType", bound="LDAPObject")
 
-class LDAPCapabilities(NamedTuple, Generic[LDAPObjectBoundType]):
+class LDAPCapabilities(NamedTuple):
     """
     A helper class that handle LDAP capabilities provided by an LDAPConnector to ldap entries.
 
     Attributes:
-        ldap_search (Callable[..., list["LDAPEntry"]])       : A function to perform an LDAP search query
-        ldap_python_cls (Callable[[str], "LDAPObjTypeAlias"]): A function to retrieve a specific LDAPObject class from a string
-        ldap_object_type (LDAPObjectType)                    : The LDAPObjectType bound to an LDAPEntry
+        ldap_search (Callable[..., list["LDAPEntry"]])                                                                  : A function to perform an LDAP search query
+        ldap_python_cls (Callable[[str], "LDAPObjTypeAlias"])                                                           : A function to retrieve a specific LDAPObject class from a string
+        ldap_map_entry (Callable[["LDAPEntry", "LDAPCapabilities", type["LDAPObjectBoundType"]], "LDAPObjectBoundType"]): A function to map an entry into an LDAPObject derivated
     """
 
     ldap_search: Callable[..., list["LDAPEntry"]]
-    ldap_python_cls: Callable[[str], type["LDAPObjectBoundType"]]
-    ldap_object_type: "LDAPObjectType"
+    ldap_python_cls: Callable[[str], type["LDAPObject"]]
 
 class LDAPObject(GenericIdentifiable):
     """

@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, Any, override
 from oudjat.utils.types import StrType
 
 from ..definitions import UUID_REG
-from ..ldap_object import LDAPObject
 from .ms_gppref import MS_GPPREF
 
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
+    from ..ldap_object import LDAPCapabilities, LDAPObject
 
 
 class LDAPGPOScope(Enum):
@@ -34,17 +34,18 @@ class LDAPGroupPolicyObject(LDAPObject):
 
     # ****************************************************************
     # Attributes & Constructors
-    def __init__(self, ldap_entry: "LDAPEntry") -> None:
+    def __init__(self, ldap_entry: "LDAPEntry", capabilities: "LDAPCapabilities") -> None:
         """
         Initialize an instance of LDAPGPO.
 
         This constructor takes an LDAP entry as input and initializes the object with necessary attributes derived from the entry.
 
         Args:
-            ldap_entry (LDAPEntry): An LDAP entry representing a group policy object.
+            ldap_entry (LDAPEntry)         : An LDAP entry representing a group policy object.
+            capabilities (LDAPCapabilities): LDAP capabilities which provide ways for an LDAP object to interact with an LDAP server through an LDAPConnector
         """
 
-        super().__init__(ldap_entry=ldap_entry)
+        super().__init__(ldap_entry, capabilities)
 
         self.display_name: str = self.entry.get("displayName")
 
@@ -64,7 +65,9 @@ class LDAPGroupPolicyObject(LDAPObject):
             )
 
         except Exception as e:
-            raise ValueError(f"{__class__.__name__}::Error while trying to get group policy scope\n{e}")
+            raise ValueError(
+                f"{__class__.__name__}::Error while trying to get group policy scope\n{e}"
+            )
 
         guids: list[str] = re.findall(UUID_REG, self.entry.get(self.scope.value))
         self.infos: dict[str, str] = {guid: MS_GPPREF[guid] for guid in guids}
@@ -110,14 +113,15 @@ class LDAPGroupPolicyObject(LDAPObject):
             list["LDAPObject"]: A list of LDAPOrganizationalUnit instances that are linked to the current GPO.
         """
 
-        entries =  self.entry.capabilities.ldap_search(
+        entries = self.capabilities.ldap_search(
             search_filter=f"(gPLink={f'*{self.name}*'})(name={ou})", attributes=attributes
         )
 
-        return [
-            entry.capabilities.ldap_python_cls(entry.capabilities.ldap_object_type.name)(ldap_entry=entry)
-            for entry in entries
-        ]
+        LDAPOUType = self.capabilities.ldap_python_cls("OU")
+        def map_ou(entry: "LDAPEntry"):
+            return LDAPOUType(entry, self.capabilities)
+
+        return list(map(map_ou, entries))
 
     @override
     def to_dict(self) -> dict[str, Any]:

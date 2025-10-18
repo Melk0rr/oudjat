@@ -4,10 +4,9 @@ from typing import TYPE_CHECKING, Any, override
 
 from oudjat.assets.network.subnet import Subnet
 
-from ..ldap_object import LDAPObject
-
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
+    from ..ldap_object import LDAPCapabilities, LDAPObject
 
 
 class LDAPSubnet(LDAPObject):
@@ -16,15 +15,16 @@ class LDAPSubnet(LDAPObject):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry"):
+    def __init__(self, ldap_entry: "LDAPEntry", capabilities: "LDAPCapabilities") -> None:
         """
         Create a new instance of LDAPSubnet.
 
         Args:
-            ldap_entry (LDAPEntry): base dictionary entry
+            ldap_entry (LDAPEntry)         : Base dictionary entry
+            capabilities (LDAPCapabilities): LDAP capabilities which provide ways for an LDAP object to interact with an LDAP server through an LDAPConnector
         """
 
-        super().__init__(ldap_entry=ldap_entry)
+        super().__init__(ldap_entry, capabilities)
         self.subnet: Subnet = Subnet(
             address=ldap_entry.get("name"),
             name=ldap_entry.get("location"),

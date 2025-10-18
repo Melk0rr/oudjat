@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING, Any, override
 from ldap3.utils.conv import escape_filter_chars
 
 from oudjat.assets.group import Group
+from oudjat.connectors.ldap.objects.ldap_object_types import LDAPObjectType
 
 from .ldap_group_types import LDAPGroupType
 
 if TYPE_CHECKING:
     from ...ldap_entry import LDAPEntry
-    from ...ldap_object import LDAPObject
+    from ...ldap_object import LDAPCapabilities, LDAPObject
 
 
 class LDAPGroup(LDAPObject):
@@ -20,17 +21,18 @@ class LDAPGroup(LDAPObject):
     # Attributes & Constructors
 
     def __init__(
-        self, ldap_entry: "LDAPEntry", ldap_parent_group: "LDAPGroup | None" = None
+        self, ldap_entry: "LDAPEntry", capabilities: "LDAPCapabilities", ldap_parent_group: "LDAPGroup | None" = None
     ) -> None:
         """
         Create a new instance of LDAPGroup.
 
         Args:
-            ldap_entry (LDAPEntry)       : the base dictionary entry
-            ldap_parent_group (LDAPGroup): to optionaly specify the parent group
+            ldap_entry (LDAPEntry)         : The base dictionary entry
+            capabilities (LDAPCapabilities): LDAP capabilities which provide ways for an LDAP object to interact with an LDAP server through an LDAPConnector
+            ldap_parent_group (LDAPGroup)  : To optionaly specify the parent group
         """
 
-        super().__init__(ldap_entry=ldap_entry)
+        super().__init__(ldap_entry, capabilities)
 
         self.group: Group[LDAPObject] = Group[LDAPObject](
             group_id=self.entry.get("objectGUID"),
@@ -108,29 +110,25 @@ class LDAPGroup(LDAPObject):
             list[LDAPObject]: a list of the group members
         """
 
-        direct_members = []
         for ref in self.get_member_refs():
             # INFO: Search for the ref in LDAP server
             # TODO: Must implement an LDAPFilter class to handle potential escape characters
             escaped_ref = escape_filter_chars(ref)
-            ref_search: list["LDAPEntry"] = self.entry.capabilities.ldap_search(
+            ref_search: list["LDAPEntry"] = self.capabilities.ldap_search(
                 search_filter=f"(distinguishedName={escaped_ref})"
             )
 
             if len(ref_search) > 0:
                 search_entry = ref_search[0]
-                LDAPObjectCls = self.entry.capabilities.ldap_python_cls(
-                    search_entry.capabilities.ldap_object_type.name
+                LDAPObjectCls = self.capabilities.ldap_python_cls(
+                    LDAPObjectType.from_object_cls(search_entry).name
                 )
 
-                new_member = LDAPObjectCls(ldap_entry=search_entry)
+                new_member = LDAPObjectCls(search_entry, self.capabilities)
                 if isinstance(new_member, LDAPGroup) and recursive:
                     new_member.fetch_members(recursive=recursive)
 
-                direct_members.append(new_member)
-
-        for member in direct_members:
-            self.add_member(member)
+                self.add_member(new_member)
 
     def get_sub_groups(self, recursive: bool = False) -> list["LDAPGroup"]:
         """

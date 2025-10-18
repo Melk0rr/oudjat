@@ -18,15 +18,16 @@ class LDAPUser(LDAPAccount):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry") -> None:
+    def __init__(self, ldap_entry: "LDAPEntry", **kwargs: Any) -> None:
         """
         Create a new instance of LDAPUser.
 
         Args:
-            ldap_entry (LDAPEntry): base dictionary entry
+            ldap_entry (LDAPEntry): Base dictionary entry
+            **kwargs (Any)        : Any further argument to pass to parent class
         """
 
-        super().__init__(ldap_entry=ldap_entry)
+        super().__init__(ldap_entry=ldap_entry, **kwargs)
 
         email = self.entry.get("mail", None)
         if email is not None:
