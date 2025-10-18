@@ -94,6 +94,11 @@ class LDAPConnector(Connector):
         self.ldap_server: ldap3.Server
         self.connection: ldap3.Connection | None = None
 
+        self.DEFAULT_CAPABILITIES: LDAPCapabilities = LDAPCapabilities(
+            ldap_search=self.search,
+            ldap_python_cls=LDAPConnector.ldap_python_cls_from_obj_type,
+        )
+
     # ****************************************************************
     # Methods
 
