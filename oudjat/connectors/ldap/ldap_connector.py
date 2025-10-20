@@ -361,7 +361,7 @@ class LDAPConnector(Connector):
 
     def get_gpo(
         self, displayName: str = "*", name: StrType = "*", attributes: StrType | None = None
-    ) -> list["LDAPGroupPolicyObject"]:
+    ) -> dict[int | str, "LDAPGroupPolicyObject"]:
         """
         Specific method to retrieve LDAP GPO instances.
 
@@ -390,11 +390,11 @@ class LDAPConnector(Connector):
         def map_gpo(entry: "LDAPEntry") -> "LDAPGroupPolicyObject":
             return LDAPGroupPolicyObject(entry, self.DEFAULT_CAPABILITIES)
 
-        return list(map(map_gpo, entries))
+        return {gpo.id: gpo for gpo in list(map(map_gpo, entries))}
 
     def get_subnet(
         self, search_filter: str | None = None, attributes: StrType | None = None
-    ) -> list["LDAPSubnet"]:
+    ) -> dict[int | str, "LDAPSubnet"]:
         """
         Specific method to retrieve LDAP subnet instances.
 
@@ -418,14 +418,14 @@ class LDAPConnector(Connector):
         def map_net(entry: "LDAPEntry") -> "LDAPSubnet":
             return LDAPSubnet(entry, self.DEFAULT_CAPABILITIES)
 
-        return list(map(map_net, entries))
+        return {net.id: net for net in list(map(map_net, entries))}
 
     def get_computer(
         self,
         search_filter: str | None = None,
         attributes: StrType | None = None,
         search_base: str | None = None,
-    ) -> list["LDAPComputer"]:
+    ) -> dict[int | str, "LDAPComputer"]:
         """
         Specific method to retrieve LDAP Computer instances.
 
@@ -448,14 +448,14 @@ class LDAPConnector(Connector):
         def map_cpt(entry: "LDAPEntry") -> "LDAPComputer":
             return LDAPComputer(entry, capabilities=self.DEFAULT_CAPABILITIES)
 
-        return list(map(map_cpt, entries))
+        return {cpt.id: cpt for cpt in list(map(map_cpt, entries))}
 
     def get_users(
         self,
         search_filter: str | None = None,
         attributes: StrType | None = None,
         search_base: str | None = None,
-    ) -> list["LDAPUser"]:
+    ) -> dict[int | str, "LDAPUser"]:
         """
         Specific method to retrieve LDAP User instances.
 
@@ -478,14 +478,15 @@ class LDAPConnector(Connector):
         def map_usr(entry: "LDAPEntry") -> "LDAPUser":
             return LDAPUser(entry, capabilities=self.DEFAULT_CAPABILITIES)
 
-        return list(map(map_usr, entries))
+        return {usr.id: usr for usr in list(map(map_usr, entries))}
 
     def get_ou(
         self,
         search_filter: str | None = None,
         search_base: str | None = None,
         attributes: StrType | None = None,
-    ) -> list["LDAPOrganizationalUnit"]:
+        recursive: bool = False,
+    ) -> dict[int | str, "LDAPOrganizationalUnit"]:
         """
         Specific method to retrieve LDAP organizational unit objects.
 
@@ -509,7 +510,7 @@ class LDAPConnector(Connector):
         def map_ou(entry: "LDAPEntry") -> "LDAPOrganizationalUnit":
             return LDAPOrganizationalUnit(entry, self.DEFAULT_CAPABILITIES)
 
-        return list(map(map_ou, entries))
+        return {ou.id: ou for ou in list(map(map_ou, entries))}
 
     def complete_partial_entry(self, ldap_entry: "LDAPEntry") -> "LDAPEntry":
         """
@@ -531,7 +532,7 @@ class LDAPConnector(Connector):
             search_filter=f"(distinguishedName={ldap_entry.dn})",
         )[0]
 
-    def get_domain_admins(self) -> list["LDAPUser"]:
+    def get_domain_admins(self) -> dict[int | str, "LDAPUser"]:
         """
         Return a list of the domain and enterprise admins.
 
