@@ -196,3 +196,20 @@ class GenericIdentifiable(ABC):
             "description": self.description,
             **self.custom_attributes,
         }
+
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def map_per_id(generic_list: list["GenericBoundType"]) -> dict[int | str, "GenericBoundType"]:
+        """
+        Map a list of GenericIdentifiable instances into a dictionary per element id.
+
+        Args:
+            generic_list (list[GenericIdentifiable]): list of GenericIdentifiable instances to map
+
+        Returns:
+            dict[int | str, GenericIdentifiable]: mapped GenericIdentifiable instances as a dictionary
+        """
+
+        return { g.id: g for g in generic_list }
