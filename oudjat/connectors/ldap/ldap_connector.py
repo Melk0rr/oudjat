@@ -579,7 +579,7 @@ class LDAPConnector(Connector):
         Return a list of the domain and enterprise admins.
 
         Returns:
-            List[LDAPEntry]: a list of LDAPEntry instances representing the domain admins
+            dict[int | str, LDAPUser]: a list of LDAPEntry instances representing the domain admins
         """
 
         return self.get_user(
