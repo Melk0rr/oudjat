@@ -113,15 +113,10 @@ class LDAPGroupPolicyObject(LDAPObject):
             list["LDAPObject"]: A list of LDAPOrganizationalUnit instances that are linked to the current GPO.
         """
 
-        entries = self.capabilities.ldap_search(
+        obj_opt = self.capabilities.ldap_obj_opt("OU")
+        return obj_opt.fetch(
             search_filter=f"(gPLink={f'*{self.name}*'})(name={ou})", attributes=attributes
         )
-
-        LDAPOUType = self.capabilities.ldap_python_cls("OU")
-        def map_ou(entry: "LDAPEntry"):
-            return LDAPOUType(entry, self.capabilities)
-
-        return list(map(map_ou, entries))
 
     @override
     def to_dict(self) -> dict[str, Any]:

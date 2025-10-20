@@ -1,7 +1,7 @@
 """A generic module to describe shared behavior of more specific LDAP objects."""
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Callable, NamedTuple, TypeVar, override
+from typing import TYPE_CHECKING, Any, Callable, Generic, NamedTuple, TypeVar, override
 
 from oudjat.assets.generic_identifiable import GenericIdentifiable
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
@@ -13,18 +13,33 @@ if TYPE_CHECKING:
 
 LDAPObjectBoundType = TypeVar("LDAPObjectBoundType", bound="LDAPObject")
 
+
+class LDAPObjectOptions(NamedTuple, Generic["LDAPObjectBoundType"]):
+    """
+    Helper class to handle passing of LDAPObject derivated and dedicated method to retrive this specific type of LDAPObject.
+
+    Attributes:
+        cls (type[LDAPObject])                            : Type class of the LDAPObject derivated
+        fetch (Callable[..., dict[int | str, LDAPObject]]): A function to retrieve the specific type
+
+    """
+
+    cls: type["LDAPObjectBoundType"]
+    fetch: Callable[..., dict[int | str, "LDAPObjectBoundType"]]
+
+
 class LDAPCapabilities(NamedTuple):
     """
     A helper class that handle LDAP capabilities provided by an LDAPConnector to ldap entries.
 
     Attributes:
-        ldap_search (Callable[..., list["LDAPEntry"]])                                                                  : A function to perform an LDAP search query
-        ldap_python_cls (Callable[[str], "LDAPObjTypeAlias"])                                                           : A function to retrieve a specific LDAPObject class from a string
-        ldap_map_entry (Callable[["LDAPEntry", "LDAPCapabilities", type["LDAPObjectBoundType"]], "LDAPObjectBoundType"]): A function to map an entry into an LDAPObject derivated
+        ldap_search (Callable[..., list["LDAPEntry"]])     : A function to perform an LDAP search query
+        ldap_obj_opt (Callable[[str], "LDAPObjectOptions"]): A function to retrieve a specific LDAPObjectOptions element
     """
 
     ldap_search: Callable[..., list["LDAPEntry"]]
-    ldap_python_cls: Callable[[str], type["LDAPObject"]]
+    ldap_obj_opt: Callable[[str], "LDAPObjectOptions"]
+
 
 class LDAPObject(GenericIdentifiable):
     """

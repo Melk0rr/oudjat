@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from .objects.account.ldap_computer import LDAPComputer
     from .objects.account.ldap_user import LDAPUser
     from .objects.gpo.ldap_gpo import LDAPGroupPolicyObject
-    from .objects.ldap_object import LDAPCapabilities, LDAPObject
+    from .objects.ldap_object import LDAPCapabilities, LDAPObject, LDAPObjectOptions
     from .objects.ou.ldap_ou import LDAPOrganizationalUnit
     from .objects.subnet.ldap_subnet import LDAPSubnet
 
@@ -64,17 +64,6 @@ class LDAPConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
 
-    # TODO: Maybe setup a NamedTuple to pass LDAPObject type + the dedicated method
-    LDAP_PYTHON_CLS: dict[str, type["LDAPObject"]] = {
-        f"{LDAPObjectType.DEFAULT}": LDAPObject,
-        f"{LDAPObjectType.COMPUTER}": LDAPComputer,
-        f"{LDAPObjectType.GPO}": LDAPGroupPolicyObject,
-        f"{LDAPObjectType.GROUP}": LDAPGroup,
-        f"{LDAPObjectType.OU}": LDAPOrganizationalUnit,
-        f"{LDAPObjectType.SUBNET}": LDAPSubnet,
-        f"{LDAPObjectType.USER}": LDAPUser,
-    }
-
     def __init__(
         self, server: str, service_name: str = "OudjatLDAPConnection", use_tls: bool = False
     ) -> None:
@@ -98,8 +87,33 @@ class LDAPConnector(Connector):
         self.connection: ldap3.Connection | None = None
 
         self.DEFAULT_CAPABILITIES: LDAPCapabilities = LDAPCapabilities(
+        self._LDAP_PYTHON_CLS: dict[str, "LDAPObjectOptions"] = {
+            f"{LDAPObjectType.DEFAULT}": LDAPObjectOptions["LDAPObject"](
+                cls=LDAPObject, fetch=self.get_object
+            ),
+            f"{LDAPObjectType.COMPUTER}": LDAPObjectOptions["LDAPComputer"](
+                cls=LDAPComputer, fetch=self.get_computer
+            ),
+            f"{LDAPObjectType.GPO}": LDAPObjectOptions["LDAPGroupPolicyObject"](
+                cls=LDAPGroupPolicyObject, fetch=self.get_gpo
+            ),
+            f"{LDAPObjectType.GROUP}": LDAPObjectOptions["LDAPGroup"](
+                cls=LDAPGroup, fetch=self.get_group
+            ),
+            f"{LDAPObjectType.OU}": LDAPObjectOptions["LDAPOrganizationalUnit"](
+                cls=LDAPOrganizationalUnit, fetch=self.get_ou
+            ),
+            f"{LDAPObjectType.SUBNET}": LDAPObjectOptions["LDAPSubnet"](
+                cls=LDAPSubnet, fetch=self.get_subnet
+            ),
+            f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](
+                cls=LDAPUser, fetch=self.get_user
+            ),
+        }
+
+        self._DEFAULT_CAPABILITIES: LDAPCapabilities = LDAPCapabilities(
             ldap_search=self.search,
-            ldap_python_cls=LDAPConnector.ldap_python_cls_from_obj_type,
+            ldap_obj_opt=self.ldap_object_opt_from_obj_type,
         )
 
     # ****************************************************************
@@ -489,6 +503,19 @@ class LDAPConnector(Connector):
             search_filter="(&(objectClass=user)(objectCategory=Person)(adminCount=1))",
         )
 
+    def ldap_object_opt_from_obj_type(self, ldap_obj_type_name: str) -> "LDAPObjectOptions":
+        """
+        Return an LDAP object based on a given LDAPEntry.
+
+        Args:
+            ldap_obj_type_name (str): The LDAPObjectType element name
+
+        Returns:
+            LDAPObjTypeAlias: the python class matching the provided entry
+        """
+
+        return self._LDAP_PYTHON_CLS[ldap_obj_type_name]
+
     # ****************************************************************
     # Static methods
 
@@ -522,17 +549,3 @@ class LDAPConnector(Connector):
             raise ValueError(f"{__class__.__name__}.ldap_entry_from_dict::Invalid entry provided")
 
         return LDAPEntry(**entry)
-
-    @staticmethod
-    def ldap_python_cls_from_obj_type(ldap_obj_type_name: str) -> type["LDAPObject"]:
-        """
-        Return an LDAP object based on a given LDAPEntry.
-
-        Args:
-            ldap_obj_type_name (str): The LDAPObjectType element name
-
-        Returns:
-            LDAPObjTypeAlias: the python class matching the provided entry
-        """
-
-        return LDAPConnector.LDAP_PYTHON_CLS[ldap_obj_type_name]

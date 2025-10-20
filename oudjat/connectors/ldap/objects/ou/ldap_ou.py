@@ -62,9 +62,8 @@ class LDAPOrganizationalUnit(LDAPObject):
         entries = self.capabilities.ldap_search(attributes="*", **search_args)
 
         for entry in entries:
-            LDAPObjectCls = self.capabilities.ldap_python_cls(
-                LDAPObjectType.from_object_cls(entry).name
-            )
+            obj_type = LDAPObjectType.from_object_cls(entry)
+            LDAPObjectCls = self.capabilities.ldap_obj_opt(obj_type.name).cls
             new_object = LDAPObjectCls(entry, self.capabilities)
 
             if isinstance(new_object, "LDAPOrganizationalUnit") and recursive:
@@ -125,24 +124,10 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         gpo_refs = re.findall(UUID_REG, self.get_gplink())
         if len(gpo_refs) == 0:
-            return []
+            return {}
 
-        gplink_filter = (
-            f"(|{''.join([f'(name={link})' for link in gpo_refs])})"
-            if len(gpo_refs) > 1
-            else f"(name={gpo_refs[0]})"
-        )
-
-        gpo_entries = self.capabilities.ldap_search(
-            search_type="GPO",
-            search_filter=f"(displayName=*){gplink_filter}",
-        )
-
-        LDAPGPOType = self.capabilities.ldap_python_cls("GPO")
-        def map_gpo(entry: "LDAPEntry"):
-            return LDAPGPOType(entry, self.capabilities)
-
-        return list(map(map_gpo, gpo_entries))
+        gpo_opt = self.capabilities.ldap_obj_opt("GPO")
+        return gpo_opt.fetch(name=gpo_refs)
 
     @override
     def to_dict(self) -> dict[str, Any]:
