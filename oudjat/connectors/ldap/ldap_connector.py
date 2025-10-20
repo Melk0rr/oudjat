@@ -337,7 +337,7 @@ class LDAPConnector(Connector):
             auto (bool)                 : Auto map the objects dynamically per type
 
         Returns:
-            list[LDAPObject]: list of objects
+            dict[int | str, LDAPObject]: list of objects
         """
 
         entries = self.search(
@@ -372,7 +372,7 @@ class LDAPConnector(Connector):
             attributes (str | list[str]): attributes to include in result
 
         Returns:
-            list[LDAPGroupPolicyObject]: list of LDAPGroupPolicyObject instances
+            dict[int | str, LDAPGroupPolicyObject]: list of LDAPGroupPolicyObject instances
         """
 
         name = (
@@ -404,7 +404,7 @@ class LDAPConnector(Connector):
             attributes (str | list[str]): attributes to include in result
 
         Returns:
-            list[LDAPSubnet]: list of subnets
+            dict[int | str, LDAPSubnet]: list of subnets
         """
 
         sb_dc = ",".join([f"DC={dc.lower()}" for dc in self.domain.split(".")])
@@ -436,7 +436,7 @@ class LDAPConnector(Connector):
             search_base (str)           : where to base the search on in terms of directory location
 
         Returns:
-            list[LDAPComputer]: list of computers
+            dict[int |str, LDAPComputer]: list of computers
         """
 
         entries = self.search(
@@ -466,7 +466,7 @@ class LDAPConnector(Connector):
             search_base (str)           : where to base the search on in terms of directory location
 
         Returns:
-            list[LDAPUserTypeAlias]: list of users
+            dict[int | str, LDAPUserTypeAlias]: list of users
         """
 
         entries = self.search(
@@ -498,7 +498,7 @@ class LDAPConnector(Connector):
             recursive (bool)            : Retrieve groups recursively if set to True
 
         Returns:
-            list[LDAPGroup]: list of OU matching filter
+            dict[int | str, LDAPGroup]: list of OU matching filter
         """
 
         entries = self.search(
@@ -535,7 +535,7 @@ class LDAPConnector(Connector):
             recursive (bool)            : Retrieve OUs recursively if set to True
 
         Returns:
-            list[LDAPOrganizationalUnit]: list of OU matching filter
+            dict[int | str, LDAPOrganizationalUnit]: list of OU matching filter
         """
 
         entries = self.search(
