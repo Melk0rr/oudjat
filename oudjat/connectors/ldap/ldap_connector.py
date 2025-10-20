@@ -76,17 +76,16 @@ class LDAPConnector(Connector):
             use_tls (bool)    : should the connector use TLS for LDAPS connection
         """
 
-        self.use_tls: bool = use_tls
-        self.port: LDAPPort = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
+        self._use_tls: bool = use_tls
+        self._port: LDAPPort = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
 
         super().__init__(target=server, service_name=service_name, use_credentials=True)
 
-        self.domain: str = ""
-        self.default_search_base: str = ""
-        self.ldap_server: ldap3.Server
-        self.connection: ldap3.Connection | None = None
+        self._domain: str = ""
+        self._default_search_base: str = ""
+        self._ldap_server: ldap3.Server
+        self._connection: ldap3.Connection | None = None
 
-        self.DEFAULT_CAPABILITIES: LDAPCapabilities = LDAPCapabilities(
         self._LDAP_PYTHON_CLS: dict[str, "LDAPObjectOptions"] = {
             f"{LDAPObjectType.DEFAULT}": LDAPObjectOptions["LDAPObject"](
                 cls=LDAPObject, fetch=self.get_object
@@ -119,7 +118,8 @@ class LDAPConnector(Connector):
     # ****************************************************************
     # Methods
 
-    def get_domain(self) -> str:
+    @property
+    def domain(self) -> str:
         """
         Return the domain name.
 
@@ -127,9 +127,11 @@ class LDAPConnector(Connector):
             str: domain name
         """
 
-        return self.domain
+        return self._domain
 
-    def get_connection(self) -> ldap3.Connection | None:
+    @property
+    @override
+    def connection(self) -> ldap3.Connection | None:
         """
         Return the server connection.
 
@@ -137,9 +139,10 @@ class LDAPConnector(Connector):
             ldap3.Connection: active connection
         """
 
-        return self.connection
+        return self._connection
 
-    def get_default_search_base(self) -> str:
+    @property
+    def default_search_base(self) -> str:
         """
         Return the default search base.
 
@@ -147,7 +150,7 @@ class LDAPConnector(Connector):
             str: default domain search base
         """
 
-        return self.default_search_base
+        return self._default_search_base
 
     def set_tls_usage(self, use_tls: bool = True) -> None:
         """
@@ -157,10 +160,9 @@ class LDAPConnector(Connector):
         use_tls (bool): should the connector use TLS
         """
 
-        self.use_tls = use_tls
-        self.port = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
+        self._use_tls = use_tls
+        self._port = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
 
-    # TODO: Make a type alias for tls versions
     @override
     def connect(self, version: "LDAPTLSVersion | None" = None) -> None:
         """
@@ -175,7 +177,7 @@ class LDAPConnector(Connector):
                 self.connect(version=LDAPTLSVersion.TLSv1_2)
 
             except LDAPSocketOpenError as e:
-                if not self.use_tls:
+                if not self._use_tls:
                     ColorPrint.yellow(
                         f"{__class__.__name__}.connect::Error while trying to connect to LDAP: {e}"
                     )
@@ -185,21 +187,20 @@ class LDAPConnector(Connector):
             return
 
         target_ip = socket.gethostbyname(str(self.target))
-
         if not target_ip:
             raise Exception(
                 f"{__class__.__name__}.connect::The target {self.target} is unreachable"
             )
 
         TLSOption = TypedDict("TLSOption", {"use_ssl": bool, "tls": ldap3.Tls | None})
-        tls_option: TLSOption = {"use_ssl": self.use_tls, "tls": None}
+        tls_option: TLSOption = {"use_ssl": self._use_tls, "tls": None}
 
-        if self.use_tls:
+        if self._use_tls:
             tls_option["tls"] = ldap3.Tls(
                 validate=ssl.CERT_NONE, version=version, ciphers="ALL:@SECLEVEL=0"
             )
 
-        ldap_server = ldap3.Server(target_ip, get_info=ldap3.ALL, port=self.port, **tls_option)
+        ldap_server = ldap3.Server(target_ip, get_info=ldap3.ALL, port=self._port, **tls_option)
 
         if self._credentials is None:
             raise ConnectionError(
@@ -220,7 +221,7 @@ class LDAPConnector(Connector):
             if not bind_result:
                 result = ldap_connection.result
 
-                if result["result"] == "RESULT_STRONGER_AUTH_REQUIRED" and self.use_tls:
+                if result["result"] == "RESULT_STRONGER_AUTH_REQUIRED" and self._use_tls:
                     self.set_tls_usage(use_tls=True)
                     return self.connect()
 
@@ -250,11 +251,11 @@ class LDAPConnector(Connector):
 
         ColorPrint.green(f"Bound to {ldap_server}")
 
-        self.ldap_server = ldap_server
-        self.connection = ldap_connection
+        self._ldap_server = ldap_server
+        self._connection = ldap_connection
 
-        self.default_search_base = self.ldap_server.info.other["defaultNamingContext"][0]
-        self.domain = self.ldap_server.info.other["ldapServiceName"][0].split("@")[-1]
+        self._default_search_base = self._ldap_server.info.other["defaultNamingContext"][0]
+        self._domain = self._ldap_server.info.other["ldapServiceName"][0].split("@")[-1]
 
     @override
     def search(
@@ -264,7 +265,7 @@ class LDAPConnector(Connector):
         search_filter: str | None = None,
         attributes: StrType | None = None,
         **kwargs: Any,
-    ) -> list[LDAPEntry]:
+    ) -> list["LDAPEntry"]:
         """
         Run an LDAP search based on the provided parameters.
 
@@ -388,7 +389,7 @@ class LDAPConnector(Connector):
         )
 
         def map_gpo(entry: "LDAPEntry") -> "LDAPGroupPolicyObject":
-            return LDAPGroupPolicyObject(entry, self.DEFAULT_CAPABILITIES)
+            return LDAPGroupPolicyObject(entry, self._DEFAULT_CAPABILITIES)
 
         return {gpo.id: gpo for gpo in list(map(map_gpo, entries))}
 
@@ -416,7 +417,7 @@ class LDAPConnector(Connector):
         )
 
         def map_net(entry: "LDAPEntry") -> "LDAPSubnet":
-            return LDAPSubnet(entry, self.DEFAULT_CAPABILITIES)
+            return LDAPSubnet(entry, self._DEFAULT_CAPABILITIES)
 
         return {net.id: net for net in list(map(map_net, entries))}
 
@@ -446,11 +447,11 @@ class LDAPConnector(Connector):
         )
 
         def map_cpt(entry: "LDAPEntry") -> "LDAPComputer":
-            return LDAPComputer(entry, capabilities=self.DEFAULT_CAPABILITIES)
+            return LDAPComputer(entry, capabilities=self._DEFAULT_CAPABILITIES)
 
         return {cpt.id: cpt for cpt in list(map(map_cpt, entries))}
 
-    def get_users(
+    def get_user(
         self,
         search_filter: str | None = None,
         attributes: StrType | None = None,
@@ -476,7 +477,7 @@ class LDAPConnector(Connector):
         )
 
         def map_usr(entry: "LDAPEntry") -> "LDAPUser":
-            return LDAPUser(entry, capabilities=self.DEFAULT_CAPABILITIES)
+            return LDAPUser(entry, capabilities=self._DEFAULT_CAPABILITIES)
 
         return {usr.id: usr for usr in list(map(map_usr, entries))}
 
@@ -527,10 +528,11 @@ class LDAPConnector(Connector):
         Specific method to retrieve LDAP organizational unit objects.
 
         Args:
-            dn (str):                   : optional distinguished name to search
-            search_filter (str)         : filter to reduce search results
-            attributes (str | List[str]): attrbutes to include in result
-            search_base (str)           : where to base the search on in terms of directory location
+            dn (str):                   : Optional distinguished name to search
+            search_filter (str)         : Filter to reduce search results
+            attributes (str | List[str]): Attrbutes to include in result
+            search_base (str)           : Where to base the search on in terms of directory location
+            recursive (bool)            : Retrieve OUs recursively if set to True
 
         Returns:
             list[LDAPOrganizationalUnit]: list of OU matching filter
@@ -544,7 +546,11 @@ class LDAPConnector(Connector):
         )
 
         def map_ou(entry: "LDAPEntry") -> "LDAPOrganizationalUnit":
-            return LDAPOrganizationalUnit(entry, self.DEFAULT_CAPABILITIES)
+            ou_instance = LDAPOrganizationalUnit(entry, self._DEFAULT_CAPABILITIES)
+            if recursive:
+                ou_instance.fetch_objects(recursive)
+
+            return ou_instance
 
         return {ou.id: ou for ou in list(map(map_ou, entries))}
 
@@ -576,7 +582,7 @@ class LDAPConnector(Connector):
             List[LDAPEntry]: a list of LDAPEntry instances representing the domain admins
         """
 
-        return self.get_users(
+        return self.get_user(
             search_filter="(&(objectClass=user)(objectCategory=Person)(adminCount=1))",
         )
 

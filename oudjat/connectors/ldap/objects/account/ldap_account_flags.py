@@ -1,4 +1,9 @@
-"""A simple module to declare account control values as a bit flag."""
+"""
+A simple module to declare account control values as a bit flag.
+
+See : https://learn.microsoft.com/fr-fr/troubleshoot/windows-server/active-directory/useraccountcontrol-manipulate-account-properties
+"""
+
 from oudjat.utils.bit_flag import BitFlag
 
 
@@ -28,7 +33,6 @@ class LDAPAccountFlag(BitFlag):
     NO_AUTH_DATA_REQUIRED = 33554432
     PARTIAL_SECRETS_ACCOUNT = 67108864
 
-
     @staticmethod
     def is_disabled(account_control: int) -> bool:
         """
@@ -41,10 +45,7 @@ class LDAPAccountFlag(BitFlag):
             bool: True if the ACCOUNT_DISABLE flag is set, otherwise False.
         """
 
-        return (
-            LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.ACCOUNT_DISABLE)
-            != 0
-        )
+        return LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.ACCOUNT_DISABLE) != 0
 
     @staticmethod
     def pwd_expires(account_control: int) -> bool:
@@ -58,9 +59,7 @@ class LDAPAccountFlag(BitFlag):
             bool: True if the PASSWD_DONT_EXPIRE flag is not set, otherwise False.
         """
 
-        return not LDAPAccountFlag.check_flag(
-            account_control, LDAPAccountFlag.PASSWD_DONT_EXPIRE
-        )
+        return not LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.PASSWD_DONT_EXPIRE)
 
     @staticmethod
     def pwd_expired(account_control: int) -> bool:
@@ -74,10 +73,7 @@ class LDAPAccountFlag(BitFlag):
             bool: True if the PASSWORD_EXPIRED flag is set, otherwise False.
         """
 
-        return (
-            LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.PASSWORD_EXPIRED)
-            != 0
-        )
+        return LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.PASSWORD_EXPIRED) != 0
 
     @staticmethod
     def pwd_required(account_control: int) -> bool:
@@ -91,9 +87,7 @@ class LDAPAccountFlag(BitFlag):
             bool: True if the PASSWD_NOTREQD flag is not set, otherwise False.
         """
 
-        return not LDAPAccountFlag.check_flag(
-            account_control, LDAPAccountFlag.PASSWD_NOTREQD
-        )
+        return not LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.PASSWD_NOTREQD)
 
     @staticmethod
     def is_locked(account_control: int) -> bool:
@@ -107,7 +101,4 @@ class LDAPAccountFlag(BitFlag):
             bool: True if the LOCKOUT flag is set, otherwise False.
         """
 
-        return not LDAPAccountFlag.check_flag(
-            account_control, LDAPAccountFlag.LOCKOUT
-        )
-
+        return not LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.LOCKOUT)

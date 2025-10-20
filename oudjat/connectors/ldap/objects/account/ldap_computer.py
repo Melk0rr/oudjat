@@ -50,8 +50,6 @@ class LDAPComputer(LDAPAccount):
             if len(os_edition_match) != 0:
                 os_edition = os_edition_match[0]
 
-        self.hostname: str = self.entry.get("dNSHostName")
-
         self.computer: Computer = Computer(
             computer_id=self._id,
             name=self._name,
@@ -64,11 +62,20 @@ class LDAPComputer(LDAPAccount):
     # ****************************************************************
     # Methods
 
+    @property
+    def hostname(self) -> str:
+        """
+        Return the hostname of the current LDAP computer object.
+
+        Returns:
+            str: the computer hostname as a string
+        """
+
+        return self.entry.get("dNSHostName")
+
     @override
     def to_dict(self) -> dict[str, Any]:
         """Convert the current instance into a dictionary."""
 
-        base_dict = super().to_dict()
         cpt_dict = self.computer.to_dict()
-
-        return {**base_dict, "hostname": cpt_dict.pop("label"), **cpt_dict}
+        return {**super().to_dict(), "hostname": cpt_dict.pop("label"), **cpt_dict}

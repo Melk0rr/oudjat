@@ -21,7 +21,10 @@ class LDAPGroup(LDAPObject):
     # Attributes & Constructors
 
     def __init__(
-        self, ldap_entry: "LDAPEntry", capabilities: "LDAPCapabilities", ldap_parent_group: "LDAPGroup | None" = None
+        self,
+        ldap_entry: "LDAPEntry",
+        capabilities: "LDAPCapabilities",
+        ldap_parent_group: "LDAPGroup | None" = None,
     ) -> None:
         """
         Create a new instance of LDAPGroup.
@@ -205,9 +208,7 @@ class LDAPGroup(LDAPObject):
 
         return members
 
-    def has_member(
-        self, ldap_object: "LDAPObject", extended: bool = False
-    ) -> bool:
+    def has_member(self, ldap_object: "LDAPObject", extended: bool = False) -> bool:
         """
         Check if the provided object is a member of the current group.
 
@@ -220,11 +221,7 @@ class LDAPGroup(LDAPObject):
             bool: True if the group contains the given object. False otherwise
         """
 
-        member_ref_list = (
-            self.get_members_flat()
-            if extended
-            else self.members.values()
-        )
+        member_ref_list = self.get_members_flat() if extended else self.members.values()
         return ldap_object.id in [m.id for m in member_ref_list]
 
     @override

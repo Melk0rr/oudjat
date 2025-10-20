@@ -19,5 +19,3 @@ __all__ = [
     "LDAPOrganizationalUnit",
     "LDAPSubnet"
 ]
-
-# TODO: Property usage module wide

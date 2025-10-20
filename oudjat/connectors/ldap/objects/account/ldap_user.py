@@ -29,38 +29,83 @@ class LDAPUser(LDAPAccount):
 
         super().__init__(ldap_entry=ldap_entry, **kwargs)
 
-        email = self.entry.get("mail", None)
-        if email is not None:
-            email = email.lower()
-
         # NOTE: Check additional account control bits (see https://learn.microsoft.com/en-us/windows/win32/adschema/a-msds-user-account-control-computed)
-        ms_acc_ctl = self.entry.get(MS_ACCOUNT_CTL_PROPERTY, None)
-
-        if ms_acc_ctl is not None:
-            self.enabled: bool = not LDAPAccountFlag.is_disabled(ms_acc_ctl)
-            self.pwd_expires: bool = LDAPAccountFlag.pwd_expires(ms_acc_ctl)
-            self.pwd_expired: bool = LDAPAccountFlag.pwd_expired(ms_acc_ctl)
-            self.pwd_required: bool = LDAPAccountFlag.pwd_required(ms_acc_ctl)
-            self.is_locked: bool = LDAPAccountFlag.is_locked(ms_acc_ctl)
+        if self.ms_account_ctl is not None:
+            self.enabled: bool = not LDAPAccountFlag.is_disabled(self.ms_account_ctl)
+            self.pwd_expires: bool = LDAPAccountFlag.pwd_expires(self.ms_account_ctl)
+            self.pwd_expired: bool = LDAPAccountFlag.pwd_expired(self.ms_account_ctl)
+            self.pwd_required: bool = LDAPAccountFlag.pwd_required(self.ms_account_ctl)
+            self.is_locked: bool = LDAPAccountFlag.is_locked(self.ms_account_ctl)
 
             for flag in list(LDAPAccountFlag):
-                if LDAPAccountFlag.check_flag(ms_acc_ctl, flag):
+                if LDAPAccountFlag.check_flag(self.ms_account_ctl, flag):
                     self.account_flags.add(flag.name)
 
         self.user: User = User(
-            user_id=self._id,
-            name=self._name,
-            firstname=self.entry.get("givenName"),
-            lastname=self.entry.get("sn"),
-            email=email,
-            login=self.get_san(),
-            description=self._description,
+            user_id=self.id,
+            name=self.name,
+            firstname=self.givenname,
+            lastname=self.surname,
+            email=self.email,
+            login=self.san,
+            description=self.description,
         )
 
     # ****************************************************************
     # Methods
 
-    def get_employee_id(self) -> str:
+    @property
+    def givenname(self) -> str:
+        """
+        Return the given name (firstname) of a user object.
+
+        Returns:
+            str: The given name of the user
+        """
+
+        return self.entry.get("givenName")
+
+    @property
+    def surname(self) -> str:
+        """
+        Return the surname (lastname / family name) of a user object.
+
+        Returns:
+            str: The lastname of the user
+        """
+
+        return self.entry.get("sn")
+
+    @property
+    def email(self) -> str:
+        """
+        Return the email address of the current user object.
+
+        Returns:
+            str: Email string of the current user
+        """
+
+        email = self.entry.get("mail", None)
+        if email is not None:
+            email = email.lower()
+
+        return email
+
+    @property
+    def ms_account_ctl(self) -> int | None:
+        """
+        Return the AD specific account control property.
+
+        This property contains additional computed bits over the base userAccountControl.
+
+        Returns:
+            int | None: The computed account control as a bit flag
+        """
+
+        self.entry.get(MS_ACCOUNT_CTL_PROPERTY, None)
+
+    @property
+    def employee_id(self) -> str:
         """
         Return the employee id.
 
@@ -70,7 +115,8 @@ class LDAPUser(LDAPAccount):
 
         return self.entry.get("employeeID", None)
 
-    def get_manager(self) -> str:
+    @property
+    def manager(self) -> str:
         """
         Return the user's manager.
 
@@ -80,6 +126,7 @@ class LDAPUser(LDAPAccount):
 
         return self.entry.get("manager", None)
 
+    @property
     def is_admin(self) -> bool:
         """
         Check if the current user is an admin.
@@ -112,8 +159,8 @@ class LDAPUser(LDAPAccount):
 
         return {
             **base_dict,
-            "employeeID": self.get_employee_id(),
-            "manager": self.get_manager(),
-            "is_admin": self.is_admin(),
+            "employee_id": self.employee_id,
+            "manager": self.manager,
+            "is_admin": self.is_admin,
             **user_dict,
         }

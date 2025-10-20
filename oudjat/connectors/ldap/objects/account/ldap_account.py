@@ -53,36 +53,33 @@ class LDAPAccount(LDAPObject, ABC):
 
         super().__init__(ldap_entry=ldap_entry, capabilities=capabilities, **kwargs)
 
-        pwd_last_set = self.get_pwd_last_set()
-        self.pwd_last_set_timestp: float | None = pwd_last_set.timestamp() if pwd_last_set is not None else None
+        self._enabled: bool = True
+        self._pwd_expires: bool = True
+        self._pwd_expired: bool = False
+        self._pwd_required: bool = True
+        self._is_locked: bool = False
 
-        self.account_control: int | None = self.entry.get("userAccountControl", None)
+        self._account_flags: set[str] = set()
 
-        self.enabled: bool = True
-        self.pwd_expires: bool = True
-        self.pwd_expired: bool = False
-        self.pwd_required: bool = True
-        self.is_locked: bool = False
-        self.account_flags: set[str] = set()
-
-        if self.account_control is not None:
-            self.enabled = not LDAPAccountFlag.is_disabled(self.account_control)
-            self.pwd_expires = LDAPAccountFlag.pwd_expires(self.account_control)
-            self.pwd_expired = LDAPAccountFlag.pwd_expired(self.account_control)
-            self.pwd_required = LDAPAccountFlag.pwd_required(self.account_control)
-            self.is_locked = LDAPAccountFlag.is_locked(self.account_control)
+        if self.account_ctl is not None:
+            self._enabled = not LDAPAccountFlag.is_disabled(self.account_ctl)
+            self._pwd_expires = LDAPAccountFlag.pwd_expires(self.account_ctl)
+            self._pwd_expired = LDAPAccountFlag.pwd_expired(self.account_ctl)
+            self._pwd_required = LDAPAccountFlag.pwd_required(self.account_ctl)
+            self._is_locked = LDAPAccountFlag.is_locked(self.account_ctl)
 
             for flag in list(LDAPAccountFlag):
-                if LDAPAccountFlag.check_flag(self.account_control, flag):
+                if LDAPAccountFlag.check_flag(self.account_ctl, flag):
                     self.account_flags.add(flag.name)
 
         else:
-            self.ldap_obj_flags.append("MISSING-USR-ACC-CTL")
+            self._ldap_obj_flags.add("MISSING-USR-ACC-CTL")
 
     # ****************************************************************
     # Methods
 
-    def get_san(self) -> str:
+    @property
+    def san(self) -> str:
         """
         Return the sAMAccountName attribute of the current account.
 
@@ -92,7 +89,8 @@ class LDAPAccount(LDAPObject, ABC):
 
         return self.entry.get("sAMAccountName")
 
-    def is_enabled(self) -> bool:
+    @property
+    def is_enabled(self) -> bool | None:
         """
         Return whether the account is enabled or not.
 
@@ -100,9 +98,10 @@ class LDAPAccount(LDAPObject, ABC):
             bool: True if the account is enabled, False otherwise.
         """
 
-        return self.enabled
+        return self._enabled
 
-    def get_status(self) -> str:
+    @property
+    def status(self) -> str:
         """
         Return the account status.
 
@@ -110,9 +109,24 @@ class LDAPAccount(LDAPObject, ABC):
             str: "Enabled" if the account is enabled, otherwise "Disabled".
         """
 
-        return "Enabled" if self.enabled else "Disabled"
+        return "Enabled" if self.is_enabled else "Disabled"
 
-    def get_account_expiration(self) -> datetime:
+    @property
+    def account_ctl(self) -> int | None:
+        """
+        Return the userAccountControl property of the current account.
+
+        The userAccountControl is a bit flag that hosts multiple informations.
+        See ldap_account_flags.py
+
+        Returns:
+            int | None: The userAccountControl represented by an int if present. Else None
+        """
+
+        return self.entry.get("userAccountControl", None)
+
+    @property
+    def account_expiration(self) -> datetime:
         """
         Return the account expiration date.
 
@@ -135,7 +149,8 @@ class LDAPAccount(LDAPObject, ABC):
             else TimeConverter.str_to_date(unified_acc_exp)
         )
 
-    def get_last_logon(self) -> datetime:
+    @property
+    def last_logon(self) -> datetime:
         """
         Return the last logon datetime of the current account.
 
@@ -145,7 +160,8 @@ class LDAPAccount(LDAPObject, ABC):
 
         return self.entry.get("lastLogonTimestamp")
 
-    def get_last_logon_days(self) -> int:
+    @property
+    def last_logon_in_days(self) -> int:
         """
         Return the number of days since the current account last logged in.
 
@@ -153,9 +169,10 @@ class LDAPAccount(LDAPObject, ABC):
             int: The difference in days between the current date and the last logon date.
         """
 
-        return TimeConverter.days_diff(self.get_last_logon())
+        return TimeConverter.days_diff(self.last_logon)
 
-    def get_pwd_last_set(self) -> datetime | None:
+    @property
+    def pwd_last_set(self) -> datetime | None:
         """
         Return the account password last set date.
 
@@ -165,7 +182,19 @@ class LDAPAccount(LDAPObject, ABC):
 
         return self.entry.get("pwdLastSet", None)
 
-    def get_pwd_last_set_days(self) -> int:
+    @property
+    def pwd_last_set_timestp(self) -> float | None:
+        """
+        Return the timestamp of the last password set for this account.
+
+        Returns:
+            float | None: A float representation of the account last password change date. None if not present
+        """
+
+        return self.pwd_last_set.timestamp() if self.pwd_last_set is not None else None
+
+    @property
+    def pwd_last_set_in_days(self) -> int:
         """
         Return account password last set in days.
 
@@ -173,20 +202,21 @@ class LDAPAccount(LDAPObject, ABC):
             int: The difference in days between the current date and the date when the password was last set.
         """
 
-        pw_last_set = self.get_pwd_last_set()
-        return TimeConverter.days_diff(pw_last_set) if pw_last_set else -1
+        return TimeConverter.days_diff(self.pwd_last_set) if self.pwd_last_set else -1
 
-    def get_account_flags(self) -> list[str]:
+    @property
+    def account_flags(self) -> set[str]:
         """
         Retrieve account flags.
 
         Returns:
-            List[str]: A list of strings representing the account flags.
+            set[str]: A list of strings representing the account flags.
         """
 
-        return list(self.account_flags)
+        return self._account_flags
 
-    def does_account_expires(self) -> bool:
+    @property
+    def account_expires(self) -> bool:
         """
         Check whether the account expires.
 
@@ -194,9 +224,21 @@ class LDAPAccount(LDAPObject, ABC):
             bool: True if the account does not expire (not year 9999), False otherwise.
         """
 
-        return not self.get_account_expiration().year == 9999
+        return not self.account_expiration.year == 9999
 
-    def does_pwd_expires(self) -> bool:
+    @property
+    def pwd_required(self) -> bool:
+        """
+        Return weither the account requires a password.
+
+        Returns:
+            bool: True if a password is required, False otherwise.
+        """
+
+        return self._pwd_required
+
+    @property
+    def pwd_expires(self) -> bool:
         """
         Return weither the account's password expires.
 
@@ -204,9 +246,10 @@ class LDAPAccount(LDAPObject, ABC):
             bool: True if the password is set to expire, False otherwise.
         """
 
-        return self.pwd_expires
+        return self._pwd_expires
 
-    def is_pwd_expired(self) -> bool:
+    @property
+    def pwd_expired(self) -> bool:
         """
         Return weither the account password is expired.
 
@@ -214,7 +257,18 @@ class LDAPAccount(LDAPObject, ABC):
             bool: True if the password has expired, False otherwise.
         """
 
-        return self.pwd_expired
+        return self._pwd_expired
+
+    @property
+    def is_locked(self) -> bool:
+        """
+        Return whether or not the account is locked down.
+
+        Returns:
+            bool: True if the account is locked. False otherwise
+        """
+
+        return self._is_locked
 
     @override
     def to_dict(self) -> dict[str, Any]:
@@ -228,17 +282,17 @@ class LDAPAccount(LDAPObject, ABC):
         base_dict = super().to_dict()
         return {
             **base_dict,
-            "san": self.get_san(),
-            "status": self.get_status(),
-            "account_expires": self.does_account_expires(),
-            "account_exp_date": acc_date_str(self.get_account_expiration()),
+            "san": self.san,
+            "status": self.status,
+            "account_expires": self.account_expires,
+            "account_exp_date": acc_date_str(self.account_expiration),
             "pwd_expires": self.pwd_expires,
             "pwd_expired": self.pwd_expired,
             "pwd_required": self.pwd_required,
-            "last_logon": acc_date_str(self.get_last_logon()),
-            "last_logon_days": self.get_last_logon_days(),
-            "pwd_last_set": acc_date_str(self.get_pwd_last_set()),
-            "pwd_last_set_days": self.get_pwd_last_set_days(),
-            "account_ctl": self.account_control,
-            "account_flags": "-".join(self.get_account_flags()),
+            "last_logon": acc_date_str(self.last_logon),
+            "last_logon_days": self.last_logon_in_days,
+            "pwd_last_set": acc_date_str(self.pwd_last_set),
+            "pwd_last_set_days": self.pwd_last_set_in_days,
+            "account_ctl": self.account_ctl,
+            "account_flags": list(self.account_flags),
         }

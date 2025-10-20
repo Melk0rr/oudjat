@@ -47,59 +47,64 @@ class LDAPGroupPolicyObject(LDAPObject):
 
         super().__init__(ldap_entry, capabilities)
 
-        self.display_name: str = self.entry.get("displayName")
-
-        self.scope: LDAPGPOScope
-        self.state: LDAPGPOState
-
-        wql = self.entry.get("gPCWQLFilter", None)
-
-        if wql is not None:
-            self.state = LDAPGPOState(int(wql.split(";")[-1][0]))
-
-        try:
-            self.scope = (
-                LDAPGPOScope.USER
-                if self.entry.get(LDAPGPOScope.USER.value) is not None
-                else LDAPGPOScope.MACHINE
-            )
-
-        except Exception as e:
-            raise ValueError(
-                f"{__class__.__name__}::Error while trying to get group policy scope\n{e}"
-            )
-
-        guids: list[str] = re.findall(UUID_REG, self.entry.get(self.scope.value))
-        self.infos: dict[str, str] = {guid: MS_GPPREF[guid] for guid in guids}
-
     # ****************************************************************
     # Methods
 
-    def get_display_name(self) -> str:
+    @property
+    def display_name(self) -> str:
         """
-        Getter for GPO display name.
+        Return the display name of the current GPO.
 
         Returns:
             str: The display name of the group policy object.
         """
 
-        return self.display_name
+        return self.entry.get("displayName")
 
-    def get_infos(self) -> dict[str, str]:
+    @property
+    def state(self) -> LDAPGPOState:
         """
-        Getter for policy GUIDs.
+        Return the current GPO state.
+
+        Returns:
+            LDAPGPOState: The state of the current GPO as an LDAPGPOState element
+        """
+
+        wql = self.entry.get("gPCWQLFilter", None)
+        return LDAPGPOState(int(wql.split(";")[-1][0]))
+
+    @property
+    def scope(self) -> LDAPGPOScope:
+        """
+        Return the scope of the current GPO instance.
+
+        Returns:
+            LDAPGPOScope: LDAPGPOScope.USER if the appropriate property is present in the GPO entry. Else LDAPGPOScope.MACHINE
+        """
+
+        return (
+            LDAPGPOScope.USER
+            if self.entry.get(LDAPGPOScope.USER.value) is not None
+            else LDAPGPOScope.MACHINE
+        )
+
+    @property
+    def infos(self) -> dict[str, str]:
+        """
+        Return the GUIDs of the current GPO and teir matching description.
 
         Returns:
             dict[str, str]: A list of GUIDs associated with the group policy preferences.
         """
 
-        return self.infos
+        guids: list[str] = re.findall(UUID_REG, self.entry.get(self.scope.value))
+        return {guid: MS_GPPREF[guid] for guid in guids}
 
     def get_linked_objects(
         self,
         attributes: StrType | None = None,
         ou: str = "*",
-    ) -> list["LDAPObject"]:
+    ) -> dict[int | str, "LDAPObject"]:
         """
         Get the GPO linked objects.
 
@@ -136,7 +141,7 @@ class LDAPGroupPolicyObject(LDAPObject):
             "displayName": self.display_name,
             "scope": self.scope.name,
             "state": self.state.name,
-            "infos": " - ".join(self.infos.values()),
+            "infos": self.infos.values(),
         }
 
     # ****************************************************************

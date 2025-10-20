@@ -27,25 +27,37 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         Args:
             ldap_entry (LDAPEntry)         : ldap entry instance to be used to populate object data
-            capabilities (LDAPCapabilities): LDAP capabilities which provide ways for an LDAP object to interact with an LDAP server through an LDAPConnector
+            capabilities (LDAPCapabilities): LDAP capabilities providing ways for an LDAP object to interact with an LDAP server through an LDAPConnector
         """
 
         super().__init__(ldap_entry, capabilities)
 
-        self.objects: dict[str, "LDAPObject"] = {}
+        self._objects: dict[str, "LDAPObject"] = {}
 
     # ****************************************************************
     # Methods
 
-    def get_gplink(self) -> str:
+    @property
+    def gplink(self) -> str:
         """
-        Return the gpLink property of the OU.
+        Return the gpLink property of the current OU.
 
         Returns:
             str : gpLink attribute containing links to group policy objects
         """
 
         return self.entry.get("gPLink")
+
+    @property
+    def objects(self) -> dict[str, "LDAPObject"]:
+        """
+        Return the object contained in the current OU.
+
+        Returns:
+            dict[str, LDAPObject]: objects of the current OU represented as a dictionary
+        """
+
+        return self._objects
 
     def fetch_objects(self, recursive: bool = False) -> None:
         """
@@ -58,7 +70,7 @@ class LDAPOrganizationalUnit(LDAPObject):
             list[LDAPObject] : entries of the objects contained in the OU
         """
 
-        search_args: dict[str, Any] = {"search_base": self.get_dn()}
+        search_args: dict[str, Any] = {"search_base": self.dn}
         entries = self.capabilities.ldap_search(attributes="*", **search_args)
 
         for entry in entries:
@@ -109,7 +121,7 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return [obj for obj in self.objects.values() if set(obj.entry.object_cls) & set(object_cls)]
 
-    def get_gpo_from_gplink(self) -> list["LDAPObject"]:
+    def get_gpo_from_gplink(self) -> dict[int | str, "LDAPObject"]:
         """
         Extract the GPO references (UUIDs) present in the current OU gpLink.
 
@@ -122,7 +134,7 @@ class LDAPOrganizationalUnit(LDAPObject):
             list[LDAPObject]: a list of LDAPGroupPolicyObject instances based on the UUIDs in thecurrent OU gpLink attribute
         """
 
-        gpo_refs = re.findall(UUID_REG, self.get_gplink())
+        gpo_refs = re.findall(UUID_REG, self.gplink)
         if len(gpo_refs) == 0:
             return {}
 
@@ -138,4 +150,4 @@ class LDAPOrganizationalUnit(LDAPObject):
             dict: A dictionary containing the attributes of the LDAP ou in a structured format
         """
 
-        return {**super().to_dict(), "gpLink": self.get_gplink()}
+        return {**super().to_dict(), "gpLink": self.gplink}
