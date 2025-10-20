@@ -319,6 +319,46 @@ class LDAPConnector(Connector):
             )
         )
 
+    def get_object(
+        self,
+        search_filter: str | None = None,
+        attributes: StrType | None = None,
+        search_base: str | None = None,
+        auto: bool = False,
+    ) -> dict[int | str, "LDAPObject"]:
+        """
+        Specific method to retrieve LDAP User instances.
+
+        Args:
+            search_filter (str)         : Filter to reduce search results
+            attributes (str | List[str]): Attributes to include in result
+            search_base (str)           : Where to base the search on in terms of directory location
+            auto (bool)                 : Auto map the objects dynamically per type
+
+        Returns:
+            list[LDAPObject]: list of objects
+        """
+
+        entries = self.search(
+            search_type=LDAPObjectType.DEFAULT,
+            search_base=search_base,
+            search_filter=search_filter,
+            attributes=attributes,
+        )
+
+        def map_obj(entry: "LDAPEntry") -> "LDAPObject":
+            if auto:
+                obj_type = LDAPObjectType.from_object_cls(entry)
+                LDAPDynamicObjectType = self._LDAP_PYTHON_CLS[obj_type.name].cls
+
+                return LDAPDynamicObjectType(
+                    self.complete_partial_entry(entry), self._DEFAULT_CAPABILITIES
+                )
+
+            return LDAPObject(entry, capabilities=self._DEFAULT_CAPABILITIES)
+
+        return {obj.id: obj for obj in list(map(map_obj, entries))}
+
     def get_gpo(
         self, displayName: str = "*", name: StrType = "*", attributes: StrType | None = None
     ) -> list["LDAPGroupPolicyObject"]:
