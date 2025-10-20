@@ -65,7 +65,7 @@ class TenableSCConnector(Connector):
         Return repositories list.
 
         Returns:
-            List : list of repos defined on security center
+            list[str] : list of repos defined on security center
         """
 
         return self.repos
