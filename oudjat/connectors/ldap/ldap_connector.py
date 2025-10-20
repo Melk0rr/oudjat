@@ -480,6 +480,42 @@ class LDAPConnector(Connector):
 
         return {usr.id: usr for usr in list(map(map_usr, entries))}
 
+    def get_group(
+        self,
+        search_filter: str | None = None,
+        search_base: str | None = None,
+        attributes: StrType | None = None,
+        recursive: bool = False,
+    ) -> dict[int | str, "LDAPGroup"]:
+        """
+        Specific method to retrieve LDAP group objects.
+
+        Args:
+            search_filter (str)         : Filter to reduce search results
+            attributes (str | List[str]): Attrbutes to include in result
+            search_base (str)           : Where to base the search on in terms of directory location
+            recursive (bool)            : Retrieve groups recursively if set to True
+
+        Returns:
+            list[LDAPGroup]: list of OU matching filter
+        """
+
+        entries = self.search(
+            search_type=LDAPObjectType.GROUP,
+            search_base=search_base,
+            search_filter=search_filter,
+            attributes=attributes,
+        )
+
+        def map_grp(entry: "LDAPEntry") -> "LDAPGroup":
+            grp_instance = LDAPGroup(entry, self._DEFAULT_CAPABILITIES)
+            if recursive:
+                grp_instance.fetch_members(recursive)
+
+            return grp_instance
+
+        return {grp.id: grp for grp in list(map(map_grp, entries))}
+
     def get_ou(
         self,
         search_filter: str | None = None,
