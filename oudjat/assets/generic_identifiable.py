@@ -1,8 +1,9 @@
 """A module to describe a generic class that includes common properties among multiple asset types."""
 
 from abc import ABC, abstractmethod
-from typing import Any, override
+from typing import Any, TypeVar, override
 
+GenericBoundType = TypeVar("GenericBoundType", bound="GenericIdentifiable")
 
 class GenericIdentifiable(ABC):
     """Generic class for objects with common attributes like id, name, description and label."""
