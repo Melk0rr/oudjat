@@ -15,6 +15,9 @@ class Connector(ABC):
     A connector can be seen as a hook to a data source that is used to pull/extract data from it.
     """
 
+    # ****************************************************************
+    # Attributes & Constructors
+
     def __init__(
         self, target: str | object, service_name: str | None = None, use_credentials: bool = False
     ) -> None:
@@ -36,6 +39,9 @@ class Connector(ABC):
             self._credentials = CredentialHelper.get_credentials(self._service_name)
 
         self._connection: Any = None
+
+    # ****************************************************************
+    # Methods
 
     @property
     def connection(self) -> object:
