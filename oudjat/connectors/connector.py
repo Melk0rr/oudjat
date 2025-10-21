@@ -46,7 +46,7 @@ class Connector(ABC):
             object : active connection object
         """
 
-        return self.connection
+        return self._connection
 
     @property
     def target(self) -> str | object:
@@ -91,7 +91,7 @@ class Connector(ABC):
             use_credentials (bool) : wheither the connector should use credentials
         """
 
-        self.service_name = new_service_name
+        self._service_name = new_service_name
 
         if use_credentials:
             self._credentials = CredentialHelper.get_credentials(new_service_name)

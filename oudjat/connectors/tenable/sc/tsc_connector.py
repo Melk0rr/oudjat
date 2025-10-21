@@ -50,17 +50,17 @@ class TenableSCConnector(Connector):
             target = f"{scheme}://{target}"
 
         super().__init__(target=target, service_name=service_name, use_credentials=True)
-        self.parsed_target: ParseResult = urlparse(target)
-        self.parsed_target = urlparse(f"{self.parsed_target.scheme}://{self.parsed_target.netloc}")
+        self._parsed_target: ParseResult = urlparse(target)
+        self._parsed_target = urlparse(f"{self._parsed_target.scheme}://{self._parsed_target.netloc}")
 
-        self.connection: TenableSC = None
-        self.repos: list[str] | None = None
+        self._connection: TenableSC = None
+        self._repos: list[str] | None = None
 
     # ****************************************************************
     # Methods
 
-    # INFO: Getters
-    def get_repos(self) -> list[str] | None:
+    @property
+    def repos(self) -> list[str] | None:
         """
         Return repositories list.
 
@@ -68,7 +68,7 @@ class TenableSCConnector(Connector):
             list[str] : list of repos defined on security center
         """
 
-        return self.repos
+        return self._repos
 
     # INFO: Base connector methods
     @override
@@ -81,14 +81,14 @@ class TenableSCConnector(Connector):
         try:
             if self._credentials is not None:
                 connection = TenableSC(
-                    host=self.parsed_target.netloc,
+                    host=self._parsed_target.netloc,
                     access_key=self._credentials.username,
                     secret_key=self._credentials.password,
                 )
 
-            ColorPrint.green(f"Connected to {self.parsed_target.netloc}")
-            self.connection = connection
-            self.repos = self.connection.repositories.list()
+            ColorPrint.green(f"Connected to {self._parsed_target.netloc}")
+            self._connection = connection
+            self._repos = self._connection.repositories.list()
 
         except Exception as e:
             raise e
@@ -111,9 +111,9 @@ class TenableSCConnector(Connector):
         Disconnect from API.
         """
 
-        del self.connection
-        self.connection = None
-        self.repos = None
+        del self._connection
+        self._connection = None
+        self._repos = []
 
     @override
     def search(self, search_type: str = "VULNS", *args: Any, **kwargs: Any) -> list[object]:
@@ -178,7 +178,7 @@ class TenableSCConnector(Connector):
             filters.append(self.BUILTIN_FILTERS["exploitable"])
 
         filters.append(self.build_severity_filter(*severities))
-        search = self.connection.analysis.vulns(*filters, tool=tool.value)
+        search = self._connection.analysis.vulns(*filters, tool=tool.value)
 
         return list(search)
 
@@ -225,7 +225,7 @@ class TenableSCConnector(Connector):
         self.check_connection()
 
         try:
-            self.connection.asset_lists.create(
+            self._connection.asset_lists.create(
                 name=name,
                 description=description,
                 list_type=list_type.value,
@@ -256,7 +256,7 @@ class TenableSCConnector(Connector):
 
         try:
             for lid in list_id:
-                self.connection.asset_lists.delete(id=lid)
+                self._connection.asset_lists.delete(id=lid)
 
         except Exception as e:
             raise e
@@ -318,7 +318,7 @@ class TenableSCConnector(Connector):
         list_details = []
         try:
             for lid in list_id:
-                list_details.append(self.connection.asset_lists.details(id=lid))
+                list_details.append(self._connection.asset_lists.details(id=lid))
 
         except Exception as e:
             raise e
@@ -345,7 +345,7 @@ class TenableSCConnector(Connector):
 
         scan_list: list[dict[str, Any]] = []
         try:
-            raw_scan_list: dict[str, Any] = self.connection.scans.list()
+            raw_scan_list: dict[str, Any] = self._connection.scans.list()
 
             if raw_scan_list is not None:
                 scan_list = raw_scan_list.get("usable", [])
@@ -382,7 +382,7 @@ class TenableSCConnector(Connector):
         scan_details: list[dict[str, object]] = []
         try:
             for sid in scan_id:
-                scan_details.append(self.connection.scans.details(id=sid))
+                scan_details.append(self._connection.scans.details(id=sid))
 
         except Exception as e:
             raise e
@@ -407,7 +407,7 @@ class TenableSCConnector(Connector):
 
         try:
             for sid in scan_id:
-                self.connection.scans.delete(id=sid)
+                self._connection.scans.delete(id=sid)
 
         except Exception as e:
             raise e
@@ -441,7 +441,7 @@ class TenableSCConnector(Connector):
         self.check_connection()
 
         try:
-            self.connection.scans.create(
+            self._connection.scans.create(
                 name=name,
                 repo=repo_id,
                 asset_lists=asset_lists,
