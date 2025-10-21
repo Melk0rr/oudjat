@@ -27,6 +27,28 @@ class FileHandler:
 
         return os.path.isfile(path)
 
+    @staticmethod
+    def import_raw(file_path: str, callback: Callable[..., Any] | None = None) -> Any:
+        """
+        Import the content of a file as a simple raw string.
+
+        Args:
+            file_path (str)    : The path to the file.
+            callback (Callable): Optional function to run to change final result.
+
+        Returns:
+            Any: default is a string, can be any type based on callback changes
+        """
+
+        fd = open(file_path, mode="r")
+        file = fd.read()
+        fd.close()
+
+        if callback:
+           file = callback(file)
+
+        return file
+
     # INFO: JSON file functions
     @staticmethod
     def import_json(file_path: str, callback: Callable[..., Any] | None = None) -> list[Any]:
