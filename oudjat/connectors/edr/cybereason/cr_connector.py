@@ -89,7 +89,7 @@ class CybereasonConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
 
-    DEFAULT_QUERY_DICT: dict[str, Any] = {"filters": []}
+    _DEFAULT_PAYLOAD: dict[str, Any] = {"filters": []}
 
     def __init__(
         self, target: str, service_name: str = "OudjatCybereasonAPI", port: int = 443
@@ -171,14 +171,14 @@ class CybereasonConnector(Connector):
 
         return f"{self._target.geturl()}{endpoint.path}"
 
-    def request(self, method: str, url: str, query: str = "") -> requests.models.Response:
+    def request(self, method: str, url: str, payload: str = "") -> requests.models.Response:
         """
         Perform a request to the given URL using established connection.
 
         Args:
-            method (str): HTTP method used for the query (usually: GET, POST, PUT)
-            url (str)   : targeted query URL
-            query (str) : dumped JSON query to run
+            method (str)  : HTTP method used for the query (usually: GET, POST, PUT)
+            url (str)     : Targeted query URL
+            payload (str) : Dumped JSON query to run
 
         Returns:
             requests.models.Response: query response
@@ -189,11 +189,11 @@ class CybereasonConnector(Connector):
                 f"{__class__.__name__}.request::Please initialize connection to {self._target.geturl()} before attempting request"
             )
 
-        if isinstance(query, dict):
-            query = json.dumps(query)
+        if isinstance(payload, dict):
+            payload = json.dumps(payload)
 
         api_headers = {"Content-Type": "application/json"}
-        return self._connection.request(method=method, url=url, data=query, headers=api_headers)
+        return self._connection.request(method=method, url=url, data=payload, headers=api_headers)
 
     @override
     def search(
@@ -228,9 +228,7 @@ class CybereasonConnector(Connector):
 
         return search_options[search_type.lower()](query=query, limit=limit, **kwargs)
 
-    def page_search(
-        self, endpoint: "CybereasonEndpoint", query: str = ""
-    ) -> DataType:
+    def page_search(self, endpoint: "CybereasonEndpoint", query: str = "") -> DataType:
         """
         Search for entries in the specified Cybereason API endpoint.
 
@@ -248,7 +246,7 @@ class CybereasonConnector(Connector):
         """
 
         api_resp = self.request(
-            method=endpoint.method, url=self.get_complete_url(endpoint), query=query
+            method=endpoint.method, url=self.get_complete_url(endpoint), payload=query
         )
 
         res = []
@@ -289,15 +287,16 @@ class CybereasonConnector(Connector):
 
         # NOTE: Limit is the provided value or the endpoint limit if none provided
         limit = limit or endpoint.limit
-        offset_mult = math.ceil(limit / endpoint.limit)
-
-        built_filter = query if query is not None else self.DEFAULT_QUERY_DICT
-        built_query = {"limit": limit, "offset": 0, **built_filter}
+        payload: dict[str, Any] = {
+            "limit": limit,
+            "offset": 0,
+            **(query or self._DEFAULT_PAYLOAD),
+        }
 
         res = []
-        for i in range(0, offset_mult):
-            built_query["offset"] = i
-            search_i = self.page_search(endpoint=endpoint, query=json.dumps(built_query))
+        for i in range(0, math.ceil(limit / endpoint.limit)):
+            payload["offset"] = i
+            search_i = self.page_search(endpoint=endpoint, query=json.dumps(payload))
 
             res.extend(search_i)
 
@@ -305,36 +304,32 @@ class CybereasonConnector(Connector):
         return list(map(CybereasonEntry.from_search_result, res, [endpoint] * len(res)))
 
     def file_search(
-        self, file_name: StrType, query: dict[str, Any] | None = None, limit: int | None = None
+        self, file_name: StrType, payload: dict[str, Any] | None = None, limit: int | None = None
     ) -> list["CybereasonEntry"]:
         """
         Search for specific file(s).
 
         Args:
-            file_name (str | list[str]): files to search
-            query (dict[str, Any])     : filter to narrow down the search results
-            limit (int)                : limit of the search result numbers
+            file_name (str | list[str]): Files to search
+            payload (dict[str, Any])   : Filter to narrow down the search results
+            limit (int)                : Limit of the search result numbers
 
         Returns:
             list[CybereasonEntry]: search results
         """
 
-        if query is None:
-            query = {}
-
         endpoint = CybereasonEndpoint.FILES
 
+        payload = payload or {}
         file_name = [file_name] if not isinstance(file_name, list) else file_name
-        limit = limit or endpoint.limit
 
-        file_filters: list[dict[str, Any]] = [
+        file_filters = [
             {"fieldName": "fileName", "values": file_name, "operator": "Equals"}
         ]
-        built_query: dict[str, Any] = {"limit": limit, "fileFilters": file_filters, **query}
 
         batch_search = self.page_search(
             endpoint=endpoint,
-            query=str(built_query),
+            query=str({"limit": limit or endpoint.limit, "fileFilters": file_filters, **payload}),
         )
 
         res = []
@@ -372,10 +367,10 @@ class CybereasonConnector(Connector):
 
         endpoint = CybereasonEndpoint.POLICIES
 
-        policy_query: str = json.dumps({"sensorsIds": sensor_ids, "keepManualOverrides": False})
+        payload: str = json.dumps({"sensorsIds": sensor_ids, "keepManualOverrides": False})
         policy_url: str = f"{self._target.geturl()}/{endpoint.path}{policy_id}/assign"
 
-        policy_edit = self.request(method=endpoint.method, url=policy_url, query=policy_query)
+        policy_edit = self.request(method=endpoint.method, url=policy_url, payload=payload)
 
         return json.loads(policy_edit.content)
 
@@ -383,38 +378,33 @@ class CybereasonConnector(Connector):
         self,
         action: CybereasonSensorAction,
         sensor_ids: StrType | None = None,
-        query_dict: dict[str, Any] | None = None,
+        payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
         Do a custom action on a list of sensors.
 
         Args:
-            action (CybereasonSensorAction): action to perform
-            sensor_ids (str | list[str])   : list of sensors the action will be performed on
-            query_dict (dict)              : the query to perform represented by a dictionary that will be dumped
-            *args                          : any additional arguments
-            **kwargs                       : any additional kwargs
+            action (CybereasonSensorAction): Action to perform
+            sensor_ids (str | list[str])   : List of sensors the action will be performed on
+            payload (dict)                 : The query to perform represented by a dictionary that will be dumped
+            *args                          : Any additional arguments
+            **kwargs                       : Any additional kwargs
 
         Returns:
             dict: API query response
         """
 
-        if sensor_ids is None:
-            sensor_ids = []
-
-        if query_dict is None:
-            query_dict = {}
+        sensor_ids = sensor_ids or []
+        payload = payload or {}
 
         if not isinstance(sensor_ids, list):
             sensor_ids = [sensor_ids]
 
-        query = json.dumps({**query_dict, "sensorsIds": sensor_ids})
         endpoint = CybereasonEndpoint.SENSORS_ACTION
-
         api_resp = self.request(
             method=endpoint.method,
             url=f"{self._target.geturl()}/{endpoint.path}/{action.value}",
-            query=query,
+            payload=json.dumps({**payload, "sensorsIds": sensor_ids}),
         )
 
         return json.loads(api_resp.content)
@@ -433,7 +423,7 @@ class CybereasonConnector(Connector):
         return self.sensor_action(
             action=CybereasonSensorAction.REMOVEFROMGROUP,
             sensor_ids=sensor_ids,
-            query_dict=self.DEFAULT_QUERY_DICT,
+            payload=self._DEFAULT_PAYLOAD,
         )
 
     def sensor_assign_group(self, sensor_ids: StrType, group_id: str) -> dict[str, Any]:
@@ -451,34 +441,34 @@ class CybereasonConnector(Connector):
         return self.sensor_action(
             action=CybereasonSensorAction.ADDTOGROUP,
             sensor_ids=sensor_ids,
-            query_dict={"argument": group_id},
+            payload={"argument": group_id},
         )
 
     def sensor_restart(
-        self, sensor_ids: StrType | None = None, query: dict[str, Any] | None = None
+        self, sensor_ids: StrType | None = None, payload: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """
         Restart given sensors.
 
         Args:
             sensor_ids (str | list[str]): IDs of the sensors to restart
-            query (dict)                : query to run
+            payload (dict[str, Any])    : Payload to send
 
         Returns:
-            dict: API query response
+            dict[str, Any]: API query response
         """
 
         # NOTE: Handling Cybereason nonsense
         # When sensor IDs are provided, the filters must be empty
         # When sensor IDs are not provided, the filters must be provided at least as an empty array (WTF/FU/KILLME)
-        if sensor_ids is None and query is None:
-            query = self.DEFAULT_QUERY_DICT
+        if sensor_ids is None and payload is None:
+            payload = self._DEFAULT_PAYLOAD
 
         elif sensor_ids is not None:
-            query = {}
+            payload = {}
 
         return self.sensor_action(
             action=CybereasonSensorAction.RESTART,
             sensor_ids=sensor_ids,
-            query_dict=query,
+            payload=payload,
         )

@@ -3,12 +3,7 @@
 from enum import Enum
 from typing import NamedTuple
 
-
-class CybereasonEndpointMethod(Enum):
-    """An enumeration of valid CybereasonEndpoint method values."""
-
-    POST = "POST"
-    GET = "GET"
+from ...connector_methods import ConnectorMethod
 
 
 class CybereasonEndpointProps(NamedTuple):
@@ -17,13 +12,13 @@ class CybereasonEndpointProps(NamedTuple):
 
     Attributes:
         path (str): the path to the endpoint
-        method (CybereasonEndpointMethod): HTTP method used to access the endpoint
+        method (ConnectorMethod): HTTP method used to access the endpoint
         limit (int | None): default result limit number
         attributes (list[str] | None): list of default attributes to retrieve from endpoint
     """
 
     path: str
-    method: CybereasonEndpointMethod
+    method: ConnectorMethod
     limit: int | None
     attributes: list[str]
 
@@ -33,7 +28,7 @@ class CybereasonEndpoint(Enum):
 
     SENSORS = CybereasonEndpointProps(
         path="/rest/sensors/query",
-        method=CybereasonEndpointMethod.POST,
+        method=ConnectorMethod.POST,
         limit=30000,
         attributes=[
             "amStatus",
@@ -60,14 +55,14 @@ class CybereasonEndpoint(Enum):
 
     SENSORS_ACTION = CybereasonEndpointProps(
         path="/rest/sensors/action",
-        method=CybereasonEndpointMethod.POST,
+        method=ConnectorMethod.POST,
         limit=1000,
         attributes=[],
     )
 
     MALWARES = CybereasonEndpointProps(
         path="/rest/malware/query",
-        method=CybereasonEndpointMethod.POST,
+        method=ConnectorMethod.POST,
         limit=1000,
         attributes=[
             "timestamp",
@@ -83,26 +78,26 @@ class CybereasonEndpoint(Enum):
     )
 
     POLICIES = CybereasonEndpointProps(
-        path="rest/policies", method=CybereasonEndpointMethod.POST, limit=1000, attributes=[]
+        path="rest/policies", method=ConnectorMethod.POST, limit=1000, attributes=[]
     )
 
     FILES = CybereasonEndpointProps(
         path="/rest/sensors/action/fileSearch",
-        method=CybereasonEndpointMethod.POST,
+        method=ConnectorMethod.POST,
         limit=30000,
         attributes=[],
     )
 
     USERS = CybereasonEndpointProps(
         path="/rest/users",
-        method=CybereasonEndpointMethod.GET,
+        method=ConnectorMethod.GET,
         limit=200,
         attributes=["creationTime", "groups", "lastUpdateTime", "locked", "roles", "username"],
     )
 
     GROUPS = CybereasonEndpointProps(
         path="/rest/groups",
-        method=CybereasonEndpointMethod.GET,
+        method=ConnectorMethod.GET,
         limit=300,
         attributes=["creationTime", "description", "id", "lastUpdate", "name"],
     )
