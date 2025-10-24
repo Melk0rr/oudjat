@@ -3,7 +3,7 @@
 import getpass
 
 import keyring
-from keyring.credentials import Credential, SimpleCredential
+from keyring.credentials import SimpleCredential
 from keyring.errors import KeyringError, PasswordDeleteError, PasswordSetError
 
 
@@ -35,7 +35,7 @@ class CredentialHelper:
             )
 
     @staticmethod
-    def get_credentials(service: str) -> Credential | SimpleCredential:
+    def get_credentials(service: str) -> SimpleCredential:
         """
         Attempt to retrieve stored credentials from the `keyring` using the provided service name.
 
@@ -65,6 +65,9 @@ class CredentialHelper:
                 # Saving credentials
                 CredentialHelper.save_credentials(service, username, password)
                 cred = SimpleCredential(username, password)
+
+            else:
+                cred = SimpleCredential(cred.username, cred.password)
 
         except KeyringError as e:
             raise KeyringError(
