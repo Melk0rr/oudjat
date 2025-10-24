@@ -10,6 +10,7 @@ from ..ldap_utils import parse_dn
 
 if TYPE_CHECKING:
     from .ldap_entry import LDAPEntry
+    from .ldap_object_types import LDAPObjectType
 
 LDAPObjectBoundType = TypeVar("LDAPObjectBoundType", bound="LDAPObject")
 
@@ -38,7 +39,7 @@ class LDAPCapabilities(NamedTuple):
     """
 
     ldap_search: Callable[..., list["LDAPEntry"]]
-    ldap_obj_opt: Callable[[str], "LDAPObjectOptions"]
+    ldap_obj_opt: Callable[["LDAPObjectType"], "LDAPObjectOptions"]
 
 
 class LDAPObject(GenericIdentifiable):

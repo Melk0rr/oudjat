@@ -75,7 +75,7 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         for entry in entries:
             obj_type = LDAPObjectType.from_object_cls(entry)
-            LDAPObjectCls = self.capabilities.ldap_obj_opt(obj_type.name).cls
+            LDAPObjectCls = self.capabilities.ldap_obj_opt(obj_type).cls
             new_object = LDAPObjectCls(entry, self.capabilities)
 
             if isinstance(new_object, "LDAPOrganizationalUnit") and recursive:
@@ -138,7 +138,7 @@ class LDAPOrganizationalUnit(LDAPObject):
         if len(gpo_refs) == 0:
             return {}
 
-        gpo_opt = self.capabilities.ldap_obj_opt("GPO")
+        gpo_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.GPO)
         return gpo_opt.fetch(name=gpo_refs)
 
     @override

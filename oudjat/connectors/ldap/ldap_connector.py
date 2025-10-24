@@ -260,7 +260,7 @@ class LDAPConnector(Connector):
     @override
     def search(
         self,
-        search_type: "LDAPObjectType | str" = LDAPObjectType.DEFAULT,
+        search_type: "LDAPObjectType" = LDAPObjectType.DEFAULT,
         search_base: str | None = None,
         search_filter: str | None = None,
         attributes: StrType | None = None,
@@ -284,9 +284,6 @@ class LDAPConnector(Connector):
             raise ConnectionError(
                 f"{__class__.__name__}.search::You must initiate connection to {self.target} before running search !"
             )
-
-        if isinstance(search_type, str):
-            search_type = LDAPObjectType[search_type]
 
         # INFO: If the search type is default : final filter is equal to provided search filter
         # Else final filter is a combination of filter matching search type + provided search filter
@@ -586,18 +583,18 @@ class LDAPConnector(Connector):
             search_filter="(&(objectClass=user)(objectCategory=Person)(adminCount=1))",
         )
 
-    def ldap_object_opt_from_obj_type(self, ldap_obj_type_name: str) -> "LDAPObjectOptions":
+    def ldap_object_opt_from_obj_type(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOptions":
         """
         Return an LDAP object based on a given LDAPEntry.
 
         Args:
-            ldap_obj_type_name (str): The LDAPObjectType element name
+            ldap_obj_type (LDAPObjectType): The LDAPObjectType element
 
         Returns:
-            LDAPObjTypeAlias: the python class matching the provided entry
+            LDAPObjTypeAlias: The python class matching the provided entry
         """
 
-        return self._LDAP_PYTHON_CLS[ldap_obj_type_name]
+        return self._LDAP_PYTHON_CLS[f"{ldap_obj_type}"]
 
     # ****************************************************************
     # Static methods

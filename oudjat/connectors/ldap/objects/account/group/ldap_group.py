@@ -124,7 +124,7 @@ class LDAPGroup(LDAPObject):
             if len(ref_search) > 0:
                 search_entry = ref_search[0]
                 entry_obj_type = LDAPObjectType.from_object_cls(search_entry)
-                LDAPObjectCls = self.capabilities.ldap_obj_opt(entry_obj_type.name).cls
+                LDAPObjectCls = self.capabilities.ldap_obj_opt(entry_obj_type).cls
 
                 new_member = LDAPObjectCls(search_entry, self.capabilities)
                 if isinstance(new_member, LDAPGroup) and recursive:

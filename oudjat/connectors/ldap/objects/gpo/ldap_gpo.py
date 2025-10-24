@@ -12,6 +12,7 @@ from .ms_gppref import MS_GPPREF
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
     from ..ldap_object import LDAPCapabilities, LDAPObject
+    from ..ldap_object_types import LDAPObjectType
 
 
 class LDAPGPOScope(Enum):
@@ -118,7 +119,7 @@ class LDAPGroupPolicyObject(LDAPObject):
             list["LDAPObject"]: A list of LDAPOrganizationalUnit instances that are linked to the current GPO.
         """
 
-        obj_opt = self.capabilities.ldap_obj_opt("OU")
+        obj_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.OU)
         return obj_opt.fetch(
             search_filter=f"(gPLink={f'*{self.name}*'})(name={ou})", attributes=attributes
         )
