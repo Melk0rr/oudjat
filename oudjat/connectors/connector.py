@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from keyring.credentials import Credential, SimpleCredential
+from keyring.credentials import SimpleCredential
 
 from oudjat.utils import CredentialHelper
 
@@ -19,24 +19,23 @@ class Connector(ABC):
     # Attributes & Constructors
 
     def __init__(
-        self, target: str | object, service_name: str | None = None, use_credentials: bool = False
+        self, target: Any, username: str | None = None, password: str | None = None
     ) -> None:
         """
         Create a new instance of Connector.
 
         Args:
-            target (any)            : connector target
-            service_name (str)      : service name to associate with the connector, will be used to register credentials
-            use_credentials (bool)  : wheither the connector should use credentials
+            target (Any)  : Connector target
+            username (str): Username to use for the connection
+            password (str): Password to use for the connection
         """
 
         self._target: Any = target
-        self._service_name: str | None = service_name
 
         # Retrieve credentials for the service
-        self._credentials: SimpleCredential | Credential | None = None
-        if use_credentials and self._service_name is not None:
-            self._credentials = CredentialHelper.get_credentials(self._service_name)
+        self._credentials: SimpleCredential | None = None
+        if username and password:
+            self._credentials = SimpleCredential(username, password)
 
         self._connection: Any = None
 
@@ -44,29 +43,29 @@ class Connector(ABC):
     # Methods
 
     @property
-    def connection(self) -> object:
+    def connection(self) -> Any:
         """
         Return the current connection object.
 
         Returns:
-            object : active connection object
+            Any : Active connection object
         """
 
         return self._connection
 
     @property
-    def target(self) -> str | object:
+    def target(self) -> Any:
         """
         Return the current connector target.
 
         Returns:
-            str | object: the target element the connector will connect to
+            Any: The target element the connector will connect to
         """
 
         return self._target
 
     @target.setter
-    def target(self, new_target: str | object) -> None:
+    def target(self, new_target: Any) -> None:
         """
         Set the connection target.
 
@@ -76,19 +75,7 @@ class Connector(ABC):
 
         self._target = new_target
 
-    @property
-    def service_name(self) -> str | None:
-        """
-        Return the service name the connector will use to store credentials.
-
-        Returns:
-            str | None: service name used by the connector
-        """
-
-        return self._service_name
-
-    @service_name.setter
-    def service_name(self, new_service_name: str, use_credentials: bool) -> None:
+    def set_credentials_from_svc_name(self, new_service_name: str) -> None:
         """
         Set the service name bound to the current connector.
 
@@ -97,10 +84,7 @@ class Connector(ABC):
             use_credentials (bool) : wheither the connector should use credentials
         """
 
-        self._service_name = new_service_name
-
-        if use_credentials:
-            self._credentials = CredentialHelper.get_credentials(new_service_name)
+        self._credentials = CredentialHelper.get_credentials(new_service_name)
 
     @abstractmethod
     def connect(self, *args: Any, **kwargs: Any) -> None:
