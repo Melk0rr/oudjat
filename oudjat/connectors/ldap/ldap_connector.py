@@ -583,7 +583,7 @@ class LDAPConnector(Connector):
             search_filter="(&(objectClass=user)(objectCategory=Person)(adminCount=1))",
         )
 
-    def ldap_object_opt_from_obj_type(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOptions":
+    def ldap_object_opt_from_obj_type(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOptions[LDAPObject]":
         """
         Return an LDAP object based on a given LDAPEntry.
 
