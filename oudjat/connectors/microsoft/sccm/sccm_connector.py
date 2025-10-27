@@ -103,7 +103,7 @@ class SCCMConnector(Connector):
     def search(
         self,
         search_filter: str,
-        attributes: StrType | None,
+        attributes: StrType | None = None,
     ) -> list[Any]:
         """
         Perform a request to the SQL server.
