@@ -119,13 +119,11 @@ class SCCMConnector(Connector):
         """
 
         try:
-            self._cursor.execute(search_filter)
+            _ = self._cursor.execute(search_filter)
 
         except Exception as e:
             raise Exception(f"An error occured while searching in {self._target}::{self._database}: \n{e}")
 
         res =  [ row for row in self._cursor.fetchall() ]
-        self._cursor.execute()
-
         return res
 
