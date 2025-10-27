@@ -104,7 +104,7 @@ class SCCMConnector(Connector):
         self,
         search_filter: str,
         attributes: StrType | None = None,
-    ) -> list[Any]:
+    ) -> list[dict[str, Any]]:
         """
         Perform a request to the SQL server.
 
@@ -124,6 +124,6 @@ class SCCMConnector(Connector):
         except Exception as e:
             raise Exception(f"An error occured while searching in {self._target}::{self._database}: \n{e}")
 
-        res =  [ row for row in self._cursor.fetchall() ]
-        return res
+        res_columns: list[str] = [ column[0] for column in self._cursor.description ]
+        return [ dict(zip(res_columns, row)) for row in self._cursor.fetchall() ]
 
