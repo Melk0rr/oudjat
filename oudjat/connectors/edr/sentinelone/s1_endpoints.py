@@ -21,7 +21,7 @@ class S1EndpointsProps(NamedTuple):
     method: "ConnectorMethod"
 
 
-class S1Endpoints(Enum):
+class S1Endpoint(Enum):
     """
     An enumeration of the possible SentinelOne connection endpoints.
     """
@@ -110,3 +110,25 @@ class S1Endpoints(Enum):
     SYSTEM_INFO = S1EndpointsProps("/web/api/v2.1/system/info", ConnectorMethod.GET)
     SYSTEM_STATUS = S1EndpointsProps("/web/api/v2.1/system/status", ConnectorMethod.GET)
     THREATS = S1EndpointsProps("/web/api/v2.1/threats", ConnectorMethod.GET)
+
+    @property
+    def path(self) -> str:
+        """
+        Return the path attribute of the S1Endpoint element.
+
+        Returns:
+            str: The path string of the endpoint
+        """
+
+        return self._value_.path
+
+    @property
+    def method(self) -> "ConnectorMethod":
+        """
+        Return the method attribute of the endpoint.
+
+        Returns:
+            ConnectorMethod: The connector method that must be used to interract with the endpoint
+        """
+
+        return self._value_.method
