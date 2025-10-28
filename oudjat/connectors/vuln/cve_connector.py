@@ -4,9 +4,7 @@ import json
 from abc import ABC, abstractmethod
 from typing import Any, override
 
-import requests
-
-from oudjat.connectors.connector import Connector
+from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.utils.types import StrType
 
 from .cve_formats import CVEDataFormat
@@ -45,15 +43,15 @@ class CVEConnector(Connector, ABC):
         If the response status code is 200, it parses the JSON content and stores it in `self.connection`. Raises a ConnectionError if the connection cannot be established.
 
         Args:
-            target (str) : The URL to which the GET request will be sent.
-            kwargs (Dict): Additional arguments to pass into requests.get
+            target (str): The URL to which the GET request will be sent.
+            kwargs (Any): Additional named arguments to pass into requests.get
         """
 
         self._connection = None
 
         try:
             headers = {"Accept": "application/json"}
-            req = requests.get(target, headers=headers, **kwargs)
+            req = ConnectorMethod.GET(target, headers=headers, **kwargs)
 
             if req.status_code == 200:
                 self._connection = json.loads(req.content.decode("utf-8"))

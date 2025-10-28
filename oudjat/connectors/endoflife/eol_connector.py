@@ -4,12 +4,10 @@ import json
 import re
 from typing import Any, override
 
-import requests
-
 from oudjat.assets.software.os.windows import WindowsEdition
-from oudjat.connectors.connector import Connector
+from oudjat.connectors import Connector, ConnectorMethod
 
-EOL_API_URL = "https://endoflife.date/api/"
+from .definitions import EOL_API_URL
 
 
 class EndOfLifeConnector(Connector):
@@ -56,7 +54,7 @@ class EndOfLifeConnector(Connector):
 
         try:
             headers = {"Accept": "application/json"}
-            req = requests.get(f"{self.target}all.json", headers=headers)
+            req = ConnectorMethod.GET(f"{self.target}all.json", headers=headers)
 
             if req.status_code == 200:
                 self._connection = True
@@ -102,7 +100,7 @@ class EndOfLifeConnector(Connector):
 
         try:
             headers = {"Accept": "application/json"}
-            req = requests.get(f"{self._target}{search_filter}.json", headers=headers)
+            req = ConnectorMethod.GET(f"{self._target}{search_filter}.json", headers=headers)
 
             if req.status_code == 200:
                 res = json.loads(req.content.decode("utf-8"))

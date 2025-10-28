@@ -3,9 +3,38 @@
 import getpass
 
 import keyring
-from keyring.credentials import Credential, SimpleCredential
+from keyring.credentials import SimpleCredential
 from keyring.errors import KeyringError, PasswordDeleteError, PasswordSetError
 
+
+class NoCredentialsError(ConnectionError):
+    """
+    A helper class to handle the absence of credentials.
+    """
+
+    def __init__(self, pfx: str = "", msg: str = "", target: str = "") -> None:
+        """
+        Create a new instance of NoCredentialsError.
+
+        Args:
+            pfx (str)   : Prefix that will be placed at the beginning of the final error message
+            msg (str)   : Custom message string
+            target (str): String representation of the target the connection is set to
+        """
+
+        message: str = "Could not connect to target"
+        if pfx:
+            message = f"{pfx} {message}"
+
+        if target:
+            message = f"{message} {target}"
+
+        message = f"{message}. No credentials were provided"
+
+        if msg:
+            message = f"{message}. {msg}"
+
+        super().__init__(message)
 
 class CredentialHelper:
     """A class that helps with credentials."""
@@ -35,7 +64,7 @@ class CredentialHelper:
             )
 
     @staticmethod
-    def get_credentials(service: str) -> Credential | SimpleCredential:
+    def get_credentials(service: str) -> SimpleCredential:
         """
         Attempt to retrieve stored credentials from the `keyring` using the provided service name.
 
@@ -65,6 +94,9 @@ class CredentialHelper:
                 # Saving credentials
                 CredentialHelper.save_credentials(service, username, password)
                 cred = SimpleCredential(username, password)
+
+            else:
+                cred = SimpleCredential(cred.username, cred.password)
 
         except KeyringError as e:
             raise KeyringError(

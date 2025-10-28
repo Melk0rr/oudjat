@@ -3,7 +3,6 @@
 import re
 from typing import Any, override
 
-import requests
 from bs4 import BeautifulSoup
 from bs4.element import PageElement, ResultSet, Tag
 
@@ -11,6 +10,7 @@ from oudjat.assets.network import URL_REGEX
 from oudjat.control.vulnerability import CVE, CVE_REGEX
 from oudjat.utils.color_print import ColorPrint
 
+from ...connector_methods import ConnectorMethod
 from ..risk_types import RiskType
 from .certfr_page_types import CERTFRPageType
 from .definitions import CERTFR_LINK_REGEX, CERTFR_REF_REGEX, REF_TYPES
@@ -121,7 +121,7 @@ class CERTFRPage:
 
         # Handle possible connection error
         try:
-            req = requests.get(self._link)
+            req = ConnectorMethod.GET(self._link)
 
             if req.status_code != 200:
                 raise ConnectionError(

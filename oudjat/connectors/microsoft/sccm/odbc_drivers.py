@@ -11,5 +11,6 @@ class ODBCDriver(Enum):
     SQL_SERVER_N11 = "{SQL Server Native Client 11.0}"
     ODBC_11 = "{ODBC Driver 11 for SQL Server}"
     ODBC_13  = "{ODBC Driver 13 for SQL Server}"
+    ODBC_13_1  = "{ODBC Driver 13.1 for SQL Server}"
     ODBC_17 = "{ODBC Driver 17 for SQL Server}"
     ODBC_18 = "{ODBC Driver 18 for SQL Server}"

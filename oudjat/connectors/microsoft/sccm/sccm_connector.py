@@ -6,6 +6,7 @@ from typing import Any, override
 
 import pyodbc
 
+from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import StrType
 
 from ...connector import Connector
@@ -24,10 +25,11 @@ class SCCMConnector(Connector):
         self,
         server: str,
         db_name: str,
+        username: str | None = None,
+        password: str | None = None,
         driver: ODBCDriver = ODBCDriver.SQL_SERVER,
         port: int = 1433,
         trusted_connection: bool = False,
-        service_name: str = "OudjatSCCMConnection",
     ) -> None:
         """
         Create a new SCCMServer instance.
@@ -35,20 +37,21 @@ class SCCMConnector(Connector):
         Args:
             server (str)             : The name of the SQL server to connect to
             db_name (str)            : The name of the database to interact with
+            username (str)           : Username to use for the connection
+            password (str)           : Password to use for the connection
             driver (ODBCDriver)      : The ODBC driver to use for the connection
             port (int)               : The port to request to
             trusted_connection (bool): Whether to use MS Windows authentication or not
             service_name (str)       : Service name used to register credentials if trusted_connection is false
         """
 
-        super().__init__(
-            target=server, service_name=service_name, use_credentials=(not trusted_connection)
-        )
+        super().__init__(target=server, username=username, password=password)
+
+        self._trusted_connection: bool = trusted_connection
 
         self._driver: "ODBCDriver" = driver
         self._port: int = port
         self._database: str = db_name
-        self._trusted_connection: bool = trusted_connection
 
         self._connection: pyodbc.Connection
         self._cursor: pyodbc.Cursor
@@ -84,14 +87,30 @@ class SCCMConnector(Connector):
         Connect to the target server.
         """
 
+        if not self._trusted_connection and self._credentials is None:
+            raise NoCredentialsError(
+                f"{__class__.__name__}.__init__::",
+                "Trusted connection is set to False, but no credentials where provided",
+                self._target
+            )
+
         try:
+            cnx_creds_args: dict[str, str] = {}
+            if not self._trusted_connection and self._credentials:
+                cnx_creds_args = {
+                    "uid": self._credentials.username,
+                    "pwd": self._credentials.password,
+                }
+
             self._connection = pyodbc.connect(
                 driver=self._driver.value,
                 server=self._target,
                 port=self._port,
                 database=self._database,
                 trusted_connection=self._trusted_connection,
+                **cnx_creds_args,
             )
+
             self._cursor = self._connection.cursor()
 
         except ConnectionError as e:
@@ -111,7 +130,7 @@ class SCCMConnector(Connector):
         Detailed description.
 
         Args:
-            search_filter (str)        : A way to narrow search scope or search results. It may be a string, a tuple, or even a callback function
+            search_filter (str): A way to narrow search scope or search results. It may be a string, a tuple, or even a callback function
             attributes (StrType | None): A list of attributes to keep in the search results
 
         Returns:
@@ -122,8 +141,9 @@ class SCCMConnector(Connector):
             _ = self._cursor.execute(search_filter)
 
         except Exception as e:
-            raise Exception(f"An error occured while searching in {self._target}::{self._database}: \n{e}")
+            raise Exception(
+                f"An error occured while searching in {self._target}::{self._database}: \n{e}"
+            )
 
-        res_columns: list[str] = [ column[0] for column in self._cursor.description ]
-        return [ dict(zip(res_columns, row)) for row in self._cursor.fetchall() ]
-
+        res_columns: list[str] = [column[0] for column in self._cursor.description]
+        return [dict(zip(res_columns, row)) for row in self._cursor.fetchall()]

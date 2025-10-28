@@ -3,10 +3,9 @@
 from datetime import datetime
 from typing import override
 
-import requests
 from bs4 import BeautifulSoup
 
-from oudjat.connectors.connector import Connector
+from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.utils.color_print import ColorPrint
 
 from .certfr_page import CERTFRPage
@@ -28,7 +27,7 @@ class CERTFRConnector(Connector):
             self (OudjatCERTFRConnection): The instance being initialized.
         """
 
-        super().__init__(target=CERTFRPage.BASE_LINK, service_name="OudjatCERTFRConnection")
+        super().__init__(target=CERTFRPage.BASE_LINK)
 
     # ****************************************************************
     # Methods
@@ -52,7 +51,7 @@ class CERTFRConnector(Connector):
             if not isinstance(self._target, str):
                 raise ValueError(f"{__class__.__name__}.connect::The CERTFR connector target must be a string")
 
-            req = requests.get(self._target)
+            req = ConnectorMethod.GET(self._target)
 
             if req.status_code == 200:
                 self._connection: bool = True
@@ -115,7 +114,7 @@ class CERTFRConnector(Connector):
         filtered_feed = []
 
         try:
-            feed_req = requests.get(feed_url)
+            feed_req = ConnectorMethod.GET(feed_url)
             feed_soup = BeautifulSoup(feed_req.content, "xml")
             feed_items = feed_soup.find_all("item")
 
