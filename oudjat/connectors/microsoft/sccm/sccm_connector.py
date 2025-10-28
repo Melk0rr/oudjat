@@ -6,6 +6,7 @@ from typing import Any, override
 
 import pyodbc
 
+from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import StrType
 
 from ...connector import Connector
@@ -87,8 +88,10 @@ class SCCMConnector(Connector):
         """
 
         if not self._trusted_connection and self._credentials is None:
-            raise ValueError(
-                f"{__class__.__name__}.__init__::Trusted connection is set to False, but no credentials where provided"
+            raise NoCredentialsError(
+                f"{__class__.__name__}.__init__::",
+                "Trusted connection is set to False, but no credentials where provided",
+                self._target
             )
 
         try:
@@ -105,7 +108,7 @@ class SCCMConnector(Connector):
                 port=self._port,
                 database=self._database,
                 trusted_connection=self._trusted_connection,
-                **cnx_creds_args
+                **cnx_creds_args,
             )
 
             self._cursor = self._connection.cursor()
@@ -127,7 +130,7 @@ class SCCMConnector(Connector):
         Detailed description.
 
         Args:
-            search_filter (str)        : A way to narrow search scope or search results. It may be a string, a tuple, or even a callback function
+            search_filter (str): A way to narrow search scope or search results. It may be a string, a tuple, or even a callback function
             attributes (StrType | None): A list of attributes to keep in the search results
 
         Returns:

@@ -40,7 +40,7 @@ class FileConnector(Connector):
         self._connection: bool = False
         self._data: list[Any] | None = None
 
-        super().__init__(file, service_name=None, use_credentials=False)
+        super().__init__(file)
 
     # ****************************************************************
     # Methods

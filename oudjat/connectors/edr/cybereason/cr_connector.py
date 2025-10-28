@@ -11,6 +11,7 @@ import requests
 from oudjat.connectors.connector import Connector
 from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoint
 from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.time_utils import TimeConverter
 from oudjat.utils.types import DataType, StrType
 
@@ -92,15 +93,16 @@ class CybereasonConnector(Connector):
     _DEFAULT_PAYLOAD: dict[str, Any] = {"filters": []}
 
     def __init__(
-        self, target: str, service_name: str = "OudjatCybereasonAPI", port: int = 443
+        self, target: str, username: str | None = None, password: str | None = None, port: int = 443
     ) -> None:
         """
         Create a new instance of CybereasonConnector.
 
         Args:
             target (str)      : Cybereason URL
-            service_name (str): name of the service, used to register credentials
-            port (int)        : port number used for the connection
+            username (str)    : Username to use for the connection
+            password (str)    : Password to use for the connection
+            port (int)        : Port number used for the connection
         """
 
         scheme = "http"
@@ -111,7 +113,7 @@ class CybereasonConnector(Connector):
         if not re.match(r"http(s?):", target):
             target = f"{scheme}://{target}"
 
-        super().__init__(target=urlparse(target), service_name=service_name, use_credentials=True)
+        super().__init__(target=urlparse(target), username=username, password=password)
 
         self._target: ParseResult = urlparse(
             f"{self._target.scheme}://{self._target.netloc}:{port}"
@@ -132,7 +134,7 @@ class CybereasonConnector(Connector):
 
         try:
             if not self._credentials:
-                raise ConnectionError(f"{__class__.__name__}.connect::No credentials set")
+                raise NoCredentialsError(pfx=f"{__class__.__name__}.connect::", target=self._target.netloc)
 
             creds = {"username": self._credentials.username, "password": self._credentials.password}
             _ = session.post(
@@ -323,9 +325,7 @@ class CybereasonConnector(Connector):
         payload = payload or {}
         file_name = [file_name] if not isinstance(file_name, list) else file_name
 
-        file_filters = [
-            {"fieldName": "fileName", "values": file_name, "operator": "Equals"}
-        ]
+        file_filters = [{"fieldName": "fileName", "values": file_name, "operator": "Equals"}]
 
         batch_search = self.page_search(
             endpoint=endpoint,

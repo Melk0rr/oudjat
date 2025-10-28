@@ -5,9 +5,7 @@ import re
 from datetime import datetime
 from typing import Any, override
 
-import requests
-
-from oudjat.connectors import Connector
+from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.utils import ColorPrint
 from oudjat.utils.types import StrType
 
@@ -32,7 +30,7 @@ class MSCVRFConnector(Connector):
         self._date: datetime = datetime.now()
         self._api_version: str = str(self._date.year)
 
-        super().__init__(target={}, service_name="OudjatMSAPI", use_credentials=False)
+        super().__init__(target={})
         self._connection: bool = False
 
     # ****************************************************************
@@ -61,19 +59,15 @@ class MSCVRFConnector(Connector):
         # API URL to retrieve CVRF id from CVE
         id_url = f"{API_BASE_URL}Updates('{cve}')"
 
-        cvrf_id = None
-
         # Retrieve CVRF ID
-        id_resp = requests.get(id_url, headers=API_REQ_HEADERS)
+        id_resp = ConnectorMethod.GET(id_url, headers=API_REQ_HEADERS)
         if id_resp.status_code != 200:
             raise ConnectionError(
                 f"{__class__.__name__}.get_cvrf_id_from_cve::Could not connect to {id_url}"
             )
 
         data = json.loads(id_resp.content)
-        cvrf_id = data["value"][0]["ID"]
-
-        return cvrf_id
+        return data["value"][0]["ID"]
 
     @override
     def connect(self, cvrf_id: str) -> None:
@@ -104,7 +98,7 @@ class MSCVRFConnector(Connector):
         else:
             self._connection = True
 
-    def add_target(self, doc: MSCVRFDocument) -> None:
+    def add_target(self, doc: "MSCVRFDocument") -> None:
         """
         Add a CVRF document to the internal target dictionary.
 

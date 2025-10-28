@@ -23,7 +23,7 @@ class MSRemed:
     # ****************************************************************
     # Attributes & Constructor
 
-    def __init__(self, num: int):
+    def __init__(self, num: int) -> None:
         """
         Create a new instance of the MSRemed class.
 

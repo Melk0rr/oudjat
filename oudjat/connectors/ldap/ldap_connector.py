@@ -10,6 +10,7 @@ from ldap3.core.exceptions import LDAPSocketOpenError
 
 from oudjat.connectors.connector import Connector
 from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import StrType
 
 from .objects.ldap_entry import LDAPEntry
@@ -65,21 +66,27 @@ class LDAPConnector(Connector):
     # Attributes & Constructors
 
     def __init__(
-        self, server: str, service_name: str = "OudjatLDAPConnection", use_tls: bool = False
+        self,
+        server: str,
+        username: str | None = None,
+        password: str | None = None,
+        use_tls: bool = False,
     ) -> None:
         """
         Create a new LDAPConnector.
 
         Args:
-            server (str)      : server name
-            service_name (str): service name used to store credentials
-            use_tls (bool)    : should the connector use TLS for LDAPS connection
+            server (str)      : Server name
+            username (str)    : Username to use for the connection
+            password (str)    : Password to use for the connection
+            service_name (str): Service name used to store credentials
+            use_tls (bool)    : Should the connector use TLS for LDAPS connection
         """
 
         self._use_tls: bool = use_tls
         self._port: LDAPPort = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
 
-        super().__init__(target=server, service_name=service_name, use_credentials=True)
+        super().__init__(target=server, username=username, password=password)
 
         self._domain: str = ""
         self._default_search_base: str = ""
@@ -157,7 +164,7 @@ class LDAPConnector(Connector):
         Set the TLS usage.
 
         Args:
-        use_tls (bool): should the connector use TLS
+            use_tls (bool): should the connector use TLS
         """
 
         self._use_tls = use_tls
@@ -171,6 +178,9 @@ class LDAPConnector(Connector):
         Args:
             version (ssl._SSLMethod): SSL/TLS version
         """
+
+        if self._credentials is None:
+            raise NoCredentialsError(pfx=f"{__class__.__name__}.connect", target=self._target)
 
         if version is None:
             try:
@@ -201,12 +211,6 @@ class LDAPConnector(Connector):
             )
 
         ldap_server = ldap3.Server(target_ip, get_info=ldap3.ALL, port=self._port, **tls_option)
-
-        if self._credentials is None:
-            raise ConnectionError(
-                f"{__class__.__name__}.connect::No credentials have been defined to connect to {self.target}"
-            )
-
         ldap_connection = ldap3.Connection(
             ldap_server,
             user=self._credentials.username,
@@ -583,7 +587,9 @@ class LDAPConnector(Connector):
             search_filter="(&(objectClass=user)(objectCategory=Person)(adminCount=1))",
         )
 
-    def ldap_object_opt_from_obj_type(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOptions[LDAPObject]":
+    def ldap_object_opt_from_obj_type(
+        self, ldap_obj_type: "LDAPObjectType"
+    ) -> "LDAPObjectOptions[LDAPObject]":
         """
         Return an LDAP object based on a given LDAPEntry.
 

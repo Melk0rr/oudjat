@@ -28,7 +28,7 @@ class MSProduct:
         if not re.match(MS_PRODUCT_REGEX, pid):
             raise ValueError(f"{__class__.__name__}::Invalid MS product ID: {pid}")
 
-        self._pid : str = pid
+        self._pid: str = pid
         self._name: str = name
         self._type: str = product_type
         self._sub_type: str = self._type
@@ -80,7 +80,7 @@ class MSProduct:
         Convert instance to dict.
 
         Returns:
-            Dict[str, str]: A dictionary representation of the product with keys "product_id", "product_name", "product_type", and "product_subtype".
+            dict[str, str]: A dictionary representation of the product
         """
 
         return {

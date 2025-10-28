@@ -10,6 +10,7 @@ from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
 from oudjat.control.vulnerability.severity import Severity
 from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import FilterTupleExtType
 
 from .tsc_asset_list_types import TSCAssetListType
@@ -31,15 +32,16 @@ class TenableSCConnector(Connector):
     }
 
     def __init__(
-        self, target: str, service_name: str = "OudjatTenableSCAPI", port: int = 443
+        self, target: str, username: str | None = None, password: str | None = None, port: int = 443
     ) -> None:
         """
         Create a new instance of TenableSCConnector.
 
         Args:
             target (str)      : Tenable.sc appliance URL
-            service_name (str): service name used to register credentials
-            port (int)        : port number
+            username (str)    : Username to use for the connection
+            password (str)    : Password to use for the connection
+            port (int)        : Port number
         """
 
         scheme = "http"
@@ -49,9 +51,11 @@ class TenableSCConnector(Connector):
         if not re.match(r"http(s?):", target):
             target = f"{scheme}://{target}"
 
-        super().__init__(target=target, service_name=service_name, use_credentials=True)
+        super().__init__(target=target, username=username, password=password)
         self._parsed_target: ParseResult = urlparse(target)
-        self._parsed_target = urlparse(f"{self._parsed_target.scheme}://{self._parsed_target.netloc}")
+        self._parsed_target = urlparse(
+            f"{self._parsed_target.scheme}://{self._parsed_target.netloc}"
+        )
 
         self._connection: TenableSC = None
         self._repos: list[str] | None = None
@@ -77,14 +81,16 @@ class TenableSCConnector(Connector):
         Connect to API using connector parameters.
         """
 
+        if self._credentials is None:
+            raise NoCredentialsError(pfx=f"{__class__.__name__}.connect::", target=self._target)
+
         connection: TenableSC | None = None
         try:
-            if self._credentials is not None:
-                connection = TenableSC(
-                    host=self._parsed_target.netloc,
-                    access_key=self._credentials.username,
-                    secret_key=self._credentials.password,
-                )
+            connection = TenableSC(
+                host=self._parsed_target.netloc,
+                access_key=self._credentials.username,
+                secret_key=self._credentials.password,
+            )
 
             ColorPrint.green(f"Connected to {self._parsed_target.netloc}")
             self._connection = connection
