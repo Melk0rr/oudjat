@@ -75,7 +75,7 @@ class Connector(ABC):
 
         self._target = new_target
 
-    def set_credentials_from_svc_name(self, new_service_name: str) -> None:
+    def set_creds_from_svc_name(self, new_service_name: str) -> None:
         """
         Set the service name bound to the current connector.
 
