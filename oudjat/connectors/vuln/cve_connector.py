@@ -63,7 +63,7 @@ class CVEConnector(Connector, ABC):
 
     @override
     @abstractmethod
-    def search(
+    def fetch(
         self,
         search_filter: StrType,
         attributes: StrType | None = None,

@@ -122,7 +122,7 @@ class TenableSCConnector(Connector):
         self._repos = []
 
     @override
-    def search(self, search_type: str = "VULNS", *args: Any, **kwargs: Any) -> list[object]:
+    def fetch(self, search_type: str = "VULNS", *args: Any, **kwargs: Any) -> list[object]:
         """
         Search the API for elements.
 
@@ -142,9 +142,9 @@ class TenableSCConnector(Connector):
 
         search_type = search_type.upper()
         search_options: dict[str, Callable] = {
-            "ASSETS": self.list_asset_lists,
-            "SCANS": self.list_scans,
-            "VULNS": self.search_vulns,
+            "ASSETS": self.asset_lists,
+            "SCANS": self.scans,
+            "VULNS": self.vulns,
         }
 
         if search_type not in search_options.keys():
@@ -160,7 +160,7 @@ class TenableSCConnector(Connector):
         return list(search)
 
     # INFO: Vulns
-    def search_vulns(
+    def vulns(
         self,
         *severities: list[int],
         tool: TSCVulnTool = TSCVulnTool.VULNDETAILS,
@@ -267,7 +267,7 @@ class TenableSCConnector(Connector):
         except Exception as e:
             raise e
 
-    def list_asset_lists(
+    def asset_lists(
         self, list_filter: FilterTupleExtType | None = None
     ) -> list[dict[str, Any]]:
         """
@@ -310,7 +310,7 @@ class TenableSCConnector(Connector):
             list_id (int | List[int]): list of ids matching the asset lists to retrieve
 
         Returns:
-            List[Dict]: list of asset list details
+            list[dict[str, Any]]: list of asset list details
 
         Raises:
             Exception: if something goes wrong while reteiving asset list details
@@ -333,7 +333,7 @@ class TenableSCConnector(Connector):
 
     # TODO: Edit asset list
     # INFO: Scans
-    def list_scans(self, scan_filter: FilterTupleExtType | None = None) -> list[dict[str, Any]]:
+    def scans(self, scan_filter: FilterTupleExtType | None = None) -> list[dict[str, Any]]:
         """
         Retrieve a list of scans with minimal information like scan ids.
 

@@ -101,10 +101,8 @@ class Connector(ABC):
         )
 
     @abstractmethod
-    def search(
+    def fetch(
         self,
-        search_filter: Any,
-        attributes: list[str] | None,
         *args: Any,
         **kwargs: Any,
     ) -> list[Any]:
@@ -112,8 +110,6 @@ class Connector(ABC):
         Retrieve data from the target.
 
         Args:
-            search_filter (Any)   : a way to narrow search scope or search results. It may be a string, a tuple, or even a callback function
-            attributes (list[str]): a list of attributes to keep in the search results
             *args (tuple)         : any args the overriding method provides
             **kwargs (dict)       : any kwargs the overriding method provides
 
