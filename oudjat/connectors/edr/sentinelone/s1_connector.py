@@ -10,6 +10,7 @@ import requests
 
 from oudjat.connectors.edr.sentinelone.s1_endpoints import S1Endpoint
 from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import DataType, StrType
 
 from ... import Connector
@@ -89,10 +90,24 @@ class S1Connector(Connector):
             str: Unified parameter as a string
         """
 
-        if isinstance(str_list, list):
-            str_list = ",".join(str_list)
+        return ",".join(str_list) if isinstance(str_list, list) else str_list
 
-        return str_list
+    def set_apitoken_from_svc_name(self, svc_name: str) -> None:
+        """
+        Set the service name bound to the current connector.
+
+        Args:
+            svc_name (str): Service name used to retrieve credentials
+        """
+
+        super().set_creds_from_svc_name(svc_name)
+
+        if self._credentials is None:
+            raise NoCredentialsError(
+                pfx=f"{__class__.__name__}.set_apitoken_from_svc_name::Could not set API key from {svc_name} service name"
+            )
+
+        self._api_token = self._credentials.password
 
     @override
     def connect(self) -> None:
@@ -101,9 +116,9 @@ class S1Connector(Connector):
         """
 
         if not self._connection:
-            if self._api_token:
-                ColorPrint.blue(f"Connecting to {self._target} with user API token")
+            ColorPrint.blue(f"Connecting to {self._target} with user API token")
 
+            if self._api_token:
                 try:
                     data = self.login_by_api_token()
                     self._connection = data[0]["token"]
@@ -111,6 +126,9 @@ class S1Connector(Connector):
                 # TODO: Better handle exception type
                 except Exception as e:
                     raise e
+
+            else:
+                raise NoCredentialsError(pfx=f"{__class__.__name__}", msg="No API token provided")
 
         else:
             ColorPrint.blue(f"Connection to {self._target} is already initialized.")
