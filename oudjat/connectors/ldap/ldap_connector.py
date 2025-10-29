@@ -118,7 +118,7 @@ class LDAPConnector(Connector):
         }
 
         self._DEFAULT_CAPABILITIES: LDAPCapabilities = LDAPCapabilities(
-            ldap_search=self.search,
+            ldap_search=self.fetch,
             ldap_obj_opt=self.ldap_object_opt_from_obj_type,
         )
 
@@ -262,7 +262,7 @@ class LDAPConnector(Connector):
         self._domain = self._ldap_server.info.other["ldapServiceName"][0].split("@")[-1]
 
     @override
-    def search(
+    def fetch(
         self,
         search_type: "LDAPObjectType" = LDAPObjectType.DEFAULT,
         search_base: str | None = None,
@@ -341,7 +341,7 @@ class LDAPConnector(Connector):
             dict[int | str, LDAPObject]: list of objects
         """
 
-        entries = self.search(
+        entries = self.fetch(
             search_type=LDAPObjectType.DEFAULT,
             search_base=search_base,
             search_filter=search_filter,
@@ -382,7 +382,7 @@ class LDAPConnector(Connector):
             else f"(name={name})"
         )
 
-        entries = self.search(
+        entries = self.fetch(
             search_type=LDAPObjectType.GPO,
             search_base=None,
             search_filter=f"(&(displayName={displayName}){name}",
@@ -410,7 +410,7 @@ class LDAPConnector(Connector):
 
         sb_dc = ",".join([f"DC={dc.lower()}" for dc in self.domain.split(".")])
 
-        entries = self.search(
+        entries = self.fetch(
             search_type=LDAPObjectType.SUBNET,
             search_base=f"CN=Subnets,CN=Sites,CN=Configuration,{sb_dc}",
             search_filter=search_filter,
@@ -440,7 +440,7 @@ class LDAPConnector(Connector):
             dict[int |str, LDAPComputer]: list of computers
         """
 
-        entries = self.search(
+        entries = self.fetch(
             search_type=LDAPObjectType.COMPUTER,
             search_base=search_base,
             search_filter=search_filter,
@@ -470,7 +470,7 @@ class LDAPConnector(Connector):
             dict[int | str, LDAPUserTypeAlias]: list of users
         """
 
-        entries = self.search(
+        entries = self.fetch(
             search_type=LDAPObjectType.USER,
             search_base=search_base,
             search_filter=search_filter,
@@ -502,7 +502,7 @@ class LDAPConnector(Connector):
             dict[int | str, LDAPGroup]: list of OU matching filter
         """
 
-        entries = self.search(
+        entries = self.fetch(
             search_type=LDAPObjectType.GROUP,
             search_base=search_base,
             search_filter=search_filter,
@@ -539,7 +539,7 @@ class LDAPConnector(Connector):
             dict[int | str, LDAPOrganizationalUnit]: list of OU matching filter
         """
 
-        entries = self.search(
+        entries = self.fetch(
             search_type=LDAPObjectType.OU,
             search_base=search_base,
             search_filter=search_filter,
@@ -570,7 +570,7 @@ class LDAPConnector(Connector):
             LDAPEntry: A complete LDAP entry that matches the provided partial entry, including all details found in the search operation.
         """
 
-        return self.search(
+        return self.fetch(
             search_type=LDAPObjectType.from_object_cls(ldap_entry),
             search_filter=f"(distinguishedName={ldap_entry.dn})",
         )[0]

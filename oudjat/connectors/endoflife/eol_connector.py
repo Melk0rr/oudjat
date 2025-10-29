@@ -66,7 +66,7 @@ class EndOfLifeConnector(Connector):
             )
 
     @override
-    def search(
+    def fetch(
         self, search_filter: str, attributes: list[str] | None = None, *args: Any, **kwargs: Any
     ) -> list[Any]:
         """

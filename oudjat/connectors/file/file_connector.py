@@ -115,7 +115,7 @@ class FileConnector(Connector):
         self._connection = False
 
     @override
-    def search(
+    def fetch(
         self,
         search_filter: Callable[[Any], bool],
         attributes: list[str] | None = None,

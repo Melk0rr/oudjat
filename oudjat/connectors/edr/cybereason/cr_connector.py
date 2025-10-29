@@ -99,10 +99,10 @@ class CybereasonConnector(Connector):
         Create a new instance of CybereasonConnector.
 
         Args:
-            target (str)      : Cybereason URL
-            username (str)    : Username to use for the connection
-            password (str)    : Password to use for the connection
-            port (int)        : Port number used for the connection
+            target (str)  : Cybereason URL
+            username (str): Username to use for the connection
+            password (str): Password to use for the connection
+            port (int)    : Port number used for the connection
         """
 
         scheme = "http"
@@ -160,7 +160,7 @@ class CybereasonConnector(Connector):
                 f"{__class__.__name__}.disconnect::Connection to {self._target.netloc} is now closed"
             )
 
-    def get_complete_url(self, endpoint: CybereasonEndpoint) -> str:
+    def endpoint_url(self, endpoint: CybereasonEndpoint) -> str:
         """
         Concatenate the base URL set to initialize the connector and the specified endpoint URL.
 
@@ -198,7 +198,7 @@ class CybereasonConnector(Connector):
         return self._connection.request(method=method, url=url, data=payload, headers=api_headers)
 
     @override
-    def search(
+    def fetch(
         self,
         search_type: str,
         query: dict[str, Any] | None = None,
@@ -230,7 +230,7 @@ class CybereasonConnector(Connector):
 
         return search_options[search_type.lower()](query=query, limit=limit, **kwargs)
 
-    def page_search(self, endpoint: "CybereasonEndpoint", query: str = "") -> DataType:
+    def _page_search(self, endpoint: "CybereasonEndpoint", query: str = "") -> DataType:
         """
         Search for entries in the specified Cybereason API endpoint.
 
@@ -248,7 +248,7 @@ class CybereasonConnector(Connector):
         """
 
         api_resp = self.request(
-            method=endpoint.method, url=self.get_complete_url(endpoint), payload=query
+            method=endpoint.method, url=self.endpoint_url(endpoint), payload=query
         )
 
         res = []
@@ -272,14 +272,14 @@ class CybereasonConnector(Connector):
         return res
 
     def sensor_search(
-        self, query: dict[str, Any] | None = None, limit: int | None = None
+        self, payload: dict[str, Any] | None = None, limit: int | None = None
     ) -> list["CybereasonEntry"]:
         """
         Search for sensors using Cybereason API and based on search filter(s) and limit.
 
         Args:
-            query (dict): query to run as a dictionary
-            limit (int) : max number of search results
+            payload (dict): Query to run as a dictionary
+            limit (int)   : Max number of search results
 
         Returns:
             list[CybereasonEntry]: search results
@@ -289,16 +289,16 @@ class CybereasonConnector(Connector):
 
         # NOTE: Limit is the provided value or the endpoint limit if none provided
         limit = limit or endpoint.limit
-        payload: dict[str, Any] = {
+        payload = {
             "limit": limit,
             "offset": 0,
-            **(query or self._DEFAULT_PAYLOAD),
+            **(payload or self._DEFAULT_PAYLOAD),
         }
 
         res = []
         for i in range(0, math.ceil(limit / endpoint.limit)):
             payload["offset"] = i
-            search_i = self.page_search(endpoint=endpoint, query=json.dumps(payload))
+            search_i = self._page_search(endpoint=endpoint, query=json.dumps(payload))
 
             res.extend(search_i)
 
@@ -327,7 +327,7 @@ class CybereasonConnector(Connector):
 
         file_filters = [{"fieldName": "fileName", "values": file_name, "operator": "Equals"}]
 
-        batch_search = self.page_search(
+        batch_search = self._page_search(
             endpoint=endpoint,
             query=str({"limit": limit or endpoint.limit, "fileFilters": file_filters, **payload}),
         )
@@ -339,7 +339,7 @@ class CybereasonConnector(Connector):
             if batch_id is not None:
                 file_search_resp = self.request(
                     method="GET",
-                    url=f"{self.get_complete_url(endpoint)}/{batch_id}",
+                    url=f"{self.endpoint_url(endpoint)}/{batch_id}",
                 )
 
                 res = (

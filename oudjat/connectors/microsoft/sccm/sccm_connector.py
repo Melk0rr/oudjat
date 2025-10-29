@@ -119,7 +119,7 @@ class SCCMConnector(Connector):
             )
 
     @override
-    def search(
+    def fetch(
         self,
         search_filter: str,
         attributes: StrType | None = None,

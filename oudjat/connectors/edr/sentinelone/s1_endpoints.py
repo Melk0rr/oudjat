@@ -21,7 +21,7 @@ class S1EndpointsProps(NamedTuple):
     method: "ConnectorMethod"
 
 
-class S1Endpoints(Enum):
+class S1Endpoint(Enum):
     """
     An enumeration of the possible SentinelOne connection endpoints.
     """
@@ -48,30 +48,30 @@ class S1Endpoints(Enum):
         "/web/api/v2.1/cloud-detection/alerts", ConnectorMethod.GET
     )
     ACCOUNTS_POLICY = S1EndpointsProps(
-        "/web/api/v2.1/accounts/{account_id}/policy", ConnectorMethod.GET
+        "/web/api/v2.1/accounts/{accountId}/policy", ConnectorMethod.GET
     )
     TENANT_POLICY = S1EndpointsProps("/web/api/v2.1/tenant/policy", ConnectorMethod.GET)
-    GROUPS_POLICY = S1EndpointsProps("/web/api/v2.1/groups/{group_id}/policy", ConnectorMethod.GET)
-    SITES_POLICY = S1EndpointsProps("/web/api/v2.1/sites/{site_id}/policy", ConnectorMethod.GET)
+    GROUPS_POLICY = S1EndpointsProps("/web/api/v2.1/groups/{groupId}/policy", ConnectorMethod.GET)
+    SITES_POLICY = S1EndpointsProps("/web/api/v2.1/sites/{siteId}/policy", ConnectorMethod.GET)
     RBAC_ROLES = S1EndpointsProps("/web/api/v2.1/rbac/roles", ConnectorMethod.GET)
-    RBAC_ROLE = S1EndpointsProps("/web/api/v2.1/rbac/role/{role_id}", ConnectorMethod.GET)
-    SITES_ID = S1EndpointsProps("/web/api/v2.1/sites/{site_id}", ConnectorMethod.GET)
+    RBAC_ROLE = S1EndpointsProps("/web/api/v2.1/rbac/role/{roleId}", ConnectorMethod.GET)
+    SITES_BY_ID = S1EndpointsProps("/web/api/v2.1/sites/{siteId}", ConnectorMethod.GET)
     SITES = S1EndpointsProps("/web/api/v2.1/sites", ConnectorMethod.GET)
     UPDATE_AGENT_DOWNLOAD = S1EndpointsProps(
-        "/web/api/v2.1/update/agent/download/{site_id}/{package_id}", ConnectorMethod.GET
+        "/web/api/v2.1/update/agent/download/{siteId}/{packageId}", ConnectorMethod.GET
     )
     UPDATE_AGENT_PACKAGES = S1EndpointsProps(
         "/web/api/v2.1/update/agent/packages", ConnectorMethod.GET
     )
     USERS_API_TOKEN_DETAILS_BY_ID = S1EndpointsProps(
-        "/web/api/v2.1/users/{user_id}/api-token-details", ConnectorMethod.GET
+        "/web/api/v2.1/users/{userId}/api-token-details", ConnectorMethod.GET
     )
     USERS_API_TOKEN_DETAILS = S1EndpointsProps(
         "/web/api/v2.1/users/api-token-details", ConnectorMethod.GET
     )
     USERS_AUTH_APP = S1EndpointsProps("/web/api/v2.1/users/auth/app", ConnectorMethod.POST)
     USERS_LOGIN_SSO_SAML2 = S1EndpointsProps(
-        "/web/api/v2.1/users/login/sso-saml2/{scope_id}", ConnectorMethod.POST
+        "/web/api/v2.1/users/login/sso-saml2/{scopeId}", ConnectorMethod.POST
     )
     USERS_AUTH_RECOVERY_CODE = S1EndpointsProps(
         "/web/api/v2.1/users/auth/recovery-code", ConnectorMethod.POST
@@ -110,3 +110,25 @@ class S1Endpoints(Enum):
     SYSTEM_INFO = S1EndpointsProps("/web/api/v2.1/system/info", ConnectorMethod.GET)
     SYSTEM_STATUS = S1EndpointsProps("/web/api/v2.1/system/status", ConnectorMethod.GET)
     THREATS = S1EndpointsProps("/web/api/v2.1/threats", ConnectorMethod.GET)
+
+    @property
+    def path(self) -> str:
+        """
+        Return the path attribute of the S1Endpoint element.
+
+        Returns:
+            str: The path string of the endpoint
+        """
+
+        return self._value_.path
+
+    @property
+    def method(self) -> "ConnectorMethod":
+        """
+        Return the method attribute of the endpoint.
+
+        Returns:
+            ConnectorMethod: The connector method that must be used to interract with the endpoint
+        """
+
+        return self._value_.method

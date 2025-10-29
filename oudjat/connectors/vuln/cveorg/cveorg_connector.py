@@ -22,7 +22,7 @@ class CVEorgConnector(CVEConnector):
     # Methods
 
     @override
-    def search(
+    def fetch(
         self,
         search_filter: StrType,
         attributes: StrType | None = None,

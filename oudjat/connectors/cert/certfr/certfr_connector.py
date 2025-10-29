@@ -62,7 +62,7 @@ class CERTFRConnector(Connector):
             )
 
     @override
-    def search(self, search_filter: str | list[str]) -> list[CERTFRPage]:
+    def fetch(self, search_filter: str | list[str]) -> list[CERTFRPage]:
         """
         Search the CERTFR website using a filter (either a single string or a list of strings) and returns a list of CERTFRPage objects that match the search criteria.
 

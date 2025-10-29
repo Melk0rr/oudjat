@@ -110,7 +110,7 @@ class MSCVRFConnector(Connector):
             self._target[doc.id] = doc
 
     @override
-    def search(
+    def fetch(
         self,
         search_filter: StrType,
     ) -> list[dict[str, Any]]:
