@@ -2,10 +2,11 @@
 A module that handles SCCM server connection and interractions.
 """
 
-from typing import Any, override
+from typing import override
 
 import pyodbc
 
+from oudjat.utils import DataType
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import StrType
 
@@ -123,7 +124,7 @@ class SCCMConnector(Connector):
         self,
         search_filter: str,
         attributes: StrType | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> "DataType":
         """
         Perform a request to the SQL server.
 

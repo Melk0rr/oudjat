@@ -2,6 +2,7 @@
 
 from typing import Any, Callable, TypeAlias, TypedDict, override
 
+from oudjat.utils import DataType
 from oudjat.utils.operators import CompareOperator
 from oudjat.utils.types import FilterTupleExtType, NumberType
 
@@ -309,18 +310,18 @@ class DataFilter:
 
     @staticmethod
     def filter_data(
-        data_to_filter: list[dict[str, Any]],
+        data_to_filter: DataType,
         filters: "DataFilter" | list["DataFilter"] | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> DataType:
         """
         Filter data based on given filters.
 
         Args:
-            data_to_filter (List[Dict])            : well... the data to be filtered duh
-            filters (DataFilter | List[DataFilter]): filters to run
+            data_to_filter (DataType)              : Well...The data to be filtered duh
+            filters (DataFilter | List[DataFilter]): Filters to run
 
         Returns:
-            List[Dict]: filtered data
+            DataType: Filtered data
         """
 
         if filters is None:

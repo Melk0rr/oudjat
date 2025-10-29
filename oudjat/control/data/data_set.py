@@ -2,9 +2,11 @@
 
 from typing import Any, TypeAlias
 
+from oudjat.utils import DataType
+
 from .data_filter import DataFilter, DataFilterDictionaryProps
 
-DataSetType: TypeAlias = list[dict[str, Any]] | "DataSet"
+DataSetType: TypeAlias = DataType | "DataSet"
 
 
 class DataSet:
@@ -17,8 +19,8 @@ class DataSet:
         self,
         name: str,
         perimeter: str,
-        initial_set: DataSetType | None = None,
-        filters: list[DataFilterDictionaryProps] | list["DataFilter"] | None = None,
+        initial_set: "DataSetType | None" = None,
+        filters: list["DataFilterDictionaryProps"] | list["DataFilter"] | None = None,
         description: str | None = None,
     ) -> None:
         """

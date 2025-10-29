@@ -3,6 +3,7 @@
 import re
 from typing import Any
 
+from oudjat.utils import DataType
 from oudjat.utils.mappers import any_to_dict
 
 from .definitions import CVE_REGEX, KB_NUM_REGEX
@@ -70,7 +71,7 @@ class MSVuln:
 
         return self._products
 
-    def add_kb(self, kb_num: int, kb: MSRemed) -> None:
+    def add_kb(self, kb_num: int, kb: "MSRemed") -> None:
         """
         Add a KB to vuln KB list.
 
@@ -85,7 +86,7 @@ class MSVuln:
         if re.match(KB_NUM_REGEX, str(kb_num)) or re.match(r"(\w+)$", str(kb_num)):
             self._kbs[kb_num] = kb
 
-    def to_flat_dict(self) -> list[dict[str, Any]]:
+    def to_flat_dict(self) -> "DataType":
         """
         Convert kbs into dictionaries.
 
@@ -93,7 +94,7 @@ class MSVuln:
             List[Dict]: A list of flattened dictionaries, each representing a KB and its related CVE.
         """
 
-        kb_dictionaries: list[dict[str, Any]] = []
+        kb_dictionaries: "DataType" = []
         for k in self._kbs.values():
             kb_dictionaries.extend(k.to_flat_dict())
 

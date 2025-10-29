@@ -3,6 +3,7 @@
 import re
 from typing import Any, override
 
+from oudjat.utils import DataType
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.types import StrType
 
@@ -29,7 +30,7 @@ class NistConnector(CVEConnector):
         attributes: StrType | None = None,
         raw: bool = False,
         **kwargs: Any,
-    ) -> list[dict[str, Any]]:
+    ) -> DataType:
         """
         Search the API for CVEs.
 
@@ -45,7 +46,7 @@ class NistConnector(CVEConnector):
             kwargs (Any)                          : Additional arguments that will be passed to connect method
 
         Returns:
-            list[dict[str, Any]]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
+            DataType: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
         """
 
         res = []

@@ -6,6 +6,7 @@ from typing import Any, override
 
 from oudjat.assets.software.os.windows import WindowsEdition
 from oudjat.connectors import Connector, ConnectorMethod
+from oudjat.utils import DataType
 
 from .definitions import EOL_API_URL
 
@@ -115,7 +116,7 @@ class EndOfLifeConnector(Connector):
 
         return res
 
-    def get_windows_rel(self, target: str = "windows") -> list[dict[str, str]]:
+    def get_windows_rel(self, target: str = "windows") -> "DataType":
         """
         Retrieve Windows releases.
 
@@ -123,13 +124,13 @@ class EndOfLifeConnector(Connector):
             target (str, optional): The product name to search for. Defaults to "windows".
 
         Returns:
-            List[Dict]: A list of dictionaries containing information about the Windows releases that match the criteria.
+            DataType: A list of dictionaries containing information about the Windows releases that match the criteria.
 
         Raises:
             ConnectionError: If unable to connect to the API endpoint or retrieve data.
         """
 
-        win_eol: list[dict[str, Any]] = self.search(search_filter=target)
+        win_eol: "DataType" = self.fetch(search_filter=target)
 
         for rel in win_eol:
             if target == "windows":

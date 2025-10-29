@@ -4,9 +4,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, NamedTuple, TypedDict, override
 
-from oudjat.control.data import DataFilter, DataSet
+from oudjat.control.data import DataFilter, DataSet, DataSetType
 from oudjat.control.data.data_filter import DataFilterDictionaryProps
-from oudjat.utils import ColorPrint, TimeConverter
+from oudjat.utils import ColorPrint, DataType, TimeConverter
 from oudjat.utils.types import DateInputType, NumberType
 
 
@@ -92,23 +92,23 @@ class KPI(DataSet):
         self,
         name: str,
         perimeter: str,
-        date: DateInputType | None = None,
-        static: KPIStaticProps | None = None,
-        data_set: list[dict[str, Any]] | DataSet | None = None,
-        filters: list[DataFilterDictionaryProps] | list[DataFilter] | None = None,
+        date: "DateInputType | None" = None,
+        static: "KPIStaticProps | None" = None,
+        data_set: "DataSetType | None" = None,
+        filters: list["DataFilterDictionaryProps"] | list["DataFilter"] | None = None,
         description: str | None = None,
     ) -> None:
         """
         Return a new instance of KPI.
 
         Args:
-            name (str)                               : name to assign to the new KPI
-            perimeter (str)                          : perimeter of the new KPI
-            date (datetime)                          : the date the KPI is generated
-            static (KPIStaticProps)                  : KPI static values
-            data_set (list[dict[str, Any]] | DataSet): the scope the KPI is based on
-            filters (List[Dict] | List[DataFilter])  : the filters the KPI result is based on
-            description (str)                        : a description of the KPI
+            name (str)                                                  : Name to assign to the new KPI
+            perimeter (str)                                             : Perimeter of the new KPI
+            date (datetime)                                             : The date the KPI is generated
+            static (KPIStaticProps)                                     : KPI static values
+            data_set (DataType | DataSet)                               : The scope the KPI is based on
+            filters (list[DataFilterDictionaryProps] | list[DataFilter]): The filters the KPI result is based on
+            description (str)                                           : A description of the KPI
         """
 
         super().__init__(
@@ -119,7 +119,7 @@ class KPI(DataSet):
             description=description,
         )
 
-        self._static: KPIStaticProps | None = static
+        self._static: "KPIStaticProps | None" = static
 
         if date is None:
             date = datetime.today()
@@ -203,14 +203,14 @@ class KPI(DataSet):
         return self._value
 
     @property
-    def conform_elements(self) -> list[dict[str, Any]]:
+    def conform_elements(self) -> DataType:
         """
         Return the output elements.
 
         More self-explanatory name for the super method "output_data" in the KPI context.
 
         Returns:
-            list[dict[str, Any]]: list of conform elements that passed the instance filters.
+            DataType: list of conform elements that passed the instance filters.
         """
 
         return super().output_data

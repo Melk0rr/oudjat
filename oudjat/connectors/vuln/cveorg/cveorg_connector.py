@@ -3,7 +3,8 @@
 import re
 from typing import Any, override
 
-from oudjat.utils.types import StrType
+from oudjat.utils import DataType
+from oudjat.utils.types import DatumType, StrType
 
 from ..cve_connector import CVEConnector
 from ..cve_formats import CVEDataFormat
@@ -90,8 +91,8 @@ class CVEorgConnector(CVEConnector):
             )
 
         containers = cve.get("containers", {}).get("cna", {})
-        metrics: list[dict[str, Any]] = containers.get("metrics", [])
-        metric_data: dict[str, Any] = metrics[0].get(list(metrics[0].keys())[0], {})
+        metrics: DataType = containers.get("metrics", [])
+        metric_data: DatumType = metrics[0].get(list(metrics[0].keys())[0], {})
 
         raw_description = containers.get("descriptions", [])
 

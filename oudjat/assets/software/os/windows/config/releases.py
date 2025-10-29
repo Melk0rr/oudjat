@@ -2,6 +2,7 @@
 
 from typing import Any, NamedTuple
 
+from oudjat.utils import DataType
 from oudjat.utils.file_utils import FileHandler
 
 
@@ -43,7 +44,7 @@ class MSRealeaseProps(NamedTuple):
         )
 
 
-release_import: list[dict[str, Any]] = FileHandler.import_json("./releases.jsonc")[0]
+release_import: DataType = FileHandler.import_json("./releases.jsonc")[0]
 
 if not isinstance(release_import, dict):
     raise ValueError("Releases import must be a dictionary")

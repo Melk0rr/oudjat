@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Any, override
 
 from oudjat.connectors import Connector, ConnectorMethod
-from oudjat.utils import ColorPrint
+from oudjat.utils import ColorPrint, DataType
 from oudjat.utils.types import StrType
 
 from .definitions import API_BASE_URL, API_REQ_HEADERS, CVE_REGEX
@@ -113,7 +113,7 @@ class MSCVRFConnector(Connector):
     def fetch(
         self,
         search_filter: StrType,
-    ) -> list[dict[str, Any]]:
+    ) -> "DataType":
         """
         Search for information about CVEs based on the provided filter.
 

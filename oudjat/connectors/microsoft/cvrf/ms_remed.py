@@ -2,9 +2,10 @@
 
 import re
 from enum import IntEnum
-from typing import Any
 
+from oudjat.utils import DataType
 from oudjat.utils.mappers import any_to_dict
+from oudjat.utils.types import DatumType
 
 from .definitions import KB_NUM_REGEX
 from .ms_product import MSProduct
@@ -43,7 +44,7 @@ class MSRemed:
     # Methods
 
     @property
-    def products(self)-> dict[str, MSProduct]:
+    def products(self) -> dict[str, MSProduct]:
         """
         Return the products impacted by this remediation.
 
@@ -77,7 +78,7 @@ class MSRemed:
 
         return self._number
 
-    def to_flat_dict(self) -> list[dict[str, Any]]:
+    def to_flat_dict(self) -> "DataType":
         """
         Convert patched products into dictionaries.
 
@@ -90,7 +91,7 @@ class MSRemed:
             for p in self._products.values()
         ]
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> "DatumType":
         """
         Convert the current kb into a dict.
 

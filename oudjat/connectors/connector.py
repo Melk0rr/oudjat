@@ -75,16 +75,15 @@ class Connector(ABC):
 
         self._target = new_target
 
-    def set_creds_from_svc_name(self, new_service_name: str) -> None:
+    def set_creds_from_svc_name(self, svc_name: str) -> None:
         """
         Set the service name bound to the current connector.
 
         Args:
-            new_service_name (str) : new service name for the connector
-            use_credentials (bool) : wheither the connector should use credentials
+            svc_name (str): Service name used to retrieve credentials
         """
 
-        self._credentials = CredentialHelper.get_credentials(new_service_name)
+        self._credentials = CredentialHelper.get_credentials(svc_name)
 
     @abstractmethod
     def connect(self, *args: Any, **kwargs: Any) -> None:
