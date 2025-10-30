@@ -1,21 +1,39 @@
 """A module handling Tenable.sc API connection."""
 
 import re
-from typing import Any, Callable, Literal, override
-from urllib.parse import ParseResult, urlparse
+from enum import Enum
+from typing import Any, Callable, TypeAlias, override
+from urllib.parse import urlparse
 
 from tenable.sc import TenableSC
 
 from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
 from oudjat.control.vulnerability.severity import Severity
-from oudjat.utils import DataType
-from oudjat.utils.color_print import ColorPrint
-from oudjat.utils.credentials import NoCredentialsError
-from oudjat.utils.types import DatumType, FilterTupleExtType
+from oudjat.utils import (
+    ColorPrint,
+    DataType,
+    DatumDataType,
+    DatumType,
+    FilterTupleExtType,
+    MyList,
+    NoCredentialsError,
+)
 
 from .tsc_asset_list_types import TSCAssetListType
+from .tsc_endpoints import TSCEndpoint
 from .tsc_vuln_tools import TSCVulnTool
+
+TSCFilter: TypeAlias = tuple[str, str, str]
+
+
+class TSCBuiltinFilter(Enum):
+    """
+    A helper enumeration to list some built-in Tenable SC filters.
+    """
+
+    VULNS_EXPLOITABLE = ("exploitAvailable", "=", "true")
+    VULNS_CRITICAL = ("severity", "=", "4")
 
 
 class TenableSCConnector(Connector):
@@ -27,10 +45,6 @@ class TenableSCConnector(Connector):
 
     # ****************************************************************
     # Attributes & Constructors
-
-    BUILTIN_FILTERS: dict[str, tuple[str, str, str]] = {
-        "exploitable": ("exploitAvailable", "=", "true")
-    }
 
     def __init__(
         self, target: str, username: str | None = None, password: str | None = None, port: int = 443
@@ -52,11 +66,7 @@ class TenableSCConnector(Connector):
         if not re.match(r"http(s?):", target):
             target = f"{scheme}://{target}"
 
-        super().__init__(target=target, username=username, password=password)
-        self._parsed_target: ParseResult = urlparse(target)
-        self._parsed_target = urlparse(
-            f"{self._parsed_target.scheme}://{self._parsed_target.netloc}"
-        )
+        super().__init__(target=urlparse(target), username=username, password=password)
 
         self._connection: TenableSC
         self._repos: list[str] | None = None
@@ -75,24 +85,28 @@ class TenableSCConnector(Connector):
 
         return self._repos
 
-    def _severity_filter(
-        self, *severities: list[int]
-    ) -> tuple[Literal["severity"], Literal["="], str]:
+    def _severity_filter(self, *severities: list[int]) -> TSCFilter:
         """
         Return a severity filter based on the provided severities.
 
         Args:
-            severities (List[str]) : severities to include in the filter (see cve.py)
+            severities (list[str]) : severities to include in the filter (see cve.py)
         """
 
-        sev_scores = ",".join([f"{Severity.from_score(sev).score}" for sev in list(*severities)])
-        return "severity", "=", sev_scores
+        severity_str: str = ",".join(
+            [f"{Severity.from_score(sev).score}" for sev in list(*severities)]
+        )
+        return (*TSCBuiltinFilter.VULNS_CRITICAL.value[:2], severity_str)
 
     # INFO: Base connector methods
     @override
     def connect(self) -> None:
         """
         Connect to API using connector parameters.
+
+        Raises:
+            NoCredentialsError: If no credentials were provided to connect to the target
+            ConnectionError: If anything goes wrong while connecting to the target
         """
 
         if self._credentials is None:
@@ -100,28 +114,17 @@ class TenableSCConnector(Connector):
 
         try:
             self._connection = TenableSC(
-                host=self._parsed_target.netloc,
+                host=self._target.netloc,
                 access_key=self._credentials.username,
                 secret_key=self._credentials.password,
             )
 
-            ColorPrint.green(f"Connected to {self._parsed_target.netloc}")
+            ColorPrint.green(f"Connected to {self._target.netloc}")
             self._repos = self._connection.repositories.list()
 
         except ConnectionError as e:
-            raise e
-
-    def check_connection(self) -> None:
-        """
-        Check if the connection is initialized.
-
-        Raises:
-            ConnectionError: if connector connection is not initialized
-        """
-
-        if self.connection is None:
             raise ConnectionError(
-                f"{__class__.__name__}.check_connection::Can't create asset list if connection is not initialized"
+                f"{__class__.__name__}.connect::Could not connect to {self._target.netloc}\n{e}"
             )
 
     def disconnect(self) -> None:
@@ -134,327 +137,338 @@ class TenableSCConnector(Connector):
         self._repos = []
 
     @override
-    def fetch(self, search_type: str = "VULNS", *args: Any, **kwargs: Any) -> list[object]:
+    def fetch(
+        self,
+        endpoint: "TSCEndpoint" = TSCEndpoint.VULNS,
+        payload: "DatumType | None" = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> "DataType":
         """
         Search the API for elements.
 
         Args:
-            search_type (str): search type (VULNS | ASSETS | SCANS)
-            *args (List)     : anything to pass to further search method
-            **kwargs (Dict)  : anything to pass to further search method
+            endpoint (TSCEndpoint)  : "Endpoint" to hit, basically which API action will be performed
+            payload (dict[str, Any]): Payload to send to the provided endpoint
+            *args (Any)             : Anything to pass to further search method
+            **kwargs (Any)          : Anything to pass to further search method
 
         Returns:
-            List: search result depending on search type
+            DataType: Data based on the provided endpoint and payload
 
         Raises:
-            Exception: if something goes wrong with the search
+            ConnectionError: If no connection is initialized
+            ConnectionError: If anything goes wrong while fetching data from the target endpoint
         """
 
-        self.check_connection()
+        if self.connection is None:
+            raise ConnectionError(
+                f"{__class__.__name__}.fetch::Can't retrieve data from {self._target.netloc}/{endpoint.value} if no connection is initialized"
+            )
 
-        search_type = search_type.upper()
-        search_options: dict[str, Callable] = {
-            "ASSETS": self.asset_lists,
-            "SCANS": self.scans,
-            "VULNS": self.vulns,
-        }
+        if payload is None:
+            payload = {}
 
-        if search_type not in search_options.keys():
-            raise ValueError(f"{__class__.__name__}.search::Invalid search type {search_type}")
-
-        search: DataType
+        res = []
         try:
-            search = search_options[search_type](*args, **kwargs)
+            endpoint_func: Callable[..., "DatumDataType"] = getattr(
+                self._connection, endpoint.value
+            )
+            req = endpoint_func(*args, **payload, **kwargs)
 
-        except Exception as e:
-            raise e
+            MyList.append_flat(res, req)
 
-        return list(search)
+        except ConnectionError as e:
+            raise ConnectionError(
+                f"{__class__.__name__}.fetch::Could not retrieve data from {self._target.netloc}/{endpoint.value}\n{e}"
+            )
 
-    # INFO: Vulns
+        return res
+
+    # ****************************************************************
+    # Methods: Vulns
+
     def vulns(
         self,
         *severities: list[int],
         tool: TSCVulnTool = TSCVulnTool.VULNDETAILS,
         exploitable: bool = True,
+        payload: dict[str, Any] | None = None
     ) -> DataType:
         """
         Retrieve the current vulnerabilities.
 
         Args:
-            severities (List[str]): Vuln severities to include
-            tool (TSCVulnTool)    : Tool to use for the search
-            exploitable (bool)    : Wheither to search only for exploitable vulnerabilities or not
+            severities (List[str])         : Vuln severities to include
+            tool (TSCVulnTool)             : Tool to use for the search
+            exploitable (bool)             : Wheither to search only for exploitable vulnerabilities or not
+            payload (dict[str, Any] | None): Payload to send to the endpoint
 
         Returns:
             DataType: Vulnerabilities matching arguments
         """
 
-        filters: list[tuple[str, str, str]] = []
+        if payload is None:
+            payload = {}
 
+        payload["tool"] = tool.value
+
+        filters: list["TSCFilter"] = []
         if exploitable:
-            filters.append(self.BUILTIN_FILTERS["exploitable"])
+            filters.append(TSCBuiltinFilter.VULNS_EXPLOITABLE.value)
 
         filters.append(self._severity_filter(*severities))
-        search = self._connection.analysis.vulns(*filters, tool=tool.value)
+        return self.fetch(endpoint=TSCEndpoint.VULNS, *filters, payload=payload)
 
-        return list(search)
+    # ****************************************************************
+    # Methods: Asset lists
 
-    # INFO: Asset lists
-    def create_asset_list(
+    def asset_lists_create(
         self,
         name: str,
         list_type: TSCAssetListType = TSCAssetListType.COMBINATION,
         description: str | None = None,
         ips: list[str] | None = None,
         dns_names: list[str] | None = None,
-        *args: tuple,
-        **kwargs: dict,
-    ) -> None:
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
         """
         Create a new asset list.
 
         Args:
-            name (str)                  : name of the asset list
-            list_type (TSCAssetListType): type of the asset list (see tsc_asset_list_types.py for details)
-            description (str)           : asset list description
-            ips: (List[str])            : a list of ip addresses to associate with the list
-            dns_names: (List[str])      : a list of dns names to associate with the list
-            args (List)                 : list of additional arguments to pass to the new asset list
-            kwargs (Dict)               : key-value couples to pass to the new asset list
+            name (str)                     : Name of the asset list
+            list_type (TSCAssetListType)   : Type of the asset list (see tsc_asset_list_types.py for details)
+            description (str | None)       : Asset list description
+            ips: (list[str] | None)        : A list of ip addresses to associate with the list
+            dns_names: (list[str] | None)  : A list of dns names to associate with the list
+            payload (dict[str, Any] | None): Payload to send to the endpoint
 
-        Raises:
-            Exception: if something goes wrong while creating the asset list
+        Returns:
+            DataType: Data containing the details of the created asset lists
         """
 
-        self.check_connection()
+        if payload is None:
+            payload = {}
 
-        try:
-            self._connection.asset_lists.create(
-                name=name,
-                description=description,
-                list_type=list_type.value,
-                ips=ips,
-                dns_names=dns_names,
-                *args,
-                **kwargs,
-            )
+        payload["name"] = name
+        payload["list_type"] = list_type.value
 
-        except Exception as e:
-            raise e
+        if description:
+            payload["description"] = description
 
-    def delete_asset_list(self, list_id: int | list[int]) -> None:
+        if ips:
+            payload["ips"] = ips
+
+        if dns_names:
+            payload["dns_names"] = dns_names
+
+        return self.fetch(endpoint=TSCEndpoint.ASSETS_CREATE, payload=payload)
+
+    def asset_lists_delete(self, list_id: int | list[int]) -> "DataType":
         """
         Delete an asset list based on given id.
 
         Args:
             list_id (int | List[int]) : list of ids of the asset lists to delete
 
-        Raises:
-            Exception: if something goes wrong while deleting the asset list
+        Returns:
+            DataType: Data containing the details of the deleted asset lists
         """
-
-        self.check_connection()
 
         if not isinstance(list_id, list):
             list_id = [list_id]
 
-        try:
-            for lid in list_id:
-                self._connection.asset_lists.delete(id=lid)
+        res = []
+        for lid in list_id:
+            res.extend(self.fetch(endpoint=TSCEndpoint.ASSETS_DELETE, id=lid))
 
-        except Exception as e:
-            raise e
+        return res
 
     def asset_lists(
-        self, list_filter: FilterTupleExtType | None = None
+        self,
+        list_filter: FilterTupleExtType | None = None,
+        fields: list[str] | None = None,
     ) -> "DataType":
         """
         Retrieve a list of asset lists with minimal informations like list ids.
 
         Args:
             list_filter (Tuple[str, str, any]): filter to apply to the listing
+            fields (list[str] | None)      : A list of attributes to return for each asset lists
 
         Returns:
-            List[Dict]: asset lists matching filter
-
-        Raises:
-            Exception: if something goes wrong while listing asset lists
+            DataType: Data of asset lists matching provided filter
         """
 
-        self.check_connection()
+        payload = {}
 
-        asset_lists: "DataType" = []
-        try:
-            asset_lists_from_api: "DatumType" = self._connection.asset_lists.list()
+        if fields:
+            payload["fields"] = fields
 
-            if asset_lists_from_api:
-                asset_lists = asset_lists_from_api.get("usable", [])
+        asset_lists = self.fetch(endpoint=TSCEndpoint.ASSETS, payload=payload)
+        if len(asset_lists) > 0:
+            asset_lists = asset_lists[0].get("usable", [])
 
-            if list_filter:
-                asset_lists = DataFilter.filter_data(
-                    data_to_filter=asset_lists, filters=DataFilter.gen_from_tuple(list_filter)
-                )
-
-        except Exception as e:
-            raise e
+        if list_filter:
+            asset_lists = DataFilter.filter_data(
+                data_to_filter=asset_lists, filters=DataFilter.gen_from_tuple(list_filter)
+            )
 
         return asset_lists
 
-    def get_asset_list_details(self, list_id: int | list[int]) -> "DataType":
+    def asset_lists_details(
+        self,
+        list_id: int | list[int],
+        fields: list[str] | None = None,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
         """
         Return the details of one or more asset lists.
 
         Args:
-            list_id (int | List[int]): list of ids matching the asset lists to retrieve
+            list_id (int | list[int])      : List of ids matching the asset lists to retrieve
+            fields (list[str] | None)      : A list of attributes to return for each asset lists
+            payload (dict[str, Any] | None): Payload to send to the endpoint
 
         Returns:
-            DataType: list of asset list details
-
-        Raises:
-            Exception: if something goes wrong while reteiving asset list details
+            DataType: Data containing the details of the assets matching the provided IDs
         """
 
-        self.check_connection()
+        if payload is None:
+            payload = {}
+
+        if fields:
+            payload["fields"] = fields
 
         if not isinstance(list_id, list):
             list_id = [list_id]
 
         list_details = []
-        try:
-            for lid in list_id:
-                list_details.append(self._connection.asset_lists.details(id=lid))
-
-        except Exception as e:
-            raise e
+        for lid in list_id:
+            list_details.extend(
+                self.fetch(endpoint=TSCEndpoint.ASSETS_DETAILS, payload={**payload, "id": lid})
+            )
 
         return list_details
 
     # TODO: Edit asset list
-    # INFO: Scans
-    def scans(self, scan_filter: "FilterTupleExtType | None" = None) -> "DataType":
+
+    # ****************************************************************
+    # Methods: Scans
+
+    def scans(
+        self,
+        scan_filter: "FilterTupleExtType | None" = None,
+        fields: list[str] | None = None,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
         """
         Retrieve a list of scans with minimal information like scan ids.
 
         Args:
             scan_filter (Tuple[str, str, any]): Filter to apply to the listing
+            fields (list[str] | None)         : A list of attributes to return for each scan
+            payload (dict[str, Any] | None)   : Payload to send to the endpoint
 
-        Return:
-            DataType: A list of scans matching the filter
-
-        Raises:
-            Exception: If something goes wrong while listing scans
+        Returns:
+            DataType: Data of the scans matching the provided filters
         """
 
-        self.check_connection()
+        if payload is None:
+            payload = {}
 
-        scan_list: list[dict[str, Any]] = []
-        try:
-            raw_scan_list: dict[str, Any] = self._connection.scans.list()
+        if fields:
+            payload["fields"] = fields
 
-            if raw_scan_list is not None:
-                scan_list = raw_scan_list.get("usable", [])
+        scan_list = self.fetch(endpoint=TSCEndpoint.SCANS, payload=payload)
 
-            if scan_filter:
-                scan_list = DataFilter.filter_data(
-                    data_to_filter=scan_list, filters=DataFilter.gen_from_tuple(scan_filter)
-                )
+        if len(scan_list) > 0:
+            scan_list = scan_list[0].get("usable", [])
 
-        except Exception as e:
-            raise e
+        if scan_filter:
+            scan_list = DataFilter.filter_data(
+                data_to_filter=scan_list, filters=DataFilter.gen_from_tuple(scan_filter)
+            )
 
         return scan_list
 
-    def get_scan_details(self, scan_id: int | list[int]) -> DataType:
+    def scans_details(self, scan_id: int | list[int]) -> "DataType":
         """
         Return the details of one or more scans.
 
         Args:
-            scan_id (int | list[int]) : one or more scan id to retrieve
+            scan_id (int | list[int]): One or more scan id to retrieve
 
-        Return:
-            List[Dict] : a list of dicionaries containing scan details
-
-        Raises:
-            Exception: if something goes wrong while reteiving scan details
+        Returns:
+            DataType: Data containing the details of the scans matching provided IDs
         """
-
-        self.check_connection()
 
         if not isinstance(scan_id, list):
             scan_id = [scan_id]
 
-        scan_details: DataType = []
-        try:
-            for sid in scan_id:
-                scan_details.append(self._connection.scans.details(id=sid))
-
-        except ConnectionError as e:
-            raise e
+        scan_details = []
+        for sid in scan_id:
+            scan_details.extend(self.fetch(endpoint=TSCEndpoint.SCANS_DETAILS, id=sid))
 
         return scan_details
 
-    def delete_scan(self, scan_id: int | list[int]) -> None:
+    def scans_delete(self, scan_id: int | list[int]) -> "DataType":
         """
         Delete an asset list based on given id.
 
         Args:
             scan_id (int | list[int]) : one or more scan id to delete
 
-        Raises:
-            Exception: if something goes wrong while deleting scan
+        Return:
+            DataType: Data containing the details of the deleted scans
         """
-
-        self.check_connection()
 
         if not isinstance(scan_id, list):
             scan_id = [scan_id]
 
-        try:
-            for sid in scan_id:
-                self._connection.scans.delete(id=sid)
+        res = []
+        for sid in scan_id:
+            res.extend(self.fetch(endpoint=TSCEndpoint.SCANS_DELETE, id=sid))
 
-        except Exception as e:
-            raise e
+        return res
 
-    def create_scan(
+    def scans_create(
         self,
         name: str,
         repo_id: int,
         asset_lists: list[int] | None = None,
         description: str | None = None,
         schedule: dict[str, str] | None = None,
-        *args: Any,
-        **kwargs: Any,
-    ) -> None:
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
         """
         Create a new scan.
 
         Args:
-            name (str)             : name of the scan
-            repo_id (int)          : repository id for the scan
-            asset_lists (List[int]): the asset lists ids to run the scan against
-            description (str)      : scan description
-            schedule (Dict)        : schedule dictionary
-            args (List)            : a list of additional arguments to pass to the new scan
-            kwargs (Dict)          : key-value couples to pass to the new scan
+            name (str)                      : Name of the scan
+            repo_id (int)                   : Repository id for the scan
+            asset_lists (list[int] | None)  : The asset lists ids to run the scan against
+            description (str | None)        : Scan description
+            schedule (dict[str, str] | None): Schedule dictionary
+            payload (dict[str, Any] | None) : Payload to send to the endpoint
 
-        Raises:
-            Exception: if something goes wrong while creating scan
+        Returns:
+            DataType: Data containing the created scan details
         """
 
-        self.check_connection()
+        if payload is None:
+            payload = {}
 
-        try:
-            self._connection.scans.create(
-                name=name,
-                repo=repo_id,
-                asset_lists=asset_lists,
-                description=description,
-                schedule=schedule,
-                *args,
-                **kwargs,
-            )
+        payload["name"] = name
+        payload["repo"] = repo_id
 
-        except Exception as e:
-            raise e
+        if asset_lists:
+            payload["asset_lists"] = asset_lists
+
+        if description:
+            payload["description"] = description
+
+        if schedule:
+            payload["schedule"] = schedule
+
+        return self.fetch(endpoint=TSCEndpoint.SCANS_CREATE, payload=payload)
