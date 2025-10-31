@@ -1,12 +1,12 @@
 """A module to handle connection to the endoflife.date website."""
 
-import json
-import re
 from typing import Any, override
+from urllib.parse import ParseResult, urlparse
 
-from oudjat.assets.software.os.windows import WindowsEdition
 from oudjat.connectors import Connector, ConnectorMethod
-from oudjat.utils import DataType
+from oudjat.connectors.endoflife.eol_endpoints import EndOfLifeEndpoint
+from oudjat.utils import DataType, MyList
+from oudjat.utils.types import StrType
 
 from .definitions import EOL_API_URL
 
@@ -22,23 +22,13 @@ class EndOfLifeConnector(Connector):
         Initialize the EndOfLifeAPIConnector by setting up the connection to the EOL API URL and initializes an empty list of products.
         """
 
-        super().__init__(target=EOL_API_URL)
-        self._products: list[str] = []
-        self._connection: bool = False
+        self._target: ParseResult
+        super().__init__(target=urlparse(EOL_API_URL))
+
+        self._connection: dict[str, Any] | None = None
 
     # ****************************************************************
     # Methods
-
-    @property
-    def products(self) -> list[str]:
-        """
-        Return a list of products.
-
-        Returns:
-            List[str]: A list containing the names of available products.
-        """
-
-        return self._products
 
     @override
     def connect(self) -> None:
@@ -51,15 +41,14 @@ class EndOfLifeConnector(Connector):
             ConnectionError: If unable to connect to the API endpoint or retrieve data.
         """
 
-        self._connection = False
+        self._connection = None
 
         try:
             headers = {"Accept": "application/json"}
-            req = ConnectorMethod.GET(f"{self.target}all.json", headers=headers)
+            req = ConnectorMethod.GET(f"{self._target.geturl()}", headers=headers)
 
             if req.status_code == 200:
-                self._connection = True
-                self._products = json.loads(req.content.decode("utf-8"))
+                self._connection = req.json()
 
         except ConnectionError as e:
             raise ConnectionError(
@@ -68,93 +57,205 @@ class EndOfLifeConnector(Connector):
 
     @override
     def fetch(
-        self, search_filter: str, attributes: list[str] | None = None, *args: Any, **kwargs: Any
-    ) -> list[Any]:
+        self,
+        endpoint: "EndOfLifeEndpoint" = EndOfLifeEndpoint.PRODUCTS,
+        filter: str = "",
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
         """
         Search the API for product infos.
 
         Args:
-            search_filter (str)   : The specific product to search for.
-            attributes (list[str]): Specify which attributes of the product to retrieve. Can be a single string or a list of strings. Defaults to None.
-            *args (Any)           : any args the overriding method provides
-            **kwargs (Any)        : any kwargs the overriding method provides
+            endpoint (str)                 : The specific product to search for.
+            filter (str)                   : A filter to append to the endpoint uri
+            payload (dict[str, Any] | None): Payload containing additional arguments to send to the target
 
         Returns:
-            List[Dict]: A list of dictionaries containing information about the products that match the search criteria.
+            DataType: A list of dictionaries containing information about the products that match the search criteria.
 
         Raises:
             ConnectionError: If unable to connect to the API endpoint or retrieve data.
             ValueError     : If the provided `search_filter` is not a valid product in the catalog.
         """
 
-        res = []
-
-        if not self._connection or len(self._products) == 0:
+        if self._connection is None:
             raise ConnectionError(
-                f"{__class__.__name__}.search::Please run connect to initialize endoflife connection"
+                f"{__class__.__name__}.fetch::Please run connect to initialize endoflife connection"
             )
 
-        if search_filter not in self._products:
-            raise ValueError(
-                f"{__class__.__name__}.search::{search_filter} is not a valid product:\n{self._products}"
-            )
+        if payload is None:
+            payload = {}
 
+        res = []
         try:
             headers = {"Accept": "application/json"}
-            req = ConnectorMethod.GET(f"{self._target}{search_filter}.json", headers=headers)
+            req = ConnectorMethod.GET(
+                f"{self._target.geturl()}{endpoint}/{filter}", headers=headers, **payload
+            )
 
             if req.status_code == 200:
-                res = json.loads(req.content.decode("utf-8"))
-
-                if attributes is not None:
-                    res = [{k: v for k, v in e.items() if k in attributes} for e in res]
+                req_json = req.json()
+                MyList.append_flat(res, req_json.get("result", []))
 
         except ConnectionError as e:
             raise ConnectionError(
-                f"{__class__.__name__}.search::Could not retrieve {search_filter} infos:\n{e}"
+                f"{__class__.__name__}.search::Could not retrieve {endpoint} infos:\n{e}"
             )
 
         return res
 
-    def get_windows_rel(self, target: str = "windows") -> "DataType":
+    # ****************************************************************
+    # Methods: Products
+
+    def products(
+        self, product: str | None = None, tags: StrType | None = None, full: bool = False
+    ) -> "DataType":
+        """
+        Return all the products or a specific one.
+
+        If no product is specified and the full argument is set to True, returns all products with full details.
+        If no product is specified and the tags argument is not None, returns products matching the provided tags.
+
+        Args:
+            product (str | None)         : Specific product to return
+            tags (str | list[str] | None): Tags to filter the result
+            full (bool)                  : Whether to return all the products details or not
+
+        Returns:
+            DataType: Data of the products
+        """
+
+        payload = {}
+        if full and product is None:
+            payload["filter"] = "full"
+
+        elif product is not None:
+            payload["filter"] = product
+
+        res = self.fetch(endpoint=EndOfLifeEndpoint.PRODUCTS, **payload)
+        if (product is None) and (tags is not None):
+            if not isinstance(tags, list):
+                tags = [tags]
+
+            def element_has_tag(element: dict[str, Any]) -> bool:
+                return any(tag in element.get("tags", []) for tag in tags)
+
+            res = list(filter(element_has_tag, res))
+
+        return res
+
+    def product_releases(self, product: str, release: str = "latest") -> "DataType":
+        """
+        Return a specific product releases.
+
+        Args:
+            product (str): The product whose release will be fetched
+            release (str): The release to fetch. Default latest
+
+        Returns:
+            DataType: Data containing the release details
+        """
+
+        return self.fetch(
+            endpoint=EndOfLifeEndpoint.PRODUCTS, filter=f"{product}/releases/{release}"
+        )
+
+    def linux(self, full: bool = False) -> "DataType":
+        """
+        Return all the Linux distributions and kernel products.
+
+        Args:
+            full (bool): Whether to return all the products details or not
+
+        Returns:
+            DataType: Data containing the products details matching the Linux-distribution and Linux-foundation tags
+        """
+
+        return self.products(tags=["linux-distribution", "linux-foundation"], full=full)
+
+    def windows(self) -> "DataType":
         """
         Retrieve Windows releases.
 
-        Args:
-            target (str, optional): The product name to search for. Defaults to "windows".
-
         Returns:
-            DataType: A list of dictionaries containing information about the Windows releases that match the criteria.
-
-        Raises:
-            ConnectionError: If unable to connect to the API endpoint or retrieve data.
+            DataType: Data containing release details for the specified target
         """
 
-        win_eol: "DataType" = self.fetch(search_filter=target)
+        return self.products(product="windows")
 
-        for rel in win_eol:
-            if target == "windows":
-                win_editions_ctg: list[str] = []
-                for e in WindowsEdition.WINDOWS.editions:
-                    ctg = e.category
-                    if ctg:
-                        win_editions_ctg.append(ctg)
+    def windows_server(self) -> "DataType":
+        """
+        Retrieve Windows releases.
 
-                win_editions_ctg = list(set(win_editions_ctg))
+        Returns:
+            DataType: Data containing release details for the specified target
+        """
 
-                r_edition: list[str] = win_editions_ctg[:-1]
+        return self.products(product="windowsserver")
 
-                edi_search = re.search(
-                    rf"^.+ \(?({'|'.join(win_editions_ctg)})\)?$", rel["releaseLabel"].upper()
-                )
-                if edi_search:
-                    r_edition = [edi_search.group(1)]
-                    rel["releaseLabel"] = rel["releaseLabel"][:-4]
+    # ****************************************************************
+    # Methods: Categories
 
-                rel["edition"] = r_edition
+    def categories(self, category: str | None = None) -> "DataType":
+        """
+        Return the product categories.
 
-            else:
-                if rel["extendedSupport"]:
-                    rel["eol"] = rel["extendedSupport"]
+        If no category is specified, all categories will be fetched.
 
-        return win_eol
+        Args:
+            category (str | None): Specific category to retrieve
+
+        Returns:
+            DataType: Data containing categories details
+        """
+
+        payload = {}
+
+        if category:
+            payload["filter"] = category
+
+        return self.fetch(endpoint=EndOfLifeEndpoint.CATEGORIES, **payload)
+
+    def apps(self) -> "DataType":
+        """
+        Return all the Apps products.
+
+        Returns:
+            DataType: Data containing the products details matching the App tag
+        """
+
+        return self.categories(category="app")
+
+    def oses(self) -> "DataType":
+        """
+        Return all the OS products.
+
+        Returns:
+            DataType: Data containing the products details matching the OS tag
+        """
+
+        return self.categories(category="os")
+
+    # ****************************************************************
+    # Methods: Tags
+
+    def tags(self, tag: str | None = None) -> "DataType":
+        """
+        Return the tags details.
+
+        If no tag is specified, all tags will be fetched.
+
+        Args:
+            tag (str | None): Specific tag to retrieve
+
+        Returns:
+            DataType: Data containing tags details
+        """
+
+        payload = {}
+
+        if tag:
+            payload["filter"] = tag
+
+        return self.fetch(endpoint=EndOfLifeEndpoint.TAGS, **payload)
+
