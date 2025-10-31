@@ -4,7 +4,7 @@ A module that handles SentinelOne API connection and interactions.
 
 import re
 from typing import Any, override
-from urllib.parse import urlparse
+from urllib.parse import ParseResult, urlparse
 
 import requests
 
@@ -51,6 +51,8 @@ class S1Connector(Connector):
             target = f"{scheme}://{target}"
 
         self._api_token: str | None = api_token
+
+        self._target: ParseResult
         super().__init__(
             target=urlparse(target), username=username, password=(self._api_token or password)
         )
@@ -116,7 +118,7 @@ class S1Connector(Connector):
         """
 
         if not self._connection:
-            ColorPrint.blue(f"Connecting to {self._target} with user API token")
+            ColorPrint.blue(f"Connecting to {self._target.netloc} with user API token")
 
             if self._api_token:
                 try:
@@ -131,7 +133,7 @@ class S1Connector(Connector):
                 raise NoCredentialsError(pfx=f"{__class__.__name__}", msg="No API token provided")
 
         else:
-            ColorPrint.blue(f"Connection to {self._target} is already initialized.")
+            ColorPrint.blue(f"Connection to {self._target.netloc} is already initialized.")
 
     @override
     def fetch(
@@ -166,7 +168,7 @@ class S1Connector(Connector):
                 payload["cursor"] = next_cursor
 
             r_params = {
-                "url": f"{self._target}{endpoint_path}",
+                "url": f"{self._target.geturl()}{endpoint_path}",
                 "headers": self._headers,
                 "json": payload,
             }

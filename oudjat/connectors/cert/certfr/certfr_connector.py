@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import override
+from urllib.parse import ParseResult, urlparse
 
 from bs4 import BeautifulSoup
 
@@ -27,7 +28,8 @@ class CERTFRConnector(Connector):
             self (OudjatCERTFRConnection): The instance being initialized.
         """
 
-        super().__init__(target=CERTFRPage.BASE_LINK)
+        self._target: ParseResult
+        super().__init__(target=urlparse(CERTFRPage.BASE_LINK))
 
     # ****************************************************************
     # Methods
@@ -48,17 +50,14 @@ class CERTFRConnector(Connector):
         """
 
         try:
-            if not isinstance(self._target, str):
-                raise ValueError(f"{__class__.__name__}.connect::The CERTFR connector target must be a string")
-
-            req = ConnectorMethod.GET(self._target)
+            req = ConnectorMethod.GET(self._target.geturl())
 
             if req.status_code == 200:
                 self._connection: bool = True
 
         except ConnectionError as e:
             raise ConnectionError(
-                f"{__class__.__name__}.connect::Could not connect to {CERTFRPage.BASE_LINK}\n{e}"
+                f"{__class__.__name__}.connect::Could not connect to {self._target.netloc}\n{e}"
             )
 
     @override

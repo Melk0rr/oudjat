@@ -3,7 +3,7 @@
 import re
 from enum import Enum
 from typing import Any, Callable, TypeAlias, override
-from urllib.parse import urlparse
+from urllib.parse import ParseResult, urlparse
 
 from tenable.sc import TenableSC
 
@@ -66,6 +66,7 @@ class TenableSCConnector(Connector):
         if not re.match(r"http(s?):", target):
             target = f"{scheme}://{target}"
 
+        self._target: ParseResult
         super().__init__(target=urlparse(target), username=username, password=password)
 
         self._connection: TenableSC
@@ -110,7 +111,9 @@ class TenableSCConnector(Connector):
         """
 
         if self._credentials is None:
-            raise NoCredentialsError(pfx=f"{__class__.__name__}.connect::", target=self._target)
+            raise NoCredentialsError(
+                pfx=f"{__class__.__name__}.connect::", target=self._target.netloc
+            )
 
         try:
             self._connection = TenableSC(
@@ -193,7 +196,7 @@ class TenableSCConnector(Connector):
         *severities: list[int],
         tool: TSCVulnTool = TSCVulnTool.VULNDETAILS,
         exploitable: bool = True,
-        payload: dict[str, Any] | None = None
+        payload: dict[str, Any] | None = None,
     ) -> DataType:
         """
         Retrieve the current vulnerabilities.

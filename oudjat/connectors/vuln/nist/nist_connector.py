@@ -26,11 +26,11 @@ class NistConnector(CVEConnector):
     @override
     def fetch(
         self,
-        search_filter: StrType,
-        attributes: StrType | None = None,
+        cves: StrType,
+        attributes: "StrType | None" = None,
         raw: bool = False,
-        **kwargs: Any,
-    ) -> DataType:
+        payload: dict[str, Any] | None = None
+    ) -> "DataType":
         """
         Search the API for CVEs.
 
@@ -40,33 +40,35 @@ class NistConnector(CVEConnector):
         If a valid response is received, it extracts vulnerability information and filters it based on the specified attributes before appending it to the result list.
 
         Args:
-            search_filter (str | list[str])       : A single CVE ID or a list of CVE IDs to be searched.
-            attributes (str | list[str], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
-            raw (bool)                            : Weither to return the raw result or the unified one
-            kwargs (Any)                          : Additional arguments that will be passed to connect method
+            cves (str | list[str])             : A single CVE ID or a list of CVE IDs to be searched.
+            attributes (str | list[str] | None): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
+            raw (bool)                         : Weither to return the raw result or the unified one
+            payload (dict[str, Any] | None)    : Payload to send to the target CVE API url
 
         Returns:
             DataType: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
         """
 
-        res = []
-
-        if not isinstance(search_filter, list):
-            search_filter = [search_filter]
+        if not isinstance(cves, list):
+            cves = [cves]
 
         if attributes is not None and not isinstance(attributes, list):
             attributes = [attributes]
+
+        if payload is None:
+            payload = {}
 
         # Vuln filter function
         def key_in_attr(item: tuple) -> bool:
             return item[0] in attributes
 
-        for cve in search_filter:
+        res = []
+        for cve in cves:
             if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
                 continue
 
-            cve_target = NistConnector.get_cve_api_url(cve)
-            self.connect(cve_target, **kwargs)
+            cve_target = NistConnector.cve_api_url(cve)
+            self.connect(cve_target, **payload)
 
             if self._connection:
                 vuln = self._connection.get("vulnerabilities", [])
@@ -144,7 +146,7 @@ class NistConnector(CVEConnector):
 
     @staticmethod
     @override
-    def get_cve_url(cve: str) -> str:
+    def cve_url(cve: str) -> str:
         """
         Return the Nist website URL of the given CVE.
 
@@ -159,7 +161,7 @@ class NistConnector(CVEConnector):
 
     @staticmethod
     @override
-    def get_cve_api_url(cve: str) -> str:
+    def cve_api_url(cve: str) -> str:
         """
         Return the Nist website URL of the given CVE.
 

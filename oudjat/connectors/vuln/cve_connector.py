@@ -3,8 +3,10 @@
 import json
 from abc import ABC, abstractmethod
 from typing import Any, override
+from urllib.parse import ParseResult
 
 from oudjat.connectors import Connector, ConnectorMethod
+from oudjat.utils import DataType
 from oudjat.utils.types import StrType
 
 from .cve_formats import CVEDataFormat
@@ -27,6 +29,7 @@ class CVEConnector(Connector, ABC):
         It sets the target URL to the NIST API URL.
         """
 
+        self._target: ParseResult
         super().__init__(target=CVEConnector.API_URL)
 
         self._connection: dict[str, Any] | None = None
@@ -65,11 +68,11 @@ class CVEConnector(Connector, ABC):
     @abstractmethod
     def fetch(
         self,
-        search_filter: StrType,
+        cves: StrType,
         attributes: StrType | None = None,
         raw: bool = False,
-        **kwargs: Any,
-    ) -> list[dict]:
+        payload: dict[str, Any] | None = None
+    ) -> "DataType":
         """
         Search the API for CVEs.
 
@@ -79,13 +82,13 @@ class CVEConnector(Connector, ABC):
         If a valid response is received, it extracts vulnerability information and filters it based on the specified attributes before appending it to the result list.
 
         Args:
-            search_filter (Union[str, List[str]])       : A single CVE ID or a list of CVE IDs to be searched.
-            attributes (Union[str, List[str]], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
-            raw (bool)                                  : Weither to return the raw result or the unified one
-            kwargs (Dict)                               : Additional arguments that will be passed to connect method
+            cves (str | list[str])            : A single CVE ID or a list of CVE IDs to be searched.
+            attributes (str, list[str] | None): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
+            raw (bool)                        : Weither to return the raw result or the unified one
+            payload (dict[str, Any] | None)   : Payload to send to the target CVE API url
 
         Returns:
-            List[Dict]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
+            DataType: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
         """
 
         raise NotImplementedError(
@@ -113,7 +116,7 @@ class CVEConnector(Connector, ABC):
 
     @staticmethod
     @abstractmethod
-    def get_cve_url(cve: str) -> str:
+    def cve_url(cve: str) -> str:
         """
         Return the Nist website URL of the given CVE.
 
@@ -130,7 +133,7 @@ class CVEConnector(Connector, ABC):
 
     @staticmethod
     @abstractmethod
-    def get_cve_api_url(cve: str) -> str:
+    def cve_api_url(cve: str) -> str:
         """
         Return the Nist website URL of the given CVE.
 

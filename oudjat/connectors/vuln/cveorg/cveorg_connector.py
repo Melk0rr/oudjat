@@ -4,7 +4,7 @@ import re
 from typing import Any, override
 
 from oudjat.utils import DataType
-from oudjat.utils.types import DatumType, StrType
+from oudjat.utils.types import StrType
 
 from ..cve_connector import CVEConnector
 from ..cve_formats import CVEDataFormat
@@ -25,11 +25,11 @@ class CVEorgConnector(CVEConnector):
     @override
     def fetch(
         self,
-        search_filter: StrType,
-        attributes: StrType | None = None,
+        cves: "StrType",
+        attributes: "StrType | None" = None,
         raw: bool = False,
-        **kwargs: Any,
-    ) -> list[dict[str, Any]]:
+        payload: dict[str, Any] | None = None
+    ) -> "DataType":
         """
         Search the API for CVEs.
 
@@ -39,29 +39,31 @@ class CVEorgConnector(CVEConnector):
         If a valid response is received, it extracts vulnerability information and filters it based on the specified attributes before appending it to the result list.
 
         Args:
-            search_filter (str | list[str])       : A single CVE ID or a list of CVE IDs to be searched.
+            cves (str | list[str])                : A single CVE ID or a list of CVE IDs to be searched.
             attributes (str | list[str], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
             raw (bool)                            : Weither to return the raw result or the unified one
-            kwargs (Any)                          : Additional arguments that will be passed to connect method
+            payload (dict[str, Any] | None)       : Payload to send to the target CVE API url
 
         Returns:
-            list[dict[str, Any]]: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
+            DataType: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
         """
 
-        res = []
-
-        if not isinstance(search_filter, list):
-            search_filter = [search_filter]
+        if not isinstance(cves, list):
+            cves = [cves]
 
         if attributes is not None and not isinstance(attributes, list):
             attributes = [attributes]
 
-        for cve in search_filter:
+        if payload is None:
+            payload = {}
+
+        res = []
+        for cve in cves:
             if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
                 continue
 
-            cve_target = CVEorgConnector.get_cve_api_url(cve)
-            self.connect(cve_target, **kwargs)
+            cve_target = CVEorgConnector.cve_api_url(cve)
+            self.connect(cve_target, **payload)
 
             vuln = self._connection
             if vuln is not None:
@@ -70,7 +72,7 @@ class CVEorgConnector(CVEConnector):
         return res
 
     @override
-    def unify_cve_data(self, cve: dict[str, Any]) -> CVEDataFormat:
+    def unify_cve_data(self, cve: dict[str, Any]) -> "CVEDataFormat":
         """
         Filter and reorganize cve data properties in order to obtain a unified format accross CVE connectors.
 
@@ -91,12 +93,12 @@ class CVEorgConnector(CVEConnector):
             )
 
         containers = cve.get("containers", {}).get("cna", {})
-        metrics: DataType = containers.get("metrics", [])
-        metric_data: DatumType = metrics[0].get(list(metrics[0].keys())[0], {})
+        metrics: "DataType" = containers.get("metrics", [])
+        metric_data: dict[str, Any] = metrics[0].get(list(metrics[0].keys())[0], {})
 
         raw_description = containers.get("descriptions", [])
 
-        unified_fmt: CVEDataFormat = {
+        unified_fmt: "CVEDataFormat" = {
             "id": cve_id,
             "status": cve_metadata.get("state", ""),
             "dates": {
@@ -127,7 +129,7 @@ class CVEorgConnector(CVEConnector):
 
     @staticmethod
     @override
-    def get_cve_url(cve: str) -> str:
+    def cve_url(cve: str) -> str:
         """
         Return the Nist website URL of the given CVE.
 
@@ -142,7 +144,7 @@ class CVEorgConnector(CVEConnector):
 
     @staticmethod
     @override
-    def get_cve_api_url(cve: str) -> str:
+    def cve_api_url(cve: str) -> str:
         """
         Return the Nist website URL of the given CVE.
 

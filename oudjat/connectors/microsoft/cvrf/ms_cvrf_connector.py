@@ -3,7 +3,7 @@
 import json
 import re
 from datetime import datetime
-from typing import Any, override
+from typing import override
 
 from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.utils import ColorPrint, DataType
@@ -36,7 +36,7 @@ class MSCVRFConnector(Connector):
     # ****************************************************************
     # Methods
 
-    def get_cvrf_id_from_cve(self, cve: str) -> str:
+    def _cvrf_id_from_cve(self, cve: str) -> str:
         """
         Retrieve a CVRF ID based on a provided CVE reference.
 
@@ -130,11 +130,11 @@ class MSCVRFConnector(Connector):
             search_filter = [search_filter]
 
         for cve in search_filter:
-            cvrf_id = self.get_cvrf_id_from_cve(cve)
+            cvrf_id = self._cvrf_id_from_cve(cve)
             _ = self.connect(cvrf_id)
             cvrf = self._target.get(cvrf_id, None)
 
-            if self.connection:
+            if self._connection:
                 cvrf.parse_vulnerabilities()
                 res.append(cvrf.get_vulnerabilities()[cve])
 

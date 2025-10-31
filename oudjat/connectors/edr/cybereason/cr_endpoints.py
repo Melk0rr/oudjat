@@ -114,7 +114,7 @@ class CybereasonEndpoint(Enum):
         return self._value_.path
 
     @property
-    def method(self) -> str:
+    def method(self) -> "ConnectorMethod":
         """
         Return a CybereasonEndpoint element HTTP method.
 
@@ -122,7 +122,7 @@ class CybereasonEndpoint(Enum):
             str: the HTTP method to use for the endpoint
         """
 
-        return self._value_.method.name
+        return self._value_.method
 
     @property
     def limit(self) -> int:

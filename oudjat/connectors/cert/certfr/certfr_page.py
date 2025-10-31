@@ -2,6 +2,7 @@
 
 import re
 from typing import Any, override
+from urllib.parse import ParseResult, urlparse
 
 from bs4 import BeautifulSoup
 from bs4.element import PageElement, ResultSet, Tag
@@ -70,7 +71,7 @@ class CERTFRPage:
 
         ref_type: str = ref_search.group(0)
 
-        self._link: str = f"{self.BASE_LINK}/{CERTFRPageType[ref_type].value}/{self._ref}/"
+        self._link: ParseResult = urlparse(f"{self.BASE_LINK}/{CERTFRPageType[ref_type].value}/{self._ref}/")
 
     # ****************************************************************
     # Methods
@@ -121,7 +122,7 @@ class CERTFRPage:
 
         # Handle possible connection error
         try:
-            req = ConnectorMethod.GET(self._link)
+            req = ConnectorMethod.GET(self._link.geturl())
 
             if req.status_code != 200:
                 raise ConnectionError(
@@ -520,7 +521,7 @@ class CERTFRPageContent:
 
         self._data = data
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert current instance into a dictionary.
 

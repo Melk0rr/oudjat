@@ -61,7 +61,7 @@ class FileConnector(Connector):
 
     @Connector.target.setter
     @override
-    def target(self, new_target: str | object) -> None:
+    def target(self, new_target: Any) -> None:
         """
         Setter for connector path.
 
@@ -80,25 +80,22 @@ class FileConnector(Connector):
         super()._target = new_target
 
     @override
-    def connect(self, file_connection_opts: dict[str, Any] | None = None) -> None:
+    def connect(self, payload: dict[str, Any] | None = None) -> None:
         """
         'Connect' to the file and import data from it.
 
         Args:
-            file_connection_opts (dict): options to pass to the file import function
-
-        Returns:
-            list[Any]: The list of data imported from the file.
+            payload (dict[str, Any] | None): Additional options to pass to the file import function
 
         Raises:
-            Exception: if the file does not exist, can't be reached or if there is any error while importing its data
+            FileExistsError: if the file does not exist, can't be reached or if there is any error while importing its data
         """
 
-        if file_connection_opts is None:
-            file_connection_opts = {}
+        if payload is None:
+            payload = {}
 
         try:
-            self._data = self._filetype.f_import(file_path=self._target, **file_connection_opts)
+            self._data = self._filetype.f_import(file_path=self._target, **payload)
             self._connection = True
 
         except FileExistsError as e:
@@ -117,10 +114,9 @@ class FileConnector(Connector):
     @override
     def fetch(
         self,
-        search_filter: Callable[[Any], bool],
+        search_filter: Callable[..., bool],
         attributes: list[str] | None = None,
-        *args: Any,
-        **kwargs: Any,
+        payload: dict[str, Any] | None = None
     ) -> list[Any]:
         """
         Search into the imported data based on given filters and attributes.
@@ -128,15 +124,14 @@ class FileConnector(Connector):
         Args:
             search_filter (Callable)        : A callback function that provides a predicate
             attributes (list[str], optional): Specific attributes to retrieve from filtered results.
-            *args (tuple)                   : any args the overriding method provides
-            **kwargs (dict)                 : any kwargs the overriding method provides
+            payload (dict[str, Any] | None): Additional options to pass to the file import function
 
         Returns:
-            List[Any]: The list of elements that match the search criteria.
+            list[Any]: Data retrived from the file based on provided filters
         """
 
         if not self.connection:
-            self.connect()
+            self.connect(payload=(payload or {}))
 
         if self.data is None:
             return []
