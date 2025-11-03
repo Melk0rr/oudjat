@@ -93,9 +93,7 @@ class TenableSCConnector(Connector):
             severities (list[str]) : severities to include in the filter (see cve.py)
         """
 
-        severity_str: str = ",".join(
-            [f"{Severity.from_score(sev).score}" for sev in severities]
-        )
+        severity_str: str = ",".join([f"{Severity.from_score(sev).score}" for sev in severities])
         return (*TSCBuiltinFilter.VULNS_CRITICAL.value[:2], severity_str)
 
     # INFO: Base connector methods
@@ -143,7 +141,7 @@ class TenableSCConnector(Connector):
         self,
         endpoint: "TSCEndpoint" = TSCEndpoint.VULNS,
         payload: dict[str, Any] | None = None,
-        *args: Any,
+        filters: list[tuple[str, str, str]] | None = None,
         **kwargs: Any,
     ) -> "DataType":
         """
@@ -171,12 +169,19 @@ class TenableSCConnector(Connector):
         if payload is None:
             payload = {}
 
+        if filters is None:
+            filters = []
+
         res = []
         try:
+            endpoint_api_name, endpoint_api_method = endpoint.value.split(".")
+            endpoint_api = getattr(self._connection, endpoint_api_name)
+
             endpoint_func: Callable[..., "DatumDataType"] = getattr(
-                self._connection, endpoint.value
+                endpoint_api, endpoint_api_method
             )
-            req = endpoint_func(*args, **payload, **kwargs)
+
+            req = endpoint_func(*filters, **payload, **kwargs)
 
             MyList.append_flat(res, req)
 
@@ -220,7 +225,7 @@ class TenableSCConnector(Connector):
             filters.append(TSCBuiltinFilter.VULNS_EXPLOITABLE.value)
 
         filters.append(self._severity_filter(*severities))
-        return self.fetch(*filters, endpoint=TSCEndpoint.VULNS, payload=payload)
+        return self.fetch(endpoint=TSCEndpoint.VULNS, filters=filters, payload=payload)
 
     # ****************************************************************
     # Methods: Asset lists
