@@ -12,29 +12,16 @@ class NoCredentialsError(ConnectionError):
     A helper class to handle the absence of credentials.
     """
 
-    def __init__(self, pfx: str = "", msg: str = "", target: str = "") -> None:
+    def __init__(self, message: str) -> None:
         """
         Create a new instance of NoCredentialsError.
 
         Args:
-            pfx (str)   : Prefix that will be placed at the beginning of the final error message
-            msg (str)   : Custom message string
-            target (str): String representation of the target the connection is set to
+            message (str): Error message
         """
 
-        message: str = "Could not connect to target"
-        if pfx:
-            message = f"{pfx} {message}"
-
-        if target:
-            message = f"{message} {target}"
-
-        message = f"{message}. No credentials were provided"
-
-        if msg:
-            message = f"{message}. {msg}"
-
-        super().__init__(message)
+        self.message: str = message
+        super().__init__(self.message)
 
 class CredentialHelper:
     """A class that helps with credentials."""
