@@ -11,6 +11,7 @@ class TSCEndpoint(Enum):
     """
 
     VULNS = "vulns.list"
+    REPOS = "repositories.list"
     SCANS = "scans.list"
     SCANS_CREATE = "scans.create"
     SCANS_DELETE = "scans.delete"
