@@ -17,7 +17,7 @@ class CompareOperation:
     """
 
     @staticmethod
-    def ope_equals(a: NumberType | str | bool, b: NumberType | str | bool) -> bool:
+    def ope_equals(a: "NumberType | str | bool", b: "NumberType | str | bool") -> bool:
         """
         Check if a equals b.
 
@@ -32,7 +32,7 @@ class CompareOperation:
         return a == b
 
     @staticmethod
-    def ope_in(a: Any, b: str | list[NumberType | str | bool]) -> bool:
+    def ope_in(a: Any, b: str | list["NumberType | str | bool"]) -> bool:
         """
         Check if a is in b.
 
@@ -47,7 +47,7 @@ class CompareOperation:
         return a in b
 
     @staticmethod
-    def ope_greater_than(a: NumberType, b: NumberType) -> bool:
+    def ope_greater_than(a: "NumberType", b: "NumberType") -> bool:
         """
         Check if a is greater than b.
 
@@ -62,7 +62,7 @@ class CompareOperation:
         return a > b
 
     @staticmethod
-    def ope_greater_equal_than(a: NumberType, b: NumberType) -> bool:
+    def ope_greater_equal_than(a: "NumberType", b: "NumberType") -> bool:
         """
         Check if a is greater than or equal to b.
 
@@ -77,7 +77,7 @@ class CompareOperation:
         return a >= b
 
     @staticmethod
-    def ope_lower_than(a: NumberType, b: NumberType) -> bool:
+    def ope_lower_than(a: "NumberType", b: "NumberType") -> bool:
         """
         Check if a is less than b.
 
@@ -92,7 +92,7 @@ class CompareOperation:
         return a < b
 
     @staticmethod
-    def ope_lower_equal_than(a: NumberType, b: NumberType) -> bool:
+    def ope_lower_equal_than(a: "NumberType", b: "NumberType") -> bool:
         """
         Check if a is less than or equal to b.
 
@@ -107,7 +107,7 @@ class CompareOperation:
         return a <= b
 
     @staticmethod
-    def ope_is(a: Any, b: NumberType | bool | None) -> bool:
+    def ope_is(a: Any, b: "NumberType | bool | None") -> bool:
         """
         Check if a is the same object as b.
 
@@ -122,7 +122,7 @@ class CompareOperation:
         return a is b
 
     @staticmethod
-    def ope_is_not(a: Any, b: NumberType | bool | None) -> bool:
+    def ope_is_not(a: Any, b: "NumberType | bool | None") -> bool:
         """
         Check if a is not the same object as b.
 
@@ -175,7 +175,7 @@ class CompareOperatorProps(NamedTuple):
         operation (Callable[..., bool]): the function associated with the operator
     """
 
-    keys: OperatorKeysProps
+    keys: "OperatorKeysProps"
     operation: Callable[..., bool]
 
 class CompareOperator(Operator):

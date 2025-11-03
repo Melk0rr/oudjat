@@ -6,7 +6,7 @@ from oudjat.utils import DataType
 
 from .data_filter import DataFilter, DataFilterDictionaryProps
 
-DataSetType: TypeAlias = DataType | "DataSet"
+DataSetType: TypeAlias = "DataType | DataSet"
 
 
 class DataSet:
@@ -41,9 +41,9 @@ class DataSet:
         self._description: str | None = description
         self._perimeter: str = perimeter
 
-        self._initial_set: DataSetType = initial_set if initial_set is not None else []
+        self._initial_set: "DataSetType" = initial_set if initial_set is not None else []
 
-        self._filters: list[DataFilter] = DataFilter.get_valid_filters_list(filters)
+        self._filters: list["DataFilter"] = DataFilter.get_valid_filters_list(filters)
 
     # ****************************************************************
     # Methods
@@ -60,7 +60,7 @@ class DataSet:
         return self._name
 
     @property
-    def initial_set(self) -> DataSetType | None:
+    def initial_set(self) -> "DataSetType | None":
         """
         Retrieve the initial dataset or a list of dictionaries that define the starting point for this dataset.
 
@@ -71,7 +71,7 @@ class DataSet:
         return self._initial_set
 
     @initial_set.setter
-    def initial_set(self, dataset: DataSetType) -> None:
+    def initial_set(self, dataset: "DataSetType") -> None:
         """
         Setter for the initial data set.
 

@@ -22,7 +22,7 @@ class EndOfLifeConnector(Connector):
         Initialize the EndOfLifeAPIConnector by setting up the connection to the EOL API URL and initializes an empty list of products.
         """
 
-        self._target: ParseResult
+        self._target: "ParseResult"
         super().__init__(target=urlparse(EOL_API_URL))
 
         self._connection: dict[str, Any] | None = None
@@ -108,7 +108,7 @@ class EndOfLifeConnector(Connector):
     # Methods: Products
 
     def products(
-        self, product: str | None = None, tags: StrType | None = None, full: bool = False
+        self, product: str | None = None, tags: "StrType | None" = None, full: bool = False
     ) -> "DataType":
         """
         Return all the products or a specific one.

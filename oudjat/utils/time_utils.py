@@ -31,7 +31,7 @@ class DateFormat(Enum):
     SEC = "%S"
 
     @staticmethod
-    def map_from_formats(formats: list["DateFormat"], flag: int | DateFlag) -> list[str]:
+    def map_from_formats(formats: list["DateFormat"], flag: "int | DateFlag") -> list[str]:
         """
         Map date formats to a list of strings based on the given flag.
 

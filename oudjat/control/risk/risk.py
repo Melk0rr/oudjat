@@ -24,8 +24,8 @@ class Risk:
         risk_id: str,
         name: str,
         description: str,
-        likelihood: RiskMeasure | int = 0,
-        impact: RiskMeasure | int = 0,
+        likelihood: "RiskMeasure | int" = 0,
+        impact: "RiskMeasure | int" = 0,
     ):
         """
         Return a new instance of Risk.
@@ -42,8 +42,8 @@ class Risk:
         self._name: str = name
         self._description: str = description
 
-        self._likelihood: RiskMeasure = RiskMeasure(min(max(1, likelihood), 4))
-        self._impact: RiskMeasure = RiskMeasure(min(max(1, impact), 4))
+        self._likelihood: "RiskMeasure" = RiskMeasure(min(max(1, likelihood), 4))
+        self._impact: "RiskMeasure" = RiskMeasure(min(max(1, impact), 4))
 
     # ****************************************************************
     # Methods
@@ -60,7 +60,7 @@ class Risk:
         return self._id
 
     @property
-    def likelihood(self) -> RiskMeasure:
+    def likelihood(self) -> "RiskMeasure":
         """
         Return the likelihood of the risk.
 
@@ -70,7 +70,7 @@ class Risk:
         return self._likelihood
 
     @likelihood.setter
-    def likelihood(self, new_likelihood: RiskMeasure) -> None:
+    def likelihood(self, new_likelihood: "RiskMeasure") -> None:
         """
         Change the likelihood of the current risk.
 
@@ -81,7 +81,7 @@ class Risk:
         self._likelihood = new_likelihood
 
     @property
-    def impact(self) -> RiskMeasure:
+    def impact(self) -> "RiskMeasure":
         """
         Return the impact of the risk.
 
@@ -92,7 +92,7 @@ class Risk:
         return self._impact
 
     @impact.setter
-    def impact(self, new_impact: RiskMeasure) -> None:
+    def impact(self, new_impact: "RiskMeasure") -> None:
         """
         Change the impact of the current risk.
 
@@ -115,7 +115,7 @@ class Risk:
         return self._likelihood * self._impact
 
     @property
-    def severity(self) -> RiskMeasure:
+    def severity(self) -> "RiskMeasure":
         """
         Getter for the risk score.
 
@@ -136,7 +136,7 @@ class Risk:
 
         return f"{self._name} => {self.severity.name} : {self.value}"
 
-    def to_dict(self) -> dict[str, str | int | RiskMeasure]:
+    def to_dict(self) -> dict[str, "str | int | RiskMeasure"]:
         """
         Convert the current Risk instance into a dictionary.
 

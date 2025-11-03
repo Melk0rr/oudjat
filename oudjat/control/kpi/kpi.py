@@ -20,8 +20,8 @@ class ConformityLevelProps(NamedTuple):
         print_color: the print function used to print the KPI value
     """
 
-    min: NumberType
-    max: NumberType
+    min: "NumberType"
+    max: "NumberType"
     print_color: Callable[..., None]
 
 
@@ -33,7 +33,7 @@ class ConformityLevel(Enum):
     CONFORM = ConformityLevelProps(min=95, max=100.01, print_color=ColorPrint.green)
 
     @property
-    def min(self) -> NumberType:
+    def min(self) -> "NumberType":
         """
         Return a ConformityLevel minimum value.
 
@@ -44,7 +44,7 @@ class ConformityLevel(Enum):
         return self._value_.min
 
     @property
-    def max(self) -> NumberType:
+    def max(self) -> "NumberType":
         """
         Return a ConformityLevel maximum value.
 
@@ -203,7 +203,7 @@ class KPI(DataSet):
         return self._value
 
     @property
-    def conform_elements(self) -> DataType:
+    def conform_elements(self) -> "DataType":
         """
         Return the output elements.
 

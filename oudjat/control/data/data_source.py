@@ -21,7 +21,7 @@ class DataSource:
         self._name: str = name
         self._description: str | None = description
 
-        self._connectors: dict[str, Connector] = {}
+        self._connectors: dict[str, "Connector"] = {}
 
     # ****************************************************************
     # Methods
@@ -49,7 +49,7 @@ class DataSource:
         return self._description
 
     @property
-    def connectors(self) -> dict[str, Connector]:
+    def connectors(self) -> dict[str, "Connector"]:
         """
         Return the current data source connectors.
 

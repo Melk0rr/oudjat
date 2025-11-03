@@ -3,7 +3,7 @@
 from typing import Any
 
 
-def any_to_dict(element: Any) -> dict[str, object]:
+def any_to_dict(element: Any) -> dict[str, Any]:
     """
     Call the to_dict method on the provided element.
 

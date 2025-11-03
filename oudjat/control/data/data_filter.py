@@ -21,7 +21,7 @@ class DataFilterDictionaryProps(TypedDict):
 
     fieldname: str
     operator: str | None
-    value: DataFilterDictionaryValueType
+    value: "DataFilterDictionaryValueType"
 
 
 class DataFilter:
@@ -62,7 +62,7 @@ class DataFilter:
             raise ValueError(f"{__class__.__name__}::Invalid operator provided: {operator}")
 
         self._fieldname: str = fieldname
-        self._operator: CompareOperator = CompareOperator.find_by_key(operator)
+        self._operator: "CompareOperator" = CompareOperator.find_by_key(operator)
         self._value: Any = value
         self._negate: bool = negate
 
@@ -81,7 +81,7 @@ class DataFilter:
         return self._fieldname
 
     @property
-    def operator(self) -> CompareOperator:
+    def operator(self) -> "CompareOperator":
         """
         Return the filter operator.
 
@@ -199,7 +199,7 @@ class DataFilter:
     # Static methods
 
     @staticmethod
-    def from_dict(filter_dict: DataFilterDictionaryProps) -> "DataFilter":
+    def from_dict(filter_dict: "DataFilterDictionaryProps") -> "DataFilter":
         """
         Create a datafilter instance from a dictionary.
 
@@ -220,7 +220,7 @@ class DataFilter:
         )
 
     @staticmethod
-    def from_tuple(filter_tuple: tuple[str, str, DataFilterDictionaryValueType]) -> "DataFilter":
+    def from_tuple(filter_tuple: tuple[str, str, "DataFilterDictionaryValueType"]) -> "DataFilter":
         """
         Create a datafilter instance from a tuple.
 
@@ -242,7 +242,7 @@ class DataFilter:
 
     @staticmethod
     def get_valid_filters_list(
-        filters_list: list[DataFilterDictionaryProps] | list["DataFilter"],
+        filters_list: list["DataFilterDictionaryProps"] | list["DataFilter"],
     ) -> list["DataFilter"]:
         """
         Check filters type and format them into DataFilter instances if needed.
@@ -257,7 +257,7 @@ class DataFilter:
         return [f if isinstance(f, DataFilter) else DataFilter.from_dict(f) for f in filters_list]
 
     @staticmethod
-    def gen_from_dict(filters: list[DataFilterDictionaryProps]) -> list["DataFilter"]:
+    def gen_from_dict(filters: list["DataFilterDictionaryProps"]) -> list["DataFilter"]:
         """
         Generate multiple DataFitler instances based on dictionnaries.
 
@@ -288,7 +288,7 @@ class DataFilter:
         return list(map(DataFilter.from_tuple, filters))
 
     @staticmethod
-    def get_conditions(element: Any, filters: list["DataFilter"] | list[DataFilterDictionaryProps]) -> bool:
+    def get_conditions(element: Any, filters: list["DataFilter"] | list["DataFilterDictionaryProps"]) -> bool:
         """
         Run all given filters against a single provided element.
 

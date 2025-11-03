@@ -9,7 +9,7 @@ from oudjat.utils.types import NumberType
 
 from .data_filter import DataFilter, DataFilterDictionaryProps
 
-DecisionNodeFlagType: TypeAlias = NumberType | str | None
+DecisionNodeFlagType: TypeAlias = "NumberType | str | None"
 
 class DecisionTreeDictionaryProps(TypedDict):
     """
@@ -40,7 +40,7 @@ class DecisionTreeNode:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, node_dict: DataFilterDictionaryProps) -> None:
+    def __init__(self, node_dict: "DataFilterDictionaryProps") -> None:
         """
         Create a new DecisionTree node.
 
@@ -53,8 +53,8 @@ class DecisionTreeNode:
             value (bool)               : the current value of the node for a given element
         """
 
-        self._flag: DecisionNodeFlagType = node_dict.get("flag", None)
-        self._node_filter: DataFilter = DataFilter.from_dict(node_dict)
+        self._flag: "DecisionNodeFlagType" = node_dict.get("flag", None)
+        self._node_filter: "DataFilter" = DataFilter.from_dict(node_dict)
         self._node_filter.negate = node_dict.get("negate", False)
         self._value: bool | None = None
 
@@ -62,7 +62,7 @@ class DecisionTreeNode:
     # Methods
 
     @property
-    def flag(self) -> DecisionNodeFlagType:
+    def flag(self) -> "DecisionNodeFlagType":
         """
         Return node flag.
 
@@ -73,7 +73,7 @@ class DecisionTreeNode:
         return self._flag
 
     @property
-    def node_filter(self) -> DataFilter:
+    def node_filter(self) -> "DataFilter":
         """
         Return the current node filter.
 
@@ -175,7 +175,7 @@ class DecisionTreeNodeList(MyList):
             DecisionTreeNodeList: A list of nodes with the specified value.
         """
 
-        def node_value_eq_value(node: DecisionTreeNode) -> bool:
+        def node_value_eq_value(node: "DecisionTreeNode") -> bool:
             return node.compute_value() == value
 
         return DecisionTreeNodeList(filter(node_value_eq_value, self))
@@ -190,7 +190,7 @@ class DecisionTreeNodeList(MyList):
 
         return list(map(str, self))
 
-    def get_flags_list(self) -> list[DecisionNodeFlagType]:
+    def get_flags_list(self) -> list["DecisionNodeFlagType"]:
         """
         Return a list of decision tree node flags.
 
@@ -198,7 +198,7 @@ class DecisionTreeNodeList(MyList):
             list[DecisionNodeFlagType]: A list of the nodes' flags.
         """
 
-        def node_flag(node: "DecisionTreeNode") -> DecisionNodeFlagType:
+        def node_flag(node: "DecisionTreeNode") -> "DecisionNodeFlagType":
             return node.flag
 
         return list(map(node_flag, self))
@@ -217,7 +217,7 @@ class DecisionTree:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, tree_dict: DecisionTreeDictionaryProps) -> None:
+    def __init__(self, tree_dict: "DecisionTreeDictionaryProps") -> None:
         """
         Create a new instance of DecisionTree.
 
@@ -232,14 +232,14 @@ class DecisionTree:
         """
 
         self._negate: bool = tree_dict.get("negate", False) or False
-        self._operator: LogicalOperator = LogicalOperator.find_by_key(tree_dict.get("operator", "and")) or LogicalOperator.AND
+        self._operator: "LogicalOperator" = LogicalOperator.find_by_key(tree_dict.get("operator", "and")) or LogicalOperator.AND
 
         if self._operator.name not in LogicalOperator._member_names_:
             raise ValueError(
                 f"{__class__.__name__}::Invalid operator provided {self._operator.name}"
             )
 
-        self._nodes: DecisionTreeNodeList = DecisionTreeNodeList()
+        self._nodes: "DecisionTreeNodeList" = DecisionTreeNodeList()
         self.build(tree_dict)
 
         self._value: bool | None = None
@@ -248,7 +248,7 @@ class DecisionTree:
     # Methods
 
     @property
-    def nodes(self) -> DecisionTreeNodeList:
+    def nodes(self) -> "DecisionTreeNodeList":
         """
         Return decision tree nodes.
 
@@ -270,7 +270,7 @@ class DecisionTree:
         return self._operator
 
     @operator.setter
-    def operator(self, new_operator: LogicalOperator) -> None:
+    def operator(self, new_operator: "LogicalOperator") -> None:
         """
         Return tree operator.
 
@@ -310,7 +310,7 @@ class DecisionTree:
 
         return self._value if not self._negate else not self._value
 
-    def add_node(self, node: DecisionTreeDictionaryProps | DataFilterDictionaryProps) -> None:
+    def add_node(self, node: "DecisionTreeDictionaryProps | DataFilterDictionaryProps") -> None:
         """
         Add a new node to the tree.
 
@@ -319,13 +319,13 @@ class DecisionTree:
         """
 
         # If the provided node contains subnodes : it is a decision tree else: it is a simple node
-        new_node: DecisionTree | DecisionTreeNode = (
+        new_node: "DecisionTree | DecisionTreeNode" = (
             DecisionTree(node) if "nodes" in node else DecisionTreeNode(node)
         )
 
         self._nodes.append(new_node)
 
-    def build(self, tree_dict: DecisionTreeDictionaryProps) -> None:
+    def build(self, tree_dict: "DecisionTreeDictionaryProps") -> None:
         """
         Build tree nodes instances from input dictionary.
 
@@ -360,7 +360,7 @@ class DecisionTree:
         self._value = None
         self._nodes.clear()
 
-    def get_leaves(self, leaves_value: bool | None = None) -> DecisionTreeNodeList:
+    def get_leaves(self, leaves_value: bool | None = None) -> "DecisionTreeNodeList":
         """
         Get all leaves of the decision tree as a list of values.
 

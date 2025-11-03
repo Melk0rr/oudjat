@@ -220,7 +220,7 @@ class FileHandler:
     # INFO: TXT file functions
     @staticmethod
     def import_txt(
-        file_path: str, delete_duplicates: bool = False, callback: Callable | None = None
+        file_path: str, delete_duplicates: bool = False, callback: Callable[..., Any] | None = None
     ) -> list[Any]:
         """
         Import a text file and optionally remove duplicates.

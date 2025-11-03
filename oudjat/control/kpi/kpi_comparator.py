@@ -61,7 +61,7 @@ class KPIComparator:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, kpi_a: KPI, kpi_b: KPI, dont_sort_by_date: bool = False) -> None:
+    def __init__(self, kpi_a: "KPI", kpi_b: "KPI", dont_sort_by_date: bool = False) -> None:
         """
         Return a new instance of KPIComparator.
 
@@ -79,19 +79,19 @@ class KPIComparator:
                 f"{__class__.__name__}::Provided KPIs do not share the same perimeter !"
             )
 
-        self._kpis: tuple[KPI, KPI] = (
+        self._kpis: tuple["KPI", "KPI"] = (
             KPIComparator.kpi_tuple_by_date(kpi_a, kpi_b)
             if not dont_sort_by_date
             else (kpi_a, kpi_b)
         )
 
-        self._tendency: KPIComparatorTendency
+        self._tendency: "KPIComparatorTendency"
 
     # ****************************************************************
     # Methods
 
     @property
-    def kpis(self) -> tuple[KPI, KPI]:
+    def kpis(self) -> tuple["KPI", "KPI"]:
         """
         Getter for the KPIs being compared.
 
@@ -102,7 +102,7 @@ class KPIComparator:
         return self._kpis
 
     @property
-    def tendency(self) -> KPIComparatorTendency:
+    def tendency(self) -> "KPIComparatorTendency":
         """
         Getter for the comparator tendency.
 
@@ -192,7 +192,7 @@ class KPIComparator:
         return comparator
 
     @staticmethod
-    def kpi_tuple_by_date(kpi_a: KPI, kpi_b: KPI) -> tuple[KPI, KPI]:
+    def kpi_tuple_by_date(kpi_a: "KPI", kpi_b: "KPI") -> tuple["KPI", "KPI"]:
         """
         Return a tuple of 2 KPIs based on their dates.
 

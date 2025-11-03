@@ -149,7 +149,7 @@ class LogicalOperatorProps(NamedTuple):
         operation (Callable[..., int | bool]): the function associated with the operator
     """
 
-    keys: OperatorKeysProps
+    keys: "OperatorKeysProps"
     operation: Callable[..., int | bool]
 
 

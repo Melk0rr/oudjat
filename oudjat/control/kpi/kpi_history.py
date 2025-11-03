@@ -24,11 +24,11 @@ class KPIHistoryNode:
         """
 
         self._kpi: KPI = kpi
-        self._prev: KPIHistoryNode | None = None
-        self._next: KPIHistoryNode | None = None
+        self._prev: "KPIHistoryNode | None" = None
+        self._next: "KPIHistoryNode | None" = None
 
     @property
-    def kpi(self) -> KPI:
+    def kpi(self) -> "KPI":
         """
         Return the node's KPI instance.
 
@@ -82,7 +82,7 @@ class KPIHistoryNode:
 
         self._next = new_node
 
-    def compare_next(self) -> KPIComparator:
+    def compare_next(self) -> "KPIComparator":
         """
         Generate a KPIComparator instance with the next node.
 
@@ -97,7 +97,7 @@ class KPIHistoryNode:
 
         return KPIComparator(self.kpi, self.next.kpi)
 
-    def compare_prev(self) -> KPIComparator:
+    def compare_prev(self) -> "KPIComparator":
         """
         Generate a KPIComparator instance with the next node.
 
@@ -116,7 +116,7 @@ class KPIHistoryNode:
 class KPIHistory:
     """KPIEvolution class to handle."""
 
-    def __init__(self, name: str, kpis: list[KPI] | None = None) -> None:
+    def __init__(self, name: str, kpis: list["KPI"] | None = None) -> None:
         """
         Create a new instance of KPIHistory.
 
@@ -178,7 +178,7 @@ class KPIHistory:
 
         return self._end is None
 
-    def set_kpis(self, kpis: list[KPI]) -> None:
+    def set_kpis(self, kpis: list["KPI"]) -> None:
         """
         Setter for the kpi list. Updates the list of KPIs in the class.
 
@@ -191,7 +191,7 @@ class KPIHistory:
         for kpi in kpis:
             self.insert_by_date(kpi)
 
-    def append(self, kpi: KPI) -> None:
+    def append(self, kpi: "KPI") -> None:
         """
         Append a new KPI into the history.
 
@@ -214,7 +214,7 @@ class KPIHistory:
 
         self._size += 1
 
-    def prepend(self, kpi: KPI) -> None:
+    def prepend(self, kpi: "KPI") -> None:
         """
         Prepend a new KPI into the history.
 
@@ -237,7 +237,7 @@ class KPIHistory:
 
         self._size += 1
 
-    def insert_by_date(self, kpi: KPI) -> None:
+    def insert_by_date(self, kpi: "KPI") -> None:
         """
         Insert a new kpi in the history based on its date.
 
@@ -309,7 +309,7 @@ class KPIHistory:
         while not self.is_empty:
             self.pop_back()
 
-    def go_through(self, callback: Callable[[KPIHistoryNode | None], None]) -> None:
+    def go_through(self, callback: Callable[["KPIHistoryNode | None"], None]) -> None:
         """
         Go through the history by iterating over its nodes.
 
@@ -337,19 +337,19 @@ class KPIHistory:
 
         logs: list[str] = []
 
-        def logs_cb(node: KPIHistoryNode | None) -> None:
+        def logs_cb(node: "KPIHistoryNode | None") -> None:
             if node is not None:
                 if self._begin is self._end:
                     logs.append(str(node.kpi) if detailed else f"{node.kpi.value}%")
 
                 else:
-                    compare: KPIComparator = node.compare_next()
+                    compare: "KPIComparator" = node.compare_next()
                     logs.append(str(compare) if detailed else f"{compare.tendency}")
 
         self.go_through(logs_cb)
         return logs
 
-    def kpis(self) -> list[KPI]:
+    def kpis(self) -> list["KPI"]:
         """
         Return the KPI instances of the current history.
 
@@ -357,16 +357,16 @@ class KPIHistory:
             list[KPI]: a list of the KPI instances that this KPIHistory contains
         """
 
-        kpis: list[KPI] = []
+        kpis: list["KPI"] = []
 
-        def kpis_cb(node: KPIHistoryNode | None) -> None:
+        def kpis_cb(node: "KPIHistoryNode | None") -> None:
             if node is not None:
                 kpis.append(node.kpi)
 
         self.go_through(kpis_cb)
         return kpis
 
-    def comparators(self) -> list[KPIComparator]:
+    def comparators(self) -> list["KPIComparator"]:
         """
         Return a list of KPIComparator for each KPI in the history.
 
@@ -374,16 +374,16 @@ class KPIHistory:
             list[KPIComparator]: list of KPIComparator instances
         """
 
-        comparators: list[KPIComparator] = []
+        comparators: list["KPIComparator"] = []
 
-        def comparators_cb(node: KPIHistoryNode | None) -> None:
+        def comparators_cb(node: "KPIHistoryNode | None") -> None:
             if self._begin is not self._end and node is not None:
                 comparators.append(node.compare_next())
 
         self.go_through(comparators_cb)
         return comparators
 
-    def tendency(self) -> KPIComparatorTendency:
+    def tendency(self) -> "KPIComparatorTendency":
         """
         Return the tendency of the current KPIHistory.
 

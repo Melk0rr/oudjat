@@ -28,7 +28,7 @@ class OperatorProps(NamedTuple):
         operation (Callable[..., Any]): operation function
     """
 
-    keys: OperatorKeysProps
+    keys: "OperatorKeysProps"
     operation: Callable[..., Any]
 
 
@@ -38,7 +38,7 @@ class Operator(Enum):
     """
 
     @property
-    def keys(self) -> OperatorKeysProps:
+    def keys(self) -> "OperatorKeysProps":
         """
         Return the operator keys.
 
@@ -97,7 +97,7 @@ class Operator(Enum):
         return [x for op in cls for x in (op.symbol, op.verbose)]
 
     @classmethod
-    def find_by_key(cls: type[OperatorType], key: str) -> OperatorType:
+    def find_by_key(cls: type["OperatorType"], key: str) -> "OperatorType":
         """
         Return a single Operator which one of the keys matches the provided string.
 
@@ -108,7 +108,7 @@ class Operator(Enum):
             Operator: the operator which keys contain the provided key string
         """
 
-        def operator_matches_key(operator: Operator) -> bool:
+        def operator_matches_key(operator: "Operator") -> bool:
             return key in [operator.symbol, operator.verbose]
 
         return next(filter(operator_matches_key, cls))

@@ -74,11 +74,11 @@ class CVEDataFormat(TypedDict):
     """
 
     id: str
-    dates: CVEDatesFmt
+    dates: "CVEDatesFmt"
     sources: list[str]
     status: str
     description: str
-    vectors: CVEVectorsFmt
-    requirements: CVERequirementsFmt
-    metrics: CVEMetricsFmt
+    vectors: "CVEVectorsFmt"
+    requirements: "CVERequirementsFmt"
+    metrics: "CVEMetricsFmt"
 
