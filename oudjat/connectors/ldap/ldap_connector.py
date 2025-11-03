@@ -112,9 +112,7 @@ class LDAPConnector(Connector):
             f"{LDAPObjectType.SUBNET}": LDAPObjectOptions["LDAPSubnet"](
                 cls=LDAPSubnet, fetch=self.subnets
             ),
-            f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](
-                cls=LDAPUser, fetch=self.users
-            ),
+            f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](cls=LDAPUser, fetch=self.users),
         }
 
         self._DEFAULT_CAPABILITIES: LDAPCapabilities = LDAPCapabilities(
@@ -180,7 +178,9 @@ class LDAPConnector(Connector):
         """
 
         if self._credentials is None:
-            raise NoCredentialsError(pfx=f"{__class__.__name__}.connect", target=self._target)
+            raise NoCredentialsError(
+                f"{__class__.__name__}.connect::Cannot connect to {self._target}, no credentials provided"
+            )
 
         if version is None:
             try:
@@ -352,7 +352,7 @@ class LDAPConnector(Connector):
             search_base=search_base,
             search_filter=search_filter,
             attributes=attributes,
-            payload=payload
+            payload=payload,
         )
 
         def map_obj(entry: "LDAPEntry") -> "LDAPObject":
@@ -399,7 +399,7 @@ class LDAPConnector(Connector):
             search_base=None,
             search_filter=f"(&(displayName={displayName}){name}",
             attributes=attributes,
-            payload=payload
+            payload=payload,
         )
 
         def map_gpo(entry: "LDAPEntry") -> "LDAPGroupPolicyObject":
@@ -432,7 +432,7 @@ class LDAPConnector(Connector):
             search_base=f"CN=Subnets,CN=Sites,CN=Configuration,{sb_dc}",
             search_filter=search_filter,
             attributes=attributes,
-            payload=payload
+            payload=payload,
         )
 
         def map_net(entry: "LDAPEntry") -> "LDAPSubnet":
@@ -465,7 +465,7 @@ class LDAPConnector(Connector):
             search_base=search_base,
             search_filter=search_filter,
             attributes=attributes,
-            payload=payload
+            payload=payload,
         )
 
         def map_cpt(entry: "LDAPEntry") -> "LDAPComputer":
@@ -498,7 +498,7 @@ class LDAPConnector(Connector):
             search_base=search_base,
             search_filter=search_filter,
             attributes=attributes,
-            payload=payload
+            payload=payload,
         )
 
         def map_usr(entry: "LDAPEntry") -> "LDAPUser":
@@ -533,7 +533,7 @@ class LDAPConnector(Connector):
             search_base=search_base,
             search_filter=search_filter,
             attributes=attributes,
-            payload=payload
+            payload=payload,
         )
 
         def map_grp(entry: "LDAPEntry") -> "LDAPGroup":
@@ -573,7 +573,7 @@ class LDAPConnector(Connector):
             search_base=search_base,
             search_filter=search_filter,
             attributes=attributes,
-            payload=payload
+            payload=payload,
         )
 
         def map_ou(entry: "LDAPEntry") -> "LDAPOrganizationalUnit":

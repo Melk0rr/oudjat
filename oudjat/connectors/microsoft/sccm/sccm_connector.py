@@ -90,9 +90,7 @@ class SCCMConnector(Connector):
 
         if not self._trusted_connection and self._credentials is None:
             raise NoCredentialsError(
-                f"{__class__.__name__}.__init__::",
-                "Trusted connection is set to False, but no credentials where provided",
-                self._target
+                f"{__class__.__name__}.__init__::Trusted connection is set to False, but no credentials where provided",
             )
 
         try:

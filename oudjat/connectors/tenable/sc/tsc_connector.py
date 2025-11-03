@@ -112,7 +112,7 @@ class TenableSCConnector(Connector):
 
         if self._credentials is None:
             raise NoCredentialsError(
-                pfx=f"{__class__.__name__}.connect::", target=self._target.netloc
+                f"{__class__.__name__}.connect::No credentials provided to connect to {self._target.netloc}"
             )
 
         try:

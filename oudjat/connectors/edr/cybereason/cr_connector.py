@@ -98,7 +98,6 @@ class CybereasonConnector(Connector):
 
         self._connection: requests.Session | None = None
 
-
     # ****************************************************************
     # Methods
 
@@ -114,7 +113,7 @@ class CybereasonConnector(Connector):
         try:
             if not self._credentials:
                 raise NoCredentialsError(
-                    pfx=f"{__class__.__name__}.connect::", target=self._target.netloc
+                    f"{__class__.__name__}.connect::Cannot connect to {self._target.netloc}, no credentials provided"
                 )
 
             creds = {"username": self._credentials.username, "password": self._credentials.password}

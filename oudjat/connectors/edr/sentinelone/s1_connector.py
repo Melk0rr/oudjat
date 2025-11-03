@@ -8,12 +8,13 @@ from urllib.parse import ParseResult, urlparse
 
 import requests
 
-from oudjat.connectors.edr.sentinelone.s1_endpoints import S1Endpoint
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import DataType, StrType
 
 from ... import Connector
+from .exceptions import SentinelOneAPIConnectionError
+from .s1_endpoints import S1Endpoint
 
 
 class S1Connector(Connector):
@@ -27,7 +28,6 @@ class S1Connector(Connector):
         self,
         target: str,
         username: str | None = None,
-        password: str | None = None,
         api_token: str | None = None,
         port: int = 443,
     ) -> None:
@@ -37,8 +37,7 @@ class S1Connector(Connector):
         Args:
             target (str)   : SentinelOne URL
             username (str) : Username to use for the connection
-            password (str) : Password to use for the connection
-            api_token (str): API token. Replace the password if provided.
+            api_token (str): API token. Stored as the connector credentials.password
             port (int)     : Port number used for the connection
         """
 
@@ -50,18 +49,27 @@ class S1Connector(Connector):
         if not re.match(r"http(s?):", target):
             target = f"{scheme}://{target}"
 
-        self._api_token: str | None = api_token
-
         self._target: ParseResult
-        super().__init__(
-            target=urlparse(target), username=username, password=(self._api_token or password)
-        )
+        super().__init__(target=urlparse(target), username=username, password=api_token)
 
         self._connection: requests.Session | None = None
         self._DEFAULT_HEADERS: dict[str, str] = {"Content-Type": "application/json"}
 
     # ****************************************************************
     # Methods
+
+    @property
+    def _api_token(self) -> str | None:
+        """
+        Return the connector api token.
+
+        Just an aliad for the connector password.
+
+        Returns:
+            str | None: The connector password string if set. Else, None
+        """
+
+        return self._credentials.password if self._credentials is not None else None
 
     @property
     def _headers(self) -> dict[str, Any]:
@@ -94,28 +102,14 @@ class S1Connector(Connector):
 
         return ",".join(str_list) if isinstance(str_list, list) else str_list
 
-    def set_apitoken_from_svc_name(self, svc_name: str) -> None:
-        """
-        Set the service name bound to the current connector.
-
-        Args:
-            svc_name (str): Service name used to retrieve credentials
-        """
-
-        super().set_creds_from_svc_name(svc_name)
-
-        if self._credentials is None:
-            raise NoCredentialsError(
-                pfx=f"{__class__.__name__}.set_apitoken_from_svc_name::Could not set API key from {svc_name} service name"
-            )
-
-        self._api_token = self._credentials.password
-
     @override
     def connect(self) -> None:
         """
         Connect to the target.
         """
+
+        if self._credentials is None:
+            raise NoCredentialsError(f"{__class__.__name__}.connect::No password provided")
 
         if not self._connection:
             ColorPrint.blue(f"Connecting to {self._target.netloc} with user API token")
@@ -126,11 +120,11 @@ class S1Connector(Connector):
                     self._connection = data[0]["token"]
 
                 # TODO: Better handle exception type
-                except Exception as e:
+                except SentinelOneAPIConnectionError as e:
                     raise e
 
             else:
-                raise NoCredentialsError(pfx=f"{__class__.__name__}", msg="No API token provided")
+                raise NoCredentialsError(f"{__class__.__name__}::No API token provided")
 
         else:
             ColorPrint.blue(f"Connection to {self._target.netloc} is already initialized.")
@@ -142,7 +136,7 @@ class S1Connector(Connector):
         payload: dict[str, Any],
         attributes: list[str] | None = None,
         path_fmt: dict[str, str] | None = None,
-    ) -> DataType:
+    ) -> "DataType":
         """
         Perform a search query through the API to retrieve data based on provided endpoint and .
 
