@@ -271,7 +271,7 @@ class DataFilter:
         return list(map(DataFilter.from_dict, filters))
 
     @staticmethod
-    def gen_from_tuple(filters: FilterTupleExtType) -> list["DataFilter"]:
+    def gen_from_tuple(filters: "FilterTupleExtType") -> list["DataFilter"]:
         """
         Generate DataFitler instances based on tuples.
 
@@ -310,7 +310,7 @@ class DataFilter:
 
     @staticmethod
     def filter_data(
-        data_to_filter: DataType,
+        data_to_filter: "DataType",
         filters: "DataFilter" | list["DataFilter"] | None = None,
     ) -> DataType:
         """
