@@ -7,7 +7,7 @@ name = "oudjat"
 version = "0.7.2a1"
 description = "Oudjat is a SOC toolbox and maybe more if I have the time"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 
 authors = [
   { name = "me1k0r", email = "runner-me1k0r@proton.me" }
