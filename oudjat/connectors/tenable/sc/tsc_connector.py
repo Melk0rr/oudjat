@@ -14,7 +14,6 @@ from oudjat.utils import (
     ColorPrint,
     DataType,
     DatumDataType,
-    DatumType,
     FilterTupleExtType,
     MyList,
     NoCredentialsError,
@@ -143,7 +142,7 @@ class TenableSCConnector(Connector):
     def fetch(
         self,
         endpoint: "TSCEndpoint" = TSCEndpoint.VULNS,
-        payload: "DatumType | None" = None,
+        payload: dict[str, Any] | None = None,
         *args: Any,
         **kwargs: Any,
     ) -> "DataType":
@@ -221,7 +220,7 @@ class TenableSCConnector(Connector):
             filters.append(TSCBuiltinFilter.VULNS_EXPLOITABLE.value)
 
         filters.append(self._severity_filter(*severities))
-        return self.fetch(endpoint=TSCEndpoint.VULNS, *filters, payload=payload)
+        return self.fetch(*filters, endpoint=TSCEndpoint.VULNS, payload=payload)
 
     # ****************************************************************
     # Methods: Asset lists
