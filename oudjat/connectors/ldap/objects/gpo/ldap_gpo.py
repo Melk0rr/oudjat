@@ -63,7 +63,7 @@ class LDAPGroupPolicyObject(LDAPObject):
         return self.entry.get("displayName")
 
     @property
-    def state(self) -> LDAPGPOState:
+    def state(self) -> "LDAPGPOState":
         """
         Return the current GPO state.
 
@@ -75,7 +75,7 @@ class LDAPGroupPolicyObject(LDAPObject):
         return LDAPGPOState(int(wql.split(";")[-1][0]))
 
     @property
-    def scope(self) -> LDAPGPOScope:
+    def scope(self) -> "LDAPGPOScope":
         """
         Return the scope of the current GPO instance.
 
@@ -103,7 +103,7 @@ class LDAPGroupPolicyObject(LDAPObject):
 
     def get_linked_objects(
         self,
-        attributes: StrType | None = None,
+        attributes: "StrType | None" = None,
         ou: str = "*",
     ) -> dict[int | str, "LDAPObject"]:
         """

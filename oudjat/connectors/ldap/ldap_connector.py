@@ -84,7 +84,7 @@ class LDAPConnector(Connector):
         """
 
         self._use_tls: bool = use_tls
-        self._port: LDAPPort = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
+        self._port: "LDAPPort" = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
 
         super().__init__(target=server, username=username, password=password)
 
@@ -115,7 +115,7 @@ class LDAPConnector(Connector):
             f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](cls=LDAPUser, fetch=self.users),
         }
 
-        self._DEFAULT_CAPABILITIES: LDAPCapabilities = LDAPCapabilities(
+        self._DEFAULT_CAPABILITIES: "LDAPCapabilities" = LDAPCapabilities(
             ldap_search=self.fetch,
             ldap_obj_opt=self.ldap_object_opt_from_obj_type,
         )

@@ -66,10 +66,10 @@ class TenableSCConnector(Connector):
         if not re.match(r"http(s?):", target):
             target = f"{scheme}://{target}"
 
-        self._target: ParseResult
+        self._target: "ParseResult"
         super().__init__(target=urlparse(target), username=username, password=password)
 
-        self._connection: TenableSC
+        self._connection: "TenableSC"
         self._repos: list[str] | None = None
 
     # ****************************************************************
@@ -86,7 +86,7 @@ class TenableSCConnector(Connector):
 
         return self._repos
 
-    def _severity_filter(self, *severities: int) -> TSCFilter:
+    def _severity_filter(self, *severities: int) -> "TSCFilter":
         """
         Return a severity filter based on the provided severities.
 
@@ -194,7 +194,7 @@ class TenableSCConnector(Connector):
     def vulns(
         self,
         *severities: int,
-        tool: TSCVulnTool = TSCVulnTool.VULNDETAILS,
+        tool: "TSCVulnTool" = TSCVulnTool.VULNDETAILS,
         exploitable: bool = True,
         payload: dict[str, Any] | None = None,
     ) -> DataType:
@@ -229,7 +229,7 @@ class TenableSCConnector(Connector):
     def asset_lists_create(
         self,
         name: str,
-        list_type: TSCAssetListType = TSCAssetListType.COMBINATION,
+        list_type: "TSCAssetListType" = TSCAssetListType.COMBINATION,
         description: str | None = None,
         ips: list[str] | None = None,
         dns_names: list[str] | None = None,
@@ -289,7 +289,7 @@ class TenableSCConnector(Connector):
 
     def asset_lists(
         self,
-        list_filter: FilterTupleExtType | None = None,
+        list_filter: "FilterTupleExtType | None" = None,
         fields: list[str] | None = None,
     ) -> "DataType":
         """

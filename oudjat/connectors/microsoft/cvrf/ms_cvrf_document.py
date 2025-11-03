@@ -63,7 +63,7 @@ class MSCVRFDocument:
         return self._id
 
     @property
-    def products(self) -> dict[str, MSProduct]:
+    def products(self) -> dict[str, "MSProduct"]:
         """
         Return the MS products mentioned in the document. If the product list is not already parsed, this method will trigger a parsing of the products from the document content.
 
@@ -77,7 +77,7 @@ class MSCVRFDocument:
         return self._products
 
     @property
-    def vulnerabilities(self) -> dict[str, MSVuln]:
+    def vulnerabilities(self) -> dict[str, "MSVuln"]:
         """
         Return the vulnerabilities mentioned in the document. If the vulnerability list is not already parsed, this method will trigger a parsing of the vulnerabilities from the document content.
 
@@ -91,7 +91,7 @@ class MSCVRFDocument:
         return self._vulns
 
     @property
-    def remediations(self) -> dict[int, MSRemed]:
+    def remediations(self) -> dict[int, "MSRemed"]:
         """
         Return the MS KBs mentioned in the document.
 
@@ -107,7 +107,7 @@ class MSCVRFDocument:
 
         return self._kbs
 
-    def add_product(self, product: MSProduct) -> None:
+    def add_product(self, product: "MSProduct") -> None:
         """
         Add a product to the list of products in the document.
 
@@ -118,7 +118,7 @@ class MSCVRFDocument:
         if product.pid not in self._products.keys():
             self._products[product.pid] = product
 
-    def add_vuln(self, vuln: MSVuln) -> None:
+    def add_vuln(self, vuln: "MSVuln") -> None:
         """
         Add a vulnerability to the list of vulnerabilities in the document.
 
@@ -129,7 +129,7 @@ class MSCVRFDocument:
         if vuln.cve not in self._vulns.keys():
             self._vulns[vuln.cve] = vuln
 
-    def add_kb(self, kb: MSRemed) -> None:
+    def add_kb(self, kb: "MSRemed") -> None:
         """
         Add a KB to the list of KBs in the document.
 

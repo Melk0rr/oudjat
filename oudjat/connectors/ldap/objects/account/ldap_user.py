@@ -41,7 +41,7 @@ class LDAPUser(LDAPAccount):
                 if LDAPAccountFlag.check_flag(self.ms_account_ctl, flag):
                     self.account_flags.add(flag.name)
 
-        self.user: User = User(
+        self.user: "User" = User(
             user_id=self.id,
             name=self.name,
             firstname=self.givenname,

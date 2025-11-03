@@ -28,7 +28,7 @@ class SCCMConnector(Connector):
         db_name: str,
         username: str | None = None,
         password: str | None = None,
-        driver: ODBCDriver = ODBCDriver.SQL_SERVER,
+        driver: "ODBCDriver" = ODBCDriver.SQL_SERVER,
         port: int = 1433,
         trusted_connection: bool = False,
     ) -> None:

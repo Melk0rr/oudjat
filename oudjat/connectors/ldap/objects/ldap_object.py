@@ -72,7 +72,7 @@ class LDAPObject(GenericIdentifiable):
         )
 
         self._ldap_obj_flags: set[str] = set()
-        self._capabilities: LDAPCapabilities = capabilities
+        self._capabilities: "LDAPCapabilities" = capabilities
 
     # ****************************************************************
     # Methods

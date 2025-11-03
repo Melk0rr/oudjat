@@ -37,7 +37,7 @@ class LDAPGroup(LDAPObject):
 
         super().__init__(ldap_entry, capabilities)
 
-        self.group: Group[LDAPObject] = Group[LDAPObject](
+        self.group: "Group[LDAPObject]" = Group[LDAPObject](
             group_id=self.entry.get("objectGUID"),
             name=self.entry.get("name"),
             label=self.entry.dn,
@@ -48,7 +48,7 @@ class LDAPGroup(LDAPObject):
     # Methods
 
     @property
-    def members(self) -> dict[str, LDAPObject]:
+    def members(self) -> dict[str, "LDAPObject"]:
         """
         Return the members of the current LDAPGroup.
 
@@ -68,7 +68,7 @@ class LDAPGroup(LDAPObject):
 
         return self.entry.get("groupType")
 
-    def get_group_type(self) -> LDAPGroupType:
+    def get_group_type(self) -> "LDAPGroupType":
         """
         Get the group type based on raw value.
 
@@ -88,7 +88,7 @@ class LDAPGroup(LDAPObject):
 
         return self.entry.get("member") or []
 
-    def add_member(self, member: LDAPObject) -> None:
+    def add_member(self, member: "LDAPObject") -> None:
         """
         Add a new member to th current LDAPGroup instance.
 

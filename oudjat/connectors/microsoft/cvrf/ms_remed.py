@@ -34,17 +34,17 @@ class MSRemed:
 
         self._number: int = num
 
-        self._type: MSRemedType = MSRemedType.KB
+        self._type: "MSRemedType" = MSRemedType.KB
         if not re.match(KB_NUM_REGEX, f"{self._number}"):
             self._type = MSRemedType.PATCH
 
-        self._products: dict[str, MSProduct] = {}
+        self._products: dict[str, "MSProduct"] = {}
 
     # ****************************************************************
     # Methods
 
     @property
-    def products(self) -> dict[str, MSProduct]:
+    def products(self) -> dict[str, "MSProduct"]:
         """
         Return the products impacted by this remediation.
 
@@ -54,7 +54,7 @@ class MSRemed:
 
         return self._products
 
-    def set_products_from_list(self, products: list[MSProduct]) -> None:
+    def set_products_from_list(self, products: list["MSProduct"]) -> None:
         """
         Setter for kb products.
 

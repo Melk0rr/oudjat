@@ -32,8 +32,8 @@ class MSVuln:
             raise ValueError(f"{__class__.__name__}::Invalid CVE provided: {cve}")
 
         self._cve: str = cve
-        self._kbs: dict[int, MSRemed] = {}
-        self._products: dict[str, MSProduct] = {}
+        self._kbs: dict[int, "MSRemed"] = {}
+        self._products: dict[str, "MSProduct"] = {}
 
     # ****************************************************************
     # Methods
@@ -50,7 +50,7 @@ class MSVuln:
         return self._cve
 
     @property
-    def remediations(self) -> dict[int, MSRemed]:
+    def remediations(self) -> dict[int, "MSRemed"]:
         """
         Return the remediations for the current vuln.
 
@@ -61,7 +61,7 @@ class MSVuln:
         return self._kbs
 
     @property
-    def impacted_products(self) -> dict[str, MSProduct]:
+    def impacted_products(self) -> dict[str, "MSProduct"]:
         """
         Return the products impacted by the current vuln.
 

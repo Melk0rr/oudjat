@@ -1,4 +1,9 @@
+"""
+A helper module to list ODBC drivers.
+"""
+
 from enum import Enum
+
 
 class ODBCDriver(Enum):
     """
