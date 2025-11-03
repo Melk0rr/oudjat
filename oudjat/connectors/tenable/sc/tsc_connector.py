@@ -148,10 +148,10 @@ class TenableSCConnector(Connector):
         Search the API for elements.
 
         Args:
-            endpoint (TSCEndpoint)  : "Endpoint" to hit, basically which API action will be performed
-            payload (dict[str, Any]): Payload to send to the provided endpoint
-            *args (Any)             : Anything to pass to further search method
-            **kwargs (Any)          : Anything to pass to further search method
+            endpoint (TSCEndpoint)                     : "Endpoint" to hit, basically which API action will be performed
+            payload (dict[str, Any])                   : Payload to send to the provided endpoint
+            filters (list[tuple[str, str, str]] | None): Additional filters to pass
+            **kwargs (Any)                             : Anything to pass to further search method
 
         Returns:
             DataType: Data based on the provided endpoint and payload
@@ -174,6 +174,7 @@ class TenableSCConnector(Connector):
 
         res = []
         try:
+
             endpoint_api_name, endpoint_api_method = endpoint.value.split(".")
             endpoint_api = getattr(self._connection, endpoint_api_name)
 
