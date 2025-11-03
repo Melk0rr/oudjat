@@ -174,7 +174,6 @@ class TenableSCConnector(Connector):
 
         res = []
         try:
-
             endpoint_api_name, endpoint_api_method = endpoint.value.split(".")
             endpoint_api = getattr(self._connection, endpoint_api_name)
 
@@ -183,8 +182,7 @@ class TenableSCConnector(Connector):
             )
 
             req = endpoint_func(*filters, **payload, **kwargs)
-
-            MyList.append_flat(res, req)
+            MyList.append_flat(res, list(req))
 
         except ConnectionError as e:
             raise ConnectionError(
