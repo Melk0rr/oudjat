@@ -33,6 +33,20 @@ class LDAPFilter:
     # Attributes & Constructor
 
     REG: str = r"\(([^=~<>]+)([=~<>]{1,2})([^)]+)\)"
+
+    def __init__(self, operator: str | None, *elements: "LDAPFilter | str") -> None:
+        """
+        Create a new instance of LDAPFilter.
+
+        Args:
+            operator (str): The filter join operator
+        """
+
+        self._operator: "LDAPFilterOperator | None" = LDAPFilterOperator(operator)
+        self._elements: list["LDAPFilter"] = []
+
+        self._value: tuple[str, str, str] | None
+
     # ****************************************************************
     # Methods
 
