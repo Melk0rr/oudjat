@@ -1,10 +1,9 @@
 """A helper module that brings some list utilities."""
 
-from abc import ABC
 from typing import Any
 
 
-class MyList(list, ABC):
+class UtilsList(list):
     """
     A helper class to provide some qol methods to lists.
     """

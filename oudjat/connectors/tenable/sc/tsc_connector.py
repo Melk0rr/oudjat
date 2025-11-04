@@ -15,7 +15,7 @@ from oudjat.utils import (
     DataType,
     DatumDataType,
     FilterTupleExtType,
-    MyList,
+    UtilsList,
     NoCredentialsError,
 )
 
@@ -182,7 +182,7 @@ class TenableSCConnector(Connector):
             )
 
             req = endpoint_func(*filters, **payload, **kwargs)
-            MyList.append_flat(res, list(req))
+            UtilsList.append_flat(res, list(req))
 
         except ConnectionError as e:
             raise ConnectionError(

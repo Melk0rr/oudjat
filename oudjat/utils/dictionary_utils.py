@@ -3,7 +3,7 @@
 from typing import Any
 
 
-class CustomDict(dict):
+class UtilsDict(dict):
     """Custom overload of the base dictionary."""
 
     # ****************************************************************
@@ -126,7 +126,7 @@ class CustomDict(dict):
 
         for el in input_tuple:
             if isinstance(el, tuple):
-                return CustomDict.from_tuple(el, input_tuple, res)
+                return UtilsDict.from_tuple(el, input_tuple, res)
             else:
                 # Assuming that the first element of each sub-tuple is the key and the second is the value
                 res[el] = parent[0][1]

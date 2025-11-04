@@ -23,7 +23,7 @@ class NoCredentialsError(ConnectionError):
         self.message: str = message
         super().__init__(self.message)
 
-class CredentialHelper:
+class CredentialUtils:
     """A class that helps with credentials."""
 
     @staticmethod
@@ -79,7 +79,7 @@ class CredentialHelper:
                 password = getpass.getpass("Password: ")
 
                 # Saving credentials
-                CredentialHelper.save_credentials(service, username, password)
+                CredentialUtils.save_credentials(service, username, password)
                 cred = SimpleCredential(username, password)
 
             else:

@@ -4,10 +4,10 @@
 
 from .bit_flag import BitFlag
 from .color_print import ColorPrint
-from .credentials import CredentialHelper, NoCredentialsError
-from .dictionary_utils import CustomDict
-from .file_utils import FileHandler, FileType
-from .list_utils import MyList
+from .credentials import CredentialUtils, NoCredentialsError
+from .dictionary_utils import UtilsDict
+from .file_utils import FileUtils, FileType
+from .list_utils import UtilsList
 from .operators import CompareOperator, LogicalOperator
 from .stdouthook import StdOutHook
 from .time_utils import DateFlag, DateFormat, TimeConverter
@@ -16,12 +16,12 @@ from .types import DataType, DatumDataType, DatumType, FilterTupleExtType, Numbe
 __all__ = [
     "BitFlag",
     "ColorPrint",
-    "CredentialHelper",
+    "CredentialUtils",
     "NoCredentialsError",
-    "CustomDict",
-    "FileHandler",
+    "UtilsDict",
+    "FileUtils",
     "FileType",
-    "MyList",
+    "UtilsList",
     "LogicalOperator",
     "CompareOperator",
     "StdOutHook",

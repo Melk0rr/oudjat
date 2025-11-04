@@ -5,7 +5,7 @@ from typing import Any
 
 from keyring.credentials import SimpleCredential
 
-from oudjat.utils import CredentialHelper
+from oudjat.utils import CredentialUtils
 
 
 class Connector(ABC):
@@ -83,7 +83,7 @@ class Connector(ABC):
             svc_name (str): Service name used to retrieve credentials
         """
 
-        self._credentials = CredentialHelper.get_credentials(svc_name)
+        self._credentials = CredentialUtils.get_credentials(svc_name)
 
     @abstractmethod
     def connect(self, *args: Any, **kwargs: Any) -> None:

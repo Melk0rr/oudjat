@@ -3,7 +3,7 @@
 from typing import Any, TypeAlias, TypedDict, override
 
 from oudjat.utils import ColorPrint, LogicalOperator
-from oudjat.utils.list_utils import MyList
+from oudjat.utils.list_utils import UtilsList
 from oudjat.utils.mappers import any_to_dict
 from oudjat.utils.types import NumberType
 
@@ -161,7 +161,7 @@ class DecisionTreeNode:
     # Static methods
 
 
-class DecisionTreeNodeList(MyList):
+class DecisionTreeNodeList(UtilsList):
     """A list of decision tree nodes."""
 
     def get_by_value(self, value: bool = True) -> "DecisionTreeNodeList":

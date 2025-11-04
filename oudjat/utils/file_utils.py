@@ -10,7 +10,7 @@ from typing import Any, Callable, NamedTuple
 from .color_print import ColorPrint
 
 
-class FileHandler:
+class FileUtils:
     """A class that provides file operations."""
 
     @staticmethod
@@ -162,7 +162,7 @@ class FileHandler:
                     _ = f.seek(0)
 
                     if delimiter is None:
-                        delimiter = FileHandler.guess_csv_delimiter(first_line)
+                        delimiter = FileUtils.guess_csv_delimiter(first_line)
 
                     print(f"\nNo delimiter specified, guessed '{delimiter}' as a delimiter")
 
@@ -299,9 +299,9 @@ class FileTypeProps(NamedTuple):
 class FileType(Enum):
     """Enumeration of file types to be used by file connector."""
 
-    CSV = FileTypeProps(FileHandler.import_csv, FileHandler.export_csv)
-    JSON = FileTypeProps(FileHandler.import_json, FileHandler.export_json)
-    TXT = FileTypeProps(FileHandler.import_txt, FileHandler.export_txt)
+    CSV = FileTypeProps(FileUtils.import_csv, FileUtils.export_csv)
+    JSON = FileTypeProps(FileUtils.import_json, FileUtils.export_json)
+    TXT = FileTypeProps(FileUtils.import_txt, FileUtils.export_txt)
 
     @property
     def f_import(self) -> Callable[..., list[Any]]:

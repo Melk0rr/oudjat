@@ -3,7 +3,7 @@
 from typing import Any, Callable, override
 
 from oudjat.connectors.connector import Connector
-from oudjat.utils.file_utils import FileHandler, FileType
+from oudjat.utils.file_utils import FileUtils, FileType
 
 
 class FileConnector(Connector):
@@ -21,7 +21,7 @@ class FileConnector(Connector):
             source (str): The source identifier or description of the file.
         """
 
-        if not FileHandler.check_path(file):
+        if not FileUtils.check_path(file):
             raise FileExistsError(
                 f"{__class__.__name__}.__init__::Invalid file path provided: {file}"
             )
@@ -72,7 +72,7 @@ class FileConnector(Connector):
         if not isinstance(new_target, str):
             raise ValueError(f"{__class__.__name__}.check_path::Please provide a string")
 
-        if not FileHandler.check_path(new_target):
+        if not FileUtils.check_path(new_target):
             raise FileExistsError(
                 f"{__class__.__name__}.check_path::Invalid file path provided: {new_target}"
             )

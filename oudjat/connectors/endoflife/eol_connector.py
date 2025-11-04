@@ -5,7 +5,7 @@ from urllib.parse import ParseResult, urlparse
 
 from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.connectors.endoflife.eol_endpoints import EndOfLifeEndpoint
-from oudjat.utils import DataType, MyList
+from oudjat.utils import DataType, UtilsList
 from oudjat.utils.types import StrType
 
 from .definitions import EOL_API_URL
@@ -95,7 +95,7 @@ class EndOfLifeConnector(Connector):
 
             if req.status_code == 200:
                 req_json = req.json()
-                MyList.append_flat(res, req_json.get("result", []))
+                UtilsList.append_flat(res, req_json.get("result", []))
 
         except ConnectionError as e:
             raise ConnectionError(
