@@ -1,3 +1,6 @@
+"""
+A module that facilitates the handling of LDAP filters.
+"""
 # TODO: Implement
 
 from enum import Enum
@@ -39,13 +42,14 @@ class LDAPFilter:
         Create a new instance of LDAPFilter.
 
         Args:
-            operator (str): The filter join operator
+            operator (str)              : The filter join operator
+            *elements (LDAPFilter | str): elements composing the filter
         """
 
         self._operator: "LDAPFilterOperator | None" = LDAPFilterOperator(operator)
         self._elements: list["LDAPFilter"] = []
 
-        self._value: tuple[str, str, str] | None
+        self._value: tuple[str, str, str] | None = None
 
     # ****************************************************************
     # Methods
