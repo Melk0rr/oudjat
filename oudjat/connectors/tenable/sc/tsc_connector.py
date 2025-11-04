@@ -15,8 +15,8 @@ from oudjat.utils import (
     DataType,
     DatumDataType,
     FilterTupleExtType,
-    UtilsList,
     NoCredentialsError,
+    UtilsList,
 )
 
 from .tsc_asset_list_types import TSCAssetListType
@@ -92,6 +92,9 @@ class TenableSCConnector(Connector):
         Args:
             severities (list[str]) : severities to include in the filter (see cve.py)
         """
+
+        if len(severities) == 0:
+            severities = (1, 2, 3, 4)
 
         severity_str: str = ",".join([f"{Severity.from_score(sev).score}" for sev in severities])
         return (*TSCBuiltinFilter.VULNS_CRITICAL.value[:2], severity_str)
