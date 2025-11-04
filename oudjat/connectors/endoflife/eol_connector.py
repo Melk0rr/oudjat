@@ -31,7 +31,7 @@ class EndOfLifeConnector(Connector):
     # Methods
 
     @override
-    def connect(self) -> None:
+    def connect(self, **kwargs: Any) -> None:
         """
         Attempt to establish a connection to the API endpoint and retrieves product information if successful.
 
@@ -45,7 +45,7 @@ class EndOfLifeConnector(Connector):
 
         try:
             headers = {"Accept": "application/json"}
-            req = ConnectorMethod.GET(f"{self._target.geturl()}", headers=headers)
+            req = ConnectorMethod.GET(f"{self._target.geturl()}", headers=headers, **kwargs)
 
             if req.status_code == 200:
                 self._connection = req.json()
@@ -90,7 +90,7 @@ class EndOfLifeConnector(Connector):
         try:
             headers = {"Accept": "application/json"}
             req = ConnectorMethod.GET(
-                f"{self._target.geturl()}{endpoint}/{filter}", headers=headers, **payload
+                f"{self._target.geturl()}{endpoint.value}/{filter}", headers=headers, **payload
             )
 
             if req.status_code == 200:
