@@ -1,5 +1,6 @@
 """A module that defines Windows releases."""
 
+import os
 from typing import Any, NamedTuple
 
 from oudjat.utils import DataType
@@ -43,8 +44,8 @@ class MSRealeaseProps(NamedTuple):
             edition=rel_dictionary.get("edition", []),
         )
 
-
-release_import: DataType = FileUtils.import_json("./releases.jsonc")[0]
+dirname = os.path.dirname(os.path.abspath(__file__))
+release_import: DataType = FileUtils.import_json(f"{dirname}/releases.jsonc")[0]
 
 if not isinstance(release_import, dict):
     raise ValueError("Releases import must be a dictionary")
