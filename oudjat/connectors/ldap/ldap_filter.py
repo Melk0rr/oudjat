@@ -243,6 +243,10 @@ class LDAPFilter:
 
     # ****************************************************************
     # Methods
+    # TODO: Properties
+    # TODO: AND method
+    # TODO: OR method
+    # TODO: Add nodes method
 
     def _parse(self, str_filter: str) -> None:
         """
