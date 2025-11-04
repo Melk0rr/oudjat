@@ -7,6 +7,8 @@ import re
 from enum import Enum
 from typing import Any, Callable, NamedTuple
 
+import commentjson
+
 from .color_print import ColorPrint
 
 
@@ -67,7 +69,7 @@ class FileUtils:
         try:
             full_path = os.path.join(os.getcwd(), file_path)
             with open(full_path, "r", encoding="utf-8") as json_file:
-                json_data = json.load(json_file)
+                json_data = commentjson.load(json_file)
 
             if callback is not None:
                 json_data = callback(json_data)
