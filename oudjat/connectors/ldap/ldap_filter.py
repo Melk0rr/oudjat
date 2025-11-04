@@ -247,6 +247,7 @@ class LDAPFilter:
     # TODO: AND method
     # TODO: OR method
     # TODO: Add nodes method
+    # TODO: Escape special chars
 
     def _parse(self, str_filter: str) -> None:
         """
