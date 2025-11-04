@@ -20,11 +20,13 @@ maintainers = [
 license = { file = "LICENSE" }
 
 dependencies = [
-  "docopt",
-  "lxml",
   "beautifulsoup4",
-  "requests",
+  "commentjson",
+  "docopt",
   "keyring"
+  "json",
+  "lxml",
+  "requests",
 ]
 
 [project.urls]
