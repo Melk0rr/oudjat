@@ -49,10 +49,10 @@ class S1Connector(Connector):
         if not re.match(r"http(s?):", target):
             target = f"{scheme}://{target}"
 
-        self._target: ParseResult
+        self._target: "ParseResult"
         super().__init__(target=urlparse(target), username=username, password=api_token)
 
-        self._connection: requests.Session | None = None
+        self._connection: "requests.Session | None" = None
         self._DEFAULT_HEADERS: dict[str, str] = {"Content-Type": "application/json"}
 
     # ****************************************************************
@@ -196,10 +196,10 @@ class S1Connector(Connector):
 
     def agents(
         self,
-        site_ids: StrType | None = None,
+        site_ids: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
         infected: bool = False,
-        net_statuses: StrType | None = None,
+        net_statuses: "StrType | None" = None,
     ) -> DataType:
         """
         Return the agents based on the provided filter.
@@ -233,7 +233,7 @@ class S1Connector(Connector):
 
         return self.fetch(endpoint=S1Endpoint.AGENTS, payload=payload)
 
-    def move_agent_to_site(self, site_id: str, cpt_name: str) -> DataType:
+    def move_agent_to_site(self, site_id: str, cpt_name: str) -> "DataType":
         """
         Move an agent that matches the filter to a specified site based on its ID.
 
@@ -257,7 +257,7 @@ class S1Connector(Connector):
     # ****************************************************************
     # Methods: Users
 
-    def login_by_api_token(self) -> DataType:
+    def login_by_api_token(self) -> "DataType":
         """
         Log in to the API with an API token.
 
@@ -273,7 +273,7 @@ class S1Connector(Connector):
         payload = {"data": {"apiToken": self._api_token}}
         return self.fetch(endpoint=S1Endpoint.USERS_LOGIN_BY_API_TOKEN, payload=payload)
 
-    def logout(self, payload: dict[str, Any] | None = None) -> DataType:
+    def logout(self, payload: dict[str, Any] | None = None) -> "DataType":
         """
         Log out the authenticated user.
 
@@ -294,8 +294,8 @@ class S1Connector(Connector):
     # Methods: Applications
 
     def cves(
-        self, site_ids: StrType | None = None, payload: dict[str, Any] | None = None
-    ) -> DataType:
+        self, site_ids: "StrType | None" = None, payload: dict[str, Any] | None = None
+    ) -> "DataType":
         """
         Get known CVEs for applications installed on endpoints with 'Application Risk-enabled Agents'.
 
@@ -323,7 +323,7 @@ class S1Connector(Connector):
     # ****************************************************************
     # Methods: Groups
 
-    def groups(self, site_id: str | None, payload: dict[str, Any] | None = None) -> DataType:
+    def groups(self, site_id: str | None, payload: dict[str, Any] | None = None) -> "DataType":
         """
         Get data of groups that match the filter.
 
@@ -347,8 +347,8 @@ class S1Connector(Connector):
         return self.fetch(S1Endpoint.GROUPS, payload)
 
     def move_agent_to_group(
-        self, group_id: str, cpt_name: str | None = None, cpt_ids: StrType | None = None
-    ) -> DataType:
+        self, group_id: str, cpt_name: str | None = None, cpt_ids: "StrType | None" = None
+    ) -> "DataType":
         """
         Move an Agent that matches the filter to a specified group in the same site.
 
@@ -388,7 +388,7 @@ class S1Connector(Connector):
     # ****************************************************************
     # Methods: Sites
 
-    def sites_by_id(self, site_id: str, payload: dict[str, Any] | None = None) -> DataType:
+    def sites_by_id(self, site_id: str, payload: dict[str, Any] | None = None) -> "DataType":
         """
         Get the data of the Site matchin the provided ID. To get the ID, run "sites".
 
@@ -411,7 +411,7 @@ class S1Connector(Connector):
             S1Endpoint.SITES_BY_ID, payload=payload or {}, path_fmt={"siteId": site_id}
         )
 
-    def sites(self, payload: dict[str, Any] | None = None) -> DataType:
+    def sites(self, payload: dict[str, Any] | None = None) -> "DataType":
         """
         Retrieve the sites that match the provided filters.
 
@@ -433,10 +433,10 @@ class S1Connector(Connector):
 
     def threats(
         self,
-        incident_statuses: StrType | None = None,
-        incident_statuses_nin: StrType | None = None,
+        incident_statuses: "StrType | None" = None,
+        incident_statuses_nin: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
-    ) -> DataType:
+    ) -> "DataType":
         """
         Get data of threats that match the filter.
 
