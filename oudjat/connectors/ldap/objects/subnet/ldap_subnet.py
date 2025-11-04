@@ -4,9 +4,11 @@ from typing import TYPE_CHECKING, Any, override
 
 from oudjat.assets.network.subnet import Subnet
 
+from ..ldap_object import LDAPObject
+
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
-    from ..ldap_object import LDAPCapabilities, LDAPObject
+    from ..ldap_object import LDAPCapabilities
 
 
 class LDAPSubnet(LDAPObject):

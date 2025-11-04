@@ -2,7 +2,7 @@
 
 from typing import Any, override
 
-from oudjat.utils.logical_operations import LogicalOperation
+from oudjat.utils.operators.logical_operators import LogicalOperation
 
 from .definitions import ip_int_to_str
 from .ipv4 import IPv4, IPv4Mask

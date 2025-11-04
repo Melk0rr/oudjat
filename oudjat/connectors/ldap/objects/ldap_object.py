@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 LDAPObjectBoundType = TypeVar("LDAPObjectBoundType", bound="LDAPObject")
 
 
-class LDAPObjectOptions(NamedTuple, Generic["LDAPObjectBoundType"]):
+class LDAPObjectOptions(NamedTuple, Generic[LDAPObjectBoundType]):
     """
     Helper class to handle passing of LDAPObject derivated and dedicated method to retrive this specific type of LDAPObject.
 
@@ -25,8 +25,8 @@ class LDAPObjectOptions(NamedTuple, Generic["LDAPObjectBoundType"]):
 
     """
 
-    cls: type["LDAPObjectBoundType"]
-    fetch: Callable[..., dict[int | str, "LDAPObjectBoundType"]]
+    cls: type[LDAPObjectBoundType]
+    fetch: Callable[..., dict[int | str, LDAPObjectBoundType]]
 
 
 class LDAPCapabilities(NamedTuple):

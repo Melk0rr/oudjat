@@ -1,6 +1,6 @@
 """A module that centralize package global variables."""
 
-from oudjat.utils.logical_operations import LogicalOperation
+from oudjat.utils.operators.logical_operators import LogicalOperation
 
 URL_REGEX = r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
 

@@ -6,11 +6,12 @@ from typing import TYPE_CHECKING, Any, override
 from oudjat.utils.types import StrType
 
 from ..definitions import UUID_REG
+from ..ldap_object import LDAPObject
 from ..ldap_object_types import LDAPObjectType
 
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
-    from ..ldap_object import LDAPCapabilities, LDAPObject
+    from ..ldap_object import LDAPCapabilities
 
 
 class LDAPOrganizationalUnit(LDAPObject):

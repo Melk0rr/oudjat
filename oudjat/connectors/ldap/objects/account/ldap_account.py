@@ -7,11 +7,12 @@ from typing import TYPE_CHECKING, Any, override
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
 from oudjat.utils.types import StrType
 
-from ..ldap_object import LDAPCapabilities, LDAPObject
+from ..ldap_object import LDAPObject
 from .ldap_account_flags import LDAPAccountFlag
 
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
+    from ..ldap_object import LDAPCapabilities
 
 
 def acc_date_str(date: datetime | None) -> str:
