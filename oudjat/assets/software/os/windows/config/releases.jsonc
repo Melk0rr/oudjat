@@ -1,6 +1,7 @@
 {
   // Windows releases
   "windows": [
+  // Windows 11
     {
       "os": "Windows",
       "releaseLabel": "11 24H2",
@@ -81,20 +82,6 @@
     },
     {
       "os": "Windows",
-      "releaseLabel": "10 22H2",
-      "releaseDate": "2022-10-18",
-      "support": "2025-10-14",
-      "eol": "2025-10-14",
-      "latest": "10.0.19045",
-      "link": "https://learn.microsoft.com/windows/release-health/release-information",
-      "lts": false,
-      "edition": [
-        "E",
-        "W"
-      ]
-    },
-    {
-      "os": "Windows",
       "releaseLabel": "11 22H2",
       "releaseDate": "2022-09-20",
       "support": "2025-10-14",
@@ -116,6 +103,47 @@
       "link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
       "lts": false,
       "edition": [
+        "W"
+      ]
+    },
+    {
+      "os": "Windows",
+      "releaseLabel": "11 21H2",
+      "releaseDate": "2021-10-04",
+      "support": "2024-10-08",
+      "eol": "2024-10-08",
+      "latest": "10.0.22000",
+      "link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
+      "lts": false,
+      "edition": [
+        "E"
+      ]
+    },
+    {
+      "os": "Windows",
+      "releaseLabel": "11 21H2",
+      "releaseDate": "2021-10-04",
+      "support": "2023-10-10",
+      "eol": "2023-10-10",
+      "latest": "10.0.22000",
+      "link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
+      "lts": false,
+      "edition": [
+        "W"
+      ]
+    },
+    // Windows 10
+    {
+      "os": "Windows",
+      "releaseLabel": "10 22H2",
+      "releaseDate": "2022-10-18",
+      "support": "2025-10-14",
+      "eol": "2025-10-14",
+      "latest": "10.0.19045",
+      "link": "https://learn.microsoft.com/windows/release-health/release-information",
+      "lts": false,
+      "edition": [
+        "E",
         "W"
       ]
     },
@@ -166,32 +194,6 @@
       "eol": "2023-06-13",
       "latest": "10.0.19044",
       "link": "https://learn.microsoft.com/windows/release-health/release-information",
-      "lts": false,
-      "edition": [
-        "W"
-      ]
-    },
-    {
-      "os": "Windows",
-      "releaseLabel": "11 21H2",
-      "releaseDate": "2021-10-04",
-      "support": "2024-10-08",
-      "eol": "2024-10-08",
-      "latest": "10.0.22000",
-      "link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
-      "lts": false,
-      "edition": [
-        "E"
-      ]
-    },
-    {
-      "os": "Windows",
-      "releaseLabel": "11 21H2",
-      "releaseDate": "2021-10-04",
-      "support": "2023-10-10",
-      "eol": "2023-10-10",
-      "latest": "10.0.22000",
-      "link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
       "lts": false,
       "edition": [
         "W"
@@ -501,6 +503,7 @@
         "IOT"
       ]
     },
+    // Windows 8.1
     {
       "os": "Windows",
       "releaseLabel": "8.1",
@@ -515,6 +518,7 @@
         "W"
       ]
     },
+    // Windows 8
     {
       "os": "Windows",
       "releaseLabel": "8",
@@ -529,6 +533,7 @@
         "W"
       ]
     },
+    // Windows 7
     {
       "os": "Windows",
       "releaseLabel": "7 SP1",
@@ -543,6 +548,7 @@
         "W"
       ]
     },
+    // Windows Vista
     {
       "os": "Windows",
       "releaseLabel": "Vista SP2",
@@ -557,6 +563,7 @@
         "W"
       ]
     },
+    // Windows XP
     {
       "os": "Windows",
       "releaseLabel": "XP SP3",
