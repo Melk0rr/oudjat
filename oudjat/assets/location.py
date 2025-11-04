@@ -1,5 +1,7 @@
 """A module that defines the notion of location."""
 
+from typing import override
+
 from ..assets import Asset, AssetType
 from ..assets.network.subnet import Subnet
 from .generic_identifiable import GenericIdentifiable
@@ -192,3 +194,14 @@ class Location(GenericIdentifiable):
             return self._subnet[f"{subnet}"].contains(ip)
 
         return any([net.contains(ip) for net in self._subnet.values()])
+
+    @override
+    def __str__(self) -> str:
+        """
+        Convert the current instance into a string.
+
+        Returns:
+            str: String representation of the current instance
+        """
+
+        return self._name

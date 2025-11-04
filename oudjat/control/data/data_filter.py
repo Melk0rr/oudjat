@@ -311,8 +311,8 @@ class DataFilter:
     @staticmethod
     def filter_data(
         data_to_filter: "DataType",
-        filters: "DataFilter" | list["DataFilter"] | None = None,
-    ) -> DataType:
+        filters: "DataFilter | list[DataFilter] | None" = None,
+    ) -> "DataType":
         """
         Filter data based on given filters.
 

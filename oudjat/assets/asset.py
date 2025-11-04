@@ -24,10 +24,10 @@ class Asset(GenericIdentifiable, ABC):
         self,
         asset_id: int | str,
         name: str,
-        asset_type: AssetType,
+        asset_type: "AssetType",
         label: str | None = None,
         description: str | None = None,
-        location: Location | list[Location] | None = None,
+        location: "Location | list[Location] | None" = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -48,8 +48,8 @@ class Asset(GenericIdentifiable, ABC):
 
         super().__init__(gid=asset_id, name=name, label=label or "", description=description or "")
 
-        self._asset_type: AssetType = asset_type
-        self._location: dict[int | str, Location] = {}
+        self._asset_type: "AssetType" = asset_type
+        self._location: dict[int | str, "Location"] = {}
 
         if location is not None:
             self.set_location_from_instance(location)
@@ -58,13 +58,13 @@ class Asset(GenericIdentifiable, ABC):
     # Methods
 
     @property
-    def location(self) -> dict[int | str, Location]:
+    def location(self) -> dict[int | str, "Location"]:
         """The location property."""
 
         return self._location
 
     @location.setter
-    def location(self, new_location: dict[int | str, Location]) -> None:
+    def location(self, new_location: dict[int | str, "Location"]) -> None:
         """
         Set the location of the current asset.
 
@@ -75,7 +75,7 @@ class Asset(GenericIdentifiable, ABC):
         self._location = new_location
 
     @property
-    def asset_type(self) -> AssetType:
+    def asset_type(self) -> "AssetType":
         """
         Return the asset type of the current object.
 
@@ -85,7 +85,7 @@ class Asset(GenericIdentifiable, ABC):
 
         return self._asset_type
 
-    def set_location_from_instance(self, new_location: Location | list[Location]) -> None:
+    def set_location_from_instance(self, new_location: "Location | list[Location]") -> None:
         """
         Setter for asset location.
 
