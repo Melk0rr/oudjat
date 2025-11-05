@@ -306,6 +306,10 @@ class LDAPFilter:
             self._operator = LDAPFilterOperator(tuple_filter[0])
             self._nodes = [ LDAPFilter(tuple_filter=sub) for sub in tuple_filter[1] ]
 
+    def add_node(self, node: "LDAPFilter") -> None:
+        if self._operator is not None:
+            self._nodes.append(node)
+
     @override
     def __str__(self) -> str:
         """
