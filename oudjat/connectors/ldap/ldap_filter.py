@@ -1,7 +1,6 @@
 """
 A module that facilitates the handling of LDAP filters.
 """
-# TODO: Implement
 
 from enum import Enum
 from typing import TypeAlias, override
@@ -243,11 +242,43 @@ class LDAPFilter:
 
     # ****************************************************************
     # Methods
-    # TODO: Properties
     # TODO: AND method
     # TODO: OR method
     # TODO: Add nodes method
     # TODO: Escape special chars
+
+    @property
+    def value(self) -> tuple[str, str, str] | None:
+        """
+        Return the value of the filter.
+
+        Returns:
+            tuple[str, str, str] | None: The tuple value if the filter is a simple node. Else None
+        """
+
+        return self._value
+
+    @property
+    def operator(self) -> "LDAPFilterOperator | None":
+        """
+        Return the filter operator.
+
+        Returns:
+            LDAPFilterOperator | None: The operator if the filter is composed multiple nodes. Else None
+        """
+
+        return self._operator
+
+    @property
+    def nodes(self) -> list["LDAPFilter"]:
+        """
+        Return the sub filter nodes of the current filter.
+
+        Returns:
+            list[LDAPFilter]: A list of the nodes composing the filter. Empty if the filter is simple
+        """
+
+        return self._nodes
 
     def _parse(self, str_filter: str) -> None:
         """
