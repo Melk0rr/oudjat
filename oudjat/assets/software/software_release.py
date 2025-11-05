@@ -40,7 +40,7 @@ class SoftwareRelease:
 
         # TODO: fully implement SoftwareReleaseVersion
         self._software: str = software_name
-        self._version: SoftwareReleaseVersion = SoftwareReleaseVersion(version)
+        self._version: "SoftwareReleaseVersion" = SoftwareReleaseVersion(version)
         self._label: str = release_label
 
         try:
@@ -53,7 +53,7 @@ class SoftwareRelease:
             )
 
         self._release_date: datetime = release_date
-        self._support: SoftwareReleaseSupportList = SoftwareReleaseSupportList()
+        self._support: "SoftwareReleaseSupportList" = SoftwareReleaseSupportList()
 
         # NOTE: maybe convert vulnerabilities into a dictionary (CVE instances ?) if needed
         self._vulnerabilities: set[str] = set()
@@ -130,6 +130,17 @@ class SoftwareRelease:
         return self._release_date
 
     @property
+    def key(self) -> str:
+        """
+        Return a unique release key based on version and label.
+
+        Returns:
+            str: Release key
+        """
+
+        return f"{self._version} - {self._label}"
+
+    @property
     def full_name(self) -> str:
         """
         Return the release full name.
@@ -185,7 +196,7 @@ class SoftwareRelease:
 
         return SoftwareReleaseSupportList(*self._support.get(edition, lts=lts))
 
-    def get_ongoing_support(self) -> list[SoftwareReleaseSupport]:
+    def get_ongoing_support(self) -> list["SoftwareReleaseSupport"]:
         """
         Return ongoing support instances.
 
@@ -195,7 +206,7 @@ class SoftwareRelease:
 
         return [s for s in self._support if s.is_ongoing]
 
-    def get_retired_support(self) -> list[SoftwareReleaseSupport]:
+    def get_retired_support(self) -> list["SoftwareReleaseSupport"]:
         """
         Return retired support instances.
 
@@ -205,7 +216,7 @@ class SoftwareRelease:
 
         return [s for s in self._support if not s.is_ongoing]
 
-    def add_support(self, support: SoftwareReleaseSupport) -> None:
+    def add_support(self, support: "SoftwareReleaseSupport") -> None:
         """
         Add a support instance to the current release.
 
@@ -315,12 +326,12 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
         Create a new instance of SoftwareReleaseDict.
         """
 
-        self._data: dict[str, ReleaseType] = {}
+        self._data: dict[str, "ReleaseType"] = {}
 
     # ****************************************************************
     # Methods
 
-    def __getitem__(self, key: str) -> ReleaseType:
+    def __getitem__(self, key: str) -> "ReleaseType":
         """
         Return a SoftwareReleaseBound element based on its key.
 
@@ -333,7 +344,7 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
 
         return self._data[key]
 
-    def __setitem__(self, key: str, value: ReleaseType) -> None:
+    def __setitem__(self, key: str, value: "ReleaseType") -> None:
         """
         Set the SoftwareRelease in the dictionary for the provided key.
 
@@ -354,7 +365,7 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
 
         return iter(self._data)
 
-    def get(self, key: str, default_value: Any = None) -> ReleaseType | None:
+    def get(self, key: str, default_value: Any = None) -> "ReleaseType | None":
         """
         Return a SoftwareReleaseBound element based on its key.
 
@@ -401,7 +412,7 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
 
         return self._data.items()
 
-    def find(self, rel_ver: str, rel_label: str | None = None) -> ReleaseType | None:
+    def find(self, rel_ver: str, rel_label: str | None = None) -> "ReleaseType | None":
         """
         Find the given release.
 
@@ -421,7 +432,7 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
 
         return self.get(key, None)
 
-    def find_by_str(self, search_str: str) -> list[ReleaseType]:
+    def find_by_str(self, search_str: str) -> list["ReleaseType"]:
         """
         Search for elements with a key matching the provided search string.
 
@@ -433,3 +444,4 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
         """
 
         return [release for key, release in self.items() if search_str in key]
+

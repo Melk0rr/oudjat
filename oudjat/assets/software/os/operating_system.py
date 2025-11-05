@@ -38,8 +38,53 @@ class OSFamily(Enum):
 
         return self._value_["pattern"]
 
+class OSRelease(SoftwareRelease):
+    """Specific software release for OperatingSystem."""
 
-class OperatingSystem(Software["OSRelease"]):
+    # ****************************************************************
+    # Methods
+
+    @property
+    @override
+    def name(self) -> str:
+        """
+        Return the OS release name. Must be implemented by overloading classes.
+
+        Returns:
+            str: forged name of the OS release
+        """
+
+        raise NotImplementedError(
+            f"{__class__.__name__}.get_name()::Method must be implemented by the overloading class"
+        )
+
+    @property
+    def os(self) -> str:
+        """
+        Return the operating system instance tide to the current release.
+
+        Returns:
+            OperatingSystem: operating system instance of the current release
+        """
+
+        return self._software
+
+    @override
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the current instance into a dictionary.
+
+        Returns:
+            Dict: dictionary representation of the current instance
+        """
+
+        base_dict = super().to_dict()
+        os_name = base_dict.pop("software")
+
+        return {"os": os_name, **base_dict}
+
+
+class OperatingSystem(Software[OSRelease]):
     """A class to describe operating systems."""
 
     # ****************************************************************
@@ -157,49 +202,4 @@ class OperatingSystem(Software["OSRelease"]):
             f"{__class__.__name__}.find_version_in_str({search_str})::Method must be implemented by the overloading class"
         )
 
-
-class OSRelease(SoftwareRelease):
-    """Specific software release for OperatingSystem."""
-
-    # ****************************************************************
-    # Methods
-
-    @property
-    @override
-    def name(self) -> str:
-        """
-        Return the OS release name. Must be implemented by overloading classes.
-
-        Returns:
-            str: forged name of the OS release
-        """
-
-        raise NotImplementedError(
-            f"{__class__.__name__}.get_name()::Method must be implemented by the overloading class"
-        )
-
-    @property
-    def os(self) -> str:
-        """
-        Return the operating system instance tide to the current release.
-
-        Returns:
-            OperatingSystem: operating system instance of the current release
-        """
-
-        return self._software
-
-    @override
-    def to_dict(self) -> dict[str, Any]:
-        """
-        Convert the current instance into a dictionary.
-
-        Returns:
-            Dict: dictionary representation of the current instance
-        """
-
-        base_dict = super().to_dict()
-        os_name = base_dict.pop("software")
-
-        return {"os": os_name, **base_dict}
 

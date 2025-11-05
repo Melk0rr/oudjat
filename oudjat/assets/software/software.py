@@ -7,7 +7,6 @@ from ..asset import Asset
 from ..asset_type import AssetType
 from .software_edition import SoftwareEdition, SoftwareEditionDict
 from .software_release import ReleaseType, SoftwareReleaseDict
-from .software_release_version import SoftwareReleaseVersion
 
 
 class SoftwareType(IntEnum):
@@ -59,9 +58,9 @@ class Software(Asset, Generic[ReleaseType]):
             editor = [editor]
 
         self._editor: list[str] | None = editor
-        self._type: SoftwareType = software_type
-        self._releases: SoftwareReleaseDict[ReleaseType] = SoftwareReleaseDict[ReleaseType]()
-        self._editions: SoftwareEditionDict = SoftwareEditionDict()
+        self._type: "SoftwareType" = software_type
+        self._releases: "SoftwareReleaseDict[ReleaseType]" = SoftwareReleaseDict[ReleaseType]()
+        self._editions: "SoftwareEditionDict" = SoftwareEditionDict()
 
     # ****************************************************************
     # Methods
@@ -100,7 +99,7 @@ class Software(Asset, Generic[ReleaseType]):
         return self._releases
 
     @property
-    def type(self) -> SoftwareType:
+    def type(self) -> "SoftwareType":
         """
         Getter for software type.
 
@@ -111,7 +110,7 @@ class Software(Asset, Generic[ReleaseType]):
         return self._type
 
     @property
-    def editions(self) -> SoftwareEditionDict:
+    def editions(self) -> "SoftwareEditionDict":
         """
         Return the editions this software can have.
 
@@ -135,7 +134,7 @@ class Software(Asset, Generic[ReleaseType]):
 
         return self.releases.find(rel_ver, rel_label) is not None
 
-    def add_release(self, new_release: ReleaseType) -> None:
+    def add_release(self, new_release: "ReleaseType") -> None:
         """
         Add a release to the list of software releases.
 
@@ -146,9 +145,8 @@ class Software(Asset, Generic[ReleaseType]):
             This method does not allow adding non-SoftwareRelease objects and returns silently if so.
         """
 
-        new_rel_ver: SoftwareReleaseVersion = new_release.version
-        if f"{new_rel_ver} - {new_release.label}" not in self.releases.keys():
-            self.releases[str(new_rel_ver)] = new_release
+        if new_release.key not in self.releases.keys():
+            self.releases[new_release.key] = new_release
 
     def find_release(self, rel_ver: str, rel_label: str | None = None) -> "ReleaseType | None":
         """
@@ -164,7 +162,7 @@ class Software(Asset, Generic[ReleaseType]):
 
         return self.releases.find(rel_ver, rel_label)
 
-    def retired_releases(self) -> list[ReleaseType]:
+    def retired_releases(self) -> list["ReleaseType"]:
         """
         Get a list of retired releases.
 
@@ -174,7 +172,7 @@ class Software(Asset, Generic[ReleaseType]):
 
         return [r for r in self.releases.values() if not r.is_supported()]
 
-    def supported_releases(self) -> list[ReleaseType]:
+    def supported_releases(self) -> list["ReleaseType"]:
         """
         Get a list of released that are currently supported.
 
@@ -184,7 +182,7 @@ class Software(Asset, Generic[ReleaseType]):
 
         return [r for r in self.releases.values() if r.is_supported()]
 
-    def get_matching_editions(self, test_str: str) -> list[SoftwareEdition]:
+    def get_matching_editions(self, test_str: str) -> list["SoftwareEdition"]:
         """
         Return the editions which pattern matches the given string.
 

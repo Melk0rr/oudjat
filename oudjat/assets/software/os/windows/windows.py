@@ -203,7 +203,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
             )
 
             self.add_release(win_rel)
-            self.releases[str(win_rel.version)][win_rel.label].add_support(win_sup)
+            self.releases[win_rel.key].add_support(win_sup)
 
     # ****************************************************************
     # Static methods
