@@ -240,5 +240,3 @@ class LDAPGroup(LDAPObject):
             "member_names": self.group.member_names,
         }
 
-
-# TODO: implement an LDAPGroupList to handle lists of LDAPGroup and build membership
