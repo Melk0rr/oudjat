@@ -214,37 +214,36 @@ class LDAPFilter:
 
     def __init__(
         self,
-        str_filter: str | None = None,
-        tuple_filter: "LDAPFilterParsedTupleType | None" = None,
-        operator: str | None = None,
+        filter_input: "LDAPFilterParsedTupleType | str | None" = None,
+        operator: "str | LDAPFilterOperator | None" = None,
         *elements: "LDAPFilter",
     ) -> None:
         """
         Create a new instance of LDAPFilter.
 
         Args:
-            str_filter (str)                        : A string representation of the filter
-            tuple_filter (LDAPFilterParsedTupleType): A tuple representation of the filter
-            operator (str)                          : The filter join operator
-            *elements (LDAPFilter | str)            : elements composing the filter
+            filter_input (str | LDAPFilterParsedTupleType | None): A string representation of the filter
+            operator (str)                                       : The filter join operator
+            *elements (LDAPFilter | str)                         : Elements composing the filter
         """
 
-        self._operator: "LDAPFilterOperator | None" = LDAPFilterOperator(operator) if operator else None
-        self._nodes: list["LDAPFilter"] = list(elements) or []
+        self._operator: "LDAPFilterOperator | None" = None
+        if operator is not None and not isinstance(operator, LDAPFilterOperator):
+            operator = LDAPFilterOperator(operator)
 
+        self._operator = operator
+
+        self._nodes: list["LDAPFilter"] = list(elements) or []
         self._value: tuple[str, str, str] | None = None
 
-        if str_filter:
-            self._parse(str_filter)
+        if isinstance(filter_input, str):
+            self._parse(filter_input)
 
-        elif tuple_filter:
-            self._from_tuple(tuple_filter)
+        elif isinstance(filter_input, tuple):
+            self._from_tuple(filter_input)
 
     # ****************************************************************
     # Methods
-    # TODO: AND method
-    # TODO: OR method
-    # TODO: Add nodes method
     # TODO: Escape special chars
 
     @property
@@ -304,11 +303,45 @@ class LDAPFilter:
 
         elif len(tuple_filter) == 2:
             self._operator = LDAPFilterOperator(tuple_filter[0])
-            self._nodes = [ LDAPFilter(tuple_filter=sub) for sub in tuple_filter[1] ]
+            self._nodes = [ LDAPFilter(filter_input=sub) for sub in tuple_filter[1] ]
 
     def add_node(self, node: "LDAPFilter") -> None:
+        """
+        Add a new node to the current filter if its operator is not None.
+
+        Args:
+            node (LDAPFilter): New node / sub-filter to add to the current filter
+        """
+
         if self._operator is not None:
             self._nodes.append(node)
+
+    def __and__(self, other: "LDAPFilter") -> "LDAPFilter":
+        """
+        Join the current filter with another one using & (AND) operator.
+
+        Args:
+            other (LDAPFilter): Another LDAP filter to join with the current one
+
+        Returns:
+            LDAPFilter: Combined LDAP filter
+        """
+
+        return LDAPFilter(None, LDAPFilterOperator.AND, self, other)
+
+
+    def __or__(self, other: "LDAPFilter") -> "LDAPFilter":
+        """
+        Join the current filter with another one using | (OR) operator.
+
+        Args:
+            other (LDAPFilter): Another LDAP filter to join with the current one
+
+        Returns:
+            LDAPFilter: Combined LDAP filter
+        """
+
+        return LDAPFilter(None, LDAPFilterOperator.OR, self, other)
 
     @override
     def __str__(self) -> str:
