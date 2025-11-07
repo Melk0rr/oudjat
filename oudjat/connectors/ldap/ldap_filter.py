@@ -52,6 +52,19 @@ class LDAPFilterComparisonOperator(Enum):
 LDAPFilterParsedTupleType: TypeAlias = tuple[str, str, str] | tuple[str, list[tuple[str, str, str]]]
 
 
+class LDAPFilterObjectCtg(Enum):
+    """
+    A helper class to list valid LDAP filter 'objectCategory' values.
+    """
+
+    COMPUTER = "computer"
+    CONTACT = "contact"
+    GROUP = "group"
+    ORGPERSON = "organizationalPerson"
+    PERSON = "person"
+    USER = "user"
+
+
 class LDAPFilterParser:
     """
     A class to parse an LDAP filter.
