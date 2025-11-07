@@ -333,6 +333,17 @@ class LDAPFilter:
 
         return self._operator
 
+    @operator.setter
+    def operator(self, new_operator: "LDAPFilterOperator") -> None:
+        """
+        Set a new operator for the current filter.
+
+        Args:
+            new_operator (LDAPFilterOperator): New operator value
+        """
+
+        self._operator = new_operator
+
     @property
     def nodes(self) -> list["LDAPFilter"]:
         """
@@ -343,6 +354,16 @@ class LDAPFilter:
         """
 
         return self._nodes
+
+    def set_operator_from_str(self, new_operator: str) -> None:
+        """
+        Set a new operator for the current filter based on a string.
+
+        Args:
+            new_operator (str): New operator string value
+        """
+
+        self._operator = LDAPFilterOperator(new_operator)
 
     def _parse(self, str_filter: str) -> None:
         """
