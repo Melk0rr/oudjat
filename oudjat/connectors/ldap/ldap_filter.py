@@ -97,6 +97,7 @@ class LDAPFilterStr(Enum):
     NAME = "(name{cmp_operator}{value})"
     SAN = "(sAMAccountName{cmp_operator}{value})"
     SAT = "(sAMAccountType{cmp_operator}{value})"
+    SN = "(sn{operator}{value})"
     TITLE = "(Title{cmp_operator}{value})"
     UAC = "(userAccountControl:1.2.840.113556.1.4.803:{cmp_operator}{uac_value})"
 
