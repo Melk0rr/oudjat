@@ -424,3 +424,43 @@ class LDAPFilter:
 
     # ****************************************************************
     # Static methods
+
+    @staticmethod
+    def dn(dn: "StrType") -> "LDAPFilter":
+        """
+        Return an LDAPFilter instance based on provided distinguished names.
+
+        Args:
+            dn (str | list[str]): List of distinguished names to filter
+
+        Returns:
+            LDAPFilter: An LDAPFilter instance based on the provided distinguished names
+        """
+
+        if not isinstance(dn, list):
+            dn = [dn]
+
+        return LDAPFilter(f"(&{''.join(list(map(LDAPFilterStr.DN, dn)))})")
+
+    @staticmethod
+    def object_cls(
+        obj_cls: "StrType", operator: "LDAPFilterOperator " = LDAPFilterOperator.OR
+    ) -> "LDAPFilter":
+        """
+        Return an LDAPFilter based on the provided object classes.
+
+        Args:
+            obj_cls (str | list[str])    : List of object class to filter
+            operator (LDAPFilterOperator): Operator used to join the object class values
+
+        Returns:
+            LDAPFilter: An LDAPFilter instance based on the provided arguments
+        """
+
+        if not isinstance(obj_cls, list):
+            obj_cls = [obj_cls]
+
+        def fmt_cls(cls_to_fmt: str) -> str:
+            return LDAPFilterStr.CLS(cls_to_fmt)
+
+        return LDAPFilter(f"{operator.value}{''.join(list(map(fmt_cls, obj_cls)))}")
