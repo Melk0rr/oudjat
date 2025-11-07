@@ -440,7 +440,7 @@ class LDAPFilter:
             str: String representation of the current LDAP filter
         """
 
-        filter_str = "()"
+        filter_str = ""
         if self._value is not None:
             filter_str = "".join(self._value)
 
