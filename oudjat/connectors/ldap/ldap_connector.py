@@ -13,6 +13,7 @@ from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import StrType
 
+from .ldap_filter import LDAPFilter
 from .objects.ldap_entry import LDAPEntry
 from .objects.ldap_object_types import LDAPObjectType
 
@@ -266,8 +267,8 @@ class LDAPConnector(Connector):
         self,
         search_type: "LDAPObjectType" = LDAPObjectType.DEFAULT,
         search_base: str | None = None,
-        search_filter: str | None = None,
-        attributes: StrType | None = None,
+        search_filter: "LDAPFilter | str | None" = None,
+        attributes: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
     ) -> list["LDAPEntry"]:
         """
@@ -301,7 +302,10 @@ class LDAPConnector(Connector):
             formated_filter = search_filter
 
         elif search_filter is not None:
-            formated_filter = f"(&{formated_filter}{search_filter})"
+            if not isinstance(search_filter, LDAPFilter):
+                search_filter = LDAPFilter(search_filter)
+
+            formated_filter = formated_filter & search_filter
 
         results = self.connection.extend.standard.paged_search(
             search_filter=formated_filter,

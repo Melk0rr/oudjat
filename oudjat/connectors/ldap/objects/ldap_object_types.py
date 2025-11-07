@@ -5,6 +5,8 @@ from typing import Any, NamedTuple
 
 from oudjat.utils.types import StrType
 
+from ..ldap_filter import LDAPFilter, LDAPFilterObjectCls, LDAPFilterObjectCtg, LDAPFilterStr
+
 
 class LDAPObjectTypeProps(NamedTuple):
     """
@@ -17,19 +19,20 @@ class LDAPObjectTypeProps(NamedTuple):
     """
 
     object_cls: str
-    filter: str
+    filter: "LDAPFilter"
     attributes: StrType
+
 
 class LDAPObjectType(Enum):
     """These are the default LDAP search parameters per object type."""
 
     DEFAULT = LDAPObjectTypeProps(
-        object_cls="*", filter="(objectClass=*)", attributes="*"
+        object_cls="*", filter=LDAPFilter(LDAPFilterStr.CLS("*")), attributes="*"
     )
 
     COMPUTER = LDAPObjectTypeProps(
         object_cls="computer",
-        filter="(objectClass=computer)",
+        filter=LDAPFilter(LDAPFilterStr.CTG(LDAPFilterObjectCtg.COMPUTER.value)),
         attributes=[
             "accountExpires",
             "cn",
@@ -55,7 +58,7 @@ class LDAPObjectType(Enum):
 
     GPO = LDAPObjectTypeProps(
         object_cls="groupPolicyContainer",
-        filter="(objectClass=groupPolicyContainer)",
+        filter=LDAPFilter(LDAPFilterStr.CLS(LDAPFilterObjectCls.GPO.value)),
         attributes=[
             "displayName",
             "gPCFileSysPath",
@@ -73,7 +76,7 @@ class LDAPObjectType(Enum):
 
     GROUP = LDAPObjectTypeProps(
         object_cls="group",
-        filter="(objectClass=group)",
+        filter=LDAPFilter(LDAPFilterStr.CTG(LDAPFilterObjectCtg.GROUP.value)),
         attributes=[
             "cn",
             "description",
@@ -91,7 +94,7 @@ class LDAPObjectType(Enum):
 
     OU = LDAPObjectTypeProps(
         object_cls="organizationalUnit",
-        filter="(objectClass=organizationalUnit)",
+        filter=LDAPFilter(LDAPFilterStr.CLS(LDAPFilterObjectCls.OU.value)),
         attributes=[
             "description",
             "gpLink",
@@ -106,7 +109,7 @@ class LDAPObjectType(Enum):
 
     SUBNET = LDAPObjectTypeProps(
         object_cls="subnet",
-        filter="(objectClass=subnet)",
+        filter=LDAPFilter(LDAPFilterStr.CLS(LDAPFilterObjectCls.SUBNET.value)),
         attributes=[
             "cn",
             "description",
@@ -121,7 +124,10 @@ class LDAPObjectType(Enum):
 
     USER = LDAPObjectTypeProps(
         object_cls="user",
-        filter="(&(objectClass=user)(!(objectClass=computer)))",
+        filter=(
+            LDAPFilter(LDAPFilterStr.CTG(LDAPFilterObjectCtg.PERSON.value))
+            & LDAPFilter(LDAPFilterStr.CLS(LDAPFilterObjectCls.USER.value))
+        ),
         attributes=[
             "accountExpires",
             "adminCount",
@@ -166,7 +172,7 @@ class LDAPObjectType(Enum):
         return self._value_.object_cls
 
     @property
-    def filter(self) -> str:
+    def filter(self) -> "LDAPFilter":
         """
         Return the filter property of an LDAPObjectType. This property is used to make LDAP queries.
 
@@ -225,4 +231,3 @@ class LDAPObjectType(Enum):
             (t.name for t in LDAPObjectType if entry_obj_cls and entry_obj_cls[-1] == t.object_cls),
             "*",
         )
-
