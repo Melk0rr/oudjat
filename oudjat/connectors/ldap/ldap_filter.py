@@ -80,7 +80,7 @@ class LDAPFilterObjectCls(Enum):
     USER = "user"
 
 
-class LDAPFilterStr(Enum):
+class LDAPFilterStrFormat(Enum):
     """
     A helper enumeration of built-in LDAP filters.
     """
@@ -102,7 +102,9 @@ class LDAPFilterStr(Enum):
     UAC = "(userAccountControl:1.2.840.113556.1.4.803:{cmp_operator}{uac_value})"
 
     def __call__(
-        self, value: str, cmp_operator: "LDAPFilterComparisonOperator" = LDAPFilterComparisonOperator.EQ
+        self,
+        value: str,
+        cmp_operator: "LDAPFilterComparisonOperator" = LDAPFilterComparisonOperator.EQ,
     ) -> str:
         """
         Format the LDAPFilter string with the provided operator and value.
@@ -452,41 +454,29 @@ class LDAPFilter:
     # Static methods
 
     @staticmethod
-    def dn(dn: "StrType") -> "LDAPFilter":
-        """
-        Return an LDAPFilter instance based on provided distinguished names.
-
-        Args:
-            dn (str | list[str]): List of distinguished names to filter
-
-        Returns:
-            LDAPFilter: An LDAPFilter instance based on the provided distinguished names
-        """
-
-        if not isinstance(dn, list):
-            dn = [dn]
-
-        return LDAPFilter(f"(&{''.join(list(map(LDAPFilterStr.DN, dn)))})")
-
-    @staticmethod
-    def object_cls(
-        obj_cls: "StrType", operator: "LDAPFilterOperator " = LDAPFilterOperator.OR
+    def filter_from_values(
+        filter_fmt: "LDAPFilterStrFormat | str", filter_values: "StrType", operator: "LDAPFilterOperator" = LDAPFilterOperator.OR
     ) -> "LDAPFilter":
         """
-        Return an LDAPFilter based on the provided object classes.
+        Return an LDAPFilter based on the provided format and values.
 
         Args:
-            obj_cls (str | list[str])    : List of object class to filter
-            operator (LDAPFilterOperator): Operator used to join the object class values
+            filter_fmt (LDAPFilterStrFormat): Which format of filter to use
+            filter_values (str | list[str]) : Values of the formats
+            operator (LDAPFilterOperator)   : Operator to join the formats
 
         Returns:
-            LDAPFilter: An LDAPFilter instance based on the provided arguments
+            LDAPFilter: New filter based on provided arguments
         """
 
-        if not isinstance(obj_cls, list):
-            obj_cls = [obj_cls]
+        if not isinstance(filter_fmt, LDAPFilterStrFormat):
+            filter_fmt = LDAPFilterStrFormat[filter_fmt.upper()]
 
-        def fmt_cls(cls_to_fmt: str) -> str:
-            return LDAPFilterStr.CLS(cls_to_fmt)
+        if not isinstance(filter_values, list):
+            filter_values = [filter_values]
 
-        return LDAPFilter(f"{operator.value}{''.join(list(map(fmt_cls, obj_cls)))}")
+        def fmt_filter(value_to_fmt: str) -> str:
+            return filter_fmt(value_to_fmt)
+
+        return LDAPFilter(f"({operator.value}{''.join(list(map(fmt_filter, filter_values)))})")
+

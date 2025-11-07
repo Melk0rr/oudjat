@@ -8,7 +8,7 @@ from .ldap_filter import (
     LDAPFilterObjectCtg,
     LDAPFilterOperator,
     LDAPFilterParser,
-    LDAPFilterStr,
+    LDAPFilterStrFormat,
 )
 from .objects import (
     LDAPComputer,
@@ -25,7 +25,7 @@ __all__ = [
     "LDAPFilterParser",
     "LDAPFilterOperator",
     "LDAPFilterComparisonOperator",
-    "LDAPFilterStr",
+    "LDAPFilterStrFormat",
     "LDAPFilterObjectCls",
     "LDAPFilterObjectCtg",
     "LDAPComputer",
