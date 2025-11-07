@@ -84,7 +84,7 @@ class LDAPOrganizationalUnit(LDAPObject):
 
             self.objects[entry.id] = new_object
 
-    def get_sub_ous(self, recursive: bool = False) -> list["LDAPOrganizationalUnit"]:
+    def sub_ous(self, recursive: bool = False) -> list["LDAPOrganizationalUnit"]:
         """
         Return only sub OUs from the ou objects.
 
@@ -100,7 +100,7 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return [obj for obj in self.objects.values() if isinstance(obj, "LDAPOrganizationalUnit")]
 
-    def get_object_per_cls(self, object_cls: StrType | None) -> list["LDAPObject"]:
+    def object_per_cls(self, object_cls: "StrType | None") -> list["LDAPObject"]:
         """
         Return the current OU objects if they match the provided classes.
 
@@ -122,7 +122,7 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return [obj for obj in self.objects.values() if set(obj.entry.object_cls) & set(object_cls)]
 
-    def get_gpo_from_gplink(self) -> dict[int | str, "LDAPObject"]:
+    def gpo_from_gplink(self) -> dict[int | str, "LDAPObject"]:
         """
         Extract the GPO references (UUIDs) present in the current OU gpLink.
 

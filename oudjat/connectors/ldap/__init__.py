@@ -1,7 +1,15 @@
 """A package that gather LDAP manipulations related modules."""
 
 from .ldap_connector import LDAPConnector
-from .ldap_filter import LDAPFilter, LDAPFilterParser
+from .ldap_filter import (
+    LDAPFilter,
+    LDAPFilterComparisonOperator,
+    LDAPFilterObjectCls,
+    LDAPFilterObjectCtg,
+    LDAPFilterOperator,
+    LDAPFilterParser,
+    LDAPFilterStr,
+)
 from .objects import (
     LDAPComputer,
     LDAPGroup,
@@ -15,10 +23,15 @@ __all__ = [
     "LDAPConnector",
     "LDAPFilter",
     "LDAPFilterParser",
+    "LDAPFilterOperator",
+    "LDAPFilterComparisonOperator",
+    "LDAPFilterStr",
+    "LDAPFilterObjectCls",
+    "LDAPFilterObjectCtg",
     "LDAPComputer",
     "LDAPGroup",
     "LDAPUser",
     "LDAPGroupPolicyObject",
     "LDAPOrganizationalUnit",
-    "LDAPSubnet"
+    "LDAPSubnet",
 ]
