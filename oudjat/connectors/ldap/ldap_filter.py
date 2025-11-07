@@ -77,6 +77,41 @@ class LDAPFilterObjectCls(Enum):
     SUBNET = "subnet"
     USER = "user"
 
+
+class LDAPFilterStr(Enum):
+    """
+    A helper enumeration of built-in LDAP filters.
+    """
+
+    ADM = "(adminCount{cmp_operator}{value})"
+    CLS = "(objectClass{cmp_operator}{value})"
+    CN = "(cn{cmp_operator}{value})"
+    CTG = "(objectCategory{cmp_operator}{value})"
+    DPT = "(department{cmp_operator}{value})"
+    DN = "(distinguishedName{cmp_operator}{value})"
+    MAIL = "(mail{cmp_operator}{value})"
+    SAN = "(sAMAccountName{cmp_operator}{value})"
+    SAT = "(sAMAccountType{cmp_operator}{value})"
+    TITLE = "(Title{cmp_operator}{value})"
+    UAC = "(userAccountControl:1.2.840.113556.1.4.803:{cmp_operator}{uac_value})"
+
+    def __call__(
+        self, value: str, cmp_operator: "LDAPFilterComparisonOperator" = LDAPFilterComparisonOperator.EQ
+    ) -> str:
+        """
+        Format the LDAPFilter string with the provided operator and value.
+
+        Args:
+            value (str)                                : Value to compare with the filter property
+            cmp_operator (LDAPFilterComparisonOperator): Comparison operator used to compare the property with the provided value
+
+        Returns:
+            str: Formated filter string
+        """
+
+        return self._value_.format(**{"cmp_operator": cmp_operator.value, "value": value})
+
+
 class LDAPFilterParser:
     """
     A class to parse an LDAP filter.
