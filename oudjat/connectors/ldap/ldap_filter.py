@@ -5,6 +5,8 @@ A module that facilitates the handling of LDAP filters.
 from enum import Enum
 from typing import TypeAlias, override
 
+from oudjat.utils.types import StrType
+
 
 class LDAPFilterOperator(Enum):
     """
@@ -363,7 +365,7 @@ class LDAPFilter:
 
         elif len(tuple_filter) == 2:
             self._operator = LDAPFilterOperator(tuple_filter[0])
-            self._nodes = [ LDAPFilter(filter_input=sub) for sub in tuple_filter[1] ]
+            self._nodes = [LDAPFilter(filter_input=sub) for sub in tuple_filter[1]]
 
     def add_node(self, node: "LDAPFilter") -> None:
         """
@@ -388,7 +390,6 @@ class LDAPFilter:
         """
 
         return LDAPFilter(None, LDAPFilterOperator.AND, self, other)
-
 
     def __or__(self, other: "LDAPFilter") -> "LDAPFilter":
         """
