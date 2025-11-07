@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, override
 
 from oudjat.utils.types import StrType
 
+from ...ldap_filter import LDAPFilter
 from ..definitions import UUID_REG
 from ..ldap_object import LDAPObject
 from .ms_gppref import MS_GPPREF
@@ -102,7 +103,7 @@ class LDAPGroupPolicyObject(LDAPObject):
         guids: list[str] = re.findall(UUID_REG, self.entry.get(self.scope.value))
         return {guid: MS_GPPREF[guid] for guid in guids}
 
-    def get_linked_objects(
+    def linked_objects(
         self,
         attributes: "StrType | None" = None,
         ou: str = "*",
@@ -121,9 +122,8 @@ class LDAPGroupPolicyObject(LDAPObject):
         """
 
         obj_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.OU)
-        return obj_opt.fetch(
-            search_filter=f"(gPLink={f'*{self.name}*'})(name={ou})", attributes=attributes
-        )
+        obj_filter = LDAPFilter(f"(gPLink={f'*{self.name}*'})") & LDAPFilter(f"(name={ou})")
+        return obj_opt.fetch(search_filter=obj_filter, attributes=attributes)
 
     @override
     def to_dict(self) -> dict[str, Any]:

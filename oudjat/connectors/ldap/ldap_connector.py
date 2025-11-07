@@ -13,6 +13,7 @@ from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import StrType
 
+from .ldap_filter import LDAPFilter
 from .objects.ldap_entry import LDAPEntry
 from .objects.ldap_object_types import LDAPObjectType
 
@@ -266,8 +267,8 @@ class LDAPConnector(Connector):
         self,
         search_type: "LDAPObjectType" = LDAPObjectType.DEFAULT,
         search_base: str | None = None,
-        search_filter: str | None = None,
-        attributes: StrType | None = None,
+        search_filter: "LDAPFilter | str | None" = None,
+        attributes: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
     ) -> list["LDAPEntry"]:
         """
@@ -301,7 +302,10 @@ class LDAPConnector(Connector):
             formated_filter = search_filter
 
         elif search_filter is not None:
-            formated_filter = f"(&{formated_filter}{search_filter})"
+            if not isinstance(search_filter, LDAPFilter):
+                search_filter = LDAPFilter(search_filter)
+
+            formated_filter = formated_filter & search_filter
 
         results = self.connection.extend.standard.paged_search(
             search_filter=formated_filter,
@@ -327,8 +331,8 @@ class LDAPConnector(Connector):
 
     def objects(
         self,
-        search_filter: str | None = None,
-        attributes: StrType | None = None,
+        search_filter: "LDAPFilter | str | None" = None,
+        attributes: "StrType | None" = None,
         search_base: str | None = None,
         auto: bool = False,
         payload: dict[str, Any] | None = None,
@@ -372,7 +376,7 @@ class LDAPConnector(Connector):
         self,
         displayName: str = "*",
         name: StrType = "*",
-        attributes: StrType | None = None,
+        attributes: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
     ) -> dict[int | str, "LDAPGroupPolicyObject"]:
         """
@@ -388,16 +392,20 @@ class LDAPConnector(Connector):
             dict[int | str, LDAPGroupPolicyObject]: list of LDAPGroupPolicyObject instances
         """
 
-        name = (
-            f"(|{''.join([f'(name={link})' for link in name])})"
-            if isinstance(name, list)
-            else f"(name={name})"
-        )
+        name_filter = LDAPFilter()
+        if isinstance(name, list):
+            for link in name:
+                name_filter.add_node(LDAPFilter(f"(name={link})"))
+
+            name_filter.set_operator_from_str("|")
+
+        else:
+            name_filter = LDAPFilter(f"(name={name})")
 
         entries = self.fetch(
             search_type=LDAPObjectType.GPO,
             search_base=None,
-            search_filter=f"(&(displayName={displayName}){name}",
+            search_filter=(LDAPFilter(f"(displayName={displayName})") & name_filter),
             attributes=attributes,
             payload=payload,
         )
@@ -409,8 +417,8 @@ class LDAPConnector(Connector):
 
     def subnets(
         self,
-        search_filter: str | None = None,
-        attributes: StrType | None = None,
+        search_filter: "LDAPFilter | str | None" = None,
+        attributes: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
     ) -> dict[int | str, "LDAPSubnet"]:
         """
@@ -442,8 +450,8 @@ class LDAPConnector(Connector):
 
     def computers(
         self,
-        search_filter: str | None = None,
-        attributes: StrType | None = None,
+        search_filter: "LDAPFilter | str | None" = None,
+        attributes: "StrType | None" = None,
         search_base: str | None = None,
         payload: dict[str, Any] | None = None,
     ) -> dict[int | str, "LDAPComputer"]:
@@ -475,8 +483,8 @@ class LDAPConnector(Connector):
 
     def users(
         self,
-        search_filter: str | None = None,
-        attributes: StrType | None = None,
+        search_filter: "LDAPFilter | str | None" = None,
+        attributes: "StrType | None" = None,
         search_base: str | None = None,
         payload: dict[str, Any] | None = None,
     ) -> dict[int | str, "LDAPUser"]:
@@ -508,9 +516,9 @@ class LDAPConnector(Connector):
 
     def groups(
         self,
-        search_filter: str | None = None,
+        search_filter: "LDAPFilter | str | None" = None,
         search_base: str | None = None,
-        attributes: StrType | None = None,
+        attributes: "StrType | None" = None,
         recursive: bool = False,
         payload: dict[str, Any] | None = None,
     ) -> dict[int | str, "LDAPGroup"]:
@@ -547,9 +555,9 @@ class LDAPConnector(Connector):
 
     def ous(
         self,
-        search_filter: str | None = None,
+        search_filter: "LDAPFilter | str | None" = None,
         search_base: str | None = None,
-        attributes: StrType | None = None,
+        attributes: "StrType | None" = None,
         recursive: bool = False,
         payload: dict[str, Any] | None = None,
     ) -> dict[int | str, "LDAPOrganizationalUnit"]:
