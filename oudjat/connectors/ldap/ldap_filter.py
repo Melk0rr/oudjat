@@ -65,6 +65,18 @@ class LDAPFilterObjectCtg(Enum):
     USER = "user"
 
 
+class LDAPFilterObjectCls(Enum):
+    """
+    A helper class to list valid LDAP filter 'objectClass' values.
+    """
+
+    CONTACT = "contact"
+    GPO = "groupPolicyContainer"
+    GROUP = "group"
+    OU = "organizationalUnit"
+    SUBNET = "subnet"
+    USER = "user"
+
 class LDAPFilterParser:
     """
     A class to parse an LDAP filter.
