@@ -394,10 +394,11 @@ class LDAPConnector(Connector):
 
         name_filter = LDAPFilter()
         if isinstance(name, list):
+            name_filter.set_operator_from_str("|")
+
             for link in name:
                 name_filter.add_node(LDAPFilter(f"(name={link})"))
 
-            name_filter.set_operator_from_str("|")
 
         else:
             name_filter = LDAPFilter(f"(name={name})")
