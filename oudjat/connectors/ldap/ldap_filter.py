@@ -401,6 +401,7 @@ class LDAPFilter:
         Args:
             node (LDAPFilter): New node / sub-filter to add to the current filter
         """
+        # TODO: Maybe add node under different condition (always set a value tuple and check if the tuple contains 2 or 3 values ?)
 
         if self._operator is not None:
             self._nodes.append(node)
