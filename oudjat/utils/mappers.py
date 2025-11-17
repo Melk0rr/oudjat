@@ -8,10 +8,10 @@ def any_to_dict(element: Any) -> dict[str, Any]:
     Call the to_dict method on the provided element.
 
     Args:
-        element (Any) : element to convert into a dict using 'to_dict' method
+        element (Any): Element to convert into a dict using 'to_dict' method
 
     Returns:
-        Dict : element converted into a dictionary
+        dict[str, Any]: A dictionary representation of the element
     """
 
     if not hasattr(element, "to_dict"):

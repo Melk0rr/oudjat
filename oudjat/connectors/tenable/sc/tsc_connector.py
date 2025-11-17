@@ -203,12 +203,12 @@ class TenableSCConnector(Connector):
         tool: "TSCVulnTool" = TSCVulnTool.VULNDETAILS,
         exploitable: bool = True,
         payload: dict[str, Any] | None = None,
-    ) -> DataType:
+    ) -> "DataType":
         """
         Retrieve the current vulnerabilities.
 
         Args:
-            severities (List[str])         : Vuln severities to include
+            severities (int)               : Vuln severities to include
             tool (TSCVulnTool)             : Tool to use for the search
             exploitable (bool)             : Wheither to search only for exploitable vulnerabilities or not
             payload (dict[str, Any] | None): Payload to send to the endpoint
@@ -278,7 +278,7 @@ class TenableSCConnector(Connector):
         Delete an asset list based on given id.
 
         Args:
-            list_id (int | List[int]) : list of ids of the asset lists to delete
+            list_id (int | list[int]): List of ids of the asset lists to delete
 
         Returns:
             DataType: Data containing the details of the deleted asset lists
@@ -320,7 +320,7 @@ class TenableSCConnector(Connector):
 
         if list_filter:
             asset_lists = DataFilter.filter_data(
-                data_to_filter=asset_lists, filters=DataFilter.gen_from_tuple(list_filter)
+                data_to_filter=asset_lists, filters=DataFilter.from_tuple_list(list_filter)
             )
 
         return asset_lists
@@ -396,7 +396,7 @@ class TenableSCConnector(Connector):
 
         if scan_filter:
             scan_list = DataFilter.filter_data(
-                data_to_filter=scan_list, filters=DataFilter.gen_from_tuple(scan_filter)
+                data_to_filter=scan_list, filters=DataFilter.from_tuple_list(scan_filter)
             )
 
         return scan_list

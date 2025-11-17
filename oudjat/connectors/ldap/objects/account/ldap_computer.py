@@ -33,7 +33,7 @@ class LDAPComputer(LDAPAccount):
         raw_os_version = self.entry.get("operatingSystemVersion")
 
         # Retrieve OS and OS edition informations
-        os_family_infos: str | None = OperatingSystem.get_matching_os_family(raw_os)
+        os_family_infos: str | None = OperatingSystem.matching_os_family(raw_os)
         os_release = None
         os_edition = None
 
@@ -45,7 +45,7 @@ class LDAPComputer(LDAPAccount):
 
             os_ver = os.__class__.find_version_in_str(raw_os_version)
             os_release = os.find_release(os_ver) if os_ver is not None else None
-            os_edition_match: list["SoftwareEdition"] = os.get_matching_editions(raw_os)
+            os_edition_match: list["SoftwareEdition"] = os.matching_editions(raw_os)
 
             if len(os_edition_match) != 0:
                 os_edition = os_edition_match[0]

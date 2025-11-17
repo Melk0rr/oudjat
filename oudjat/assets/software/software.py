@@ -38,12 +38,12 @@ class Software(Asset, Generic[ReleaseType]):
         editor(s), and optional description. The software type defaults to an application unless specified otherwise.
 
         Args:
-            software_id (int | str)               : A unique identifier for the software, which can be either an integer or a string.
-            name (str)                            : The name of the software.
-            label (str)                           : A brief label that describes the software.
-            software_type (SoftwareType, optional): Specifies the type of the software. Defaults to SoftwareType.APPLICATION.
-            editor (str | list[str], optional)    : The editor(s) responsible for the development or maintenance of the software
-            description (str, optional)           : A detailed description of the software. Defaults to None.
+            software_id (int | str)            : A unique identifier for the software, which can be either an integer or a string.
+            name (str)                         : The name of the software.
+            label (str)                        : A brief label that describes the software.
+            software_type (SoftwareType | None): Specifies the type of the software. Defaults to SoftwareType.APPLICATION.
+            editor (str | list[str] | None)    : The editor(s) responsible for the development or maintenance of the software
+            description (str | None)           : A detailed description of the software. Defaults to None.
         """
 
         super().__init__(
@@ -154,7 +154,7 @@ class Software(Asset, Generic[ReleaseType]):
 
         Args:
             rel_ver (str): The version of the release to search for.
-            rel_label (str, optional): The label of the release to search for. Defaults to None.
+            rel_label (str | None): The label of the release to search for. Defaults to None.
 
         Returns:
             ReleaseType: The found release object or None if not found.
@@ -182,7 +182,7 @@ class Software(Asset, Generic[ReleaseType]):
 
         return [r for r in self.releases.values() if r.is_supported()]
 
-    def get_matching_editions(self, test_str: str) -> list["SoftwareEdition"]:
+    def matching_editions(self, test_str: str) -> list["SoftwareEdition"]:
         """
         Return the editions which pattern matches the given string.
 
@@ -193,7 +193,7 @@ class Software(Asset, Generic[ReleaseType]):
             SoftwareEditionDict: A dictionary containing matching editions.
         """
 
-        return self.editions.get_by_label(test_str)
+        return self.editions.find_by_label(test_str)
 
     @override
     def __str__(self) -> str:

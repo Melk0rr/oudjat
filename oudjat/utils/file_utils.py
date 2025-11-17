@@ -146,9 +146,9 @@ class FileUtils:
         Import CSV content into a list of dictionaries.
 
         Args:
-            file_path (str)              : The path to the CSV file.
-            callback (callable, optional): A callable function to process the data after reading.
-            delimiter (str, optional)    : The character used as a delimiter in the CSV file.
+            file_path (str)           : The path to the CSV file.
+            callback (callable | None): A callable function to process the data after reading.
+            delimiter (str | None)    : The character used as a delimiter in the CSV file.
 
         Returns:
             list of dicts: The content of the CSV file parsed into a list of dictionaries.
@@ -191,10 +191,10 @@ class FileUtils:
         Export data into a CSV file.
 
         Args:
-            data (list of dicts)     : The data to be exported.
-            file_path (str)          : The path where the CSV file will be saved.
-            delimiter (str, optional): The character used as a delimiter in the CSV file. Defaults to ",".
-            append (bool, optional)  : Whether to append to an existing file or overwrite it.
+            data (list of dicts)  : The data to be exported.
+            file_path (str)       : The path where the CSV file will be saved.
+            delimiter (str | None): The character used as a delimiter in the CSV file. Defaults to ",".
+            append (bool | None)  : Whether to append to an existing file or overwrite it.
         """
 
         if len(data) == 0:
@@ -228,9 +228,9 @@ class FileUtils:
         Import a text file and optionally remove duplicates.
 
         Args:
-            file_path (str)                   : The path to the text file.
-            delete_duplicates (bool, optional): Whether to remove duplicate lines from the file.
-            callback (callable, optional)     : A callable function to process the data after reading.
+            file_path (str)                : The path to the text file.
+            delete_duplicates (bool | None): Whether to remove duplicate lines from the file.
+            callback (callable | None)     : A callable function to process the data after reading.
 
         Returns:
             list: The content of the text file as a list of strings.
@@ -262,9 +262,9 @@ class FileUtils:
         Export data into a text file.
 
         Args:
-            data (list)             : The data to be exported as strings.
-            file_path (str)         : The path where the text file will be saved.
-            append (bool, optional) : Whether to append to an existing file or overwrite it.
+            data (list)         : The data to be exported as strings.
+            file_path (str)     : The path where the text file will be saved.
+            append (bool | None): Whether to append to an existing file or overwrite it.
         """
 
         if len(data) == 0:

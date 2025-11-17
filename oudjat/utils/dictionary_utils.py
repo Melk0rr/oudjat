@@ -14,7 +14,6 @@ class UtilsDict(dict):
         Join dictionary items with the provided character.
 
         Args:
-            dictionary (Dict): The input dictionary containing key-value pairs.
             char (str): The character to use for joining the keys and values.
 
         Returns:
@@ -33,7 +32,6 @@ class UtilsDict(dict):
         Join dictionary values with the provided character.
 
         Args:
-            dictionary (Dict): The input dictionary containing key-value pairs.
             char (str): The character to use for joining the values.
 
         Returns:
@@ -56,8 +54,8 @@ class UtilsDict(dict):
         Join dictionary items with the provided character.
 
         Args:
-            dictionary (Dict): The input dictionary containing key-value pairs.
-            char (str)       : The character to use for joining the keys and values.
+            dictionary (dict[str, Any]): The input dictionary containing key-value pairs.
+            char (str)                 : The character to use for joining the keys and values.
 
         Returns:
             str: A string where each item in the dictionary is joined by the specified character, formatted as "key: value".
@@ -75,8 +73,8 @@ class UtilsDict(dict):
         Join dictionary values with the provided character.
 
         Args:
-            dictionary (Dict): The input dictionary containing key-value pairs.
-            char (str)       : The character to use for joining the values.
+            dictionary (dict[str, Any]): The input dictionary containing key-value pairs.
+            char (str)                 : The character to use for joining the values.
 
         Returns:
             str: A string where each value in the dictionary is joined by the specified character.
@@ -94,11 +92,11 @@ class UtilsDict(dict):
         Map a list into a dictionary using the provided key.
 
         Args:
-            list_to_map (List): The input list of dictionaries or objects that have the specified key.
-            key (str)         : The key to use for mapping values in the list to a new dictionary.
+            list_to_map (list[dict[str, Any]]): The input list of dictionaries or objects that have the specified key.
+            key (str)                         : The key to use for mapping values in the list to a new dictionary.
 
         Returns:
-            Dict: A dictionary where each element in the list is mapped by the specified key as the key and the entire element as the value.
+            dict[Any, dict[str, Any]]: A dictionary where each element in the list is mapped by the specified key as the key and the entire element as the value.
 
         Example:
             >>> map_list_to_dict([{'id': 1, 'name': 'Alice'}, {'id': 2, 'name': 'Bob'}], 'id')
@@ -108,17 +106,19 @@ class UtilsDict(dict):
         return {el[key]: el for el in list_to_map}
 
     @staticmethod
-    def from_tuple(input_tuple: tuple[str], parent: tuple[str], res: dict[str, Any] | None = None) -> dict[str, Any]:
+    def from_tuple(
+        input_tuple: tuple[str], parent: tuple[str], res: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """
         Convert a nested tuple into a dictionary recursively.
 
         Args:
-            input_tuple (Tuple) : The input tuple to be converted into a dictionary.
-            parent (Tuple)      : The parent tuple from which the current element is taken.
-            res (Dict, optional): A dictionary to store intermediate results. Defaults to an empty dictionary.
+            input_tuple (tuple[str]): The input tuple to be converted into a dictionary.
+            parent (tuple[str])     : The parent tuple from which the current element is taken.
+            res (dict[str, Any])    : A dictionary to store intermediate results. Defaults to an empty dictionary.
 
         Returns:
-            Dict: A nested dictionary where each key-value pair represents an element and its corresponding parent index.
+            dict[str, Any]: A nested dictionary where each key-value pair represents an element and its corresponding parent index.
         """
 
         if res is None:

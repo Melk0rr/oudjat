@@ -104,7 +104,7 @@ class CVEConnector(Connector, ABC):
             cve (dict[str, Any]): cve data as a dictionary
 
         Returns:
-            Dict: formated dictionary
+            CVEDataFormat: A formated dictionary
         """
 
         raise NotImplementedError(
@@ -128,7 +128,7 @@ class CVEConnector(Connector, ABC):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.get_cve_url::Method must be implemented by the overloading class"
+            f"{__class__.__name__}.cve_url::Method must be implemented by the overloading class"
         )
 
     @staticmethod
@@ -145,7 +145,7 @@ class CVEConnector(Connector, ABC):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.get_cve_api_url::Method must be implemented by the overloading class"
+            f"{__class__.__name__}.cve_api_url::Method must be implemented by the overloading class"
         )
 
     @staticmethod

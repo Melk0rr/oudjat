@@ -20,7 +20,7 @@ class Location(GenericIdentifiable):
         description: str | None = None,
         city: str | None = None,
         label: str | None = None,
-        subnet: Subnet | dict[int | str, Subnet] | None = None,
+        subnet: "Subnet | dict[int | str, Subnet] | None" = None,
     ) -> None:
         """
         Create a new instance of Location.
@@ -29,12 +29,12 @@ class Location(GenericIdentifiable):
         The subnet can be provided as either a single Subnet instance or a dictionary of subnets.
 
         Args:
-            location_id (Union[int, str])                       : A unique identifier for the location.
-            name (str)                                          : The name of the location.
-            description (str, optional)                         : A description of the location. Defaults to None.
-            city (str, optional)                                : The city where the location is situated. Defaults to None.
-            label (str, optional)                               : A short label for the location. Defaults to None.
-            subnet (Union[Subnet, Dict[str, Subnet]], optional) : The subnet or subnets associated with this location.
+            location_id (int | str)                         : A unique identifier for the location.
+            name (str)                                      : The name of the location.
+            description (str | None)                        : A description of the location. Defaults to None.
+            city (str | None)                               : The city where the location is situated. Defaults to None.
+            label (str | None)                              : A short label for the location. Defaults to None.
+            subnet (Subnet | dict[int | str, Subnet] | None): The subnet or subnets associated with this location.
         """
 
         super().__init__(gid=location_id, name=name, label=label, description=description)
@@ -60,7 +60,7 @@ class Location(GenericIdentifiable):
         Retrieves the subnet by name. If no specific subnet is provided, returns all subnets as a dictionary.
 
         Args:
-            subnet (str, optional): The name of the subnet to retrieve. Defaults to None.
+            subnet (str | None): The name of the subnet to retrieve. Defaults to None.
 
         Returns:
             Subnet: The subnet instance associated with the given name or all subnets if none specified.
@@ -71,7 +71,7 @@ class Location(GenericIdentifiable):
 
         if subnet not in self._subnet.keys():
             raise ValueError(
-                f"{__class__.__name__}.get_custom_attr::{subnet} is not a subnet of {self._id}"
+                f"{__class__.__name__}.subnet::{subnet} is not a subnet of {self._id}"
             )
 
         return {subnet: self._subnet[subnet]}
@@ -128,7 +128,7 @@ class Location(GenericIdentifiable):
 
             self._assets[at_name] = at_assets
 
-    def get_asset(self, asset_type: AssetType, asset_id: int | str) -> Asset:
+    def asset(self, asset_type: AssetType, asset_id: int | str) -> Asset:
         """
         Look for an asset based on asset type and id.
 
@@ -142,7 +142,7 @@ class Location(GenericIdentifiable):
 
         return self.assets[asset_type.name][asset_id]
 
-    def get_asset_per_type(self, asset_type: AssetType) -> dict[int | str, Asset] | None:
+    def asset_per_type(self, asset_type: AssetType) -> dict[int | str, Asset] | None:
         """
         Return a dictionary of assets for the given type.
 
@@ -150,7 +150,7 @@ class Location(GenericIdentifiable):
             asset_type (AssetType): The type of assets to retrieve.
 
         Returns:
-            Dict: A dictionary of assets filtered by the specified type or None if no assets found.
+            dict[int | str, Asset]: A dictionary of assets filtered by the specified type or None if no assets found.
         """
 
         return self._assets.get(asset_type.name, None)
@@ -180,8 +180,8 @@ class Location(GenericIdentifiable):
         The function will check the ip against all of the location's subnets if no specific subnet is provided.
 
         Args:
-            ip (str)              : The IP address to check against the subnets.
-            subnet (str, optional): The specific subnet name to check against. Defaults to None.
+            ip (str)           : The IP address to check against the subnets.
+            subnet (str | None): The specific subnet name to check against. Defaults to None.
 
         Returns:
             bool: True if the IP is within the specified subnet or any subnet if none is specified, False otherwise.

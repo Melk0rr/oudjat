@@ -37,12 +37,12 @@ class Asset(GenericIdentifiable, ABC):
         Also initializes the location attribute as an empty list and sets the given locations using the set_location method.
 
         Args:
-            asset_id (Union[int, str])                        : The unique identifier for the asset.
+            asset_id (int | str)                              : The unique identifier for the asset.
             name (str)                                        : The name of the asset.
             asset_type (AssetType)                            : The type of the asset.
-            label (str, optional)                             : A short description or label for the asset. Defaults to None.
-            description (str, optional)                       : A detailed description of the asset. Defaults to None.
-            location ("Location" | list["Location"], optional): The location(s) where the asset is situated. Defaults to None.
+            label (str | None)                                : A short description or label for the asset. Defaults to None.
+            description (str | None)                          : A detailed description of the asset. Defaults to None.
+            location (Location | list[Location] | None)       : The location(s) where the asset is situated. Defaults to None.
             kwargs (Any)                                      : Any further arguments
         """
 
@@ -102,12 +102,12 @@ class Asset(GenericIdentifiable, ABC):
         self.location = { loc.id: loc for loc in new_location }
 
     @override
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert current asset into a dict.
 
         Returns:
-            Dict: A dictionary representation of the Asset object including its id, name, label, description, asset type, and location.
+            dict[str, Any]: A dictionary representation of the Asset object including its id, name, label, description, asset type, and location.
         """
         return {
             **super().to_dict(),

@@ -121,10 +121,9 @@ class KPIComparator:
     def compare(self) -> None:
         """
         Compare the values of the KPIs and set the tendency.
-
-        This method compares the stored values of the KPIs, determines the tendency using `get_tendency_key`, and stores the result in `self.tendency`. If no values have been fetched yet, it calls `fetch_values` to do so.
         """
 
+        # TODO: Not clear
         self._tendency = self.tendency
         self.print_tendency()
 

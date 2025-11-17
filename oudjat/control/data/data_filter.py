@@ -132,7 +132,7 @@ class DataFilter:
         Set a new value for the negate attribute.
 
         Args:
-            new_negate_value (bool): new value of the negate attribute
+            new_negate_value (bool): New value of the negate attribute
         """
 
         self._negate = new_negate_value
@@ -142,10 +142,10 @@ class DataFilter:
         Run the current filter against a dictionary.
 
         Args:
-            element (Dict): element to run the filter against
+            element (dict[str, Any]): Element to run the filter against
 
         Returns:
-            bool: wheither or not the dictionary matches the filter
+            bool: Wheither or not the dictionary matches the filter
         """
 
         check: bool = self.operation(element[self.fieldname], self.value)
@@ -156,10 +156,10 @@ class DataFilter:
         Run the current filter against the provided value.
 
         Args:
-            value (Any): value to run the filter against
+            value (Any): Value to run the filter against
 
         Returns:
-            bool: wheither or not the given value matches the filter
+            bool: Wheither or not the given value matches the filter
         """
 
         check: bool = self.operation(value, self.value)
@@ -204,10 +204,10 @@ class DataFilter:
         Create a datafilter instance from a dictionary.
 
         Args:
-            filter_dict (Dict): dictionary used to create DataFilter instance
+            filter_dict (DataFilterDictionaryProps): Dictionary used to create DataFilter instance
 
         Returns:
-            DataFilter: new instance
+            DataFilter: New DataFilter instance
 
         Exemple:
             my_filter = DataFilter.from_dict({ "fieldname": "name", "operator": "=", "value": "Rick Deckard"})
@@ -225,10 +225,10 @@ class DataFilter:
         Create a datafilter instance from a tuple.
 
         Args:
-            filter_tuple (Tuple): tuple used to create DataFilter instance
+            filter_tuple (Tuple): Tuple used to create DataFilter instance
 
         Returns:
-            DataFilter: new instance
+            DataFilter: New DataFilter instance
 
         Exemple:
             my_filter = DataFilter.from_tuple(( "name", "=", "Rick Deckard" ))
@@ -241,45 +241,45 @@ class DataFilter:
         )
 
     @staticmethod
-    def get_valid_filters_list(
+    def valid_filters_list(
         filters_list: list["DataFilterDictionaryProps"] | list["DataFilter"],
     ) -> list["DataFilter"]:
         """
         Check filters type and format them into DataFilter instances if needed.
 
         Args:
-            filters_list (list[Dict] | list[DataFilter]): filter list to check / format
+            filters_list (list[DataFilterDictionaryProps] | list[DataFilter]): Filter list to check / format
 
         Returns:
-            list[DataFilter]: formated list of data filter instances
+            list[DataFilter]: Formated list of data filter instances
         """
 
         return [f if isinstance(f, DataFilter) else DataFilter.from_dict(f) for f in filters_list]
 
     @staticmethod
-    def gen_from_dict(filters: list["DataFilterDictionaryProps"]) -> list["DataFilter"]:
+    def from_dict_list(filters: list["DataFilterDictionaryProps"]) -> list["DataFilter"]:
         """
         Generate multiple DataFitler instances based on dictionnaries.
 
         Args:
-            filters (List[Dict]): list of dictionaries used to generated instances
+            filters (list[DataFilterDictionaryProps]): List of dictionaries used to generated instances
 
         Returns:
-            List[DataFilter]: data filter instances
+            list[DataFilter]: Data filter instances
         """
 
         return list(map(DataFilter.from_dict, filters))
 
     @staticmethod
-    def gen_from_tuple(filters: "FilterTupleExtType") -> list["DataFilter"]:
+    def from_tuple_list(filters: "FilterTupleExtType") -> list["DataFilter"]:
         """
         Generate DataFitler instances based on tuples.
 
         Args:
-            filters (List[Tuple]): list of tuples used to generated instances
+            filters (FilterTupleExtType): list of tuples used to generated instances
 
         Returns:
-            List[DataFilter]: data filter instances
+            list[DataFilter]: data filter instances
         """
 
         if not isinstance(filters, list):
@@ -288,16 +288,16 @@ class DataFilter:
         return list(map(DataFilter.from_tuple, filters))
 
     @staticmethod
-    def get_conditions(element: Any, filters: list["DataFilter"] | list["DataFilterDictionaryProps"]) -> bool:
+    def conditions(element: Any, filters: list["DataFilter"] | list["DataFilterDictionaryProps"]) -> bool:
         """
         Run all given filters against a single provided element.
 
         Args:
-            element (Any)                          : element to check
-            filters (List[Dict] | List[DataFilter]): filters to run
+            element (Any)                                               : Element to check
+            filters (list[DataFilterDictionaryProps] | list[DataFilter]): Filters to run
 
         Returns:
-            bool: filter results
+            bool: Filter results
         """
 
         checks = []
@@ -318,7 +318,7 @@ class DataFilter:
 
         Args:
             data_to_filter (DataType)              : Well...The data to be filtered duh
-            filters (DataFilter | List[DataFilter]): Filters to run
+            filters (DataFilter | list[DataFilter]): Filters to run
 
         Returns:
             DataType: Filtered data

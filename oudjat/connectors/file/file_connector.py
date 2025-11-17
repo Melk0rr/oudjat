@@ -3,7 +3,7 @@
 from typing import Any, Callable, override
 
 from oudjat.connectors.connector import Connector
-from oudjat.utils.file_utils import FileUtils, FileType
+from oudjat.utils.file_utils import FileType, FileUtils
 
 
 class FileConnector(Connector):
@@ -122,8 +122,8 @@ class FileConnector(Connector):
         Search into the imported data based on given filters and attributes.
 
         Args:
-            search_filter (Callable)        : A callback function that provides a predicate
-            attributes (list[str], optional): Specific attributes to retrieve from filtered results.
+            search_filter (Callable)       : A callback function that provides a predicate
+            attributes (list[str] | None)  : Specific attributes to retrieve from filtered results.
             payload (dict[str, Any] | None): Additional options to pass to the file import function
 
         Returns:

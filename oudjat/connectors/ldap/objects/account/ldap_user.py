@@ -149,7 +149,7 @@ class LDAPUser(LDAPAccount):
         Convert the current instance into a dictionary.
 
         Returns:
-            Dict: the current user represented as a dictionary
+            dict[str, Any]: The current user represented as a dictionary
         """
 
         base_dict = super().to_dict()

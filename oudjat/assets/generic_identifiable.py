@@ -23,11 +23,11 @@ class GenericIdentifiable(ABC):
         Create a new instance of GenericIdentifiable.
 
         Args:
-            gid (Union[int, str])      : The identifier of the object. Can be an integer or a string.
-            name (str)                 : The name of the object.
-            label (str, optional)      : A short text label for the object, defaults to None.
-            description (str, optional): A detailed description of the object, defaults to None.
-            kwargs (Any)               : Any further arguments
+            gid (int | str)         : The identifier of the object. Can be an integer or a string.
+            name (str)              : The name of the object.
+            label (str | None)      : A short text label for the object, defaults to None.
+            description (str | None): A detailed description of the object, defaults to None.
+            kwargs (Any)            : Any further arguments
 
         """
 
@@ -110,7 +110,7 @@ class GenericIdentifiable(ABC):
 
         if key not in self.custom_attributes.keys():
             raise ValueError(
-                f"{__class__.__name__}.get_custom_attr::{self._id} does not have any custom attribute {key}"
+                f"{__class__.__name__}.custom_attr::{self._id} does not have any custom attribute {key}"
             )
 
         return self.custom_attributes[key]
@@ -134,6 +134,7 @@ class GenericIdentifiable(ABC):
             key (str): The key for the new custom attribute.
             value (Any): The value of the new custom attribute.
         """
+        # TODO: Maybe use SoucedValue to track source directly there
 
         self.custom_attributes[key] = value
 
@@ -142,7 +143,7 @@ class GenericIdentifiable(ABC):
         Add multiple new custom attributes.
 
         Args:
-            new_custom_attr (Dict[str, Any]): A dictionary of new custom attributes to be added.
+            new_custom_attr (dict[str, Any]): A dictionary of new custom attributes to be added.
         """
 
         self.custom_attributes.update(new_custom_attr)
@@ -156,6 +157,16 @@ class GenericIdentifiable(ABC):
         """
 
         del self.custom_attributes[key]
+
+    def custom_attr(self, key: str) -> Any:
+        """
+        Return a custom attribute by key.
+
+        Args:
+            key (str): The key of the custom attribute to return.
+        """
+
+        return self.custom_attributes[key]
 
     def clear_custom_attr(self) -> None:
         """
@@ -186,7 +197,7 @@ class GenericIdentifiable(ABC):
         Convert the current instance into a dictionary.
 
         Returns:
-            Dict: A dictionary representation of the object, including id, name, label, description, and custom attributes.
+            dict[str, Any]: A dictionary representation of the object, including id, name, label, description, and custom attributes.
         """
 
         return {

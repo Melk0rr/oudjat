@@ -53,7 +53,7 @@ class CERTFRPage:
         if not self.is_valid_ref(ref) and not self.is_valid_link(ref):
             raise ValueError(f"{__class__.__name__}::Invalid CERTFR ref provided : {ref}")
 
-        self._ref: str = ref if self.is_valid_ref(ref) else self.get_ref_from_link(ref)
+        self._ref: str = ref if self.is_valid_ref(ref) else self.ref_from_link(ref)
 
         self._raw_content: BeautifulSoup | None = None
         self._title: str | None = None
@@ -104,7 +104,7 @@ class CERTFRPage:
         Retrieve the CVEs from the content section and returns them as a list. If no CVEs are found, it returns an empty list.
 
         Returns:
-            List["CVE"]: A list of CVE objects if available, otherwise an empty list.
+            list[CVE]: A list of CVE objects if available, otherwise an empty list.
         """
 
         return list(self._content.cves.values()) if self._content else []
@@ -197,12 +197,12 @@ class CERTFRPage:
 
         return f"{self._ref}: {self._title}"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current CERTFRPage instance into a dictionary representation. The method creates a dictionary containing the ref, title, and parsed meta and content information if available.
 
         Returns:
-            Dict: A dictionary containing the page information.
+            dict[str, Any]: A dictionary containing the page information.
         """
 
         content_dict: dict[str, Any] = self._content.to_dict() if self._content else {}
@@ -255,7 +255,7 @@ class CERTFRPage:
         return re.match(CERTFR_LINK_REGEX, link) is not None
 
     @staticmethod
-    def get_ref_from_link(link: str) -> str:
+    def ref_from_link(link: str) -> str:
         """
         Return a CERTFR ref based on a link.
 
@@ -274,7 +274,7 @@ class CERTFRPage:
 
         if not re.match(CERTFR_LINK_REGEX, link):
             raise ValueError(
-                f"{__class__.__name__}.get_ref_from_link::Invalid CERTFR link provided: {link}"
+                f"{__class__.__name__}.ref_from_link::Invalid CERTFR link provided: {link}"
             )
 
         return re.findall(CERTFR_REF_REGEX, link)[0]
@@ -330,7 +330,7 @@ class CERTFRPageMeta:
         Retrieve the sources from metadata, if not already set, and returns them as a list of cleaned strings.
 
         Returns:
-            List[str]: A list of sources or None if not available.
+            list[str]: A list of sources or None if not available.
         """
 
         clean_sources: list[str] = self._data.get("Source(s)", "").split("\n")
@@ -362,7 +362,7 @@ class CERTFRPageMeta:
         Convert the metadata of the instance into a dictionary format, including initial date, last change date, and sources.
 
         Returns:
-            Dict: A dictionary containing the parsed metadata or an empty dictionary if no data is available.
+            dict[str, Any]: A dictionary containing the parsed metadata or an empty dictionary if no data is available.
         """
 
         meta_dict: dict[str, Any] = {
@@ -533,7 +533,7 @@ class CERTFRPageContent:
             "risks": list(map(RiskType.risk_name, self.risks)),
             "products": self.products,
             "description": self.description,
-            "cves": [cve.get_ref() for cve in self.cves.values()],
+            "cves": [cve.ref for cve in self.cves.values()],
             "solutions": self.solutions,
             "documentations": self.filter_documentations(doc_filter="cve.org"),
         }

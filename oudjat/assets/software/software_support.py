@@ -25,10 +25,10 @@ class SoftwareReleaseSupport:
         Create a new instance SoftwareReleaseSupport.
 
         Args:
-            active_support (str | datetime)       : The date when support starts or a string in 'YYYY-MM-DD' format.
-            end_of_life (str | datetime, optional): The date when support ends or a string in 'YYYY-MM-DD' format.
-            edition (list[str], optional)         : A list of software editions supported by the release.
-            long_term_support (bool, optional)    : Whether the release has long term support.
+            active_support (str | datetime)    : The date when support starts or a string in 'YYYY-MM-DD' format.
+            end_of_life (str | datetime | None): The date when support ends or a string in 'YYYY-MM-DD' format.
+            edition (list[str] | None)         : A list of software editions supported by the release.
+            long_term_support (bool | None)    : Whether the release has long term support.
         """
 
         self._edition: SoftwareEditionDict = SoftwareEditionDict(**edition)

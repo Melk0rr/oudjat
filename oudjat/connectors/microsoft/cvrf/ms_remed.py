@@ -59,10 +59,7 @@ class MSRemed:
         Setter for kb products.
 
         Args:
-            products (List[MSProduct]): A list of MSProduct instances to be added or updated in the KB's product dictionary.
-
-        Updates:
-            self.products (Dict[str, MSProduct]): Adds or updates entries in the product dictionary with the provided products, ensuring no duplicates based on product ID.
+            products (list[MSProduct]): A list of MSProduct instances to be added or updated in the KB's product dictionary.
         """
 
         self._products = {p.pid: p for p in products if p.pid not in self._products.keys()}
@@ -83,7 +80,7 @@ class MSRemed:
         Convert patched products into dictionaries.
 
         Returns:
-            List[Dict]: A list of dictionaries where each dictionary contains the remed number, type, and product details flattened from the MSProduct instances.
+            DataType: A list of dictionaries where each dictionary contains the remed number, type, and product details flattened from the MSProduct instances.
         """
 
         return [

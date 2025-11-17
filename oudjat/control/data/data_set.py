@@ -27,11 +27,11 @@ class DataSet:
         Create a new DataSet instance.
 
         Args:
-            name (str)                                               : the name of the dataset.
-            perimeter (str)                                          : the perimeter or boundary of the dataset.
-            initial_set (Union[List[Dict], "DataSet"], optional)     : initial data set or list of dictionaries representing data. Defaults to None.
-            filters (Union[List[Dict], List["DataFilter"]], optional): filters applied to the data. Defaults to an empty list.
-            description (str, optional)                              : a brief description of the dataset. Defaults to None.
+            name (str)                                                  : The name of the dataset.
+            perimeter (str)                                             : The perimeter or boundary of the dataset.
+            initial_set (DataSetType | None)                            : Initial data set or list of dictionaries representing data. Defaults to None.
+            filters (list[DataFilterDictionaryProps] | list[DataFilter]): Filters applied to the data. Defaults to an empty list.
+            description (str | None)                                    : A brief description of the dataset. Defaults to None.
         """
 
         if filters is None:
@@ -43,7 +43,7 @@ class DataSet:
 
         self._initial_set: "DataSetType" = initial_set if initial_set is not None else []
 
-        self._filters: list["DataFilter"] = DataFilter.get_valid_filters_list(filters)
+        self._filters: list["DataFilter"] = DataFilter.valid_filters_list(filters)
 
     # ****************************************************************
     # Methods
@@ -131,10 +131,10 @@ class DataSet:
         Setter for the list of data filters.
 
         Args:
-            filters (Union[List[Dict], List["DataFilter"]], optional): The new list of filters to be set. Defaults to an empty list.
+            filters (list[DataFilter]): The new list of filters to be set. Defaults to an empty list.
         """
 
-        self._filters = DataFilter.get_valid_filters_list(filters)
+        self._filters = DataFilter.valid_filters_list(filters)
 
     @property
     def initial_set_data(self) -> list[dict[str, Any]]:
@@ -142,7 +142,7 @@ class DataSet:
         Getter for input data.
 
         Returns:
-            list[dict[str, Any]]: the input data either retrieved through initial DataSet.get_data or the initial_set directly
+            list[dict[str, Any]]: The input data either retrieved through initial DataSet.output_data or the initial_set directly
         """
 
         return (
@@ -199,7 +199,7 @@ class DataSet:
     # Static methods
 
     @staticmethod
-    def get_dataset_data(dataset: "DataSet") -> list[dict[str, Any]]:
+    def dataset_data(dataset: "DataSet") -> list[dict[str, Any]]:
         """
         Return the data of the provided DataSet instance.
 
@@ -242,7 +242,7 @@ class DataSet:
             name=name,
             perimeter=list(perimeters)[0],
             initial_set=[
-                item for set_data in map(DataSet.get_dataset_data, sets) for item in set_data
+                item for set_data in map(DataSet.dataset_data, sets) for item in set_data
             ],
             filters=[],
         )

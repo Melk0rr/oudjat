@@ -55,7 +55,7 @@ class IPv4:
         Create a new instance of IP address.
 
         Args:
-            address (Union[int, str]): The IP address to be initialized. Can be either an integer or a string.
+            address (int | str): The IP address to be initialized. Can be either an integer or a string.
 
         Raises:
             ValueError: If the provided address is not a valid IPv4 or IPv6 address.
@@ -64,7 +64,7 @@ class IPv4:
         if isinstance(address, int):
             address = ip_int_to_str(address)
 
-        self._version: IPVersion
+        self._version: "IPVersion"
         if re.match(IPVersion.IPV4.pattern, address):
             self._version = IPVersion.IPV4
 
@@ -75,7 +75,7 @@ class IPv4:
             raise ValueError(f"{__class__.__name__}::Invalid IPv4 address provided: '{address}'")
 
         self._address: int = ip_str_to_int(address)
-        self._ports: dict[int, Port] = {}
+        self._ports: dict[int, "Port"] = {}
 
     # ****************************************************************
     # Methods
@@ -92,7 +92,7 @@ class IPv4:
         return self._address
 
     @property
-    def version(self) -> IPVersion:
+    def version(self) -> "IPVersion":
         """
         Return the version of the current ip address.
 
@@ -102,22 +102,24 @@ class IPv4:
 
         return self._version
 
-    def get_port_numbers(self) -> list[int]:
+    @property
+    def port_numbers(self) -> list[int]:
         """
         Getter for the Port numbers.
 
         Returns:
-            List[int]: A list of integers representing the port numbers.
+            list[int]: A list of integers representing the port numbers.
         """
 
         return list(self._ports.keys())
 
-    def get_port_strings(self) -> list[str]:
+    @property
+    def port_strings(self) -> list[str]:
         """
         Getter for the Port strings.
 
         Returns:
-            List[str]: A list of strings representing the port numbers converted to string format.
+            list[str]: A list of strings representing the port numbers converted to string format.
         """
 
         return list(map(str, self._ports.values()))
@@ -132,12 +134,12 @@ class IPv4:
         for port in list(self._ports.keys()):
             del self._ports[port]
 
-    def set_open_ports(self, ports: list[Port]) -> None:
+    def set_open_ports(self, ports: list["Port"]) -> None:
         """
         Set the open ports.
 
         Args:
-            ports (Union[List[int], List[Port]]): A list of integers or Port objects representing the ports to be set.
+            ports (list[Port]): A list of integers or Port objects representing the ports to be set.
 
         This method first clears the existing ports and then adds the new ports provided in the argument.
         """
@@ -146,28 +148,28 @@ class IPv4:
         for p in ports:
             self.append_open_port(p)
 
-    def is_port_in_list(self, port: int) -> bool:
+    def is_port_in_list(self, port: "int | Port") -> bool:
         """
         Check if the given port is in the list of ports.
 
+        This method first converts the given argument to an integer representation of a port and then checks its presence in the `ports` dictionary.
+
         Args:
-            port (Union[int, Port]): A port number or a Port object to be checked.
+            port (int | Port): A port number or a Port object to be checked.
 
         Returns:
             bool: True if the port is found in the `ports` dictionary, False otherwise.
-
-        This method first converts the given argument to an integer representation of a port and then checks its presence in the `ports` dictionary.
         """
 
-        return port in self._ports.keys()
+        return int(port) in self._ports.keys()
 
     def append_open_port(self, port: Port, force: bool = False) -> None:
         """
         Append the port to the list of open ports.
 
         Args:
-            port (Port)          : The port to be appended.
-            force (bool, optional): If set to True, will replace the existing port in the list wheither it already exists or not. Defaults to False.
+            port (Port)        : The port to be appended.
+            force (bool | None): If set to True, will replace the existing port in the list wheither it already exists or not. Defaults to False.
 
         Raises:
             ValueError: If the provided port is neither an instance of Port nor an integer, a ValueError is raised.
@@ -245,8 +247,7 @@ class IPv4Mask(IPv4):
         This method initializes the object with either a CIDR notation value or an integer/string representation of a netmask.
 
         Args:
-            mask (Union[int, str])  : The netmask value as an integer or string.
-            cidr (int)              : The network prefix length in CIDR notation.
+            mask (int | str): The netmask value as an integer or string.
 
         Raises:
             ValueError: If both `mask` and `cidr` are None, or if `cidr` is not between 1 and 32, or if `mask` is neither an integer nor a string.
@@ -275,6 +276,19 @@ class IPv4Mask(IPv4):
 
         return self._cidr
 
+    @property
+    def wildcard(self) -> IPv4:
+        """
+        Return mask wildcard.
+
+        This method calculates and returns the wildcard address for the current network mask.
+
+        Returns:
+            IPv4: The wildcard address as an IPv4 object
+        """
+
+        return IPv4(ip_not(self._address))
+
     def cidr_to_int(self) -> int:
         """
         Return the current mask as an integer.
@@ -286,18 +300,6 @@ class IPv4Mask(IPv4):
         """
 
         return cidr_to_int(self._cidr)
-
-    def get_wildcard(self) -> IPv4:
-        """
-        Return mask wildcard.
-
-        This method calculates and returns the wildcard address for the current network mask.
-
-        Returns:
-            IPv4: The wildcard address as an IPv4 object
-        """
-
-        return IPv4(ip_not(self._address))
 
     @override
     def __str__(self, cidr: bool = False) -> str:
@@ -355,7 +357,7 @@ class IPv4Mask(IPv4):
         return IPv4Mask(cidr_to_int(cidr))
 
     @staticmethod
-    def get_netcidr(mask: str) -> int:
+    def netcidr(mask: str) -> int:
         """
         Return CIDR notation for a given mask.
 
@@ -369,24 +371,24 @@ class IPv4Mask(IPv4):
             ValueError: If the provided mask is not valid
         """
 
-        if mask not in IPv4Mask.get_valid_mask():
+        if mask not in IPv4Mask.valid_mask():
             raise ValueError(f"{__class__.__name__}.get_netcidr::Invalid mask provided: {mask}")
 
         return count_1_bits(IPv4(mask).address)
 
     @staticmethod
-    def get_valid_mask() -> list[str]:
+    def valid_mask() -> list[str]:
         """
         List all valid netmask strings for CIDR notation from 1 to 32.
 
         Returns:
-            List[str]: A list of valid netmask strings
+            list[str]: A list of valid netmask strings
         """
 
-        return list(map(IPv4Mask.get_netmask, range(1, 33)))
+        return list(map(IPv4Mask.netmask, range(1, 33)))
 
     @staticmethod
-    def get_netmask(network_length: int) -> str:
+    def netmask(network_length: int) -> str:
         """
         Return an ipv4 mask string based on a network length.
 

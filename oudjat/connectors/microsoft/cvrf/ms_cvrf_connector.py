@@ -53,7 +53,7 @@ class MSCVRFConnector(Connector):
 
         if not re.match(CVE_REGEX, cve):
             raise ValueError(
-                f"{__class__.__name__}.get_cvrf_id_from_cve::Invalid CVE provided: {cve}"
+                f"{__class__.__name__}._cvrf_id_from_cve::Invalid CVE provided: {cve}"
             )
 
         # API URL to retrieve CVRF id from CVE
@@ -63,7 +63,7 @@ class MSCVRFConnector(Connector):
         id_resp = ConnectorMethod.GET(id_url, headers=API_REQ_HEADERS)
         if id_resp.status_code != 200:
             raise ConnectionError(
-                f"{__class__.__name__}.get_cvrf_id_from_cve::Could not connect to {id_url}"
+                f"{__class__.__name__}._cvrf_id_from_cve::Could not connect to {id_url}"
             )
 
         data = json.loads(id_resp.content)
@@ -118,10 +118,10 @@ class MSCVRFConnector(Connector):
         Search for information about CVEs based on the provided filter.
 
         Args:
-            search_filter (Union[str, List[str]]): The CVE identifier or list of identifiers to search for.
+            search_filter (str | list[str]): The CVE identifier or list of identifiers to search for.
 
         Returns:
-            List[Dict]: A list of dictionaries containing vulnerability information corresponding to the filtered CVEs.
+            DataType: A list of dictionaries containing vulnerability information corresponding to the filtered CVEs.
         """
 
         res = []
@@ -132,10 +132,10 @@ class MSCVRFConnector(Connector):
         for cve in search_filter:
             cvrf_id = self._cvrf_id_from_cve(cve)
             _ = self.connect(cvrf_id)
-            cvrf = self._target.get(cvrf_id, None)
+            cvrf: "MSCVRFDocument" = self._target.get(cvrf_id, None)
 
             if self._connection:
                 cvrf.parse_vulnerabilities()
-                res.append(cvrf.get_vulnerabilities()[cve])
+                res.append(cvrf.vulnerabilities[cve])
 
         return res

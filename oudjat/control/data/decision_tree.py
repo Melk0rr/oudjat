@@ -99,7 +99,7 @@ class DecisionTreeNode:
         Return the node value after init if value is not set.
 
         Args:
-            element (dict[str, Any], optional): an element to be filtered represented as a dictionary. Defaults to None.
+            element (dict[str, Any] | None): an element to be filtered represented as a dictionary. Defaults to None.
 
         Returns:
             bool: The value of the node after applying its filter if necessary.
@@ -164,12 +164,12 @@ class DecisionTreeNode:
 class DecisionTreeNodeList(UtilsList):
     """A list of decision tree nodes."""
 
-    def get_by_value(self, value: bool = True) -> "DecisionTreeNodeList":
+    def by_value(self, value: bool = True) -> "DecisionTreeNodeList":
         """
         Return a sub decision tree node list matching the given value.
 
         Args:
-            value (bool, optional): The boolean value to filter by. Defaults to True.
+            value (bool | None): The boolean value to filter by. Defaults to True.
 
         Returns:
             DecisionTreeNodeList: A list of nodes with the specified value.
@@ -180,7 +180,7 @@ class DecisionTreeNodeList(UtilsList):
 
         return DecisionTreeNodeList(filter(node_value_eq_value, self))
 
-    def get_details_list(self) -> list[str]:
+    def details_list(self) -> list[str]:
         """
         Return a list of decision tree node detail string.
 
@@ -190,7 +190,7 @@ class DecisionTreeNodeList(UtilsList):
 
         return list(map(str, self))
 
-    def get_flags_list(self) -> list["DecisionNodeFlagType"]:
+    def flags_list(self) -> list["DecisionNodeFlagType"]:
         """
         Return a list of decision tree node flags.
 
@@ -296,7 +296,7 @@ class DecisionTree:
         Return tree value.
 
         Args:
-            element (dict[str, Any], optional): A dictionary representing the data to evaluate against the tree conditions.
+            element (dict[str, Any] | None): A dictionary representing the data to evaluate against the tree conditions.
 
         Returns:
             bool: The computed boolean value of the tree based on the conditions, or None if not yet computed.
@@ -360,12 +360,12 @@ class DecisionTree:
         self._value = None
         self._nodes.clear()
 
-    def get_leaves(self, leaves_value: bool | None = None) -> "DecisionTreeNodeList":
+    def leaves(self, leaves_value: bool | None = None) -> "DecisionTreeNodeList":
         """
         Get all leaves of the decision tree as a list of values.
 
         Returns:
-            List: A list of values representing the leaf nodes of the decision tree.
+            DecisionTreeNodeList: A list of values representing the leaf nodes of the decision tree.
         """
 
         if self._nodes.is_empty():
@@ -377,13 +377,13 @@ class DecisionTree:
                 leaves.append(n)
 
             elif isinstance(n, DecisionTree):
-                leaves.extend(n.get_leaves())
+                leaves.extend(n.leaves())
 
             else:
-                raise ValueError(f"{__class__.__name__}.get_leaves::Invalid node found")
+                raise ValueError(f"{__class__.__name__}.leaves::Invalid node found")
 
         if leaves_value is not None:
-            leaves = leaves.get_by_value(value=leaves_value)
+            leaves = leaves.by_value(value=leaves_value)
 
         return leaves
 
@@ -411,7 +411,7 @@ class DecisionTree:
             "value": self._value,
             "negate": self._negate,
             "operator": self._operator,
-            "flags": self._nodes.get_flags_list(),
+            "flags": self._nodes.flags_list(),
             "details": list(map(any_to_dict, self._nodes)),
         }
 

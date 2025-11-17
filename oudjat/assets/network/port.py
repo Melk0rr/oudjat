@@ -1,7 +1,7 @@
 """A module that describe TCP/UDP ports."""
 
 from enum import IntEnum
-from typing import override
+from typing import Any, override
 
 
 class PortState(IntEnum):
@@ -144,12 +144,12 @@ class Port:
 
         return f"{self.application}({self.number})"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return a dictionary based on port number and application.
 
         Returns:
-            Dict: A dictionary containing the port number and application name.
+            dict[str, Any]: A dictionary containing the port number and application name.
         """
 
         return {"number": self.number, "application": self.application, "status": self.state.name}

@@ -15,23 +15,6 @@ if TYPE_CHECKING:
     from ..ldap_object import LDAPCapabilities
 
 
-def acc_date_str(date: datetime | None) -> str:
-    """
-    Convert an account date into a readable string.
-
-    Args:
-        date (datetime): date to convert into a readable string
-
-    Returns:
-        str: readable formated string
-    """
-
-    if date is None:
-        return ""
-
-    return TimeConverter.date_to_str(date, date_format=DateFormat.from_flag(DateFlag.YMD_HMS))
-
-
 class LDAPAccount(LDAPObject, ABC):
     """A class to describe generic LDAP account objects."""
 
@@ -277,7 +260,7 @@ class LDAPAccount(LDAPObject, ABC):
         Convert the current instance into a dict.
 
         Returns:
-            Dict: A dictionary containing various account details including sAMAccountName, status, expiration date, etc.
+            dict[str, Any]: A dictionary containing various account details including sAMAccountName, status, expiration date, etc.
         """
 
         base_dict = super().to_dict()
@@ -286,14 +269,35 @@ class LDAPAccount(LDAPObject, ABC):
             "san": self.san,
             "status": self.status,
             "account_expires": self.account_expires,
-            "account_exp_date": acc_date_str(self.account_expiration),
+            "account_exp_date": LDAPAccount._format_acc_date_str(self.account_expiration),
             "pwd_expires": self.pwd_expires,
             "pwd_expired": self.pwd_expired,
             "pwd_required": self.pwd_required,
-            "last_logon": acc_date_str(self.last_logon),
+            "last_logon": LDAPAccount._format_acc_date_str(self.last_logon),
             "last_logon_days": self.last_logon_in_days,
-            "pwd_last_set": acc_date_str(self.pwd_last_set),
+            "pwd_last_set": LDAPAccount._format_acc_date_str(self.pwd_last_set),
             "pwd_last_set_days": self.pwd_last_set_in_days,
             "account_ctl": self.account_ctl,
             "account_flags": list(self.account_flags),
         }
+
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def _format_acc_date_str(date: datetime | None) -> str:
+        """
+        Convert an account date into a readable string.
+
+        Args:
+            date (datetime): date to convert into a readable string
+
+        Returns:
+            str: readable formated string
+        """
+
+        if date is None:
+            return ""
+
+        return TimeConverter.date_to_str(date, date_format=DateFormat.from_flag(DateFlag.YMD_HMS))
+

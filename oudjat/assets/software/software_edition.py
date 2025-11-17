@@ -16,9 +16,9 @@ class SoftwareEdition:
         Create a new SoftwareEdition.
 
         Args:
-            label (str)             : The name or identifier of the software edition.
-            category (str, optional): The category that the software edition belongs to. Defaults to None.
-            pattern (str, optional) : A regex pattern used for matching strings against this edition. Defaults to None.
+            label (str)          : The name or identifier of the software edition.
+            category (str | None): The category that the software edition belongs to. Defaults to None.
+            pattern (str | None) : A regex pattern used for matching strings against this edition. Defaults to None.
         """
 
         self._label: str = label
@@ -102,7 +102,7 @@ class SoftwareEditionDict(dict):
 
         return list(map(str, self.values()))
 
-    def get_by_label(self, label: str) -> list[SoftwareEdition]:
+    def find_by_label(self, label: str) -> list[SoftwareEdition]:
         """
         Return software editions for which the given label matches the pattern.
 
@@ -117,22 +117,6 @@ class SoftwareEditionDict(dict):
             return edition.match_str(label)
 
         return list(filter(filter_values, self.values()))
-
-    def get_by_category(self, category: str) -> list[str]:
-        """
-        Return a sub-dictionary of software editions based on category value.
-
-        Args:
-            category (str): The category to filter the software editions by.
-
-        Returns:
-            SoftwareEditionDict: A dictionary containing only the SoftwareEdition instances that belong to the specified category.
-        """
-
-        def filter_values(edition: "SoftwareEdition") -> bool:
-            return edition.category == category
-
-        return list(map(str, filter(filter_values, self.values())))
 
     def filter_by_category(self, category: str | list[str]) -> "SoftwareEditionDict":
         """

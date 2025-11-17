@@ -82,7 +82,7 @@ class MSCVRFDocument:
         Return the vulnerabilities mentioned in the document. If the vulnerability list is not already parsed, this method will trigger a parsing of the vulnerabilities from the document content.
 
         Returns:
-            Dict[str, MSVuln]: A dictionary containing the vulnerabilities keyed by their CVE IDs.
+            dict[str, MSVuln]: A dictionary containing the vulnerabilities keyed by their CVE IDs.
         """
 
         if not self._vulns:
@@ -99,7 +99,7 @@ class MSCVRFDocument:
         Note that this method indirectly calls parse_vulnerabilities to ensure products are parsed before KBs.
 
         Returns:
-            Dict[str, MSRemed]: A dictionary containing the KBs keyed by their numbers.
+            dict[str, MSRemed]: A dictionary containing the KBs keyed by their numbers.
         """
 
         if not self._kbs:

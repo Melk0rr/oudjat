@@ -82,8 +82,8 @@ class LDAPEntry(dict[str, Any]):
         If the attribute is not present in the "attributes" dictionary, or if it is a list with no elements, returns the provided default value.
 
         Args:
-            key (str)                    : The attribute key to retrieve.
-            default_value (Any, optional): The value to return if the attribute is not found or is an empty list. Defaults to None.
+            key (str)          : The attribute key to retrieve.
+            default_value (Any): The value to return if the attribute is not found or is an empty list. Defaults to None.
 
         Returns:
             Any: The value of the specified attribute or the default value if not found or empty.
@@ -113,7 +113,7 @@ class LDAPEntry(dict[str, Any]):
 
         return self.__getitem__("attributes").__setitem__(key, value)
 
-    def get_raw(self, key: str) -> Any:
+    def raw(self, key: str) -> Any:
         """
         Retrieve the value of the specified raw attribute.
 

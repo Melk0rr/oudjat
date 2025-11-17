@@ -3,7 +3,7 @@
 import re
 from datetime import datetime
 from enum import Enum
-from typing import override
+from typing import Any, override
 
 from oudjat.assets.computer.computer_type import ComputerType
 from oudjat.assets.software import (
@@ -33,10 +33,10 @@ class MSOSRelease(OSRelease):
         Instanciate OS release specific to Microsoft.
 
         Args:
-            os_name (Software)                 : software instance the release is based on
-            version (Union[int, str])          : release version
-            release_date (Union[str, datetime]): release date
-            release_label (str)                : release label
+            os_name (Software)           : Software instance the release is based on
+            version (int | str)          : Release version
+            release_date (str | datetime): Release date
+            release_label (str)          : Release label
         """
 
         super().__init__(
@@ -64,17 +64,17 @@ class MSOSRelease(OSRelease):
 
         return f"{self.software} {self.label.split(' ')[0]}"
 
-    def os_dict(self) -> dict:
+    def _os_dict(self) -> dict[str, Any]:
         """
         Return a dictionary with os infos.
 
         This method extends the functionality of its parent class to include specific OS information such as name and version numbers, by combining data from both itself and the superclass. The extended dictionary includes 'name', 'version_main', and 'version_build' keys.
 
         Returns:
-            Dict: A dictionary containing OS-specific information including the software name and versions.
+            dict[str, Any]: A dictionary containing OS-specific information including the software name and versions.
         """
 
-        base_dict = super().software_dict()  # Assuming superclass has an os_info_dict method
+        base_dict = super()._software_dict()  # Assuming superclass has an os_info_dict method
         return {
             **base_dict,
             "name": self.name,
@@ -92,7 +92,7 @@ class MSOSRelease(OSRelease):
         """
 
         base_dict = super().to_dict()  # Assuming superclass has a to_dict method
-        return {**base_dict, **self.os_dict()}
+        return {**base_dict, **self._os_dict()}
 
 
 class WindowsEdition(Enum):
@@ -141,7 +141,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
         msos_id: int | str,
         name: str,
         label: str,
-        computer_type: ComputerType | list[ComputerType],
+        computer_type: "ComputerType | list[ComputerType]",
         description: str | None = None,
     ) -> None:
         """
@@ -150,11 +150,11 @@ class MicrosoftOperatingSystem(OperatingSystem):
         Initializes a new instance of the MicrosoftOperatingSystem class with the specified parameters.
 
         Args:
-            msos_id (Union[int, str])                               : The identifier for the operating system.
-            name (str)                                              : The name of the operating system.
-            label (str)                                             : A short label or abbreviation for the operating system.
-            computer_type (Union[ComputerType, List[ComputerType]]) : The type(s) of computer compatible with this operating system.
-            description (str, optional)                             : A detailed description of the operating system. Defaults to None.
+            msos_id (int | str)                              : The identifier for the operating system.
+            name (str)                                       : The name of the operating system.
+            label (str)                                      : A short label or abbreviation for the operating system.
+            computer_type (ComputerType | list[ComputerType]): The type(s) of computer compatible with this operating system.
+            description (str | None)                         : A detailed description of the operating system. Defaults to None.
         """
 
         super().__init__(
@@ -167,7 +167,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
             os_family=OSFamily.WINDOWS,
         )
 
-        self._editions: SoftwareEditionDict = SoftwareEditionDict(
+        self._editions: "SoftwareEditionDict" = SoftwareEditionDict(
             **WindowsEdition[self._name.replace(" ", "").upper()].value
         )
 
@@ -195,7 +195,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
                     release_label=rel.release_label,
                 )
 
-            win_sup: SoftwareReleaseSupport = SoftwareReleaseSupport(
+            win_sup: "SoftwareReleaseSupport" = SoftwareReleaseSupport(
                 active_support=rel.support,
                 end_of_life=rel.eol,
                 long_term_support=rel.lts,

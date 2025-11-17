@@ -16,24 +16,25 @@ class Subnet:
 
     def __init__(
         self,
-        address: int | str | IPv4,
+        address: int | str | "IPv4",
         name: str,
-        mask: IPv4Mask | None = None,
+        mask: "IPv4Mask | None" = None,
         description: str | None = None,
-        hosts: list[IPv4] | None = None,
-    ):
+        hosts: list["IPv4"] | None = None,
+    ) -> None:
         """
         Initialize a Subnet object.
 
         Args:
-            address (Union[str, IPv4])                    : The network address in string format or an IPv4 object representing the base IP address of the subnet.
-            name (str)                                    : A descriptive name for the subnet.
-            mask (Union[int, str, IPv4Mask], optional)    : The subnet mask. Can be provided as a CIDR notation string, an integer representing the number of leading 1-bits in the netmask, or a custom IPv4Mask object. If not provided, it will be determined from the address if possible (e.g., "192.168.1.0/24").
-            description (str, optional)                   : A brief description of the subnet, useful for administrative notes.
-            hosts (Union[List[IPv4], List[str]], optional): An optional list of IP addresses or strings representing host IPs that are part of this subnet. Each element can be an IPv4 object or a string representation of an IP address.
+            address (int | str | IPv4): The network address in string format or an IPv4 object representing the base IP address of the subnet.
+            name (str)                : A descriptive name for the subnet.
+            mask (IPv4Mask | None)    : The subnet mask. Can be provided as a CIDR notation string, an integer representing the number of leading 1-bits in the netmask, or a custom IPv4Mask object. I
+                                        If not provided, it will be determined from the address if possible (e.g., "192.168.1.0/24").
+            description (str | None)  : A brief description of the subnet, useful for administrative notes.
+            hosts (list[IPv4] | None) : An optional list of IP addresses or strings representing host IPs that are part of this subnet. Each element can be an IPv4 object or a string representation of an IP address.
         """
 
-        self._mask: IPv4Mask
+        self._mask: "IPv4Mask"
 
         # NOTE: Try to extract mask if provided as CIDR notation along with the address as a string
         cidr: int
@@ -154,9 +155,7 @@ class Subnet:
             IPv4: The broadcast IP address of the subnet.
         """
 
-        broadcast_int: int = LogicalOperation.logical_or(
-            int(self.mask.get_wildcard()), int(self.address)
-        )
+        broadcast_int: int = LogicalOperation.logical_or(int(self.mask.wildcard), int(self.address))
 
         return IPv4(ip_int_to_str(broadcast_int))
 
@@ -184,7 +183,7 @@ class Subnet:
         List all possible hosts in the subnet.
 
         Returns:
-            List[str]: A list of IP addresses representing the host range in the subnet.
+            list[str]: A list of IP addresses representing the host range in the subnet.
         """
         start = self.address.address + 1
         end = int(self.broadcast)

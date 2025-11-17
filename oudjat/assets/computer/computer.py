@@ -36,10 +36,10 @@ class Computer(Asset):
         name: str,
         label: str | None = None,
         description: str | None = None,
-        computer_type: str | ComputerType | None = None,
-        os_release: OSRelease | None = None,
-        os_edition: SoftwareEdition | None = None,
-        ip: str | IPv4 | None = None,
+        computer_type: "str | ComputerType | None" = None,
+        os_release: "OSRelease | None" = None,
+        os_edition: "SoftwareEdition | None" = None,
+        ip: "str | IPv4 | None" = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -54,15 +54,15 @@ class Computer(Asset):
         - etc.
 
         Args:
-            computer_id (Union[int, str])           : A unique identifier for the computer, which can be either an integer or a string.
-            name (str)                              : The name of the computer.
-            label (str, optional)                   : A short description or tag for the computer.
-            description (str, optional)             : A detailed description of the computer and its purpose.
-            computer_type (Union[str, ComputerType]): Specifies the type of the computer, which can be provided either as a string or an instance of ComputerType enum.
-            os_release (OSRelease, optional)        : The release version of the operating system installed on the computer. Defaults to None.
-            os_edition (SoftwareEdition, optional)  : The edition of the operating system for the given release. Defaults to None.
-            ip (Union[str, IPv4], optional)         : The IP address assigned to the computer, which can be provided as either a string or an instance of IPv4 class. Defaults to None.
-            kwargs (Any)                            : Any further arguments
+            computer_id (int | str)                  : A unique identifier for the computer, which can be either an integer or a string.
+            name (str)                               : The name of the computer.
+            label (str | None)                       : A short description or tag for the computer.
+            description (str | None)                 : A detailed description of the computer and its purpose.
+            computer_type (str | ComputerType | None): Specifies the type of the computer, which can be provided either as a string or an instance of ComputerType enum.
+            os_release (OSRelease | None)            : The release version of the operating system installed on the computer. Defaults to None.
+            os_edition (SoftwareEdition | None)      : The edition of the operating system for the given release. Defaults to None.
+            ip (str | IPv4 | None)                   : The IP address assigned to the computer, which can be provided as either a string or an instance of IPv4 class. Defaults to None.
+            kwargs (Any)                             : Any further arguments
         """
 
         super().__init__(
@@ -196,7 +196,7 @@ class Computer(Asset):
         return self._ip
 
     @ip.setter
-    def ip(self, new_ip: IPv4) -> None:
+    def ip(self, new_ip: "IPv4") -> None:
         """
         Set a new ip address for this computer.
 
@@ -207,18 +207,29 @@ class Computer(Asset):
         self._ip = new_ip
 
     @property
-    def os_support(self) -> list[SoftwareReleaseSupport]:
+    def os_support(self) -> list["SoftwareReleaseSupport"]:
         """
         Get support for current computer os release and edition.
 
         Returns:
-            List[SoftwareReleaseSupport]: A list of SoftwareReleaseSupport instances representing the support for the current OS release and edition.
+            list[SoftwareReleaseSupport]: A list of SoftwareReleaseSupport instances representing the support for the current OS release and edition.
         """
 
         if self._os.release is None:
             return []
 
-        return self._os.release.get_support_for_edition(str(self._os.edition))
+        return self._os.release.support_for_edition(str(self._os.edition))
+
+    @property
+    def softwares(self) -> dict[str, "SoftwareRelease"]:
+        """
+        Return the computer software release dictionary.
+
+        Returns:
+            dict[str, SoftwareRelease]: A dictionary of SoftwareRelease instances representing the software installed on the computer.
+        """
+
+        return self._softwares
 
     def set_ip_from_str(self, new_ip_str: str) -> None:
         """
@@ -241,16 +252,6 @@ class Computer(Asset):
 
         if resolved_ip is not None:
             self._ip = IPv4(resolved_ip)
-
-    def get_softwares(self) -> dict[str, SoftwareRelease]:
-        """
-        Getter for the computer software release list.
-
-        Returns:
-            dict[str, SoftwareRelease]: A dictionary of SoftwareRelease instances representing the software installed on the computer.
-        """
-
-        return self._softwares
 
     def is_os_supported(self) -> bool:
         """
@@ -277,12 +278,12 @@ class Computer(Asset):
         return self.name
 
     @override
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary representation.
 
         Returns:
-            Dict: A dictionary containing information about the computer, including OS release and edition details.
+            dict[str, Any]: A dictionary containing information about the computer, including OS release and edition details.
         """
 
         asset_dict = super().to_dict()

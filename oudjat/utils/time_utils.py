@@ -36,11 +36,11 @@ class DateFormat(Enum):
         Map date formats to a list of strings based on the given flag.
 
         Args:
-            formats (List[DateFormat]): A list of date formats
-            flag (DateStrFlag)        : bit flag used to select desired formats
+            formats (list[DateFormat]): A list of date formats
+            flag (int | DateStrFlag)  : bit flag used to select desired formats
 
         Returns:
-            List[str]: A list of strings where each string corresponds to a date format in `chars` that matches the given `flag`.
+            list[str]: A list of strings where each string corresponds to a date format in `chars` that matches the given `flag`.
         """
 
         return [c.value for c in formats if DateFlag.check_flag(flag, DateFlag[c.name])]
@@ -55,10 +55,10 @@ class DateFormat(Enum):
         The flags determine which parts of the date and time are included, and the separators for these parts can be customized using `date_sep`, `time_sep`, and `main_sep`.
 
         Args:
-            date_flags (int)        : an integer representing a set of flags that specify which components to include in the date string.
-            date_sep (str, optional): the separator used between date components. Defaults to "-".
-            time_sep (str, optional): the separator used between time components. Defaults to ":".
-            main_sep (str, optional): the separator used between the date and time parts in the final string. Defaults to " ".
+            date_flags (int)     : An integer representing a set of flags that specify which components to include in the date string.
+            date_sep (str | None): The separator used between date components. Defaults to "-".
+            time_sep (str | None): The separator used between time components. Defaults to ":".
+            main_sep (str | None): The separator used between the date and time parts in the final string. Defaults to " ".
 
         Returns:
             str: A concatenated string representing the formatted date and time based on the flags provided.
@@ -103,9 +103,9 @@ class TimeConverter:
         Convert a Unix time (either as an integer or string) to a readable date and time string.
 
         Args:
-            unix_time (Union[int, str]): the Unix timestamp either as an integer or string.
-            delta (int)                : optional. The timezone offset in hours to adjust the datetime object by. Default is 1 hour.
-            date_flag (int)            : DateFlag int that indicates the output format.
+            unix_time (int | str): The Unix timestamp either as an integer or string.
+            delta (int)          : Optional. The timezone offset in hours to adjust the datetime object by. Default is 1 hour.
+            date_flag (int)      : DateFlag int that indicates the output format.
 
         Returns:
             str: A formatted string representing the date and time from the given Unix timestamp.

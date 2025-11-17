@@ -55,7 +55,7 @@ class MSVuln:
         Return the remediations for the current vuln.
 
         Returns:
-            Dict: a dictionary of MSRemed instances
+            dict[int, MSRemed]: A dictionary of MSRemed instances
         """
 
         return self._kbs
@@ -66,7 +66,7 @@ class MSVuln:
         Return the products impacted by the current vuln.
 
         Returns:
-            Dict: a dictionary of MSProduct instances
+            dict[str, MSProduct]: A dictionary of MSProduct instances
         """
 
         return self._products
@@ -91,7 +91,7 @@ class MSVuln:
         Convert kbs into dictionaries.
 
         Returns:
-            List[Dict]: A list of flattened dictionaries, each representing a KB and its related CVE.
+            DataType: A list of flattened dictionaries, each representing a KB and its related CVE.
         """
 
         kb_dictionaries: "DataType" = []
@@ -105,7 +105,7 @@ class MSVuln:
         Convert current vuln into a dict.
 
         Returns:
-            Dict[str, Any]: A dictionary representation of the MSVuln object containing CVE and its associated KBs.
+            dict[str, Any]: A dictionary representation of the MSVuln object containing CVE and its associated KBs.
         """
 
         return {

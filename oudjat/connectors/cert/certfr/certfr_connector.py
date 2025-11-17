@@ -66,11 +66,10 @@ class CERTFRConnector(Connector):
         Search the CERTFR website using a filter (either a single string or a list of strings) and returns a list of CERTFRPage objects that match the search criteria.
 
         Args:
-            self (OudjatCERTFRConnection): The instance on which this method is called.
-            search_filter (Union[str, List[str]]): A single string or a list of strings used as filters for searching within CERTFR pages.
+            search_filter (str | list[str]): A single string or a list of strings used as filters for searching within CERTFR pages.
 
         Returns:
-            List[CERTFRPage]: A list of CERTFRPage objects that match the search criteria.
+            list[CERTFRPage]: A list of CERTFRPage objects that match the search criteria.
         """
 
         res = []
@@ -103,11 +102,11 @@ class CERTFRConnector(Connector):
         Perform a GET request to the provided feed URL and parses its content using BeautifulSoup to extract items based on optional filtering by date string.
 
         Args:
-            feed_url (str): The URL of the RSS feed to be parsed.
-            date_str_filter (str, optional): A date string used for filtering extracted items. Defaults to None.
+            feed_url (str)              : The URL of the RSS feed to be parsed.
+            date_str_filter (str | None): A date string used for filtering extracted items. Defaults to None.
 
         Returns:
-            List[str]: A list of references extracted from the CERTFR feed page that match the date filter criteria if provided.
+            list[str]: A list of references extracted from the CERTFR feed page that match the date filter criteria if provided.
         """
 
         filtered_feed = []
@@ -122,7 +121,7 @@ class CERTFRConnector(Connector):
 
                 certfr_ref = ""
                 if item_link:
-                    certfr_ref = CERTFRPage.get_ref_from_link(item_link.text)
+                    certfr_ref = CERTFRPage.ref_from_link(item_link.text)
 
                 if date_str_filter:
                     try:

@@ -296,7 +296,7 @@ class KPI(DataSet):
         Convert the current instance into a dictionary.
 
         Returns:
-            Dict : dictionary representation of the current kpi
+            dict[str, Any]: A dictionary representation of the current kpi
         """
 
         base = super().to_dict()

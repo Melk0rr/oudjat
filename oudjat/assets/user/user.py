@@ -30,13 +30,13 @@ class User(Asset):
         Initializes a new instance of the User class with the provided parameters.
 
         Args:
-            user_id (Union[int, str])  : the unique identifier for the user.
-            name (str)                 : the full name of the user.
-            firstname (str)            : the first name of the user.
-            lastname (str)             : the last name of the user.
-            login (str)                : the login username for the user.
-            email (str, optional)      : the email address of the user. Defaults to None.
-            description (str, optional): a description or bio for the user. Defaults to None.
+            user_id (int | str)        : The unique identifier for the user.
+            name (str)                 : The full name of the user.
+            firstname (str)            : The first name of the user.
+            lastname (str)             : The last name of the user.
+            login (str)                : The login username for the user.
+            email (str | None)         : The email address of the user. Defaults to None.
+            description (str | None)   : A description or bio for the user. Defaults to None.
         """
 
         super().__init__(
@@ -136,7 +136,7 @@ class User(Asset):
         Convert the current instance into a dictionary.
 
         Returns:
-            Dict: A dictionary representation of the User instance.
+            dict[str, Any]: A dictionary representation of the User instance.
         """
 
         asset_dict = super().to_dict()

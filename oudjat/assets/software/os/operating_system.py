@@ -75,7 +75,7 @@ class OSRelease(SoftwareRelease):
         Convert the current instance into a dictionary.
 
         Returns:
-            Dict: dictionary representation of the current instance
+            dict[str, Any]: A dictionary representation of the current instance
         """
 
         base_dict = super().to_dict()
@@ -95,8 +95,8 @@ class OperatingSystem(Software[OSRelease]):
         os_id: int | str,
         name: str,
         label: str,
-        os_family: OSFamily,
-        computer_type: ComputerType | list[ComputerType],
+        os_family: "OSFamily",
+        computer_type: "ComputerType | list[ComputerType]",
         editor: str | list[str] | None = None,
         description: str | None = None,
     ) -> None:
@@ -104,13 +104,13 @@ class OperatingSystem(Software[OSRelease]):
         Return a new instance of OperatingSystem.
 
         Args:
-            os_id (int | str)                       : OS unique ID
-            name (str)                              : The name of the operating system
-            label (str)                             : A short string to labelize the os
-            os_family (OSFamily)                    : Family of operating system, usually (Linux, MAC, Windows)
-            computer_type (List[str | ComputerType]): The type(s) of computer the OS is tide to
-            editor (str | List[str])                : The editor in charge of the OS maintenance and/or development
-            description (str)                       : A string to describe the OS
+            os_id (int | str)                                : OS unique ID
+            name (str)                                       : The name of the operating system
+            label (str)                                      : A short string to labelize the os
+            os_family (OSFamily)                             : Family of operating system, usually (Linux, MAC, Windows)
+            computer_type (ComputerType | list[ComputerType]): The type(s) of computer the OS is tide to
+            editor (str | list[str])                         : The editor in charge of the OS maintenance and/or development
+            description (str)                                : A string to describe the OS
         """
 
         super().__init__(
@@ -125,25 +125,25 @@ class OperatingSystem(Software[OSRelease]):
         if not isinstance(computer_type, list):
             computer_type = [computer_type]
 
-        self._computer_type: list[ComputerType] = computer_type
-        self._os_family: OSFamily = os_family
+        self._computer_type: list["ComputerType"] = computer_type
+        self._os_family: "OSFamily" = os_family
 
     # ****************************************************************
     # Methods
 
     @property
-    def computer_type(self) -> list[ComputerType]:
+    def computer_type(self) -> list["ComputerType"]:
         """
         Return the computer types related to the current OS.
 
         Returns:
-            List[ComputerType]: the list of computer types as ComputerType enumeration elements
+            list[ComputerType]: the list of computer types as ComputerType enumeration elements
         """
 
         return self._computer_type
 
     @property
-    def os_family(self) -> OSFamily:
+    def os_family(self) -> "OSFamily":
         """
         Return the OS family of the current OS.
 
@@ -168,7 +168,7 @@ class OperatingSystem(Software[OSRelease]):
     # Static methods
 
     @staticmethod
-    def get_matching_os_family(test_str: str) -> str | None:
+    def matching_os_family(test_str: str) -> str | None:
         """
         Try to retrieve a substring of the provided string matching an OSFamily element.
 

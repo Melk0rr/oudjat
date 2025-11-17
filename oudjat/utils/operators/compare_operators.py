@@ -37,8 +37,8 @@ class CompareOperation:
         Check if a is in b.
 
         Args:
-            a (Any): The item to search for.
-            b (Union[List, str]): The container object to search within.
+            a (Any)                                : The item to search for.
+            b (str | list[NumberType | str | bool]): The container object to search within.
 
         Returns:
             bool: True if a is found within b, False otherwise.

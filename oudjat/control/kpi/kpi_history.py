@@ -2,7 +2,7 @@
 
 from typing import Callable
 
-from oudjat.utils import ColorPrint
+from oudjat.utils import ColorPrint, Context
 
 from .kpi import KPI
 from .kpi_comparator import KPIComparator, KPIComparatorTendency
@@ -92,7 +92,7 @@ class KPIHistoryNode:
 
         if self.next is None:
             raise ValueError(
-                f"{__class__.__name__}.compare_next::Next history node is None. Can't compare it !"
+                f"{Context.caller_infos()['qualname']}::Next history node is None. Can't compare it !"
             )
 
         return KPIComparator(self.kpi, self.next.kpi)
@@ -107,7 +107,7 @@ class KPIHistoryNode:
 
         if self.prev is None:
             raise ValueError(
-                f"{__class__.__name__}.compare_next::Previous history node is None. Can't compare it !"
+                f"{Context.caller_infos()['qualname']}::Previous history node is None. Can't compare it !"
             )
 
         return KPIComparator(self.prev.kpi, self.kpi)
@@ -121,8 +121,8 @@ class KPIHistory:
         Create a new instance of KPIHistory.
 
         Args:
-            name (str)                : The name of the object instance.
-            kpis (list[KPI], optional): A list of KPI objects to initialize with. Defaults to an empty list.
+            name (str)             : The name of the object instance.
+            kpis (list[KPI] | None): A list of KPI objects to initialize with. Defaults to an empty list.
         """
 
         self._name: str = name
@@ -183,7 +183,7 @@ class KPIHistory:
         Setter for the kpi list. Updates the list of KPIs in the class.
 
         Args:
-            kpis (List[KPI], optional): A list of KPI objects to set. Defaults to an empty list.
+            kpis (list[KPI]): A list of KPI objects to set. Defaults to an empty list.
         """
 
         self.clear()

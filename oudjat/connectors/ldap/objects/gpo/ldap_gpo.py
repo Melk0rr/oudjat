@@ -114,8 +114,8 @@ class LDAPGroupPolicyObject(LDAPObject):
         This method searches for LDAP entries that are linked to the current group policy object (GPO).
 
         Args:
-            attributes (str | list[str], optional): The attributes to retrieve from the linked LDAP entries.
-            ou (str, optional)                    : The organizational unit (OU) in which to search for linked objects.
+            attributes (str | list[str] | None): The attributes to retrieve from the linked LDAP entries.
+            ou (str | None)                    : The organizational unit (OU) in which to search for linked objects.
 
         Returns:
             list["LDAPObject"]: A list of LDAPOrganizationalUnit instances that are linked to the current GPO.
@@ -133,7 +133,7 @@ class LDAPGroupPolicyObject(LDAPObject):
         This method converts the group policy object (GPO) and its related information into a dictionary format for easier serialization or transmission.
 
         Returns:
-            Dict: A dictionary containing the GPO's display name, scope, state, and linked GUIDs.
+            dict[str, Any]: A dictionary containing the GPO's display name, scope, state, and linked GUIDs.
         """
 
         base_dict = super().to_dict()

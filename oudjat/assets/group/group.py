@@ -9,6 +9,7 @@ from ..asset_type import AssetType
 
 MemberType = TypeVar("MemberType", bound=GenericIdentifiable)
 
+
 class Group(Asset, Generic[MemberType]):
     """A class to handle groups of assets."""
 
@@ -21,16 +22,16 @@ class Group(Asset, Generic[MemberType]):
         name: str,
         label: str | None = None,
         description: str | None = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """
         Create a new Group of assets.
 
         Args:
-            group_id (Union[int, str]) : The identifier of the group.
+            group_id (int | str)       : The identifier of the group.
             name (str)                 : The name of the group.
-            label (str, optional)      : A short text label for the group. Defaults to None.
-            description (str, optional): A detailed description of the group. Defaults to None.
+            label (str | None)         : A short text label for the group. Defaults to None.
+            description (str | None)   : A detailed description of the group. Defaults to None.
             kwargs (Any)               : Any further arguments
         """
 
@@ -43,18 +44,18 @@ class Group(Asset, Generic[MemberType]):
             **kwargs,
         )
 
-        self._members: dict[str, MemberType] = {}
+        self._members: dict[str, "MemberType"] = {}
 
     # ****************************************************************
     # Methods
 
     @property
-    def members(self) -> dict[str, MemberType]:
+    def members(self) -> dict[str, "MemberType"]:
         """
         Return the members of the group.
 
         Returns:
-            Dict[str, Asset]: A dictionary containing all members by their identifier.
+            dict[str, MemberType]: A dictionary containing all members by their identifier.
         """
 
         return self._members
@@ -65,12 +66,12 @@ class Group(Asset, Generic[MemberType]):
         Return the list of member names in the group.
 
         Returns:
-            List[str]: A list of names of all members.
+            list[str]: A list of names of all members.
         """
 
         return [m.name for m in self.members.values()]
 
-    def add_member(self, member: MemberType) -> None:
+    def add_member(self, member: "MemberType") -> None:
         """
         Add a new member to the group.
 
@@ -87,9 +88,7 @@ class Group(Asset, Generic[MemberType]):
         This method deletes all entries in the member list.
         """
 
-        for member_id in list(
-            self.members.keys()
-        ):  # Using list to avoid RuntimeError during modification
+        for member_id in list(self.members.keys()):
             del self.members[member_id]
 
     @override

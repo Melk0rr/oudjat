@@ -1,10 +1,11 @@
 """A module to define common target command behavior."""
 
+from collections.abc import Iterator
 from multiprocessing import Pool
-from typing import Dict, List
+from typing import Any, override
 
 from oudjat.control.vulnerability import CVE
-from oudjat.utils import ColorPrint, FileHandler
+from oudjat.utils import ColorPrint, FileUtils
 
 from .base import Base
 
@@ -12,23 +13,23 @@ from .base import Base
 class Target(Base):
     """A class that describes common target command."""
 
-    def __init__(self, options: Dict) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         """
         Create a new instance of Target command.
 
         Args:
-            options (Dict): options passed to the command
+            options (dict[str, Any]): Options passed to the command
         """
         super().__init__(options)
-        self.results: List[Dict] = []
+        self.results: list[dict[str, Any]] = []
 
-        self.str_file_option_handle("TARGET", "FILE")
+        self._str_file_option_handle("TARGET", "FILE")
 
         # If a CSV of CVE is provided, populate CVE instances
         if self.options["--cve-list"]:
             print("Importing cve data...")
 
-            def cve_import_callback(reader):
+            def cve_import_callback(reader: "Iterator"):
                 cve_instances = []
 
                 with Pool(processes=5) as pool:
@@ -37,10 +38,10 @@ class Target(Base):
 
                 return cve_instances
 
-            cve_import = FileHandler.import_csv(self.options["--cve-list"], cve_import_callback)
+            cve_import = FileUtils.import_csv(self.options["--cve-list"], cve_import_callback)
             self.options["--cve-list"] = cve_import
 
-    def str_file_option_handle(self, string_option: str, file_option: str) -> None:
+    def _str_file_option_handle(self, string_option: str, file_option: str) -> None:
         """
         Handle the initialization of a list-based option by checking if an existing option is provided as a file path.
 
@@ -56,7 +57,7 @@ class Target(Base):
         """
 
         args = (
-            FileHandler.import_txt(file_path=self.options[file_option])
+            FileUtils.import_txt(file_path=self.options[file_option])
             if self.options[file_option]
             else self.options[string_option].split(",")
         )
@@ -81,10 +82,8 @@ class Target(Base):
         """Write the results into a CSV file."""
 
         print("\nExporting results to csv...")
-        FileHandler.export_csv(self.results, self.options["--export-csv"], "|")
+        FileUtils.export_csv(self.results, self.options["--export-csv"], "|")
 
+    @override
     def run(self) -> None:
         """Run from the cli module."""
-
-        # Retrieve IP of target and run initial configuration
-        self.init()

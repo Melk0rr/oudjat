@@ -141,7 +141,7 @@ class CybereasonEndpoint(Enum):
         Return a CybereasonEndpoint element search result attributes.
 
         Returns:
-            List[str]: the list of attributes to return from requesting the endpoint if relevent
+            list[str]: the list of attributes to return from requesting the endpoint if relevent
         """
 
         return self._value_.attributes

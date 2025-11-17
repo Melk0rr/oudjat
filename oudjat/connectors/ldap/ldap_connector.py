@@ -13,7 +13,7 @@ from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import StrType
 
-from .ldap_filter import LDAPFilter
+from .ldap_filter import LDAPFilter, LDAPFilterStrFormat
 from .objects.ldap_entry import LDAPEntry
 from .objects.ldap_object_types import LDAPObjectType
 
@@ -342,7 +342,7 @@ class LDAPConnector(Connector):
 
         Args:
             search_filter (str)            : Filter to reduce search results
-            attributes (str | List[str])   : Attributes to include in result
+            attributes (str | list[str])   : Attributes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
             auto (bool)                    : Auto map the objects dynamically per type
             payload (dict[str, Any] | None): Payload to send to the server
@@ -494,7 +494,7 @@ class LDAPConnector(Connector):
 
         Args:
             search_filter (str)            : filter to reduce search results
-            attributes (str | List[str])   : attributes to include in result
+            attributes (str | list[str])   : attributes to include in result
             search_base (str)              : where to base the search on in terms of directory location
             payload (dict[str, Any] | None): Payload to send to the server
 
@@ -528,7 +528,7 @@ class LDAPConnector(Connector):
 
         Args:
             search_filter (str)            : Filter to reduce search results
-            attributes (str | List[str])   : Attrbutes to include in result
+            attributes (str | list[str])   : Attrbutes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
             recursive (bool)               : Retrieve groups recursively if set to True
             payload (dict[str, Any] | None): Payload to send to the server
@@ -568,7 +568,7 @@ class LDAPConnector(Connector):
         Args:
             dn (str):                      : Optional distinguished name to search
             search_filter (str)            : Filter to reduce search results
-            attributes (str | List[str])   : Attrbutes to include in result
+            attributes (str | list[str])   : Attrbutes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
             recursive (bool)               : Retrieve OUs recursively if set to True
             payload (dict[str, Any] | None): Payload to send to the server
@@ -602,8 +602,7 @@ class LDAPConnector(Connector):
         The search is conducted using the distinguished name (DN) of the provided `LDAPEntry`.
 
         Args:
-            self (object): The instance of the class containing this method, typically a class that interacts with an LDAP directory.
-            ldap_entry (LDAPEntry): An object representing a partial entry in the LDAP directory. It must have methods to get its type and distinguished name (`get_type` and `get_dn` respectively).
+            ldap_entry (LDAPEntry): An object representing a partial entry in the LDAP directory.
 
         Returns:
             LDAPEntry: A complete LDAP entry that matches the provided partial entry, including all details found in the search operation.
@@ -611,7 +610,7 @@ class LDAPConnector(Connector):
 
         return self.fetch(
             search_type=LDAPObjectType.from_object_cls(ldap_entry),
-            search_filter=f"(distinguishedName={ldap_entry.dn})",
+            search_filter=LDAPFilterStrFormat.DN(ldap_entry.dn),
         )[0]
 
     def domain_admins(self) -> dict[int | str, "LDAPUser"]:

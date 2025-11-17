@@ -17,9 +17,9 @@ class StdOutHook:
         Initialize a new instance of StdOutHook.
 
         Args:
-            filename (str)         : the name of the file to write to.
-            silent (bool, optional): whether to suppress writing to stdout. Defaults to False.
-            output (bool, optional): whether to write to the specified file. Defaults to True.
+            filename (str)      : The name of the file to write to.
+            silent (bool | None): Whether to suppress writing to stdout. Defaults to False.
+            output (bool | None): Whether to write to the specified file. Defaults to True.
         """
 
         self.lines: list[str] = []
@@ -32,8 +32,8 @@ class StdOutHook:
         Write the provided text to stdout if not in silent mode or if `override` is True.
 
         Args:
-            text (str)               : the text to be written.
-            override (bool, optional): whether to bypass the silent setting and write to stdout anyway. Defaults to False.
+            text (str)            : The text to be written.
+            override (bool | None): Whether to bypass the silent setting and write to stdout anyway. Defaults to False.
 
         """
 

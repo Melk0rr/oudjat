@@ -54,12 +54,12 @@ class DataSource:
         Return the current data source connectors.
 
         Returns:
-            Dict: the connectors attached to this data source
+            dict[str, Connector]: The connectors attached to this data source
         """
 
         return self._connectors
 
-    def get_connector(self, connector_key: str) -> "Connector":
+    def connector(self, connector_key: str) -> "Connector":
         """
         Return one of the data source connector based on its key.
 
@@ -71,7 +71,7 @@ class DataSource:
         """
 
         if connector_key not in self.connectors:
-            raise ValueError(f"{__class__.__name__}.get_connector::Invalid connector key provided")
+            raise ValueError(f"{__class__.__name__}.connector::Invalid connector key provided")
 
         return self.connectors[connector_key]
 

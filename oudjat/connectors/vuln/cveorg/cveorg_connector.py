@@ -39,10 +39,10 @@ class CVEorgConnector(CVEConnector):
         If a valid response is received, it extracts vulnerability information and filters it based on the specified attributes before appending it to the result list.
 
         Args:
-            cves (str | list[str])                : A single CVE ID or a list of CVE IDs to be searched.
-            attributes (str | list[str], optional): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
-            raw (bool)                            : Weither to return the raw result or the unified one
-            payload (dict[str, Any] | None)       : Payload to send to the target CVE API url
+            cves (str | list[str])             : A single CVE ID or a list of CVE IDs to be searched.
+            attributes (str | list[str] | None): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
+            raw (bool)                         : Weither to return the raw result or the unified one
+            payload (dict[str, Any] | None)    : Payload to send to the target CVE API url
 
         Returns:
             DataType: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
