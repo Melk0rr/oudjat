@@ -23,7 +23,7 @@ dependencies = [
   "beautifulsoup4",
   "commentjson",
   "docopt",
-  "keyring"
+  "keyring",
   "json",
   "lxml",
   "requests",
