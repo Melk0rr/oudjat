@@ -282,7 +282,7 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry.
 
         Args:
-            payload (dict[str, Any])         : Payload to send to the endpoint
+            payload (dict[str, Any]): Payload to send to the endpoint
 
         Returns:
             DataType: Logout response data
