@@ -24,7 +24,6 @@ dependencies = [
   "commentjson",
   "docopt",
   "keyring",
-  "json",
   "lxml",
   "requests",
 ]
