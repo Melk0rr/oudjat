@@ -294,7 +294,10 @@ class S1Connector(Connector):
     # Methods: Applications
 
     def applications(
-        self, site_ids: "StrType | None" = None, payload: dict[str, Any] | None = None
+        self,
+        vendors: "StrType | None" = None,
+        site_ids: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Get applications installed on endpoints.
@@ -306,8 +309,9 @@ class S1Connector(Connector):
         403 - Insufficient permissions
 
         Args:
+            vendors (str | list[str] | None) : List of vendors to include. If None, all are included
             site_ids (str | list[str] | None): List of site ids to filter
-            payload (dict[str, Any])         : Payload to send to the endpoint
+            payload (dict[str, Any] | None)  : Payload to send to the endpoint
 
         Returns:
             DataType: Applications data based on the provided filters
@@ -315,6 +319,9 @@ class S1Connector(Connector):
 
         if payload is None:
             payload = {}
+
+        if vendors is not None:
+            payload["vendors"] = self._unify_str_list(vendors)
 
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
