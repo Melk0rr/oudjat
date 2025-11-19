@@ -35,6 +35,9 @@ class S1Endpoint(Enum):
         "/web/api/v2.1/agents/actions/move-to-site", ConnectorMethod.POST
     )
     APPLICATIONS_INVENTORY = S1EndpointsProps(
+        "/web/api/v2.1/application-management/inventory", ConnectorMethod.GET
+    )
+    APPLICATIONS_INVENTORY_ENDPOINTS = S1EndpointsProps(
         "/web/api/v2.1/application-management/inventory/endpoints", ConnectorMethod.GET
     )
     APPLICATIONS_CVES = S1EndpointsProps(
