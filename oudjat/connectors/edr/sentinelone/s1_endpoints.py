@@ -41,7 +41,13 @@ class S1Endpoint(Enum):
         "/web/api/v2.1/application-management/inventory/endpoints", ConnectorMethod.GET
     )
     APPLICATIONS_CVES = S1EndpointsProps(
+        "/web/api/v2.1/application-management/risks", ConnectorMethod.GET
+    )
+    APPLICATIONS_APP_CVES = S1EndpointsProps(
         "/web/api/v2.1/application-management/risks/cves", ConnectorMethod.GET
+    )
+    APPLICATIONS_WITH_RISKS = S1EndpointsProps(
+        "/web/api/v2.1/application-management/risks/applications", ConnectorMethod.GET
     )
     GROUPS = S1EndpointsProps("/web/api/v2.1/groups", ConnectorMethod.GET)
     GROUPS_MOVE_AGENTS = S1EndpointsProps(

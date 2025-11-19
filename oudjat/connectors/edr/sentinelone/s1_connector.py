@@ -11,6 +11,7 @@ import requests
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import DataType, StrType
+from oudjat.utils.context import Context
 
 from ... import Connector
 from .exceptions import SentinelOneAPIConnectionError
@@ -182,7 +183,7 @@ class S1Connector(Connector):
 
             if req.status_code != 200:
                 raise Exception(
-                    f"{__class__.__name__}.fetch::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
+                    f"{Context.caller_infos()['qualname']}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
                 )
 
             next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
@@ -328,6 +329,41 @@ class S1Connector(Connector):
 
         return self.fetch(S1Endpoint.APPLICATIONS_INVENTORY, payload)
 
+    def applications_with_risks(
+        self,
+        vendors: "StrType | None" = None,
+        site_ids: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Get applications with known CVEs.
+
+        Possible response messages
+        200 - Success
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry.
+        403 - Insufficient permissions
+
+        Args:
+            vendors (str | list[str] | None) : List of vendors to include. If None, all are included
+            site_ids (str | list[str] | None): List of site ids to filter
+            payload (dict[str, Any] | None)  : Payload to send to the endpoint
+
+        Returns:
+            DataType: Applications data based on the provided filters
+        """
+
+        if payload is None:
+            payload = {}
+
+        if vendors is not None:
+            payload["vendors"] = self._unify_str_list(vendors)
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
+
+        return self.fetch(S1Endpoint.APPLICATIONS_WITH_RISKS, payload)
+
     def cves(
         self, site_ids: "StrType | None" = None, payload: dict[str, Any] | None = None
     ) -> "DataType":
@@ -338,6 +374,7 @@ class S1Connector(Connector):
         200 - Success
         400 - Invalid user input received. See error details for further information.
         401 - Unauthorized access - please sign in and retry.
+        403 - Insufficient permissions
 
         Args:
             site_ids (str | list[str] | None): List of site ids to filter
@@ -354,6 +391,56 @@ class S1Connector(Connector):
             payload["siteIds"] = self._unify_str_list(site_ids)
 
         return self.fetch(S1Endpoint.APPLICATIONS_CVES, payload)
+
+    def application_cves(
+        self,
+        application_ids: "StrType | None" = None,
+        application_name: str | None = None,
+        application_vendor: str | None = None,
+        site_ids: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Get CVEs for a specific appliation.
+
+        Possible response messages
+        200 - Success
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry.
+        403 - Insufficient permissions
+
+        Args:
+            application_ids (str | list[str] | None): List of applications to include
+            application_name (str | None)           : Application name, if application ids are not specified
+            application_vendor (str | None)         : Application vendor, if application ids are not specified
+            site_ids (str | list[str] | None)       : List of site ids to filter
+            payload (dict[str, Any])                : Payload to send to the endpoint
+
+        Returns:
+            DataType: CVEs data based on the provided filters
+        """
+
+        if payload is None:
+            payload = {}
+
+        if application_ids is not None:
+            payload["applicationIds"] = self._unify_str_list(application_ids)
+
+        elif application_name is not None and application_vendor is not None:
+            payload["applicationName"] = application_name
+            payload["applicationVendor"] = application_vendor
+
+        else:
+            raise ValueError(
+                f"{Context.caller_infos()['qualname']}::You must provide either application IDs or specify an application name and vendor"
+            )
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
+
+        return self.fetch(S1Endpoint.APPLICATIONS_APP_CVES, payload)
+
+
 
     # ****************************************************************
     # Methods: Groups
