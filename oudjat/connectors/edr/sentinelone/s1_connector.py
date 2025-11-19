@@ -303,6 +303,7 @@ class S1Connector(Connector):
         200 - Success
         400 - Invalid user input received. See error details for further information.
         401 - Unauthorized access - please sign in and retry.
+        403 - Insufficient permissions
 
         Args:
             site_ids (str | list[str] | None): List of site ids to filter
