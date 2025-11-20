@@ -3,7 +3,7 @@
 from typing import Any, NamedTuple, override
 
 from oudjat.assets import Asset, AssetType
-from oudjat.assets.network.ipv4 import IPv4
+from oudjat.assets.network.ipv4 import IP
 from oudjat.assets.software import (
     SoftwareEdition,
     SoftwareRelease,
@@ -39,7 +39,7 @@ class Computer(Asset):
         computer_type: "str | ComputerType | None" = None,
         os_release: "OSRelease | None" = None,
         os_edition: "SoftwareEdition | None" = None,
-        ip: "str | IPv4 | None" = None,
+        ip: "str | IP | None" = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -81,9 +81,9 @@ class Computer(Asset):
 
         self._computer_type: ComputerType | None = None
 
-        self._ip: IPv4 | None = None
+        self._ip: IP | None = None
         if ip is not None:
-            self.ip = IPv4(ip) if not isinstance(ip, IPv4) else ip
+            self.ip = IP(ip) if not isinstance(ip, IP) else ip
 
         self._softwares: dict[str, SoftwareRelease] = {}
         self._protection_agent: SoftwareRelease | None = None
@@ -185,7 +185,7 @@ class Computer(Asset):
         self._os = new_os
 
     @property
-    def ip(self) -> IPv4 | None:
+    def ip(self) -> IP | None:
         """
         Return the current IP address of this computer.
 
@@ -196,7 +196,7 @@ class Computer(Asset):
         return self._ip
 
     @ip.setter
-    def ip(self, new_ip: "IPv4") -> None:
+    def ip(self, new_ip: "IP") -> None:
         """
         Set a new ip address for this computer.
 
@@ -239,7 +239,7 @@ class Computer(Asset):
             new_ip_str (str): The IPv4 instance representing the IP address of the computer.
         """
 
-        self._ip = IPv4(new_ip_str)
+        self._ip = IP(new_ip_str)
 
     def resolve_ip(self) -> None:
         """
@@ -248,12 +248,12 @@ class Computer(Asset):
 
         resolved_ip: str | None = None
         if self.label is not None:
-            resolved_ip = IPv4.resolve_from_hostname(hostname=self.label)
+            resolved_ip = IP.resolve_from_hostname(hostname=self.label)
 
         if resolved_ip is not None:
-            self._ip = IPv4(resolved_ip)
+            self._ip = IP(resolved_ip)
 
-    def is_os_supported(self) -> bool:
+    def os_supported(self) -> bool:
         """
         Check if the operating system of the computer is supported.
 
@@ -318,5 +318,5 @@ class Computer(Asset):
             "os_support_details": os_support_dict.pop("details", None),
             "os_has_lts": os_support_dict.pop("lts", False),
             **release_dict,
-            "is_os_supported": self.is_os_supported(),
+            "is_os_supported": self.os_supported(),
         }
