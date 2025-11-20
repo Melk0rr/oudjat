@@ -99,7 +99,7 @@ class Asset(GenericIdentifiable, ABC):
         if not isinstance(new_location, list):
             new_location = [new_location]
 
-        self.location = { loc.id: loc for loc in new_location }
+        self._location = { loc.id: loc for loc in new_location }
 
     @override
     def to_dict(self) -> dict[str, Any]:
