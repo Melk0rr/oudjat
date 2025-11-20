@@ -166,3 +166,29 @@ class LogicalOperator(Operator):
     NOR = LogicalOperatorProps({"symbol": "!|", "verbose": "nor"}, LogicalOperation.logical_nor)
     NAND = LogicalOperatorProps({"symbol": "!&", "verbose": "nand"}, LogicalOperation.logical_nand)
 
+    @property
+    def keys(self) -> "OperatorKeysProps":
+        """
+        Return the keys of the operator.
+
+        Returns:
+            OperatorKeysProps: Keys TypedDict with the symbol key and the verbose key
+        """
+
+        return self._value_.keys
+
+    def __call__(self, *args: int | bool, **kwargs: int | bool) -> int | bool:
+        """
+        Call the operator's operation.
+
+        Args:
+            *args (int | bool)   : Any aditional unnamed arguments
+            **kwargs (int | bool): Any aditional named arguments
+
+        Returns:
+            int | bool: The result of the operator's operation
+        """
+
+        return self._value_.operation(*args, **kwargs)
+
+
