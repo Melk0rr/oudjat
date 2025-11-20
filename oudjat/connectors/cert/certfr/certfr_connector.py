@@ -7,6 +7,7 @@ from urllib.parse import ParseResult, urlparse
 from bs4 import BeautifulSoup
 
 from oudjat.connectors import Connector, ConnectorMethod
+from oudjat.utils import Context
 from oudjat.utils.color_print import ColorPrint
 
 from .certfr_page import CERTFRPage
@@ -57,7 +58,7 @@ class CERTFRConnector(Connector):
 
         except ConnectionError as e:
             raise ConnectionError(
-                f"{__class__.__name__}.connect::Could not connect to {self._target.netloc}\n{e}"
+                f"{Context.caller_infos()['qualname']}::Could not connect to {self._target.netloc}\n{e}"
             )
 
     @override
