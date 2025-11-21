@@ -2,6 +2,8 @@
 A module that deals with subnet masks.
 """
 
+from typing import Any, override
+
 from oudjat.utils.context import Context
 
 from .ip import IP
@@ -46,7 +48,7 @@ class NetMask(IP):
             int: current mask instance as CIDR notation
         """
 
-        return IP.count_1_bits(self._address)
+        return IP.count_1_bits(self._value)
 
     @property
     def wildcard(self) -> "IP":
@@ -59,7 +61,26 @@ class NetMask(IP):
             IPv4: The wildcard address as an IPv4 object
         """
 
-        return IP(IP.ip_not(self._address))
+        return IP(IP.ip_not(self._value))
+
+    @override
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the current net mask into a dictionary.
+
+        Returns:
+            dict[str, Any]: A dictionary representation of the current subnet mask
+        """
+
+        address_dict = super().to_dict()
+        _ = address_dict.pop("ports")
+
+        return {
+            **address_dict,
+            "cidr": self.cidr,
+            "wildcard": self.wildcard
+        }
+
 
     # ****************************************************************
     # Static methods
@@ -122,7 +143,7 @@ class NetMask(IP):
         if mask not in NetMask.valid_mask():
             raise ValueError(f"{__class__.__name__}.get_netcidr::Invalid mask provided: {mask}")
 
-        return IP.count_1_bits(IP(mask).address)
+        return IP.count_1_bits(IP(mask).value)
 
     @staticmethod
     def cidr_to_mask_int(cidr: int, ip_version: "IPVersion" = IPVersion.IPV4) -> int:

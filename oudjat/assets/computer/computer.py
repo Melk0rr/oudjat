@@ -1,9 +1,10 @@
 """A module that defines the Computer asset type."""
 
-from typing import Any, NamedTuple, override
+from enum import IntEnum
+from typing import Any, NamedTuple, TypedDict, override
 
 from oudjat.assets import Asset, AssetType
-from oudjat.assets.network.ipv4 import IP
+from oudjat.assets.network.ip import IP
 from oudjat.assets.software import (
     SoftwareEdition,
     SoftwareRelease,
@@ -20,8 +21,51 @@ class ComputerOSProps(NamedTuple):
     A helper class to properly and conveniently handle computer os attributes types.
     """
 
-    release: OSRelease | None
-    edition: SoftwareEdition | None
+    release: "OSRelease | None"
+    edition: "SoftwareEdition | None"
+
+
+class ComputerStatus(IntEnum):
+    """
+    A simple enumeration of a computer possible statuses.
+
+    Attributes:
+        UNKNOWN: The computer status is unknown
+        OFF    : The computer is powered off
+        ON     : The computer is powered on
+        SLEEP  : The computer is in sleep mode
+    """
+
+    UNKNOWN = -1
+    OFF = 0
+    ON = 1
+    SLEEP = 2
+
+    @override
+    def __str__(self) -> str:
+        """
+        Convert a computer status into a simple string.
+
+        Returns:
+            str: A string representation of a computer status
+        """
+
+        return self.name
+
+
+class ComputerBaseDict(TypedDict):
+    """
+    A helper class to properly handle Computer base dictionary attributes.
+
+    Attributes:
+        computerType (ComputerType)    : The type of the computer
+        computerStatus (ComputerStatus): The status of the computer
+    """
+
+    computerType: "ComputerType"
+    computerStatus: "ComputerStatus"
+    ip: str | None
+    softwares: dict[str, Any]
 
 
 class Computer(Asset):
@@ -61,7 +105,7 @@ class Computer(Asset):
             computer_type (str | ComputerType | None): Specifies the type of the computer, which can be provided either as a string or an instance of ComputerType enum.
             os_release (OSRelease | None)            : The release version of the operating system installed on the computer. Defaults to None.
             os_edition (SoftwareEdition | None)      : The edition of the operating system for the given release. Defaults to None.
-            ip (str | IPv4 | None)                   : The IP address assigned to the computer, which can be provided as either a string or an instance of IPv4 class. Defaults to None.
+            ip (str | IP | None)                     : The IP address assigned to the computer, which can be provided as either a string or an instance of IPv4 class. Defaults to None.
             kwargs (Any)                             : Any further arguments
         """
 
@@ -71,15 +115,20 @@ class Computer(Asset):
             label=label,
             description=description,
             asset_type=AssetType.COMPUTER,
-            **kwargs
+            **kwargs,
         )
 
-        self._os: ComputerOSProps = ComputerOSProps(os_release, os_edition)
+        self._os: "ComputerOSProps" = ComputerOSProps(os_release, os_edition)
 
-        if os_release is not None:
-            self.os = ComputerOSProps(os_release, os_edition)
+        if computer_type is None or (
+            isinstance(computer_type, str) and computer_type.upper() in ComputerType._member_names_
+        ):
+            computer_type = ComputerType.UNKNOWN
 
-        self._computer_type: ComputerType | None = None
+        else:
+            computer_type = ComputerType(computer_type)
+
+        self._computer_type: "ComputerType" = computer_type
 
         self._ip: IP | None = None
         if ip is not None:
@@ -87,12 +136,13 @@ class Computer(Asset):
 
         self._softwares: dict[str, SoftwareRelease] = {}
         self._protection_agent: SoftwareRelease | None = None
+        self._status: "ComputerStatus" = ComputerStatus.UNKNOWN
 
     # ****************************************************************
     # Methods
 
     @property
-    def computer_type(self) -> ComputerType | None:
+    def computer_type(self) -> "ComputerType":
         """
         Return the computer type associated with the current computer.
 
@@ -103,7 +153,7 @@ class Computer(Asset):
         return self._computer_type
 
     @computer_type.setter
-    def computer_type(self, new_computer_type: ComputerType) -> None:
+    def computer_type(self, new_computer_type: "ComputerType") -> None:
         """
         Set the computer type of this computer.
 
@@ -114,7 +164,29 @@ class Computer(Asset):
         self._computer_type = new_computer_type
 
     @property
-    def os_release(self) -> OSRelease | None:
+    def status(self) -> "ComputerStatus":
+        """
+        Return the computer type associated with the current computer.
+
+        Returns:
+            ComputerType | None: the current computer type
+        """
+
+        return self._status
+
+    @status.setter
+    def status(self, new_status: "ComputerStatus") -> None:
+        """
+        Set the computer type of this computer.
+
+        Args:
+            new_status (ComputerStatus): New computer status
+        """
+
+        self._status = new_status
+
+    @property
+    def os_release(self) -> "OSRelease | None":
         """
         Return the os release of the current computer.
 
@@ -126,7 +198,7 @@ class Computer(Asset):
 
     # TODO: Better / simpler computer_type handling
     @os_release.setter
-    def os_release(self, new_os_release: OSRelease) -> None:
+    def os_release(self, new_os_release: "OSRelease") -> None:
         """
         Set the os release of the current computer instance.
 
@@ -286,37 +358,24 @@ class Computer(Asset):
             dict[str, Any]: A dictionary containing information about the computer, including OS release and edition details.
         """
 
-        asset_dict = super().to_dict()
+        # OS Release informations
+        release_dict = self._os.release.to_dict() if self._os.release is not None else {}
+        edition_dict = self._os.edition.to_dict() if self._os.edition is not None else {}
 
-        # INFO: OS Release informations
-        release_dict = {}
+        # OS support information
+        os_support_dict = self.os_support[0].to_dict() if len(self.os_support) > 0 else {}
 
-        if self._os.release is not None:
-            release_dict = self._os.release.to_dict()
-            release_dict.pop("is_supported")
-            release_dict.pop("software")
-            release_dict.pop("support")
-
-        # INFO: OS support information
-        os_support_dict = {}
-        if len(self.os_support) > 0:
-            os_support_dict = self.os_support[0].to_dict()
+        base_dict: "ComputerBaseDict" = {
+            "computerType": self._computer_type,
+            "computerStatus": self._status,
+            "ip": str(self._ip) if self._ip else None,
+            "softwares": {sid: s.to_dict() for sid, s in self._softwares.items()}
+        }
 
         return {
-            **asset_dict,
-            "computer_type": self.computer_type,
-            "os_release": release_dict.pop("name", None),
-            "os_release_label": release_dict.pop("label", None),
-            "os_release_full_name": release_dict.pop("full_name", None),
-            "os_release_version": release_dict.pop("version", None),
-            "os_release_date": release_dict.pop("release_date", None),
-            "os_release_main_version": release_dict.pop("version_main", None),
-            "os_release_build": release_dict.pop("version_build", None),
-            "os_edition": str(self._os.edition),
-            "os_active_support": os_support_dict.pop("active_support", None),
-            "os_end_of_life": os_support_dict.pop("end_of_life", None),
-            "os_support_details": os_support_dict.pop("details", None),
-            "os_has_lts": os_support_dict.pop("lts", False),
-            **release_dict,
-            "is_os_supported": self.os_supported(),
+            **super().to_dict(),
+            **base_dict,
+            "osRelease": release_dict,
+            "osEdition": edition_dict,
+            "osSupport": os_support_dict,
         }

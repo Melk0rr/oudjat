@@ -365,13 +365,11 @@ class CERTFRPageMeta:
             dict[str, Any]: A dictionary containing the parsed metadata or an empty dictionary if no data is available.
         """
 
-        meta_dict: dict[str, Any] = {
-            "date_initial": self.date_initial,
-            "date_last": self.date_last,
+        return {
+            "dateInitial": self.date_initial,
+            "dateLast": self.date_last,
             "sources": self.sources,
         }
-
-        return meta_dict
 
 
 class CERTFRPageContent:
@@ -529,7 +527,7 @@ class CERTFRPageContent:
             dict: A dictionary representation of the class instance's state, including risks, products, description, CVEs, solutions, and documentations.
         """
 
-        content_dict: dict[str, Any] = {
+        return {
             "risks": list(map(RiskType.risk_name, self.risks)),
             "products": self.products,
             "description": self.description,
@@ -538,4 +536,3 @@ class CERTFRPageContent:
             "documentations": self.filter_documentations(doc_filter="cve.org"),
         }
 
-        return content_dict

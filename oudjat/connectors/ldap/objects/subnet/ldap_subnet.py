@@ -27,7 +27,7 @@ class LDAPSubnet(LDAPObject):
         """
 
         super().__init__(ldap_entry, capabilities)
-        self.subnet: "Subnet" = Subnet(
+        self._subnet: "Subnet" = Subnet(
             address=ldap_entry.get("name"),
             name=ldap_entry.get("location"),
             description=" ".join(ldap_entry.get("description")),
@@ -45,7 +45,7 @@ class LDAPSubnet(LDAPObject):
             str: string representation of the current instance
         """
 
-        return str(self.subnet)
+        return str(self._subnet)
 
     @override
     def to_dict(self) -> dict[str, Any]:
@@ -56,4 +56,7 @@ class LDAPSubnet(LDAPObject):
             dict[str, Any]: dictionary representation of the current instance
         """
 
-        return self.subnet.to_dict()
+        return {
+            **super().to_dict(),
+            **self._subnet.to_dict()
+        }

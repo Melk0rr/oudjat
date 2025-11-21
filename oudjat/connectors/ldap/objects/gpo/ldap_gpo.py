@@ -143,7 +143,7 @@ class LDAPGroupPolicyObject(LDAPObject):
             "displayName": self.display_name,
             "scope": self.scope.name,
             "state": self.state.name,
-            "infos": self.infos.values(),
+            "infos": self.infos,
         }
 
     # ****************************************************************

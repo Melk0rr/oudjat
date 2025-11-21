@@ -48,17 +48,19 @@ class Subnet:
 
         if mask is None:
             raise ValueError(
-                f"{__class__.__name__}.__init__::Provided net address has no mask set: {address.address}"
+                f"{__class__.__name__}.__init__::Provided net address has no mask set: {address.value}"
             )
 
-        self.mask = mask
+        self._mask = mask
 
         # NOTE: Assures the address is a valid subnet address
-        self._address: IP = IP(address=LogicalOperation.logical_and(int(address), int(self._mask)))
+        self._address: "IP" = IP(
+            address=LogicalOperation.logical_and(int(address), int(self._mask))
+        )
 
         self._name: str = name
         self._description: str | None = description
-        self._hosts: dict[str, IP] = {}
+        self._hosts: dict[str, "IP"] = {}
 
         if hosts is not None:
             for ip in hosts:
@@ -183,7 +185,7 @@ class Subnet:
         Returns:
             list[str]: A list of IP addresses representing the host range in the subnet.
         """
-        start = self.address.address + 1
+        start = self.address.value + 1
         end = int(self.broadcast)
 
         return [f"{IP.ip_int_to_str(i)}/{self.mask.cidr}" for i in range(start, end)]
@@ -198,7 +200,7 @@ class Subnet:
 
         if (
             self.contains(host)
-            and int(host) != int(self.address)
+            and int(host) != int(self._address)
             and int(host) != int(self.broadcast)
         ):
             self._hosts[str(host)] = host
@@ -222,9 +224,8 @@ class Subnet:
         """
 
         return {
-            "net_address": str(self.address),
-            "net_mask": str(self.mask),
-            "net_mask_cidr": f"/{self.mask.cidr}",
-            "hosts": self._hosts,
-            "broadcast_address": str(self.broadcast),
+            "address": str(self.address),
+            "mask": self._mask.to_dict(),
+            "hosts": {h_k: h.to_dict() for h_k, h in self._hosts.items()},
+            "broadcast": str(self.broadcast),
         }

@@ -1,9 +1,26 @@
 """A module to describe a generic class that includes common properties among multiple asset types."""
 
 from abc import ABC, abstractmethod
-from typing import Any, TypeVar, override
+from typing import Any, TypeVar, TypedDict, override
 
 GenericBoundType = TypeVar("GenericBoundType", bound="GenericIdentifiable")
+
+class GenericIdentifiableBaseDict(TypedDict):
+    """
+    A helper class to properly handle base GenericIdentifiable dictionary attributes.
+
+    Attributes:
+        id (int | str)          : The id of the object
+        name (str)              : The name of the object
+        label (str | None)      : The label of the object, if any
+        description (str | None): The description given to the object, if any
+    """
+
+    id: int | str
+    name: str
+    label: str | None
+    description: str | None
+
 
 class GenericIdentifiable(ABC):
     """Generic class for objects with common attributes like id, name, description and label."""
@@ -200,11 +217,15 @@ class GenericIdentifiable(ABC):
             dict[str, Any]: A dictionary representation of the object, including id, name, label, description, and custom attributes.
         """
 
-        return {
+        base_dict: "GenericIdentifiableBaseDict" = {
             "id": self._id,
             "name": self.name,
             "label": self.label,
             "description": self.description,
+        }
+
+        return {
+            **base_dict,
             **self.custom_attributes,
         }
 

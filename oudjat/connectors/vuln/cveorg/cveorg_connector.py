@@ -108,8 +108,8 @@ class CVEorgConnector(CVEConnector):
             "description": raw_description[0].get("value", "") if len(raw_description) > 0 else "",
             "sources": [r["url"] for r in containers.get("references", [])],
             "vectors": {
-                "vector_str": metric_data.get("vectorString", ""),
-                "attack_vector": metric_data.get("attackVector", ""),
+                "vectorStr": metric_data.get("vectorString", ""),
+                "attackVector": metric_data.get("attackVector", ""),
             },
             "metrics": {
                 "score": metric_data.get("baseScore", 0),
@@ -117,8 +117,8 @@ class CVEorgConnector(CVEConnector):
                 "severity": metric_data.get("baseSeverity", "INFO"),
             },
             "requirements": {
-                "privileges_required": metric_data.get("privilegesRequired", "NONE"),
-                "attack_requirements": metric_data.get("attackRequirements", "NONE"),
+                "privilegesRequired": metric_data.get("privilegesRequired", "NONE"),
+                "attackRequirements": metric_data.get("attackRequirements", "NONE"),
             },
         }
 

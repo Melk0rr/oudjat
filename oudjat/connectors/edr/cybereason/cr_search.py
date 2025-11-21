@@ -12,6 +12,5 @@ class CybereasonSearchSort(Enum):
     """Samples of possible Cybereason search."""
 
     NEWEST_TO_OLDEST = {"sortingFieldName": "timestamp", "sortDirection": "DESC"}
-
     OLDEST_TO_NEWEST = {"sortingFieldName": "timestamp", "sortDirection": "ASC"}
 

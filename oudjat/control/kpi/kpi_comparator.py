@@ -163,9 +163,8 @@ class KPIComparator:
         """
 
         return {
-            "kpi_perimeter": self.kpis[0].perimeter,
-            "kpi_a_value": self.kpis[0].value,
-            "kpi_b_value": self.kpis[1].value,
+            "perimeter": self._kpis[0].perimeter,
+            "kpis": (self._kpis[0].to_dict(), self._kpis[1].to_dict()),
             "tendency": self.tendency.icon
         }
 

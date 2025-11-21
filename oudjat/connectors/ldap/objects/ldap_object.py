@@ -227,11 +227,11 @@ class LDAPObject(GenericIdentifiable):
             "sid": self.sid,
             "classes": self.classes,
             "domain": self.domain,
-            "creation_date": TimeConverter.date_to_str(
+            "creationDate": TimeConverter.date_to_str(
                 self.creation_date, DateFormat.from_flag(DateFlag.YMD_HMS)
             ),
-            "change_date": TimeConverter.date_to_str(
+            "changedDate": TimeConverter.date_to_str(
                 self.change_date, DateFormat.from_flag(DateFlag.YMD_HMS)
             ),
-            "oudjat_flags": self._ldap_obj_flags,
+            "oudjatFlags": self._ldap_obj_flags,
         }

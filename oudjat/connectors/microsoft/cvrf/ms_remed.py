@@ -84,7 +84,7 @@ class MSRemed:
         """
 
         return [
-            {"remed": self._number, "remed_type": self._type, **p.to_dict()}
+            {"remed": self._number, "remedType": self._type, **p.to_dict()}
             for p in self._products.values()
         ]
 
@@ -98,5 +98,5 @@ class MSRemed:
 
         return {
             "remed": self._number,
-            "patched_products": list(map(any_to_dict, self._products.values())),
+            "patchedProducts": list(map(any_to_dict, self._products.values())),
         }

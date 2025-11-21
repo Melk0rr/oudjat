@@ -26,8 +26,8 @@ class CVEVectorsFmt(TypedDict):
         attack_vector (str): main CVE attack vector
     """
 
-    vector_str: str
-    attack_vector: str
+    vectorStr: str
+    attackVector: str
 
 
 class CVERequirementsFmt(TypedDict):
@@ -39,8 +39,8 @@ class CVERequirementsFmt(TypedDict):
         attack_requirements (str): any requirements to perform an attack using this CVE
     """
 
-    privileges_required: str
-    attack_requirements: str
+    privilegesRequired: str
+    attackRequirements: str
 
 
 class CVEMetricsFmt(TypedDict):

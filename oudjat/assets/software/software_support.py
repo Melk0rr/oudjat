@@ -167,8 +167,8 @@ class SoftwareReleaseSupport:
 
         return {
             "edition": self.edition,
-            "active_support": TimeConverter.date_to_str(self._active_support),
-            "end_of_life": TimeConverter.date_to_str(self._end_of_life),
+            "activeSupport": TimeConverter.date_to_str(self._active_support),
+            "endOfLife": TimeConverter.date_to_str(self._end_of_life),
             "status": self.status,
             "lts": self._lts,
             "details": self.support_details,

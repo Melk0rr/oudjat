@@ -1,62 +1,19 @@
 """A module that describes the notion of software edition."""
 
 import re
-from typing import override
+from typing import Any, NamedTuple, override
 
 
-class SoftwareEdition:
+class SoftwareEdition(NamedTuple):
     """
     A class to handle software editions.
 
     A software often comes in different editions and with it, different releases, support, etc.
     """
 
-    def __init__(self, label: str, category: str | None = None, pattern: str | None = None) -> None:
-        """
-        Create a new SoftwareEdition.
-
-        Args:
-            label (str)          : The name or identifier of the software edition.
-            category (str | None): The category that the software edition belongs to. Defaults to None.
-            pattern (str | None) : A regex pattern used for matching strings against this edition. Defaults to None.
-        """
-
-        self._label: str = label
-        self._category: str | None = category
-        self._pattern: str | None = pattern
-
-    @property
-    def label(self) -> str:
-        """
-        Getter for edition label.
-
-        Returns:
-            str: The label of the software edition.
-        """
-
-        return self._label
-
-    @property
-    def category(self) -> str | None:
-        """
-        Getter for edition category.
-
-        Returns:
-            str: The category of the software edition.
-        """
-
-        return self._category
-
-    @property
-    def pattern(self) -> str | None:
-        """
-        Getter for edition pattern.
-
-        Returns:
-            str: The regex pattern used for matching strings against this edition.
-        """
-
-        return self._pattern
+    label: str
+    category: str | None
+    pattern: str | None
 
     def match_str(self, test_str: str) -> bool:
         """
@@ -69,10 +26,10 @@ class SoftwareEdition:
             bool: True if the string matches the pattern or if no pattern is set, False otherwise.
         """
 
-        if self._pattern is None:
+        if self.pattern is None:
             return False
 
-        return re.search(self._pattern, test_str) is not None
+        return re.search(self.pattern, test_str) is not None
 
     @override
     def __str__(self) -> str:
@@ -83,7 +40,21 @@ class SoftwareEdition:
             str: The label of the software edition as its string representation.
         """
 
-        return self._label
+        return self.label
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the current object into a dictionary.
+
+        Returns:
+            dict[str, Any]: A dictionary representation of the current object
+        """
+
+        return {
+            "label": self.label,
+            "category": self.category,
+            "pattern": self.pattern,
+        }
 
 
 class SoftwareEditionDict(dict):
@@ -102,7 +73,7 @@ class SoftwareEditionDict(dict):
 
         return list(map(str, self.values()))
 
-    def find_by_label(self, label: str) -> list[SoftwareEdition]:
+    def find_by_label(self, label: str) -> list["SoftwareEdition"]:
         """
         Return software editions for which the given label matches the pattern.
 

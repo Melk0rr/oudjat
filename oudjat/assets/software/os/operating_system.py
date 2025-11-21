@@ -1,42 +1,14 @@
 """A module defining operating system behavior."""
 
 import re
-from enum import Enum
 from typing import Any, override
 
 from oudjat.assets.computer.computer_type import ComputerType
 
 from ..software import Software, SoftwareType
 from ..software_release import SoftwareRelease
+from .os_families import OSFamily
 
-
-class OSFamily(Enum):
-    """OS family enumeration."""
-
-    ANDROID = {
-        "pattern": r"[Aa]ndroid|[Aa][Oo][Ss][Pp]|[Gg]raphene[Oo][Ss]|[Ll]ineage[Oo][Ss]|\/e\/[Oo][Ss]|[Cc]alyx[Oo][Ss]",
-    }
-
-    BSD = {"pattern": r"[Bb][Ss][Dd]"}
-
-    LINUX = {
-        "pattern": r"[Dd]ebian|[Uu]buntu|[Mm]int|[Nn]ix[Oo][Ss]|(?:[Oo]pen)?[Ss][Uu][Ss][Ee]|[Ff]edora|[Rr](?:ed )?[Hh](?:at )?[Ee](?:nterprise )?[Ll](?:inux)?|[Oo]racle(?: Linux)?",
-    }
-
-    MAC = {"pattern": r"[Mm][Aa][Cc](?:[Oo][Ss])?"}
-
-    WINDOWS = {"pattern": r"[Ww]indows(?: [Ss]erver)?"}
-
-    @property
-    def pattern(self) -> str:
-        """
-        Get the regex pattern for the operating system family.
-
-        Returns:
-            str: The regex pattern as a string.
-        """
-
-        return self._value_["pattern"]
 
 class OSRelease(SoftwareRelease):
     """Specific software release for OperatingSystem."""
@@ -164,6 +136,14 @@ class OperatingSystem(Software[OSRelease]):
             f"{__class__.__name__}.gen_releases::Method must be implemented by the overloading class"
         )
 
+    @override
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            **super().to_dict(),
+            "osFamily": self._os_family,
+            "computerTypes": self._computer_type,
+        }
+
     # ****************************************************************
     # Static methods
 
@@ -201,5 +181,3 @@ class OperatingSystem(Software[OSRelease]):
         raise NotImplementedError(
             f"{__class__.__name__}.find_version_in_str({search_str})::Method must be implemented by the overloading class"
         )
-
-
