@@ -125,8 +125,8 @@ class NistConnector(CVEConnector):
             "description": cve.get("descriptions", [])[0].get("value", ""),
             "sources": [r["url"] for r in cve.get("references", [])],
             "vectors": {
-                "vector_str": cvss_data.get("vectorString", ""),
-                "attack_vector": cvss_data.get("attackVector", ""),
+                "vectorStr": cvss_data.get("vectorString", ""),
+                "attackVector": cvss_data.get("attackVector", ""),
             },
             "metrics": {
                 "score": cvss_data.get("baseScore", 0),
@@ -134,8 +134,8 @@ class NistConnector(CVEConnector):
                 "severity": cvss_data.get("baseSeverity", "INFO")
             },
             "requirements": {
-                "privileges_required": cvss_data.get("privilegesRequired", "NONE"),
-                "attack_requirements": cvss_data.get("attackRequirements", "NONE"),
+                "privilegesRequired": cvss_data.get("privilegesRequired", "NONE"),
+                "attackRequirements": cvss_data.get("attackRequirements", "NONE"),
             },
         }
 

@@ -12,7 +12,8 @@ from oudjat.assets.software import (
     SoftwareReleaseSupport,
 )
 
-from ..operating_system import OperatingSystem, OSFamily, OSRelease
+from ..operating_system import OperatingSystem, OSRelease
+from ..os_families import OSFamily
 from .config.releases import WINDOWS_RELEASES
 
 
@@ -117,8 +118,8 @@ class WindowsEdition(Enum):
     })
 
     WINDOWSSERVER = SoftwareEditionDict({
-        "Standard": SoftwareEdition(label="Standard", pattern=r"[Ss]tandard"),
-        "Datacenter": SoftwareEdition(label="Datacenter", pattern=r"[Dd]atacenter"),
+        "Standard": SoftwareEdition(label="Standard", category=None, pattern=r"[Ss]tandard"),
+        "Datacenter": SoftwareEdition(label="Datacenter", category=None, pattern=r"[Dd]atacenter"),
     })
 
     @property

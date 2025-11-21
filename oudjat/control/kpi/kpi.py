@@ -304,8 +304,7 @@ class KPI(DataSet):
 
         return {
             **base,
-            "initial_set_size": self.initial_set_size,
-            "conform_count": self.conform_count,
+            "conformCount": self.conform_count,
             "date": self.date_str,
             "value": self.value,
             "conformity": self.conformity_level.name,

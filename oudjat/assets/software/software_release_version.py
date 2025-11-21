@@ -30,7 +30,7 @@ class SoftwareReleaseVersion:
     def __init__(
         self,
         version: int | str,
-        stage: tuple[SoftwareReleaseStage, int] = (SoftwareReleaseStage.RELEASE, 1),
+        stage: tuple["SoftwareReleaseStage", int] = (SoftwareReleaseStage.RELEASE, 1),
     ) -> None:
         """
         Create a new instance of SoftwareReleaseVersion.
@@ -50,7 +50,7 @@ class SoftwareReleaseVersion:
         self._minor: int = 0
         self._build: int = 0
 
-        self._stage: SoftwareReleaseStage = stage[0]
+        self._stage: "SoftwareReleaseStage" = stage[0]
         self._stage_version: int = stage[1]
         self._raw: int | str = version
 
@@ -191,7 +191,7 @@ class SoftwareReleaseVersion:
         """
 
         return {
-            "raw": self.raw,
+            "raw": self._raw,
             "major": self._major,
             "minor": self._minor,
             "build": self._build,

@@ -223,7 +223,5 @@ class Software(Asset, Generic[ReleaseType]):
         return {
             **base_dict,
             "editor": self.editor,
-            "releases": ",".join(map(str, self.releases)),
-            "supported_releases": ",".join(list(map(str, self.supported_releases()))),
-            "retired_releases": ",".join(list(map(str, self.retired_releases()))),
+            "releases": {r.key: r.to_dict() for r in self._releases.values()},
         }

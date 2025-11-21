@@ -190,9 +190,9 @@ class DataSet:
             "description": self.description,
             "perimeter": self.perimeter,
             "filters": list(map(str, self.filters)),
-            "initial_set_name": self.initial_set_name,
-            "initial_set_size": len(self.initial_set_data),
-            "output_data_size": len(self.output_data)
+            "initialSetName": self.initial_set_name,
+            "initialSetSize": len(self.initial_set_data),
+            "outputDataSize": len(self.output_data)
         }
 
     # ****************************************************************

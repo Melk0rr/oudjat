@@ -101,3 +101,17 @@ class Group(Asset, Generic[MemberType]):
         """
 
         return f"{self._name}"
+
+    @override
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the current group instance into a dictionary.
+
+        Returns:
+            dict[str, Any]: A dictionary representation of the current group
+        """
+
+        return {
+            **super().to_dict(),
+            "members": {mid: m.to_dict() for mid, m in self._members.items()},
+        }

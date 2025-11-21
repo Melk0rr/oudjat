@@ -1,6 +1,6 @@
 """A module that defines the notion of location."""
 
-from typing import override
+from typing import Any, override
 
 from ..assets import Asset, AssetType
 from ..assets.network.subnet import Subnet
@@ -70,9 +70,7 @@ class Location(GenericIdentifiable):
             return self._subnet
 
         if subnet not in self._subnet.keys():
-            raise ValueError(
-                f"{__class__.__name__}.subnet::{subnet} is not a subnet of {self._id}"
-            )
+            raise ValueError(f"{__class__.__name__}.subnet::{subnet} is not a subnet of {self._id}")
 
         return {subnet: self._subnet[subnet]}
 
@@ -205,3 +203,21 @@ class Location(GenericIdentifiable):
         """
 
         return self._name
+
+    @override
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the current location into a dictionary.
+
+        Returns:
+            dict[str, Any]: A dictionary representation of the current location
+        """
+
+        asset_dict = {}
+        for asset_type, at_dict in self._assets.items():
+            asset_dict[asset_type] = {asset_k: asset for asset_k, asset in at_dict.items()}
+
+        return {
+            **super().to_dict(),
+            "assets": asset_dict,
+        }

@@ -1,7 +1,7 @@
 """A module that defines base Asset properties."""
 
 from abc import ABC
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, Any, TypedDict, override
 
 from .asset_type import AssetType
 from .generic_identifiable import GenericIdentifiable
@@ -9,6 +9,17 @@ from .generic_identifiable import GenericIdentifiable
 if TYPE_CHECKING:
     from .location import Location
 
+class AssetBaseDict(TypedDict):
+    """
+    A helper class to properly handle Asset base dictionary attributes.
+
+    Attributes:
+        assetType (AssetType)               : The asset type
+        location (dict[int | str, Location]): The locations associated with the asset
+    """
+
+    assetType: "AssetType"
+    location: dict[int | str, "Location"]
 
 class Asset(GenericIdentifiable, ABC):
     """
@@ -109,8 +120,13 @@ class Asset(GenericIdentifiable, ABC):
         Returns:
             dict[str, Any]: A dictionary representation of the Asset object including its id, name, label, description, asset type, and location.
         """
+
+        base_dict: "AssetBaseDict" = {
+            "assetType": self.asset_type,
+            "location": self.location,
+        }
+
         return {
             **super().to_dict(),
-            "asset_type": self.asset_type.name,
-            "location": self.location,
+            **base_dict
         }

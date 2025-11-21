@@ -295,8 +295,8 @@ class SoftwareRelease:
             "software": self.software,
             "name": self.name,
             "version": self.version.to_dict(),
-            "full_name": self.full_name,
-            "is_supported": self.is_supported(),
+            "fullname": self.full_name,
+            "isSupported": self.is_supported(),
         }
 
     def to_dict(self) -> dict[str, Any]:
@@ -309,9 +309,9 @@ class SoftwareRelease:
 
         return {
             "label": self.label,
-            "release_date": TimeConverter.date_to_str(self._release_date),
+            "releaseDate": TimeConverter.date_to_str(self._release_date),
             **self._software_dict(),
-            "support": ", ".join(list(map(str, self.support))),
+            "support": [s.to_dict() for s in self._support]
         }
 
 

@@ -159,8 +159,8 @@ class LDAPUser(LDAPAccount):
 
         return {
             **base_dict,
-            "employee_id": self.employee_id,
+            "employeeId": self.employee_id,
             "manager": self.manager,
-            "is_admin": self.is_admin,
+            "isAdmin": self.is_admin,
             **user_dict,
         }

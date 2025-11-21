@@ -84,8 +84,8 @@ class MSProduct:
         """
 
         return {
-            "product_id": self._pid,
-            "product_name": self._name,
-            "product_type": self._type,
-            "product_subtype": self._sub_type,
+            "productId": self._pid,
+            "productName": self._name,
+            "productType": self._type,
+            "productSubtype": self._sub_type,
         }
