@@ -16,13 +16,14 @@ class LoggingFormatter(logging.Formatter):
     RED: str = "\x1b[31;21m"
     BOLD_RED: str = "\x1b[31;1m"
     GREEN: str = "\x1b[32;21m"
+    BLUE: str = "\x1b[34;21m"
     RESET: str = "\x1b[0m"
 
     _format_str: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
     _FORMATS: dict[int, str] = {
         logging.DEBUG: GREY + _format_str + RESET,
-        logging.INFO: GREEN + _format_str + RESET,
+        logging.INFO: BLUE + _format_str + RESET,
         logging.WARNING: YELLOW + _format_str + RESET,
         logging.ERROR: RED + _format_str + RESET,
         logging.CRITICAL: BOLD_RED + _format_str + RESET,
