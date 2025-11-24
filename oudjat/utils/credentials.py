@@ -23,6 +23,22 @@ class NoCredentialsError(ConnectionError):
         self.message: str = message
         super().__init__(self.message)
 
+class InvalidCredentialsError(ConnectionError):
+    """
+    A helper class to handle the absence of credentials.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of NoCredentialsError.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
+
 class CredentialUtils:
     """A class that helps with credentials."""
 
