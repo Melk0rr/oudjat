@@ -160,7 +160,7 @@ class NetMask(IP):
 
         if not (0 <= cidr <= ip_version.bit_count):
             raise ValueError(
-                f"{Context.caller_infos()['qualname']}::Invalid cidr value provided. CIDR must be between 0 and {ip_version.bit_count}"
+                f"{Context()}::Invalid cidr value provided. CIDR must be between 0 and {ip_version.bit_count}"
             )
 
         return (ip_version.max_value << (ip_version.bit_count - cidr)) & ip_version.max_value

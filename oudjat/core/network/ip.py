@@ -30,19 +30,19 @@ class IP:
             ValueError: If the provided address is not a valid IPv4 or IPv6 address.
         """
 
-        context = Context.caller_infos()
+        context = Context()
 
         self._version: "IPVersion"
         self._value: int
         if isinstance(address, int):
             if version is None:
                 raise ValueError(
-                    f"{context['qualname']}::When initializing a new IP with integer value, you must provide the IP version"
+                    f"{context}::When initializing a new IP with integer value, you must provide the IP version"
                 )
 
             if not (0 <= address < (1 << version.bit_count)):
                 raise ValueError(
-                    f"{context['qualname']}::Invalid address value provided. The integer value you provided does not match the provided version {version}"
+                    f"{context}::Invalid address value provided. The integer value you provided does not match the provided version {version}"
                 )
 
             self._version = version
@@ -58,7 +58,7 @@ class IP:
 
             else:
                 raise ValueError(
-                    f"{Context.caller_infos()['qualname']}::Invalid IPv4 address provided: '{address}'"
+                    f"{context}::Invalid IPv4 address provided: '{address}'"
                 )
 
             self._value = IP.ip_str_to_int(address, self._version)
@@ -324,7 +324,7 @@ class IP:
 
         if re.match(ip_version.pattern, ip) is None:
             raise ValueError(
-                f"{Context.caller_infos()['qualname']}::The provided IP {ip} does not match {ip_version} pattern"
+                f"{Context()}::The provided IP {ip} does not match {ip_version} pattern"
             )
 
         ip_int: int

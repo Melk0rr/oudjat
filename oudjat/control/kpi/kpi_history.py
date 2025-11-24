@@ -92,7 +92,7 @@ class KPIHistoryNode:
 
         if self.next is None:
             raise ValueError(
-                f"{Context.caller_infos()['qualname']}::Next history node is None. Can't compare it !"
+                f"{Context()}::Next history node is None. Can't compare it !"
             )
 
         return KPIComparator(self.kpi, self.next.kpi)
@@ -107,7 +107,7 @@ class KPIHistoryNode:
 
         if self.prev is None:
             raise ValueError(
-                f"{Context.caller_infos()['qualname']}::Previous history node is None. Can't compare it !"
+                f"{Context()}::Previous history node is None. Can't compare it !"
             )
 
         return KPIComparator(self.prev.kpi, self.kpi)

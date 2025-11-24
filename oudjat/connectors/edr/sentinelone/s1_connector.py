@@ -9,9 +9,9 @@ from urllib.parse import ParseResult, urlparse
 import requests
 
 from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.context import Context
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import DataType, StrType
-from oudjat.utils.context import Context
 
 from ... import Connector
 from .exceptions import SentinelOneAPIConnectionError
@@ -183,7 +183,7 @@ class S1Connector(Connector):
 
             if req.status_code != 200:
                 raise Exception(
-                    f"{Context.caller_infos()['qualname']}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
+                    f"{Context()}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
                 )
 
             next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
@@ -432,7 +432,7 @@ class S1Connector(Connector):
 
         else:
             raise ValueError(
-                f"{Context.caller_infos()['qualname']}::You must provide either application IDs or specify an application name and vendor"
+                f"{Context()}::You must provide either application IDs or specify an application name and vendor"
             )
 
         if site_ids is not None:

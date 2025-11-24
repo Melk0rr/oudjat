@@ -58,7 +58,7 @@ class CERTFRConnector(Connector):
 
         except ConnectionError as e:
             raise ConnectionError(
-                f"{Context.caller_infos()['qualname']}::Could not connect to {self._target.netloc}\n{e}"
+                f"{Context()}::Could not connect to {self._target.netloc}\n{e}"
             )
 
     @override
