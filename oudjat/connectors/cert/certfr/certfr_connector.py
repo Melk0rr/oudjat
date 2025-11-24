@@ -1,5 +1,6 @@
 """Module to connect to the CERTFR and initialize parsing."""
 
+import logging
 from datetime import datetime
 from typing import override
 from urllib.parse import ParseResult, urlparse
@@ -9,6 +10,7 @@ from bs4 import BeautifulSoup
 from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.utils import Context
 from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.types import StrType
 
 from .certfr_page import CERTFRPage
 
@@ -29,8 +31,10 @@ class CERTFRConnector(Connector):
             self (OudjatCERTFRConnection): The instance being initialized.
         """
 
-        self._target: ParseResult
+        self._target: "ParseResult"
         super().__init__(target=urlparse(CERTFRPage.BASE_LINK))
+
+        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
 
     # ****************************************************************
     # Methods
@@ -50,6 +54,7 @@ class CERTFRConnector(Connector):
             None
         """
 
+        self.logger.info(f"{Context()}::Connecting to {self._target.netloc}")
         try:
             req = ConnectorMethod.GET(self._target.geturl())
 
@@ -57,14 +62,15 @@ class CERTFRConnector(Connector):
                 self._connection: bool = True
 
         except ConnectionError as e:
-            raise ConnectionError(
-                f"{Context()}::Could not connect to {self._target.netloc}\n{e}"
-            )
+            raise ConnectionError(f"{Context()}::Could not connect to {self._target.netloc}\n{e}")
 
     @override
-    def fetch(self, search_filter: str | list[str]) -> list[CERTFRPage]:
+    def fetch(self, search_filter: "StrType") -> list["CERTFRPage"]:
         """
-        Search the CERTFR website using a filter (either a single string or a list of strings) and returns a list of CERTFRPage objects that match the search criteria.
+        Fetch the CERTFR website using a filter.
+
+        You can provide either a single string or a list of strings).
+        Returns a list of CERTFRPage objects that match the search criteria.
 
         Args:
             search_filter (str | list[str]): A single string or a list of strings used as filters for searching within CERTFR pages.
@@ -84,7 +90,7 @@ class CERTFRConnector(Connector):
         search_filter = list(set(search_filter))
 
         for ref in search_filter:
-            ColorPrint.blue(ref)
+            self.logger.info(f"{Context()}::Fetching {ref}")
 
             page = CERTFRPage(ref)
             page.connect()
@@ -100,7 +106,9 @@ class CERTFRConnector(Connector):
     @staticmethod
     def parse_feed(feed_url: str, date_str_filter: str | None = None) -> list[str]:
         """
-        Perform a GET request to the provided feed URL and parses its content using BeautifulSoup to extract items based on optional filtering by date string.
+        Parse the content of the provided feed URL.
+
+        Uses BeautifulSoup to extract items based on optional filtering by date string.
 
         Args:
             feed_url (str)              : The URL of the RSS feed to be parsed.

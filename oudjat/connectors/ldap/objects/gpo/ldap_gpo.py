@@ -1,9 +1,11 @@
 """A module to allow Group policy object retrieving and manipulations throug LDAPConnector."""
 
+import logging
 import re
 from enum import Enum, IntEnum
 from typing import TYPE_CHECKING, Any, override
 
+from oudjat.utils import Context
 from oudjat.utils.types import StrType
 
 from ...ldap_filter import LDAPFilter
@@ -49,6 +51,7 @@ class LDAPGroupPolicyObject(LDAPObject):
         """
 
         super().__init__(ldap_entry, capabilities)
+        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
 
     # ****************************************************************
     # Methods
@@ -121,8 +124,11 @@ class LDAPGroupPolicyObject(LDAPObject):
             list["LDAPObject"]: A list of LDAPOrganizationalUnit instances that are linked to the current GPO.
         """
 
+        self.logger.info(f"{Context()}::Retrieving linked object of {self.display_name}")
+
         obj_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.OU)
         obj_filter = LDAPFilter(f"(gPLink={f'*{self.name}*'})") & LDAPFilter(f"(name={ou})")
+
         return obj_opt.fetch(search_filter=obj_filter, attributes=attributes)
 
     @override

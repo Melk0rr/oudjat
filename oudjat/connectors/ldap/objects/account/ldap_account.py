@@ -21,7 +21,9 @@ class LDAPAccount(LDAPObject, ABC):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, ldap_entry: "LDAPEntry", capabilities: "LDAPCapabilities", **kwargs: Any) -> None:
+    def __init__(
+        self, ldap_entry: "LDAPEntry", capabilities: "LDAPCapabilities", **kwargs: Any
+    ) -> None:
         """
         Initialize an LDAP Entry-based object with specific handling for user accounts.
 
@@ -268,17 +270,23 @@ class LDAPAccount(LDAPObject, ABC):
             **base_dict,
             "san": self.san,
             "status": self.status,
-            "accountExpires": self.account_expires,
-            "accountExpDate": LDAPAccount._format_acc_date_str(self.account_expiration),
-            "pwdExpires": self.pwd_expires,
-            "pwdExpired": self.pwd_expired,
-            "pwdRequired": self.pwd_required,
-            "lastLogon": LDAPAccount._format_acc_date_str(self.last_logon),
-            "lastLogonDays": self.last_logon_in_days,
-            "pwdLastSet": LDAPAccount._format_acc_date_str(self.pwd_last_set),
-            "pwdLastSetDays": self.pwd_last_set_in_days,
-            "accountCtl": self.account_ctl,
-            "accountFlags": list(self.account_flags),
+            "account":{
+                "expires": self.account_expires,
+                "expirationDate": LDAPAccount._format_acc_date_str(self.account_expiration),
+                "ctl": self.account_ctl,
+                "flags": list(self.account_flags),
+            },
+            "pwd": {
+                "expires": self.pwd_expires,
+                "expired": self.pwd_expired,
+                "required": self.pwd_required,
+                "lastSet": LDAPAccount._format_acc_date_str(self.pwd_last_set),
+                "lastSetDays": self.pwd_last_set_in_days,
+            },
+            "logon": {
+                "lastLogon": LDAPAccount._format_acc_date_str(self.last_logon),
+                "lastLogonDays": self.last_logon_in_days,
+            },
         }
 
     # ****************************************************************
@@ -300,4 +308,3 @@ class LDAPAccount(LDAPObject, ABC):
             return ""
 
         return TimeConverter.date_to_str(date, date_format=DateFormat.from_flag(DateFlag.YMD_HMS))
-

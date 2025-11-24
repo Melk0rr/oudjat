@@ -2,13 +2,13 @@
 A module that handles SentinelOne API connection and interactions.
 """
 
+import logging
 import re
 from typing import Any, override
 from urllib.parse import ParseResult, urlparse
 
 import requests
 
-from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.context import Context
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import DataType, StrType
@@ -41,6 +41,8 @@ class S1Connector(Connector):
             api_token (str): API token. Stored as the connector credentials.password
             port (int)     : Port number used for the connection
         """
+
+        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
 
         scheme = "http"
         if port == 443:
@@ -109,11 +111,13 @@ class S1Connector(Connector):
         Connect to the target.
         """
 
+        context = Context()
+
         if self._credentials is None:
-            raise NoCredentialsError(f"{__class__.__name__}.connect::No password provided")
+            raise NoCredentialsError(f"{context}::No password provided")
 
         if not self._connection:
-            ColorPrint.blue(f"Connecting to {self._target.netloc} with user API token")
+            self.logger.info(f"{context}::Connecting to {self._target.netloc} with user API token")
 
             if self._api_token:
                 try:
@@ -125,10 +129,13 @@ class S1Connector(Connector):
                     raise e
 
             else:
-                raise NoCredentialsError(f"{__class__.__name__}::No API token provided")
+                raise NoCredentialsError(f"{context}::No API token provided")
 
+            self.logger.info(f"{context}::Connected to {self._target.netloc}")
         else:
-            ColorPrint.blue(f"Connection to {self._target.netloc} is already initialized.")
+            self.logger.warning(
+                f"{context}::Connection to {self._target.netloc} is already initialized."
+            )
 
     @override
     def fetch(
@@ -151,6 +158,8 @@ class S1Connector(Connector):
             DataType: list of retrieved elements
         """
 
+        context = Context()
+
         res = []
         next_cursor = None
 
@@ -158,6 +167,7 @@ class S1Connector(Connector):
         if path_fmt:
             endpoint_path = endpoint_path.format(**path_fmt)
 
+        self.logger.debug(f"{context}::{endpoint} > {payload}")
         while True:
             if next_cursor:
                 payload["cursor"] = next_cursor
@@ -181,9 +191,11 @@ class S1Connector(Connector):
                 else:
                     res.append(req_json["data"])
 
+            self.logger.debug(f"{context}::{endpoint} > {req_json}")
+
             if req.status_code != 200:
-                raise Exception(
-                    f"{Context()}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
+                raise SentinelOneAPIConnectionError(
+                    f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
                 )
 
             next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
@@ -439,8 +451,6 @@ class S1Connector(Connector):
             payload["siteIds"] = self._unify_str_list(site_ids)
 
         return self.fetch(S1Endpoint.APPLICATIONS_APP_CVES, payload)
-
-
 
     # ****************************************************************
     # Methods: Groups

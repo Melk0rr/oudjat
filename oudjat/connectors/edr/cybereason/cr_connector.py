@@ -1,6 +1,7 @@
 """A module to handle connection to Cybereason API."""
 
 import json
+import logging
 import math
 import re
 from typing import Any, override
@@ -10,13 +11,16 @@ import requests
 
 from oudjat.connectors.connector import Connector
 from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoint
-from oudjat.utils.color_print import ColorPrint
-from oudjat.utils.credentials import NoCredentialsError
+from oudjat.utils import Context
 from oudjat.utils.time_utils import TimeConverter
 from oudjat.utils.types import StrType
 
 from .cr_sensor_actions import CybereasonSensorAction
-from .exceptions import CybereasonAPIConnectionError, CybereasonAPIRequestError
+from .exceptions import (
+    CybereasonAPIConnectionError,
+    CybereasonAPIRequestError,
+    CybereasonCredentialsError,
+)
 
 
 class CybereasonEntry(dict):
@@ -85,6 +89,8 @@ class CybereasonConnector(Connector):
         if port == 443:
             scheme += "s"
 
+        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+
         # Inject protocol if not found
         if not re.match(r"http(s?):", target):
             target = f"{scheme}://{target}"
@@ -96,7 +102,8 @@ class CybereasonConnector(Connector):
             f"{self._target.scheme}://{self._target.netloc}:{port}"
         )
 
-        self._connection: requests.Session | None = None
+        self.logger.debug(f"{Context()}::New CybereasonConnector - {self._target.netloc}")
+        self._connection: "requests.Session | None" = None
 
     # ****************************************************************
     # Methods
@@ -107,13 +114,16 @@ class CybereasonConnector(Connector):
         Connect to Cybereason API using connector parameters.
         """
 
+        context = Context()
+        self.logger.info(f"{context}::Connecting to {self._target.netloc}")
+
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         session = requests.session()
 
         try:
             if not self._credentials:
-                raise NoCredentialsError(
-                    f"{__class__.__name__}.connect::Cannot connect to {self._target.netloc}, no credentials provided"
+                raise CybereasonCredentialsError(
+                    f"{context}::Cannot connect to {self._target.netloc}, no credentials provided"
                 )
 
             creds = {"username": self._credentials.username, "password": self._credentials.password}
@@ -123,10 +133,10 @@ class CybereasonConnector(Connector):
 
         except CybereasonAPIConnectionError as e:
             raise CybereasonAPIConnectionError(
-                f"{__class__.__name__}.connect::An error occured while trying to connect to Cybereason API at {self.target}: {e}"
+                f"{context}::An error occured while trying to connect to Cybereason API at {self.target.netloc}: {e}"
             )
 
-        ColorPrint.green(f"Connected to {self._target.netloc}")
+        self.logger.info(f"{context}::Connected to {self._target.netloc}")
         self._connection = session
 
     def disconnect(self) -> None:
@@ -136,9 +146,7 @@ class CybereasonConnector(Connector):
 
         if self._connection is not None:
             self._connection.close()
-            ColorPrint.yellow(
-                f"{__class__.__name__}.disconnect::Connection to {self._target.netloc} is now closed"
-            )
+            self.logger.warning(f"{Context()}::Connection to {self._target.netloc} is now closed")
 
     def _endpoint_url(self, endpoint: CybereasonEndpoint) -> str:
         """
@@ -174,9 +182,11 @@ class CybereasonConnector(Connector):
             list[CybereasonEntry]: search results
         """
 
+        context = Context()
+
         if self._connection is None:
-            raise ConnectionError(
-                f"{__class__.__name__}.request::Please initialize connection to {self._target.netloc} before attempting request"
+            raise CybereasonAPIConnectionError(
+                f"{context}::Please initialize connection to {self._target.netloc} before attempting request"
             )
 
         if payload is None:
@@ -184,6 +194,8 @@ class CybereasonConnector(Connector):
 
         if attributes is None:
             attributes = endpoint.attributes
+
+        self.logger.debug(f"{context}::Fetching {endpoint} data {payload}")
 
         res: list["CybereasonEntry"] = []
         try:
@@ -208,6 +220,7 @@ class CybereasonConnector(Connector):
                 else:
                     req_json = [req_json]
 
+            # Map to CybereasonEntry instances
             def map_cr_entry(element: dict[str, Any]) -> "CybereasonEntry":
                 filtered_element = {k: v for k, v in element.items() if k in attributes}
                 return CybereasonEntry(**filtered_element)
@@ -216,7 +229,7 @@ class CybereasonConnector(Connector):
 
         except CybereasonAPIRequestError as e:
             raise CybereasonAPIRequestError(
-                f"{__class__.__name__}.fetch::An error occured while retriving data from {self._endpoint_url(endpoint)}\n{e}"
+                f"{context}::An error occured while retriving data from {self._endpoint_url(endpoint)}\n{e}"
             )
 
         return res
@@ -236,13 +249,12 @@ class CybereasonConnector(Connector):
             list[CybereasonEntry]: API query response
         """
 
+
         if not isinstance(sensor_ids, list):
             sensor_ids = [sensor_ids]
 
-        endpoint = CybereasonEndpoint.POLICIES
-
         payload = {"sensorsIds": sensor_ids, "keepManualOverrides": False}
-        return self.fetch(endpoint=endpoint, endpoint_arg=f"{policy_id}/assign", payload=payload)
+        return self.fetch(endpoint=CybereasonEndpoint.POLICIES, endpoint_arg=f"{policy_id}/assign", payload=payload)
 
     # ****************************************************************
     # Methods: Sensors

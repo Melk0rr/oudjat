@@ -1,5 +1,6 @@
 """CERTFR module to specifically handle CERTFR pages."""
 
+import logging
 import re
 from typing import Any, override
 from urllib.parse import ParseResult, urlparse
@@ -9,12 +10,13 @@ from bs4.element import PageElement, ResultSet, Tag
 
 from oudjat.control.vulnerability import CVE, CVE_REGEX
 from oudjat.core.network import URL_REGEX
-from oudjat.utils.color_print import ColorPrint
+from oudjat.utils import Context
 
 from ...connector_methods import ConnectorMethod
 from ..risk_types import RiskType
 from .certfr_page_types import CERTFRPageType
 from .definitions import CERTFR_LINK_REGEX, CERTFR_REF_REGEX, REF_TYPES
+from .exceptions import CERTFRInvalidLinkError, CERTFRReferenceError
 
 
 def clean_str(str_to_clean: str) -> str:
@@ -50,28 +52,31 @@ class CERTFRPage:
             ValueError: If the provided reference is invalid and cannot be validated through either `is_valid_ref` or `is_valid_link`.
         """
 
+        context = Context()
+        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+
         if not self.is_valid_ref(ref) and not self.is_valid_link(ref):
-            raise ValueError(f"{__class__.__name__}::Invalid CERTFR ref provided : {ref}")
+            raise CERTFRReferenceError(f"{context}::Invalid CERTFR ref provided : {ref}")
 
         self._ref: str = ref if self.is_valid_ref(ref) else self.ref_from_link(ref)
 
-        self._raw_content: BeautifulSoup | None = None
+        self._raw_content: "BeautifulSoup | None" = None
         self._title: str | None = None
 
-        self._meta: CERTFRPageMeta | None = None
-        self._content: CERTFRPageContent | None = None
+        self._meta: "CERTFRPageMeta | None" = None
+        self._content: "CERTFRPageContent | None" = None
 
         # Set page type
         ref_search = re.search(rf"(?:{REF_TYPES})", self._ref)
 
         if not ref_search:
-            raise ValueError(
-                f"{__class__.__name__}.__init__::Could not match any reference type to {self._ref}"
-            )
+            raise ValueError(f"{context}::Could not match any reference type to {self._ref}")
 
         ref_type: str = ref_search.group(0)
 
-        self._link: ParseResult = urlparse(f"{self.BASE_LINK}/{CERTFRPageType[ref_type].value}/{self._ref}/")
+        self._link: "ParseResult" = urlparse(
+            f"{self.BASE_LINK}/{CERTFRPageType[ref_type].value}/{self._ref}/"
+        )
 
     # ****************************************************************
     # Methods
@@ -120,35 +125,34 @@ class CERTFRPage:
             ConnectionError : An error message is printed if the connection fails or encounters a non-200 status code.
         """
 
+        context = Context()
+
         # Handle possible connection error
         try:
             req = ConnectorMethod.GET(self._link.geturl())
 
             if req.status_code != 200:
-                raise ConnectionError(
-                    f"{__class__.__name__}.connect::Error while trying to connect to {self.ref}"
-                )
+                raise ConnectionError(f"{context}::Error while trying to connect to {self.ref}")
 
             self._raw_content = BeautifulSoup(req.content, "html.parser")
-
             title = self._raw_content.find_next("title")
 
             if title:
                 self._title = title.text
 
-            print(self._title)
+            self.logger.info(f"{context}::Connected to {self._link.netloc}")
 
         except ConnectionError:
-            ColorPrint.red(
-                f"{__class__.__name__}.connect::Error while requesting {
-                    self._ref
-                }. Make sure it is accessible"
+            self.logger.error(
+                f"{context}::Error requesting {self._ref}. Make sure it is accessible"
             )
 
     def disconnect(self) -> None:
         """
         Reset the parsing state of the CERTFRPage instance by setting raw_content, meta, and content to None.
         """
+
+        self.logger.warning(f"{Context()}::Disconnected from {self._link.geturl()}")
 
         self._raw_content = None
         self._meta = None
@@ -168,23 +172,24 @@ class CERTFRPage:
         if self._raw_content is None:
             self.connect()
 
+        context = Context()
+        self.logger.debug(f"{context}::Parsing {self._ref}")
+
         if self._raw_content:
             try:
-                sections: ResultSet = self._raw_content.find_all("section")
+                sections: "ResultSet" = self._raw_content.find_all("section")
 
                 if len(sections) >= 2:
                     # Meta parsing
-                    self._meta = CERTFRPageMeta(meta_section=sections[0])
+                    self._meta = CERTFRPageMeta(ref=self._ref, meta_section=sections[0])
                     self._meta.parse()
 
                     # Content parsing
-                    self._content = CERTFRPageContent(content_section=sections[1])
+                    self._content = CERTFRPageContent(ref=self._ref, content_section=sections[1])
                     self._content.parse()
 
             except Exception as e:
-                ColorPrint.red(
-                    f"{__class__.__name__}.parse::A parsing error occured for {self._ref}\n{e}"
-                )
+                self.logger.error(f"{context}::A parsing error occured for {self._ref}\n{e}")
 
     @override
     def __str__(self) -> str:
@@ -273,9 +278,7 @@ class CERTFRPage:
         """
 
         if not re.match(CERTFR_LINK_REGEX, link):
-            raise ValueError(
-                f"{__class__.__name__}.ref_from_link::Invalid CERTFR link provided: {link}"
-            )
+            raise CERTFRInvalidLinkError(f"{Context()}::Invalid CERTFR link provided: {link}")
 
         return re.findall(CERTFR_REF_REGEX, link)[0]
 
@@ -288,16 +291,20 @@ class CERTFRPageMeta:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, meta_section: BeautifulSoup) -> None:
+    def __init__(self, ref: str, meta_section: "BeautifulSoup") -> None:
         """
         Initialize new CERTFR meta parser.
 
         Args:
-            meta_section (element): A BeautifulSoup4 element containing the meta data in a table format.
+            ref (str)                   : The reference of the page being parsed
+            meta_section (BeautifulSoup): A BeautifulSoup4 element containing the meta data in a table format.
         """
 
-        self._meta_table: PageElement = meta_section.find_all("table")[0]
+        self._ref: str = ref
+        self._meta_table: "PageElement" = meta_section.find_all("table")[0]
         self._data: dict[str, Any] = {}
+
+        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
 
     # ****************************************************************
     # Methods
@@ -347,6 +354,8 @@ class CERTFRPageMeta:
         Parse the meta table to extract key-value pairs and store them in `data`. This method populates the `data` attribute with a dictionary of cleaned metadata keys and values.
         """
 
+        context = Context()
+
         meta = {}
         for row in self._meta_table.find_all_next("tr"):
             cells = row.find_all_next("td")
@@ -356,6 +365,7 @@ class CERTFRPageMeta:
             meta[clean_str(c_name)] = clean_str(c_value)
 
         self._data = meta
+        self.logger.debug(f"{context}::Parsed {self._ref} meta table {meta}")
 
     def to_dict(self) -> dict[str, Any]:
         """
@@ -378,22 +388,26 @@ class CERTFRPageContent:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, content_section: BeautifulSoup) -> None:
+    def __init__(self, ref: str, content_section: "BeautifulSoup") -> None:
         """
         Initialize new CERTFR page content.
 
         Args:
-            content_section (element): The HTML content section to be parsed and used within the class instance.
+            ref (str)                      : The reference of the page being parsed
+            content_section (BeautifulSoup): The HTML content section to be parsed and used within the class instance.
         """
 
-        self._content: BeautifulSoup = content_section
+        self._ref: str = ref
+        self._content: "BeautifulSoup" = content_section
         self._data: dict[str, Any] = {}
+
+        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
 
     # ****************************************************************
     # Methods
 
     @property
-    def risks(self) -> set[RiskType]:
+    def risks(self) -> set["RiskType"]:
         """
         Getter / parser for the list of risks.
 
@@ -401,10 +415,10 @@ class CERTFRPageContent:
             short (bool): A flag to indicate if the risk information should be brief. Default is True.
 
         Returns:
-            set: A set of RiskType objects parsed from the content.
+            set[RiskType]: A set of RiskType objects parsed from the content.
         """
 
-        risk_set: set[RiskType] = set()
+        risk_set: set["RiskType"] = set()
 
         for risk in RiskType:
             if risk.value["fr"].lower() in [r.lower() for r in self._data.get("Risques", [])]:
@@ -418,7 +432,7 @@ class CERTFRPageContent:
         Getter / parser for affected products.
 
         Returns:
-            list: A list of product names identified as affected by the issues in the content.
+            list[str]: A list of product names identified as affected by the issues in the content.
         """
 
         return self._data.get("Systèmes affectés", [])
@@ -429,7 +443,7 @@ class CERTFRPageContent:
         Getter / parser for description.
 
         Returns:
-            str: A detailed description extracted from the content, or None if not available.
+            str | None: A detailed description extracted from the content, or None if not available.
         """
 
         return self._data.get("Résumé", None)
@@ -440,18 +454,18 @@ class CERTFRPageContent:
         Getter / parser for solutions.
 
         Returns:
-            str: Solutions to the issues discussed in the content, or None if not available.
+            list[str]: Solutions to the issues discussed in the content, or None if not available.
         """
 
         return self._data.get("Solutions", [])
 
     @property
-    def cves(self) -> dict[str, CVE]:
+    def cves(self) -> dict[str, "CVE"]:
         """
         Return the refs of all the related CVEs.
 
         Returns:
-            list: A list of CVE references that are linked in the content.
+            dict[str, CVE]: A dictionary of CVE references that are linked in the content.
         """
 
         cves = {}
@@ -471,7 +485,7 @@ class CERTFRPageContent:
             doc_filter (str): A string to filter out certain documentation URLs. Default is None.
 
         Returns:
-            list: A filtered or unfiltered list of URLs pointing to documentation from the content.
+            list[str]: A filtered or unfiltered list of URLs pointing to documentation from the content.
         """
 
         return self._data.get("Documentation", [])
@@ -484,7 +498,7 @@ class CERTFRPageContent:
             doc_filter (str): A string to filter out certain documentation URLs. Default is None.
 
         Returns:
-            list: A filtered or unfiltered list of URLs pointing to documentation from the content.
+            list[str]: A filtered or unfiltered list of URLs pointing to documentation from the content.
         """
 
         docs = self.documentations
@@ -500,6 +514,8 @@ class CERTFRPageContent:
 
         This method processes the HTML content looking for hierarchical titles and their corresponding lists or paragraphs, which are then stored in a dictionary format.
         """
+
+        context = Context()
 
         data: dict[str, Any] = {}
         titles = self._content.find_all("h2")
@@ -518,6 +534,7 @@ class CERTFRPageContent:
         data["Documentation"] = re.findall(URL_REGEX, self._content.text)
 
         self._data = data
+        self.logger.debug(f"{context}::Parsed {self._ref} content {data}")
 
     def to_dict(self) -> dict[str, Any]:
         """
@@ -535,4 +552,3 @@ class CERTFRPageContent:
             "solutions": self.solutions,
             "documentations": self.filter_documentations(doc_filter="cve.org"),
         }
-
