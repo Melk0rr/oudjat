@@ -2,8 +2,8 @@
 
 from typing import Any, override
 
-from ..assets import Asset, AssetType
-from ..assets.network.subnet import Subnet
+from ..core import Asset, AssetType
+from ..core.network.subnet import Subnet
 from .generic_identifiable import GenericIdentifiable
 
 

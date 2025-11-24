@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Generic, NamedTuple, TypeVar, override
 
-from oudjat.assets.generic_identifiable import GenericIdentifiable
+from oudjat.core.generic_identifiable import GenericIdentifiable
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
 
 from ..ldap_utils import parse_dn

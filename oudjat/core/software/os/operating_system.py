@@ -3,7 +3,7 @@
 import re
 from typing import Any, override
 
-from oudjat.assets.computer.computer_type import ComputerType
+from oudjat.core.computer.computer_type import ComputerType
 
 from ..software import Software, SoftwareType
 from ..software_release import SoftwareRelease

@@ -3,15 +3,15 @@
 from enum import IntEnum
 from typing import Any, NamedTuple, TypedDict, override
 
-from oudjat.assets import Asset, AssetType
-from oudjat.assets.network.ip import IP
-from oudjat.assets.software import (
+from oudjat.core import Asset, AssetType
+from oudjat.core.network.ip import IP
+from oudjat.core.software import (
     SoftwareEdition,
     SoftwareRelease,
     SoftwareReleaseSupport,
 )
-from oudjat.assets.software.os import OSRelease
-from oudjat.assets.software.os.os_option import OSOption
+from oudjat.core.software.os import OSRelease
+from oudjat.core.software.os.os_option import OSOption
 
 from .computer_type import ComputerType
 

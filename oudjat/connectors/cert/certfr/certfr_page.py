@@ -7,8 +7,8 @@ from urllib.parse import ParseResult, urlparse
 from bs4 import BeautifulSoup
 from bs4.element import PageElement, ResultSet, Tag
 
-from oudjat.assets.network import URL_REGEX
 from oudjat.control.vulnerability import CVE, CVE_REGEX
+from oudjat.core.network import URL_REGEX
 from oudjat.utils.color_print import ColorPrint
 
 from ...connector_methods import ConnectorMethod

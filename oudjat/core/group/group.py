@@ -2,7 +2,7 @@
 
 from typing import Any, Generic, TypeVar, override
 
-from oudjat.assets.generic_identifiable import GenericIdentifiable
+from oudjat.core.generic_identifiable import GenericIdentifiable
 
 from ..asset import Asset
 from ..asset_type import AssetType

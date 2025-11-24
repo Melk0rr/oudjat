@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING, Any, override
 
-from oudjat.assets.network.subnet import Subnet
+from oudjat.core.network.subnet import Subnet
 
 from ..ldap_object import LDAPObject
 

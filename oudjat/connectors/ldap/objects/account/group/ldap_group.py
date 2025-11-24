@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Any, override
 
 from ldap3.utils.conv import escape_filter_chars
 
-from oudjat.assets.group import Group
 from oudjat.connectors.ldap.objects.ldap_object_types import LDAPObjectType
+from oudjat.core.group import Group
 
 from ...ldap_object import LDAPObject
 from .ldap_group_types import LDAPGroupType

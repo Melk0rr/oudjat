@@ -2,9 +2,9 @@
 
 from typing import TYPE_CHECKING, Any, override
 
-from oudjat.assets.computer import Computer
-from oudjat.assets.software import SoftwareEdition
-from oudjat.assets.software.os import OperatingSystem, OSOption
+from oudjat.core.computer import Computer
+from oudjat.core.software import SoftwareEdition
+from oudjat.core.software.os import OperatingSystem, OSOption
 
 from .ldap_account import LDAPAccount
 

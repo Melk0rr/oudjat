@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-from oudjat.assets.computer.computer_type import ComputerType
+from oudjat.core.computer.computer_type import ComputerType
 
 from .windows.windows import MicrosoftOperatingSystem
 
