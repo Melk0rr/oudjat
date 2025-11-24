@@ -1,5 +1,6 @@
 """Main module of the LDAP package. Handles connection to an LDAP server and data retrieving operations."""
 
+import logging
 import socket
 import ssl
 from enum import IntEnum
@@ -9,6 +10,7 @@ import ldap3
 from ldap3.core.exceptions import LDAPSocketOpenError
 
 from oudjat.connectors.connector import Connector
+from oudjat.utils import Context
 from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import StrType
@@ -89,10 +91,15 @@ class LDAPConnector(Connector):
 
         super().__init__(target=server, username=username, password=password)
 
+
+        self.logger = logging.getLogger(__class__.__name__)
         self._domain: str = ""
         self._default_search_base: str = ""
         self._ldap_server: ldap3.Server
         self._connection: ldap3.Connection | None = None
+
+        context = Context.caller_infos()
+        self.logger.debug(f"{context['qualname']}::")
 
         self._LDAP_PYTHON_CLS: dict[str, "LDAPObjectOptions"] = {
             f"{LDAPObjectType.DEFAULT}": LDAPObjectOptions["LDAPObject"](
