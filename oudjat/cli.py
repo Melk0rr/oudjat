@@ -3,7 +3,7 @@ A SOC toolbox and maybe more if I have the time.
 
 Usage:
     oudjat -h | --help
-    oudjat -l=LOGGING | --log=LOGGING
+    oudjat -l=LOGGING | --log=LOGLEVEL
     oudjat -V | --version
 
 Commands
@@ -13,7 +13,7 @@ Options:
     -c --config=CONFIG              specify config file
     -f --file                       set target (reads from file, one domain per line)
     -h --help                       show this help message and exit
-    -l --log=LOGGINGK               specify the log level
+    -l --log=LOGLEVEL               specify the log level
     -o --output=FILENAME            save execution logs to the specified file
     -S --silent                     simple output, one per line
     -t --target                     set target (comma separated, no spaces, if multiple)
