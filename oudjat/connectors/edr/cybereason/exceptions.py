@@ -2,7 +2,6 @@
 A helper module to declare some useful exceptions.
 """
 
-
 from requests import RequestException
 
 from oudjat.utils import NoCredentialsError

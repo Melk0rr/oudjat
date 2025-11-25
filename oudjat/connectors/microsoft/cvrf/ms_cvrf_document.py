@@ -1,11 +1,12 @@
 """Module that handles CVRF document manipulation."""
 
 import json
+import logging
 import re
 from typing import Any
 
 from oudjat.connectors import ConnectorMethod
-from oudjat.utils.color_print import ColorPrint
+from oudjat.utils import Context
 
 from .definitions import API_BASE_URL, API_REQ_HEADERS, CVRF_ID_REGEX
 from .ms_product import MSProduct
@@ -30,8 +31,11 @@ class MSCVRFDocument:
             ValueError: If the provided ID does not match the required regex pattern.
         """
 
+        context = Context()
+        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+
         if not re.match(CVRF_ID_REGEX, doc_id):
-            raise ValueError(f"{__class__.__name__}::CVRF ID must follow the 'YYYY-MMM' format !")
+            raise ValueError(f"{context}::CVRF ID must follow the 'YYYY-MMM' format !")
 
         self._id: str = doc_id
         self._url: str = f"{API_BASE_URL}cvrf/{self._id}"
@@ -39,9 +43,9 @@ class MSCVRFDocument:
         url_resp = ConnectorMethod.GET(self._url, headers=API_REQ_HEADERS)
 
         if url_resp.status_code != 200:
-            raise ConnectionError(f"{__class__.__name__}::Could not connect to {self._url}")
+            raise ConnectionError(f"{context}::Could not connect to {self._url}")
 
-        ColorPrint.green(f"{self._url}")
+        self.logger.info(f"{context}::{self._url}")
 
         self._content: dict[str, Any] = json.loads(url_resp.content)
         self._products: dict[str, "MSProduct"] = {}
@@ -175,3 +179,18 @@ class MSCVRFDocument:
                 vuln.add_kb(kb_id, mskb)
 
             self.add_vuln(vuln)
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the current document into a dictionary.
+
+        Returns:
+            dict[str, Any]: A dictionary representation of the current document
+        """
+
+        return {
+            "id": self._id,
+            "products": self._products,
+            "vulns": self._vulns,
+            "kbs": self._kbs
+        }

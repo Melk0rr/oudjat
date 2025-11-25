@@ -1,8 +1,9 @@
 """A module to track KPI history."""
 
+import logging
 from typing import Callable
 
-from oudjat.utils import ColorPrint, Context
+from oudjat.utils import Context
 
 from .kpi import KPI
 from .kpi_comparator import KPIComparator, KPIComparatorTendency
@@ -125,9 +126,11 @@ class KPIHistory:
             kpis (list[KPI] | None): A list of KPI objects to initialize with. Defaults to an empty list.
         """
 
+        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+
         self._name: str = name
-        self._begin: KPIHistoryNode | None
-        self._end: KPIHistoryNode | None
+        self._begin: "KPIHistoryNode | None"
+        self._end: "KPIHistoryNode | None"
         self._size: int = 0
 
         if kpis is not None:
@@ -212,6 +215,7 @@ class KPIHistory:
             new_node.prev = self._end
             self._end = new_node
 
+        self.logger.debug(f"{Context()}::Appended node for {self._name} > {kpi}")
         self._size += 1
 
     def prepend(self, kpi: "KPI") -> None:
@@ -235,6 +239,7 @@ class KPIHistory:
             new_node.next = self._begin
             self._begin = new_node
 
+        self.logger.debug(f"{Context()}::Prepended node for {self._name} > {kpi}")
         self._size += 1
 
     def insert_by_date(self, kpi: "KPI") -> None:
@@ -308,6 +313,8 @@ class KPIHistory:
 
         while not self.is_empty:
             self.pop_back()
+
+        self.logger.warning(f"{Context()}::Cleared history {self._name}")
 
     def go_through(self, callback: Callable[["KPIHistoryNode | None"], None]) -> None:
         """
@@ -409,6 +416,6 @@ class KPIHistory:
         Print the history of KPIs based on the logs method result.
         """
 
-        ColorPrint.blue(f"\n {self.name} History")
+        self.logger.info(f"{Context()}:: {self.name} History")
         for log in self.logs():
             print(log)

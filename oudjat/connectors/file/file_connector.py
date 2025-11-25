@@ -1,9 +1,13 @@
 """A module to perform connection to various types of file."""
 
+import logging
 from typing import Any, Callable, override
 
 from oudjat.connectors.connector import Connector
+from oudjat.utils import Context
 from oudjat.utils.file_utils import FileType, FileUtils
+
+from .exceptions import FileTypeError
 
 
 class FileConnector(Connector):
@@ -21,20 +25,21 @@ class FileConnector(Connector):
             source (str): The source identifier or description of the file.
         """
 
+        context = Context()
+        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+
         if not FileUtils.check_path(file):
-            raise FileExistsError(
-                f"{__class__.__name__}.__init__::Invalid file path provided: {file}"
-            )
+            raise FileExistsError(f"{context}::Invalid file path provided: {file}")
 
         file_ext: str = file.split(".")[-1]
 
         self._source: str = source
         try:
-            self._filetype: FileType = FileType[file_ext.upper()]
+            self._filetype: "FileType" = FileType[file_ext.upper()]
 
-        except ValueError:
-            raise ValueError(
-                f"{__class__.__name__}.__init__::{file_ext.upper()} files are not supported by {__class__.__name__}"
+        except FileTypeError:
+            raise FileTypeError(
+                f"{context}::{file_ext.upper()} files are not supported by {context.cls}"
             )
 
         self._connection: bool = False
@@ -54,10 +59,29 @@ class FileConnector(Connector):
             list[Any]: The stored data from the file.
         """
 
-        if not self.connection:
-            self.connect()
-
         return self._data
+
+    @property
+    def filetype(self) -> "FileType":
+        """
+        Return the current file type associated with the connector.
+
+        Returns:
+            FileType: The file type enum element
+        """
+
+        return self._filetype
+
+    @filetype.setter
+    def filetype(self, new_filetype: "FileType") -> None:
+        """
+        Set a manual file type for the connector.
+
+        Args:
+            new_filetype (FileType): New filetype value
+        """
+
+        self._filetype = new_filetype
 
     @Connector.target.setter
     @override
@@ -69,12 +93,13 @@ class FileConnector(Connector):
             new_target (str): The new file path to be set.
         """
 
+        context = Context()
         if not isinstance(new_target, str):
-            raise ValueError(f"{__class__.__name__}.check_path::Please provide a string")
+            raise ValueError(f"{context}::Please provide a string")
 
         if not FileUtils.check_path(new_target):
             raise FileExistsError(
-                f"{__class__.__name__}.check_path::Invalid file path provided: {new_target}"
+                f"{context}::Invalid file path provided: {new_target}"
             )
 
         super()._target = new_target
@@ -91,6 +116,9 @@ class FileConnector(Connector):
             FileExistsError: if the file does not exist, can't be reached or if there is any error while importing its data
         """
 
+        context = Context()
+        self.logger.info(f"{context}::Connecting to {self._filetype} file {self._target}")
+
         if payload is None:
             payload = {}
 
@@ -98,15 +126,20 @@ class FileConnector(Connector):
             self._data = self._filetype.f_import(file_path=self._target, **payload)
             self._connection = True
 
+            self.logger.info(f"{context}::Connected to {self._filetype} file {self._target}")
+            self.logger.debug(f"{context}::{self._data}")
+
         except FileExistsError as e:
             raise FileExistsError(
-                f"{__class__.__name__}.connect::Error connecting to file {self.target}\n{e}"
+                f"{context}::Error connecting to file {self.target}\n{e}"
             )
 
     def disconnect(self) -> None:
         """
         'Disconnects' from the targeted file by resetting data and connection status.
         """
+
+        self.logger.warning(f"{Context()}::Disconnected from {self._target}")
 
         self._data = None
         self._connection = False
@@ -116,7 +149,7 @@ class FileConnector(Connector):
         self,
         search_filter: Callable[..., bool],
         attributes: list[str] | None = None,
-        payload: dict[str, Any] | None = None
+        payload: dict[str, Any] | None = None,
     ) -> list[Any]:
         """
         Search into the imported data based on given filters and attributes.
@@ -130,14 +163,20 @@ class FileConnector(Connector):
             list[Any]: Data retrived from the file based on provided filters
         """
 
+        context = Context()
         if not self.connection:
             self.connect(payload=(payload or {}))
 
-        if self.data is None:
+        if self._data is None:
             return []
 
-        return [
+        self.logger.debug(f"{context}::{self._target} > {attributes}")
+
+        res = [
             {k: v for k, v in el.items() if k in attributes}
-            for el in self.data
+            for el in self._data
             if search_filter(el)
         ]
+
+        self.logger.debug(f"{context}::{self._target} > {res}")
+        return res

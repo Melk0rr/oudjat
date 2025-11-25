@@ -1,12 +1,13 @@
 """Main module of the MS CVRF package that inits connection to a CVRF document."""
 
 import json
+import logging
 import re
 from datetime import datetime
 from typing import override
 
 from oudjat.connectors import Connector, ConnectorMethod
-from oudjat.utils import ColorPrint, DataType
+from oudjat.utils import Context, DataType
 from oudjat.utils.types import StrType
 
 from .definitions import API_BASE_URL, API_REQ_HEADERS, CVE_REGEX
@@ -26,6 +27,8 @@ class MSCVRFConnector(Connector):
         This method sets up the connector by initializing the current date and version,
         setting up the connection using superclass methods, and marking it as not connected.
         """
+
+        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
 
         self._date: datetime = datetime.now()
         self._api_version: str = str(self._date.year)
@@ -51,10 +54,9 @@ class MSCVRFConnector(Connector):
             ConnectionError: If unable to connect to the API to retrieve the CVRF ID.
         """
 
+        context = Context()
         if not re.match(CVE_REGEX, cve):
-            raise ValueError(
-                f"{__class__.__name__}._cvrf_id_from_cve::Invalid CVE provided: {cve}"
-            )
+            raise ValueError(f"{context}::Invalid CVE provided: {cve}")
 
         # API URL to retrieve CVRF id from CVE
         id_url = f"{API_BASE_URL}Updates('{cve}')"
@@ -62,9 +64,7 @@ class MSCVRFConnector(Connector):
         # Retrieve CVRF ID
         id_resp = ConnectorMethod.GET(id_url, headers=API_REQ_HEADERS)
         if id_resp.status_code != 200:
-            raise ConnectionError(
-                f"{__class__.__name__}._cvrf_id_from_cve::Could not connect to {id_url}"
-            )
+            raise ConnectionError(f"{context}::Could not connect to {id_url}")
 
         data = json.loads(id_resp.content)
         return data["value"][0]["ID"]
@@ -81,6 +81,9 @@ class MSCVRFConnector(Connector):
             MSCVRFDocument: An instance of the CVRF document corresponding to the provided CVRF ID.
         """
 
+        context = Context()
+        self.logger.info(f"{context}::Connecting to {cvrf_id}")
+
         self._connection = False
 
         cvrf = self._target.get(cvrf_id, None)
@@ -90,9 +93,11 @@ class MSCVRFConnector(Connector):
                 self.add_target(cvrf)
                 self._connection = True
 
+                self.logger.info(f"{context}::Connected to {cvrf_id}")
+
             except ConnectionError as e:
-                ColorPrint.red(
-                    f"{__class__.__name__}.connect::Could not connect to the provided CVRF document {e}"
+                self.logger.error(
+                    f"{context}.connect::Could not connect to the provided CVRF document {e}"
                 )
 
         else:
@@ -124,6 +129,7 @@ class MSCVRFConnector(Connector):
             DataType: A list of dictionaries containing vulnerability information corresponding to the filtered CVEs.
         """
 
+        context = Context()
         res = []
 
         if not isinstance(search_filter, list):
@@ -131,10 +137,14 @@ class MSCVRFConnector(Connector):
 
         for cve in search_filter:
             cvrf_id = self._cvrf_id_from_cve(cve)
+
+            self.logger.debug(f"{context}::{cvrf_id}")
             _ = self.connect(cvrf_id)
             cvrf: "MSCVRFDocument" = self._target.get(cvrf_id, None)
 
             if self._connection:
+                self.logger.debug(f"{context}::{cvrf_id} > {cvrf.to_dict()}")
+
                 cvrf.parse_vulnerabilities()
                 res.append(cvrf.vulnerabilities[cve])
 
