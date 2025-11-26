@@ -24,7 +24,7 @@ class EndOfLifeConnector(Connector):
         Initialize the EndOfLifeAPIConnector by setting up the connection to the EOL API URL and initializes an empty list of products.
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         self._target: "ParseResult"
         super().__init__(target=urlparse(EOL_API_URL))

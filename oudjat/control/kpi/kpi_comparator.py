@@ -3,7 +3,7 @@
 from enum import Enum
 from typing import Any, Callable, NamedTuple, override
 
-from oudjat.utils import ColorPrint
+from oudjat.utils import ColorPrint, Context
 
 from .kpi import KPI
 
@@ -76,7 +76,7 @@ class KPIComparator:
 
         if kpi_a.perimeter != kpi_b.perimeter:
             raise ValueError(
-                f"{__class__.__name__}::Provided KPIs do not share the same perimeter !"
+                f"{Context()}::Provided KPIs do not share the same perimeter !"
             )
 
         self._kpis: tuple["KPI", "KPI"] = (

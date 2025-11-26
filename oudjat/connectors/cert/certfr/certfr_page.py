@@ -53,7 +53,7 @@ class CERTFRPage:
         """
 
         context = Context()
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         if not self.is_valid_ref(ref) and not self.is_valid_link(ref):
             raise CERTFRReferenceError(f"{context}::Invalid CERTFR ref provided : {ref}")
@@ -304,7 +304,7 @@ class CERTFRPageMeta:
         self._meta_table: "PageElement" = meta_section.find_all("table")[0]
         self._data: dict[str, Any] = {}
 
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
     # ****************************************************************
     # Methods
@@ -401,7 +401,7 @@ class CERTFRPageContent:
         self._content: "BeautifulSoup" = content_section
         self._data: dict[str, Any] = {}
 
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
     # ****************************************************************
     # Methods

@@ -1,6 +1,7 @@
+"""
+Main module.
+"""
+
 __version__ = "0.7.2a1"
 
-# TODO: Handle logs properly with logging
-# TODO: Use Context for logging and errors
-# TODO: More custom Error types
 # TODO: Use SourcedValue in the final commands and configuration handlers to track data sources

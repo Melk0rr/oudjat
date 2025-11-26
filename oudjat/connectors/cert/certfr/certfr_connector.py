@@ -9,10 +9,10 @@ from bs4 import BeautifulSoup
 
 from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.utils import Context
-from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.types import StrType
 
 from .certfr_page import CERTFRPage
+from .exceptions import CERTFRParsingError
 
 
 class CERTFRConnector(Connector):
@@ -34,7 +34,7 @@ class CERTFRConnector(Connector):
         self._target: "ParseResult"
         super().__init__(target=urlparse(CERTFRPage.BASE_LINK))
 
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
     # ****************************************************************
     # Methods
@@ -118,6 +118,9 @@ class CERTFRConnector(Connector):
             list[str]: A list of references extracted from the CERTFR feed page that match the date filter criteria if provided.
         """
 
+        context = Context()
+        logger = logging.getLogger(__name__)
+
         filtered_feed = []
 
         try:
@@ -146,17 +149,14 @@ class CERTFRConnector(Connector):
                                 filtered_feed.append(certfr_ref)
 
                     except ValueError:
-                        ColorPrint.red(
-                            "Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !"
+                        logger.error(
+                            f"{context}::Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !"
                         )
 
                 else:
                     filtered_feed.append(certfr_ref)
 
-        except Exception as e:
-            print(
-                e,
-                f"A parsing error occured for {feed_url}: {e}\nCheck if the page has the expected format.",
-            )
+        except CERTFRParsingError as e:
+            logger.error(f"{context}::A parsing error occured for {feed_url}: {e}")
 
         return filtered_feed

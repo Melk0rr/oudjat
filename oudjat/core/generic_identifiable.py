@@ -1,7 +1,11 @@
 """A module to describe a generic class that includes common properties among multiple asset types."""
 
 from abc import ABC, abstractmethod
-from typing import Any, TypeVar, TypedDict, override
+from typing import Any, TypedDict, TypeVar, override
+
+from oudjat.utils import Context
+
+from .exceptions import CustomAttributeError
 
 GenericBoundType = TypeVar("GenericBoundType", bound="GenericIdentifiable")
 
@@ -126,8 +130,8 @@ class GenericIdentifiable(ABC):
             return self._custom_attributes
 
         if key not in self.custom_attributes.keys():
-            raise ValueError(
-                f"{__class__.__name__}.custom_attr::{self._id} does not have any custom attribute {key}"
+            raise CustomAttributeError(
+                f"{Context()}::{self._id} does not have a custom attribute {key}"
             )
 
         return self.custom_attributes[key]
@@ -206,7 +210,7 @@ class GenericIdentifiable(ABC):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.__str__::This method must be implemented by the overloading class"
+            f"{Context()}::This method must be implemented by the overloading class"
         )
 
     def to_dict(self) -> dict[str, Any]:

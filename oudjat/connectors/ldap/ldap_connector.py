@@ -15,8 +15,8 @@ from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import StrType
 
 from .exceptions import (
+    InvalidLDAPEntryError,
     LDAPConnectionError,
-    LDAPInvalidEntryError,
     LDAPSchemaError,
     LDAPUnreachableServerError,
 )
@@ -96,7 +96,7 @@ class LDAPConnector(Connector):
 
         super().__init__(target=server, username=username, password=password)
 
-        self.logger = logging.getLogger(__class__.__name__)
+        self.logger = logging.getLogger(__name__)
         self._domain: str = ""
         self._default_search_base: str = ""
         self._ldap_server: ldap3.Server
@@ -354,7 +354,7 @@ class LDAPConnector(Connector):
 
         def ldap_entry_from_dict(entry: dict[str, Any]) -> "LDAPEntry":
             if entry.get("attributes", None) is None:
-                raise LDAPInvalidEntryError(
+                raise InvalidLDAPEntryError(
                     f"{context}::Invalid entry provided. No attribute found"
                 )
 
@@ -711,6 +711,6 @@ class LDAPConnector(Connector):
         """
 
         if entry.get("attributes", None) is None:
-            raise ValueError(f"{__class__.__name__}.ldap_entry_from_dict::Invalid entry provided")
+            raise InvalidLDAPEntryError(f"{Context()}::Invalid entry provided")
 
         return LDAPEntry(**entry)

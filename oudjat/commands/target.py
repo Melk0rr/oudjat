@@ -1,11 +1,12 @@
 """A module to define common target command behavior."""
 
+import logging
 from collections.abc import Iterator
 from multiprocessing import Pool
 from typing import Any, override
 
 from oudjat.control.vulnerability import CVE
-from oudjat.utils import ColorPrint, FileUtils
+from oudjat.utils import Context, FileUtils
 
 from .base import Base
 
@@ -20,6 +21,9 @@ class Target(Base):
         Args:
             options (dict[str, Any]): Options passed to the command
         """
+
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
+
         super().__init__(options)
         self.results: list[dict[str, Any]] = []
 
@@ -64,7 +68,7 @@ class Target(Base):
 
         self.options[string_option] = list(filter(None, args))
 
-    def handle_exception(self, e: Exception, message: str = "") -> None:
+    def handle_exception(self, e: "Exception", message: str = "") -> None:
         """
         Handle exception for the current class.
 
@@ -72,11 +76,9 @@ class Target(Base):
             e (Exception): exception tu raise
             message (str): exception message
         """
-        if self.options["--verbose"]:
-            print(e)
 
         if message:
-            ColorPrint.red(message)
+            self.logger.error(f"{Context(2)}::{message}\n{e}")
 
     def res_2_csv(self) -> None:
         """Write the results into a CSV file."""

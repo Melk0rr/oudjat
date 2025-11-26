@@ -7,8 +7,8 @@ from oudjat.utils import DataType
 from oudjat.utils.mappers import any_to_dict
 from oudjat.utils.types import DatumType
 
+from .cvrf_product import CVRFProduct
 from .definitions import KB_NUM_REGEX
-from .ms_product import MSProduct
 
 
 class MSRemedType(IntEnum):
@@ -18,7 +18,7 @@ class MSRemedType(IntEnum):
     PATCH = 1
 
 
-class MSRemed:
+class CVRFRemed:
     """Class to manipulate MS KBs."""
 
     # ****************************************************************
@@ -38,28 +38,28 @@ class MSRemed:
         if not re.match(KB_NUM_REGEX, f"{self._number}"):
             self._type = MSRemedType.PATCH
 
-        self._products: dict[str, "MSProduct"] = {}
+        self._products: dict[str, "CVRFProduct"] = {}
 
     # ****************************************************************
     # Methods
 
     @property
-    def products(self) -> dict[str, "MSProduct"]:
+    def products(self) -> dict[str, "CVRFProduct"]:
         """
         Return the products impacted by this remediation.
 
         Returns:
-            dict[str, MSProduct]: dictionary of products
+            dict[str, CVRFProduct]: dictionary of products
         """
 
         return self._products
 
-    def set_products_from_list(self, products: list["MSProduct"]) -> None:
+    def set_products_from_list(self, products: list["CVRFProduct"]) -> None:
         """
         Setter for kb products.
 
         Args:
-            products (list[MSProduct]): A list of MSProduct instances to be added or updated in the KB's product dictionary.
+            products (list[CVRFProduct]): A list of CVRFProduct instances to be added or updated in the KB's product dictionary.
         """
 
         self._products = {p.pid: p for p in products if p.pid not in self._products.keys()}
@@ -80,7 +80,7 @@ class MSRemed:
         Convert patched products into dictionaries.
 
         Returns:
-            DataType: A list of dictionaries where each dictionary contains the remed number, type, and product details flattened from the MSProduct instances.
+            DataType: A list of dictionaries where each dictionary contains the remed number, type, and product details flattened from the CVRFProduct instances.
         """
 
         return [
@@ -93,7 +93,7 @@ class MSRemed:
         Convert the current kb into a dict.
 
         Returns:
-            Dict[str, Any]: A dictionary containing the remed number and a list of dictionaries representing the patched products, each converted from their MSProduct instances using `to_dict`.
+            Dict[str, Any]: A dictionary containing the remed number and a list of dictionaries representing the patched products, each converted from their CVRFProduct instances using `to_dict`.
         """
 
         return {

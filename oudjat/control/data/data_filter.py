@@ -2,10 +2,12 @@
 
 from typing import Any, Callable, TypeAlias, TypedDict, override
 
-from oudjat.utils import DataType
+from oudjat.control.data.exceptions import DataFilterInvalidOperatorError
+from oudjat.utils import Context, DataType
 from oudjat.utils.operators import CompareOperator
 from oudjat.utils.types import FilterTupleExtType, NumberType
 
+# TODO: Support Callable value
 DataFilterDictionaryValueType: TypeAlias = NumberType | bool | str | None
 
 
@@ -46,7 +48,7 @@ class DataFilter:
     # Attributes & Constructors
 
     def __init__(
-        self, fieldname: str, value: Any, operator: str = "in", negate: bool = False
+        self, fieldname: str, value: Any, operator: "str | CompareOperator" = "in", negate: bool = False
     ) -> None:
         """
         Return a new instance of data filter.
@@ -58,11 +60,14 @@ class DataFilter:
             negate (bool)  : if you want to negate the filter result or not (True -> False; False -> True)
         """
 
-        if operator not in CompareOperator.list_all_keys():
-            raise ValueError(f"{__class__.__name__}::Invalid operator provided: {operator}")
+        if isinstance(operator, str):
+            if operator not in CompareOperator.list_all_keys():
+                raise DataFilterInvalidOperatorError(f"{Context()}::Invalid operator provided: {operator}")
+
+            operator = CompareOperator.find_by_key(operator)
 
         self._fieldname: str = fieldname
-        self._operator: "CompareOperator" = CompareOperator.find_by_key(operator)
+        self._operator: "CompareOperator" = operator
         self._value: Any = value
         self._negate: bool = negate
 
@@ -196,10 +201,10 @@ class DataFilter:
         }
 
     # ****************************************************************
-    # Static methods
+    # Class methods
 
-    @staticmethod
-    def from_dict(filter_dict: "DataFilterDictionaryProps") -> "DataFilter":
+    @classmethod
+    def from_dict(cls, filter_dict: "DataFilterDictionaryProps") -> "DataFilter":
         """
         Create a datafilter instance from a dictionary.
 
@@ -213,14 +218,14 @@ class DataFilter:
             my_filter = DataFilter.from_dict({ "fieldname": "name", "operator": "=", "value": "Rick Deckard"})
         """
 
-        return DataFilter(
+        return cls(
             fieldname=filter_dict["fieldname"],
             operator=filter_dict.get("operator", None) or "is",
             value=filter_dict.get("value", None),
         )
 
-    @staticmethod
-    def from_tuple(filter_tuple: tuple[str, str, "DataFilterDictionaryValueType"]) -> "DataFilter":
+    @classmethod
+    def from_tuple(cls, filter_tuple: tuple[str, str, "DataFilterDictionaryValueType"]) -> "DataFilter":
         """
         Create a datafilter instance from a tuple.
 
@@ -234,11 +239,45 @@ class DataFilter:
             my_filter = DataFilter.from_tuple(( "name", "=", "Rick Deckard" ))
         """
 
-        return DataFilter(
+        return cls(
             fieldname=filter_tuple[0],
             operator=filter_tuple[1],
             value=filter_tuple[2],
         )
+
+    @classmethod
+    def from_dict_list(cls, filters: list["DataFilterDictionaryProps"]) -> list["DataFilter"]:
+        """
+        Generate multiple DataFitler instances based on dictionnaries.
+
+        Args:
+            filters (list[DataFilterDictionaryProps]): List of dictionaries used to generated instances
+
+        Returns:
+            list[DataFilter]: Data filter instances
+        """
+
+        return list(map(DataFilter.from_dict, filters))
+
+    @classmethod
+    def from_tuple_list(cls, filters: "FilterTupleExtType") -> list["DataFilter"]:
+        """
+        Generate DataFitler instances based on tuples.
+
+        Args:
+            filters (FilterTupleExtType): list of tuples used to generated instances
+
+        Returns:
+            list[DataFilter]: data filter instances
+        """
+
+        if not isinstance(filters, list):
+            filters = [filters]
+
+        return list(map(DataFilter.from_tuple, filters))
+
+    # ****************************************************************
+    # Static methods
 
     @staticmethod
     def valid_filters_list(
@@ -255,37 +294,6 @@ class DataFilter:
         """
 
         return [f if isinstance(f, DataFilter) else DataFilter.from_dict(f) for f in filters_list]
-
-    @staticmethod
-    def from_dict_list(filters: list["DataFilterDictionaryProps"]) -> list["DataFilter"]:
-        """
-        Generate multiple DataFitler instances based on dictionnaries.
-
-        Args:
-            filters (list[DataFilterDictionaryProps]): List of dictionaries used to generated instances
-
-        Returns:
-            list[DataFilter]: Data filter instances
-        """
-
-        return list(map(DataFilter.from_dict, filters))
-
-    @staticmethod
-    def from_tuple_list(filters: "FilterTupleExtType") -> list["DataFilter"]:
-        """
-        Generate DataFitler instances based on tuples.
-
-        Args:
-            filters (FilterTupleExtType): list of tuples used to generated instances
-
-        Returns:
-            list[DataFilter]: data filter instances
-        """
-
-        if not isinstance(filters, list):
-            filters = [filters]
-
-        return list(map(DataFilter.from_tuple, filters))
 
     @staticmethod
     def conditions(element: Any, filters: list["DataFilter"] | list["DataFilterDictionaryProps"]) -> bool:

@@ -39,7 +39,7 @@ class LDAPGroup(LDAPObject):
         """
 
         super().__init__(ldap_entry, capabilities)
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         self.group: "Group[LDAPObject]" = Group[LDAPObject](
             group_id=self.entry.get("objectGUID"),

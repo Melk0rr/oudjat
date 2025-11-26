@@ -65,16 +65,26 @@ class ConformityLevel(Enum):
 
         return self._value_.print_color
 
+    @override
+    def __str__(self) -> str:
+        """
+        Convert a ConformityLevel into a string.
+
+        Returns:
+            str: A string representation of the conforimty level
+        """
+
+        return self.name
+
 
 class KPIStaticProps(TypedDict):
     """
     A helper function to describe a KPI static attributes.
 
     Attributes:
-        value (float)       : the value of the KPI
-        date (DateInputType): the date the KPI was generated on
-        scope_size (int)    : the input DataSet size
-        conform_count (int) : the number of conform elements
+        value (float)         : The value of the KPI
+        initial_set_size (int): The input DataSet size
+        conform_count (int)   : The number of conform elements
     """
 
     value: float
@@ -300,14 +310,13 @@ class KPI(DataSet):
         """
 
         base = super().to_dict()
-        del base["output_data_size"]
+        _ = base.pop("outputDataSize")
 
         return {
             **base,
-            "conformCount": self.conform_count,
             "date": self.date_str,
             "value": self.value,
-            "conformity": self.conformity_level.name,
+            "conformity": {"level": str(self.conformity_level), "count": self.conform_count},
         }
 
     # ****************************************************************

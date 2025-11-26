@@ -60,7 +60,7 @@ class TenableSCConnector(Connector):
             port (int)        : Port number
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
         scheme = "http"
         if port == 443:
             scheme += "s"

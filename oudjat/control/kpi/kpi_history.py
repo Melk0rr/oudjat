@@ -126,7 +126,7 @@ class KPIHistory:
             kpis (list[KPI] | None): A list of KPI objects to initialize with. Defaults to an empty list.
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         self._name: str = name
         self._begin: "KPIHistoryNode | None"

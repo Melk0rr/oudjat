@@ -2,8 +2,11 @@
 
 from typing import Any, override
 
+from oudjat.utils import Context
+
 from ..core import Asset, AssetType
 from ..core.network.subnet import Subnet
+from .exceptions import InvalidAssetTypeError
 from .generic_identifiable import GenericIdentifiable
 
 
@@ -70,7 +73,7 @@ class Location(GenericIdentifiable):
             return self._subnet
 
         if subnet not in self._subnet.keys():
-            raise ValueError(f"{__class__.__name__}.subnet::{subnet} is not a subnet of {self._id}")
+            raise ValueError(f"{Context()}::{subnet} is not a subnet of {self._id}")
 
         return {subnet: self._subnet[subnet]}
 
@@ -120,9 +123,7 @@ class Location(GenericIdentifiable):
 
         for at_name, at_assets in new_assets.items():
             if at_name.upper() not in AssetType._member_names_:
-                raise ValueError(
-                    f"{__class__.__name__}.@assets.setter::Invalid asset type provided {at_name}"
-                )
+                raise InvalidAssetTypeError(f"{Context()}::Invalid asset type provided {at_name}")
 
             self._assets[at_name] = at_assets
 

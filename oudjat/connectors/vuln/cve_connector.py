@@ -31,7 +31,7 @@ class CVEConnector(Connector, ABC):
         It sets the target URL to the NIST API URL.
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         self._target: "ParseResult"
         super().__init__(target=CVEConnector.API_URL)

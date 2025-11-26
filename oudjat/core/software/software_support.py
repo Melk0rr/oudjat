@@ -3,6 +3,8 @@
 from datetime import datetime
 from typing import Any, override
 
+from oudjat.core.software.exceptions import SoftwareReleaseSupportInvalidEndDate
+from oudjat.utils import Context
 from oudjat.utils.time_utils import TimeConverter
 
 from .software_edition import SoftwareEdition, SoftwareEditionDict
@@ -34,8 +36,8 @@ class SoftwareReleaseSupport:
         self._edition: SoftwareEditionDict = SoftwareEditionDict(**edition)
 
         if active_support is None and end_of_life is None:
-            raise ValueError(
-                f"{__class__.__name__}::Please provide either an active support or end of life date."
+            raise SoftwareReleaseSupportInvalidEndDate(
+                f"{Context()}::Please provide either an active support or end of life date."
             )
 
         # Handling none support values
@@ -86,7 +88,6 @@ class SoftwareReleaseSupport:
 
         return "Ongoing" if self.is_ongoing else "Retired"
 
-
     @property
     def is_ongoing(self) -> bool:
         """
@@ -119,7 +120,7 @@ class SoftwareReleaseSupport:
         return state
 
     @property
-    def has_long_term_support(self) -> bool:
+    def lts(self) -> bool:
         """
         Check if the release has long term support.
 
@@ -208,7 +209,7 @@ class SoftwareReleaseSupportList(list[SoftwareReleaseSupport]):
         self,
         edition: str | list[str],
         lts: bool = False,
-    ) -> list[SoftwareReleaseSupport]:
+    ) -> list["SoftwareReleaseSupport"]:
         """
         Return releases matching arguments.
 
@@ -222,13 +223,13 @@ class SoftwareReleaseSupportList(list[SoftwareReleaseSupport]):
             list[SoftwareReleaseSupport]: A list of `SoftwareReleaseSupport` objects that meet the specified conditions.
         """
 
-        def support_edition(sup: SoftwareReleaseSupport) -> bool:
+        def support_edition(sup: "SoftwareReleaseSupport") -> bool:
             return sup.supports_edition(edition, lts)
 
         return list(filter(support_edition, self))
 
     @override
-    def append(self, support: SoftwareReleaseSupport) -> None:
+    def append(self, support: "SoftwareReleaseSupport") -> None:
         """
         Append a new support to the list.
 

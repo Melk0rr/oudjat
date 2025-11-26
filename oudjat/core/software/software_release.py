@@ -4,12 +4,14 @@ from collections.abc import Iterator
 from datetime import datetime
 from typing import Any, Generic, TypeVar, override
 
+from oudjat.utils import Context
 from oudjat.utils.time_utils import TimeConverter
 
 from .software_release_version import SoftwareReleaseVersion
 from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportList
 
 ReleaseType = TypeVar("ReleaseType", bound="SoftwareRelease")
+
 
 class SoftwareRelease:
     """A class to describe software releases."""
@@ -48,9 +50,7 @@ class SoftwareRelease:
                 release_date = TimeConverter.str_to_date(release_date)
 
         except ValueError as e:
-            raise ValueError(
-                f"{__class__.__name__}::Please provide dates with %Y-%m-%d format\n{e}"
-            )
+            raise ValueError(f"{Context()}::Please provide dates with %Y-%m-%d format\n{e}")
 
         self._release_date: datetime = release_date
         self._support: "SoftwareReleaseSupportList" = SoftwareReleaseSupportList()
@@ -115,7 +115,7 @@ class SoftwareRelease:
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.get_name::Method must be implemented by the overloading class"
+            f"{Context()}.get_name::Method must be implemented by the overloading class"
         )
 
     @property
@@ -161,7 +161,6 @@ class SoftwareRelease:
         """
 
         return self._vulnerabilities
-
 
     @property
     def ongoing_support(self) -> list["SoftwareReleaseSupport"]:
@@ -230,9 +229,7 @@ class SoftwareRelease:
             None
         """
 
-        if not self._support.contains(
-            edition=list(support.edition.keys()), lts=support.has_long_term_support
-        ):
+        if not self._support.contains(edition=list(support.edition.keys()), lts=support.lts):
             self._support.append(support)
 
     def has_vulnerability(self, vuln: str | list[str] | None = None) -> list[str]:
@@ -311,7 +308,7 @@ class SoftwareRelease:
             "label": self.label,
             "releaseDate": TimeConverter.date_to_str(self._release_date),
             **self._software_dict(),
-            "support": [s.to_dict() for s in self._support]
+            "support": [s.to_dict() for s in self._support],
         }
 
 
@@ -329,7 +326,7 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
         self._data: dict[str, "ReleaseType"] = {}
 
         if len(kwargs) > 0:
-            self._data.update({ k: v for k, v in kwargs.items() })
+            self._data.update({k: v for k, v in kwargs.items()})
 
     # ****************************************************************
     # Methods
@@ -464,4 +461,3 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
         return SoftwareReleaseDict[ReleaseType](
             **{rel_k: rel for rel_k, rel in self.items() if str(rel.version) == version}
         )
-

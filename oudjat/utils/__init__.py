@@ -9,7 +9,7 @@ from .credentials import CredentialUtils, InvalidCredentialsError, NoCredentials
 from .dictionary_utils import UtilsDict
 from .file_utils import FileType, FileUtils
 from .list_utils import UtilsList
-from .logging import LoggingFormatter
+from .logging import OudjatFormatter
 from .operators import CompareOperator, LogicalOperator
 from .stdouthook import StdOutHook
 from .time_utils import DateFlag, DateFormat, TimeConverter
@@ -27,7 +27,7 @@ __all__ = [
     "FileType",
     "UtilsList",
     "LogicalOperator",
-    "LoggingFormatter",
+    "OudjatFormatter",
     "CompareOperator",
     "StdOutHook",
     "DateFlag",

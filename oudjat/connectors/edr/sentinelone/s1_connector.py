@@ -42,7 +42,7 @@ class S1Connector(Connector):
             port (int)     : Port number used for the connection
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         scheme = "http"
         if port == 443:
@@ -510,7 +510,7 @@ class S1Connector(Connector):
 
         else:
             raise ValueError(
-                f"{__class__.__name__}.move_agent_to_group::Neither computer_name nor cpt_ids specified"
+                f"{Context()}.move_agent_to_group::Neither computer_name nor cpt_ids specified"
             )
 
         return self.fetch(

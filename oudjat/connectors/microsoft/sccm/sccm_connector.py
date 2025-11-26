@@ -48,7 +48,7 @@ class SCCMConnector(Connector):
             service_name (str)       : Service name used to register credentials if trusted_connection is false
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         super().__init__(target=server, username=username, password=password)
 

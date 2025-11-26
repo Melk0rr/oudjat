@@ -36,7 +36,7 @@ class LDAPOrganizationalUnit(LDAPObject):
         super().__init__(ldap_entry, capabilities)
 
         self._objects: dict[str, "LDAPObject"] = {}
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
     # ****************************************************************
     # Methods

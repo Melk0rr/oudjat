@@ -89,7 +89,7 @@ class CybereasonConnector(Connector):
         if port == 443:
             scheme += "s"
 
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         # Inject protocol if not found
         if not re.match(r"http(s?):", target):

@@ -1,15 +1,18 @@
 """A module that provide a way to dynamically change behaviors or add properties to an object through decision trees."""
 
+import logging
 from typing import Any, TypeAlias, TypedDict, override
 
-from oudjat.utils import ColorPrint, LogicalOperator
+from oudjat.utils import Context, LogicalOperator
 from oudjat.utils.list_utils import UtilsList
 from oudjat.utils.mappers import any_to_dict
 from oudjat.utils.types import NumberType
 
 from .data_filter import DataFilter, DataFilterDictionaryProps
+from .exceptions import DecisionTreeBuildError, DecisionTreeInvalidNodeError
 
 DecisionNodeFlagType: TypeAlias = "NumberType | str | None"
+
 
 class DecisionTreeDictionaryProps(TypedDict):
     """
@@ -26,6 +29,7 @@ class DecisionTreeDictionaryProps(TypedDict):
     operator: str
     nodes: list["DecisionTreeDictionaryProps | DataFilterDictionaryProps"]
     negate: bool | None
+
 
 class DecisionTreeNode:
     """
@@ -109,9 +113,7 @@ class DecisionTreeNode:
             self.init(element)
 
         if self._value is None:
-            raise ValueError(
-                f"{__class__.__name__}.compute_value::An error occured while computing node value"
-            )
+            raise ValueError(f"{Context()}::An error occured while computing node value")
 
         return self._value
 
@@ -231,13 +233,16 @@ class DecisionTree:
             value (bool)                : final value of the decision tree for an input element
         """
 
+        context = Context()
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
+
         self._negate: bool = tree_dict.get("negate", False) or False
-        self._operator: "LogicalOperator" = LogicalOperator.find_by_key(tree_dict.get("operator", "and")) or LogicalOperator.AND
+        self._operator: "LogicalOperator" = (
+            LogicalOperator.find_by_key(tree_dict.get("operator", "and")) or LogicalOperator.AND
+        )
 
         if self._operator.name not in LogicalOperator._member_names_:
-            raise ValueError(
-                f"{__class__.__name__}::Invalid operator provided {self._operator.name}"
-            )
+            raise ValueError(f"{context}::Invalid operator provided {self._operator.name}")
 
         self._nodes: "DecisionTreeNodeList" = DecisionTreeNodeList()
         self.build(tree_dict)
@@ -338,8 +343,8 @@ class DecisionTree:
             for n in tree_dict.get("nodes", []):
                 self.add_node(n)
 
-        except Exception as e:
-            ColorPrint.red(f"{__class__.__name__}.build::An error occured while building tree\n{e}")
+        except DecisionTreeBuildError as e:
+            self.logger.error(f"{Context()}::An error occured while building tree\n{e}")
 
     def init(self, element: dict[str, Any]) -> None:
         """
@@ -368,6 +373,7 @@ class DecisionTree:
             DecisionTreeNodeList: A list of values representing the leaf nodes of the decision tree.
         """
 
+        context = Context()
         if self._nodes.is_empty():
             return self._nodes
 
@@ -380,7 +386,7 @@ class DecisionTree:
                 leaves.extend(n.leaves())
 
             else:
-                raise ValueError(f"{__class__.__name__}.leaves::Invalid node found")
+                raise DecisionTreeInvalidNodeError(f"{context}::Invalid node found")
 
         if leaves_value is not None:
             leaves = leaves.by_value(value=leaves_value)

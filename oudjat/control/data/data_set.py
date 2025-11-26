@@ -2,7 +2,8 @@
 
 from typing import Any, TypeAlias
 
-from oudjat.utils import DataType
+from oudjat.control.data.exceptions import DataSetPerimeterError
+from oudjat.utils import Context, DataType
 
 from .data_filter import DataFilter, DataFilterDictionaryProps
 
@@ -43,6 +44,7 @@ class DataSet:
 
         self._initial_set: "DataSetType" = initial_set if initial_set is not None else []
 
+        # TODO: Use DecisionTree instead
         self._filters: list["DataFilter"] = DataFilter.valid_filters_list(filters)
 
     # ****************************************************************
@@ -190,27 +192,16 @@ class DataSet:
             "description": self.description,
             "perimeter": self.perimeter,
             "filters": list(map(str, self.filters)),
-            "initialSetName": self.initial_set_name,
-            "initialSetSize": len(self.initial_set_data),
-            "outputDataSize": len(self.output_data)
+            "initialSet": {
+                "name": self.initial_set_name,
+                "size": len(self.initial_set_data)
+            },
+            "outputDataSize": len(self.output_data),
         }
 
     # ****************************************************************
     # Static methods
 
-    @staticmethod
-    def dataset_data(dataset: "DataSet") -> list[dict[str, Any]]:
-        """
-        Return the data of the provided DataSet instance.
-
-        Args:
-            dataset (DataSet): DataSet instance the data will be returned
-
-        Returns:
-            str: the perimeter of the provided dataset
-        """
-
-        return dataset.output_data
 
     @staticmethod
     def merge_sets(name: str, sets: list["DataSet"]) -> "DataSet":
@@ -228,21 +219,19 @@ class DataSet:
             ValueError: if the data sets do not have the same perimeter.
         """
 
-        def map_ds_perim(dataset: "DataSet") -> str:
-            return dataset.perimeter
+        def dataset_data(dataset: "DataSet") -> list[dict[str, Any]]:
+            return dataset.output_data
 
         # Check if all sets are on the same perimeter
-        perimeters = set(map(map_ds_perim, sets))
+        perimeters = set([ds.perimeter for ds in sets])
         if len(perimeters) > 1:
-            raise ValueError(
-                f"{__class__.__name__}.merge_sets::Please provide data sets with the same perimeter"
+            raise DataSetPerimeterError(
+                f"{Context()}::Please provide data sets with the same perimeter"
             )
 
         return DataSet(
             name=name,
             perimeter=list(perimeters)[0],
-            initial_set=[
-                item for set_data in map(DataSet.dataset_data, sets) for item in set_data
-            ],
+            initial_set=[item for set_data in map(dataset_data, sets) for item in set_data],
             filters=[],
         )

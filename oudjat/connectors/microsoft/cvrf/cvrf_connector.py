@@ -7,14 +7,15 @@ from datetime import datetime
 from typing import override
 
 from oudjat.connectors import Connector, ConnectorMethod
+from oudjat.control.vulnerability import CVE_REGEX
 from oudjat.utils import Context, DataType
 from oudjat.utils.types import StrType
 
-from .definitions import API_BASE_URL, API_REQ_HEADERS, CVE_REGEX
-from .ms_cvrf_document import MSCVRFDocument
+from .cvrf_document import CVRFDocument
+from .definitions import API_BASE_URL, API_REQ_HEADERS
 
 
-class MSCVRFConnector(Connector):
+class CVRFConnector(Connector):
     """Connector to interact with Microsoft API."""
 
     # ****************************************************************
@@ -22,13 +23,13 @@ class MSCVRFConnector(Connector):
 
     def __init__(self) -> None:
         """
-        Initialize a new instance of MSAPIConnector.
+        Initialize a new instance of CVRFConnector.
 
         This method sets up the connector by initializing the current date and version,
         setting up the connection using superclass methods, and marking it as not connected.
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         self._date: datetime = datetime.now()
         self._api_version: str = str(self._date.year)
@@ -76,9 +77,6 @@ class MSCVRFConnector(Connector):
 
         Args:
             cvrf_id (str): The identifier of the CVRF document to connect to.
-
-        Returns:
-            MSCVRFDocument: An instance of the CVRF document corresponding to the provided CVRF ID.
         """
 
         context = Context()
@@ -89,7 +87,7 @@ class MSCVRFConnector(Connector):
         cvrf = self._target.get(cvrf_id, None)
         if cvrf is None:
             try:
-                cvrf = MSCVRFDocument(cvrf_id)
+                cvrf = CVRFDocument(cvrf_id)
                 self.add_target(cvrf)
                 self._connection = True
 
@@ -103,12 +101,12 @@ class MSCVRFConnector(Connector):
         else:
             self._connection = True
 
-    def add_target(self, doc: "MSCVRFDocument") -> None:
+    def add_target(self, doc: "CVRFDocument") -> None:
         """
         Add a CVRF document to the internal target dictionary.
 
         Args:
-            doc (MSCVRFDocument): The CVRF document instance to be added.
+            doc (CVRFDocument): The CVRF document instance to be added.
         """
 
         if doc.id not in self._target.keys():
@@ -140,7 +138,7 @@ class MSCVRFConnector(Connector):
 
             self.logger.debug(f"{context}::{cvrf_id}")
             _ = self.connect(cvrf_id)
-            cvrf: "MSCVRFDocument" = self._target.get(cvrf_id, None)
+            cvrf: "CVRFDocument" = self._target.get(cvrf_id, None)
 
             if self._connection:
                 self.logger.debug(f"{context}::{cvrf_id} > {cvrf.to_dict()}")

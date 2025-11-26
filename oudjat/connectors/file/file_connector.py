@@ -26,7 +26,7 @@ class FileConnector(Connector):
         """
 
         context = Context()
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         if not FileUtils.check_path(file):
             raise FileExistsError(f"{context}::Invalid file path provided: {file}")

@@ -46,12 +46,13 @@ from docopt import docopt
 
 import oudjat.commands
 from oudjat.banner import banner
-from oudjat.utils import ColorPrint, LoggingFormatter, StdOutHook, TimeConverter
+from oudjat.utils import ColorPrint, StdOutHook, TimeConverter
+from oudjat.utils.logging import oudjatLogger
 
 from . import __version__ as VERSION
 
 
-def config_logging(options: dict[str, str]) -> None:
+def config_logging(options: dict[str, str]) -> "logging.Logger":
     """
     Set the logging level.
 
@@ -67,19 +68,7 @@ def config_logging(options: dict[str, str]) -> None:
         "DEBUG": logging.DEBUG,
     }
 
-    handler = logging.StreamHandler()
-    handler.setFormatter(LoggingFormatter())
-
-    logging_options: dict[str, Any] = {
-        "level": LOGGING_LEVELS[options.get("--log", "WARNING")],
-        "handlers": handler,
-    }
-
-    if options["--output"]:
-        logging_options["filename"] = options["--output"]
-        logging_options["filemode"] = "w"
-
-    logging.basicConfig(**logging_options)
+    return oudjatLogger(level=LOGGING_LEVELS.get(options["--log"], LOGGING_LEVELS["INFO"]))
 
 
 def command_switch(options: dict[str, str]) -> Any:
@@ -111,16 +100,17 @@ def main() -> None:
 
         original_stdout = sys.stdout
 
-        config_logging(options)
+        logger = config_logging(options)
+
         if options["--output"] and options["--silent"]:
             sys.stdout = StdOutHook(options["FILENAME"], options["--silent"], options["--output"])
 
         if not options["--target"] and not options["--file"] and not options["--directory"]:
-            ColorPrint.red("Target required! Use -h to see usage. Either -f or -t")
+            logger.error("Target required! Use -h to see usage. Either -f or -t")
             return
 
         if options["--target"] and options["--file"]:
-            ColorPrint.red("Please only supply one target method - either -f or -t.")
+            logger.error("Please only supply one target method - either -f or -t.")
             return
 
         ColorPrint.blue(banner)
@@ -128,11 +118,7 @@ def main() -> None:
         command = command_switch(options)
         command.run()
 
-        print(
-            f"\nWatchers infos search took {
-                TimeConverter.seconds_to_str(time.time() - start_time)
-            }s"
-        )
+        logger.info(f"Oudjat runtime -  {TimeConverter.seconds_to_str(time.time() - start_time)}s")
 
         sys.stdout = original_stdout
 

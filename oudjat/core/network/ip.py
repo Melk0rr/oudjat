@@ -1,10 +1,11 @@
 """A module that describes IP addresses."""
 
+import logging
 import re
 import socket
 from typing import Any, override
 
-from oudjat.utils import ColorPrint, Context, LogicalOperator
+from oudjat.utils import Context, LogicalOperator
 
 from .ipversions import IPVersion
 from .port import Port
@@ -31,6 +32,7 @@ class IP:
         """
 
         context = Context()
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         self._version: "IPVersion"
         self._value: int
@@ -50,17 +52,13 @@ class IP:
             address = IP.ip_int_to_str(address, version)
 
         else:
-            if re.match(IPVersion.IPV4.pattern, address):
-                self._version = IPVersion.IPV4
-
-            elif re.match(IPVersion.IPV6.pattern, address):
-                self._version = IPVersion.IPV6
-
-            else:
+            version = IPVersion.from_str(address)
+            if version is None:
                 raise ValueError(
-                    f"{context}::Invalid IPv4 address provided: '{address}'"
+                    f"{context}::Invalid IP address provided: '{address}'"
                 )
 
+            self._version = version
             self._value = IP.ip_str_to_int(address, self._version)
 
         self._ports: dict[int, "Port"] = {}
@@ -261,12 +259,14 @@ class IP:
             str: The resolved IP address.
         """
 
+        logger: "logging.Logger" = logging.getLogger(__name__)
+
         ip = None
         try:
             ip = socket.gethostbyname(hostname)
 
         except Exception as e:
-            ColorPrint.red(f"{hostname}: could not resolve IP address\n{e}")
+            logger.error(f"{hostname}: could not resolve IP address\n{e}")
 
         return ip
 

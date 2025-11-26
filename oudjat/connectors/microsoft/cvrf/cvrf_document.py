@@ -8,13 +8,13 @@ from typing import Any
 from oudjat.connectors import ConnectorMethod
 from oudjat.utils import Context
 
+from .cvrf_product import CVRFProduct
+from .cvrf_remed import CVRFRemed
+from .cvrf_vuln import CVRFVuln
 from .definitions import API_BASE_URL, API_REQ_HEADERS, CVRF_ID_REGEX
-from .ms_product import MSProduct
-from .ms_remed import MSRemed
-from .ms_vuln import MSVuln
 
 
-class MSCVRFDocument:
+class CVRFDocument:
     """Class to manipulate MS CVRF documents."""
 
     # ****************************************************************
@@ -32,7 +32,7 @@ class MSCVRFDocument:
         """
 
         context = Context()
-        self.logger: "logging.Logger" = logging.getLogger(__class__.__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         if not re.match(CVRF_ID_REGEX, doc_id):
             raise ValueError(f"{context}::CVRF ID must follow the 'YYYY-MMM' format !")
@@ -48,9 +48,9 @@ class MSCVRFDocument:
         self.logger.info(f"{context}::{self._url}")
 
         self._content: dict[str, Any] = json.loads(url_resp.content)
-        self._products: dict[str, "MSProduct"] = {}
-        self._vulns: dict[str, "MSVuln"] = {}
-        self._kbs: dict[int, "MSRemed"] = {}
+        self._products: dict[str, "CVRFProduct"] = {}
+        self._vulns: dict[str, "CVRFVuln"] = {}
+        self._kbs: dict[int, "CVRFRemed"] = {}
 
     # ****************************************************************
     # Methods
@@ -67,12 +67,12 @@ class MSCVRFDocument:
         return self._id
 
     @property
-    def products(self) -> dict[str, "MSProduct"]:
+    def products(self) -> dict[str, "CVRFProduct"]:
         """
         Return the MS products mentioned in the document. If the product list is not already parsed, this method will trigger a parsing of the products from the document content.
 
         Returns:
-            dict[str, MSProduct]: A dictionary containing the products keyed by their IDs.
+            dict[str, CVRFProduct]: A dictionary containing the products keyed by their IDs.
         """
 
         if not self._products:
@@ -81,7 +81,7 @@ class MSCVRFDocument:
         return self._products
 
     @property
-    def vulnerabilities(self) -> dict[str, "MSVuln"]:
+    def vulnerabilities(self) -> dict[str, "CVRFVuln"]:
         """
         Return the vulnerabilities mentioned in the document. If the vulnerability list is not already parsed, this method will trigger a parsing of the vulnerabilities from the document content.
 
@@ -95,7 +95,7 @@ class MSCVRFDocument:
         return self._vulns
 
     @property
-    def remediations(self) -> dict[int, "MSRemed"]:
+    def remediations(self) -> dict[int, "CVRFRemed"]:
         """
         Return the MS KBs mentioned in the document.
 
@@ -111,18 +111,18 @@ class MSCVRFDocument:
 
         return self._kbs
 
-    def add_product(self, product: "MSProduct") -> None:
+    def add_product(self, product: "CVRFProduct") -> None:
         """
         Add a product to the list of products in the document.
 
         Args:
-            product (MSProduct): The product to be added.
+            product (CVRFProduct): The product to be added.
         """
 
         if product.pid not in self._products.keys():
             self._products[product.pid] = product
 
-    def add_vuln(self, vuln: "MSVuln") -> None:
+    def add_vuln(self, vuln: "CVRFVuln") -> None:
         """
         Add a vulnerability to the list of vulnerabilities in the document.
 
@@ -133,7 +133,7 @@ class MSCVRFDocument:
         if vuln.cve not in self._vulns.keys():
             self._vulns[vuln.cve] = vuln
 
-    def add_kb(self, kb: "MSRemed") -> None:
+    def add_kb(self, kb: "CVRFRemed") -> None:
         """
         Add a KB to the list of KBs in the document.
 
@@ -153,7 +153,7 @@ class MSCVRFDocument:
         for branch in prod_tree:
             for p in branch["Items"]:
                 self.add_product(
-                    MSProduct(pid=p["ProductID"], name=p["Value"], product_type=branch["Name"])
+                    CVRFProduct(pid=p["ProductID"], name=p["Value"], product_type=branch["Name"])
                 )
 
     def parse_vulnerabilities(self) -> None:
@@ -165,12 +165,12 @@ class MSCVRFDocument:
             self.parse_products()
 
         for raw_vuln in self._content["Vulnerability"]:
-            vuln = MSVuln(cve=raw_vuln["CVE"])
+            vuln = CVRFVuln(cve=raw_vuln["CVE"])
 
             for kb in raw_vuln["Remediations"]:
                 kb_id = kb["Description"]["Value"]
 
-                mskb = MSRemed(num=kb_id)
+                mskb = CVRFRemed(num=kb_id)
                 mskb.set_products_from_list(
                     [self._products[pid] for pid in kb.get("ProductID", [])]
                 )

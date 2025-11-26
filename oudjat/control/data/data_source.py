@@ -1,6 +1,9 @@
 """A module to describe data sources and (in the shadows) bind them to connectors."""
 
 from oudjat.connectors.connector import Connector
+from oudjat.utils import Context
+
+from .exceptions import DataSourceConnectorKeyError
 
 
 class DataSource:
@@ -71,7 +74,7 @@ class DataSource:
         """
 
         if connector_key not in self.connectors:
-            raise ValueError(f"{__class__.__name__}.connector::Invalid connector key provided")
+            raise DataSourceConnectorKeyError(f"{Context()}.connector::Invalid connector key provided")
 
         return self.connectors[connector_key]
 

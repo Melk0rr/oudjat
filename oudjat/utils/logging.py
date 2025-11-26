@@ -3,10 +3,11 @@ A helper module to handle logging format.
 """
 
 import logging
+import sys
 from typing import override
 
 
-class LoggingFormatter(logging.Formatter):
+class OudjatFormatter(logging.Formatter):
     """
     A simple class to configure logging foramt.
     """
@@ -45,3 +46,35 @@ class LoggingFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
 
         return formatter.format(record)
+
+
+@staticmethod
+def oudjatLogger(
+    level: int = logging.INFO,
+    stdout: bool = True,
+    filename: str | None = None,
+) -> "logging.Logger":
+    """
+    Create a new custom Logger.
+
+    Args:
+        name (str)           : Logger name
+        level (int)          : Log level
+        stdout (bool)        : Whether to add stream to stdout
+        filename (str | None): Optional filename for file handler
+    """
+
+    logger = logging.getLogger()
+    logger.setLevel(level)
+
+    if stdout:
+        sh = logging.StreamHandler(sys.stdout)
+        sh.setFormatter(OudjatFormatter())
+        logger.addHandler(sh)
+
+    if filename:
+        fh = logging.FileHandler(filename)
+        fh.setFormatter(OudjatFormatter())
+        logger.addHandler(fh)
+
+    return logger
