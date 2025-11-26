@@ -6,6 +6,23 @@ import inspect
 from typing import TypedDict, override
 
 
+class ContextLevelSkipError(ValueError):
+    """
+    A helper class to handle invalid Context level skip error.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of ContextLevelSkipError.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
+
+
 class ContextCallerProps(TypedDict):
     """
     A helper class to handle Context caller infos properly.
@@ -50,7 +67,9 @@ class Context:
         start = 0 + skip
 
         if len(stack) < start + 1:
-            raise ValueError(f"{__class__.__name__}.caller_infos::Caller stack is {len(stack)}, you skipped {skip} levels")
+            raise ContextLevelSkipError(
+                f"{__class__.__name__}.__init__::Caller stack is {len(stack)}, you skipped {skip} levels"
+            )
 
         parent_f = stack[start][0]
 
@@ -69,7 +88,7 @@ class Context:
 
         self.function: str | None = None
         self.qualname: str | None = None
-        if parent_f.f_code.co_name != '<module>':
+        if parent_f.f_code.co_name != "<module>":
             self.function = parent_f.f_code.co_name
             self.qualname = parent_f.f_code.co_qualname
 
@@ -105,9 +124,8 @@ class Context:
             "function": self.function,
             "qualname": self.qualname,
             "file": self.file,
-            "line": self.line
+            "line": self.line,
         }
 
     # ****************************************************************
     # Static methods
-

@@ -2,6 +2,7 @@
 A helper module to handle IP versions.
 """
 
+import re
 from enum import Enum
 from typing import NamedTuple
 
@@ -91,3 +92,24 @@ class IPVersion(Enum):
         """
 
         return (1 << self._value_.bit_count) - 1
+
+    @staticmethod
+    def from_str(ip_str: str) -> "IPVersion | None":
+        """
+        Guess the IP version based on the provided IP string.
+
+        Args:
+            ip_str (str): IP string representation
+
+        Returns:
+            IPVersion | None: The matching IP version if any
+        """
+
+        version = None
+        if re.match(IPVersion.IPV4.pattern, ip_str):
+            version = IPVersion.IPV4
+
+        elif re.match(IPVersion.IPV6.pattern, ip_str):
+            version = IPVersion.IPV6
+
+        return version

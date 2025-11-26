@@ -2,6 +2,8 @@
 
 from typing import Any
 
+from oudjat.utils import Context
+
 
 class Base(object):
     """A base command."""
@@ -71,5 +73,5 @@ class Base(object):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.run::Method must be implemented by the overloading class"
+            f"{Context()}::Method must be implemented by the overloading class"
         )

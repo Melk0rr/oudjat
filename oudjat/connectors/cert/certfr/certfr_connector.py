@@ -1,5 +1,6 @@
 """Module to connect to the CERTFR and initialize parsing."""
 
+import logging
 from datetime import datetime
 from typing import override
 from urllib.parse import ParseResult, urlparse
@@ -8,9 +9,10 @@ from bs4 import BeautifulSoup
 
 from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.utils import Context
-from oudjat.utils.color_print import ColorPrint
+from oudjat.utils.types import StrType
 
 from .certfr_page import CERTFRPage
+from .exceptions import CERTFRParsingError
 
 
 class CERTFRConnector(Connector):
@@ -29,8 +31,10 @@ class CERTFRConnector(Connector):
             self (OudjatCERTFRConnection): The instance being initialized.
         """
 
-        self._target: ParseResult
+        self._target: "ParseResult"
         super().__init__(target=urlparse(CERTFRPage.BASE_LINK))
+
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
     # ****************************************************************
     # Methods
@@ -50,6 +54,7 @@ class CERTFRConnector(Connector):
             None
         """
 
+        self.logger.info(f"{Context()}::Connecting to {self._target.netloc}")
         try:
             req = ConnectorMethod.GET(self._target.geturl())
 
@@ -57,14 +62,15 @@ class CERTFRConnector(Connector):
                 self._connection: bool = True
 
         except ConnectionError as e:
-            raise ConnectionError(
-                f"{Context()}::Could not connect to {self._target.netloc}\n{e}"
-            )
+            raise ConnectionError(f"{Context()}::Could not connect to {self._target.netloc}\n{e}")
 
     @override
-    def fetch(self, search_filter: str | list[str]) -> list[CERTFRPage]:
+    def fetch(self, search_filter: "StrType") -> list["CERTFRPage"]:
         """
-        Search the CERTFR website using a filter (either a single string or a list of strings) and returns a list of CERTFRPage objects that match the search criteria.
+        Fetch the CERTFR website using a filter.
+
+        You can provide either a single string or a list of strings).
+        Returns a list of CERTFRPage objects that match the search criteria.
 
         Args:
             search_filter (str | list[str]): A single string or a list of strings used as filters for searching within CERTFR pages.
@@ -84,7 +90,7 @@ class CERTFRConnector(Connector):
         search_filter = list(set(search_filter))
 
         for ref in search_filter:
-            ColorPrint.blue(ref)
+            self.logger.info(f"{Context()}::Fetching {ref}")
 
             page = CERTFRPage(ref)
             page.connect()
@@ -100,7 +106,9 @@ class CERTFRConnector(Connector):
     @staticmethod
     def parse_feed(feed_url: str, date_str_filter: str | None = None) -> list[str]:
         """
-        Perform a GET request to the provided feed URL and parses its content using BeautifulSoup to extract items based on optional filtering by date string.
+        Parse the content of the provided feed URL.
+
+        Uses BeautifulSoup to extract items based on optional filtering by date string.
 
         Args:
             feed_url (str)              : The URL of the RSS feed to be parsed.
@@ -109,6 +117,9 @@ class CERTFRConnector(Connector):
         Returns:
             list[str]: A list of references extracted from the CERTFR feed page that match the date filter criteria if provided.
         """
+
+        context = Context()
+        logger = logging.getLogger(__name__)
 
         filtered_feed = []
 
@@ -138,17 +149,14 @@ class CERTFRConnector(Connector):
                                 filtered_feed.append(certfr_ref)
 
                     except ValueError:
-                        ColorPrint.red(
-                            "Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !"
+                        logger.error(
+                            f"{context}::Invalid date filter format. Please provide a date filter following the pattern YYYY-MM-DD !"
                         )
 
                 else:
                     filtered_feed.append(certfr_ref)
 
-        except Exception as e:
-            print(
-                e,
-                f"A parsing error occured for {feed_url}: {e}\nCheck if the page has the expected format.",
-            )
+        except CERTFRParsingError as e:
+            logger.error(f"{context}::A parsing error occured for {feed_url}: {e}")
 
         return filtered_feed

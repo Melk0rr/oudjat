@@ -1,8 +1,8 @@
 """
-A helper module to define S1 exceptions.
+A helper module to define endoflife.date exceptions.
 """
 
-class SentinelOneAPIConnectionError(ConnectionError):
+class EndOfLifeAPIConnectionError(ConnectionError):
     """
     A helper error class to handle request errors to the Cybereason API.
     """

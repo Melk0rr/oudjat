@@ -1,10 +1,13 @@
 """A module that provide credential utilities."""
 
 import getpass
+import logging
 
 import keyring
 from keyring.credentials import SimpleCredential
 from keyring.errors import KeyringError, PasswordDeleteError, PasswordSetError
+
+from oudjat.utils.context import Context
 
 
 class NoCredentialsError(ConnectionError):
@@ -23,11 +26,31 @@ class NoCredentialsError(ConnectionError):
         self.message: str = message
         super().__init__(self.message)
 
+
+class InvalidCredentialsError(ConnectionError):
+    """
+    A helper class to handle the absence of credentials.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of NoCredentialsError.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
+
+
 class CredentialUtils:
     """A class that helps with credentials."""
 
-    @staticmethod
-    def save_credentials(service: str, username: str, password: str) -> None:
+    logger: "logging.Logger" = logging.getLogger(__name__)
+
+    @classmethod
+    def save_credentials(cls, service: str, username: str, password: str) -> None:
         """
         Use the `keyring` library to securely store the provided credentials (username and password) for a specified service in an encrypted vault.
 
@@ -42,16 +65,19 @@ class CredentialUtils:
             keyring.errors.PasswordSetError: If there is an error while attempting to save the password.
         """
 
+        context = Context()
+
         try:
             keyring.set_password(service, username, password)
+            cls.logger.info(f"{context}::Saved credentials for {service}")
 
         except PasswordSetError as e:
             raise PasswordSetError(
-                f"{__class__.__name__}.save_credentials::Error while saving credentials for {service}:{username}\n{e}"
+                f"{context}::Error while saving credentials for {service}:{username}\n{e}"
             )
 
-    @staticmethod
-    def get_credentials(service: str) -> SimpleCredential:
+    @classmethod
+    def get_credentials(cls, service: str) -> "SimpleCredential":
         """
         Attempt to retrieve stored credentials from the `keyring` using the provided service name.
 
@@ -68,11 +94,14 @@ class CredentialUtils:
             keyring.errors.KeyringError: If there is an error while retrieving the credentials or if the keyring operation fails.
         """
 
+        context = Context()
+        cls.logger.info(f"{context}::Retrieving credentials for {service}")
+
         try:
             cred = keyring.get_credential(service, "")
 
             if cred is None:
-                print(f"\nNo stored credentials for {service}. Please enter your credentials:")
+                print(f"No stored credentials for {service}. Please enter your credentials:")
 
                 # Ask user's credentials
                 username = input("Username: ")
@@ -87,13 +116,13 @@ class CredentialUtils:
 
         except KeyringError as e:
             raise KeyringError(
-                f"{__class__.__name__}.get_credentials::An error occured while retreiving credentials for {service}\n{e}"
+                f"{context}::An error occured while retreiving credentials for {service}\n{e}"
             )
 
         return cred
 
-    @staticmethod
-    def del_credentials(service: str, username: str) -> None:
+    @classmethod
+    def del_credentials(cls, service: str, username: str) -> None:
         """
         Remove stored credentials from the `keyring` using both the service identifier and the specified username.
 
@@ -107,10 +136,13 @@ class CredentialUtils:
             keyring.errors.PasswordDeleteError: If there is an error while attempting to delete the password.
         """
 
+        context = Context()
+
         try:
             keyring.delete_password(service, username)
+            cls.logger.info(f"{context}::Deleted credentials for {service}@{username}")
 
         except PasswordDeleteError as e:
             raise PasswordDeleteError(
-                f"{__class__.__name__}.del_credentials::Error while deleting password for {service}:{username}\n{e}"
+                f"{context}::Error while deleting password for {service}@{username}\n{e}"
             )

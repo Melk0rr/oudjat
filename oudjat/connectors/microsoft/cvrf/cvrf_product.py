@@ -3,10 +3,13 @@
 import re
 from typing import override
 
-from .definitions import MS_PRODUCT_REGEX
+from oudjat.utils import Context
+
+from .definitions import CVRF_PRODUCT_REGEX
+from .exceptions import InvalidCVRFProductError
 
 
-class MSProduct:
+class CVRFProduct:
     """Class to manipulate MS product."""
 
     # ****************************************************************
@@ -14,7 +17,7 @@ class MSProduct:
 
     def __init__(self, pid: str, name: str, product_type: str) -> None:
         """
-        Create a new instance of the MSProduct.
+        Create a new instance of the CVRFProduct.
 
         Args:
             pid (str)         : The unique identifier of the product.
@@ -25,8 +28,8 @@ class MSProduct:
             ValueError: If the provided product ID does not match the MS_PRODUCT_REGEX pattern.
         """
 
-        if not re.match(MS_PRODUCT_REGEX, pid):
-            raise ValueError(f"{__class__.__name__}::Invalid MS product ID: {pid}")
+        if not re.match(CVRF_PRODUCT_REGEX, pid):
+            raise InvalidCVRFProductError(f"{Context()}::Invalid MS product ID: {pid}")
 
         self._pid: str = pid
         self._name: str = name

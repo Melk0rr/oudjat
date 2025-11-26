@@ -1,5 +1,6 @@
 """Main module of the LDAP package. Handles connection to an LDAP server and data retrieving operations."""
 
+import logging
 import socket
 import ssl
 from enum import IntEnum
@@ -9,10 +10,16 @@ import ldap3
 from ldap3.core.exceptions import LDAPSocketOpenError
 
 from oudjat.connectors.connector import Connector
-from oudjat.utils.color_print import ColorPrint
+from oudjat.utils import Context
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import StrType
 
+from .exceptions import (
+    InvalidLDAPEntryError,
+    LDAPConnectionError,
+    LDAPSchemaError,
+    LDAPUnreachableServerError,
+)
 from .ldap_filter import LDAPFilter, LDAPFilterStrFormat
 from .objects.ldap_entry import LDAPEntry
 from .objects.ldap_object_types import LDAPObjectType
@@ -89,10 +96,14 @@ class LDAPConnector(Connector):
 
         super().__init__(target=server, username=username, password=password)
 
+        self.logger = logging.getLogger(__name__)
         self._domain: str = ""
         self._default_search_base: str = ""
         self._ldap_server: ldap3.Server
         self._connection: ldap3.Connection | None = None
+
+        context = Context()
+        self.logger.debug(f"{context}::New LDAPConnector - {self._target}:{self._port}")
 
         self._LDAP_PYTHON_CLS: dict[str, "LDAPObjectOptions"] = {
             f"{LDAPObjectType.DEFAULT}": LDAPObjectOptions["LDAPObject"](
@@ -169,6 +180,8 @@ class LDAPConnector(Connector):
         self._use_tls = use_tls
         self._port = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
 
+        self.logger.debug(f"{Context()}::New TLS usage: {self._use_tls}({self._port})")
+
     @override
     def connect(self, version: "LDAPTLSVersion | None" = None) -> None:
         """
@@ -176,32 +189,42 @@ class LDAPConnector(Connector):
 
         Args:
             version (ssl._SSLMethod): SSL/TLS version
+
+        Raises:
+            NoCredentialsError        : No credentials were provided to connect to the server
+            LDAPSocketOpenError       : An error occured while bounding TLS socket
+            LDAPUnreachableServerError: The LDAP server is unreachable
+            LDAPConnectionError       : Wrong LDAP credentials were provided
+            LDAPSchemaError           : Failed to retrieve LDAP server schema
         """
+
+        context = Context()
+        self.logger.info(f"{context}::Connecting to {self._target}")
 
         if self._credentials is None:
             raise NoCredentialsError(
-                f"{__class__.__name__}.connect::Cannot connect to {self._target}, no credentials provided"
+                f"{context}::Cannot connect to {self._target}, no credentials provided"
             )
 
         if version is None:
+            self.logger.debug(
+                f"{context}::No TLS version specified, trying with {LDAPTLSVersion.TLSv1_2}"
+            )
+
             try:
                 self.connect(version=LDAPTLSVersion.TLSv1_2)
 
             except LDAPSocketOpenError as e:
                 if not self._use_tls:
-                    ColorPrint.yellow(
-                        f"{__class__.__name__}.connect::Error while trying to connect to LDAP: {e}"
-                    )
+                    self.logger.warning(f"{context}::Error while trying to connect to LDAP: {e}")
 
                 self.connect(version=LDAPTLSVersion.TLSv1)
 
             return
 
-        target_ip = socket.gethostbyname(str(self.target))
+        target_ip = socket.gethostbyname(str(self._target))
         if not target_ip:
-            raise Exception(
-                f"{__class__.__name__}.connect::The target {self.target} is unreachable"
-            )
+            raise LDAPUnreachableServerError(f"{context}::The target {self.target} is unreachable")
 
         TLSOption = TypedDict("TLSOption", {"use_ssl": bool, "tls": ldap3.Tls | None})
         tls_option: TLSOption = {"use_ssl": self._use_tls, "tls": None}
@@ -221,12 +244,15 @@ class LDAPConnector(Connector):
         )
 
         if not ldap_connection.bound:
+            self.logger.debug(f"{context}::Bounding connection")
             bind_result = ldap_connection.bind()
 
             if not bind_result:
                 result = ldap_connection.result
 
                 if result["result"] == "RESULT_STRONGER_AUTH_REQUIRED" and self._use_tls:
+                    self.logger.debug(f"{context}::Stronger LDAP authentication is required.")
+
                     self.set_tls_usage(use_tls=True)
                     return self.connect()
 
@@ -234,12 +260,12 @@ class LDAPConnector(Connector):
                     result["description"] == "invalidCredentials"
                     and result["message"].split(":")[0] == "80090346"
                 ):
-                    raise Exception(
-                        f"{__class__.__name__}.connect::LDAP channel binding required. Use -scheme ldaps -ldap-channel-binding"
+                    raise LDAPConnectionError(
+                        f"{context}::LDAP channel binding required. Use -scheme ldaps -ldap-channel-binding"
                     )
 
-                raise Exception(
-                    f"{__class__.__name__}.connect::Failed LDAP authentication ({result['description']}) {result['message']}]"
+                raise LDAPConnectionError(
+                    f"{context}::Failed LDAP authentication ({result['description']}) {result['message']}]"
                 )
 
         if ldap_server.schema is None:
@@ -247,20 +273,24 @@ class LDAPConnector(Connector):
 
             if ldap_connection.result["result"] != 0:
                 if ldap_connection.result["message"].split(":")[0] == "000004DC":
-                    raise Exception(
-                        f"{__class__.__name__}.connect::Failed to bind to LDAP. Most likely due to an invalid username"
+                    raise LDAPConnectionError(
+                        f"{context}::Failed to bind to LDAP. Most likely due to an invalid username"
                     )
 
             if ldap_server.schema is None:
-                raise Exception(f"{__class__.__name__}.connect::Failed to get LDAP schema")
+                raise LDAPSchemaError(f"{context}::Failed to get LDAP schema")
 
-        ColorPrint.green(f"Bound to {ldap_server}")
+        self.logger.info(f"{context}::Bound to {ldap_server}")
 
         self._ldap_server = ldap_server
         self._connection = ldap_connection
 
         self._default_search_base = self._ldap_server.info.other["defaultNamingContext"][0]
         self._domain = self._ldap_server.info.other["ldapServiceName"][0].split("@")[-1]
+
+        self.logger.debug(
+            f"{context}::Default search base for {self._domain} is {self._default_search_base}"
+        )
 
     @override
     def fetch(
@@ -283,11 +313,15 @@ class LDAPConnector(Connector):
 
         Returns:
             list[LDAPEntry]: list of ldap entries
+
+        Raises:
+            LDAPConnectionError: No connection was previously initiated
         """
 
+        context = Context()
         if self.connection is None:
-            raise ConnectionError(
-                f"{__class__.__name__}.search::You must initiate connection to {self.target} before running search !"
+            raise LDAPConnectionError(
+                f"{context}::You must initiate connection to {self.target} before running search !"
             )
 
         if payload is None:
@@ -307,27 +341,35 @@ class LDAPConnector(Connector):
 
             formated_filter = formated_filter & search_filter
 
-        results = self.connection.extend.standard.paged_search(
-            search_filter=formated_filter,
-            search_base=(search_base or self.default_search_base),
-            attributes=(attributes or search_type.attributes),
-            **payload,
-        )
+        payload["search_filter"] = formated_filter
+        payload["search_base"] = search_base or self.default_search_base
+        payload["attributes"] = attributes or search_type.attributes
+
+        self.logger.debug(f"{context}::{search_type} > {payload}")
+
+        # Actual request
+        results = self.connection.extend.standard.paged_search(**payload)
+
+        self.logger.debug(f"{context}::{search_type} > {results}")
 
         def ldap_entry_from_dict(entry: dict[str, Any]) -> "LDAPEntry":
             if entry.get("attributes", None) is None:
-                raise ValueError(
-                    f"{__class__.__name__}.ldap_entry_from_dict::Invalid entry provided"
+                raise InvalidLDAPEntryError(
+                    f"{context}::Invalid entry provided. No attribute found"
                 )
 
             return LDAPEntry(**entry)
 
-        return list(
+        res = list(
             map(
                 ldap_entry_from_dict,
-                filter(LDAPConnector.check_entry_type, results),
+                filter(LDAPConnector._check_search_res_entry, results),
             )
         )
+
+        self.logger.debug(f"{context}::Retrieved {len(res)} entries")
+
+        return res
 
     def objects(
         self,
@@ -398,7 +440,6 @@ class LDAPConnector(Connector):
 
             for link in name:
                 name_filter.add_node(LDAPFilter(f"(name={link})"))
-
 
         else:
             name_filter = LDAPFilter(f"(name={name})")
@@ -644,7 +685,7 @@ class LDAPConnector(Connector):
     # Static methods
 
     @staticmethod
-    def check_entry_type(entry: dict[str, Any]) -> bool:
+    def _check_search_res_entry(entry: dict[str, Any]) -> bool:
         """
         Check if the provided entry is a searchResEntry.
 
@@ -670,6 +711,6 @@ class LDAPConnector(Connector):
         """
 
         if entry.get("attributes", None) is None:
-            raise ValueError(f"{__class__.__name__}.ldap_entry_from_dict::Invalid entry provided")
+            raise InvalidLDAPEntryError(f"{Context()}::Invalid entry provided")
 
         return LDAPEntry(**entry)

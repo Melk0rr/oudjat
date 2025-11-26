@@ -3,15 +3,16 @@
 import re
 from typing import Any
 
-from oudjat.utils import DataType
+from oudjat.control.vulnerability import CVE_REGEX, InvalidCVERefError
+from oudjat.utils import Context, DataType
 from oudjat.utils.mappers import any_to_dict
 
-from .definitions import CVE_REGEX, KB_NUM_REGEX
-from .ms_product import MSProduct
-from .ms_remed import MSRemed
+from .cvrf_product import CVRFProduct
+from .cvrf_remed import CVRFRemed
+from .definitions import KB_NUM_REGEX
 
 
-class MSVuln:
+class CVRFVuln:
     """Class to manipulate CVE data related to MS products in a CVRF document."""
 
     # ****************************************************************
@@ -29,11 +30,11 @@ class MSVuln:
         """
 
         if not re.match(CVE_REGEX, cve):
-            raise ValueError(f"{__class__.__name__}::Invalid CVE provided: {cve}")
+            raise InvalidCVERefError(f"{Context()}::Invalid CVE provided: {cve}")
 
         self._cve: str = cve
-        self._kbs: dict[int, "MSRemed"] = {}
-        self._products: dict[str, "MSProduct"] = {}
+        self._kbs: dict[int, "CVRFRemed"] = {}
+        self._products: dict[str, "CVRFProduct"] = {}
 
     # ****************************************************************
     # Methods
@@ -50,7 +51,7 @@ class MSVuln:
         return self._cve
 
     @property
-    def remediations(self) -> dict[int, "MSRemed"]:
+    def remediations(self) -> dict[int, "CVRFRemed"]:
         """
         Return the remediations for the current vuln.
 
@@ -61,17 +62,17 @@ class MSVuln:
         return self._kbs
 
     @property
-    def impacted_products(self) -> dict[str, "MSProduct"]:
+    def impacted_products(self) -> dict[str, "CVRFProduct"]:
         """
         Return the products impacted by the current vuln.
 
         Returns:
-            dict[str, MSProduct]: A dictionary of MSProduct instances
+            dict[str, CVRFProduct]: A dictionary of CVRFProduct instances
         """
 
         return self._products
 
-    def add_kb(self, kb_num: int, kb: "MSRemed") -> None:
+    def add_kb(self, kb_num: int, kb: "CVRFRemed") -> None:
         """
         Add a KB to vuln KB list.
 

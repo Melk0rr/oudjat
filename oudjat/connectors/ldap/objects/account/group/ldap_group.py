@@ -1,11 +1,13 @@
 """Main module of the LDAP group package that implement LDAP group object manipulations tools."""
 
+import logging
 from typing import TYPE_CHECKING, Any, override
 
 from ldap3.utils.conv import escape_filter_chars
 
 from oudjat.connectors.ldap.objects.ldap_object_types import LDAPObjectType
 from oudjat.core.group import Group
+from oudjat.utils.context import Context
 
 from ...ldap_object import LDAPObject
 from .ldap_group_types import LDAPGroupType
@@ -37,6 +39,7 @@ class LDAPGroup(LDAPObject):
         """
 
         super().__init__(ldap_entry, capabilities)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         self.group: "Group[LDAPObject]" = Group[LDAPObject](
             group_id=self.entry.get("objectGUID"),
@@ -110,14 +113,16 @@ class LDAPGroup(LDAPObject):
         Args:
             ldap_get_member_func (Callable[..., list[LDAPObject]]): LDAP
             recursive (bool)                                      : Either to retrieve the members recursively or not
-
-        Returns:
-            list[LDAPObject]: a list of the group members
         """
 
+        context = Context()
+        self.logger.info(f"{context}::Fetching members of {self.dn}{recursive and ' recursively'}")
+
         for ref in self.member_refs():
+            self.logger.info(f"{context}::Fetching member data for {ref}")
+
             # INFO: Search for the ref in LDAP server
-            # TODO: Must implement an LDAPFilter class to handle potential escape characters
+            # TODO: Use LDAPFilter ?
             escaped_ref = escape_filter_chars(ref)
             ref_search: list["LDAPEntry"] = self.capabilities.ldap_search(
                 search_filter=f"(distinguishedName={escaped_ref})"
@@ -130,11 +135,16 @@ class LDAPGroup(LDAPObject):
 
                 new_member = LDAPObjectCls(search_entry, self.capabilities)
                 if isinstance(new_member, LDAPGroup) and recursive:
+                    self.logger.debug(f"{context}::Fetching members of sub group {ref}")
                     new_member.fetch_members(recursive=recursive)
 
+                self.logger.debug(f"{context}::Adding new member {ref}")
                 self.add_member(new_member)
 
-    def sub_groups(self, recursive: bool = False) -> list["LDAPGroup"]:
+            else:
+                self.logger.warning(f"{context}::Could not find data for {ref}")
+
+    def sub_groups(self, recursive: bool = False) -> dict[str, "LDAPGroup"]:
         """
         Return child group of the current group.
 
@@ -143,23 +153,27 @@ class LDAPGroup(LDAPObject):
             recursive (bool)              : Either to retrieve the sub groups recursively or not
 
         Returns:
-            list[LDAPGroup]: a list of sub groups
+            dict[str, LDAPGroup]: A dictionary of sub groups
         """
 
         if len(self.members.keys()) == 0:
             self.fetch_members(recursive=recursive)
 
-        sub_groups: list["LDAPGroup"] = []
+        self.logger.info(
+            f"{Context()}::Fetching sub groups of {self.dn}{recursive and ' recursively'}"
+        )
+
+        sub_groups: dict[str, "LDAPGroup"] = {}
         for member in self.members.values():
             if isinstance(member, LDAPGroup):
-                sub_groups.append(member)
+                sub_groups[f"{member.id}"] = member
 
                 if recursive:
-                    sub_groups.extend(member.sub_groups(recursive=recursive))
+                    sub_groups.update(member.sub_groups(recursive=recursive))
 
         return sub_groups
 
-    def non_group_members(self, recursive: bool = False) -> list["LDAPObject"]:
+    def non_group_members(self, recursive: bool = False) -> dict[str, "LDAPObject"]:
         """
         Return non group members of the current group.
 
@@ -168,24 +182,28 @@ class LDAPGroup(LDAPObject):
             recursive (bool)              : either to retrieve the members recursively or not
 
         Returns:
-            list[LDAPObject]: a list of the members with sub group excluded
+            dict[str, LDAPObject]: A dictionary of the members with sub group excluded
         """
 
         if len(self.members.keys()) == 0:
             self.fetch_members(recursive=recursive)
 
-        members = []
+        self.logger.info(
+            f"{Context()}::Fetching non group members of {self.dn}{recursive and ' recursively'}"
+        )
+
+        members = {}
         for member in self.members.values():
             if not isinstance(member, LDAPGroup):
-                members.append(member)
+                members[f"{member.id}"] = member
 
             else:
                 if recursive:
-                    members.extend(member.non_group_members(recursive=recursive))
+                    members.update(member.non_group_members(recursive=recursive))
 
         return members
 
-    def members_flat(self) -> list["LDAPObject"]:
+    def members_flat(self) -> dict[str, "LDAPObject"]:
         """
         Return a flat list of the current group members.
 
@@ -193,20 +211,21 @@ class LDAPGroup(LDAPObject):
             ldap_connector (LDAPConnector): ldap connector instance to use for the request
 
         Returns:
-            list[LDAPObject]: a list of all the members found recursively but in a flattened list
-
+            dict[str, LDAPObject]: A dictionary of all the members found recursively but in a flattened dictionary
         """
 
         if len(self.members.keys()) == 0:
             self.fetch_members(recursive=True)
 
-        members = []
+        self.logger.info(f"{Context()}::Flattening members of {self.dn}")
+
+        members = {}
         for member in self.members.values():
             if isinstance(member, LDAPGroup):
-                members.extend(member.members_flat())
+                members.update(member.members_flat())
 
             else:
-                members.append(member)
+                members[f"{member.id}"] = member
 
         return members
 
@@ -223,8 +242,8 @@ class LDAPGroup(LDAPObject):
             bool: True if the group contains the given object. False otherwise
         """
 
-        member_ref_list = self.members_flat() if extended else self.members.values()
-        return ldap_object.id in [m.id for m in member_ref_list]
+        member_ref_list = self.members_flat().keys() if extended else self.members.keys()
+        return ldap_object.id in member_ref_list
 
     @override
     def to_dict(self) -> dict[str, Any]:
@@ -239,6 +258,5 @@ class LDAPGroup(LDAPObject):
             **super().to_dict(),
             **self.group.to_dict(),
             "groupType": self.group_type.name,
-            "memberNames": self.group.member_names,
+            "members": {mid: m.to_dict() for mid, m in self.members.items()},
         }
-

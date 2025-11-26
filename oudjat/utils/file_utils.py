@@ -2,6 +2,7 @@
 
 import csv
 import json
+import logging
 import os
 import re
 from enum import Enum
@@ -9,28 +10,23 @@ from typing import Any, Callable, NamedTuple
 
 import commentjson
 
-from .color_print import ColorPrint
+from oudjat.utils.context import Context
 
 
 class FileUtils:
     """A class that provides file operations."""
 
-    @staticmethod
-    def check_path(path: str) -> bool:
-        """
-        Check if the provided path is valid.
+    # ****************************************************************
+    # Attributes & Constructors
 
-        Args:
-            path (str): The file path to be checked.
+    logger: "logging.Logger" = logging.getLogger(__name__)
 
-        Raises:
-            FileNotFoundError: If the provided path does not point to a valid file.
-        """
+    # ****************************************************************
+    # Class methods
 
-        return os.path.isfile(path)
-
-    @staticmethod
-    def import_raw(file_path: str, callback: Callable[..., Any] | None = None) -> Any:
+    # NOTE: RAW
+    @classmethod
+    def import_raw(cls, file_path: str, callback: Callable[..., Any] | None = None) -> Any:
         """
         Import the content of a file as a simple raw string.
 
@@ -42,18 +38,56 @@ class FileUtils:
             Any: default is a string, can be any type based on callback changes
         """
 
-        fd = open(file_path, mode="r")
-        file = fd.read()
-        fd.close()
+        context = Context()
 
-        if callback:
-           file = callback(file)
+        try:
+            full_path = os.path.join(os.getcwd(), file_path)
+            cls.logger.info(f"{context}::Importing raw data from {full_path}")
+
+            fd = open(file_path, mode="r")
+            file = fd.read()
+            fd.close()
+
+            if callback:
+                file = callback(file)
+
+            cls.logger.info(f"{context}::Imported raw data from {full_path}")
+            cls.logger.debug(f"{context}::{file}")
+
+        except Exception as e:
+            raise e
 
         return file
 
-    # INFO: JSON file functions
-    @staticmethod
-    def import_json(file_path: str, callback: Callable[..., Any] | None = None) -> list[Any]:
+    @classmethod
+    def export_raw(cls, data: str, file_path: str, append: bool = False) -> None:
+        """
+        Export the content of a file as a simple raw string.
+
+        Args:
+            data (str)     : The string to export
+            file_path (str): The path where the file will be saved.
+            append (bool)  : Whether to export in append mode or not
+        """
+
+        context = Context()
+
+        full_path = os.path.join(os.getcwd(), file_path)
+        cls.logger.info(f"{context}::Exporting raw data in {full_path}")
+
+        try:
+            full_path = os.path.join(os.getcwd(), file_path)
+            with open(full_path, "a" if append else "w", encoding="utf-8") as file:
+                _ = file.write(data)
+
+        except Exception as e:
+            raise e
+
+        cls.logger.info(f"{context}::Successfully exported raw data to {file_path}")
+
+    # NOTE: JSON
+    @classmethod
+    def import_json(cls, file_path: str, callback: Callable[..., Any] | None = None) -> list[Any]:
         """
         Import json data from a specified file.
 
@@ -65,16 +99,21 @@ class FileUtils:
             dict or list: The content of the imported JSON file.
         """
 
+        context = Context()
+
         json_data = None
         try:
             full_path = os.path.join(os.getcwd(), file_path)
+            cls.logger.info(f"{context}::Importing JSON data from {full_path}")
+
             with open(full_path, "r", encoding="utf-8") as json_file:
                 json_data = commentjson.load(json_file)
 
             if callback is not None:
                 json_data = callback(json_data)
 
-            ColorPrint.green(f"Successfully imported JSON data from {full_path}")
+            cls.logger.info(f"{context}::Successfully imported JSON data from {full_path}")
+            cls.logger.debug(f"{context}::{json_data}")
 
         except Exception as e:
             raise e
@@ -84,8 +123,8 @@ class FileUtils:
 
         return json_data
 
-    @staticmethod
-    def export_json(data: list[Any], file_path: str) -> None:
+    @classmethod
+    def export_json(cls, data: list[Any], file_path: str) -> None:
         """
         Export data to a JSON file.
 
@@ -94,53 +133,28 @@ class FileUtils:
             file_path (str)    : The path where the JSON file will be saved.
         """
 
+        context = Context()
+
         if len(data) == 0:
             print("No data to export !")
             return
 
         try:
             full_path = os.path.join(os.getcwd(), file_path)
+            cls.logger.info(f"{context}::Exporting JSON data to {full_path}")
 
             with open(full_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
 
-            ColorPrint.green(f"Successfully exported JSON data to {full_path}")
+            cls.logger.info(f"{context}::Successfully exported JSON data to {full_path}")
 
         except Exception as e:
             raise e
 
-    # INFO: CSV file functions
-    @staticmethod
-    def guess_csv_delimiter(csv_first_line: str) -> str:
-        """
-        Guess the CSV delimiter based on the provided first line.
-
-        Helper function that tries to determine the delimiter used in a CSV file. It does so by parsing special characters in the header line and returning the character with the highest count
-
-        Args:
-            csv_first_line (str): the CSV header line (in theory). The user can provide any other line if he whishes
-
-        Returns:
-            str: the delimiter used (?) in the CSV file based on the provided line. Or ',' if no delimiter are found
-        """
-        delimiter = ","
-        delimiter_list: list[str] = re.findall(r"\W", csv_first_line)
-
-        if len(delimiter_list) > 0:
-            delimiter_counts: dict[str, int] = {}
-            for c in delimiter_list:
-                if c not in delimiter_counts:
-                    delimiter_counts[c] = 1
-
-                delimiter_counts[c] += 1
-
-            delimiter: str = max(delimiter_counts, key=lambda d: delimiter_counts[d])
-
-        return delimiter
-
-    @staticmethod
+    # INFO: CSV
+    @classmethod
     def import_csv(
-        file_path: str, callback: Callable | None = None, delimiter: str | None = None
+        cls, file_path: str, callback: Callable | None = None, delimiter: str | None = None
     ) -> list[Any]:
         """
         Import CSV content into a list of dictionaries.
@@ -154,6 +168,9 @@ class FileUtils:
             list of dicts: The content of the CSV file parsed into a list of dictionaries.
         """
 
+        context = Context()
+        cls.logger.info(f"{context}::Importing CSV file {file_path}")
+
         data: list[Any] = []
         try:
             full_path = os.path.join(os.getcwd(), file_path)
@@ -166,7 +183,9 @@ class FileUtils:
                     if delimiter is None:
                         delimiter = FileUtils.guess_csv_delimiter(first_line)
 
-                    print(f"\nNo delimiter specified, guessed '{delimiter}' as a delimiter")
+                    cls.logger.warning(
+                        f"{context}::No delimiter specified, guessed '{delimiter}' as a delimiter"
+                    )
 
                 reader = csv.DictReader(f, delimiter=delimiter, skipinitialspace=True)
 
@@ -176,16 +195,17 @@ class FileUtils:
 
                 data = raw_data
 
-            ColorPrint.green(f"Successfully imported CSV data from {file_path}")
+            cls.logger.info(f"{context}::Successfully imported data from {file_path}")
+            cls.logger.debug(f"{context}::{data}")
 
         except Exception as e:
             raise e
 
         return data
 
-    @staticmethod
+    @classmethod
     def export_csv(
-        data: list[Any], file_path: str, delimiter: str = ",", append: bool = False
+        cls, data: list[Any], file_path: str, delimiter: str = ",", append: bool = False
     ) -> None:
         """
         Export data into a CSV file.
@@ -196,6 +216,10 @@ class FileUtils:
             delimiter (str | None): The character used as a delimiter in the CSV file. Defaults to ",".
             append (bool | None)  : Whether to append to an existing file or overwrite it.
         """
+
+        context = Context()
+        cls.logger.info(f"{context}::Exporting CSV data to {file_path}")
+        cls.logger.debug(f"{context}::{len(data)} elements to export")
 
         if len(data) == 0:
             print("No data to export !")
@@ -214,15 +238,18 @@ class FileUtils:
 
                 writer.writerows(data)
 
-            ColorPrint.green(f"Successfully exported CSV data to {file_path}")
+            cls.logger.info(f"{context}Successfully exported CSV data to {file_path}")
 
         except Exception as e:
             raise e
 
-    # INFO: TXT file functions
-    @staticmethod
+    # INFO: TXT
+    @classmethod
     def import_txt(
-        file_path: str, delete_duplicates: bool = False, callback: Callable[..., Any] | None = None
+        cls,
+        file_path: str,
+        delete_duplicates: bool = False,
+        callback: Callable[..., Any] | None = None,
     ) -> list[Any]:
         """
         Import a text file and optionally remove duplicates.
@@ -236,8 +263,10 @@ class FileUtils:
             list: The content of the text file as a list of strings.
         """
 
-        data = None
+        context = Context()
+        cls.logger.info(f"{context}::Importing TXT file {file_path}")
 
+        data = None
         try:
             full_path = os.path.join(os.getcwd(), file_path)
             with open(full_path, encoding="utf-8") as f:
@@ -249,15 +278,16 @@ class FileUtils:
             if callback is not None:
                 data = callback(data)
 
-            ColorPrint.green(f"Successfully imported TXT data from {file_path}")
+            cls.logger.info(f"{context}::Successfully imported TXT data from {file_path}")
+            cls.logger.debug(f"{context}::{data}")
 
         except Exception as e:
             raise e
 
         return data
 
-    @staticmethod
-    def export_txt(data: list[Any], file_path: str, append: bool = False) -> None:
+    @classmethod
+    def export_txt(cls, data: list[Any], file_path: str, append: bool = False) -> None:
         """
         Export data into a text file.
 
@@ -279,10 +309,57 @@ class FileUtils:
                 for line in data:
                     _ = f.write(f"{line}" + "\n")
 
-            ColorPrint.green(f"Successfully exported TXT data to {file_path}")
+            cls.logger.info(f"{Context()}::Successfully exported TXT data to {file_path}")
 
         except Exception as e:
             raise e
+
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def check_path(path: str) -> bool:
+        """
+        Check if the provided path is valid.
+
+        Args:
+            path (str): The file path to be checked.
+
+        Raises:
+            FileNotFoundError: If the provided path does not point to a valid file.
+        """
+
+        return os.path.isfile(path)
+
+    @staticmethod
+    def guess_csv_delimiter(csv_first_line: str) -> str:
+        """
+        Guess the CSV delimiter based on the provided first line.
+
+        Helper function that tries to determine the delimiter used in a CSV file.
+        It does so by parsing special characters in the header line and returning the character with the highest count
+
+        Args:
+            csv_first_line (str): the CSV header line (in theory). The user can provide any other line if he whishes
+
+        Returns:
+            str: the delimiter used (?) in the CSV file based on the provided line. Or ',' if no delimiter are found
+        """
+
+        delimiter = ","
+        delimiter_list: list[str] = re.findall(r"\W", csv_first_line)
+
+        if len(delimiter_list) > 0:
+            delimiter_counts: dict[str, int] = {}
+            for c in delimiter_list:
+                if c not in delimiter_counts:
+                    delimiter_counts[c] = 1
+
+                delimiter_counts[c] += 1
+
+            delimiter: str = max(delimiter_counts, key=lambda d: delimiter_counts[d])
+
+        return delimiter
 
 
 class FileTypeProps(NamedTuple):
@@ -304,6 +381,7 @@ class FileType(Enum):
     CSV = FileTypeProps(FileUtils.import_csv, FileUtils.export_csv)
     JSON = FileTypeProps(FileUtils.import_json, FileUtils.export_json)
     TXT = FileTypeProps(FileUtils.import_txt, FileUtils.export_txt)
+    RAW = FileTypeProps(FileUtils.import_raw, FileUtils.export_raw)
 
     @property
     def f_import(self) -> Callable[..., list[Any]]:

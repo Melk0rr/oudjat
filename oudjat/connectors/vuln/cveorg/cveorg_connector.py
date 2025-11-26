@@ -2,8 +2,9 @@
 
 import re
 from typing import Any, override
+from urllib.parse import ParseResult, urlparse
 
-from oudjat.utils import DataType
+from oudjat.utils import Context, DataType
 from oudjat.utils.types import StrType
 
 from ..cve_connector import CVEConnector
@@ -16,8 +17,8 @@ class CVEorgConnector(CVEConnector):
     # ****************************************************************
     # Attributes & Constructors
 
-    URL: str = "https://www.cve.org/"
-    API_URL: str = "https://cveawg.mitre.org/api/cve/"
+    URL: "ParseResult" = urlparse("https://www.cve.org/")
+    API_URL: "ParseResult" = urlparse("https://cveawg.mitre.org/api/cve/")
 
     # ****************************************************************
     # Methods
@@ -48,6 +49,7 @@ class CVEorgConnector(CVEConnector):
             DataType: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
         """
 
+        context = Context()
         if not isinstance(cves, list):
             cves = [cves]
 
@@ -63,10 +65,13 @@ class CVEorgConnector(CVEConnector):
                 continue
 
             cve_target = CVEorgConnector.cve_api_url(cve)
+
+            self.logger.debug(f"{context}::{cve_target} > {payload}")
             self.connect(cve_target, **payload)
 
             vuln = self._connection
             if vuln is not None:
+                self.logger.debug(f"{context}::{cve_target} > {vuln}")
                 res.append(self.unify_cve_data(vuln) if not raw else vuln)
 
         return res
@@ -89,7 +94,7 @@ class CVEorgConnector(CVEConnector):
 
         if cve_id is None or published_date is None:
             raise ValueError(
-                f"{__class__.__name__}.unify_cve_data::Invalid CVE provided {cve} missing mandatory informations"
+                f"{Context()}::Invalid CVE provided {cve} missing mandatory informations"
             )
 
         containers = cve.get("containers", {}).get("cna", {})
@@ -140,7 +145,7 @@ class CVEorgConnector(CVEConnector):
             str: Nist vuln detail URL based on the provided CVE
         """
 
-        return f"{CVEorgConnector.URL}CVERecord?id={cve}"
+        return f"{CVEorgConnector.URL.geturl()}CVERecord?id={cve}"
 
     @staticmethod
     @override
@@ -155,4 +160,4 @@ class CVEorgConnector(CVEConnector):
             str: Nist vuln detail URL based on the provided CVE
         """
 
-        return f"{CVEorgConnector.API_URL}{cve}"
+        return f"{CVEorgConnector.API_URL.geturl()}{cve}"

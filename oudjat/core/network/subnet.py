@@ -2,6 +2,7 @@
 
 from typing import Any, override
 
+from oudjat.utils import Context
 from oudjat.utils.operators.logical_operators import LogicalOperation
 
 from .ip import IP
@@ -34,6 +35,8 @@ class Subnet:
             hosts (list[IPv4] | None) : An optional list of IP addresses or strings representing host IPs that are part of this subnet. Each element can be an IPv4 object or a string representation of an IP address.
         """
 
+        context = Context()
+
         self._mask: "NetMask"
 
         # NOTE: Try to extract mask if provided as CIDR notation along with the address as a string
@@ -47,9 +50,7 @@ class Subnet:
             address = IP(address)
 
         if mask is None:
-            raise ValueError(
-                f"{__class__.__name__}.__init__::Provided net address has no mask set: {address.value}"
-            )
+            raise ValueError(f"{context}::Provided net address has no mask set: {address.value}")
 
         self._mask = mask
 

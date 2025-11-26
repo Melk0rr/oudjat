@@ -1,7 +1,7 @@
 """A package dedicated to extracting KB data from Microsoft CVRF documents."""
 
-from .ms_cvrf_connector import MSCVRFConnector
+from .cvrf_connector import CVRFConnector
 
-__all__ = ["MSCVRFConnector"]
+__all__ = ["CVRFConnector"]
 
 # TODO: Use assets for consistency

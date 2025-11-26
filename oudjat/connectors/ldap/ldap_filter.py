@@ -5,7 +5,10 @@ A module that facilitates the handling of LDAP filters.
 from enum import Enum
 from typing import TypeAlias, override
 
+from oudjat.utils import Context
 from oudjat.utils.types import StrType
+
+from .exceptions import InvalidLDAPFilterCmpOperator, InvalidLDAPFilterString
 
 
 class LDAPFilterOperator(Enum):
@@ -147,11 +150,12 @@ class LDAPFilterParser:
             tuple[str, str, str] | list[tuple[str, tuple[str, str, str]]]: Parsed content
         """
 
+        context = Context()
         self._skip_wspace()
 
         if not self._filter.startswith("(") and self._filter.endswith(")"):
-            raise ValueError(
-                f"{__class__.__name__}._parse::Invalid LDAP filter string. Must start with '(' and end with ')'"
+            raise InvalidLDAPFilterString(
+                f"{context}::Invalid LDAP filter string. Must start with '(' and end with ')'"
             )
 
         self._consume("(")
@@ -160,7 +164,7 @@ class LDAPFilterParser:
         self._skip_wspace()
 
         if self._position != len(self._filter):
-            raise ValueError(f"{__class__.__name__}.parse::Unexpected trailing characters")
+            raise ValueError(f"{context}::Unexpected trailing characters")
 
         return res
 
@@ -212,10 +216,11 @@ class LDAPFilterParser:
         for cmp_ope in LDAPFilterComparisonOperator:
             if self._peek() == cmp_ope.value:
                 self._position += len(cmp_ope.value)
+
                 return cmp_ope.value
 
-        raise ValueError(
-            f"{__class__.__name__}._parse_cmp_operator::Invalid comparison operator found at {self._position}"
+        raise InvalidLDAPFilterCmpOperator(
+            f"{Context()}::Invalid comparison operator found at {self._position}"
         )
 
     def _peek(self) -> str | None:
@@ -241,7 +246,7 @@ class LDAPFilterParser:
 
         else:
             raise ValueError(
-                f"{__class__.__name__}._consume::Expected {ch} at position {self._position}, but found {self._peek()}"
+                f"{Context()}::Expected {ch} at position {self._position}, but found {self._peek()}"
             )
 
     def _parse_until(self, chars: list[str]) -> str:
@@ -456,7 +461,9 @@ class LDAPFilter:
 
     @staticmethod
     def filter_from_values(
-        filter_fmt: "LDAPFilterStrFormat | str", filter_values: "StrType", operator: "LDAPFilterOperator" = LDAPFilterOperator.OR
+        filter_fmt: "LDAPFilterStrFormat | str",
+        filter_values: "StrType",
+        operator: "LDAPFilterOperator" = LDAPFilterOperator.OR,
     ) -> "LDAPFilter":
         """
         Return an LDAPFilter based on the provided format and values.
@@ -480,4 +487,3 @@ class LDAPFilter:
             return filter_fmt(value_to_fmt)
 
         return LDAPFilter(f"({operator.value}{''.join(list(map(fmt_filter, filter_values)))})")
-

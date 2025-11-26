@@ -5,7 +5,7 @@ from typing import Any
 
 from keyring.credentials import SimpleCredential
 
-from oudjat.utils import CredentialUtils
+from oudjat.utils import Context, CredentialUtils
 
 
 class Connector(ABC):
@@ -33,7 +33,7 @@ class Connector(ABC):
         self._target: Any = target
 
         # Retrieve credentials for the service
-        self._credentials: SimpleCredential | None = None
+        self._credentials: "SimpleCredential | None" = None
         if username and password:
             self._credentials = SimpleCredential(username, password)
 
@@ -96,7 +96,7 @@ class Connector(ABC):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.connect::Method must be implemented by the overloading class"
+            f"{Context()}::Method must be implemented by the overloading class"
         )
 
     @abstractmethod
@@ -117,5 +117,5 @@ class Connector(ABC):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.search::Method must be implemented by the overloading class"
+            f"{Context()}::Method must be implemented by the overloading class"
         )

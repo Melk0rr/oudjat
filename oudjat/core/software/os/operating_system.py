@@ -4,6 +4,7 @@ import re
 from typing import Any, override
 
 from oudjat.core.computer.computer_type import ComputerType
+from oudjat.utils import Context
 
 from ..software import Software, SoftwareType
 from ..software_release import SoftwareRelease
@@ -27,7 +28,7 @@ class OSRelease(SoftwareRelease):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.get_name()::Method must be implemented by the overloading class"
+            f"{Context()}.get_name()::Method must be implemented by the overloading class"
         )
 
     @property
@@ -133,7 +134,7 @@ class OperatingSystem(Software[OSRelease]):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.gen_releases::Method must be implemented by the overloading class"
+            f"{Context()}::Method must be implemented by the overloading class"
         )
 
     @override
@@ -179,5 +180,5 @@ class OperatingSystem(Software[OSRelease]):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.find_version_in_str({search_str})::Method must be implemented by the overloading class"
+            f"{Context()}::Method must be implemented by the overloading class > {search_str}"
         )

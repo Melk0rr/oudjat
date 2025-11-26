@@ -1,5 +1,6 @@
 """A module handling Tenable.sc API connection."""
 
+import logging
 import re
 from enum import Enum
 from typing import Any, Callable, TypeAlias, override
@@ -11,7 +12,7 @@ from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
 from oudjat.control.vulnerability.severity import Severity
 from oudjat.utils import (
-    ColorPrint,
+    Context,
     DataType,
     DatumDataType,
     FilterTupleExtType,
@@ -19,6 +20,7 @@ from oudjat.utils import (
     UtilsList,
 )
 
+from .exceptions import TenableSCConnectionError
 from .tsc_asset_list_types import TSCAssetListType
 from .tsc_endpoints import TSCEndpoint
 from .tsc_vuln_tools import TSCVulnTool
@@ -58,6 +60,7 @@ class TenableSCConnector(Connector):
             port (int)        : Port number
         """
 
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
         scheme = "http"
         if port == 443:
             scheme += "s"
@@ -110,9 +113,12 @@ class TenableSCConnector(Connector):
             ConnectionError: If anything goes wrong while connecting to the target
         """
 
+        context = Context()
+        self.logger.info(f"{context}::Connecting to {self._target.netloc}")
+
         if self._credentials is None:
             raise NoCredentialsError(
-                f"{__class__.__name__}.connect::No credentials provided to connect to {self._target.netloc}"
+                f"{context}::No credentials provided to connect to {self._target.netloc}"
             )
 
         try:
@@ -122,18 +128,20 @@ class TenableSCConnector(Connector):
                 secret_key=self._credentials.password,
             )
 
-            ColorPrint.green(f"Connected to {self._target.netloc}")
+            self.logger.info(f"{context}::Connected to {self._target.netloc}")
             self._repos = self._connection.repositories.list()
 
-        except ConnectionError as e:
-            raise ConnectionError(
-                f"{__class__.__name__}.connect::Could not connect to {self._target.netloc}\n{e}"
+        except TenableSCConnectionError as e:
+            raise TenableSCConnectionError(
+                f"{context}::Could not connect to {self._target.netloc}\n{e}"
             )
 
     def disconnect(self) -> None:
         """
         Disconnect from API.
         """
+
+        self.logger.warning(f"{Context()}::Disconnected from {self._target.netloc}")
 
         del self._connection
         self._connection = None
@@ -164,9 +172,10 @@ class TenableSCConnector(Connector):
             ConnectionError: If anything goes wrong while fetching data from the target endpoint
         """
 
+        context = Context()
         if self.connection is None:
-            raise ConnectionError(
-                f"{__class__.__name__}.fetch::Can't retrieve data from {self._target.netloc}/{endpoint.value} if no connection is initialized"
+            raise TenableSCConnectionError(
+                f"{context}::Can't retrieve data from {self._target.netloc}/{endpoint.value} if no connection is initialized"
             )
 
         if payload is None:
@@ -175,21 +184,26 @@ class TenableSCConnector(Connector):
         if filters is None:
             filters = []
 
+        payload = { **payload, **kwargs }
+
         res = []
         try:
             endpoint_api_name, endpoint_api_method = endpoint.value.split(".")
             endpoint_api = getattr(self._connection, endpoint_api_name)
 
+            self.logger.debug(f"{context}::{endpoint.value} > {payload}")
             endpoint_func: Callable[..., "DatumDataType"] = getattr(
                 endpoint_api, endpoint_api_method
             )
 
-            req = endpoint_func(*filters, **payload, **kwargs)
+            req = endpoint_func(*filters, **payload)
             UtilsList.append_flat(res, list(req))
 
-        except ConnectionError as e:
-            raise ConnectionError(
-                f"{__class__.__name__}.fetch::Could not retrieve data from {self._target.netloc}/{endpoint.value}\n{e}"
+            self.logger.debug(f"{context}::{endpoint.value} > {req}")
+
+        except TenableSCConnectionError as e:
+            raise TenableSCConnectionError(
+                f"{context}::Could not retrieve data from {self._target.netloc}/{endpoint.value}\n{e}"
             )
 
         return res

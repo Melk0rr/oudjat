@@ -1,12 +1,14 @@
 """A module that describes common CVE connector behaviors."""
 
 import json
+import logging
 from abc import ABC, abstractmethod
 from typing import Any, override
 from urllib.parse import ParseResult
 
 from oudjat.connectors import Connector, ConnectorMethod
-from oudjat.utils import DataType
+from oudjat.connectors.vuln.exceptions import CVEDatabaseConnectionError
+from oudjat.utils import Context, DataType
 from oudjat.utils.types import StrType
 
 from .cve_formats import CVEDataFormat
@@ -18,8 +20,8 @@ class CVEConnector(Connector, ABC):
     # ****************************************************************
     # Attributes & Constructors
 
-    URL: str = ""
-    API_URL: str = ""
+    URL: "ParseResult"
+    API_URL: "ParseResult"
 
     def __init__(self) -> None:
         """
@@ -29,7 +31,9 @@ class CVEConnector(Connector, ABC):
         It sets the target URL to the NIST API URL.
         """
 
-        self._target: ParseResult
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
+
+        self._target: "ParseResult"
         super().__init__(target=CVEConnector.API_URL)
 
         self._connection: dict[str, Any] | None = None
@@ -50,6 +54,9 @@ class CVEConnector(Connector, ABC):
             kwargs (Any): Additional named arguments to pass into requests.get
         """
 
+        context = Context()
+        self.logger.info(f"{context}::Connecting to {target}")
+
         self._connection = None
 
         try:
@@ -58,11 +65,10 @@ class CVEConnector(Connector, ABC):
 
             if req.status_code == 200:
                 self._connection = json.loads(req.content.decode("utf-8"))
+                self.logger.info(f"{context}::Connected to {target}")
 
-        except ConnectionError as e:
-            raise ConnectionError(
-                f"{__class__.__name__}.connect::Could not connect to {self.target}\n{e}"
-            )
+        except CVEDatabaseConnectionError as e:
+            raise CVEDatabaseConnectionError(f"{context}::Could not connect to {target}\n{e}")
 
     @override
     @abstractmethod
@@ -71,7 +77,7 @@ class CVEConnector(Connector, ABC):
         cves: StrType,
         attributes: StrType | None = None,
         raw: bool = False,
-        payload: dict[str, Any] | None = None
+        payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Search the API for CVEs.
@@ -92,7 +98,7 @@ class CVEConnector(Connector, ABC):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.search::Method must be implemented by the overloading class"
+            f"{Context()}::Method must be implemented by the overloading class"
         )
 
     @abstractmethod
@@ -108,7 +114,7 @@ class CVEConnector(Connector, ABC):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.unify_cve_data::Method must be implemented by the overloading class"
+            f"{Context()}::Method must be implemented by the overloading class"
         )
 
     # ****************************************************************
@@ -128,7 +134,7 @@ class CVEConnector(Connector, ABC):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.cve_url::Method must be implemented by the overloading class"
+            f"{Context()}::Method must be implemented by the overloading class"
         )
 
     @staticmethod
@@ -145,7 +151,7 @@ class CVEConnector(Connector, ABC):
         """
 
         raise NotImplementedError(
-            f"{__class__.__name__}.cve_api_url::Method must be implemented by the overloading class"
+            f"{Context()}::Method must be implemented by the overloading class"
         )
 
     @staticmethod

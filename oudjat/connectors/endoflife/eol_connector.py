@@ -1,14 +1,16 @@
 """A module to handle connection to the endoflife.date website."""
 
+import logging
 from typing import Any, override
 from urllib.parse import ParseResult, urlparse
 
 from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.connectors.endoflife.eol_endpoints import EndOfLifeEndpoint
-from oudjat.utils import DataType, UtilsList
+from oudjat.utils import Context, DataType, UtilsList
 from oudjat.utils.types import StrType
 
 from .definitions import EOL_API_URL
+from .exceptions import EndOfLifeAPIConnectionError
 
 
 class EndOfLifeConnector(Connector):
@@ -21,6 +23,8 @@ class EndOfLifeConnector(Connector):
         """
         Initialize the EndOfLifeAPIConnector by setting up the connection to the EOL API URL and initializes an empty list of products.
         """
+
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         self._target: "ParseResult"
         super().__init__(target=urlparse(EOL_API_URL))
@@ -41,6 +45,9 @@ class EndOfLifeConnector(Connector):
             ConnectionError: If unable to connect to the API endpoint or retrieve data.
         """
 
+        context = Context()
+        self.logger.info(f"{context}::Connecting to {self._target.netloc}")
+
         self._connection = None
 
         try:
@@ -49,10 +56,11 @@ class EndOfLifeConnector(Connector):
 
             if req.status_code == 200:
                 self._connection = req.json()
+                self.logger.info(f"{context}::Connected to {self._target.netloc}")
 
-        except ConnectionError as e:
-            raise ConnectionError(
-                f"{__class__.__name__}.connect::Could not connect to {self.target}\n{e}"
+        except EndOfLifeAPIConnectionError as e:
+            raise EndOfLifeAPIConnectionError(
+                f"{context}::Could not connect to {self._target.netloc}\n{e}"
             )
 
     @override
@@ -78,14 +86,16 @@ class EndOfLifeConnector(Connector):
             ValueError     : If the provided `search_filter` is not a valid product in the catalog.
         """
 
+        context = Context()
         if self._connection is None:
             raise ConnectionError(
-                f"{__class__.__name__}.fetch::Please run connect to initialize endoflife connection"
+                f"{context}::Please run connect to initialize endoflife connection"
             )
 
         if payload is None:
             payload = {}
 
+        self.logger.debug(f"{context}::{endpoint.value}/{filter} > {payload}")
         res = []
         try:
             headers = {"Accept": "application/json"}
@@ -95,11 +105,13 @@ class EndOfLifeConnector(Connector):
 
             if req.status_code == 200:
                 req_json = req.json()
+                self.logger.debug(f"{context}::{endpoint.value}/{filter} > {req_json}")
+
                 UtilsList.append_flat(res, req_json.get("result", []))
 
-        except ConnectionError as e:
-            raise ConnectionError(
-                f"{__class__.__name__}.search::Could not retrieve {endpoint} infos:\n{e}"
+        except EndOfLifeAPIConnectionError as e:
+            raise EndOfLifeAPIConnectionError(
+                f"{context}::Could not retrieve {endpoint} infos:\n{e}"
             )
 
         return res
@@ -258,4 +270,3 @@ class EndOfLifeConnector(Connector):
             payload["filter"] = tag
 
         return self.fetch(endpoint=EndOfLifeEndpoint.TAGS, **payload)
-
