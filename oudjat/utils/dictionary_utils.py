@@ -1,6 +1,6 @@
 """A module that gather dictionary utilities."""
 
-from typing import Any
+from typing import Any, Callable
 
 
 class UtilsDict(dict):
@@ -87,13 +87,18 @@ class UtilsDict(dict):
         return char.join(map(str, dictionary.values()))
 
     @staticmethod
-    def map_list_to_dict(list_to_map: list[dict[str, Any]], key: str) -> dict[Any, dict[str, Any]]:
+    def map_list_to_dict(
+        list_to_map: list[dict[str, Any]],
+        key: str,
+        key_callback: Callable[[str], str] | None = None,
+    ) -> dict[Any, dict[str, Any]]:
         """
         Map a list into a dictionary using the provided key.
 
         Args:
-            list_to_map (list[dict[str, Any]]): The input list of dictionaries or objects that have the specified key.
-            key (str)                         : The key to use for mapping values in the list to a new dictionary.
+            list_to_map (list[dict[str, Any]]) : The input list of dictionaries or objects that have the specified key.
+            key (str)                          : The key to use for mapping values in the list to a new dictionary.
+            key_callback (Callable[[str], str]): Optional callback to transform the key
 
         Returns:
             dict[Any, dict[str, Any]]: A dictionary where each element in the list is mapped by the specified key as the key and the entire element as the value.
@@ -103,7 +108,7 @@ class UtilsDict(dict):
             {1: {'id': 1, 'name': 'Alice'}, 2: {'id': 2, 'name': 'Bob'}}
         """
 
-        return {el[key]: el for el in list_to_map}
+        return {(key_callback(el[key]) if key_callback else el[key]): el for el in list_to_map}
 
     @staticmethod
     def from_tuple(
