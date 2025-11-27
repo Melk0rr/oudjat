@@ -40,7 +40,6 @@ class SoftwareRelease:
             ValueError: If `release_date` is provided as a string and does not match the expected date format.
         """
 
-        # TODO: fully implement SoftwareReleaseVersion
         self._software: str = software_name
         self._version: "SoftwareReleaseVersion" = SoftwareReleaseVersion(version)
         self._label: str = release_label

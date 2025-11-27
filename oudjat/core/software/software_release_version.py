@@ -4,6 +4,9 @@ import re
 from enum import Enum
 from typing import override
 
+from oudjat.core.software.exceptions import SoftwareReleaseVersionSplittingError
+from oudjat.utils import Context
+
 
 class SoftwareReleaseStage(Enum):
     """
@@ -58,19 +61,22 @@ class SoftwareReleaseVersion:
             self._major = version
 
         else:
-            # TODO: Try-except + improve this part
-            version_split = version.split(".")
-            match = re.match(self.PATTERN, version_split[-1])
-            if match:
-                self._build = int(match.groups()[0])
-                self._stage = SoftwareReleaseStage(match.groups()[1])
-                self._stage_version = int(match.groups()[2])
+            try:
+                version_split = version.split(".")
+                match = re.match(self.PATTERN, version_split[-1])
+                if match:
+                    self._build = int(match.groups()[0])
+                    self._stage = SoftwareReleaseStage(match.groups()[1])
+                    self._stage_version = int(match.groups()[2])
 
-            else:
-                self._build = int(version_split[2])
+                else:
+                    self._build = int(version_split[2])
 
-            self._major = int(version_split[0])
-            self._minor = int(version_split[1])
+                self._major = int(version_split[0])
+                self._minor = int(version_split[1])
+
+            except SoftwareReleaseVersionSplittingError as e:
+                raise SoftwareReleaseVersionSplittingError(f"{Context()}::{e}")
 
     @property
     def major(self) -> int:
