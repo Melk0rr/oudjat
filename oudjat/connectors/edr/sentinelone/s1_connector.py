@@ -124,9 +124,8 @@ class S1Connector(Connector):
                     data = self.login_by_api_token()
                     self._connection = data[0]["token"]
 
-                # TODO: Better handle exception type
                 except SentinelOneAPIConnectionError as e:
-                    raise e
+                    raise SentinelOneAPIConnectionError(f"{context}::{e}")
 
             else:
                 raise NoCredentialsError(f"{context}::No API token provided")
