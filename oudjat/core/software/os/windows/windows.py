@@ -184,7 +184,6 @@ class MicrosoftOperatingSystem(OperatingSystem):
         based on the version and label found in the data. It also sets support details for each release.
         """
 
-        # TODO: Use NamedTuple to handle releases types properly or convert to JSON
         for rel in WINDOWS_RELEASES[f"{self._label}"]:
             win_rel = self.find_release(rel.release_label)
 
