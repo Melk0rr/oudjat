@@ -2,6 +2,7 @@
 
 from typing import Any, TypeAlias
 
+from oudjat.control.data.decision_tree import DecisionTree, DecisionTreeDictionaryProps
 from oudjat.control.data.exceptions import DataSetPerimeterError
 from oudjat.utils import Context, DataType
 
@@ -21,22 +22,19 @@ class DataSet:
         name: str,
         perimeter: str,
         initial_set: "DataSetType | None" = None,
-        filters: list["DataFilterDictionaryProps"] | list["DataFilter"] | None = None,
+        decision_tree: "DecisionTree | DecisionTreeDictionaryProps | None" = None,
         description: str | None = None,
     ) -> None:
         """
         Create a new DataSet instance.
 
         Args:
-            name (str)                                                  : The name of the dataset.
-            perimeter (str)                                             : The perimeter or boundary of the dataset.
-            initial_set (DataSetType | None)                            : Initial data set or list of dictionaries representing data. Defaults to None.
-            filters (list[DataFilterDictionaryProps] | list[DataFilter]): Filters applied to the data. Defaults to an empty list.
-            description (str | None)                                    : A brief description of the dataset. Defaults to None.
+            name (str)                                                       : The name of the dataset.
+            perimeter (str)                                                  : The perimeter or boundary of the dataset.
+            initial_set (DataSetType | None)                                 : Initial data set or list of dictionaries representing data. Defaults to None.
+            decision_tree (DecisionTree | DecisionTreeDictionaryProps | None): Filters applied to the data. Defaults to an empty list.
+            description (str | None)                                         : A brief description of the dataset. Defaults to None.
         """
-
-        if filters is None:
-            filters = []
 
         self._name: str = name
         self._description: str | None = description
@@ -44,8 +42,10 @@ class DataSet:
 
         self._initial_set: "DataSetType" = initial_set if initial_set is not None else []
 
-        # TODO: Use DecisionTree instead
-        self._filters: list["DataFilter"] = DataFilter.valid_filters_list(filters)
+        if decision_tree is not None and not isinstance(decision_tree, DecisionTree):
+            decision_tree = DecisionTree(tree_dict=decision_tree)
+
+        self._decision_tree: "DecisionTree | None" = decision_tree
 
     # ****************************************************************
     # Methods
@@ -117,26 +117,26 @@ class DataSet:
         return self._initial_set.name if isinstance(self._initial_set, DataSet) else None
 
     @property
-    def filters(self) -> list["DataFilter"]:
+    def decision_tree(self) -> "DecisionTree | None":
         """
         Return the data filters associated to this DataSet.
 
         Returns:
-            list[DataFilter]: list of data filters that will determine the data set output
+            DecisionTree | None: DecisionTree that determines the data set output
         """
 
-        return self._filters
+        return self._decision_tree
 
-    @filters.setter
-    def filters(self, filters: list["DataFilter"]) -> None:
+    @decision_tree.setter
+    def decision_tree(self, new_decision_tree: "DecisionTree") -> None:
         """
         Setter for the list of data filters.
 
         Args:
-            filters (list[DataFilter]): The new list of filters to be set. Defaults to an empty list.
+            new_decision_tree (DecisionTree): New decision tree value
         """
 
-        self._filters = DataFilter.valid_filters_list(filters)
+        self._decision_tree = new_decision_tree
 
     @property
     def initial_set_data(self) -> list[dict[str, Any]]:
@@ -154,7 +154,7 @@ class DataSet:
         )
 
     @property
-    def empty_initial_set_data(self) -> bool:
+    def _is_initial_set_empty(self) -> bool:
         """
         Check if input data is null or empty.
 
@@ -174,8 +174,8 @@ class DataSet:
         """
 
         data = self.initial_set_data
-        if not self.empty_initial_set_data and len(self._filters) > 0:
-            data = DataFilter.filter_data(data, self._filters)
+        if not self._is_initial_set_empty and self._decision_tree is not None:
+            data = self._decision_tree.filter_data(self.initial_set_data)
 
         return data
 
@@ -191,7 +191,7 @@ class DataSet:
             "name": self.name,
             "description": self.description,
             "perimeter": self.perimeter,
-            "filters": list(map(str, self.filters)),
+            "decision_tree": self._decision_tree.to_dict() if self._decision_tree else {},
             "initialSet": {
                 "name": self.initial_set_name,
                 "size": len(self.initial_set_data)
@@ -233,5 +233,4 @@ class DataSet:
             name=name,
             perimeter=list(perimeters)[0],
             initial_set=[item for set_data in map(dataset_data, sets) for item in set_data],
-            filters=[],
         )

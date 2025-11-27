@@ -3,9 +3,8 @@
 import logging
 from typing import Any, TypeAlias, TypedDict, override
 
-from oudjat.utils import Context, LogicalOperator
+from oudjat.utils import Context, DataType, LogicalOperator
 from oudjat.utils.list_utils import UtilsList
-from oudjat.utils.mappers import any_to_dict
 from oudjat.utils.types import NumberType
 
 from .data_filter import DataFilter, DataFilterDictionaryProps
@@ -157,7 +156,7 @@ class DecisionTreeNode:
             dict[str, Any]: A dictionary representation of the node containing its flag, value, and filter.
         """
 
-        return {"flag": self._flag, "value": self._value, "filter": str(self._node_filter)}
+        return {"flag": self._flag, "value": self._value, "filter": self._node_filter.to_dict()}
 
     # ****************************************************************
     # Static methods
@@ -225,12 +224,6 @@ class DecisionTree:
 
         Args:
             tree_dict (dict[str, Any]): A dictionary representing the decision tree.
-
-        Attributes:
-            negate (bool)               : if True, the final value of the tree will be inverted
-            operator (LogicalOperator)  : logical operator that joins node values
-            nodes (DecisionTreeNodeList): a list of DecisionTree nodes that will determine the result of the tree
-            value (bool)                : final value of the decision tree for an input element
         """
 
         context = Context()
@@ -245,7 +238,12 @@ class DecisionTree:
             raise ValueError(f"{context}::Invalid operator provided {self._operator.name}")
 
         self._nodes: "DecisionTreeNodeList" = DecisionTreeNodeList()
-        self.build(tree_dict)
+        try:
+            for n in tree_dict.get("nodes", []):
+                self.add_node(n)
+
+        except DecisionTreeBuildError as e:
+            self.logger.error(f"{context}::An error occured while building tree\n{e}")
 
         self._value: bool | None = None
 
@@ -296,7 +294,10 @@ class DecisionTree:
         if new_operator.upper() in LogicalOperator._member_names_:
             self._operator = LogicalOperator[new_operator.upper()]
 
-    def compute_value(self, element: dict[str, Any] | None = None) -> bool:
+        else:
+            self.logger.error(f"{Context()}::Could not change tree operator. Invalid operator string provided {new_operator}")
+
+    def value(self, element: dict[str, Any] | None = None) -> bool:
         """
         Return tree value.
 
@@ -308,12 +309,25 @@ class DecisionTree:
         """
 
         if element:
-            self.init(element)
+            self._init(element)
 
         if self._value is None:
             return False
 
         return self._value if not self._negate else not self._value
+
+    def filter_data(self, data_to_filter: "DataType") -> "DataType":
+        """
+        Filter provided data based on the current tree.
+
+        Args:
+            data_to_filter (DataType): Data to filter
+
+        Returns:
+            DataType: Filtered data
+        """
+
+        return [ el for el in data_to_filter if self.value(el) ]
 
     def add_node(self, node: "DecisionTreeDictionaryProps | DataFilterDictionaryProps") -> None:
         """
@@ -330,23 +344,7 @@ class DecisionTree:
 
         self._nodes.append(new_node)
 
-    def build(self, tree_dict: "DecisionTreeDictionaryProps") -> None:
-        """
-        Build tree nodes instances from input dictionary.
-
-        Args:
-            tree_dict (dict[str, Any]): input dictionary to build the tree
-        """
-
-        try:
-            self._nodes.clear()
-            for n in tree_dict.get("nodes", []):
-                self.add_node(n)
-
-        except DecisionTreeBuildError as e:
-            self.logger.error(f"{Context()}::An error occured while building tree\n{e}")
-
-    def init(self, element: dict[str, Any]) -> None:
+    def _init(self, element: dict[str, Any]) -> None:
         """
         Initialize tree node values.
 
@@ -418,7 +416,7 @@ class DecisionTree:
             "negate": self._negate,
             "operator": self._operator,
             "flags": self._nodes.flags_list(),
-            "details": list(map(any_to_dict, self._nodes)),
+            "nodes": [n.to_dict() for n in self._nodes]
         }
 
     # ****************************************************************
