@@ -4,8 +4,8 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, NamedTuple, TypedDict, override
 
-from oudjat.control.data import DataFilter, DataSet, DataSetType
-from oudjat.control.data.data_filter import DataFilterDictionaryProps
+from oudjat.control.data import DataSet, DataSetType
+from oudjat.control.data.decision_tree import DecisionTree, DecisionTreeDictionaryProps
 from oudjat.utils import ColorPrint, DataType, TimeConverter
 from oudjat.utils.types import DateInputType, NumberType
 
@@ -105,7 +105,7 @@ class KPI(DataSet):
         date: "DateInputType | None" = None,
         static: "KPIStaticProps | None" = None,
         data_set: "DataSetType | None" = None,
-        filters: list["DataFilterDictionaryProps"] | list["DataFilter"] | None = None,
+        decision_tree: "DecisionTree | DecisionTreeDictionaryProps | None" = None,
         description: str | None = None,
     ) -> None:
         """
@@ -117,7 +117,7 @@ class KPI(DataSet):
             date (datetime)                                             : The date the KPI is generated
             static (KPIStaticProps)                                     : KPI static values
             data_set (DataType | DataSet)                               : The scope the KPI is based on
-            filters (list[DataFilterDictionaryProps] | list[DataFilter]): The filters the KPI result is based on
+            decision_tree (DecisionTree | DecisionTreeDictionaryProps | None): Filters applied to the data. Defaults to an empty list.
             description (str)                                           : A description of the KPI
         """
 
@@ -125,7 +125,7 @@ class KPI(DataSet):
             name=name,
             perimeter=perimeter,
             initial_set=data_set,
-            filters=filters,
+            decision_tree=decision_tree,
             description=description,
         )
 
