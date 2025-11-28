@@ -12,6 +12,7 @@ import commentjson
 
 from oudjat.utils.context import Context
 
+# TODO: merge txt methods with raw methods
 
 class FileUtils:
     """A class that provides file operations."""
@@ -373,15 +374,16 @@ class FileTypeProps(NamedTuple):
 
     f_import: Callable[..., list[Any]]
     f_export: Callable[..., None]
+    mimetype: str
 
 
 class FileType(Enum):
     """Enumeration of file types to be used by file connector."""
 
-    CSV = FileTypeProps(FileUtils.import_csv, FileUtils.export_csv)
-    JSON = FileTypeProps(FileUtils.import_json, FileUtils.export_json)
-    TXT = FileTypeProps(FileUtils.import_txt, FileUtils.export_txt)
-    RAW = FileTypeProps(FileUtils.import_raw, FileUtils.export_raw)
+    CSV = FileTypeProps(FileUtils.import_csv, FileUtils.export_csv, mimetype="text/csv")
+    JSON = FileTypeProps(FileUtils.import_json, FileUtils.export_json, mimetype="application/json")
+    TXT = FileTypeProps(FileUtils.import_txt, FileUtils.export_txt, mimetype="text/plain")
+    RAW = FileTypeProps(FileUtils.import_raw, FileUtils.export_raw, mimetype="text/plain")
 
     @property
     def f_import(self) -> Callable[..., list[Any]]:

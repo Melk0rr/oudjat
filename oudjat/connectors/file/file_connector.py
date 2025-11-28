@@ -9,6 +9,7 @@ from oudjat.utils.file_utils import FileType, FileUtils
 
 from .exceptions import FileTypeError
 
+# TODO: Use mimetype to determine file type
 
 class FileConnector(Connector):
     """File connector to interact with different file types."""
