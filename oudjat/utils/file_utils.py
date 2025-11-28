@@ -26,12 +26,12 @@ class FileUtils:
 
     # NOTE: RAW
     @classmethod
-    def import_raw(cls, file_path: str, callback: Callable[..., Any] | None = None) -> Any:
+    def import_raw(cls, filepath: str, callback: Callable[..., Any] | None = None) -> Any:
         """
         Import the content of a file as a simple raw string.
 
         Args:
-            file_path (str)    : The path to the file.
+            filepath (str)     : The path to the file.
             callback (Callable): Optional function to run to change final result.
 
         Returns:
@@ -41,10 +41,10 @@ class FileUtils:
         context = Context()
 
         try:
-            full_path = os.path.join(os.getcwd(), file_path)
+            full_path = os.path.join(os.getcwd(), filepath)
             cls.logger.info(f"{context}::Importing raw data from {full_path}")
 
-            fd = open(file_path, mode="r")
+            fd = open(filepath, mode="r")
             file = fd.read()
             fd.close()
 
@@ -60,39 +60,39 @@ class FileUtils:
         return file
 
     @classmethod
-    def export_raw(cls, data: str, file_path: str, append: bool = False) -> None:
+    def export_raw(cls, data: str, filepath: str, append: bool = False) -> None:
         """
         Export the content of a file as a simple raw string.
 
         Args:
-            data (str)     : The string to export
-            file_path (str): The path where the file will be saved.
-            append (bool)  : Whether to export in append mode or not
+            data (str)    : The string to export
+            filepath (str): The path where the file will be saved.
+            append (bool) : Whether to export in append mode or not
         """
 
         context = Context()
 
-        full_path = os.path.join(os.getcwd(), file_path)
+        full_path = os.path.join(os.getcwd(), filepath)
         cls.logger.info(f"{context}::Exporting raw data in {full_path}")
 
         try:
-            full_path = os.path.join(os.getcwd(), file_path)
+            full_path = os.path.join(os.getcwd(), filepath)
             with open(full_path, "a" if append else "w", encoding="utf-8") as file:
                 _ = file.write(data)
 
         except Exception as e:
             raise e
 
-        cls.logger.info(f"{context}::Successfully exported raw data to {file_path}")
+        cls.logger.info(f"{context}::Successfully exported raw data to {filepath}")
 
     # NOTE: JSON
     @classmethod
-    def import_json(cls, file_path: str, callback: Callable[..., Any] | None = None) -> list[Any]:
+    def import_json(cls, filepath: str, callback: Callable[..., Any] | None = None) -> list[Any]:
         """
         Import json data from a specified file.
 
         Args:
-            file_path (str)    : the path to the JSON file.
+            filepath (str)     : the path to the JSON file.
             callback (Callable): optional function to run to change final result.
 
         Returns:
@@ -103,7 +103,7 @@ class FileUtils:
 
         json_data = None
         try:
-            full_path = os.path.join(os.getcwd(), file_path)
+            full_path = os.path.join(os.getcwd(), filepath)
             cls.logger.info(f"{context}::Importing JSON data from {full_path}")
 
             with open(full_path, "r", encoding="utf-8") as json_file:
@@ -124,13 +124,13 @@ class FileUtils:
         return json_data
 
     @classmethod
-    def export_json(cls, data: list[Any], file_path: str) -> None:
+    def export_json(cls, data: list[Any], filepath: str) -> None:
         """
         Export data to a JSON file.
 
         Args:
             data (dict or list): The data to be exported.
-            file_path (str)    : The path where the JSON file will be saved.
+            filepath (str)     : The path where the JSON file will be saved.
         """
 
         context = Context()
@@ -140,7 +140,7 @@ class FileUtils:
             return
 
         try:
-            full_path = os.path.join(os.getcwd(), file_path)
+            full_path = os.path.join(os.getcwd(), filepath)
             cls.logger.info(f"{context}::Exporting JSON data to {full_path}")
 
             with open(full_path, "w", encoding="utf-8") as f:
@@ -154,13 +154,13 @@ class FileUtils:
     # INFO: CSV
     @classmethod
     def import_csv(
-        cls, file_path: str, callback: Callable | None = None, delimiter: str | None = None
+        cls, filepath: str, callback: Callable | None = None, delimiter: str | None = None
     ) -> list[Any]:
         """
         Import CSV content into a list of dictionaries.
 
         Args:
-            file_path (str)           : The path to the CSV file.
+            filepath (str)            : The path to the CSV file.
             callback (callable | None): A callable function to process the data after reading.
             delimiter (str | None)    : The character used as a delimiter in the CSV file.
 
@@ -169,11 +169,11 @@ class FileUtils:
         """
 
         context = Context()
-        cls.logger.info(f"{context}::Importing CSV file {file_path}")
+        cls.logger.info(f"{context}::Importing CSV file {filepath}")
 
         data: list[Any] = []
         try:
-            full_path = os.path.join(os.getcwd(), file_path)
+            full_path = os.path.join(os.getcwd(), filepath)
             with open(full_path, "r", encoding="utf-8", newline="") as f:
                 # WARN: Try to guess the delimiter if none was specified
                 if delimiter is None:
@@ -195,7 +195,7 @@ class FileUtils:
 
                 data = raw_data
 
-            cls.logger.info(f"{context}::Successfully imported data from {file_path}")
+            cls.logger.info(f"{context}::Successfully imported data from {filepath}")
             cls.logger.debug(f"{context}::{data}")
 
         except Exception as e:
@@ -205,20 +205,20 @@ class FileUtils:
 
     @classmethod
     def export_csv(
-        cls, data: list[Any], file_path: str, delimiter: str = ",", append: bool = False
+        cls, data: list[Any], filepath: str, delimiter: str = ",", append: bool = False
     ) -> None:
         """
         Export data into a CSV file.
 
         Args:
             data (list of dicts)  : The data to be exported.
-            file_path (str)       : The path where the CSV file will be saved.
+            filepath (str)        : The path where the CSV file will be saved.
             delimiter (str | None): The character used as a delimiter in the CSV file. Defaults to ",".
             append (bool | None)  : Whether to append to an existing file or overwrite it.
         """
 
         context = Context()
-        cls.logger.info(f"{context}::Exporting CSV data to {file_path}")
+        cls.logger.info(f"{context}::Exporting CSV data to {filepath}")
         cls.logger.debug(f"{context}::{len(data)} elements to export")
 
         if len(data) == 0:
@@ -226,7 +226,7 @@ class FileUtils:
             return
 
         try:
-            full_path = os.path.join(os.getcwd(), file_path)
+            full_path = os.path.join(os.getcwd(), filepath)
 
             mode = "a" if append else "w"
             with open(full_path, mode, encoding="utf-8", newline="") as f:
@@ -238,7 +238,7 @@ class FileUtils:
 
                 writer.writerows(data)
 
-            cls.logger.info(f"{context}Successfully exported CSV data to {file_path}")
+            cls.logger.info(f"{context}Successfully exported CSV data to {filepath}")
 
         except Exception as e:
             raise e
@@ -247,7 +247,7 @@ class FileUtils:
     @classmethod
     def import_txt(
         cls,
-        file_path: str,
+        filepath: str,
         delete_duplicates: bool = False,
         callback: Callable[..., Any] | None = None,
     ) -> list[Any]:
@@ -255,7 +255,7 @@ class FileUtils:
         Import a text file and optionally remove duplicates.
 
         Args:
-            file_path (str)                : The path to the text file.
+            filepath (str)                 : The path to the text file.
             delete_duplicates (bool | None): Whether to remove duplicate lines from the file.
             callback (callable | None)     : A callable function to process the data after reading.
 
@@ -264,11 +264,11 @@ class FileUtils:
         """
 
         context = Context()
-        cls.logger.info(f"{context}::Importing TXT file {file_path}")
+        cls.logger.info(f"{context}::Importing TXT file {filepath}")
 
         data = None
         try:
-            full_path = os.path.join(os.getcwd(), file_path)
+            full_path = os.path.join(os.getcwd(), filepath)
             with open(full_path, encoding="utf-8") as f:
                 data = list(filter(None, f.read().split("\n")))
 
@@ -278,7 +278,7 @@ class FileUtils:
             if callback is not None:
                 data = callback(data)
 
-            cls.logger.info(f"{context}::Successfully imported TXT data from {file_path}")
+            cls.logger.info(f"{context}::Successfully imported TXT data from {filepath}")
             cls.logger.debug(f"{context}::{data}")
 
         except Exception as e:
@@ -287,13 +287,13 @@ class FileUtils:
         return data
 
     @classmethod
-    def export_txt(cls, data: list[Any], file_path: str, append: bool = False) -> None:
+    def export_txt(cls, data: list[Any], filepath: str, append: bool = False) -> None:
         """
         Export data into a text file.
 
         Args:
             data (list)         : The data to be exported as strings.
-            file_path (str)     : The path where the text file will be saved.
+            filepath (str)      : The path where the text file will be saved.
             append (bool | None): Whether to append to an existing file or overwrite it.
         """
 
@@ -302,14 +302,14 @@ class FileUtils:
             return
 
         try:
-            full_path = os.path.join(os.getcwd(), file_path)
+            full_path = os.path.join(os.getcwd(), filepath)
 
             mode = "a" if append else "w"
             with open(full_path, mode, encoding="utf-8", newline="") as f:
                 for line in data:
                     _ = f.write(f"{line}" + "\n")
 
-            cls.logger.info(f"{Context()}::Successfully exported TXT data to {file_path}")
+            cls.logger.info(f"{Context()}::Successfully exported TXT data to {filepath}")
 
         except Exception as e:
             raise e

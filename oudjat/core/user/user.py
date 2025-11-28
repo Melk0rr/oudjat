@@ -3,9 +3,10 @@
 import re
 from typing import Any, TypedDict, override
 
+from oudjat.utils.mail import EMAIL_REG
+
 from ..asset import Asset
 from ..asset_type import AssetType
-from .definitions import EMAIL_REG
 from .user_type import UserType
 
 
