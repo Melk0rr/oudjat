@@ -100,7 +100,7 @@ class LDAPFilterStrFormat(Enum):
     NAME = "(name{cmp_operator}{value})"
     SAN = "(sAMAccountName{cmp_operator}{value})"
     SAT = "(sAMAccountType{cmp_operator}{value})"
-    SN = "(sn{operator}{value})"
+    SN = "(sn{cmp_operator}{value})"
     TITLE = "(Title{cmp_operator}{value})"
     UAC = "(userAccountControl:1.2.840.113556.1.4.803:{cmp_operator}{uac_value})"
 
@@ -457,10 +457,11 @@ class LDAPFilter:
         return f"({filter_str})"
 
     # ****************************************************************
-    # Static methods
+    # Class methods
 
-    @staticmethod
-    def filter_from_values(
+    @classmethod
+    def format(
+        cls,
         filter_fmt: "LDAPFilterStrFormat | str",
         filter_values: "StrType",
         operator: "LDAPFilterOperator" = LDAPFilterOperator.OR,
@@ -486,4 +487,46 @@ class LDAPFilter:
         def fmt_filter(value_to_fmt: str) -> str:
             return filter_fmt(value_to_fmt)
 
-        return LDAPFilter(f"({operator.value}{''.join(list(map(fmt_filter, filter_values)))})")
+        return cls(f"({operator.value}{''.join(list(map(fmt_filter, filter_values)))})")
+
+    @classmethod
+    def dn(
+        cls,
+        values: "StrType",
+    ) -> "LDAPFilter":
+        """
+        Return an LDAPFilter based on the provided distinguished names.
+
+        It joins the values with the | (OR) operator.
+
+        Args:
+            values (str | list[str]): Distinguished names that will compose the filter
+
+        Returns:
+            LDAPFilter: A new LDAPFilter instance based on the provided DNs
+        """
+
+        return cls.format(LDAPFilterStrFormat.DN, values)
+
+
+    @classmethod
+    def san(
+        cls,
+        values: "StrType",
+    ) -> "LDAPFilter":
+        """
+        Return an LDAPFilter based on the provided sam account names.
+
+        It joins the values with the | (OR) operator.
+
+        Args:
+            values (str | list[str]): Sam account names that will compose the filter
+
+        Returns:
+            LDAPFilter: A new LDAPFilter instance based on the provided sam account names
+        """
+
+        return cls.format(LDAPFilterStrFormat.SAN, values)
+
+    # ****************************************************************
+    # Static methods
