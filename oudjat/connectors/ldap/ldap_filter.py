@@ -508,6 +508,24 @@ class LDAPFilter:
 
         return cls.format(LDAPFilterStrFormat.DN, values)
 
+    @classmethod
+    def name(
+        cls,
+        values: "StrType",
+    ) -> "LDAPFilter":
+        """
+        Return an LDAPFilter based on the provided names.
+
+        It joins the values with the | (OR) operator.
+
+        Args:
+            values (str | list[str]): Names that will compose the filter
+
+        Returns:
+            LDAPFilter: A new LDAPFilter instance based on the provided names
+        """
+
+        return cls.format(LDAPFilterStrFormat.NAME, values)
 
     @classmethod
     def san(
