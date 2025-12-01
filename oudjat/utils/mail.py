@@ -31,6 +31,21 @@ class InvalidEmailAddressError(ValueError):
         self.message: str = message
         super().__init__(self.message)
 
+class EmptyMailRecipientError(ValueError):
+    """
+    A helper class to handle empty recipient errors.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of EmptyMailRecipientError.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
 
 class EmailSendError(ConnectionError):
     """
@@ -89,11 +104,7 @@ class Mail:
         self._smtp_server: str = smtp_server
         self._smtp_port: int = smtp_port
         self._message: "EmailMessage" = EmailMessage()
-        self._recipients: dict[str, list[str]] = {
-            f"{MailRecipientType.TO.name}": [],
-            f"{MailRecipientType.CC.name}": [],
-            f"{MailRecipientType.BCC.name}": [],
-        }
+        self._recipients: dict[str, list[str]] = {}
 
     @property
     def sender(self) -> str:
@@ -151,8 +162,10 @@ class Mail:
         """
 
         if re.match(EMAIL_REG, email):
-            self._recipients[recipient_type.name].append(email)
-            self._message[recipient_type.value] = ", ".join(self._recipients[recipient_type.name])
+            if recipient_type.value not in self._recipients.keys():
+                self._recipients[recipient_type.value] = []
+
+            self._recipients[recipient_type.value].append(email)
 
         else:
             self.logger.error(f"{Context()}::Invalid recipient provided {email}")
@@ -203,6 +216,12 @@ class Mail:
         """
 
         context = Context()
+
+        if len(list(self._recipients.keys())) == 0:
+            raise EmptyMailRecipientError(f"{context}::No mail recipient provided")
+
+        for recipient_type in self._recipients.keys():
+            self._message[recipient_type] = ", ".join(self._recipients[recipient_type])
 
         try:
             with smtplib.SMTP(self._smtp_server, self._smtp_port) as server:
