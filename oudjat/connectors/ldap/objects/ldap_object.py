@@ -235,5 +235,5 @@ class LDAPObject(GenericIdentifiable):
             "changedDate": TimeConverter.date_to_str(
                 self.change_date, DateFormat.from_flag(DateFlag.YMD_HMS)
             ),
-            "ldapObjFlags": self._ldap_obj_flags,
+            "ldapObjFlags": list(self._ldap_obj_flags),
         }
