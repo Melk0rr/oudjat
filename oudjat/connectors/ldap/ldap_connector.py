@@ -339,7 +339,7 @@ class LDAPConnector(Connector):
 
             formated_filter = formated_filter & search_filter
 
-        payload["search_filter"] = formated_filter
+        payload["search_filter"] = str(formated_filter)
         payload["search_base"] = search_base or self.default_search_base
         payload["attributes"] = attributes or search_type.attributes
 
