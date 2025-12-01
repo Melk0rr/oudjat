@@ -61,7 +61,7 @@ class Target(Base):
         """
 
         args = (
-            FileUtils.import_txt(file_path=self.options[file_option])
+            FileUtils.import_txt(filepath=self.options[file_option])
             if self.options[file_option]
             else self.options[string_option].split(",")
         )

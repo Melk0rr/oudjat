@@ -124,7 +124,7 @@ class FileConnector(Connector):
             payload = {}
 
         try:
-            self._data = self._filetype.f_import(file_path=self._target, **payload)
+            self._data = self._filetype.f_import(filepath=self._target, **payload)
             self._connection = True
 
             self.logger.info(f"{context}::Connected to {self._filetype} file {self._target}")
