@@ -201,7 +201,7 @@ class User(Asset):
             "lastname": self._lastname,
             "email": self._email,
             "login": self._login,
-            "userType": self._user_type
+            "userType": str(self._user_type)
         }
 
         return {

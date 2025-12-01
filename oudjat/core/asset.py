@@ -18,7 +18,7 @@ class AssetBaseDict(TypedDict):
         location (dict[int | str, Location]): The locations associated with the asset
     """
 
-    assetType: "AssetType"
+    assetType: str
     location: dict[int | str, "Location"]
 
 class Asset(GenericIdentifiable, ABC):
@@ -122,7 +122,7 @@ class Asset(GenericIdentifiable, ABC):
         """
 
         base_dict: "AssetBaseDict" = {
-            "assetType": self.asset_type,
+            "assetType": str(self._asset_type),
             "location": self.location,
         }
 
