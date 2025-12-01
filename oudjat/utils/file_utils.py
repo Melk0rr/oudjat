@@ -14,6 +14,41 @@ from oudjat.utils.context import Context
 
 # TODO: merge txt methods with raw methods
 
+
+class FileImportError(Exception):
+    """
+    A helper class to handle file import errors.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of FileImportError.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
+
+
+class FileExportError(Exception):
+    """
+    A helper class to handle file export errors.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of FileExportError.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
+
+
 class FileUtils:
     """A class that provides file operations."""
 
@@ -24,67 +59,6 @@ class FileUtils:
 
     # ****************************************************************
     # Class methods
-
-    # NOTE: RAW
-    @classmethod
-    def import_raw(cls, filepath: str, callback: Callable[..., Any] | None = None) -> Any:
-        """
-        Import the content of a file as a simple raw string.
-
-        Args:
-            filepath (str)     : The path to the file.
-            callback (Callable): Optional function to run to change final result.
-
-        Returns:
-            Any: default is a string, can be any type based on callback changes
-        """
-
-        context = Context()
-
-        try:
-            full_path = os.path.join(os.getcwd(), filepath)
-            cls.logger.info(f"{context}::Importing raw data from {full_path}")
-
-            fd = open(filepath, mode="r")
-            file = fd.read()
-            fd.close()
-
-            if callback:
-                file = callback(file)
-
-            cls.logger.info(f"{context}::Imported raw data from {full_path}")
-            cls.logger.debug(f"{context}::{file}")
-
-        except Exception as e:
-            raise e
-
-        return file
-
-    @classmethod
-    def export_raw(cls, data: str, filepath: str, append: bool = False) -> None:
-        """
-        Export the content of a file as a simple raw string.
-
-        Args:
-            data (str)    : The string to export
-            filepath (str): The path where the file will be saved.
-            append (bool) : Whether to export in append mode or not
-        """
-
-        context = Context()
-
-        full_path = os.path.join(os.getcwd(), filepath)
-        cls.logger.info(f"{context}::Exporting raw data in {full_path}")
-
-        try:
-            full_path = os.path.join(os.getcwd(), filepath)
-            with open(full_path, "a" if append else "w", encoding="utf-8") as file:
-                _ = file.write(data)
-
-        except Exception as e:
-            raise e
-
-        cls.logger.info(f"{context}::Successfully exported raw data to {filepath}")
 
     # NOTE: JSON
     @classmethod
@@ -116,8 +90,8 @@ class FileUtils:
             cls.logger.info(f"{context}::Successfully imported JSON data from {full_path}")
             cls.logger.debug(f"{context}::{json_data}")
 
-        except Exception as e:
-            raise e
+        except FileImportError as e:
+            raise FileImportError(f"{context}::{e}")
 
         if isinstance(json_data, dict):
             json_data = [json_data]
@@ -137,7 +111,7 @@ class FileUtils:
         context = Context()
 
         if len(data) == 0:
-            print("No data to export !")
+            cls.logger.error(f"{context}::No data to export !")
             return
 
         try:
@@ -149,8 +123,8 @@ class FileUtils:
 
             cls.logger.info(f"{context}::Successfully exported JSON data to {full_path}")
 
-        except Exception as e:
-            raise e
+        except FileExportError as e:
+            raise FileExportError(f"{context}::{e}")
 
     # INFO: CSV
     @classmethod
@@ -199,8 +173,8 @@ class FileUtils:
             cls.logger.info(f"{context}::Successfully imported data from {filepath}")
             cls.logger.debug(f"{context}::{data}")
 
-        except Exception as e:
-            raise e
+        except FileImportError as e:
+            raise FileImportError(f"{context}::{e}")
 
         return data
 
@@ -219,11 +193,12 @@ class FileUtils:
         """
 
         context = Context()
+
         cls.logger.info(f"{context}::Exporting CSV data to {filepath}")
         cls.logger.debug(f"{context}::{len(data)} elements to export")
 
         if len(data) == 0:
-            print("No data to export !")
+            cls.logger.error(f"{context}::No data to export !")
             return
 
         try:
@@ -239,16 +214,17 @@ class FileUtils:
 
                 writer.writerows(data)
 
-            cls.logger.info(f"{context}Successfully exported CSV data to {filepath}")
+            cls.logger.info(f"{context}::Successfully exported CSV data to {filepath}")
 
-        except Exception as e:
-            raise e
+        except FileExportError as e:
+            raise FileExportError(f"{context}::{e}")
 
     # INFO: TXT
     @classmethod
     def import_txt(
         cls,
         filepath: str,
+        raw: bool = False,
         delete_duplicates: bool = False,
         callback: Callable[..., Any] | None = None,
     ) -> list[Any]:
@@ -257,6 +233,7 @@ class FileUtils:
 
         Args:
             filepath (str)                 : The path to the text file.
+            raw (bool)                     : Whether to import the txt file as a raw string
             delete_duplicates (bool | None): Whether to remove duplicate lines from the file.
             callback (callable | None)     : A callable function to process the data after reading.
 
@@ -271,10 +248,13 @@ class FileUtils:
         try:
             full_path = os.path.join(os.getcwd(), filepath)
             with open(full_path, encoding="utf-8") as f:
-                data = list(filter(None, f.read().split("\n")))
+                if raw:
+                    data = f.read()
 
-            if delete_duplicates:
-                data = list(set(data))
+                else:
+                    data = list(filter(None, f.read().split("\n")))
+                    if delete_duplicates:
+                        data = list(set(data))
 
             if callback is not None:
                 data = callback(data)
@@ -282,24 +262,26 @@ class FileUtils:
             cls.logger.info(f"{context}::Successfully imported TXT data from {filepath}")
             cls.logger.debug(f"{context}::{data}")
 
-        except Exception as e:
-            raise e
+        except FileImportError as e:
+            raise FileImportError(f"{context}::{e}")
 
-        return data
+        return data if isinstance(data, list) else [data]
 
     @classmethod
-    def export_txt(cls, data: list[Any], filepath: str, append: bool = False) -> None:
+    def export_txt(cls, data: Any, filepath: str, raw: bool = False, append: bool = False) -> None:
         """
         Export data into a text file.
 
         Args:
-            data (list)         : The data to be exported as strings.
-            filepath (str)      : The path where the text file will be saved.
-            append (bool | None): Whether to append to an existing file or overwrite it.
+            data (list)         : The data to be exported as strings
+            filepath (str)      : The path where the text file will be saved
+            raw (bool)          : Whether to export the data as a raw string
+            append (bool | None): Whether to append to an existing file or overwrite it
         """
 
+        context = Context()
         if len(data) == 0:
-            print("No data to export !")
+            cls.logger.error(f"{context}::No data to export !")
             return
 
         try:
@@ -307,13 +289,17 @@ class FileUtils:
 
             mode = "a" if append else "w"
             with open(full_path, mode, encoding="utf-8", newline="") as f:
-                for line in data:
-                    _ = f.write(f"{line}" + "\n")
+                if raw:
+                    _ = f.write(data)
+
+                else:
+                    for line in data:
+                        _ = f.write(f"{line}" + "\n")
 
             cls.logger.info(f"{Context()}::Successfully exported TXT data to {filepath}")
 
-        except Exception as e:
-            raise e
+        except FileExportError as e:
+            raise FileExportError(f"{context}::{e}")
 
     # ****************************************************************
     # Static methods
@@ -358,6 +344,10 @@ class FileUtils:
 
                 delimiter_counts[c] += 1
 
+            # Remove quotes from list of delimiters
+            if '"' in delimiter_counts.keys():
+                del delimiter_counts['"']
+
             delimiter: str = max(delimiter_counts, key=lambda d: delimiter_counts[d])
 
         return delimiter
@@ -383,7 +373,6 @@ class FileType(Enum):
     CSV = FileTypeProps(FileUtils.import_csv, FileUtils.export_csv, mimetype="text/csv")
     JSON = FileTypeProps(FileUtils.import_json, FileUtils.export_json, mimetype="application/json")
     TXT = FileTypeProps(FileUtils.import_txt, FileUtils.export_txt, mimetype="text/plain")
-    RAW = FileTypeProps(FileUtils.import_raw, FileUtils.export_raw, mimetype="text/plain")
 
     @property
     def f_import(self) -> Callable[..., list[Any]]:
