@@ -22,6 +22,7 @@ from .exceptions import (
 )
 from .ldap_filter import LDAPFilter, LDAPFilterStrFormat
 from .objects.ldap_entry import LDAPEntry
+from .objects.ldap_object import LDAPObjectOptions
 from .objects.ldap_object_types import LDAPObjectType
 
 if TYPE_CHECKING:
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
     from .objects.account.ldap_computer import LDAPComputer
     from .objects.account.ldap_user import LDAPUser
     from .objects.gpo.ldap_gpo import LDAPGroupPolicyObject
-    from .objects.ldap_object import LDAPCapabilities, LDAPObject, LDAPObjectOptions
+    from .objects.ldap_object import LDAPCapabilities, LDAPObject
     from .objects.ou.ldap_ou import LDAPOrganizationalUnit
     from .objects.subnet.ldap_subnet import LDAPSubnet
 
