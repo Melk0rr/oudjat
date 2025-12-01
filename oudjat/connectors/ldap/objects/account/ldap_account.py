@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, override
 
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
-from oudjat.utils.types import StrType
 
 from ..ldap_object import LDAPObject
 from .ldap_account_flags import LDAPAccountFlag
@@ -120,20 +119,20 @@ class LDAPAccount(LDAPObject, ABC):
             datetime: The expiration date of the account as a datetime object, or a fixed year 9999 if it does not have an expiration.
         """
 
-        default_acc_exp: StrType | None = self.entry.get("accountExpires")
-        unified_acc_exp: str
+        default_acc_exp = self.entry.get("accountExpires")
 
-        if isinstance(default_acc_exp, list):
-            unified_acc_exp = str(default_acc_exp[0]) if len(default_acc_exp) > 0 else ""
+        unified_acc_exp = datetime(9999, 12, 31, 23, 59, 59)
+        if isinstance(default_acc_exp, datetime):
+            unified_acc_exp = default_acc_exp
+
+        elif isinstance(default_acc_exp, list):
+            if len(default_acc_exp) > 0:
+                unified_acc_exp = TimeConverter.str_to_date(default_acc_exp[0])
 
         else:
-            unified_acc_exp = str(default_acc_exp)
+            unified_acc_exp = TimeConverter.str_to_date(default_acc_exp)
 
-        return (
-            datetime(9999, 12, 31)
-            if default_acc_exp is None
-            else TimeConverter.str_to_date(unified_acc_exp)
-        )
+        return unified_acc_exp
 
     @property
     def last_logon(self) -> datetime:
