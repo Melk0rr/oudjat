@@ -174,7 +174,8 @@ class LDAPObject(GenericIdentifiable):
             str: The timestamp of when the LDAP object was created.
         """
 
-        return TimeConverter.str_to_date(self.entry.get("whenCreated"))
+        attr_value = self.entry.get("whenCreated")
+        return attr_value if isinstance(attr_value, datetime) else TimeConverter.str_to_date(attr_value)
 
     @property
     def change_date(self) -> datetime:
@@ -185,7 +186,8 @@ class LDAPObject(GenericIdentifiable):
             str: The timestamp of the last modification to the LDAP object.
         """
 
-        return TimeConverter.str_to_date(self.entry.get("whenChanged"))
+        attr_value = self.entry.get("whenChanged")
+        return attr_value if isinstance(attr_value, datetime) else TimeConverter.str_to_date(attr_value)
 
     def is_in_ou(self, ou_name: str, recursive: bool = True) -> bool:
         """
@@ -233,5 +235,5 @@ class LDAPObject(GenericIdentifiable):
             "changedDate": TimeConverter.date_to_str(
                 self.change_date, DateFormat.from_flag(DateFlag.YMD_HMS)
             ),
-            "oudjatFlags": self._ldap_obj_flags,
+            "ldapObjFlags": self._ldap_obj_flags,
         }
