@@ -2,6 +2,7 @@
 
 from abc import ABC
 from datetime import datetime
+from enum import IntEnum
 from typing import TYPE_CHECKING, Any, override
 
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
@@ -12,6 +13,27 @@ from .ldap_account_flags import LDAPAccountFlag
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
     from ..ldap_object import LDAPCapabilities
+
+
+class LDAPAccountStatus(IntEnum):
+    """
+    A helper class to handle LDAPAccount status.
+    """
+
+    UNKNOWN = -1
+    DISABLED = 0
+    ENABLED = 1
+
+    @override
+    def __str__(self) -> str:
+        """
+        Convert an LDAPAccountStatus into a string.
+
+        Returns:
+            str: A string represenation of an LDAPAccountStatus
+        """
+
+        return self.name
 
 
 class LDAPAccount(LDAPObject, ABC):
@@ -38,7 +60,7 @@ class LDAPAccount(LDAPObject, ABC):
 
         super().__init__(ldap_entry=ldap_entry, capabilities=capabilities, **kwargs)
 
-        self._enabled: bool = True
+        self._status: "LDAPAccountStatus" = LDAPAccountStatus.UNKNOWN
         self._pwd_expires: bool = True
         self._pwd_expired: bool = False
         self._pwd_required: bool = True
@@ -47,7 +69,7 @@ class LDAPAccount(LDAPObject, ABC):
         self._account_flags: set[str] = set()
 
         if self.account_ctl is not None:
-            self._enabled = not LDAPAccountFlag.is_disabled(self.account_ctl)
+            self._status = LDAPAccountStatus(not LDAPAccountFlag.is_disabled(self.account_ctl))
             self._pwd_expires = LDAPAccountFlag.pwd_expires(self.account_ctl)
             self._pwd_expired = LDAPAccountFlag.pwd_expired(self.account_ctl)
             self._pwd_required = LDAPAccountFlag.pwd_required(self.account_ctl)
@@ -75,18 +97,7 @@ class LDAPAccount(LDAPObject, ABC):
         return self.entry.get("sAMAccountName")
 
     @property
-    def is_enabled(self) -> bool | None:
-        """
-        Return whether the account is enabled or not.
-
-        Returns:
-            bool: True if the account is enabled, False otherwise.
-        """
-
-        return self._enabled
-
-    @property
-    def status(self) -> str:
+    def status(self) -> "LDAPAccountStatus":
         """
         Return the account status.
 
@@ -94,7 +105,7 @@ class LDAPAccount(LDAPObject, ABC):
             str: "Enabled" if the account is enabled, otherwise "Disabled".
         """
 
-        return "Enabled" if self.is_enabled else "Disabled"
+        return self._status
 
     @property
     def account_ctl(self) -> int | None:
@@ -269,7 +280,8 @@ class LDAPAccount(LDAPObject, ABC):
             **base_dict,
             "san": self.san,
             "status": self.status,
-            "account":{
+            "account": {
+                "status": str(self._status),
                 "expires": self.account_expires,
                 "expirationDate": LDAPAccount._format_acc_date_str(self.account_expiration),
                 "ctl": self.account_ctl,
