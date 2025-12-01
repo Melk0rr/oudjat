@@ -146,7 +146,7 @@ class LDAPAccount(LDAPObject, ABC):
         return unified_acc_exp
 
     @property
-    def last_logon(self) -> datetime:
+    def last_logon(self) -> datetime | None:
         """
         Return the last logon datetime of the current account.
 
@@ -165,7 +165,7 @@ class LDAPAccount(LDAPObject, ABC):
             int: The difference in days between the current date and the last logon date.
         """
 
-        return TimeConverter.days_diff(self.last_logon)
+        return TimeConverter.days_diff(self.last_logon) if self.last_logon else -1
 
     @property
     def pwd_last_set(self) -> datetime | None:
