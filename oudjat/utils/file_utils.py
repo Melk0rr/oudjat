@@ -12,8 +12,6 @@ import commentjson
 
 from oudjat.utils.context import Context
 
-# TODO: merge txt methods with raw methods
-
 
 class FileImportError(Exception):
     """
