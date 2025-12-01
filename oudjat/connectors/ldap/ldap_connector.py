@@ -527,7 +527,7 @@ class LDAPConnector(Connector):
         attributes: "StrType | None" = None,
         search_base: str | None = None,
         payload: dict[str, Any] | None = None,
-    ) -> dict[int | str, "LDAPUser"]:
+    ) -> dict[str, "LDAPUser"]:
         """
         Specific method to retrieve LDAP User instances.
 
