@@ -29,19 +29,20 @@ class LDAPUser(LDAPAccount):
 
         super().__init__(ldap_entry=ldap_entry, **kwargs)
 
-        # NOTE: Check additional account control bits (see https://learn.microsoft.com/en-us/windows/win32/adschema/a-msds-user-account-control-computed)
+        # Check additional account control bits
+        # see https://learn.microsoft.com/en-us/windows/win32/adschema/a-msds-user-account-control-computed
         if self.ms_account_ctl is not None:
-            self.enabled: bool = not LDAPAccountFlag.is_disabled(self.ms_account_ctl)
-            self.pwd_expires: bool = LDAPAccountFlag.pwd_expires(self.ms_account_ctl)
-            self.pwd_expired: bool = LDAPAccountFlag.pwd_expired(self.ms_account_ctl)
-            self.pwd_required: bool = LDAPAccountFlag.pwd_required(self.ms_account_ctl)
-            self.is_locked: bool = LDAPAccountFlag.is_locked(self.ms_account_ctl)
+            self._enabled: bool = not LDAPAccountFlag.is_disabled(self.ms_account_ctl)
+            self._pwd_expires: bool = LDAPAccountFlag.pwd_expires(self.ms_account_ctl)
+            self._pwd_expired: bool = LDAPAccountFlag.pwd_expired(self.ms_account_ctl)
+            self._pwd_required: bool = LDAPAccountFlag.pwd_required(self.ms_account_ctl)
+            self._is_locked: bool = LDAPAccountFlag.is_locked(self.ms_account_ctl)
 
             for flag in list(LDAPAccountFlag):
                 if LDAPAccountFlag.check_flag(self.ms_account_ctl, flag):
-                    self.account_flags.add(flag.name)
+                    self._account_flags.add(flag.name)
 
-        self.user: "User" = User(
+        self._user: "User" = User(
             user_id=self.id,
             name=self.name,
             firstname=self.givenname,
@@ -155,7 +156,7 @@ class LDAPUser(LDAPAccount):
         base_dict = super().to_dict()
         base_dict.pop("san")
 
-        user_dict = self.user.to_dict()
+        user_dict = self._user.to_dict()
 
         return {
             **base_dict,

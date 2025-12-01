@@ -50,7 +50,7 @@ class LDAPComputer(LDAPAccount):
             if len(os_edition_match) != 0:
                 os_edition = os_edition_match[0]
 
-        self.computer: "Computer" = Computer(
+        self._computer: "Computer" = Computer(
             computer_id=self._id,
             name=self._name,
             label=self.hostname,
@@ -77,5 +77,5 @@ class LDAPComputer(LDAPAccount):
     def to_dict(self) -> dict[str, Any]:
         """Convert the current instance into a dictionary."""
 
-        cpt_dict = self.computer.to_dict()
+        cpt_dict = self._computer.to_dict()
         return {**super().to_dict(), "hostname": cpt_dict.pop("label"), **cpt_dict}
