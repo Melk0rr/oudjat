@@ -6,6 +6,7 @@ from typing import Any, NamedTuple
 from oudjat.utils import DataType
 from oudjat.utils.file_utils import FileUtils
 
+# TODO: Rework JSON structure and SoftwareReleaseDict
 
 class MSRealeaseProps(NamedTuple):
     """A class to properly handle MS release types."""
