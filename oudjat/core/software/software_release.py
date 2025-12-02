@@ -454,7 +454,7 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
             version (str): String representation of a release version to filter
 
         Returns:
-            SoftwareReleaseDict: a filtered version of the current dictionary
+            SoftwareReleaseDict: A filtered version of the current dictionary
         """
 
         return SoftwareReleaseDict[ReleaseType](

@@ -20,6 +20,17 @@ class SoftwareReleaseStage(Enum):
     RELEASE_CANDIDATE = "rc"
     RELEASE = ""
 
+    @override
+    def __str__(self) -> str:
+        """
+        Convert the SoftwareReleaseStage into a string.
+
+        Returns:
+            str: A string representation of the software release stage
+        """
+
+        return self._value_
+
 
 class SoftwareReleaseVersion:
     """
@@ -156,7 +167,7 @@ class SoftwareReleaseVersion:
         return self._raw
 
     @property
-    def stage(self) -> tuple[SoftwareReleaseStage, int]:
+    def stage(self) -> tuple["SoftwareReleaseStage", int]:
         """
         Return the stage version number.
 
@@ -167,7 +178,7 @@ class SoftwareReleaseVersion:
         return (self._stage, self._stage_version)
 
     @stage.setter
-    def stage(self, new_stage: tuple[SoftwareReleaseStage, int]) -> None:
+    def stage(self, new_stage: tuple["SoftwareReleaseStage", int]) -> None:
         """
         Set the stage version number of the current SoftwareReleaseVersion.
 
