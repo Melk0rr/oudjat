@@ -461,7 +461,7 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
             **{rel_k: rel for rel_k, rel in self.items() if str(rel.version) == version}
         )
 
-    def to_dict(self) -> dict[str, "ReleaseType"]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the SoftwareReleaseDict into a regular dictionary.
 
@@ -469,4 +469,4 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
             dict[str, ReleaseType]: A regular dictionary representation of the current instance
         """
 
-        return self._data
+        return { rel_k: rel.to_dict() for rel_k, rel in self._data.items() }
