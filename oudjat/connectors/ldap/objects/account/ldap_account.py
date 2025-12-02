@@ -33,7 +33,7 @@ class LDAPAccountStatus(IntEnum):
             str: A string represenation of an LDAPAccountStatus
         """
 
-        return self.name
+        return self._name_
 
 
 class LDAPAccount(LDAPObject, ABC):
