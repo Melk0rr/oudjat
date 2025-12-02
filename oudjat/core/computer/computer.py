@@ -121,7 +121,7 @@ class Computer(Asset):
         self._os: "ComputerOSProps" = ComputerOSProps(os_release, os_edition)
 
         if computer_type is None or (
-            isinstance(computer_type, str) and computer_type.upper() in ComputerType._member_names_
+            isinstance(computer_type, str) and computer_type.upper() not in ComputerType._member_names_
         ):
             computer_type = ComputerType.UNKNOWN
 
