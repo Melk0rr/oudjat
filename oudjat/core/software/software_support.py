@@ -43,7 +43,7 @@ class SoftwareReleaseSupport:
 
     def __init__(
         self,
-        edition: dict[str, SoftwareEdition],
+        edition: dict[str, "SoftwareEdition"],
         active_support: str | datetime | None = None,
         end_of_life: str | datetime | None = None,
         long_term_support: bool = False,
@@ -58,33 +58,25 @@ class SoftwareReleaseSupport:
             long_term_support (bool | None)    : Whether the release has long term support.
         """
 
-        self._edition: SoftwareEditionDict = SoftwareEditionDict(**edition)
+        self._edition: "SoftwareEditionDict" = SoftwareEditionDict(**edition)
 
         if active_support is None and end_of_life is None:
             raise SoftwareReleaseSupportInvalidEndDate(
                 f"{Context()}::Please provide either an active support or end of life date."
             )
 
-        # Handling none support values
-        self._active_support: datetime
-        self._end_of_life: datetime
-        if active_support is not None and end_of_life is None:
-            self._end_of_life = (
-                TimeConverter.str_to_date(active_support)
-                if not isinstance(active_support, datetime)
-                else active_support
-            )
-
-            self._active_support = self._end_of_life
-
         if active_support is None and end_of_life is not None:
-            self._active_support = (
-                TimeConverter.str_to_date(end_of_life)
-                if not isinstance(end_of_life, datetime)
-                else end_of_life
-            )
+            active_support = end_of_life
 
-            self._end_of_life = self._active_support
+        if end_of_life is None and active_support is not None:
+            end_of_life = active_support
+
+        if active_support is None or end_of_life is None:
+            raise SoftwareReleaseSupportInvalidEndDate(f"{Context()}::Something went wrong setting support active_support or end_of_life date")
+
+        # Handling none support values
+        self._active_support: datetime = SoftwareReleaseSupport._support_date_fmt(active_support)
+        self._end_of_life: datetime = SoftwareReleaseSupport._support_date_fmt(end_of_life)
 
         self._lts: bool = long_term_support
 
@@ -202,6 +194,24 @@ class SoftwareReleaseSupport:
 
     # ****************************************************************
     # Static methods
+
+    @staticmethod
+    def _support_date_fmt(date_to_fmt: str | datetime) -> datetime:
+        """
+        Format the provided date as a datetime if needed.
+
+        Args:
+            date_to_fmt (str | datetime): The date to format if needed
+
+        Returns:
+            datetime: Formated datetime
+        """
+
+        return (
+            TimeConverter.str_to_date(date_to_fmt)
+            if not isinstance(date_to_fmt, datetime)
+            else date_to_fmt
+        )
 
 
 class SoftwareReleaseSupportList(list[SoftwareReleaseSupport]):
