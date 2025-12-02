@@ -41,6 +41,17 @@ class LDAPTLSVersion(IntEnum):
     TLSv1_1 = ssl.PROTOCOL_TLSv1_1
     TLSv1_2 = ssl.PROTOCOL_TLSv1_2
 
+    @override
+    def __str__(self) -> str:
+        """
+        Convert an LDAPTLSVersion into a string.
+
+        Returns:
+            str: A string representation of the LDAPTLSVersion
+        """
+
+        return self.name
+
 
 class LDAPPort(IntEnum):
     """
@@ -348,8 +359,6 @@ class LDAPConnector(Connector):
         # Actual request
         results = self.connection.extend.standard.paged_search(**payload)
 
-        self.logger.debug(f"{context}::{search_type} > {results}")
-
         def ldap_entry_from_dict(entry: dict[str, Any]) -> "LDAPEntry":
             if entry.get("attributes", None) is None:
                 raise InvalidLDAPEntryError(
@@ -365,6 +374,7 @@ class LDAPConnector(Connector):
             )
         )
 
+        self.logger.debug(f"{context}::{search_type} > {[el.dn for el in res]}")
         self.logger.debug(f"{context}::Retrieved {len(res)} entries")
 
         return res
