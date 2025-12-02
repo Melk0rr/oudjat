@@ -130,9 +130,9 @@ class LDAPAccount(LDAPObject, ABC):
             datetime: The expiration date of the account as a datetime object, or a fixed year 9999 if it does not have an expiration.
         """
 
-        default_acc_exp = self.entry.get("accountExpires")
+        default_acc_exp = self.entry.get("accountExpires", datetime(9999, 12, 31, 23, 59, 59))
 
-        unified_acc_exp = datetime(9999, 12, 31, 23, 59, 59)
+        unified_acc_exp = default_acc_exp
         if isinstance(default_acc_exp, datetime):
             unified_acc_exp = default_acc_exp
 
