@@ -5,7 +5,7 @@ from datetime import datetime
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any, override
 
-from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
+from oudjat.utils.time_utils import TimeConverter
 
 from ..ldap_object import LDAPObject
 from .ldap_account_flags import LDAPAccountFlag
@@ -283,7 +283,7 @@ class LDAPAccount(LDAPObject, ABC):
             "account": {
                 "status": str(self._status),
                 "expires": self.account_expires,
-                "expirationDate": LDAPAccount._format_acc_date_str(self.account_expiration),
+                "expirationDate": LDAPObject._format_acc_date_str(self.account_expiration),
                 "ctl": self.account_ctl,
                 "flags": list(self.account_flags),
             },
@@ -291,31 +291,12 @@ class LDAPAccount(LDAPObject, ABC):
                 "expires": self.pwd_expires,
                 "expired": self.pwd_expired,
                 "required": self.pwd_required,
-                "lastSet": LDAPAccount._format_acc_date_str(self.pwd_last_set),
+                "lastSet": LDAPObject._format_acc_date_str(self.pwd_last_set),
                 "lastSetDays": self.pwd_last_set_in_days,
             },
             "logon": {
-                "lastLogon": LDAPAccount._format_acc_date_str(self.last_logon),
+                "lastLogon": LDAPObject._format_acc_date_str(self.last_logon),
                 "lastLogonDays": self.last_logon_in_days,
             },
         }
 
-    # ****************************************************************
-    # Static methods
-
-    @staticmethod
-    def _format_acc_date_str(date: datetime | None) -> str:
-        """
-        Convert an account date into a readable string.
-
-        Args:
-            date (datetime): date to convert into a readable string
-
-        Returns:
-            str: readable formated string
-        """
-
-        if date is None:
-            return ""
-
-        return TimeConverter.date_to_str(date, date_format=DateFormat.from_flag(DateFlag.YMD_HMS))
