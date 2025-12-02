@@ -50,7 +50,7 @@ class ComputerStatus(IntEnum):
             str: A string representation of a computer status
         """
 
-        return self.name
+        return self._name_
 
 
 class ComputerBaseDict(TypedDict):

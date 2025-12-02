@@ -54,4 +54,4 @@ class OSFamily(Enum):
             str: A simple string representation of the OS family
         """
 
-        return self.name
+        return self._name_

@@ -50,7 +50,7 @@ class LDAPTLSVersion(IntEnum):
             str: A string representation of the LDAPTLSVersion
         """
 
-        return self.name
+        return self._name_
 
 
 class LDAPPort(IntEnum):
