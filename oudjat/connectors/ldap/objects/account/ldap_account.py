@@ -281,7 +281,6 @@ class LDAPAccount(LDAPObject, ABC):
         return {
             **base_dict,
             "san": self.san,
-            "status": self.status,
             "account": {
                 "status": str(self._status),
                 "expires": self.account_expires,
