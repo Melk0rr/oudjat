@@ -3,7 +3,7 @@
 import os
 from typing import Any, NamedTuple
 
-from oudjat.utils import DataType
+from oudjat.utils import Context, DataType
 from oudjat.utils.file_utils import FileUtils
 
 # TODO: Rework JSON structure and SoftwareReleaseDict
@@ -49,7 +49,7 @@ dirname = os.path.dirname(os.path.abspath(__file__))
 release_import: DataType = FileUtils.import_json(f"{dirname}/releases.jsonc")[0]
 
 if not isinstance(release_import, dict):
-    raise ValueError("Releases import must be a dictionary")
+    raise ValueError(f"{Context()}::Releases import must be a dictionary")
 
 WINDOWS_RELEASES: dict[str, list[MSRealeaseProps]] = {
     os_label: list(map(MSRealeaseProps.from_dictionary, os_releases))
