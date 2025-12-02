@@ -224,5 +224,5 @@ class MicrosoftOperatingSystem(OperatingSystem):
         """
 
         search = re.search(MicrosoftOperatingSystem.VERSION_REG, search_str)
-        return search is not None and ".".join([search.group(1), search.group(2)]) or None
+        return ".".join([search.group(1), search.group(2)]) if search is not None else None
 
