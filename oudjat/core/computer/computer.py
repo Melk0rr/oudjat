@@ -62,8 +62,8 @@ class ComputerBaseDict(TypedDict):
         computerStatus (ComputerStatus): The status of the computer
     """
 
-    computerType: "ComputerType"
-    computerStatus: "ComputerStatus"
+    computerType: str
+    computerStatus: str
     ip: str | None
     softwares: dict[str, Any]
 
@@ -366,8 +366,8 @@ class Computer(Asset):
         os_support_dict = self.os_support[0].to_dict() if len(self.os_support) > 0 else {}
 
         base_dict: "ComputerBaseDict" = {
-            "computerType": self._computer_type,
-            "computerStatus": self._status,
+            "computerType": str(self._computer_type),
+            "computerStatus": str(self._status),
             "ip": str(self._ip) if self._ip else None,
             "softwares": {sid: s.to_dict() for sid, s in self._softwares.items()}
         }
