@@ -195,7 +195,7 @@ class SoftwareReleaseSupport:
             "edition": self.edition,
             "activeSupport": TimeConverter.date_to_str(self._active_support),
             "endOfLife": TimeConverter.date_to_str(self._end_of_life),
-            "status": self.status,
+            "status": str(self.status),
             "lts": self._lts,
             "details": self.support_details,
         }
