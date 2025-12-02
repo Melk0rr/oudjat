@@ -1,6 +1,7 @@
 """A module that describes the notion of software support."""
 
 from datetime import datetime
+from enum import IntEnum
 from typing import Any, override
 
 from oudjat.core.software.exceptions import SoftwareReleaseSupportInvalidEndDate
@@ -8,6 +9,30 @@ from oudjat.utils import Context
 from oudjat.utils.time_utils import TimeConverter
 
 from .software_edition import SoftwareEdition, SoftwareEditionDict
+
+
+class SoftwareReleaseSupportStatus(IntEnum):
+    """
+    A simple enumeration to handle software release support status.
+
+    Attributes:
+        RETIRED: The release support is retired
+        ONGOING: The release support is still ongoing
+    """
+
+    RETIRED = 0
+    ONGOING = 1
+
+    @override
+    def __str__(self) -> str:
+        """
+        Convert a SoftwareReleaseSupportStatus into a string.
+
+        Returns:
+            str: A string representation of the support status
+        """
+
+        return self._name_
 
 
 class SoftwareReleaseSupport:
@@ -78,7 +103,7 @@ class SoftwareReleaseSupport:
         return self._edition
 
     @property
-    def status(self) -> str:
+    def status(self) -> "SoftwareReleaseSupportStatus":
         """
         Return a string representing the current support status.
 
@@ -86,7 +111,7 @@ class SoftwareReleaseSupport:
             str: "Ongoing" if support is ongoing, otherwise "Retired".
         """
 
-        return "Ongoing" if self.is_ongoing else "Retired"
+        return SoftwareReleaseSupportStatus(int(self.is_ongoing))
 
     @property
     def is_ongoing(self) -> bool:
