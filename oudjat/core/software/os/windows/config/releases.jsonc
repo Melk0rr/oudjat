@@ -9,6 +9,7 @@
         "eol": "2027-10-12",
         "latest": "10.0.26200",
         "link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
+        "lts": false,
         "edition": "W"
       }
     },
