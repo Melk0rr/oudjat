@@ -146,7 +146,7 @@ class Software(Asset, Generic[ReleaseType]):
             This method does not allow adding non-SoftwareRelease objects and returns silently if so.
         """
 
-        if new_release.version not in self.releases.keys():
+        if str(new_release.version) not in self.releases.keys():
             self.releases[str(new_release.version)] = SoftwareRelEditionDict[ReleaseType]()
 
         self.releases[str(new_release.version)][edition] = new_release
