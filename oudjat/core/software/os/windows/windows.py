@@ -103,24 +103,38 @@ class WindowsEdition(Enum):
     Tries to handle edition types (E,W,IOT).
     """
 
-    WINDOWS = SoftwareEditionDict({
-        "Enterprise": SoftwareEdition(label="Enterprise", category="E", pattern=r"Ent[er]{2}prise"),
-        "Education": SoftwareEdition(label="Education", category="E", pattern=r"[EÉeé]ducation"),
-        "IoT Enterprise": SoftwareEdition(
-            label="IoT Enterprise", category="E", pattern=r"[Ii][Oo][Tt] Ent[er]{2}prise"
-        ),
-        "Home": SoftwareEdition(label="Home", category="W", pattern=r"[Hh]ome"),
-        "Pro": SoftwareEdition(label="Pro", category="W", pattern=r"Pro(?:fession[n]?[ae]l)?"),
-        "Pro Education": SoftwareEdition(
-            label="Pro Education", category="W", pattern=r"Pro(?:fession[n]?[ae]l)? [EÉeé]ducation"
-        ),
-        "IOT": SoftwareEdition(label="IOT", category="IOT", pattern=r"[Ii][Oo][Tt]"),
-    })
+    WINDOWS = SoftwareEditionDict(
+        {
+            "Enterprise": SoftwareEdition(
+                label="Enterprise", category="E", pattern=r"Ent[er]{2}prise"
+            ),
+            "Education": SoftwareEdition(
+                label="Education", category="E", pattern=r"[EÉeé]ducation"
+            ),
+            "IoT Enterprise": SoftwareEdition(
+                label="IoT Enterprise", category="E", pattern=r"[Ii][Oo][Tt] Ent[er]{2}prise"
+            ),
+            "Home": SoftwareEdition(label="Home", category="W", pattern=r"[Hh]ome"),
+            "Pro": SoftwareEdition(label="Pro", category="W", pattern=r"Pro(?:fession[n]?[ae]l)?"),
+            "Pro Education": SoftwareEdition(
+                label="Pro Education",
+                category="W",
+                pattern=r"Pro(?:fession[n]?[ae]l)? [EÉeé]ducation",
+            ),
+            "IOT": SoftwareEdition(label="IOT", category="IOT", pattern=r"[Ii][Oo][Tt]"),
+        }
+    )
 
-    WINDOWSSERVER = SoftwareEditionDict({
-        "Standard": SoftwareEdition(label="Standard", category="Standard", pattern=r"[Ss]tandard"),
-        "Datacenter": SoftwareEdition(label="Datacenter", category="Standard", pattern=r"[Dd]atacenter"),
-    })
+    WINDOWSSERVER = SoftwareEditionDict(
+        {
+            "Standard": SoftwareEdition(
+                label="Standard", category="Standard", pattern=r"[Ss]tandard"
+            ),
+            "Datacenter": SoftwareEdition(
+                label="Datacenter", category="Standard", pattern=r"[Dd]atacenter"
+            ),
+        }
+    )
 
     @property
     def editions(self) -> list[SoftwareEdition]:
@@ -227,4 +241,3 @@ class MicrosoftOperatingSystem(OperatingSystem):
 
         search = re.search(MicrosoftOperatingSystem.VERSION_REG, search_str)
         return ".".join([search.group(1), search.group(2)]) if search is not None else None
-

@@ -6,7 +6,7 @@ from typing import Any, Generic, override
 from ..asset import Asset
 from ..asset_type import AssetType
 from .software_edition import SoftwareEdition, SoftwareEditionDict
-from .software_release import ReleaseType, SoftwareRelVersionDict
+from .software_release import ReleaseType, SoftwareRelEditionDict, SoftwareRelVersionDict
 
 
 class SoftwareType(IntEnum):
@@ -147,7 +147,9 @@ class Software(Asset, Generic[ReleaseType]):
         """
 
         if new_release.key not in self.releases.keys():
-            self.releases[str(new_release.version)][edition] = new_release
+            self.releases[str(new_release.version)] = SoftwareRelEditionDict[ReleaseType]()
+
+        self.releases[str(new_release.version)][edition] = new_release
 
     def find_release(self, version: str, edition: str = "Standard") -> "ReleaseType | None":
         """
