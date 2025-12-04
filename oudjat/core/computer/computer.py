@@ -290,7 +290,7 @@ class Computer(Asset):
         if self._os.release is None:
             return []
 
-        return self._os.release.support_for_edition(str(self._os.edition))
+        return self._os.release.support_by_edition(str(self._os.edition))
 
     @property
     def softwares(self) -> dict[str, "SoftwareRelease"]:

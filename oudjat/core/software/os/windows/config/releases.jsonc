@@ -27,6 +27,18 @@
       }
     },
     "10.0.22631": {
+      "E": {
+        "os": "Windows",
+        "releaseLabel": "11 23H2",
+        "releaseDate": "2023-10-31",
+        "support": "2026-11-10",
+        "eol": "2026-11-10",
+        "latest": "10.0.22631",
+        "link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
+        "lts": false,
+        "edition": "W"
+      },
+
       "W": {
         "os": "Windows",
         "releaseLabel": "11 23H2",

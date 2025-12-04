@@ -201,7 +201,7 @@ class SoftwareRelease:
             ]
         )
 
-    def support_for_edition(
+    def support_by_edition(
         self, edition: str | list[str], lts: bool = False
     ) -> "SoftwareReleaseSupportList":
         """
