@@ -12,7 +12,7 @@ class SoftwareEdition(NamedTuple):
     """
 
     label: str
-    category: str | None
+    category: str
     pattern: str | None
 
     def match_str(self, test_str: str) -> bool:

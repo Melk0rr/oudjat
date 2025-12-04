@@ -118,8 +118,8 @@ class WindowsEdition(Enum):
     })
 
     WINDOWSSERVER = SoftwareEditionDict({
-        "Standard": SoftwareEdition(label="Standard", category=None, pattern=r"[Ss]tandard"),
-        "Datacenter": SoftwareEdition(label="Datacenter", category=None, pattern=r"[Dd]atacenter"),
+        "Standard": SoftwareEdition(label="Standard", category="Standard", pattern=r"[Ss]tandard"),
+        "Datacenter": SoftwareEdition(label="Datacenter", category="Standard", pattern=r"[Dd]atacenter"),
     })
 
     @property
@@ -184,26 +184,28 @@ class MicrosoftOperatingSystem(OperatingSystem):
         based on the version and label found in the data. It also sets support details for each release.
         """
 
-        for rel in WINDOWS_RELEASES[f"{self._label}"]:
-            win_rel = self.find_release(rel.release_label)
+        releases = WINDOWS_RELEASES[f"{self._label}"]
+        for version, edition_dict in releases.items():
+            for edition, rel_dict in edition_dict.items():
+                win_rel = self.find_release(version, edition)
 
-            if win_rel is None:
-                win_rel = MSOSRelease(
-                    os_name=self.name,
-                    version=rel.latest,
-                    release_date=rel.release_date,
-                    release_label=rel.release_label,
+                if win_rel is None:
+                    win_rel = MSOSRelease(
+                        os_name=self.name,
+                        version=rel_dict["latest"],
+                        release_date=rel_dict["releaseDate"],
+                        release_label=rel_dict["releaseLabel"],
+                    )
+
+                win_sup: "SoftwareReleaseSupport" = SoftwareReleaseSupport(
+                    active_support=rel_dict["support"],
+                    end_of_life=rel_dict["eol"],
+                    long_term_support=rel_dict["lts"],
+                    edition=self._editions.filter_by_category(edition),
                 )
 
-            win_sup: "SoftwareReleaseSupport" = SoftwareReleaseSupport(
-                active_support=rel.support,
-                end_of_life=rel.eol,
-                long_term_support=rel.lts,
-                edition=self._editions.filter_by_category(rel.edition),
-            )
-
-            self.add_release(win_rel)
-            self.releases[win_rel.key].add_support(win_sup)
+                self.add_release(win_rel, edition)
+                self.releases[version][edition].add_support(win_sup)
 
     # ****************************************************************
     # Static methods

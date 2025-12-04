@@ -97,7 +97,7 @@ class FileUtils:
         return json_data
 
     @classmethod
-    def export_json(cls, data: list[Any], filepath: str) -> None:
+    def export_json(cls, data: list[dict[str, Any]] | dict[str, Any], filepath: str) -> None:
         """
         Export data to a JSON file.
 

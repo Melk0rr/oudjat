@@ -310,76 +310,72 @@ class SoftwareRelease:
             "support": [s.to_dict() for s in self._support],
         }
 
-
-class SoftwareReleaseDict(Generic[ReleaseType]):
-    """Software release dictionary."""
+class SoftwareRelEditionDict(Generic[ReleaseType]):
+    """Software release edition dictionary."""
 
     # ****************************************************************
     # Constructor & Attributes
 
-    def __init__(self, **kwargs: "ReleaseType") -> None:
+    def __init__(self) -> None:
         """
         Create a new instance of SoftwareReleaseDict.
         """
 
-        self._data: dict[str, "ReleaseType"] = {}
-
-        if len(kwargs) > 0:
-            self._data.update({k: v for k, v in kwargs.items()})
+        self._edition_rels: dict[str, "ReleaseType"] = {}
 
     # ****************************************************************
     # Methods
 
-    def __getitem__(self, key: str) -> "ReleaseType":
+    def __getitem__(self, version: str) -> "ReleaseType":
         """
-        Return a SoftwareReleaseBound element based on its key.
+        Return a SoftwareRelEditionDict element based on its key.
 
         Args:
-            key (str): the key of the item to return
+            version (str): The version of the release to retrieve
 
         Returns:
             ReleaseType: covariant element of SoftwareRelease
         """
 
-        return self._data[key]
+        return self._edition_rels[version]
 
-    def __setitem__(self, key: str, value: "ReleaseType") -> None:
+    def __setitem__(self, version: str, value: "ReleaseType") -> None:
         """
-        Set the SoftwareRelease in the dictionary for the provided key.
+        Set the SoftwareRelEditionDict in the dictionary for the provided key.
 
         Args:
-            key (str)          : New element key
+            version (str)      : The version of the release to retrieve
             value (ReleaseType): Value of the new element
         """
 
-        self._data[key] = value
+        self._edition_rels[version] = value
 
     def __iter__(self) -> Iterator[str]:
         """
-        Return an iterator to go through the SoftwareReleases.
+        Return an iterator to go through the SoftwareRelEditionDict instances.
 
         Returns:
             Iterator[str]: iterator object
         """
 
-        return iter(self._data)
+        return iter(self._edition_rels)
 
-    def get(self, key: str, default_value: Any = None) -> "ReleaseType | None":
+    def get(self, version: str, default_value: Any = None) -> "ReleaseType | None":
         """
-        Return a SoftwareReleaseBound element based on its key.
+        Return a SoftwareRelEditionDict element based on its key.
 
         If the element cannot be found, return the default value.
 
         Args:
-            key (str)          : key of the element to return
-            default_value (Any): default value in case the element cannot be found
+            version (str)      : Key of the element to return
+            default_value (Any): Default value in case the element cannot be found
 
         Returns:
-            SoftwareReleaseBound | None: element associated with provided key or default value
+            SoftwareRelEditionDict | None: Element associated with provided key or default value
 
         """
 
-        return self._data.get(key, default_value)
+        return self._edition_rels.get(version, default_value)
 
     def keys(self):
         """
@@ -389,7 +385,7 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
             dict_keys[str, SoftwareReleaseBound_co]: the keys of the current dictionary
         """
 
-        return self._data.keys()
+        return self._edition_rels.keys()
 
     def values(self):
         """
@@ -399,7 +395,7 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
             dict_values[str, SoftwareReleaseBound_co]: the values of the current dictionary
         """
 
-        return self._data.values()
+        return self._edition_rels.values()
 
     def items(self):
         """
@@ -409,9 +405,116 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
             dict_items[str, SoftwareReleaseBound_co]: the items of the current dictionary
         """
 
-        return self._data.items()
+        return self._edition_rels.items()
 
-    def find(self, rel_ver: str, rel_label: str | None = None) -> "ReleaseType | None":
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the SoftwareRelVersionDict into a regular dictionary.
+
+        Returns:
+            dict[str, ReleaseType]: A regular dictionary representation of the current instance
+        """
+
+        return { edition: rel.to_dict() for edition, rel in self._edition_rels.items() }
+
+class SoftwareRelVersionDict(Generic[ReleaseType]):
+    """Software release version dictionary."""
+
+    # ****************************************************************
+    # Constructor & Attributes
+
+    def __init__(self) -> None:
+        """
+        Create a new instance of SoftwareReleaseDict.
+        """
+
+        self._versions: dict[str, SoftwareRelEditionDict[ReleaseType]] = {}
+
+    # ****************************************************************
+    # Methods
+
+    def __getitem__(self, version: str) -> "SoftwareRelEditionDict[ReleaseType]":
+        """
+        Return a SoftwareRelEditionDict element based on its key.
+
+        Args:
+            version (str): The version of the release to retrieve
+
+        Returns:
+            ReleaseType: covariant element of SoftwareRelease
+        """
+
+        return self._versions[version]
+
+    def __setitem__(self, version: str, value: "SoftwareRelEditionDict[ReleaseType]") -> None:
+        """
+        Set the SoftwareRelEditionDict in the dictionary for the provided key.
+
+        Args:
+            version (str)      : The version of the release to retrieve
+            value (ReleaseType): Value of the new element
+        """
+
+        self._versions[version] = value
+
+    def __iter__(self) -> Iterator[str]:
+        """
+        Return an iterator to go through the SoftwareRelEditionDict instances.
+
+        Returns:
+            Iterator[str]: iterator object
+        """
+
+        return iter(self._versions)
+
+    def get(self, version: str, default_value: Any = None) -> "SoftwareRelEditionDict[ReleaseType] | None":
+        """
+        Return a SoftwareRelEditionDict element based on its key.
+
+        If the element cannot be found, return the default value.
+
+        Args:
+            version (str)      : Key of the element to return
+            default_value (Any): Default value in case the element cannot be found
+
+        Returns:
+            SoftwareRelEditionDict | None: Element associated with provided key or default value
+
+        """
+
+        return self._versions.get(version, default_value)
+
+    def keys(self):
+        """
+        Return the keys of the data dict.
+
+        Returns:
+            dict_keys[str, SoftwareRelEditionDict[ReleaseType]]: The keys of the current dictionary
+        """
+
+        return self._versions.keys()
+
+    def values(self):
+        """
+        Return the values of the data dict.
+
+        Returns:
+            dict_values[str, SoftwareRelEditionDict[ReleaseType]]: The values of the current dictionary
+        """
+
+        return self._versions.values()
+
+    def items(self):
+        """
+        Return the items of the data dict.
+
+        Returns:
+            dict_items[str, SoftwareRelEditionDict[ReleaseType]]: The items of the current dictionary
+        """
+
+        return self._versions.items()
+
+    def find(self, version: str, edition: str = "Standard") -> "ReleaseType | None":
         """
         Find the given release.
 
@@ -419,19 +522,20 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
         It returns either the entire release information if only the version is specified, or it narrows down the search to a specific label within that version if both are provided.
 
         Args:
-            rel_ver (str)         : The version of the software release to find.
-            rel_label (str | None): The label associated with the release. Defaults to None.
+            version (str)       : The version of the software release to find.
+            edition (str | None): The label associated with the release. Defaults to None.
 
         Returns:
-            SoftwareReleaseDict: A dictionary containing either the entire release information or a specific label's information based on the provided criteria.
+            SoftwareRelease | None: The software release matching the provided version and edition if any
         """
 
-        label_key = f" - {rel_label}"
-        key = f"{rel_ver}{label_key if rel_label else ''}"
+        edition_dict = self.get(version, {})
+        if edition_dict is None:
+            return edition_dict
 
-        return self.get(key, None)
+        return edition_dict.get(edition, None)
 
-    def filter_by_str(self, search_str: str) -> "SoftwareReleaseDict[ReleaseType]":
+    def filter_by_str(self, search_str: str) -> "SoftwareRelVersionDict[ReleaseType]":
         """
         Search for elements with a key matching the provided search string.
 
@@ -442,31 +546,16 @@ class SoftwareReleaseDict(Generic[ReleaseType]):
             list[SoftwareReleaseBound]: list of elements found
         """
 
-        return SoftwareReleaseDict[ReleaseType](
-            **{rel_k: rel for rel_k, rel in self.items() if search_str in rel_k}
-        )
-
-    def filter_by_version(self, version: str) -> "SoftwareReleaseDict[ReleaseType]":
-        """
-        Filter the content of the current release dictionary by release version.
-
-        Args:
-            version (str): String representation of a release version to filter
-
-        Returns:
-            SoftwareReleaseDict: A filtered version of the current dictionary
-        """
-
-        return SoftwareReleaseDict[ReleaseType](
-            **{rel_k: rel for rel_k, rel in self.items() if str(rel.version) == version}
+        return SoftwareRelVersionDict[ReleaseType](
+            **{version: edition_dict for version, edition_dict in self.items() if search_str in version}
         )
 
     def to_dict(self) -> dict[str, Any]:
         """
-        Convert the SoftwareReleaseDict into a regular dictionary.
+        Convert the SoftwareRelVersionDict into a regular dictionary.
 
         Returns:
-            dict[str, ReleaseType]: A regular dictionary representation of the current instance
+            dict[str, SoftwareRelEditionDict]: A regular dictionary representation of the current instance
         """
 
-        return { rel_k: rel.to_dict() for rel_k, rel in self._data.items() }
+        return { version: edition_dict.to_dict() for version, edition_dict in self._versions.items() }
