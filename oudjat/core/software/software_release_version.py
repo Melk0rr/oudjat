@@ -188,6 +188,58 @@ class SoftwareReleaseVersion:
 
         self._stage, self._stage_version = new_stage
 
+    def __gt__(self, other: "SoftwareReleaseVersion") -> bool:
+        """
+        Check if current version is above the other.
+
+        Args:
+            other (SoftwareReleaseVersion): The other version to compare
+
+        Returns:
+            bool: True if the current version is above the other. False otherwise
+        """
+
+        return self.major >= other.major and self.minor >= other.minor and self.build > other.build
+
+    def __ge__(self, other: "SoftwareReleaseVersion") -> bool:
+        """
+        Check if current version is equal or above the other.
+
+        Args:
+            other (SoftwareReleaseVersion): The other version to compare
+
+        Returns:
+            bool: True if the current version is above or equal to the other. False otherwise
+        """
+
+        return self.major >= other.major and self.minor >= other.minor and self.build >= other.build
+
+    def __lt__(self, other: "SoftwareReleaseVersion") -> bool:
+        """
+        Check if current version is below the other.
+
+        Args:
+            other (SoftwareReleaseVersion): The other version to compare
+
+        Returns:
+            bool: True if the current version is below the other. False otherwise
+        """
+
+        return self.major <= other.major and self.minor <= other.minor and self.build < other.build
+
+    def __le__(self, other: "SoftwareReleaseVersion") -> bool:
+        """
+        Check if current version is equal or above the other.
+
+        Args:
+            other (SoftwareReleaseVersion): The other version to compare
+
+        Returns:
+            bool: True if the current version is lower or equal to the other. False otherwise
+        """
+
+        return self.major <= other.major and self.minor <= other.minor and self.build <= other.build
+
     @override
     def __str__(self) -> str:
         """

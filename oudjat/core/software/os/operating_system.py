@@ -18,20 +18,6 @@ class OSRelease(SoftwareRelease):
     # Methods
 
     @property
-    @override
-    def name(self) -> str:
-        """
-        Return the OS release name. Must be implemented by overloading classes.
-
-        Returns:
-            str: forged name of the OS release
-        """
-
-        raise NotImplementedError(
-            f"{Context()}.get_name()::Method must be implemented by the overloading class"
-        )
-
-    @property
     def os(self) -> str:
         """
         Return the operating system instance tide to the current release.
