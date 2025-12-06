@@ -241,6 +241,34 @@ class SoftwareReleaseVersion:
         return self.major <= other.major and self.minor <= other.minor and self.build <= other.build
 
     @override
+    def __eq__(self, other: object) -> bool:
+        """
+        Check if current version is equal or above the other.
+
+        Args:
+            other (SoftwareReleaseVersion): The other version to compare
+
+        Returns:
+            bool: True if the current version is lower or equal to the other. False otherwise
+        """
+
+        if not isinstance(other, SoftwareReleaseVersion):
+            raise ValueError(f"{Context()}::You are trying to compare a SoftwareReleaseVersion with {type(object)}")
+
+        return self.major == other.major and self.minor == other.minor and self.build == other.build
+
+    @override
+    def __hash__(self) -> int:
+        """
+        Generate a hash for the current version.
+
+        Returns:
+            int: Hash based on the version numbers
+        """
+
+        return hash((self._major, self._minor, self._build))
+
+    @override
     def __str__(self) -> str:
         """
         Convert the current SoftwareReleaseVersion into a string.
