@@ -218,6 +218,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
 
             for channel, support_dict in version_dict["channels"].items():
                 win_sup: "SoftwareReleaseSupport" = SoftwareReleaseSupport(
+                    channel=channel,
                     active_support=support_dict["activeSupport"],
                     security_support=support_dict["securitySupport"],
                     extended_security_support=support_dict["extendedSecuritySupport"],

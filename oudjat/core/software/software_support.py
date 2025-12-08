@@ -39,6 +39,7 @@ class SoftwareReleaseSupport:
 
     def __init__(
         self,
+        channel: str,
         active_support: str | datetime,
         security_support: str | datetime | None = None,
         extended_security_support: str | datetime | None = None,
@@ -48,12 +49,15 @@ class SoftwareReleaseSupport:
         Create a new instance SoftwareReleaseSupport.
 
         Args:
+            channel (str)                                    : The support channel name
             active_support (str | datetime | None)           : The date when regular support ends. Can be a string with 'YYYY-MM-DD' format.
             security_support (str | datetime | None)         : The date when security support ends. Can be a string with 'YYYY-MM-DD' format.
             extended_security_support (str | datetime | None): The date when extended security support ends. Can be a string with 'YYYY-MM-DD' format.
             edition (list[str] | None)                       : A list of software editions supported by the release.
             long_term_support (bool | None)                  : Whether the release has long term support.
         """
+
+        self._channel: str = channel
 
         if security_support is None:
             security_support = active_support
@@ -154,6 +158,7 @@ class SoftwareReleaseSupport:
         )
 
         return {
+            "channel": self._channel,
             "activeSupport": TimeConverter.date_to_str(self._active_support),
             "securitySupport": TimeConverter.date_to_str(self._security_support),
             "extendedSecuritySupport": esu,
