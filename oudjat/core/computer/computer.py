@@ -279,7 +279,7 @@ class Computer(Asset):
         self._ip = new_ip
 
     @property
-    def os_support(self) -> list["SoftwareReleaseSupport"]:
+    def os_support(self) -> "SoftwareReleaseSupport | None":
         """
         Get support for current computer os release and edition.
 
@@ -287,10 +287,12 @@ class Computer(Asset):
             list[SoftwareReleaseSupport]: A list of SoftwareReleaseSupport instances representing the support for the current OS release and edition.
         """
 
-        if self._os.release is None:
-            return []
+        support = None
+        if self._os.release is not None:
+            if self._os.edition is not None:
+                support = self._os.release.support_channels.get(self._os.edition.channel)
 
-        return self._os.release.support_by_edition(str(self._os.edition))
+        return support
 
     @property
     def softwares(self) -> dict[str, "SoftwareRelease"]:
@@ -336,7 +338,7 @@ class Computer(Asset):
         if self._os.release is None:
             return False
 
-        return self._os.release.is_supported(str(self._os.edition))
+        return self._os.release.is_supported(self._os.edition)
 
     @override
     def __str__(self) -> str:
@@ -363,7 +365,7 @@ class Computer(Asset):
         edition_dict = self._os.edition.to_dict() if self._os.edition is not None else {}
 
         # OS support information
-        os_support_dict = self.os_support[0].to_dict() if len(self.os_support) > 0 else {}
+        os_support_dict = self.os_support.to_dict() if self.os_support is not None else {}
 
         base_dict: "ComputerBaseDict" = {
             "computerType": str(self._computer_type),

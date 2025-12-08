@@ -11,6 +11,7 @@ from oudjat.core.software import (
     SoftwareEditionDict,
     SoftwareReleaseSupport,
 )
+from oudjat.core.software.software_release_version import SoftwareReleaseVersion
 
 from ..operating_system import OperatingSystem, OSRelease
 from ..os_families import OSFamily
@@ -63,7 +64,7 @@ class MSOSRelease(OSRelease):
             str: A combined name based on the software's name and part of its label.
         """
 
-        return f"{self.software} {self.label.split(' ')[0]}"
+        return f"{self.software} {(self.label or "").split(' ')[0]}"
 
     def _os_dict(self) -> dict[str, Any]:
         """
@@ -106,32 +107,32 @@ class WindowsEdition(Enum):
     WINDOWS = SoftwareEditionDict(
         {
             "Enterprise": SoftwareEdition(
-                label="Enterprise", category="E", pattern=r"Ent[er]{2}prise"
+                label="Enterprise", channel="E", pattern=r"Ent[er]{2}prise"
             ),
             "Education": SoftwareEdition(
-                label="Education", category="E", pattern=r"[EÉeé]ducation"
+                label="Education", channel="E", pattern=r"[EÉeé]ducation"
             ),
             "IoT Enterprise": SoftwareEdition(
-                label="IoT Enterprise", category="E", pattern=r"[Ii][Oo][Tt] Ent[er]{2}prise"
+                label="IoT Enterprise", channel="E", pattern=r"[Ii][Oo][Tt] Ent[er]{2}prise"
             ),
-            "Home": SoftwareEdition(label="Home", category="W", pattern=r"[Hh]ome"),
-            "Pro": SoftwareEdition(label="Pro", category="W", pattern=r"Pro(?:fession[n]?[ae]l)?"),
+            "Home": SoftwareEdition(label="Home", channel="W", pattern=r"[Hh]ome"),
+            "Pro": SoftwareEdition(label="Pro", channel="W", pattern=r"Pro(?:fession[n]?[ae]l)?"),
             "Pro Education": SoftwareEdition(
                 label="Pro Education",
-                category="W",
+                channel="W",
                 pattern=r"Pro(?:fession[n]?[ae]l)? [EÉeé]ducation",
             ),
-            "IOT": SoftwareEdition(label="IOT", category="IOT", pattern=r"[Ii][Oo][Tt]"),
+            "IOT": SoftwareEdition(label="IOT", channel="IOT", pattern=r"[Ii][Oo][Tt]"),
         }
     )
 
     WINDOWSSERVER = SoftwareEditionDict(
         {
             "Standard": SoftwareEdition(
-                label="Standard", category="Standard", pattern=r"[Ss]tandard"
+                label="Standard", channel="Standard", pattern=r"[Ss]tandard"
             ),
             "Datacenter": SoftwareEdition(
-                label="Datacenter", category="Standard", pattern=r"[Dd]atacenter"
+                label="Datacenter", channel="Standard", pattern=r"[Dd]atacenter"
             ),
         }
     )
@@ -199,27 +200,31 @@ class MicrosoftOperatingSystem(OperatingSystem):
         """
 
         releases = WINDOWS_RELEASES[f"{self._label}"]
-        for version, edition_dict in releases.items():
-            for edition, rel_dict in edition_dict.items():
-                win_rel = self.find_release(version, edition)
+        for version, version_dict in releases.items():
+            win_rel = self.releases.get(version, None)
 
-                if win_rel is None:
-                    win_rel = MSOSRelease(
-                        os_name=self.name,
-                        version=rel_dict["latest"],
-                        release_date=rel_dict["releaseDate"],
-                        release_label=rel_dict["releaseLabel"],
-                    )
-
-                win_sup: "SoftwareReleaseSupport" = SoftwareReleaseSupport(
-                    active_support=rel_dict["support"],
-                    end_of_life=rel_dict["eol"],
-                    long_term_support=rel_dict["lts"],
-                    edition=self._editions.filter_by_category(edition),
+            if win_rel is None:
+                win_rel = MSOSRelease(
+                    os_name=self.name,
+                    version=version,
+                    release_date=version_dict["releaseDate"],
+                    release_label=version_dict["releaseLabel"],
                 )
 
-                self.add_release(win_rel, edition)
-                self.releases[version][edition].add_support(win_sup)
+                win_rel.latest_version = SoftwareReleaseVersion(version_dict["latest"])
+                win_rel.add_custom_attr("link", version_dict["link"])
+
+            for channel, support_dict in version_dict["channels"].items():
+                win_sup: "SoftwareReleaseSupport" = SoftwareReleaseSupport(
+                    active_support=support_dict["activeSupport"],
+                    security_support=support_dict["securitySupport"],
+                    extended_security_support=support_dict["extendedSecuritySupport"],
+                    long_term_support=support_dict["lts"],
+                )
+
+                self.releases[version].add_support(channel, win_sup)
+
+            self.add_release(win_rel)
 
     # ****************************************************************
     # Static methods

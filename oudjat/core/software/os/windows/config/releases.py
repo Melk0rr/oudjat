@@ -7,22 +7,38 @@ from oudjat.utils.file_utils import FileUtils
 
 # TODO: Rework JSON structure and SoftwareReleaseDict
 
-PerEditionMSReleaseDict: TypeAlias = dict[str, "MSReleaseProps"]
-PerVersionMSReleaseDict: TypeAlias = dict[str, "PerEditionMSReleaseDict"]
+PerVersionMSReleaseDict: TypeAlias = dict[str, "MSReleaseProps"]
 PerOSMSReleaseDict: TypeAlias = dict[str, "PerVersionMSReleaseDict"]
 
+class MSSupportProps(TypedDict):
+    """
+    A class to properly handle MS support attribute types.
+
+    Attributes:
+        eos (str)       : Base end of support date
+        eol (str)       : End of life / end of security support
+        esu (str | None): Extended security support date
+        lts (bool)      : Does the channel include Long Time Support
+    """
+
+    activeSupport: str
+    securitySupport: str
+    extendedSecuritySupport: str | None
+    lts: bool
+
+ChannelDict: TypeAlias = dict[str, "MSSupportProps"]
+
 class MSReleaseProps(TypedDict):
-    """A class to properly handle MS release types."""
+    """
+    A class to properly handle MS release attribute types.
+    """
 
     os: str
     releaseLabel: str
     releaseDate: str
-    support: str
-    eol: str
-    lts: bool
     latest: str
     link: str
-    edition: str
+    channels: "ChannelDict"
 
 dirname = os.path.dirname(os.path.abspath(__file__))
 WINDOWS_RELEASES: "PerOSMSReleaseDict" = FileUtils.import_json(f"{dirname}/releases.jsonc")[0]

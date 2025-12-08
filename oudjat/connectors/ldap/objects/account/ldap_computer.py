@@ -49,10 +49,8 @@ class LDAPComputer(LDAPAccount):
             if len(os_edition_match) != 0:
                 os_edition = os_edition_match[0]
 
-            os_edition_ctg = os_edition.category if os_edition else "Standard"
             if os_ver:
-                os_release = os.find_release(os_ver, edition=os_edition_ctg)
-
+                os_release = os.releases.get(os_ver)
 
         self._computer: "Computer" = Computer(
             computer_id=self._id,

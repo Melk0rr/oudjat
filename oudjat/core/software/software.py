@@ -6,7 +6,7 @@ from typing import Any, Generic, override
 from ..asset import Asset
 from ..asset_type import AssetType
 from .software_edition import SoftwareEdition, SoftwareEditionDict
-from .software_release import ReleaseType, SoftwareRelEditionDict, SoftwareRelVersionDict
+from .software_release import ReleaseType, SoftwareRelVersionDict
 
 
 class SoftwareType(IntEnum):
@@ -120,7 +120,7 @@ class Software(Asset, Generic[ReleaseType]):
 
         return self._editions
 
-    def has_release(self, rel_ver: str, rel_label: str) -> bool:
+    def has_release(self, rel_ver: str) -> bool:
         """
         Check if the current software has a release with the given version and label.
 
@@ -132,9 +132,9 @@ class Software(Asset, Generic[ReleaseType]):
             bool: True if a matching release is found, otherwise False.
         """
 
-        return self.releases.find(rel_ver, rel_label) is not None
+        return rel_ver in self.releases.keys()
 
-    def add_release(self, new_release: "ReleaseType", edition: str = "Standard") -> None:
+    def add_release(self, new_release: "ReleaseType") -> None:
         """
         Add a release to the list of software releases.
 
@@ -146,38 +146,7 @@ class Software(Asset, Generic[ReleaseType]):
             This method does not allow adding non-SoftwareRelease objects and returns silently if so.
         """
 
-        if str(new_release.version) not in self.releases.keys():
-            self.releases[str(new_release.version)] = SoftwareRelEditionDict[ReleaseType]()
-
-        self.releases[str(new_release.version)][edition] = new_release
-
-    def find_release(self, version: str, edition: str = "Standard") -> "ReleaseType | None":
-        """
-        Find a release by its version and optionally label.
-
-        Args:
-            version (str): The version of the release to search for.
-            edition (str): The label of the release to search for. Defaults to None.
-
-        Returns:
-            ReleaseType: The found release object or None if not found.
-        """
-
-        return self.releases.find(version, edition)
-
-    def releases_list(self) -> list["ReleaseType"]:
-        """
-        Return a flat list of SoftwareRelease instances bound to the current software.
-
-        Returns:
-            list[ReleaseType]: A list of software releases
-        """
-
-        rel_list = []
-        for ver_dict in self._releases.values():
-            rel_list.extend(ver_dict.values())
-
-        return rel_list
+        self.releases[str(new_release.version)] = new_release
 
     def retired_releases(self) -> list["ReleaseType"]:
         """
@@ -187,7 +156,7 @@ class Software(Asset, Generic[ReleaseType]):
             list[SoftwareRelease]: A list of SoftwareRelease objects that are not supported.
         """
 
-        return [r for r in self.releases_list() if not r.is_supported()]
+        return [r for r in self.releases.values() if not r.is_supported()]
 
     def supported_releases(self) -> list["ReleaseType"]:
         """
@@ -197,7 +166,7 @@ class Software(Asset, Generic[ReleaseType]):
             list[SoftwareRelease]: A list of SoftwareRelease objects that are supported.
         """
 
-        return [r for r in self.releases_list() if r.is_supported()]
+        return [r for r in self.releases.values() if r.is_supported()]
 
     def matching_editions(self, test_str: str) -> list["SoftwareEdition"]:
         """

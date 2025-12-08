@@ -223,9 +223,9 @@ class GenericIdentifiable(ABC):
 
         base_dict: "GenericIdentifiableBaseDict" = {
             "id": self._id,
-            "name": self.name,
-            "label": self.label,
-            "description": self.description,
+            "name": self._name,
+            "label": self._label,
+            "description": self._description,
         }
 
         return {
