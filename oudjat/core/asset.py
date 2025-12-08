@@ -19,7 +19,7 @@ class AssetBaseDict(TypedDict):
     """
 
     assetType: str
-    location: dict[int | str, "Location"]
+    location: dict[str, dict[str, Any]]
 
 class Asset(GenericIdentifiable, ABC):
     """
@@ -60,7 +60,7 @@ class Asset(GenericIdentifiable, ABC):
         super().__init__(gid=asset_id, name=name, label=label or "", description=description or "")
 
         self._asset_type: "AssetType" = asset_type
-        self._location: dict[int | str, "Location"] = {}
+        self._location: dict[str, "Location"] = {}
 
         if location is not None:
             self.set_location_from_instance(location)
@@ -69,13 +69,13 @@ class Asset(GenericIdentifiable, ABC):
     # Methods
 
     @property
-    def location(self) -> dict[int | str, "Location"]:
+    def location(self) -> dict[str, "Location"]:
         """The location property."""
 
         return self._location
 
     @location.setter
-    def location(self, new_location: dict[int | str, "Location"]) -> None:
+    def location(self, new_location: dict[str, "Location"]) -> None:
         """
         Set the location of the current asset.
 
@@ -110,7 +110,7 @@ class Asset(GenericIdentifiable, ABC):
         if not isinstance(new_location, list):
             new_location = [new_location]
 
-        self._location = { loc.id: loc for loc in new_location }
+        self._location = { f"{loc.id}": loc for loc in new_location }
 
     @override
     def to_dict(self) -> dict[str, Any]:
@@ -123,7 +123,7 @@ class Asset(GenericIdentifiable, ABC):
 
         base_dict: "AssetBaseDict" = {
             "assetType": str(self._asset_type),
-            "location": self.location,
+            "location": {loc_k: loc.to_dict() for loc_k, loc in self._location.items()},
         }
 
         return {

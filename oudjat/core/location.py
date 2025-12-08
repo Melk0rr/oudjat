@@ -4,9 +4,7 @@ from typing import Any, override
 
 from oudjat.utils import Context
 
-from ..core import Asset, AssetType
 from ..core.network.subnet import Subnet
-from .exceptions import InvalidAssetTypeError
 from .generic_identifiable import GenericIdentifiable
 
 
@@ -42,7 +40,6 @@ class Location(GenericIdentifiable):
 
         super().__init__(gid=location_id, name=name, label=label, description=description)
 
-        self._assets: dict[str, dict[int | str, Asset]] = {}
         self._subnet: dict[int | str, Subnet] = {}
 
         if subnet is not None:
@@ -101,77 +98,6 @@ class Location(GenericIdentifiable):
 
         self._subnet[str(subnet)] = subnet
 
-    @property
-    def assets(self) -> dict[str, dict[int | str, Asset]]:
-        """
-        Return the assets currently associated with this location.
-
-        Returns:
-            dict[int | str, Asset]: location assets represented as a dictionary
-        """
-
-        return self._assets
-
-    @assets.setter
-    def assets(self, new_assets: dict[str, dict[int | str, Asset]]) -> None:
-        """
-        Set the assets associated with the current location.
-
-        Args:
-            new_assets (dict[int | str, Asset]): a dictionary of assets to associate with the current location
-        """
-
-        for at_name, at_assets in new_assets.items():
-            if at_name.upper() not in AssetType._member_names_:
-                raise InvalidAssetTypeError(f"{Context()}::Invalid asset type provided {at_name}")
-
-            self._assets[at_name] = at_assets
-
-    def asset(self, asset_type: AssetType, asset_id: int | str) -> Asset:
-        """
-        Look for an asset based on asset type and id.
-
-        Args:
-            asset_type (AssetType): The type of the asset to search for.
-            asset_id (int | str)  : The identifier of the asset to search for.
-
-        Returns:
-            Asset: The found asset or None if not found.
-        """
-
-        return self.assets[asset_type.name][asset_id]
-
-    def asset_per_type(self, asset_type: AssetType) -> dict[int | str, Asset] | None:
-        """
-        Return a dictionary of assets for the given type.
-
-        Args:
-            asset_type (AssetType): The type of assets to retrieve.
-
-        Returns:
-            dict[int | str, Asset]: A dictionary of assets filtered by the specified type or None if no assets found.
-        """
-
-        return self._assets.get(asset_type.name, None)
-
-    def add_asset(self, asset: Asset) -> None:
-        """
-        Add a new asset to the current location.
-
-        Args:
-            asset (Asset)         : The asset instance to be added.
-            asset_type (AssetType): The type of the asset to which the provided asset belongs.
-
-        Raises:
-            KeyError: If the asset type does not exist in the assets dictionary.
-        """
-
-        if asset.asset_type.name not in self.assets.keys():
-            self.assets[asset.asset_type.name] = {}
-
-        if asset.id not in self.assets[asset.asset_type.name].keys():
-            self.assets[asset.asset_type.name][asset.id] = asset
-
     def is_ip_in_subnet(self, ip: str, subnet: str | None = None) -> bool:
         """
         Check if the provided ip is in one of the location subnet.
@@ -214,11 +140,6 @@ class Location(GenericIdentifiable):
             dict[str, Any]: A dictionary representation of the current location
         """
 
-        asset_dict = {}
-        for asset_type, at_dict in self._assets.items():
-            asset_dict[asset_type] = {asset_k: asset for asset_k, asset in at_dict.items()}
-
         return {
             **super().to_dict(),
-            "assets": asset_dict,
         }
