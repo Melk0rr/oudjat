@@ -101,7 +101,7 @@ class LDAPGroup(LDAPObject):
             member (LDAPObject): member to add
         """
 
-        self.group.add_member(member)
+        self.group.add_member(key=member.dn, member=member)
 
     def fetch_members(
         self,

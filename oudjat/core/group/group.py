@@ -71,15 +71,16 @@ class Group(Asset, Generic[MemberType]):
 
         return [m.name for m in self.members.values()]
 
-    def add_member(self, member: "MemberType") -> None:
+    def add_member(self, key: str, member: "MemberType") -> None:
         """
         Add a new member to the group.
 
         Args:
+            key (str)                   : The key to associate with the member
             member (GenericIdentifiable): The asset to be added as a member.
         """
 
-        self._members[f"{member.id}"] = member
+        self._members[key] = member
 
     def clear_members(self) -> None:
         """
