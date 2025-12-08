@@ -362,7 +362,8 @@ class Computer(Asset):
 
         # OS Release informations
         release_dict = self._os.release.to_dict() if self._os.release is not None else {}
-        del release_dict["supportChannels"]
+        if "supportChannels" in release_dict:
+            del release_dict["supportChannels"]
 
         edition_dict = self._os.edition.to_dict() if self._os.edition is not None else {}
 
