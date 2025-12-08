@@ -63,7 +63,7 @@ class Asset(GenericIdentifiable, ABC):
         self._location: dict[str, "Location"] = {}
 
         if location is not None:
-            self.set_location_from_instance(location)
+            self._set_location_from_instances(location)
 
     # ****************************************************************
     # Methods
@@ -96,7 +96,17 @@ class Asset(GenericIdentifiable, ABC):
 
         return self._asset_type
 
-    def set_location_from_instance(self, new_location: "Location | list[Location]") -> None:
+    def add_location(self, new_location: "Location") -> None:
+        """
+        Add a new location to the asset.
+
+        Args:
+            new_location (Location): New location to bound to the asset
+        """
+
+        self._location[f"{new_location.id}"] = new_location
+
+    def _set_location_from_instances(self, new_location: "Location | list[Location]") -> None:
         """
         Setter for asset location.
 
