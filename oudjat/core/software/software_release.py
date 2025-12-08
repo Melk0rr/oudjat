@@ -279,8 +279,8 @@ class SoftwareRelease(GenericIdentifiable):
             "software": self.software,
             "name": self.name,
             "version": {
-                "initial": self._version.to_dict(),
-                "latest": self._latest_version.to_dict()
+                "initial": str(self._version),
+                "latest": str(self._latest_version)
             },
             "fullname": self.full_name,
             "isSupported": self.is_supported(),
