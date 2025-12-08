@@ -11,12 +11,12 @@ from oudjat.utils.types import StrType
 from ...ldap_filter import LDAPFilter
 from ..definitions import UUID_REG
 from ..ldap_object import LDAPObject
+from ..ldap_object_types import LDAPObjectType
 from .ms_gppref import MS_GPPREF
 
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
     from ..ldap_object import LDAPCapabilities
-    from ..ldap_object_types import LDAPObjectType
 
 
 class LDAPGPOScope(Enum):
