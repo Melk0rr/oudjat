@@ -133,7 +133,7 @@ class LDAPGroup(LDAPObject):
                 entry_obj_type = LDAPObjectType.from_object_cls(search_entry)
                 LDAPObjectCls = self.capabilities.ldap_obj_opt(entry_obj_type).cls
 
-                new_member = LDAPObjectCls(search_entry, self.capabilities)
+                new_member = LDAPObjectCls(search_entry, capabilities=self.capabilities)
                 if isinstance(new_member, LDAPGroup) and recursive:
                     self.logger.debug(f"{context}::Fetching members of sub group {ref}")
                     new_member.fetch_members(recursive=recursive)
