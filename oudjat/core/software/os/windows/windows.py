@@ -214,6 +214,8 @@ class MicrosoftOperatingSystem(OperatingSystem):
                 win_rel.latest_version = SoftwareReleaseVersion(version_dict["latest"])
                 win_rel.add_custom_attr("link", version_dict["link"])
 
+            self.add_release(win_rel)
+
             for channel, support_dict in version_dict["channels"].items():
                 win_sup: "SoftwareReleaseSupport" = SoftwareReleaseSupport(
                     active_support=support_dict["activeSupport"],
@@ -224,7 +226,6 @@ class MicrosoftOperatingSystem(OperatingSystem):
 
                 self.releases[version].add_support(channel, win_sup)
 
-            self.add_release(win_rel)
 
     # ****************************************************************
     # Static methods
