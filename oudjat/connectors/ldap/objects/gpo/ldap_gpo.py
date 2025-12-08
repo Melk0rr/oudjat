@@ -110,7 +110,7 @@ class LDAPGroupPolicyObject(LDAPObject):
         self,
         attributes: "StrType | None" = None,
         ou: str = "*",
-    ) -> dict[int | str, "LDAPObject"]:
+    ) -> dict[str, "LDAPObject"]:
         """
         Get the GPO linked objects.
 
@@ -129,7 +129,8 @@ class LDAPGroupPolicyObject(LDAPObject):
         obj_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.OU)
         obj_filter = LDAPFilter(f"(gPLink={f'*{self.name}*'})") & LDAPFilter(f"(name={ou})")
 
-        return obj_opt.fetch(search_filter=obj_filter, attributes=attributes)
+        res = obj_opt.fetch(search_filter=obj_filter, attributes=attributes)
+        return res
 
     @override
     def to_dict(self) -> dict[str, Any]:
@@ -150,6 +151,7 @@ class LDAPGroupPolicyObject(LDAPObject):
             "scope": self.scope.name,
             "state": self.state.name,
             "infos": self.infos,
+            "linkedObjects": list(self.linked_objects().keys())
         }
 
     # ****************************************************************
