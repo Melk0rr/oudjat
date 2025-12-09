@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
 
 
-class LDAPComputer(LDAPAccount):
+class LDAPComputer(Computer):
     """A class to describe LDAP computer objects."""
 
     # ****************************************************************
@@ -27,10 +27,10 @@ class LDAPComputer(LDAPAccount):
             **kwargs (Any)        : Any further argument to pass to parent class
         """
 
-        super().__init__(ldap_entry=ldap_entry, **kwargs)
+        self._account: "LDAPAccount" = LDAPAccount(ldap_entry, **kwargs)
 
-        raw_os = self.entry.get("operatingSystem")
-        raw_os_version = self.entry.get("operatingSystemVersion")
+        raw_os = self._account.entry.get("operatingSystem")
+        raw_os_version = self._account.entry.get("operatingSystemVersion")
 
         # Retrieve OS and OS edition informations
         os_family_infos: str | None = (
@@ -56,7 +56,7 @@ class LDAPComputer(LDAPAccount):
             if os_ver:
                 os_release = os.releases.get(os_ver)
 
-        self._computer: "Computer" = Computer(
+        super().__init__(
             computer_id=self._id,
             name=self._name,
             label=self.hostname,
@@ -66,7 +66,7 @@ class LDAPComputer(LDAPAccount):
         )
 
         if cpt_type is not None:
-            self._computer.computer_type = cpt_type[0]
+            super().computer_type = cpt_type[0]
 
     # ****************************************************************
     # Methods
@@ -80,11 +80,11 @@ class LDAPComputer(LDAPAccount):
             str: the computer hostname as a string
         """
 
-        return self.entry.get("dNSHostName")
+        return self._account.entry.get("dNSHostName")
 
     @override
     def to_dict(self) -> dict[str, Any]:
         """Convert the current instance into a dictionary."""
 
-        cpt_dict = self._computer.to_dict()
-        return {**super().to_dict(), "hostname": cpt_dict.pop("label"), **cpt_dict}
+        cpt_dict = super().to_dict()
+        return {**self._account.to_dict(), "hostname": cpt_dict.pop("label"), **cpt_dict}
