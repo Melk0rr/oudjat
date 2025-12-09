@@ -105,7 +105,7 @@ class LDAPOrganizationalUnit(LDAPObject):
         return {
             obj_id: obj
             for obj_id, obj in self.objects.items()
-            if isinstance(obj, "LDAPOrganizationalUnit")
+            if isinstance(obj, LDAPOrganizationalUnit)
         }
 
     def object_per_cls(self, object_cls: "StrType | None") -> dict[str, "LDAPObject"]:
