@@ -211,7 +211,7 @@ class LDAPObjectType(Enum):
         def object_cls_is(object_type: "LDAPObjectType") -> bool:
             return object_type.object_cls == entry.get("attributes", {}).get("objectClass", [])[-1]
 
-        return next(filter(object_cls_is, LDAPObjectType))
+        return next(filter(object_cls_is, LDAPObjectType), LDAPObjectType.DEFAULT)
 
     @staticmethod
     def resolve_entry_cls(entry: dict[str, Any]) -> str:
