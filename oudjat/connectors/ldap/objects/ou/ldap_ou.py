@@ -81,7 +81,7 @@ class LDAPOrganizationalUnit(LDAPObject):
             LDAPObjectCls = self.capabilities.ldap_obj_opt(obj_type).cls
             new_object = LDAPObjectCls(entry, self.capabilities)
 
-            if isinstance(new_object, "LDAPOrganizationalUnit") and recursive:
+            if isinstance(new_object, LDAPOrganizationalUnit) and recursive:
                 new_object.fetch_objects(recursive)
 
             self.objects[entry.dn] = new_object
