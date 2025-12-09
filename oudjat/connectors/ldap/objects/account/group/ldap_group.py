@@ -166,7 +166,7 @@ class LDAPGroup(LDAPObject):
         sub_groups: dict[str, "LDAPGroup"] = {}
         for member in self.members.values():
             if isinstance(member, LDAPGroup):
-                sub_groups[f"{member.id}"] = member
+                sub_groups[f"{member.dn}"] = member
 
                 if recursive:
                     sub_groups.update(member.sub_groups(recursive=recursive))
@@ -195,7 +195,7 @@ class LDAPGroup(LDAPObject):
         members = {}
         for member in self.members.values():
             if not isinstance(member, LDAPGroup):
-                members[f"{member.id}"] = member
+                members[f"{member.dn}"] = member
 
             else:
                 if recursive:
@@ -225,7 +225,7 @@ class LDAPGroup(LDAPObject):
                 members.update(member.members_flat())
 
             else:
-                members[f"{member.id}"] = member
+                members[f"{member.dn}"] = member
 
         return members
 
@@ -243,7 +243,7 @@ class LDAPGroup(LDAPObject):
         """
 
         member_ref_list = self.members_flat().keys() if extended else self.members.keys()
-        return ldap_object.id in member_ref_list
+        return ldap_object.dn in member_ref_list
 
     @override
     def to_dict(self) -> dict[str, Any]:
