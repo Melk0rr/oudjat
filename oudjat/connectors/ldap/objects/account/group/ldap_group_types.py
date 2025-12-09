@@ -1,5 +1,7 @@
 """A simple module to define LDAP group types as a bit flag."""
 
+from typing import override
+
 from oudjat.utils.bit_flag import BitFlag
 
 
@@ -13,3 +15,13 @@ class LDAPGroupType(BitFlag):
     DOMAIN_SECURITY = -2147483644
     UNIVERSAL_SECURITY = -2147483640
 
+    @override
+    def __str__(self) -> str:
+        """
+        Convert an LDAPGroupType into a string.
+
+        Returns:
+            str: A string representation of the LDAP group type
+        """
+
+        return self._name_

@@ -257,6 +257,6 @@ class LDAPGroup(LDAPObject):
         return {
             **super().to_dict(),
             **self.group.to_dict(),
-            "groupType": self.group_type.name,
+            "groupType": str(self.group_type),
             "members": list(self.members.keys()),
         }
