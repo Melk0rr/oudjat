@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING, Any, override
 
-from oudjat.core.computer import Computer, ComputerType
+from oudjat.core.computer import Computer
 from oudjat.core.software import SoftwareEdition
 from oudjat.core.software.os import OperatingSystem, OSOption
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
 
 
-class LDAPComputer(Computer):
+class LDAPComputer(LDAPAccount):
     """A class to describe LDAP computer objects."""
 
     # ****************************************************************
@@ -27,10 +27,10 @@ class LDAPComputer(Computer):
             **kwargs (Any)        : Any further argument to pass to parent class
         """
 
-        self._account: "LDAPAccount" = LDAPAccount(ldap_entry, **kwargs)
+        super().__init__(ldap_entry=ldap_entry, **kwargs)
 
-        raw_os = self._account.entry.get("operatingSystem")
-        raw_os_version = self._account.entry.get("operatingSystemVersion")
+        raw_os = self.entry.get("operatingSystem")
+        raw_os_version = self.entry.get("operatingSystemVersion")
 
         # Retrieve OS and OS edition informations
         os_family_infos: str | None = (
@@ -56,17 +56,17 @@ class LDAPComputer(Computer):
             if os_ver:
                 os_release = os.releases.get(os_ver)
 
-        super().__init__(
-            computer_id=self._account.id,
-            name=self._account.name,
+        self._computer: "Computer" = Computer(
+            computer_id=self._id,
+            name=self._name,
             label=self.hostname,
-            description=self._account.description,
+            description=self._description,
             os_release=os_release,
             os_edition=os_edition,
         )
 
         if cpt_type is not None:
-            self._computer_type: "ComputerType" = cpt_type[0]
+            self._computer.computer_type = cpt_type[0]
 
     # ****************************************************************
     # Methods
@@ -80,11 +80,11 @@ class LDAPComputer(Computer):
             str: the computer hostname as a string
         """
 
-        return self._account.entry.get("dNSHostName")
+        return self.entry.get("dNSHostName")
 
     @override
     def to_dict(self) -> dict[str, Any]:
         """Convert the current instance into a dictionary."""
 
-        cpt_dict = super().to_dict()
-        return {**self._account.to_dict(), "hostname": cpt_dict.pop("label"), **cpt_dict}
+        cpt_dict = self._computer.to_dict()
+        return {**super().to_dict(), "hostname": cpt_dict.pop("label"), **cpt_dict}
