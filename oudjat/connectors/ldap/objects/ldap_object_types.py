@@ -209,7 +209,7 @@ class LDAPObjectType(Enum):
         """
 
         def object_cls_is(object_type: "LDAPObjectType") -> bool:
-            return object_type.object_cls == entry.get("attributes", {}).get("objectClass", [])[-1]
+            return object_type.object_cls == entry.get("objectClass", [])[-1]
 
         return next(filter(object_cls_is, LDAPObjectType), LDAPObjectType.DEFAULT)
 
@@ -225,7 +225,7 @@ class LDAPObjectType(Enum):
             str: The name of the object class, or None if no matching class is found.
         """
 
-        entry_obj_cls: list[str] = entry.get("attributes", {}).get("objectClass", [])
+        entry_obj_cls: list[str] = entry.get("objectClass", [])
 
         return next(
             (t.name for t in LDAPObjectType if entry_obj_cls and entry_obj_cls[-1] == t.object_cls),
