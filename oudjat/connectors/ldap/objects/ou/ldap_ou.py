@@ -169,4 +169,4 @@ class LDAPOrganizationalUnit(LDAPObject):
             dict: A dictionary containing the attributes of the LDAP ou in a structured format
         """
 
-        return {**super().to_dict(), "gpLink": self.gplink}
+        return {**super().to_dict(), "gpLink": self.gplink, "objects": list(self.objects.keys())}
