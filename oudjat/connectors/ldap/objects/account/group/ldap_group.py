@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, override
 
 from ldap3.utils.conv import escape_filter_chars
 
+from oudjat.connectors.ldap.ldap_filter import LDAPFilter
 from oudjat.connectors.ldap.objects.ldap_object_types import LDAPObjectType
 from oudjat.core.group import Group
 from oudjat.utils.context import Context
@@ -125,7 +126,7 @@ class LDAPGroup(LDAPObject):
             # TODO: Use LDAPFilter ?
             escaped_ref = escape_filter_chars(ref)
             ref_search: list["LDAPEntry"] = self.capabilities.ldap_search(
-                search_filter=f"(distinguishedName={escaped_ref})"
+                search_filter=LDAPFilter.dn(escaped_ref)
             )
 
             if len(ref_search) > 0:

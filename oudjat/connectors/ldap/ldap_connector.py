@@ -21,15 +21,8 @@ from .exceptions import (
     LDAPUnreachableServerError,
 )
 from .ldap_filter import LDAPFilter, LDAPFilterStrFormat
-from .objects.account.group.ldap_group import LDAPGroup
-from .objects.account.ldap_computer import LDAPComputer
-from .objects.account.ldap_user import LDAPUser
-from .objects.gpo.ldap_gpo import LDAPGroupPolicyObject
 from .objects.ldap_entry import LDAPEntry
-from .objects.ldap_object import LDAPCapabilities, LDAPObject, LDAPObjectOptions
 from .objects.ldap_object_types import LDAPObjectType
-from .objects.ou.ldap_ou import LDAPOrganizationalUnit
-from .objects.subnet.ldap_subnet import LDAPSubnet
 
 
 class LDAPTLSVersion(IntEnum):
@@ -113,33 +106,6 @@ class LDAPConnector(Connector):
 
         context = Context()
         self.logger.debug(f"{context}::New LDAPConnector - {self._target}:{self._port}")
-
-        self._LDAP_PYTHON_CLS: dict[str, "LDAPObjectOptions"] = {
-            f"{LDAPObjectType.DEFAULT}": LDAPObjectOptions["LDAPObject"](
-                cls=LDAPObject, fetch=self.objects
-            ),
-            f"{LDAPObjectType.COMPUTER}": LDAPObjectOptions["LDAPComputer"](
-                cls=LDAPComputer, fetch=self.computers
-            ),
-            f"{LDAPObjectType.GPO}": LDAPObjectOptions["LDAPGroupPolicyObject"](
-                cls=LDAPGroupPolicyObject, fetch=self.gpos
-            ),
-            f"{LDAPObjectType.GROUP}": LDAPObjectOptions["LDAPGroup"](
-                cls=LDAPGroup, fetch=self.groups
-            ),
-            f"{LDAPObjectType.OU}": LDAPObjectOptions["LDAPOrganizationalUnit"](
-                cls=LDAPOrganizationalUnit, fetch=self.ous
-            ),
-            f"{LDAPObjectType.SUBNET}": LDAPObjectOptions["LDAPSubnet"](
-                cls=LDAPSubnet, fetch=self.subnets
-            ),
-            f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](cls=LDAPUser, fetch=self.users),
-        }
-
-        self._DEFAULT_CAPABILITIES: "LDAPCapabilities" = LDAPCapabilities(
-            ldap_search=self.fetch,
-            ldap_obj_opt=self.ldap_object_opt_from_obj_type,
-        )
 
     # ****************************************************************
     # Methods
@@ -384,9 +350,8 @@ class LDAPConnector(Connector):
         search_filter: "LDAPFilter | str | None" = None,
         attributes: "StrType | None" = None,
         search_base: str | None = None,
-        auto: bool = False,
         payload: dict[str, Any] | None = None,
-    ) -> dict[str, "LDAPObject"]:
+    ) -> list["LDAPEntry"]:
         """
         Specific method to retrieve LDAP User instances.
 
@@ -394,11 +359,10 @@ class LDAPConnector(Connector):
             search_filter (str)            : Filter to reduce search results
             attributes (str | list[str])   : Attributes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
-            auto (bool)                    : Auto map the objects dynamically per type
             payload (dict[str, Any] | None): Payload to send to the server
 
         Returns:
-            dict[str, LDAPObject]: list of objects
+            list[LDAPEntry]: A list of entries based on the provided arguments and payload
         """
 
         entries = self.fetch(
@@ -409,18 +373,97 @@ class LDAPConnector(Connector):
             payload=payload,
         )
 
-        def map_obj(entry: "LDAPEntry") -> "LDAPObject":
-            if auto:
-                obj_type = LDAPObjectType.from_object_cls(entry)
-                LDAPDynamicObjectType = self._LDAP_PYTHON_CLS[obj_type.name].cls
+        return entries
 
-                return LDAPDynamicObjectType(
-                    self.complete_partial_entry(entry), self._DEFAULT_CAPABILITIES
-                )
+    def computers(
+        self,
+        search_filter: "LDAPFilter | str | None" = None,
+        attributes: "StrType | None" = None,
+        search_base: str | None = None,
+        payload: dict[str, Any] | None = None,
+    ) -> list["LDAPEntry"]:
+        """
+        Specific method to retrieve LDAP Computer instances.
 
-            return LDAPObject(entry, capabilities=self._DEFAULT_CAPABILITIES)
+        Args:
+            search_filter (str)            : filter to reduce search results
+            attributes (str | list[str])   : attributes to include in result
+            search_base (str)              : where to base the search on in terms of directory location
+            payload (dict[str, Any] | None): Payload to send to the server
 
-        return {obj.dn: obj for obj in list(map(map_obj, entries))}
+        Returns:
+            list[LDAPEntry]: A list of entries based on the provided arguments and payload
+        """
+
+        entries = self.fetch(
+            search_type=LDAPObjectType.COMPUTER,
+            search_base=search_base,
+            search_filter=search_filter,
+            attributes=attributes,
+            payload=payload,
+        )
+
+        return entries
+
+    def users(
+        self,
+        search_filter: "LDAPFilter | str | None" = None,
+        attributes: "StrType | None" = None,
+        search_base: str | None = None,
+        payload: dict[str, Any] | None = None,
+    ) -> list["LDAPEntry"]:
+        """
+        Specific method to retrieve LDAP User instances.
+
+        Args:
+            search_filter (str)            : filter to reduce search results
+            attributes (str | list[str])   : attributes to include in result
+            search_base (str)              : where to base the search on in terms of directory location
+            payload (dict[str, Any] | None): Payload to send to the server
+
+        Returns:
+            list[LDAPEntry]: A list of entries based on the provided arguments and payload
+        """
+
+        entries = self.fetch(
+            search_type=LDAPObjectType.USER,
+            search_base=search_base,
+            search_filter=search_filter,
+            attributes=attributes,
+            payload=payload,
+        )
+
+        return entries
+
+    def groups(
+        self,
+        search_filter: "LDAPFilter | str | None" = None,
+        search_base: str | None = None,
+        attributes: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
+    ) -> list["LDAPEntry"]:
+        """
+        Specific method to retrieve LDAP group objects.
+
+        Args:
+            search_filter (str)            : Filter to reduce search results
+            attributes (str | list[str])   : Attrbutes to include in result
+            search_base (str)              : Where to base the search on in terms of directory location
+            payload (dict[str, Any] | None): Payload to send to the server
+
+        Returns:
+            list[LDAPEntry]: A list of entries based on the provided arguments and payload
+        """
+
+        entries = self.fetch(
+            search_type=LDAPObjectType.GROUP,
+            search_base=search_base,
+            search_filter=search_filter,
+            attributes=attributes,
+            payload=payload,
+        )
+
+        return entries
 
     def gpos(
         self,
@@ -428,7 +471,7 @@ class LDAPConnector(Connector):
         name: StrType = "*",
         attributes: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
-    ) -> dict[str, "LDAPGroupPolicyObject"]:
+    ) -> list["LDAPEntry"]:
         """
         Specific method to retrieve LDAP GPO instances.
 
@@ -439,7 +482,7 @@ class LDAPConnector(Connector):
             payload (dict[str, Any] | None): Payload to send to the server
 
         Returns:
-            dict[str, LDAPGroupPolicyObject]: list of LDAPGroupPolicyObject instances
+            list[LDAPEntry]: A list of entries based on the provided arguments and payload
         """
 
         name_filter = LDAPFilter()
@@ -460,17 +503,45 @@ class LDAPConnector(Connector):
             payload=payload,
         )
 
-        def map_gpo(entry: "LDAPEntry") -> "LDAPGroupPolicyObject":
-            return LDAPGroupPolicyObject(entry, self._DEFAULT_CAPABILITIES)
+        return entries
 
-        return {gpo.dn: gpo for gpo in list(map(map_gpo, entries))}
+    def ous(
+        self,
+        search_filter: "LDAPFilter | str | None" = None,
+        search_base: str | None = None,
+        attributes: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
+    ) -> list["LDAPEntry"]:
+        """
+        Specific method to retrieve LDAP organizational unit objects.
+
+        Args:
+            dn (str):                      : Optional distinguished name to search
+            search_filter (str)            : Filter to reduce search results
+            attributes (str | list[str])   : Attrbutes to include in result
+            search_base (str)              : Where to base the search on in terms of directory location
+            payload (dict[str, Any] | None): Payload to send to the server
+
+        Returns:
+            list[LDAPEntry]: A list of entries based on the provided arguments and payload
+        """
+
+        entries = self.fetch(
+            search_type=LDAPObjectType.OU,
+            search_base=search_base,
+            search_filter=search_filter,
+            attributes=attributes,
+            payload=payload,
+        )
+
+        return entries
 
     def subnets(
         self,
         search_filter: "LDAPFilter | str | None" = None,
         attributes: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
-    ) -> dict[str, "LDAPSubnet"]:
+    ) -> list["LDAPEntry"]:
         """
         Specific method to retrieve LDAP subnet instances.
 
@@ -480,7 +551,7 @@ class LDAPConnector(Connector):
             payload (dict[str, Any] | None): Payload to send to the server
 
         Returns:
-            dict[str, LDAPSubnet]: list of subnets
+            list[LDAPEntry]: A list of entries based on the provided arguments and payload
         """
 
         sb_dc = ",".join([f"DC={dc.lower()}" for dc in self.domain.split(".")])
@@ -493,155 +564,7 @@ class LDAPConnector(Connector):
             payload=payload,
         )
 
-        def map_net(entry: "LDAPEntry") -> "LDAPSubnet":
-            return LDAPSubnet(entry, self._DEFAULT_CAPABILITIES)
-
-        return {net.dn: net for net in list(map(map_net, entries))}
-
-    def computers(
-        self,
-        search_filter: "LDAPFilter | str | None" = None,
-        attributes: "StrType | None" = None,
-        search_base: str | None = None,
-        payload: dict[str, Any] | None = None,
-    ) -> dict[str, "LDAPComputer"]:
-        """
-        Specific method to retrieve LDAP Computer instances.
-
-        Args:
-            search_filter (str)            : filter to reduce search results
-            attributes (str | list[str])   : attributes to include in result
-            search_base (str)              : where to base the search on in terms of directory location
-            payload (dict[str, Any] | None): Payload to send to the server
-
-        Returns:
-            dict[str, LDAPComputer]: list of computers
-        """
-
-        entries = self.fetch(
-            search_type=LDAPObjectType.COMPUTER,
-            search_base=search_base,
-            search_filter=search_filter,
-            attributes=attributes,
-            payload=payload,
-        )
-
-        def map_cpt(entry: "LDAPEntry") -> "LDAPComputer":
-            return LDAPComputer(entry, capabilities=self._DEFAULT_CAPABILITIES)
-
-        return {cpt.dn: cpt for cpt in list(map(map_cpt, entries))}
-
-    def users(
-        self,
-        search_filter: "LDAPFilter | str | None" = None,
-        attributes: "StrType | None" = None,
-        search_base: str | None = None,
-        payload: dict[str, Any] | None = None,
-    ) -> dict[str, "LDAPUser"]:
-        """
-        Specific method to retrieve LDAP User instances.
-
-        Args:
-            search_filter (str)            : filter to reduce search results
-            attributes (str | list[str])   : attributes to include in result
-            search_base (str)              : where to base the search on in terms of directory location
-            payload (dict[str, Any] | None): Payload to send to the server
-
-        Returns:
-            dict[str, LDAPUserTypeAlias]: list of users
-        """
-
-        entries = self.fetch(
-            search_type=LDAPObjectType.USER,
-            search_base=search_base,
-            search_filter=search_filter,
-            attributes=attributes,
-            payload=payload,
-        )
-
-        def map_usr(entry: "LDAPEntry") -> "LDAPUser":
-            return LDAPUser(entry, capabilities=self._DEFAULT_CAPABILITIES)
-
-        return {usr.dn: usr for usr in list(map(map_usr, entries))}
-
-    def groups(
-        self,
-        search_filter: "LDAPFilter | str | None" = None,
-        search_base: str | None = None,
-        attributes: "StrType | None" = None,
-        recursive: bool = False,
-        payload: dict[str, Any] | None = None,
-    ) -> dict[str, "LDAPGroup"]:
-        """
-        Specific method to retrieve LDAP group objects.
-
-        Args:
-            search_filter (str)            : Filter to reduce search results
-            attributes (str | list[str])   : Attrbutes to include in result
-            search_base (str)              : Where to base the search on in terms of directory location
-            recursive (bool)               : Retrieve groups recursively if set to True
-            payload (dict[str, Any] | None): Payload to send to the server
-
-        Returns:
-            dict[str, LDAPGroup]: list of OU matching filter
-        """
-
-        entries = self.fetch(
-            search_type=LDAPObjectType.GROUP,
-            search_base=search_base,
-            search_filter=search_filter,
-            attributes=attributes,
-            payload=payload,
-        )
-
-        def map_grp(entry: "LDAPEntry") -> "LDAPGroup":
-            grp_instance = LDAPGroup(entry, self._DEFAULT_CAPABILITIES)
-            if recursive:
-                grp_instance.fetch_members(recursive)
-
-            return grp_instance
-
-        return {grp.dn: grp for grp in list(map(map_grp, entries))}
-
-    def ous(
-        self,
-        search_filter: "LDAPFilter | str | None" = None,
-        search_base: str | None = None,
-        attributes: "StrType | None" = None,
-        recursive: bool = False,
-        payload: dict[str, Any] | None = None,
-    ) -> dict[str, "LDAPOrganizationalUnit"]:
-        """
-        Specific method to retrieve LDAP organizational unit objects.
-
-        Args:
-            dn (str):                      : Optional distinguished name to search
-            search_filter (str)            : Filter to reduce search results
-            attributes (str | list[str])   : Attrbutes to include in result
-            search_base (str)              : Where to base the search on in terms of directory location
-            recursive (bool)               : Retrieve OUs recursively if set to True
-            payload (dict[str, Any] | None): Payload to send to the server
-
-        Returns:
-            dict[str, LDAPOrganizationalUnit]: list of OU matching filter
-        """
-
-        entries = self.fetch(
-            search_type=LDAPObjectType.OU,
-            search_base=search_base,
-            search_filter=search_filter,
-            attributes=attributes,
-            payload=payload,
-        )
-
-        def map_ou(entry: "LDAPEntry") -> "LDAPOrganizationalUnit":
-            ou_instance = LDAPOrganizationalUnit(entry, self._DEFAULT_CAPABILITIES)
-            if recursive:
-                ou_instance.fetch_objects(recursive)
-
-            return ou_instance
-
-        return {ou.dn: ou for ou in list(map(map_ou, entries))}
+        return entries
 
     def complete_partial_entry(self, ldap_entry: "LDAPEntry") -> "LDAPEntry":
         """
@@ -662,7 +585,7 @@ class LDAPConnector(Connector):
             search_filter=LDAPFilterStrFormat.DN(ldap_entry.dn),
         )[0]
 
-    def domain_admins(self) -> dict[str, "LDAPUser"]:
+    def domain_admins(self) -> list["LDAPEntry"]:
         """
         Return a list of the domain and enterprise admins.
 
@@ -673,21 +596,6 @@ class LDAPConnector(Connector):
         return self.users(
             search_filter="(&(objectClass=user)(objectCategory=Person)(adminCount=1))",
         )
-
-    def ldap_object_opt_from_obj_type(
-        self, ldap_obj_type: "LDAPObjectType"
-    ) -> "LDAPObjectOptions[LDAPObject]":
-        """
-        Return an LDAP object based on a given LDAPEntry.
-
-        Args:
-            ldap_obj_type (LDAPObjectType): The LDAPObjectType element
-
-        Returns:
-            LDAPObjTypeAlias: The python class matching the provided entry
-        """
-
-        return self._LDAP_PYTHON_CLS[f"{ldap_obj_type}"]
 
     # ****************************************************************
     # Static methods
