@@ -57,10 +57,10 @@ class LDAPComputer(Computer):
                 os_release = os.releases.get(os_ver)
 
         super().__init__(
-            computer_id=self._id,
-            name=self._name,
+            computer_id=self._account.id,
+            name=self._account.name,
             label=self.hostname,
-            description=self._description,
+            description=self._account.description,
             os_release=os_release,
             os_edition=os_edition,
         )
