@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING, Any, override
 
-from oudjat.core.computer import Computer
+from oudjat.core.computer import Computer, ComputerType
 from oudjat.core.software import SoftwareEdition
 from oudjat.core.software.os import OperatingSystem, OSOption
 
@@ -66,7 +66,7 @@ class LDAPComputer(Computer):
         )
 
         if cpt_type is not None:
-            super().computer_type = cpt_type[0]
+            self._computer_type: "ComputerType" = cpt_type[0]
 
     # ****************************************************************
     # Methods

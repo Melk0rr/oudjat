@@ -243,7 +243,7 @@ class Computer(Asset):
         return self._os
 
     @os.setter
-    def os(self, new_os: ComputerOSProps) -> None:
+    def os(self, new_os: "ComputerOSProps") -> None:
         """
         Set the os informations for the current computer object.
 
