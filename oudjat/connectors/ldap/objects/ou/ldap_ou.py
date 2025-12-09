@@ -84,7 +84,7 @@ class LDAPOrganizationalUnit(LDAPObject):
             if isinstance(new_object, "LDAPOrganizationalUnit") and recursive:
                 new_object.fetch_objects(recursive)
 
-            self.objects[entry.id] = new_object
+            self.objects[entry.dn] = new_object
 
     def sub_ous(self, recursive: bool = False) -> dict[str, "LDAPOrganizationalUnit"]:
         """
@@ -137,7 +137,7 @@ class LDAPOrganizationalUnit(LDAPObject):
             if set(obj.entry.object_cls) & set(object_cls)
         }
 
-    def gpo_from_gplink(self) -> dict[int | str, "LDAPObject"]:
+    def gpo_from_gplink(self) -> dict[str, "LDAPObject"]:
         """
         Extract the GPO references (UUIDs) present in the current OU gpLink.
 
