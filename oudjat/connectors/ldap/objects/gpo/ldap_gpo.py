@@ -29,7 +29,7 @@ class LDAPGPOScope(Enum):
 class LDAPGPOState(IntEnum):
     """GPO state enumeration."""
 
-    UNKNOWN = -1
+    ENABLED_NO_FILTERS = -1
     ENABLED = 0
     DISABLED = 1
     ENFORCED = 2
@@ -90,7 +90,7 @@ class LDAPGroupPolicyObject(LDAPObject):
 
         wql = self.entry.get("gPCWQLFilter", None)
         if wql is None:
-            return LDAPGPOState.UNKNOWN
+            return LDAPGPOState.ENABLED_NO_FILTERS
 
         return LDAPGPOState(int(wql.split(";")[-1][0]))
 
