@@ -2,7 +2,7 @@
 
 import re
 from enum import Enum
-from typing import override
+from typing import Any, override
 
 from oudjat.core.software.exceptions import (
     InvalidSoftwareVersionError,
@@ -75,17 +75,18 @@ class SoftwareReleaseVersion:
             self._major = version
 
         else:
-            version_split = version.split(".")
-            match = re.match(VERSION_REG, version_split[-1])
+            match = re.match(VERSION_REG, version)
 
             if match is None:
                 raise InvalidSoftwareVersionError(f"{Context()}::Invalid version provided {version}")
+
+            print(match.groups())
 
             self._major = int(match.group(1))
             self._minor = int(match.group(2))
             self._build = int(match.group(3))
 
-            if match.group(4):
+            if match.group(4) is not None:
                 stage_match = re.match(STAGE_REG, match.group(4))
 
                 if stage_match:
@@ -282,7 +283,7 @@ class SoftwareReleaseVersion:
 
         return f"{self._major}.{self._minor}.{self._build}{self._stage}{self._stage_version if self._stage is not SoftwareReleaseStage.RELEASE else ''}"
 
-    def to_dict(self) -> dict[str, int | str]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the current software release version into a dictionary.
 
@@ -295,5 +296,9 @@ class SoftwareReleaseVersion:
             "major": self._major,
             "minor": self._minor,
             "build": self._build,
-            "stage": f"{self._stage}{self._stage_version}",
+            "stage": {
+                "name": self._stage.name,
+                "version": self._stage_version,
+                "value": f"{self._stage}{self._stage_version}"
+            },
         }
