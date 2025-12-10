@@ -68,6 +68,17 @@ class LDAPGroupPolicyObject(LDAPObject):
         return self.entry.get("displayName")
 
     @property
+    def path(self) -> str:
+        """
+        Return the GPO path in sysvol.
+
+        Returns:
+            str: The sysvol path of the GPO
+        """
+
+        return self.entry.get("gPCFileSysPath")
+
+    @property
     def state(self) -> "LDAPGPOState":
         """
         Return the current GPO state.
@@ -77,6 +88,9 @@ class LDAPGroupPolicyObject(LDAPObject):
         """
 
         wql = self.entry.get("gPCWQLFilter", None)
+        if wql is None:
+            return LDAPGPOState.DISABLED
+
         return LDAPGPOState(int(wql.split(";")[-1][0]))
 
     @property
@@ -155,6 +169,7 @@ class LDAPGroupPolicyObject(LDAPObject):
             "displayName": self.display_name,
             "scope": self.scope.name,
             "state": self.state.name,
+            "path": self.path,
             "infos": self.infos,
             "linkedObjects": list(self.linked_objects().keys()),
         }
