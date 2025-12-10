@@ -11,6 +11,7 @@ MS_GPPREF: dict[str, str] = {
     "{1612B55C-243C-48DD-A449-FFC097B19776}": "Data Sources",
     "{16BE69FA-4209-4250-88CB-716CF41954E0}": "Central Access Policy Configuration",
     "{17D89FEC-5C44-4972-B12D-241CAEF74509}": "Group Policy Local Users and Groups",
+    "{180F39F3-CF17-4C68-8410-94B71452A22D}": "Tool Extension GUID (Advanced Audit Policy Configuration)",
     "{1A6364EB-776B-4120-ADE1-B63A406A76B5}": "Group Policy Device Settings",
     "{1B767E9A-7BE4-4D35-85C1-2E174A7BA951}": "Devices",
     "{25537BA6-77A8-11D2-9B6C-0000F8080861}": "Folder Redirection",
