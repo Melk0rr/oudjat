@@ -118,7 +118,7 @@ class LDAPGroupPolicyObject(LDAPObject):
         """
 
         guids: list[str] = re.findall(UUID_REG, self.entry.get(self.scope.value))
-        return {guid: MS_CSE[guid] for guid in guids}
+        return {guid: MS_CSE[guid] if guid in MS_CSE else "[Unknown CSE GUID]" for guid in guids}
 
     def linked_objects(
         self,
