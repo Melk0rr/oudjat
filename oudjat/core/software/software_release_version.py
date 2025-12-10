@@ -80,8 +80,6 @@ class SoftwareReleaseVersion:
             if match is None:
                 raise InvalidSoftwareVersionError(f"{Context()}::Invalid version provided {version}")
 
-            print(match.groups())
-
             self._major = int(match.group(1))
             self._minor = int(match.group(2))
             self._build = int(match.group(3))
