@@ -12,7 +12,7 @@ from ...ldap_filter import LDAPFilter
 from ..definitions import UUID_REG
 from ..ldap_object import LDAPObject
 from ..ldap_object_types import LDAPObjectType
-from .ms_gppref import MS_GPPREF
+from .ms_cse import MS_CSE
 
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
@@ -118,7 +118,7 @@ class LDAPGroupPolicyObject(LDAPObject):
         """
 
         guids: list[str] = re.findall(UUID_REG, self.entry.get(self.scope.value))
-        return {guid: MS_GPPREF[guid] for guid in guids}
+        return {guid: MS_CSE[guid] for guid in guids}
 
     def linked_objects(
         self,
