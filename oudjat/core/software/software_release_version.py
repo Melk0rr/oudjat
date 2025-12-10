@@ -4,8 +4,13 @@ import re
 from enum import Enum
 from typing import override
 
-from oudjat.core.software.exceptions import SoftwareReleaseVersionSplittingError
+from oudjat.core.software.exceptions import (
+    InvalidSoftwareVersionError,
+    SoftwareReleaseVersionSplittingError,
+)
 from oudjat.utils import Context
+
+from .definitions import STAGE_REG, VERSION_REG
 
 
 class SoftwareReleaseStage(Enum):
@@ -39,8 +44,6 @@ class SoftwareReleaseVersion:
     The class handles version stage and version semantic parts major, minor and build.
     """
 
-    PATTERN: str = r"^(\d+)(a|b|rc)(\d+)$"
-
     def __init__(
         self,
         version: int | str,
@@ -72,22 +75,22 @@ class SoftwareReleaseVersion:
             self._major = version
 
         else:
-            try:
-                version_split = version.split(".")
-                match = re.match(self.PATTERN, version_split[-1])
-                if match:
-                    self._build = int(match.groups()[0])
-                    self._stage = SoftwareReleaseStage(match.groups()[1])
-                    self._stage_version = int(match.groups()[2])
+            version_split = version.split(".")
+            match = re.match(VERSION_REG, version_split[-1])
 
-                else:
-                    self._build = int(version_split[2])
+            if match is None:
+                raise InvalidSoftwareVersionError(f"{Context()}::Invalid version provided {version}")
 
-                self._major = int(version_split[0])
-                self._minor = int(version_split[1])
+            self._major = int(match.group(1))
+            self._minor = int(match.group(2))
+            self._build = int(match.group(3))
 
-            except SoftwareReleaseVersionSplittingError as e:
-                raise SoftwareReleaseVersionSplittingError(f"{Context()}::{e}")
+            if match.group(4):
+                stage_match = re.match(STAGE_REG, match.group(4))
+
+                if stage_match:
+                    self._stage = SoftwareReleaseStage(stage_match.group(1))
+                    self._stage_version = int(stage_match.group(2))
 
     @property
     def major(self) -> int:
