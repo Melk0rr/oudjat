@@ -127,9 +127,14 @@ class LDAPGroupPolicyObject(LDAPObject):
         self.logger.info(f"{Context()}::Retrieving linked object of {self.display_name}")
 
         obj_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.OU)
-        obj_filter = LDAPFilter(f"(gPLink={f'*{self.name}*'})") & LDAPFilter(f"(name={ou})")
+        LDAPOUCls = obj_opt.cls
 
-        res = obj_opt.fetch(search_filter=obj_filter, attributes=attributes)
+        obj_filter = LDAPFilter(f"(gPLink={f'*{self.name}*'})") & LDAPFilter.name(ou)
+
+        res = {}
+        for entry in obj_opt.fetch(search_filter=obj_filter, attributes=attributes):
+            res[entry.dn] = LDAPOUCls(entry, capabilities=self.capabilities)
+
         return res
 
     @override
@@ -151,7 +156,7 @@ class LDAPGroupPolicyObject(LDAPObject):
             "scope": self.scope.name,
             "state": self.state.name,
             "infos": self.infos,
-            "linkedObjects": list(self.linked_objects().keys())
+            "linkedObjects": list(self.linked_objects().keys()),
         }
 
     # ****************************************************************

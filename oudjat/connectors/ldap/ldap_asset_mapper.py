@@ -19,6 +19,9 @@ class LDAPAssetMapper:
     A class that maps LDAPEntry instances into various assets.
     """
 
+    # ****************************************************************
+    # Attributes & Constructor
+
     def __init__(self, ldapco: "LDAPConnector") -> None:
         """
         Create a new LDAPAssetMapper.
@@ -31,30 +34,35 @@ class LDAPAssetMapper:
 
         self._MAP: dict[str, "LDAPObjectOptions"] = {
             f"{LDAPObjectType.DEFAULT}": LDAPObjectOptions["LDAPObject"](
-                cls=LDAPObject, fetch=self.objects
+                cls=LDAPObject, fetch=self._connector.objects
             ),
             f"{LDAPObjectType.COMPUTER}": LDAPObjectOptions["LDAPComputer"](
-                cls=LDAPComputer, fetch=self.computers
+                cls=LDAPComputer, fetch=self._connector.computers
             ),
             f"{LDAPObjectType.GPO}": LDAPObjectOptions["LDAPGroupPolicyObject"](
-                cls=LDAPGroupPolicyObject, fetch=self.gpos
+                cls=LDAPGroupPolicyObject, fetch=self._connector.gpos
             ),
             f"{LDAPObjectType.GROUP}": LDAPObjectOptions["LDAPGroup"](
-                cls=LDAPGroup, fetch=self.groups
+                cls=LDAPGroup, fetch=self._connector.groups
             ),
             f"{LDAPObjectType.OU}": LDAPObjectOptions["LDAPOrganizationalUnit"](
-                cls=LDAPOrganizationalUnit, fetch=self.ous
+                cls=LDAPOrganizationalUnit, fetch=self._connector.ous
             ),
             f"{LDAPObjectType.SUBNET}": LDAPObjectOptions["LDAPSubnet"](
-                cls=LDAPSubnet, fetch=self.subnets
+                cls=LDAPSubnet, fetch=self._connector.subnets
             ),
-            f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](cls=LDAPUser, fetch=self.users),
+            f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](
+                cls=LDAPUser, fetch=self._connector.users
+            ),
         }
 
         self._CAPABILITIES: "LDAPCapabilities" = LDAPCapabilities(
             ldap_search=self._connector.fetch,
-            ldap_obj_opt=self.map_object,
+            ldap_obj_opt=self._object_opt,
         )
+
+    # ****************************************************************
+    # Methods
 
     def objects(
         self,
@@ -107,7 +115,7 @@ class LDAPAssetMapper:
 
     def users(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPUser"]:
         """
-        Map the provided LDAP entries into a dictionary of LDAPUser instances.
+        Map the provided LDAP entries into a dictionary of User instances.
 
         Args:
             entries (list[LDAPEntry]): LDAP entries to map
@@ -213,7 +221,7 @@ class LDAPAssetMapper:
 
         return subnets
 
-    def map_object(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOptions[LDAPObject]":
+    def _object_opt(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOptions[LDAPObject]":
         """
         Return an LDAP object based on a given type.
 
