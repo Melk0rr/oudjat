@@ -157,8 +157,13 @@ class LDAPOrganizationalUnit(LDAPObject):
             return {}
 
         gpo_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.GPO)
+        LDAPGPOCls = gpo_opt.cls
 
-        return gpo_opt.fetch(name=gpo_refs)
+        res = {}
+        for entry in gpo_opt.fetch(name=gpo_refs):
+            res[entry.dn] = LDAPGPOCls(entry, capabilities=self.capabilities)
+
+        return res
 
     @override
     def to_dict(self) -> dict[str, Any]:

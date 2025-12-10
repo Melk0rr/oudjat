@@ -1,5 +1,6 @@
 """A package that gather LDAP manipulations related modules."""
 
+from .ldap_asset_mapper import LDAPAssetMapper
 from .ldap_connector import LDAPConnector
 from .ldap_filter import (
     LDAPFilter,
@@ -20,6 +21,7 @@ from .objects import (
 )
 
 __all__ = [
+    "LDAPAssetMapper",
     "LDAPConnector",
     "LDAPFilter",
     "LDAPFilterParser",

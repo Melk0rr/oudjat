@@ -5,11 +5,12 @@ from typing import Any, override
 from oudjat.utils import Context
 from oudjat.utils.operators.logical_operators import LogicalOperation
 
+from ..generic_identifiable import GenericIdentifiable
 from .ip import IP
 from .netmask import NetMask
 
 
-class Subnet:
+class Subnet(GenericIdentifiable):
     """A class to handle subnets."""
 
     # ****************************************************************
@@ -59,8 +60,8 @@ class Subnet:
             address=LogicalOperation.logical_and(int(address), int(self._mask))
         )
 
-        self._name: str = name
-        self._description: str | None = description
+        super().__init__(gid=str(self), name=name, description=description)
+
         self._hosts: dict[str, "IP"] = {}
 
         if hosts is not None:
@@ -69,50 +70,6 @@ class Subnet:
 
     # ****************************************************************
     # Methods
-
-    @property
-    def name(self) -> str:
-        """
-        Return the name of this subnet instance.
-
-        Returns:
-             str: name of the subnet as a string
-        """
-
-        return self._name
-
-    @name.setter
-    def name(self, new_name: str) -> None:
-        """
-        Set a new name for the current subnet.
-
-        Args:
-            new_name (str): new name for the subnet
-        """
-
-        self._name = new_name
-
-    @property
-    def description(self) -> str | None:
-        """
-        Return the name of this subnet instance.
-
-        Returns:
-             str: name of the subnet as a string
-        """
-
-        return self._description
-
-    @description.setter
-    def description(self, new_description: str) -> None:
-        """
-        Set a new description for the current subnet.
-
-        Args:
-            new_description (str): new description for the subnet
-        """
-
-        self._description = new_description
 
     @property
     def address(self) -> IP:
@@ -216,6 +173,7 @@ class Subnet:
         """
         return f"{self.address}/{self.mask.cidr}"
 
+    @override
     def to_dict(self) -> dict[str, Any]:
         """
         Convert the current subnet instance into a dictionary.
@@ -224,9 +182,13 @@ class Subnet:
             dict: A dictionary representation of the subnet
         """
 
+        base = super().to_dict()
+        _ = base.pop("id")
+
         return {
             "address": str(self.address),
             "mask": self._mask.to_dict(),
+            **base,
             "hosts": {h_k: h.to_dict() for h_k, h in self._hosts.items()},
             "broadcast": str(self.broadcast),
         }

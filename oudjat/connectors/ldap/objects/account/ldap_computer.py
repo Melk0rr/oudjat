@@ -82,9 +82,24 @@ class LDAPComputer(LDAPAccount):
 
         return self.entry.get("dNSHostName")
 
+    def to_computer(self) -> "Computer":
+        """
+        Convert the current LDAPComputer into a regular Computer instance.
+
+        Returns:
+            Computer: A regular computer asset based on the current LDAPComputer
+        """
+
+        cpt = self._computer
+        cpt.add_custom_attr("ldap", {**super().to_dict(), "hostname": self.hostname})
+
+        return cpt
+
     @override
     def to_dict(self) -> dict[str, Any]:
         """Convert the current instance into a dictionary."""
 
-        cpt_dict = self._computer.to_dict()
-        return {**super().to_dict(), "hostname": cpt_dict.pop("label"), **cpt_dict}
+        return {
+            **super().to_dict(),
+            **self._computer.to_dict()
+        }
