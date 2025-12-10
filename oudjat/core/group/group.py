@@ -114,5 +114,5 @@ class Group(Asset, Generic[MemberType]):
 
         return {
             **super().to_dict(),
-            "members": {mid: m.to_dict() for mid, m in self._members.items()},
+            "members": list(self._members.keys()),
         }
