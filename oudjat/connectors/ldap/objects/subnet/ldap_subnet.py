@@ -36,6 +36,19 @@ class LDAPSubnet(LDAPObject):
     # ****************************************************************
     # Methods
 
+    def to_subnet(self) -> "Subnet":
+        """
+        Convert the current LDAPSubnet into a regular Subnet instance.
+
+        Returns:
+            Subnet: A regular subnet instance based on the current LDAPSubnet
+        """
+
+        net = self._subnet
+        net.add_custom_attr("ldap", super().to_dict())
+
+        return net
+
     @override
     def __str__(self) -> str:
         """

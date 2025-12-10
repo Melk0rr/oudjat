@@ -144,6 +144,35 @@ class LDAPUser(LDAPAccount):
 
         return is_admin
 
+    def to_user(self) -> "User":
+        """
+        Convert the current LDAPUser into a regular User instance.
+
+        Returns:
+            User: A regular User instance based on the current LDAPUser
+        """
+
+        usr = self._user
+        usr.add_custom_attr("ldap", self.ldap_dict())
+
+        return usr
+
+    def ldap_dict(self) -> dict[str, Any]:
+        """
+        Return a dictionary of the LDAP properties.
+
+        Returns:
+            dict[str, Any]: A dictionary of the user LDAP properties
+        """
+
+        return {
+            **super().to_dict(),
+            f"{MS_ACCOUNT_CTL_PROPERTY}": self.ms_account_ctl,
+            "employeeId": self.employee_id,
+            "manager": self.manager,
+            "isAdmin": self.is_admin,
+        }
+
     @override
     def to_dict(self) -> dict[str, Any]:
         """
@@ -153,15 +182,7 @@ class LDAPUser(LDAPAccount):
             dict[str, Any]: The current user represented as a dictionary
         """
 
-        base_dict = super().to_dict()
-        base_dict.pop("san")
-
-        user_dict = self._user.to_dict()
-
         return {
-            **base_dict,
-            "employeeId": self.employee_id,
-            "manager": self.manager,
-            "isAdmin": self.is_admin,
-            **user_dict,
+            **self.ldap_dict(),
+            **self._user.to_dict()
         }

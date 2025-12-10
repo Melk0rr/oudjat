@@ -42,7 +42,7 @@ class LDAPGroup(LDAPObject):
         super().__init__(ldap_entry, capabilities)
         self.logger: "logging.Logger" = logging.getLogger(__name__)
 
-        self.group: "Group[LDAPObject]" = Group[LDAPObject](
+        self._group: "Group[LDAPObject]" = Group[LDAPObject](
             group_id=self.entry.get("objectGUID"),
             name=self.entry.get("name"),
             label=self.entry.dn,
@@ -61,7 +61,7 @@ class LDAPGroup(LDAPObject):
             dict[str, LDAPObject]: members as a dictionary of LDAPObject instances
         """
 
-        return self.group.members
+        return self._group.members
 
     def _group_type_raw(self) -> int:
         """
@@ -84,6 +84,19 @@ class LDAPGroup(LDAPObject):
 
         return LDAPGroupType(self._group_type_raw())
 
+    def to_group(self) -> "Group":
+        """
+        Return a group instance based on the current LDAPGroup.
+
+        Returns:
+            Group: The group asset instance bound to this LDAPGroup
+        """
+
+        grp = self._group
+        grp.add_custom_attr("ldap", {**super().to_dict(), "groupType": str(self.group_type)})
+
+        return grp
+
     def member_refs(self) -> list[str]:
         """
         Return member refs.
@@ -102,7 +115,7 @@ class LDAPGroup(LDAPObject):
             member (LDAPObject): member to add
         """
 
-        self.group.add_member(key=member.dn, member=member)
+        self._group.add_member(key=member.dn, member=member)
 
     def fetch_members(
         self,
@@ -112,8 +125,7 @@ class LDAPGroup(LDAPObject):
         Retrieve the group members.
 
         Args:
-            ldap_get_member_func (Callable[..., list[LDAPObject]]): LDAP
-            recursive (bool)                                      : Either to retrieve the members recursively or not
+            recursive (bool): Either to retrieve the members recursively or not
         """
 
         context = Context()
@@ -123,7 +135,6 @@ class LDAPGroup(LDAPObject):
             self.logger.info(f"{context}::Fetching member data for {ref}")
 
             # INFO: Search for the ref in LDAP server
-            # TODO: Use LDAPFilter ?
             escaped_ref = escape_filter_chars(ref)
             ref_search: list["LDAPEntry"] = self.capabilities.ldap_search(
                 search_filter=LDAPFilter.dn(escaped_ref)
@@ -150,7 +161,6 @@ class LDAPGroup(LDAPObject):
         Return child group of the current group.
 
         Args:
-            ldap_connector (LDAPConnector): LDAP connector instance to use for the request
             recursive (bool)              : Either to retrieve the sub groups recursively or not
 
         Returns:
@@ -179,7 +189,6 @@ class LDAPGroup(LDAPObject):
         Return non group members of the current group.
 
         Args:
-            ldap_connector (LDAPConnector): ldap connector instance to use for the request
             recursive (bool)              : either to retrieve the members recursively or not
 
         Returns:
@@ -208,9 +217,6 @@ class LDAPGroup(LDAPObject):
         """
         Return a flat list of the current group members.
 
-        Args:
-            ldap_connector (LDAPConnector): ldap connector instance to use for the request
-
         Returns:
             dict[str, LDAPObject]: A dictionary of all the members found recursively but in a flattened dictionary
         """
@@ -235,9 +241,8 @@ class LDAPGroup(LDAPObject):
         Check if the provided object is a member of the current group.
 
         Args:
-            ldap_connector (LDAPConnector): ldap connector instance to use for the request
-            ldap_object (LDAPObject)      : object to search
-            extended (bool)               : either to check if the object is a member of sub groups
+            ldap_object (LDAPObject)      : Object to search
+            extended (bool)               : Either to check if the object is a member of sub groups
 
         Returns:
             bool: True if the group contains the given object. False otherwise
@@ -255,9 +260,4 @@ class LDAPGroup(LDAPObject):
             dict[str, Any]: The current instance converted into a dictionary
         """
 
-        return {
-            **super().to_dict(),
-            **self.group.to_dict(),
-            "groupType": str(self.group_type),
-            "members": list(self.members.keys()),
-        }
+        return self._group.to_dict()
