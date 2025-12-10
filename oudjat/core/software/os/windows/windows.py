@@ -150,8 +150,6 @@ class MicrosoftOperatingSystem(OperatingSystem):
     # ****************************************************************
     # Attributes & Constructors
 
-    VERSION_REG: str = r"(\d{1,2}\.\d)\W*(\d{4,5})\W*"
-
     def __init__(
         self,
         msos_id: int | str,
@@ -231,20 +229,3 @@ class MicrosoftOperatingSystem(OperatingSystem):
     # ****************************************************************
     # Static methods
 
-    @staticmethod
-    @override
-    def find_version_in_str(search_str: str) -> str | None:
-        """
-        Try to find a version in the provided string based on the class VERSION_REG.
-
-        This static method uses a regular expression to find and return a version number from the input string.
-
-        Args:
-            search_str (str): The string to search for a version match.
-
-        Returns:
-            str: A string representing the matched version, or None if no match is found.
-        """
-
-        search = re.search(MicrosoftOperatingSystem.VERSION_REG, search_str)
-        return ".".join([search.group(1), search.group(2)]) if search is not None else None

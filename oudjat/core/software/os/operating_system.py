@@ -152,19 +152,3 @@ class OperatingSystem(Software[OSRelease]):
                 return search.group(0)
 
         return None
-
-    @staticmethod
-    def find_version_in_str(search_str: str) -> str | None:
-        """
-        Use a regular expression to find and return a version number from the input string. It must be implemented by the class inheriting OperatingSystem.
-
-        Args:
-            search_str (str): The string to search for a version match.
-
-        Returns:
-            str: A string representing the matched version, or None if no match is found.
-        """
-
-        raise NotImplementedError(
-            f"{Context()}::Method must be implemented by the overloading class > {search_str}"
-        )

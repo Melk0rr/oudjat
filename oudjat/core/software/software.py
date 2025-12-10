@@ -1,7 +1,10 @@
 """Main module of the software package that defines the notion of software."""
 
+import re
 from enum import IntEnum
 from typing import Any, Generic, override
+
+from oudjat.core.software.definitions import VERSION_REG
 
 from ..asset import Asset
 from ..asset_type import AssetType
@@ -211,3 +214,23 @@ class Software(Asset, Generic[ReleaseType]):
             "editor": self.editor,
             "releases": {key: r.to_dict() for key, r in self._releases.items()},
         }
+
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def find_version_in_str(search_str: str) -> str | None:
+        """
+        Try to find a version in the provided string based on the class VERSION_REG.
+
+        This static method uses a regular expression to find and return a version number from the input string.
+
+        Args:
+            search_str (str): The string to search for a version match.
+
+        Returns:
+            str: A string representing the matched version, or None if no match is found.
+        """
+
+        search = re.search(VERSION_REG, search_str)
+        return search.group(0) if search is not None else None
