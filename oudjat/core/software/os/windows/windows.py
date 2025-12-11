@@ -1,6 +1,5 @@
 """A module that defines specific OS properties for Windows."""
 
-import re
 from datetime import datetime
 from enum import Enum
 from typing import Any, override
@@ -157,6 +156,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
         label: str,
         computer_type: "ComputerType | list[ComputerType]",
         description: str | None = None,
+        **kwargs: Any
     ) -> None:
         """
         Create a new instance of MicrosoftOperatingSystem.
@@ -169,6 +169,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
             label (str)                                      : A short label or abbreviation for the operating system.
             computer_type (ComputerType | list[ComputerType]): The type(s) of computer compatible with this operating system.
             description (str | None)                         : A detailed description of the operating system. Defaults to None.
+            **kwargs (Any)                                   : Any additional arguments that will be passed to parent class
         """
 
         super().__init__(
@@ -179,6 +180,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
             description=description,
             editor="Microsoft",
             os_family=OSFamily.WINDOWS,
+            **kwargs
         )
 
         self._editions: "SoftwareEditionDict" = SoftwareEditionDict(

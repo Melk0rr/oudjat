@@ -33,6 +33,7 @@ class Software(Asset, Generic[ReleaseType]):
         software_type: SoftwareType = SoftwareType.APPLICATION,
         editor: str | list[str] | None = None,
         description: str | None = None,
+        **kwargs: Any,
     ) -> None:
         """
         Initialize a new instance of the Software class.
@@ -47,6 +48,7 @@ class Software(Asset, Generic[ReleaseType]):
             software_type (SoftwareType | None): Specifies the type of the software. Defaults to SoftwareType.APPLICATION.
             editor (str | list[str] | None)    : The editor(s) responsible for the development or maintenance of the software
             description (str | None)           : A detailed description of the software. Defaults to None.
+            **kwargs (Any)                     : Any additional arguments that will be passed to parent class
         """
 
         super().__init__(
@@ -55,6 +57,7 @@ class Software(Asset, Generic[ReleaseType]):
             label=label,
             asset_type=AssetType.SOFTWARE,
             description=description,
+            **kwargs,
         )
 
         if editor is not None and not isinstance(editor, list):

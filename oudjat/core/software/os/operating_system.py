@@ -58,6 +58,7 @@ class OperatingSystem(Software[OSRelease]):
         computer_type: "ComputerType | list[ComputerType]",
         editor: str | list[str] | None = None,
         description: str | None = None,
+        **kwargs: Any,
     ) -> None:
         """
         Return a new instance of OperatingSystem.
@@ -70,6 +71,7 @@ class OperatingSystem(Software[OSRelease]):
             computer_type (ComputerType | list[ComputerType]): The type(s) of computer the OS is tide to
             editor (str | list[str])                         : The editor in charge of the OS maintenance and/or development
             description (str)                                : A string to describe the OS
+            **kwargs (Any)                                   : Any additional arguments that will be passed to parent class
         """
 
         super().__init__(
@@ -79,6 +81,7 @@ class OperatingSystem(Software[OSRelease]):
             software_type=SoftwareType.OS,
             editor=editor,
             description=description,
+            **kwargs,
         )
 
         if not isinstance(computer_type, list):

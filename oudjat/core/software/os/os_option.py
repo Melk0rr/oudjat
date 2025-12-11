@@ -16,6 +16,7 @@ class OSOption(Enum):
         label="windows",
         computer_type=ComputerType.WORKSTATION,
         description="Microsoft operating system for workstations",
+        tags=["microsoft", "windows"]
     )
 
     WINDOWSSERVER = MicrosoftOperatingSystem(
@@ -24,5 +25,6 @@ class OSOption(Enum):
         label="windows-server",
         computer_type=ComputerType.SERVER,
         description="Microsoft operating system for servers",
+        tags=["microsoft", "windows"]
     )
 
