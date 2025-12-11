@@ -180,6 +180,21 @@ class LDAPComputer(LDAPAccount):
 
         return os_edition_match[0] if len(os_edition_match) != 0 else None
 
+    def _ldap_dict(self) -> dict[str, Any]:
+        """
+        Return a dictionary that contains only LDAP attributes of the computer.
+
+        Returns:
+            dict[str, Any]: A dictionary of LDAP attributes
+        """
+
+        return {
+            **super().to_dict(),
+            "hostname": self.hostname,
+            "os": self.os,
+            "osVersion": self.os_ver
+        }
+
     def to_computer(self) -> "Computer":
         """
         Convert the current LDAPComputer into a regular Computer instance.
@@ -189,7 +204,7 @@ class LDAPComputer(LDAPAccount):
         """
 
         cpt = self._computer
-        cpt.add_custom_attr("ldap", {**super().to_dict(), "hostname": self.hostname})
+        cpt.add_custom_attr("ldap", self._ldap_dict())
 
         return cpt
 
@@ -197,4 +212,4 @@ class LDAPComputer(LDAPAccount):
     def to_dict(self) -> dict[str, Any]:
         """Convert the current instance into a dictionary."""
 
-        return {**super().to_dict(), **self._computer.to_dict()}
+        return {**self._ldap_dict(), **self._computer.to_dict()}
