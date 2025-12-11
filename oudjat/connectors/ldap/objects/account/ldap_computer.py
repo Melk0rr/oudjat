@@ -1,11 +1,13 @@
 """A module to handle manipulation of LDAP computer objects."""
 
+import logging
 import re
 from typing import TYPE_CHECKING, Any, override
 
 from oudjat.core.computer import Computer
-from oudjat.core.software import SoftwareEdition
-from oudjat.core.software.os import OperatingSystem, OSOption
+from oudjat.core.software import Software, SoftwareEdition
+from oudjat.core.software.os import OperatingSystem, OSFamily, OSOption, OSRelease
+from oudjat.utils import Context
 
 from .ldap_account import LDAPAccount
 
@@ -30,6 +32,7 @@ class LDAPComputer(LDAPAccount):
             **kwargs (Any)        : Any further argument to pass to parent class
         """
 
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
         super().__init__(ldap_entry=ldap_entry, **kwargs)
 
         # Retrieve OS and OS edition informations
@@ -38,23 +41,24 @@ class LDAPComputer(LDAPAccount):
         cpt_type = None
 
         if self.os is not None:
-            os_family_infos: str | None = OperatingSystem.matching_os_family(self.os)
+            os_family, os_family_str = self._os_family()
 
-            if os_family_infos is not None and self.os_ver is not None:
-                os: "OperatingSystem" = OSOption[os_family_infos.replace(" ", "").upper()].value
-                cpt_type = os.computer_type
+            if (os_family is not None and os_family_str is not None) and self.os_ver is not None:
+                os_family_options = OSOption.per_family(os_family)
+                os_opt_name = os_family_str.replace(" ", "").upper()
 
-                if len(os.releases.values()) == 0:
-                    os.gen_releases()
+                if len(os_family_options.keys()) == 0 or os_opt_name not in os_family_options.keys():
+                    self.logger.error(f"{Context()}::Can't find {os_opt_name} in {os_family} OSes")
 
-                os_ver = os.__class__.find_version_in_str(self._win_ver_fmt(self.os_ver))
-                os_edition_match: list["SoftwareEdition"] = os.matching_editions(self.os)
+                else:
+                    os: "OperatingSystem" = os_family_options[os_opt_name].value
+                    cpt_type = os.computer_type
 
-                if len(os_edition_match) != 0:
-                    os_edition = os_edition_match[0]
+                    if len(os.releases.values()) == 0:
+                        os.gen_releases()
 
-                if os_ver:
-                    os_release = os.releases.get(os_ver)
+                    os_edition = self._os_edition_from_os(os)
+                    os_release = self._os_release_from_ver(os)
 
         self._computer: "Computer" = Computer(
             computer_id=self._id,
@@ -104,6 +108,24 @@ class LDAPComputer(LDAPAccount):
 
         return self.entry.get("operatingSystemVersion", None)
 
+    def _os_family(self) -> tuple["OSFamily | None", str | None]:
+        """
+        Return the OSFamily matching the computer operatingSystem attribute, as well as its matching substring.
+
+        Returns:
+            tuple[OSFamily | None, str | None]: Both the OSFamily and substring matching computer operatingSystem attribute
+        """
+
+        family, family_str = None, None
+        if self.os is not None:
+            family = OSFamily.matching_family(self.os)
+
+            if family is not None:
+                family_str = re.search(family.pattern, self.os or "")
+                family_str = family_str.group(0) if family_str is not None else None
+
+        return family, family_str
+
     def _win_ver_fmt(self, version: str) -> str:
         """
         Format the given windows version if it matches the specific regex.
@@ -122,6 +144,41 @@ class LDAPComputer(LDAPAccount):
             formated_version = ".".join([win_ver_search.group(1), win_ver_search.group(2)])
 
         return formated_version
+
+    def _os_release_from_ver(self, os: "OperatingSystem") -> "OSRelease | None":
+        """
+        Return an OS release instance based on the computer operatingSystemVersion attribute.
+
+        Args:
+            os (OperatingSystem): The operating system from which retrieve the release
+
+        Returns:
+            OSRelease | None: The OS release that matches the computer operatingSystemVersion if any
+        """
+
+        if self.os_ver is None:
+            return None
+
+        os_ver = Software.find_version_in_str(self._win_ver_fmt(self.os_ver))
+        return os.releases.get(os_ver) if os_ver else None
+
+    def _os_edition_from_os(self, os: "OperatingSystem") -> "SoftwareEdition | None":
+        """
+        Return a SoftwareEdition instance based on the computer operatingSystem attribute.
+
+        Args:
+            os (OperatingSystem): The OS from which the edition should be retrieved
+
+        Returns:
+            SoftwareEdition | None: The SoftwareEdition instance that matches the computer operatingSystem attribute if any
+        """
+
+        if self.os is None:
+            return None
+
+        os_edition_match: list["SoftwareEdition"] = os.matching_editions(self.os)
+
+        return os_edition_match[0] if len(os_edition_match) != 0 else None
 
     def to_computer(self) -> "Computer":
         """
