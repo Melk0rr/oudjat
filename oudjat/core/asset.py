@@ -57,7 +57,7 @@ class Asset(GenericIdentifiable, ABC):
             kwargs (Any)                                      : Any further arguments
         """
 
-        super().__init__(gid=asset_id, name=name, label=label or "", description=description or "")
+        super().__init__(gid=asset_id, name=name, label=label or "", description=description, **kwargs)
 
         self._asset_type: "AssetType" = asset_type
         self._location: dict[str, "Location"] = {}
