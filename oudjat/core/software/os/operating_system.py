@@ -134,24 +134,3 @@ class OperatingSystem(Software[OSRelease]):
             "computerTypes": self._computer_type,
         }
 
-    # ****************************************************************
-    # Static methods
-
-    @staticmethod
-    def matching_os_family(test_str: str) -> str | None:
-        """
-        Try to retrieve a substring of the provided string matching an OSFamily element.
-
-        Args:
-            test_str (str): provided string that possibly matches an OSFamily element
-
-        Returns:
-            str: substring that match an OSFamily element
-        """
-
-        for f in OSFamily:
-            search = re.search(f.pattern, test_str)
-            if search is not None:
-                return search.group(0)
-
-        return None

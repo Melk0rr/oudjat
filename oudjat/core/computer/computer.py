@@ -11,7 +11,7 @@ from oudjat.core.software import (
     SoftwareReleaseSupport,
 )
 from oudjat.core.software.os import OSRelease
-from oudjat.core.software.os.os_option import OSOption
+from oudjat.core.software.os.os_options import OSOption
 
 from .computer_type import ComputerType
 
