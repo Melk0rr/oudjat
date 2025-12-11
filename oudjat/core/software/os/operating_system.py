@@ -1,6 +1,5 @@
 """A module defining operating system behavior."""
 
-import re
 from typing import Any, override
 
 from oudjat.core.computer.computer_type import ComputerType

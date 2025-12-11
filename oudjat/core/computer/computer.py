@@ -121,7 +121,8 @@ class Computer(Asset):
         self._os: "ComputerOSProps" = ComputerOSProps(os_release, os_edition)
 
         if computer_type is None or (
-            isinstance(computer_type, str) and computer_type.upper() not in ComputerType._member_names_
+            isinstance(computer_type, str)
+            and computer_type.upper() not in ComputerType._member_names_
         ):
             computer_type = ComputerType.UNKNOWN
 
@@ -374,13 +375,15 @@ class Computer(Asset):
             "computerType": str(self._computer_type),
             "computerStatus": str(self._status),
             "ip": str(self._ip) if self._ip else None,
-            "softwares": {sid: s.to_dict() for sid, s in self._softwares.items()}
+            "softwares": {sid: s.to_dict() for sid, s in self._softwares.items()},
         }
 
         return {
             **super().to_dict(),
             **base_dict,
-            "osRelease": release_dict,
-            "osEdition": edition_dict,
-            "osSupport": os_support_dict,
+            "os": {
+                "release": release_dict,
+                "edition": edition_dict,
+                "support": os_support_dict
+            },
         }
