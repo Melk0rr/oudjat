@@ -191,8 +191,10 @@ class LDAPComputer(LDAPAccount):
         return {
             **super().to_dict(),
             "hostname": self.hostname,
-            "os": self.os,
-            "osVersion": self.os_ver
+            "os": {
+                "name": self.os,
+                "version": self.os_ver
+            }
         }
 
     def to_computer(self) -> "Computer":
