@@ -75,7 +75,9 @@ class MSOSRelease(OSRelease):
             dict[str, Any]: A dictionary containing OS-specific information including the software name and versions.
         """
 
-        base_dict = super()._software_dict()  # Assuming superclass has an os_info_dict method
+        base_dict = super()._software_dict()
+        _ = base_dict.pop("software")
+
         return {
             **base_dict,
             "name": self.name,
