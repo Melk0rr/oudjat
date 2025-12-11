@@ -304,7 +304,7 @@ class LDAPConnector(Connector):
 
         payload["generator"] = False
 
-        # INFO: If the search type is default : final filter is equal to provided search filter
+        # If the search type is default : final filter is equal to provided search filter
         # Else final filter is a combination of filter matching search type + provided search filter
         formated_filter = search_type.filter
         if search_type == LDAPObjectType.DEFAULT and search_filter is not None:
@@ -411,19 +411,30 @@ class LDAPConnector(Connector):
         attributes: "StrType | None" = None,
         search_base: str | None = None,
         payload: dict[str, Any] | None = None,
+        extension_attr: bool = True,
     ) -> list["LDAPEntry"]:
         """
         Specific method to retrieve LDAP User instances.
 
         Args:
-            search_filter (str)            : filter to reduce search results
-            attributes (str | list[str])   : attributes to include in result
-            search_base (str)              : where to base the search on in terms of directory location
+            search_filter (str)            : Filter to reduce search results
+            attributes (str | list[str])   : Attributes to include in result
+            search_base (str)              : Where to base the search on in terms of directory location
             payload (dict[str, Any] | None): Payload to send to the server
+            extension_attr (bool)          : Whether to include extension attributes
 
         Returns:
             list[LDAPEntry]: A list of entries based on the provided arguments and payload
         """
+
+        if extension_attr:
+            if attributes is None:
+                attributes = LDAPObjectType.USER.attributes
+
+            attributes = list(attributes)
+            attributes.extend([ f"extensionAttribute{i}" for i in range(1, 16) ])
+
+            attributes = list(set(attributes))
 
         entries = self.fetch(
             search_type=LDAPObjectType.USER,

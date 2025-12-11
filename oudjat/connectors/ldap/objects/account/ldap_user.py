@@ -128,6 +128,23 @@ class LDAPUser(LDAPAccount):
         return self.entry.get("manager", None)
 
     @property
+    def extension_attr(self) -> dict[str, Any]:
+        """
+        Return a dictionary of the user extension attributes if there is any.
+
+        Returns:
+            dict[str, Any]: A dictionary of extension attributes
+        """
+
+        extension_attr = {}
+        for i in range(1, 16):
+            attr_i = self.entry.get(f"extensionAttribute{i}", None)
+            if attr_i is not None:
+                extension_attr[f"extensionAttribute{i}"] = attr_i
+
+        return extension_attr
+
+    @property
     def is_admin(self) -> bool:
         """
         Check if the current user is an admin.
@@ -171,6 +188,7 @@ class LDAPUser(LDAPAccount):
             "employeeId": self.employee_id,
             "manager": self.manager,
             "isAdmin": self.is_admin,
+            "extensionAttributes": self.extension_attr
         }
 
     @override
@@ -182,7 +200,4 @@ class LDAPUser(LDAPAccount):
             dict[str, Any]: The current user represented as a dictionary
         """
 
-        return {
-            **self.ldap_dict(),
-            **self._user.to_dict()
-        }
+        return {**self.ldap_dict(), **self._user.to_dict()}
