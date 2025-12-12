@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, override
 
 from oudjat.core.user import User
 
-from .definitions import MS_ACCOUNT_CTL_PROPERTY
+from .definitions import MS_ACCOUNT_CTL_PROPERTY, MS_EXCH_RECIPIENT
 from .ldap_account import LDAPAccount
 from .ldap_account_flags import LDAPAccountFlag
 
@@ -103,7 +103,18 @@ class LDAPUser(LDAPAccount):
             int | None: The computed account control as a bit flag
         """
 
-        self.entry.get(MS_ACCOUNT_CTL_PROPERTY, None)
+        self.entry.get(MS_ACCOUNT_CTL_PROPERTY)
+
+    @property
+    def ms_recipient_details(self) -> int | None:
+        """
+        Return the Exchange recipient type stored as a bitmask.
+
+        Returns:
+            int | None: The bitmask giving Exchange recipient type details if set
+        """
+
+        return self.entry.get(MS_EXCH_RECIPIENT)
 
     @property
     def employee_id(self) -> str:

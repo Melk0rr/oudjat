@@ -3,6 +3,7 @@
 from enum import Enum
 from typing import Any, NamedTuple
 
+from oudjat.connectors.ldap.objects.account.definitions import MS_ACCOUNT_CTL_PROPERTY, MS_EXCH_RECIPIENT
 from oudjat.utils.types import StrType
 
 from ..ldap_filter import LDAPFilter, LDAPFilterObjectCls, LDAPFilterObjectCtg, LDAPFilterStrFormat
@@ -140,8 +141,8 @@ class LDAPObjectType(Enum):
             "mail",
             "manager",
             "memberOf",
-            "msDS-User-Account-Control-Computed",
-            "msExchRecipientTypeDetails",
+            f"{MS_ACCOUNT_CTL_PROPERTY}",
+            f"{MS_EXCH_RECIPIENT}",
             "name",
             "objectClass",
             "objectGUID",
