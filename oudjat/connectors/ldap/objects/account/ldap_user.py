@@ -184,7 +184,13 @@ class LDAPUser(LDAPAccount):
         """
 
         usr = self._user
-        usr.add_custom_attr("ldap", self.ldap_dict())
+        ldap_dict = self.ldap_dict()
+        _ = ldap_dict.pop("id")
+        _ = ldap_dict.pop("name")
+        _ = ldap_dict.pop("label")
+        _ = ldap_dict.pop("description")
+
+        usr.add_custom_attr("ldap", ldap_dict)
 
         return usr
 
