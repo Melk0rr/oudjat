@@ -2,9 +2,10 @@
 
 from typing import TYPE_CHECKING, Any, override
 
+from oudjat.connectors.ldap.objects.account.ms_exch_flags import MSExchFlag
 from oudjat.core.user import User
 
-from .definitions import MS_ACCOUNT_CTL_PROPERTY, MS_EXCH_RECIPIENT
+from .definitions import MS_ACCOUNT_CTL, MS_EXCH_RECIPIENT
 from .ldap_account import LDAPAccount
 from .ldap_account_flags import LDAPAccountFlag
 
@@ -38,9 +39,11 @@ class LDAPUser(LDAPAccount):
             self._pwd_required: bool = LDAPAccountFlag.pwd_required(self.ms_account_ctl)
             self._is_locked: bool = LDAPAccountFlag.is_locked(self.ms_account_ctl)
 
-            for flag in list(LDAPAccountFlag):
-                if LDAPAccountFlag.check_flag(self.ms_account_ctl, flag):
-                    self._account_flags.add(flag.name)
+            self._account_flags.update(LDAPAccountFlag.flags(self.ms_account_ctl))
+
+        self._exchange_flags: set[str] = set()
+        if self.ms_exchange_recipient_details is not None:
+            self._exchange_flags.update(MSExchFlag.flags(self.ms_exchange_recipient_details))
 
         self._user: "User" = User(
             user_id=self.id,
@@ -103,10 +106,10 @@ class LDAPUser(LDAPAccount):
             int | None: The computed account control as a bit flag
         """
 
-        return self.entry.get(MS_ACCOUNT_CTL_PROPERTY)
+        return self.entry.get(MS_ACCOUNT_CTL)
 
     @property
-    def ms_recipient_details(self) -> int | None:
+    def ms_exchange_recipient_details(self) -> int | None:
         """
         Return the Exchange recipient type stored as a bitmask.
 
@@ -193,13 +196,18 @@ class LDAPUser(LDAPAccount):
             dict[str, Any]: A dictionary of the user LDAP properties
         """
 
+        base = super().to_dict()
+        base["account"][MS_ACCOUNT_CTL] = self.ms_account_ctl
         return {
-            **super().to_dict(),
-            f"{MS_ACCOUNT_CTL_PROPERTY}": self.ms_account_ctl,
+            **base,
             "employeeId": self.employee_id,
             "manager": self.manager,
             "isAdmin": self.is_admin,
-            "extensionAttributes": self.extension_attr
+            "exchange": {
+                "recipientDetails": self.ms_exchange_recipient_details,
+                "flags": list(self._exchange_flags)
+            },
+            "extensionAttributes": self.extension_attr,
         }
 
     @override
