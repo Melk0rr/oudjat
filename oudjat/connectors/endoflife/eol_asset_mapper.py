@@ -3,9 +3,10 @@ A module to map EndOfLife.date results into actual assets.
 """
 
 from oudjat.core.software import SoftwareReleaseSupport, SoftwareReleaseVersion
-from oudjat.core.software.os import OSRelease
 from oudjat.core.software.os.windows.windows import MSOSRelease
+
 from .eol_connector import EndOfLifeConnector
+
 
 class EOLAssetMapper:
     """
