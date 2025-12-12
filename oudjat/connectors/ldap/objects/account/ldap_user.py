@@ -103,7 +103,7 @@ class LDAPUser(LDAPAccount):
             int | None: The computed account control as a bit flag
         """
 
-        self.entry.get(MS_ACCOUNT_CTL_PROPERTY)
+        return self.entry.get(MS_ACCOUNT_CTL_PROPERTY)
 
     @property
     def ms_recipient_details(self) -> int | None:
