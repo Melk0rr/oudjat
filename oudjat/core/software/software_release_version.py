@@ -6,7 +6,6 @@ from typing import Any, override
 
 from oudjat.core.software.exceptions import (
     InvalidSoftwareVersionError,
-    SoftwareReleaseVersionSplittingError,
 )
 from oudjat.utils import Context
 
@@ -22,6 +21,7 @@ class SoftwareReleaseStage(Enum):
 
     ALPHA = "a"
     BETA = "b"
+    SERVICE_PACK = "sp"
     RELEASE_CANDIDATE = "rc"
     RELEASE = ""
 
@@ -78,7 +78,9 @@ class SoftwareReleaseVersion:
             match = re.match(VERSION_REG, version)
 
             if match is None:
-                raise InvalidSoftwareVersionError(f"{Context()}::Invalid version provided {version}")
+                raise InvalidSoftwareVersionError(
+                    f"{Context()}::Invalid version provided {version}"
+                )
 
             self._major = int(match.group(1))
             self._minor = int(match.group(2))
@@ -255,7 +257,9 @@ class SoftwareReleaseVersion:
         """
 
         if not isinstance(other, SoftwareReleaseVersion):
-            raise ValueError(f"{Context()}::You are trying to compare a SoftwareReleaseVersion with {type(object)}")
+            raise ValueError(
+                f"{Context()}::You are trying to compare a SoftwareReleaseVersion with {type(object)}"
+            )
 
         return self.major == other.major and self.minor == other.minor and self.build == other.build
 
@@ -297,6 +301,6 @@ class SoftwareReleaseVersion:
             "stage": {
                 "name": self._stage.name,
                 "version": self._stage_version,
-                "value": f"{self._stage}{self._stage_version}"
+                "value": f"{self._stage}{self._stage_version}",
             },
         }

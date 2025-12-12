@@ -25,6 +25,7 @@ class MSOSRelease(OSRelease):
 
     def __init__(
         self,
+        release_id: str,
         os_name: str,
         version: int | str,
         release_date: str | datetime,
@@ -34,6 +35,7 @@ class MSOSRelease(OSRelease):
         Instanciate OS release specific to Microsoft.
 
         Args:
+            release_id (str)             : The ID of the release
             os_name (Software)           : Software instance the release is based on
             version (int | str)          : Release version
             release_date (str | datetime): Release date
@@ -41,6 +43,7 @@ class MSOSRelease(OSRelease):
         """
 
         super().__init__(
+            release_id=release_id,
             software_name=os_name,
             version=version,
             release_date=release_date,
