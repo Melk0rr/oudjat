@@ -197,7 +197,7 @@ class LDAPUser(LDAPAccount):
         """
 
         base = super().to_dict()
-        base["account"][MS_ACCOUNT_CTL] = self.ms_account_ctl
+        base["account"][MS_ACCOUNT_CTL.replace("-", "")] = self.ms_account_ctl
         return {
             **base,
             "employeeId": self.employee_id,
@@ -205,7 +205,7 @@ class LDAPUser(LDAPAccount):
             "isAdmin": self.is_admin,
             "exchange": {
                 "recipientDetails": self.ms_exchange_recipient_details,
-                "flags": list(self._exchange_flags)
+                "flags": list(self._exchange_flags),
             },
             "extensionAttributes": self.extension_attr,
         }
