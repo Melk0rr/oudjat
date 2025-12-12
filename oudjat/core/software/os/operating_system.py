@@ -1,14 +1,15 @@
 """A module defining operating system behavior."""
 
-from typing import Any, override
+from typing import TYPE_CHECKING, Any, override
 
-from oudjat.core.computer.computer_type import ComputerType
 from oudjat.utils import Context
 
 from ..software import Software, SoftwareType
 from ..software_release import SoftwareRelease
 from .os_families import OSFamily
 
+if TYPE_CHECKING:
+    from oudjat.core.computer.computer_type import ComputerType
 
 class OSRelease(SoftwareRelease):
     """Specific software release for OperatingSystem."""

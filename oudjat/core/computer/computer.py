@@ -1,7 +1,7 @@
 """A module that defines the Computer asset type."""
 
 from enum import IntEnum
-from typing import Any, NamedTuple, TypedDict, override
+from typing import TYPE_CHECKING, Any, NamedTuple, TypedDict, override
 
 from oudjat.core import Asset, AssetType
 from oudjat.core.network.ip import IP
@@ -10,11 +10,12 @@ from oudjat.core.software import (
     SoftwareRelease,
     SoftwareReleaseSupport,
 )
-from oudjat.core.software.os.operating_system import OSRelease
 from oudjat.core.software.os.os_options import OSOption
 
 from .computer_type import ComputerType
 
+if TYPE_CHECKING:
+    from oudjat.core.software.os.operating_system import OSRelease
 
 class ComputerOSProps(NamedTuple):
     """
