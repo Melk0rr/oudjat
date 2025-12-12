@@ -21,3 +21,17 @@ class BitFlag(IntEnum):
 
         return value & flag
 
+    @classmethod
+    def flags(cls, value: int) -> list[str]:
+        """
+        Return a list of flags that matched the provided value.
+
+        Args:
+            value (int): The value to compare to the bitflag elements
+
+        Returns:
+            list[str]: A list of flag names
+        """
+
+        return [flag.name for flag in cls if BitFlag.check_flag(value, flag) ]
+
