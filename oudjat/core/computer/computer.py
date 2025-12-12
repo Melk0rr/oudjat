@@ -10,7 +10,6 @@ from oudjat.core.software import (
     SoftwareRelease,
     SoftwareReleaseSupport,
 )
-from oudjat.core.software.os.os_options import OSOption
 
 from .computer_type import ComputerType
 
@@ -198,7 +197,6 @@ class Computer(Asset):
 
         return self._os.release
 
-    # TODO: Better / simpler computer_type handling
     @os_release.setter
     def os_release(self, new_os_release: "OSRelease") -> None:
         """
@@ -208,7 +206,8 @@ class Computer(Asset):
             new_os_release (OSRelease): os release instance to set to this computer
         """
 
-        self.computer_type = next(iter(OSOption[new_os_release.os].value.computer_type))
+        # Reset computer type. It must be set again afterwards
+        self.computer_type = ComputerType.UNKNOWN
         self._os = ComputerOSProps(new_os_release, self._os.edition)
 
     @property
@@ -253,9 +252,8 @@ class Computer(Asset):
             new_os (ComputerOSProps): new os informations represented as a ComputerOSProps instance
         """
 
-        if new_os.release is not None:
-            self.computer_type = next(iter(OSOption[new_os.release.os].value.computer_type))
-
+        # Reset computer type. It must be set again afterwards
+        self.computer_type = ComputerType.UNKNOWN
         self._os = new_os
 
     @property
