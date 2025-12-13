@@ -2,6 +2,8 @@
 A module to map EndOfLife.date results into actual assets.
 """
 
+import re
+
 from oudjat.core.software import SoftwareReleaseSupport, SoftwareReleaseVersion
 from oudjat.core.software.os.windows.windows import MSOSRelease
 
@@ -49,16 +51,17 @@ class EOLAssetMapper:
             release_date = rel["releaseDate"]
             release_label = " ".join(str(rel["label"]).split(" ")[:2])
 
-            releases[rel_version] = MSOSRelease(
-                release_id=f"{windows_eol['name']}-{rel_version}",
-                os_name=software_name,
-                version=rel_version,
-                release_date=release_date,
-                release_label=release_label
-            )
+            if rel_version not in releases.keys():
+                releases[rel_version] = MSOSRelease(
+                    release_id=f"{windows_eol['name']}-{rel_version}",
+                    os_name=software_name,
+                    version=rel_version,
+                    release_date=release_date,
+                    release_label=release_label
+                )
 
-            releases[rel_version].latest_version = SoftwareReleaseVersion(rel_version)
-            releases[rel_version].add_custom_attr("link", rel["latest"]["link"])
+                releases[rel_version].latest_version = SoftwareReleaseVersion(rel_version)
+                releases[rel_version].add_custom_attr("link", rel["latest"]["link"])
 
             # Handle support
             rel_channel = "-".join(rel_name_split[2:]).upper()
@@ -95,25 +98,26 @@ class EOLAssetMapper:
 
             # Create release
             release_date = rel["releaseDate"]
-            release_label = str(rel["label"]).split(" ")[2]
+            release_label = " ".join(str(rel["label"]).split(" ")[2:]).replace(" (LTSC)", "").replace(" SAC", "").replace(" AC", "")
 
             if "-sp" in rel["name"]:
                 rel_version += rel_name_split[1]
 
-            releases[rel_version] = MSOSRelease(
-                release_id=f"{windows_eol['name']}-{rel_version}",
-                os_name=software_name,
-                version=rel_version,
-                release_date=release_date,
-                release_label=release_label
-            )
+            if rel_version not in releases.keys():
+                releases[rel_version] = MSOSRelease(
+                    release_id=f"{windows_eol['name']}-{rel_version}",
+                    os_name=software_name,
+                    version=rel_version,
+                    release_date=release_date,
+                    release_label=release_label
+                )
 
-            releases[rel_version].latest_version = SoftwareReleaseVersion(rel_version)
-            releases[rel_version].add_custom_attr("link", rel["latest"]["link"])
+                releases[rel_version].latest_version = SoftwareReleaseVersion(rel_version)
+                releases[rel_version].add_custom_attr("link", rel["latest"]["link"])
 
             # Handle support
-            rel_channel = "-".join(rel_name_split[1:]).upper()
-            rel_channel = ["LTSC"] if rel_channel == "" else [rel_channel]
+            channel_search = re.search(r"(LTSC|SAC|AC)", rel["label"])
+            rel_channel = [channel_search.group(0)] if channel_search is not None else ["LTSC"]
 
             for ch in rel_channel:
                 support = SoftwareReleaseSupport(

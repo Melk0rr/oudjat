@@ -12,6 +12,7 @@ from oudjat.utils import Context
 from .definitions import STAGE_REG, VERSION_REG
 
 
+# TODO: Improve stage handling: allow more freedom in stage inicator ?
 class SoftwareReleaseStage(Enum):
     """
     An enumeration of software release stages.
