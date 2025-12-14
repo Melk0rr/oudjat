@@ -5,6 +5,7 @@ A module to map EndOfLife.date results into actual assets.
 import re
 
 from oudjat.core.software import SoftwareReleaseSupport, SoftwareReleaseVersion
+from oudjat.core.software.os import OSRelease
 from oudjat.core.software.os.windows.windows import MSOSRelease
 
 from .eol_connector import EndOfLifeConnector
@@ -70,6 +71,7 @@ class EOLAssetMapper:
             for ch in rel_channel:
                 support = SoftwareReleaseSupport(
                     channel=ch,
+                    support_from=release_date,
                     active_support=rel["eoasFrom"],
                     security_support=rel["eolFrom"],
                     extended_security_support=rel["eoesFrom"],
@@ -122,6 +124,7 @@ class EOLAssetMapper:
             for ch in rel_channel:
                 support = SoftwareReleaseSupport(
                     channel=ch,
+                    support_from=release_date,
                     active_support=rel["eoasFrom"],
                     security_support=rel["eolFrom"],
                     extended_security_support=rel["eoesFrom"],
@@ -129,5 +132,51 @@ class EOLAssetMapper:
                 )
 
                 releases[rel_version].add_support(ch, support)
+
+        return releases
+
+    def rhel(self) -> dict[str, "OSRelease"]:
+        """
+        Return a dictionary of MSOSRelease instances.
+
+        Returns:
+            dict[str, MSOSRelease]: A dictionary of MSOSRelease for each windows instance retrieved from EOL API
+        """
+
+        releases: dict[str, "OSRelease"] = {}
+        rhel_eol = self._connector.products("rhel")[0]
+        software_name = rhel_eol["label"]
+
+        for rel in rhel_eol["releases"]:
+            rel_version = int(rel["name"])
+
+            # Create release
+            release_date = rel["releaseDate"]
+            release_label = rel["name"]
+
+            if rel_version not in releases.keys():
+                releases[f"{rel_version}"] = MSOSRelease(
+                    release_id=f"{rhel_eol['name']}-{rel_version}",
+                    os_name=software_name,
+                    version=rel_version,
+                    release_date=release_date,
+                    release_label=release_label
+                )
+
+                releases[f"{rel_version}"].latest_version = SoftwareReleaseVersion(rel["latest"]["name"])
+                releases[f"{rel_version}"].add_custom_attr("link", rel["latest"]["link"])
+
+            # Handle support
+            for ch in ["Standard", "ELS"]:
+                support = SoftwareReleaseSupport(
+                    channel=ch,
+                    support_from=release_date if ch == "Standard" else rel["eolFrom"],
+                    active_support=rel["eoasFrom"] if ch == "Standard" else rel["eoesFrom"],
+                    security_support=rel["eolFrom"] if ch == "Standard" else rel["eoesFrom"],
+                    extended_security_support=rel["eoesFrom"] if ch == "ELS" else None,
+                    long_term_support=rel["isLts"],
+                )
+
+                releases[f"{rel_version}"].add_support(ch, support)
 
         return releases
