@@ -7,12 +7,27 @@ from typing import TypedDict, override
 from oudjat.utils.time_utils import TimeConverter
 
 
+class SoftwareReleaseSupportDetailsDict(TypedDict):
+    """
+    A helper class to properly handle SoftwareReleaseSupport details dictionary types.
+
+    Attributes:
+        start (str)   : Details about the start of the support
+        end (str)     : Details about the end of the support
+        duration (int): Duration of the support
+    """
+
+    start: str
+    end: str
+    duration: int
+
 class SoftwareReleaseSupportDict(TypedDict):
     """
     A helper class to properly handle support dictionary types.
 
     Attributes:
         channel (str)                       : The support channel of the support
+        supportFrom (str)                   : The start date of the support
         activeSupport (str)                 : The activeSupport date as a string
         securitySupport (str)               : The securitySupport date as a string
         extendedSecuritySupport (str | None): The extendedSecuritySupport date as a string
@@ -22,12 +37,13 @@ class SoftwareReleaseSupportDict(TypedDict):
     """
 
     channel: str
+    supportFrom: str
     activeSupport: str
     securitySupport: str
     extendedSecuritySupport: str | None
     status: str
     lts: bool
-    details: str
+    details: "SoftwareReleaseSupportDetailsDict"
 
 
 class SoftwareReleaseSupportStatus(IntEnum):
@@ -39,6 +55,7 @@ class SoftwareReleaseSupportStatus(IntEnum):
         ONGOING: The release support is still ongoing
     """
 
+    UPCOMING = -1
     RETIRED = 0
     ONGOING = 1
 
@@ -63,6 +80,7 @@ class SoftwareReleaseSupport:
     def __init__(
         self,
         channel: str,
+        support_from: str | datetime,
         active_support: str | datetime,
         security_support: str | datetime | None = None,
         extended_security_support: str | datetime | None = None,
@@ -73,6 +91,7 @@ class SoftwareReleaseSupport:
 
         Args:
             channel (str)                                    : The support channel name
+            support_from (str | datetime)                    : The start date of the support
             active_support (str | datetime | None)           : The date when regular support ends. Can be a string with 'YYYY-MM-DD' format.
             security_support (str | datetime | None)         : The date when security support ends. Can be a string with 'YYYY-MM-DD' format.
             extended_security_support (str | datetime | None): The date when extended security support ends. Can be a string with 'YYYY-MM-DD' format.
@@ -81,6 +100,7 @@ class SoftwareReleaseSupport:
         """
 
         self._channel: str = channel
+        self._support_from: datetime = SoftwareReleaseSupport._support_date_fmt(support_from)
 
         if security_support is None:
             security_support = active_support
@@ -111,6 +131,9 @@ class SoftwareReleaseSupport:
             str: "Ongoing" if support is ongoing, otherwise "Retired".
         """
 
+        if TimeConverter.days_diff(self._support_from) < 0:
+            return SoftwareReleaseSupportStatus.UPCOMING
+
         return SoftwareReleaseSupportStatus(int(self.is_ongoing))
 
     @property
@@ -122,27 +145,44 @@ class SoftwareReleaseSupport:
             bool: True if the support period is ongoing, False otherwise.
         """
 
-        return TimeConverter.days_diff(self._security_support, reverse=True) > 0
+        return (
+            TimeConverter.days_diff(self._support_from) > 0
+            and TimeConverter.days_diff(self._security_support, reverse=True) > 0
+        )
 
     @property
-    def support_details(self) -> str:
+    def duration(self) -> int:
         """
-        Return a detailed string about the supported status.
+        Return how long the support is ongoing.
 
         Returns:
-            str: A string indicating how many days are left in support or whether support has ended already.
+            int: The number of support days
         """
 
+        return (self._security_support - self._support_from).days
+
+    @property
+    def support_details(self) -> "SoftwareReleaseSupportDetailsDict":
+        """
+        Return some details about the start and end of the support.
+
+        Returns:
+            dict[str, str]: A dictionary with start and end details
+        """
+
+        from_days = TimeConverter.days_diff(self._support_from)
+        start = f"{abs(from_days)} days"
+        start = f"Started {start} ago" if from_days > 0 else f"Starts in {start}"
+
         support_days = TimeConverter.days_diff(self._security_support, reverse=True)
-        state = f"{abs(support_days)} days"
+        end = f"{abs(support_days)} days"
+        end = f"Ends in {end}" if support_days > 0 else f"Ended {end} ago"
 
-        if support_days > 0:
-            state = f"Ends in {state}"
-
-        else:
-            state = f"Ended {state} ago"
-
-        return state
+        return {
+            "start": start,
+            "end": end,
+            "duration": self.duration
+        }
 
     @property
     def lts(self) -> bool:
@@ -182,6 +222,7 @@ class SoftwareReleaseSupport:
 
         return {
             "channel": self._channel,
+            "supportFrom": TimeConverter.date_to_str(self._support_from),
             "activeSupport": TimeConverter.date_to_str(self._active_support),
             "securitySupport": TimeConverter.date_to_str(self._security_support),
             "extendedSecuritySupport": esu,
@@ -209,6 +250,7 @@ class SoftwareReleaseSupport:
 
         return cls(
             channel=support_dict["channel"],
+            support_from=support_dict["supportFrom"],
             active_support=support_dict["activeSupport"],
             security_support=support_dict["securitySupport"],
             extended_security_support=support_dict["extendedSecuritySupport"],
