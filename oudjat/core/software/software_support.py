@@ -2,9 +2,32 @@
 
 from datetime import datetime
 from enum import IntEnum
-from typing import Any, override
+from typing import TypedDict, override
 
 from oudjat.utils.time_utils import TimeConverter
+
+
+class SoftwareReleaseSupportDict(TypedDict):
+    """
+    A helper class to properly handle support dictionary types.
+
+    Attributes:
+        channel (str)                       : The support channel of the support
+        activeSupport (str)                 : The activeSupport date as a string
+        securitySupport (str)               : The securitySupport date as a string
+        extendedSecuritySupport (str | None): The extendedSecuritySupport date as a string
+        status (str)                        : The support status (SoftwareReleaseSupportStatus) as a string
+        lts (bool)                          : Whether the support is LTS or not
+        details (str)                       : Support details string
+    """
+
+    channel: str
+    activeSupport: str
+    securitySupport: str
+    extendedSecuritySupport: str | None
+    status: str
+    lts: bool
+    details: str
 
 
 class SoftwareReleaseSupportStatus(IntEnum):
@@ -143,7 +166,7 @@ class SoftwareReleaseSupport:
 
         return f"{self.status}{' - LTS' if self._lts else ''}"
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> "SoftwareReleaseSupportDict":
         """
         Convert the current support instance into a dict.
 
@@ -168,6 +191,31 @@ class SoftwareReleaseSupport:
         }
 
     # ****************************************************************
+    # Class methods
+
+    @classmethod
+    def from_dict(cls, support_dict: "SoftwareReleaseSupportDict") -> "SoftwareReleaseSupport":
+        """
+        Create a new instance of SoftwareReleaseSupport from a dictionary.
+
+        The provided dictionary must follow the SoftwareReleaseSupportDict model
+
+        Args:
+            support_dict (SoftwareReleaseSupportDict): The dictionary the new instance will be based on
+
+        Returns:
+            SoftwareReleaseSupport: A new instance of SoftwareReleaseSupport based on the provided dictionary
+        """
+
+        return cls(
+            channel=support_dict["channel"],
+            active_support=support_dict["activeSupport"],
+            security_support=support_dict["securitySupport"],
+            extended_security_support=support_dict["extendedSecuritySupport"],
+            long_term_support=support_dict["lts"],
+        )
+
+    # ****************************************************************
     # Static methods
 
     @staticmethod
@@ -187,4 +235,3 @@ class SoftwareReleaseSupport:
             if not isinstance(date_to_fmt, datetime)
             else date_to_fmt
         )
-
