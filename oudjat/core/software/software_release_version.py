@@ -84,8 +84,8 @@ class SoftwareReleaseVersion:
                 )
 
             self._major = int(match.group(1))
-            self._minor = int(match.group(2))
-            self._build = int(match.group(3))
+            self._minor = int(match.group(2)) if match.group(2) is not None else 0
+            self._build = int(match.group(3)) if match.group(3) is not None else 0
 
             if match.group(4) is not None:
                 stage_match = re.match(STAGE_REG, match.group(4))
