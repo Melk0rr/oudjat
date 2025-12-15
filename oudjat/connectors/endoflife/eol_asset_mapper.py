@@ -118,8 +118,8 @@ class EOLAssetMapper:
                     release_label=release_label
                 )
 
-                releases[rel_version].latest_version = SoftwareReleaseVersion(rel_version)
-                releases[rel_version].add_custom_attr("link", rel["latest"]["link"])
+                releases[rel_key].latest_version = SoftwareReleaseVersion(rel_version)
+                releases[rel_key].add_custom_attr("link", rel["latest"]["link"])
 
             # Handle support
             channel_search = re.search(r"(LTSC|SAC|AC)", rel["label"])
