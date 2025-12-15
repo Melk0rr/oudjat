@@ -103,12 +103,13 @@ class EOLAssetMapper:
             release_date = rel["releaseDate"]
             release_label = " ".join(str(rel["label"]).split(" ")[2:]).replace(" (LTSC)", "").replace(" SAC", "").replace(" AC", "")
 
-            rel_version = f"{release_label}-{rel_version}"
+            rel_key = rel_version
             if "-sp" in rel["name"]:
                 rel_version += rel_name_split[1]
 
+            rel_key = f"{release_label.replace(' ', '-')}-{rel_version}"
             if rel_version not in releases.keys():
-                releases[rel_version] = OSRelease(
+                releases[rel_key] = OSRelease(
                     release_id=f"{windows_eol['name']}-{rel_version}",
                     name=f"{software_name} {release_label}",
                     os_name=software_name,
