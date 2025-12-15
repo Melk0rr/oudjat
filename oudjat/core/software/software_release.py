@@ -28,7 +28,7 @@ class SoftwareRelease(GenericIdentifiable):
         software_name: str,
         version: int | str,
         release_date: str | datetime,
-        release_label: str,
+        release_label: str | None = None,
     ) -> None:
         """
         Create a new instance of SoftwareRelease.
@@ -137,18 +137,7 @@ class SoftwareRelease(GenericIdentifiable):
         return self._release_date
 
     @property
-    def key(self) -> str:
-        """
-        Return a unique release key based on version and label.
-
-        Returns:
-            str: Release key
-        """
-
-        return f"{self._version} - {self._label}"
-
-    @property
-    def full_name(self) -> str:
+    def fullname(self) -> str:
         """
         Return the release full name.
 
@@ -156,7 +145,11 @@ class SoftwareRelease(GenericIdentifiable):
             str: The full name of the software release, combining the software name and its label.
         """
 
-        return f"{self._software} {self._label}"
+        res = self._name
+        if self._label is not None:
+            res += f" {self._label}"
+
+        return res
 
     @property
     def vulnerabilities(self) -> set[str]:
@@ -250,7 +243,7 @@ class SoftwareRelease(GenericIdentifiable):
             vuln (str): The vulnerability string to be added.
         """
 
-        self.vulnerabilities.add(vuln)
+        self._vulnerabilities.add(vuln)
 
     @override
     def __str__(self, show_version: bool = False) -> str:
@@ -264,7 +257,7 @@ class SoftwareRelease(GenericIdentifiable):
             str: A string representation of the software release, optionally including the version.
         """
 
-        name = self.full_name
+        name = self.fullname
 
         if show_version:
             name = f"{name.strip()}({self._version})"
@@ -286,7 +279,7 @@ class SoftwareRelease(GenericIdentifiable):
                 "initial": str(self._version),
                 "latest": str(self._latest_version)
             },
-            "fullname": self.full_name,
+            "fullname": self.fullname,
             "isSupported": self.is_supported(),
         }
 

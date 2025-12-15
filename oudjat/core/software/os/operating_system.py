@@ -26,7 +26,7 @@ class OSRelease(SoftwareRelease):
         os_name: str,
         version: int | str,
         release_date: str | datetime,
-        release_label: str,
+        release_label: str | None = None,
     ) -> None:
         """
         Instanciate OS release specific to Microsoft.

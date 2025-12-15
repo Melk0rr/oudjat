@@ -50,7 +50,7 @@ class EOLAssetMapper:
             # Create release
             release_date = rel["releaseDate"]
             rel_label_split = str(rel["label"]).split(" ")
-            release_label = rel_label_split[1] if len(rel_label_split) >= 2 else rel_name_split[0]
+            release_label = rel_label_split[1] if len(rel_label_split) >= 2 else None
 
             if rel_version not in releases.keys():
                 releases[rel_version] = OSRelease(
