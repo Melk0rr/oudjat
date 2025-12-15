@@ -11,10 +11,11 @@ from oudjat.core.software import (
     SoftwareReleaseSupport,
 )
 
-from .computer_type import ComputerType
+from .computer_type import ComputerType, MachineType
 
 if TYPE_CHECKING:
     from oudjat.core.software.os.operating_system import OSRelease
+
 
 class ComputerOSProps(NamedTuple):
     """
@@ -63,6 +64,7 @@ class ComputerBaseDict(TypedDict):
     """
 
     computerType: str
+    machineType: str
     computerStatus: str
     ip: str | None
     softwares: dict[str, Any]
@@ -81,6 +83,7 @@ class Computer(Asset):
         label: str | None = None,
         description: str | None = None,
         computer_type: "str | ComputerType | None" = None,
+        machine_type: "str | MachineType | None" = None,
         os_release: "OSRelease | None" = None,
         os_edition: "SoftwareEdition | None" = None,
         ip: "str | IP | None" = None,
@@ -103,10 +106,11 @@ class Computer(Asset):
             label (str | None)                       : A short description or tag for the computer.
             description (str | None)                 : A detailed description of the computer and its purpose.
             computer_type (str | ComputerType | None): Specifies the type of the computer, which can be provided either as a string or an instance of ComputerType enum.
+            machine_type (str | ComputerType | None) : The machine type of the computer
             os_release (OSRelease | None)            : The release version of the operating system installed on the computer. Defaults to None.
             os_edition (SoftwareEdition | None)      : The edition of the operating system for the given release. Defaults to None.
-            ip (str | IP | None)                     : The IP address assigned to the computer, which can be provided as either a string or an instance of IPv4 class. Defaults to None.
-            kwargs (Any)                             : Any further arguments
+            ip (str | IP | None)                     : The IP address assigned to the computer, which can be provided as either a string or an instance of IPv4 class
+            **kwargs (Any)                           : Any further arguments
         """
 
         super().__init__(
@@ -120,16 +124,8 @@ class Computer(Asset):
 
         self._os: "ComputerOSProps" = ComputerOSProps(os_release, os_edition)
 
-        if computer_type is None or (
-            isinstance(computer_type, str)
-            and computer_type.upper() not in ComputerType._member_names_
-        ):
-            computer_type = ComputerType.UNKNOWN
-
-        else:
-            computer_type = ComputerType(computer_type)
-
-        self._computer_type: "ComputerType" = computer_type
+        self._computer_type: "ComputerType" = self._standardize_computer_type(computer_type)
+        self._machine_type: "MachineType" = self._standardize_machine_type(machine_type)
 
         self._ip: IP | None = None
         if ip is not None:
@@ -148,7 +144,7 @@ class Computer(Asset):
         Return the computer type associated with the current computer.
 
         Returns:
-            ComputerType | None: the current computer type
+            ComputerType: the current computer type
         """
 
         return self._computer_type
@@ -163,6 +159,28 @@ class Computer(Asset):
         """
 
         self._computer_type = new_computer_type
+
+    @property
+    def machine_type(self) -> "MachineType":
+        """
+        Return the machine type associated with the current computer.
+
+        Returns:
+            MachineType: The current machine type
+        """
+
+        return self._machine_type
+
+    @machine_type.setter
+    def machine_type(self, new_machine_type: "MachineType") -> None:
+        """
+        Set the computer type of this computer.
+
+        Args:
+            new_machine_type (MachineType): New machine type
+        """
+
+        self._machine_type = new_machine_type
 
     @property
     def status(self) -> "ComputerStatus":
@@ -305,6 +323,50 @@ class Computer(Asset):
 
         return self._softwares
 
+    def _standardize_computer_type(self, computer_type: "str | ComputerType | None") -> "ComputerType":
+        """
+        Standardize provided argument into a ComputerType whether the input is provided as a string, a ComputerType or None.
+
+        Args:
+            computer_type (str | ComputerType | None): Input computer type that will be formatted into a ComputerType if needed
+
+        Returns:
+            ComputerType: Standardized computer type
+        """
+
+        if computer_type is None or (
+            isinstance(computer_type, str)
+            and computer_type.upper() not in ComputerType._member_names_
+        ):
+            computer_type = ComputerType.UNKNOWN
+
+        else:
+            computer_type = ComputerType(computer_type)
+
+        return computer_type
+
+    def _standardize_machine_type(self, machine_type: "str | MachineType | None") -> "MachineType":
+        """
+        Standardize provided argument into a MachineType whether the input is provided as a string, a MachineType or None.
+
+        Args:
+            machine_type (str | ComputerType | None): Input machine type that will be formatted into a MachineType if needed
+
+        Returns:
+            MachineType: Standardized computer type
+        """
+
+        if machine_type is None or (
+            isinstance(machine_type, str)
+            and machine_type.upper() not in MachineType._member_names_
+        ):
+            machine_type = MachineType.UNKNOWN
+
+        else:
+            machine_type = MachineType(machine_type)
+
+        return machine_type
+
     def set_ip_from_str(self, new_ip_str: str) -> None:
         """
         Set a new ip address for this computer based on a string.
@@ -372,6 +434,7 @@ class Computer(Asset):
 
         base_dict: "ComputerBaseDict" = {
             "computerType": str(self._computer_type),
+            "machineType": str(self._machine_type),
             "computerStatus": str(self._status),
             "ip": str(self._ip) if self._ip else None,
             "softwares": {sid: s.to_dict() for sid, s in self._softwares.items()},
@@ -380,9 +443,5 @@ class Computer(Asset):
         return {
             **super().to_dict(),
             **base_dict,
-            "os": {
-                "release": release_dict,
-                "edition": edition_dict,
-                "support": os_support_dict
-            },
+            "os": {"release": release_dict, "edition": edition_dict, "support": os_support_dict},
         }
