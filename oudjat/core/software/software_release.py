@@ -146,7 +146,7 @@ class SoftwareRelease(GenericIdentifiable):
         """
 
         res = self._name
-        if self._label is not None:
+        if self._label is not None and self._label not in self._name:
             res += f" {self._label}"
 
         return res
