@@ -24,6 +24,7 @@ class SoftwareRelease(GenericIdentifiable):
     def __init__(
         self,
         release_id: str,
+        name: str,
         software_name: str,
         version: int | str,
         release_date: str | datetime,
@@ -34,6 +35,7 @@ class SoftwareRelease(GenericIdentifiable):
 
         Args:
             release_id (str)             : The ID of the release
+            name (str)                   : The name of the release
             software_name (str)          : The software name which this release belongs to.
             version (int | str)          : The version of the software, can be either an integer or a string representation of a number.
             release_date (str | datetime): The date when the software was released. Can be provided as a string formatted like: `%Y-%m-%d`
@@ -50,7 +52,7 @@ class SoftwareRelease(GenericIdentifiable):
         self._version: "SoftwareReleaseVersion" = SoftwareReleaseVersion(version)
         self._latest_version: "SoftwareReleaseVersion" = self._version
 
-        super().__init__(gid=release_id, name=f"{software_name} {release_label}", label=release_label)
+        super().__init__(gid=release_id, name=name, label=release_label)
 
         try:
             if not isinstance(release_date, datetime):
@@ -154,7 +156,7 @@ class SoftwareRelease(GenericIdentifiable):
             str: The full name of the software release, combining the software name and its label.
         """
 
-        return f"{self.software} {self.label}"
+        return f"{self._software} {self._label}"
 
     @property
     def vulnerabilities(self) -> set[str]:

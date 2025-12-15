@@ -1,5 +1,6 @@
 """A module defining operating system behavior."""
 
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, override
 
 from oudjat.utils import Context
@@ -11,8 +12,42 @@ from .os_families import OSFamily
 if TYPE_CHECKING:
     from oudjat.core.computer.computer_type import ComputerType
 
+
 class OSRelease(SoftwareRelease):
     """Specific software release for OperatingSystem."""
+
+    # ****************************************************************
+    # Constructor & Attributes
+
+    def __init__(
+        self,
+        release_id: str,
+        name: str,
+        os_name: str,
+        version: int | str,
+        release_date: str | datetime,
+        release_label: str,
+    ) -> None:
+        """
+        Instanciate OS release specific to Microsoft.
+
+        Args:
+            release_id (str)             : The ID of the release
+            name (str)                   : The name of the release
+            os_name (Software)           : Software instance the release is based on
+            version (int | str)          : Release version
+            release_date (str | datetime): Release date
+            release_label (str)          : Release label
+        """
+
+        super().__init__(
+            release_id=release_id,
+            name=name,
+            software_name=os_name,
+            version=version,
+            release_date=release_date,
+            release_label=release_label,
+        )
 
     # ****************************************************************
     # Methods
@@ -133,4 +168,3 @@ class OperatingSystem(Software[OSRelease]):
             "osFamily": self._os_family,
             "computerTypes": self._computer_type,
         }
-
