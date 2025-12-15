@@ -6,7 +6,6 @@ import re
 
 from oudjat.core.software import SoftwareReleaseSupport, SoftwareReleaseVersion
 from oudjat.core.software.os import OSRelease
-from oudjat.core.software.os.windows.windows import MSOSRelease
 
 from .eol_connector import EndOfLifeConnector
 
@@ -32,7 +31,7 @@ class EOLAssetMapper:
     # ****************************************************************
     # Methods
 
-    def windows(self) -> dict[str, "MSOSRelease"]:
+    def windows(self) -> dict[str, "OSRelease"]:
         """
         Return a dictionary of MSOSRelease instances.
 
@@ -40,7 +39,7 @@ class EOLAssetMapper:
             dict[str, MSOSRelease]: A dictionary of MSOSRelease for each windows instance retrieved from EOL API
         """
 
-        releases: dict[str, "MSOSRelease"] = {}
+        releases: dict[str, "OSRelease"] = {}
         windows_eol = self._connector.windows()[0]
         software_name = " ".join(str(windows_eol["label"]).split(" ")[1:])
 
@@ -53,8 +52,9 @@ class EOLAssetMapper:
             release_label = " ".join(str(rel["label"]).split(" ")[:2])
 
             if rel_version not in releases.keys():
-                releases[rel_version] = MSOSRelease(
+                releases[rel_version] = OSRelease(
                     release_id=f"{windows_eol['name']}-{rel_version}",
+                    name=f"{software_name} {release_label}",
                     os_name=software_name,
                     version=rel_version,
                     release_date=release_date,
@@ -82,7 +82,7 @@ class EOLAssetMapper:
 
         return releases
 
-    def windows_server(self) -> dict[str, "MSOSRelease"]:
+    def windows_server(self) -> dict[str, "OSRelease"]:
         """
         Return a dictionary of MSOSRelease instances.
 
@@ -90,7 +90,7 @@ class EOLAssetMapper:
             dict[str, MSOSRelease]: A dictionary of MSOSRelease for each windows instance retrieved from EOL API
         """
 
-        releases: dict[str, "MSOSRelease"] = {}
+        releases: dict[str, "OSRelease"] = {}
         windows_eol = self._connector.windows_server()[0]
         software_name = " ".join(str(windows_eol["label"]).split(" ")[1:])
 
@@ -106,8 +106,9 @@ class EOLAssetMapper:
                 rel_version += rel_name_split[1]
 
             if rel_version not in releases.keys():
-                releases[rel_version] = MSOSRelease(
+                releases[rel_version] = OSRelease(
                     release_id=f"{windows_eol['name']}-{rel_version}",
+                    name=f"{software_name} {release_label}",
                     os_name=software_name,
                     version=rel_version,
                     release_date=release_date,
@@ -155,8 +156,9 @@ class EOLAssetMapper:
             release_label = rel["name"]
 
             if rel_version not in releases.keys():
-                releases[f"{rel_version}"] = MSOSRelease(
+                releases[f"{rel_version}"] = OSRelease(
                     release_id=f"{rhel_eol['name']}-{rel_version}",
+                    name=f"{software_name} {rel['name']}",
                     os_name=software_name,
                     version=rel_version,
                     release_date=release_date,

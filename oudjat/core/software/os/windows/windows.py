@@ -17,90 +17,6 @@ from ..os_families import OSFamily
 from .config.releases import WINDOWS_RELEASES
 
 
-class MSOSRelease(OSRelease):
-    """A class to handle OS releases specific to Microsoft."""
-
-    # ****************************************************************
-    # Attributes & Constructors
-
-    def __init__(
-        self,
-        release_id: str,
-        os_name: str,
-        version: int | str,
-        release_date: str | datetime,
-        release_label: str,
-    ) -> None:
-        """
-        Instanciate OS release specific to Microsoft.
-
-        Args:
-            release_id (str)             : The ID of the release
-            os_name (Software)           : Software instance the release is based on
-            version (int | str)          : Release version
-            release_date (str | datetime): Release date
-            release_label (str)          : Release label
-        """
-
-        super().__init__(
-            release_id=release_id,
-            software_name=os_name,
-            version=version,
-            release_date=release_date,
-            release_label=release_label,
-        )
-
-    # ****************************************************************
-    # Methods
-
-    @property
-    @override
-    def name(self) -> str:
-        """
-        Return a forged name of the release.
-
-        This method constructs and returns a string that includes the name of the software
-        concatenated with the first word from the label. The software name and label are instance variables of this class.
-
-        Returns:
-            str: A combined name based on the software's name and part of its label.
-        """
-
-        return f"{self.software} {(self.label or "").split(' ')[0]}"
-
-    def _os_dict(self) -> dict[str, Any]:
-        """
-        Return a dictionary with os infos.
-
-        This method extends the functionality of its parent class to include specific OS information such as name and version numbers, by combining data from both itself and the superclass. The extended dictionary includes 'name', 'version_main', and 'version_build' keys.
-
-        Returns:
-            dict[str, Any]: A dictionary containing OS-specific information including the software name and versions.
-        """
-
-        base_dict = super()._software_dict()
-        _ = base_dict.pop("software")
-
-        return {
-            **base_dict,
-            "name": self.name,
-        }
-
-    @override
-    def to_dict(self) -> dict:
-        """
-        Convert the current instance into a dictionary.
-
-        This method overrides or extends the standard conversion behavior to include specific class information such as OS name and version numbers.
-
-        Returns:
-            Dict: A dictionary representation of the instance including extended OS-related information.
-        """
-
-        base_dict = super().to_dict()  # Assuming superclass has a to_dict method
-        return {**base_dict, **self._os_dict()}
-
-
 class WindowsEdition(Enum):
     """
     Windows edition enum.
@@ -210,7 +126,7 @@ class MicrosoftOperatingSystem(OperatingSystem):
             win_rel = self.releases.get(version, None)
 
             if win_rel is None:
-                win_rel = MSOSRelease(
+                win_rel = OSRelease(
                     os_name=self.name,
                     version=version,
                     release_date=version_dict["releaseDate"],
