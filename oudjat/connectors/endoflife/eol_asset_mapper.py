@@ -135,7 +135,7 @@ class EOLAssetMapper:
                     long_term_support=rel["isLts"],
                 )
 
-                releases[rel_version].add_support(ch, support)
+                releases[rel_key].add_support(ch, support)
 
         return releases
 
