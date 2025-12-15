@@ -49,6 +49,9 @@ class WindowsEdition(Enum):
     # TODO: See how to handle server channels (depends on the release)
     WINDOWSSERVER = SoftwareEditionDict(
         {
+            "Enterprise": SoftwareEdition(
+                label="Enterprise", channel="LTSC", pattern=r"Ent[er]{2}prise"
+            ),
             "Standard": SoftwareEdition(
                 label="Standard", channel="LTSC", pattern=r"[Ss]tandard"
             ),
