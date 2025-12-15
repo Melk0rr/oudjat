@@ -104,10 +104,11 @@ class EOLAssetMapper:
             release_label = " ".join(str(rel["label"]).split(" ")[2:]).replace(" (LTSC)", "").replace(" SAC", "").replace(" AC", "")
 
             rel_key = rel_version
+            rel_key = f"{release_label.replace(' ', '-')}-{rel_version}"
+
             if "-sp" in rel["name"]:
                 rel_version += rel_name_split[1]
 
-            rel_key = f"{release_label.replace(' ', '-')}-{rel_version}"
             if rel_version not in releases.keys():
                 releases[rel_key] = OSRelease(
                     release_id=f"{windows_eol['name']}-{rel_version}",
