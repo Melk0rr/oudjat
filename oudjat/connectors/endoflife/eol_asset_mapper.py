@@ -49,12 +49,13 @@ class EOLAssetMapper:
 
             # Create release
             release_date = rel["releaseDate"]
-            release_label = " ".join(str(rel["label"]).split(" ")[:2])
+            rel_label_split = str(rel["label"]).split(" ")
+            release_label = rel_label_split[1] if len(rel_label_split) >= 2 else rel_name_split[0]
 
             if rel_version not in releases.keys():
                 releases[rel_version] = OSRelease(
                     release_id=f"{windows_eol['name']}-{rel_version}",
-                    name=f"{software_name} {release_label}",
+                    name=f"{software_name} {rel['label'].split(" ")[0]}",
                     os_name=software_name,
                     version=rel_version,
                     release_date=release_date,
