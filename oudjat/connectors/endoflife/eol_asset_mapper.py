@@ -103,6 +103,7 @@ class EOLAssetMapper:
             release_date = rel["releaseDate"]
             release_label = " ".join(str(rel["label"]).split(" ")[2:]).replace(" (LTSC)", "").replace(" SAC", "").replace(" AC", "")
 
+            rel_version = f"{release_label}-{rel_version}"
             if "-sp" in rel["name"]:
                 rel_version += rel_name_split[1]
 
@@ -118,10 +119,6 @@ class EOLAssetMapper:
 
                 releases[rel_version].latest_version = SoftwareReleaseVersion(rel_version)
                 releases[rel_version].add_custom_attr("link", rel["latest"]["link"])
-
-            else:
-                releases[rel_version].name = f"{software_name} {release_label}"
-                releases[rel_version].label = release_label
 
             # Handle support
             channel_search = re.search(r"(LTSC|SAC|AC)", rel["label"])
