@@ -6,7 +6,7 @@ from typing import override
 
 class ComputerType(Enum):
     """
-    Enumeration to list computer types.
+    An enumeration to list computer types.
 
     Attributes:
         UNKNOWN    : The computer type is unknown
@@ -25,6 +25,33 @@ class ComputerType(Enum):
 
         Returns:
             str: A string representation of the computer type
+        """
+
+        return self._name_
+
+
+class MachineType(Enum):
+    """
+    An enumeration to list machine types.
+
+    Attributes:
+        UNKNOWN : The machine type is unknown
+        PHYSICAL: The machine is physical
+        VIRTUAL : The machine is virtual (VM)
+
+    """
+
+    UNKNOWN = "Unknown"
+    PHYSICAL = "Physical"
+    VIRTUAL = "Virtual"
+
+    @override
+    def __str__(self) -> str:
+        """
+        Convert a MachineType into a string.
+
+        Returns:
+            str: A string representation of the machine type
         """
 
         return self._name_

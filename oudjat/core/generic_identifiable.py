@@ -84,6 +84,17 @@ class GenericIdentifiable(ABC):
 
         return self._name
 
+    @name.setter
+    def name(self, new_name: str) -> None:
+        """
+        Set a new name for the current element.
+
+        Args:
+            new_name (str): New name value
+        """
+
+        self._name = new_name
+
     @property
     def label(self) -> str | None:
         """
@@ -94,6 +105,17 @@ class GenericIdentifiable(ABC):
         """
 
         return self._label
+
+    @label.setter
+    def label(self, new_label: str) -> None:
+        """
+        Set a new label for the current element.
+
+        Args:
+            new_label (str): New label value
+        """
+
+        self._label = new_label
 
     @property
     def description(self) -> str | None:

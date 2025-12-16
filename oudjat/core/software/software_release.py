@@ -24,16 +24,18 @@ class SoftwareRelease(GenericIdentifiable):
     def __init__(
         self,
         release_id: str,
+        name: str,
         software_name: str,
         version: int | str,
         release_date: str | datetime,
-        release_label: str,
+        release_label: str | None = None,
     ) -> None:
         """
         Create a new instance of SoftwareRelease.
 
         Args:
             release_id (str)             : The ID of the release
+            name (str)                   : The name of the release
             software_name (str)          : The software name which this release belongs to.
             version (int | str)          : The version of the software, can be either an integer or a string representation of a number.
             release_date (str | datetime): The date when the software was released. Can be provided as a string formatted like: `%Y-%m-%d`
@@ -50,7 +52,7 @@ class SoftwareRelease(GenericIdentifiable):
         self._version: "SoftwareReleaseVersion" = SoftwareReleaseVersion(version)
         self._latest_version: "SoftwareReleaseVersion" = self._version
 
-        super().__init__(gid=release_id, name=f"{software_name} {release_label}", label=release_label)
+        super().__init__(gid=release_id, name=name, label=release_label)
 
         try:
             if not isinstance(release_date, datetime):
@@ -135,18 +137,7 @@ class SoftwareRelease(GenericIdentifiable):
         return self._release_date
 
     @property
-    def key(self) -> str:
-        """
-        Return a unique release key based on version and label.
-
-        Returns:
-            str: Release key
-        """
-
-        return f"{self._version} - {self._label}"
-
-    @property
-    def full_name(self) -> str:
+    def fullname(self) -> str:
         """
         Return the release full name.
 
@@ -154,7 +145,11 @@ class SoftwareRelease(GenericIdentifiable):
             str: The full name of the software release, combining the software name and its label.
         """
 
-        return f"{self.software} {self.label}"
+        res = self._name
+        if self._label is not None and self._label not in self._name:
+            res += f" {self._label}"
+
+        return res
 
     @property
     def vulnerabilities(self) -> set[str]:
@@ -248,7 +243,7 @@ class SoftwareRelease(GenericIdentifiable):
             vuln (str): The vulnerability string to be added.
         """
 
-        self.vulnerabilities.add(vuln)
+        self._vulnerabilities.add(vuln)
 
     @override
     def __str__(self, show_version: bool = False) -> str:
@@ -262,7 +257,7 @@ class SoftwareRelease(GenericIdentifiable):
             str: A string representation of the software release, optionally including the version.
         """
 
-        name = self.full_name
+        name = self.fullname
 
         if show_version:
             name = f"{name.strip()}({self._version})"
@@ -284,7 +279,7 @@ class SoftwareRelease(GenericIdentifiable):
                 "initial": str(self._version),
                 "latest": str(self._latest_version)
             },
-            "fullname": self.full_name,
+            "fullname": self.fullname,
             "isSupported": self.is_supported(),
         }
 

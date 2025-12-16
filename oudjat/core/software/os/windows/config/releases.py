@@ -3,30 +3,13 @@
 import os
 from typing import TypeAlias, TypedDict
 
+from oudjat.core.software.software_support import SoftwareReleaseSupportDict
 from oudjat.utils.file_utils import FileUtils
-
-# TODO: Rework JSON structure and SoftwareReleaseDict
 
 PerVersionMSReleaseDict: TypeAlias = dict[str, "MSReleaseProps"]
 PerOSMSReleaseDict: TypeAlias = dict[str, "PerVersionMSReleaseDict"]
 
-class MSSupportProps(TypedDict):
-    """
-    A class to properly handle MS support attribute types.
-
-    Attributes:
-        eos (str)       : Base end of support date
-        eol (str)       : End of life / end of security support
-        esu (str | None): Extended security support date
-        lts (bool)      : Does the channel include Long Time Support
-    """
-
-    activeSupport: str
-    securitySupport: str
-    extendedSecuritySupport: str | None
-    lts: bool
-
-ChannelDict: TypeAlias = dict[str, "MSSupportProps"]
+ChannelDict: TypeAlias = dict[str, "SoftwareReleaseSupportDict"]
 
 class MSReleaseProps(TypedDict):
     """
