@@ -323,18 +323,18 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
     # ****************************************************************
     # Methods
 
-    def __getitem__(self, version: str) -> "ReleaseType":
+    def __getitem__(self, key: str) -> "ReleaseType":
         """
         Return a Software release element based on its key.
 
         Args:
-            version (str): The version of the release to retrieve
+            key (str): The version of the release to retrieve
 
         Returns:
             ReleaseType: covariant element of SoftwareRelease
         """
 
-        return self._versions[version]
+        return self._versions[key]
 
     def __setitem__(self, version: str, value: "ReleaseType") -> None:
         """
@@ -358,7 +358,7 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
         return iter(self._versions)
 
     def get(
-        self, version: str, default_value: Any = None
+        self, key: str, default_value: Any = None
     ) -> "ReleaseType | None":
         """
         Return a SoftwareRelEditionDict element based on its key.
@@ -366,7 +366,7 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
         If the element cannot be found, return the default value.
 
         Args:
-            version (str)      : Key of the element to return
+            key (str)          : Key of the element to return
             default_value (Any): Default value in case the element cannot be found
 
         Returns:
@@ -374,7 +374,7 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
 
         """
 
-        return self._versions.get(version, default_value)
+        return self._versions.get(key, default_value)
 
     def keys(self):
         """
