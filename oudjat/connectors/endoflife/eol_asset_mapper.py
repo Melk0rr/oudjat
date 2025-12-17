@@ -31,7 +31,7 @@ class EOLAssetMapper:
     # ****************************************************************
     # Methods
 
-    def windows(self) -> dict[str, "OSRelease"]:
+    def windows(self) -> dict[str, list["OSRelease"]]:
         """
         Return a dictionary of MSOSRelease instances.
 
@@ -39,7 +39,7 @@ class EOLAssetMapper:
             dict[str, MSOSRelease]: A dictionary of MSOSRelease for each windows instance retrieved from EOL API
         """
 
-        releases: dict[str, "OSRelease"] = {}
+        releases: dict[str, list["OSRelease"]] = {}
         windows_eol = self._connector.windows()[0]
         software_name = " ".join(str(windows_eol["label"]).split(" ")[1:])
 
@@ -52,18 +52,18 @@ class EOLAssetMapper:
             rel_label_split = str(rel["label"]).split(" ")
             release_label = rel_label_split[1] if len(rel_label_split) >= 2 else None
 
-            if rel_version not in releases.keys():
-                releases[rel_version] = OSRelease(
-                    release_id=f"{windows_eol['name']}-{rel_version}",
-                    name=f"{software_name} {rel['label'].split(" ")[0]}",
-                    os_name=software_name,
-                    version=rel_version,
-                    release_date=release_date,
-                    release_label=release_label
-                )
+            rel_key = rel_version
+            os_rel = OSRelease(
+                release_id=f"{windows_eol['name']}-{rel_version}",
+                name=f"{software_name} {rel['label'].split(" ")[0]}",
+                os_name=software_name,
+                version=rel_version,
+                release_date=release_date,
+                release_label=release_label
+            )
 
-                releases[rel_version].latest_version = SoftwareReleaseVersion(rel_version)
-                releases[rel_version].add_custom_attr("link", rel["latest"]["link"])
+            os_rel.latest_version = SoftwareReleaseVersion(rel_version)
+            os_rel.add_custom_attr("link", rel["latest"]["link"])
 
             # Handle support
             rel_channel = "-".join(rel_name_split[2:]).upper()
@@ -79,11 +79,16 @@ class EOLAssetMapper:
                     long_term_support=rel["isLts"],
                 )
 
-                releases[rel_version].add_support(ch, support)
+                os_rel.add_support(ch, support)
+
+            if rel_key not in releases.keys():
+                releases[rel_key] = []
+
+            releases[rel_key].append(os_rel)
 
         return releases
 
-    def windows_server(self) -> dict[str, "OSRelease"]:
+    def windows_server(self) -> dict[str, list["OSRelease"]]:
         """
         Return a dictionary of MSOSRelease instances.
 
@@ -91,7 +96,7 @@ class EOLAssetMapper:
             dict[str, MSOSRelease]: A dictionary of MSOSRelease for each windows instance retrieved from EOL API
         """
 
-        releases: dict[str, "OSRelease"] = {}
+        releases: dict[str, list["OSRelease"]] = {}
         windows_eol = self._connector.windows_server()[0]
         software_name = " ".join(str(windows_eol["label"]).split(" ")[1:])
 
@@ -104,23 +109,21 @@ class EOLAssetMapper:
             release_label = " ".join(str(rel["label"]).split(" ")[2:]).replace(" (LTSC)", "").replace(" SAC", "").replace(" AC", "")
 
             rel_key = rel_version
-            rel_key = f"{release_label.replace(' ', '-')}-{rel_version}"
 
             if "-sp" in rel["name"]:
                 rel_version += rel_name_split[1]
 
-            if rel_version not in releases.keys():
-                releases[rel_key] = OSRelease(
-                    release_id=f"{windows_eol['name']}-{rel_version}",
-                    name=f"{software_name} {release_label}",
-                    os_name=software_name,
-                    version=rel_version,
-                    release_date=release_date,
-                    release_label=release_label
-                )
+            os_rel = OSRelease(
+                release_id=f"{windows_eol['name']}-{release_label.replace(' ', '-')}-{rel_version}",
+                name=f"{software_name} {rel_name_split[0]}",
+                os_name=software_name,
+                version=rel_version,
+                release_date=release_date,
+                release_label=release_label
+            )
 
-                releases[rel_key].latest_version = SoftwareReleaseVersion(rel_version)
-                releases[rel_key].add_custom_attr("link", rel["latest"]["link"])
+            os_rel.latest_version = SoftwareReleaseVersion(rel_version)
+            os_rel.add_custom_attr("link", rel["latest"]["link"])
 
             # Handle support
             channel_search = re.search(r"(LTSC|SAC|AC)", rel["label"])
@@ -136,11 +139,16 @@ class EOLAssetMapper:
                     long_term_support=rel["isLts"],
                 )
 
-                releases[rel_key].add_support(ch, support)
+                os_rel.add_support(ch, support)
+
+            if rel_key not in releases.keys():
+                releases[rel_key] = []
+
+            releases[rel_key].append(os_rel)
 
         return releases
 
-    def rhel(self) -> dict[str, "OSRelease"]:
+    def rhel(self) -> dict[str, list["OSRelease"]]:
         """
         Return a dictionary of MSOSRelease instances.
 
@@ -148,29 +156,29 @@ class EOLAssetMapper:
             dict[str, MSOSRelease]: A dictionary of MSOSRelease for each windows instance retrieved from EOL API
         """
 
-        releases: dict[str, "OSRelease"] = {}
+        releases: dict[str, list["OSRelease"]] = {}
         rhel_eol = self._connector.products("rhel")[0]
         software_name = rhel_eol["label"]
 
         for rel in rhel_eol["releases"]:
-            rel_version = int(rel["name"])
+            rel_version = SoftwareReleaseVersion(int(rel["name"]))
+            rel_key = str(rel_version)
 
             # Create release
             release_date = rel["releaseDate"]
             release_label = rel["name"]
 
-            if rel_version not in releases.keys():
-                releases[f"{rel_version}"] = OSRelease(
-                    release_id=f"{rhel_eol['name']}-{rel_version}",
-                    name=f"{software_name} {rel['name']}",
-                    os_name=software_name,
-                    version=rel_version,
-                    release_date=release_date,
-                    release_label=release_label
-                )
+            os_rel = OSRelease(
+                release_id=f"{rhel_eol['name']}-{rel_version}",
+                name=f"{software_name} {rel['name']}",
+                os_name=software_name,
+                version=str(rel_version),
+                release_date=release_date,
+                release_label=release_label
+            )
 
-                releases[f"{rel_version}"].latest_version = SoftwareReleaseVersion(rel["latest"]["name"])
-                releases[f"{rel_version}"].add_custom_attr("link", rel["latest"]["link"])
+            os_rel.latest_version = SoftwareReleaseVersion(rel["latest"]["name"])
+            os_rel.add_custom_attr("link", rel["latest"]["link"])
 
             # Handle support
             for ch in ["Standard", "ELS"]:
@@ -183,6 +191,11 @@ class EOLAssetMapper:
                     long_term_support=rel["isLts"],
                 )
 
-                releases[f"{rel_version}"].add_support(ch, support)
+                os_rel.add_support(ch, support)
+
+            if rel_key not in releases.keys():
+                releases[rel_key] = []
+
+            releases[rel_key].append(os_rel)
 
         return releases
