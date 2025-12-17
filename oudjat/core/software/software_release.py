@@ -240,6 +240,58 @@ class SoftwareRelease(GenericIdentifiable):
 
         self._vulnerabilities.add(vuln)
 
+    def __gt__(self, other: "SoftwareRelease") -> bool:
+        """
+        Check if current release is greater (version wise) than the other.
+
+        Args:
+            other (SoftwareRelease): The other release
+
+        Returns:
+            bool: True if the current release version is greater than the other release version
+        """
+
+        return self.version > other.version
+
+    def __ge__(self, other: "SoftwareRelease") -> bool:
+        """
+        Check if current release is greater or equal (version wise) than the other.
+
+        Args:
+            other (SoftwareRelease): The other release
+
+        Returns:
+            bool: True if the current release version is greater or equal than the other release version
+        """
+
+        return self.version >= other.version
+
+    def __lt__(self, other: "SoftwareRelease") -> bool:
+        """
+        Check if current release is lower (version wise) than the other.
+
+        Args:
+            other (SoftwareRelease): The other release
+
+        Returns:
+            bool: True if the current release version is lower than the other release version
+        """
+
+        return self.version < other.version
+
+    def __le__(self, other: "SoftwareRelease") -> bool:
+        """
+        Check if current release is lower or equal (version wise) than the other.
+
+        Args:
+            other (SoftwareRelease): The other release
+
+        Returns:
+            bool: True if the current release version is lower or equal than the other release version
+        """
+
+        return self.version <= other.version
+
     @override
     def __str__(self, show_version: bool = False) -> str:
         """
