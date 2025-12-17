@@ -145,11 +145,7 @@ class SoftwareRelease(GenericIdentifiable):
             str: The full name of the software release, combining the software name and its label.
         """
 
-        res = self._name
-        if self._label is not None and self._label not in self._name:
-            res += f" {self._label}"
-
-        return res
+        return f"{self._software} {self._label}"
 
     @property
     def vulnerabilities(self) -> set[str]:
