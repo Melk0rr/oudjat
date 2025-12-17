@@ -50,3 +50,51 @@ class InvalidSoftwareVersionError(ValueError):
 
         self.message: str = message
         super().__init__(self.message)
+
+class UnknownSoftwareReleaseVersionError(KeyError):
+    """
+    A helper class to handle unknown software release version errors.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of UnknownSoftwareReleaseVersionError.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
+
+class EmptyReleaseCandidatesError(ValueError):
+    """
+    A helper class to handle empty SoftwareReleaseResolver candidates error.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of EmptyReleaseCandidatesError.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
+
+class AmbiguousReleaseException(Exception):
+    """
+    A helper class to handle ambiguous SoftwareRelease resolution.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of AmbiguousReleaseException.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
