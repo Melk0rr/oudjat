@@ -1,8 +1,10 @@
 """A module that describe the concept of software release."""
 
+import logging
+import re
 from collections.abc import Iterator
 from datetime import datetime
-from typing import Any, Generic, TypeVar, override
+from typing import Any, Callable, Generic, TypeVar, override
 
 from oudjat.core.generic_identifiable import GenericIdentifiable
 from oudjat.core.software.software_edition import SoftwareEdition
@@ -322,10 +324,7 @@ class SoftwareRelease(GenericIdentifiable):
         return {
             "software": self.software,
             "name": self.name,
-            "version": {
-                "initial": str(self._version),
-                "latest": str(self._latest_version)
-            },
+            "version": {"initial": str(self._version), "latest": str(self._latest_version)},
             "fullname": self.fullname,
             "isSupported": self.is_supported(),
         }
@@ -349,6 +348,172 @@ class SoftwareRelease(GenericIdentifiable):
         }
 
 
+class SoftwareReleaseList(list, Generic[ReleaseType]):
+    """
+    A class to provide useful methods to narrow down / filter a list of SoftwareRelease.
+    """
+
+    # ****************************************************************
+    # Methods
+
+    def is_empty(self) -> bool:
+        """
+        Check if the list is empty.
+
+        Returns:
+            bool: True if the list is empty. False otherwise
+        """
+
+        return len(self) == 0
+
+    def unique(
+        self,
+        *filters: Callable[
+            ["SoftwareReleaseList[ReleaseType]"], "SoftwareReleaseList[ReleaseType]"
+        ],
+    ) -> "ReleaseType | None":
+        """
+        Filter the list of SoftwareRelease with the provided filters until there is only a unique release left if possible.
+
+        The method chains the provided filters one after the other to narrow down the result.
+
+        Args:
+            filters (Callable[[SoftwareReleaseList], SoftwareReleaseList]): The list of filters to resolve the list of releases
+
+        Returns:
+            ReleaseType | None: The resolved release if any
+        """
+
+        candidates = self
+        for f in filters:
+            candidates = f(candidates)
+            if candidates.is_empty():
+                return None
+
+            if len(candidates) == 1:
+                return candidates[0]
+
+        return None
+
+    def filter_by_label(
+        self,
+        label_str: str,
+        filter_cb: Callable[[str, str], bool] | None = None,
+        fallback: bool = False,
+    ) -> "SoftwareReleaseList[ReleaseType]":
+        """
+        Filter the list of SoftwareRelease by comparing the releases label with the provided string.
+
+        By default, the method searches for each release label in the provided string.
+        You can also provide a custom callback.
+
+        Args:
+            label_str (str)                                      : The string to compare to the release labels
+            filter_cb (Callable[[ReleaseType, str], bool] | None): Custom label comparison callback
+            fallback (bool)                                      : If True, falls back to the default list. Else, returns the filtered list
+
+        Returns:
+            SoftwareReleaseList: Filtered SoftwareRelease list
+        """
+
+        cb: Callable[["ReleaseType"], bool]
+        if filter_cb is not None:
+
+            def arg_filter_cb(rel: "ReleaseType") -> bool:
+                return filter_cb(f"{rel.label}", label_str)
+
+            cb = arg_filter_cb
+
+        else:
+
+            def label_filter_cb(rel: "ReleaseType") -> bool:
+                return re.search(f"{rel.label}", label_str) is not None
+
+            cb = label_filter_cb
+
+        filtered_rels: "SoftwareReleaseList[ReleaseType]" = SoftwareReleaseList(filter(cb, self))
+        if fallback and len(filtered_rels) == 0:
+            filtered_rels = self
+
+        return filtered_rels
+
+    def filter_by_status(
+        self, supported: bool = True, fallback: bool = False
+    ) -> "SoftwareReleaseList[ReleaseType]":
+        """
+        Filter the list of SoftwareRelease by comparing the releases supported status with the provided value.
+
+        Args:
+            supported (bool): Whether to filter releases if they are supported or out of support
+            fallback (bool) : If True, falls back to the default list. Else, returns the filtered list
+
+        Returns:
+            SoftwareReleaseList: Filtered SoftwareRelease list
+        """
+
+        def status_filter_cb(rel: "ReleaseType") -> bool:
+            return rel.is_supported() == supported
+
+        filtered_rels: "SoftwareReleaseList[ReleaseType]" = SoftwareReleaseList(
+            filter(status_filter_cb, self)
+        )
+
+        if fallback and len(filtered_rels) == 0:
+            filtered_rels = self
+
+        return filtered_rels
+
+    def filter_by_id(
+        self, id_str: str, fallback: bool = False
+    ) -> "SoftwareReleaseList[ReleaseType]":
+        """
+        Filter the list of SoftwareRelease by comparing the releases id with the provided string.
+
+        Args:
+            id_str (str)   : The string to compare to the release id
+            fallback (bool): If True, falls back to the default list. Else, returns the filtered list
+
+        Returns:
+            SoftwareReleaseList: Filtered SoftwareRelease list
+        """
+
+        def id_filter_cb(rel: "ReleaseType") -> bool:
+            return rel.id == id_str
+
+        filtered_rels: "SoftwareReleaseList[ReleaseType]" = SoftwareReleaseList(
+            filter(id_filter_cb, self)
+        )
+        if fallback and len(filtered_rels) == 0:
+            filtered_rels = self
+
+        return filtered_rels
+
+    def filter_max_version(self) -> "SoftwareReleaseList[ReleaseType]":
+        """
+        Filter the list of SoftwareRelease by keeping only the ones with the highest version.
+
+        Returns:
+            SoftwareReleaseList: Filtered SoftwareRelease list
+        """
+
+        max_version = max([rel.version for rel in self])
+
+        def filter_version_cb(rel: "ReleaseType") -> bool:
+            return rel.version == max_version
+
+        return SoftwareReleaseList(filter(filter_version_cb, self))
+
+    def to_dict(self) -> list[dict[str, Any]]:
+        """
+        Convert the releases of the list into dictionaries.
+
+        Returns:
+            list[dict[str, Any]]: A list of releases dictionaries
+        """
+
+        return [rel.to_dict() for rel in self]
+
+
 class SoftwareRelVersionDict(Generic[ReleaseType]):
     """Software release version dictionary."""
 
@@ -360,12 +525,13 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
         Create a new instance of SoftwareReleaseDict.
         """
 
-        self._versions: dict[str, "ReleaseType"] = {}
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
+        self._releases: dict[str, "SoftwareReleaseList[ReleaseType]"] = {}
 
     # ****************************************************************
     # Methods
 
-    def __getitem__(self, key: str) -> "ReleaseType":
+    def __getitem__(self, key: str) -> "SoftwareReleaseList[ReleaseType]":
         """
         Return a Software release element based on its key.
 
@@ -376,18 +542,18 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
             ReleaseType: covariant element of SoftwareRelease
         """
 
-        return self._versions[key]
+        return self._releases[key]
 
-    def __setitem__(self, version: str, value: "ReleaseType") -> None:
+    def __setitem__(self, key: str, value: "ReleaseType") -> None:
         """
         Set the Software release in the dictionary for the provided key.
 
         Args:
-            version (str)      : The version of the release to retrieve
+            key (str)          : The version of the release to retrieve
             value (ReleaseType): Value of the new element
         """
 
-        self._versions[version] = value
+        self._releases[key] = SoftwareReleaseList([value])
 
     def __iter__(self) -> Iterator[str]:
         """
@@ -397,11 +563,32 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
             Iterator[str]: iterator object
         """
 
-        return iter(self._versions)
+        return iter(self._releases)
 
-    def get(
-        self, key: str, default_value: Any = None
-    ) -> "ReleaseType | None":
+    def add(self, key: str, release: "ReleaseType", force: bool = False) -> None:
+        """
+        Add a new release for the provided version key.
+
+        The method checks if a similar release (based on ID) already exists for the provided version key.
+        If force argument is set to True, the new release will be added regardless.
+
+        Args:
+            key (str)            : The key of the new release
+            release (ReleaseType): The new release to add
+            force (bool)         : Whether to force the addition of the new release
+        """
+
+        _ = self._releases.setdefault(key, SoftwareReleaseList())
+
+        if force or not any(rel.id == release.id for rel in self._releases[key]):
+            self._releases[key].append(release)
+
+        else:
+            self.logger.warning(
+                f"{Context()}::A release with same id ({release.id}) already exists for version {key}"
+            )
+
+    def get(self, key: str, default_value: Any = None) -> "SoftwareReleaseList[ReleaseType] | None":
         """
         Return a SoftwareRelEditionDict element based on its key.
 
@@ -412,11 +599,11 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
             default_value (Any): Default value in case the element cannot be found
 
         Returns:
-            ReleaseType | None: Element associated with provided key or default value
+            list[ReleaseType] | None: Element associated with provided key or default value
 
         """
 
-        return self._versions.get(key, default_value)
+        return self._releases.get(key, default_value)
 
     def keys(self):
         """
@@ -426,7 +613,7 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
             dict_keys[str, ReleaseType]: The keys of the current dictionary
         """
 
-        return self._versions.keys()
+        return self._releases.keys()
 
     def values(self):
         """
@@ -436,7 +623,7 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
             dict_values[str, ReleaseType]: The values of the current dictionary
         """
 
-        return self._versions.values()
+        return self._releases.values()
 
     def items(self):
         """
@@ -446,7 +633,7 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
             dict_items[str, ReleaseType]: The items of the current dictionary
         """
 
-        return self._versions.items()
+        return self._releases.items()
 
     def filter_by_str(self, search_str: str) -> "SoftwareRelVersionDict[ReleaseType]":
         """
@@ -475,4 +662,7 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
             dict[str, SoftwareRelEditionDict]: A regular dictionary representation of the current instance
         """
 
-        return {version: version_dict.to_dict() for version, version_dict in self._versions.items()}
+        return {
+            version: [ver.to_dict() for ver in versions]
+            for version, versions in self._releases.items()
+        }
