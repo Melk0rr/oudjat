@@ -209,8 +209,7 @@ class SoftwareRelease(GenericIdentifiable):
             support (SoftwareReleaseSupport): The support instance to be added.
         """
 
-        if channel not in self._support_channels.keys():
-            self._support_channels[channel] = support
+        _ = self._support_channels.setdefault(channel, support)
 
     def has_vulnerability(self, vuln: str | list[str] | None = None) -> list[str]:
         """
