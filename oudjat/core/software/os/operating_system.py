@@ -1,9 +1,6 @@
 """A module defining operating system behavior."""
 
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, override
-
-from oudjat.utils import Context
 
 from ..software import Software, SoftwareType
 from ..software_release import SoftwareRelease
@@ -19,36 +16,6 @@ class OSRelease(SoftwareRelease):
     # ****************************************************************
     # Constructor & Attributes
 
-    def __init__(
-        self,
-        release_id: str,
-        name: str,
-        os_name: str,
-        version: int | str,
-        release_date: str | datetime,
-        release_label: str | None = None,
-    ) -> None:
-        """
-        Instanciate OS release specific to Microsoft.
-
-        Args:
-            release_id (str)             : The ID of the release
-            name (str)                   : The name of the release
-            os_name (Software)           : Software instance the release is based on
-            version (int | str)          : Release version
-            release_date (str | datetime): Release date
-            release_label (str)          : Release label
-        """
-
-        super().__init__(
-            release_id=release_id,
-            name=name,
-            software_name=os_name,
-            version=version,
-            release_date=release_date,
-            release_label=release_label,
-        )
-
     # ****************************************************************
     # Methods
 
@@ -62,21 +29,6 @@ class OSRelease(SoftwareRelease):
         """
 
         return self._software
-
-    @override
-    def to_dict(self) -> dict[str, Any]:
-        """
-        Convert the current instance into a dictionary.
-
-        Returns:
-            dict[str, Any]: A dictionary representation of the current instance
-        """
-
-        base_dict = super().to_dict()
-        os_name = base_dict.pop("software")
-
-        return {"os": os_name, **base_dict}
-
 
 class OperatingSystem(Software[OSRelease]):
     """A class to describe operating systems."""
@@ -149,17 +101,6 @@ class OperatingSystem(Software[OSRelease]):
         """
 
         return self._os_family
-
-    def gen_releases(self) -> None:
-        """
-        Generate the list of releases of the current OS.
-
-        It must be overwritten by the classes inheriting OperatingSystem
-        """
-
-        raise NotImplementedError(
-            f"{Context()}::Method must be implemented by the overloading class"
-        )
 
     @override
     def to_dict(self) -> dict[str, Any]:

@@ -5,11 +5,17 @@ from enum import IntEnum
 from typing import Any, Generic, override
 
 from oudjat.core.software.definitions import VERSION_REG
+from oudjat.core.software.exceptions import UnknownSoftwareReleaseVersionError
+from oudjat.utils import Context
 
 from ..asset import Asset
 from ..asset_type import AssetType
 from .software_edition import SoftwareEdition, SoftwareEditionDict
-from .software_release import ReleaseType, SoftwareRelVersionDict
+from .software_release import (
+    ReleaseType,
+    SoftwareReleaseList,
+    SoftwareRelVersionDict,
+)
 
 
 class SoftwareType(IntEnum):
@@ -33,6 +39,7 @@ class Software(Asset, Generic[ReleaseType]):
         software_type: SoftwareType = SoftwareType.APPLICATION,
         editor: str | list[str] | None = None,
         description: str | None = None,
+        editions: "SoftwareEditionDict | None" = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -42,13 +49,15 @@ class Software(Asset, Generic[ReleaseType]):
         editor(s), and optional description. The software type defaults to an application unless specified otherwise.
 
         Args:
-            software_id (int | str)            : A unique identifier for the software, which can be either an integer or a string.
-            name (str)                         : The name of the software.
-            label (str)                        : A brief label that describes the software.
-            software_type (SoftwareType | None): Specifies the type of the software. Defaults to SoftwareType.APPLICATION.
-            editor (str | list[str] | None)    : The editor(s) responsible for the development or maintenance of the software
-            description (str | None)           : A detailed description of the software. Defaults to None.
-            **kwargs (Any)                     : Any additional arguments that will be passed to parent class
+            software_id (int | str)                               : A unique identifier for the software, which can be either an integer or a string.
+            name (str)                                            : The name of the software.
+            label (str)                                           : A brief label that describes the software.
+            software_type (SoftwareType | None)                   : Specifies the type of the software. Defaults to SoftwareType.APPLICATION.
+            editor (str | list[str] | None)                       : The editor(s) responsible for the development or maintenance of the software
+            description (str | None)                              : A detailed description of the software. Defaults to None.
+            releases (dict[str, list[GenericSoftwareReleaseDict]]): A dictionary of software releases dictionaries used to generate the software releases
+            editions (SoftwareEditionDict | None)                 : A dictionary of the software editions
+            **kwargs (Any)                                        : Any additional arguments that will be passed to parent class
         """
 
         super().__init__(
@@ -65,7 +74,10 @@ class Software(Asset, Generic[ReleaseType]):
 
         self._editor: list[str] | None = editor
         self._type: "SoftwareType" = software_type
-        self._releases: "SoftwareRelVersionDict[ReleaseType]" = SoftwareRelVersionDict[ReleaseType]()
+        self._releases: "SoftwareRelVersionDict[ReleaseType]" = SoftwareRelVersionDict[
+            ReleaseType
+        ]()
+
         self._editions: "SoftwareEditionDict" = SoftwareEditionDict()
 
     # ****************************************************************
@@ -104,6 +116,17 @@ class Software(Asset, Generic[ReleaseType]):
 
         return self._releases
 
+    @releases.setter
+    def releases(self, new_releases: "SoftwareRelVersionDict[ReleaseType]") -> None:
+        """
+        Set the releases for this software.
+
+        Args:
+            new_releases (SoftwareReleaseDict): New releases value
+        """
+
+        self._releases = new_releases
+
     @property
     def type(self) -> "SoftwareType":
         """
@@ -126,6 +149,26 @@ class Software(Asset, Generic[ReleaseType]):
 
         return self._editions
 
+    def release(self, key: str) -> "ReleaseType | SoftwareReleaseList[ReleaseType]":
+        """
+        Return the releases matching the provided key.
+
+        Args:
+            key (str): The key of the sought release
+
+        Returns:
+            SoftwareReleaseList: A custom list of SoftwareRelease that can be narrowed down using its custom methods
+        """
+
+        candidates = self._releases.get(key)
+
+        if candidates is None:
+            raise UnknownSoftwareReleaseVersionError(
+                f"{Context()}::{self.name} does not have any release matching the provided key {key}"
+            )
+
+        return candidates[0] if len(candidates) == 1 else candidates
+
     def has_release(self, rel_ver: str) -> bool:
         """
         Check if the current software has a release with the given version and label.
@@ -140,21 +183,18 @@ class Software(Asset, Generic[ReleaseType]):
 
         return rel_ver in self.releases.keys()
 
-    def add_release(self, new_release: "ReleaseType") -> None:
+    def add_release(self, new_release: "ReleaseType", force: bool = False) -> None:
         """
         Add a release to the list of software releases.
 
         Args:
             new_release (SoftwareRelease): The release object to be added
-            edition (str)                : The edition of the release
-
-        Note:
-            This method does not allow adding non-SoftwareRelease objects and returns silently if so.
+            force (bool)                 : Whether to force the addition of the new release
         """
 
-        self.releases[str(new_release.version)] = new_release
+        self._releases.add(str(new_release.version), new_release, force=force)
 
-    def retired_releases(self) -> list["ReleaseType"]:
+    def retired_releases(self) -> "SoftwareReleaseList[ReleaseType]":
         """
         Get a list of retired releases.
 
@@ -162,9 +202,13 @@ class Software(Asset, Generic[ReleaseType]):
             list[SoftwareRelease]: A list of SoftwareRelease objects that are not supported.
         """
 
-        return [r for r in self.releases.values() if not r.is_supported()]
+        res: "SoftwareReleaseList[ReleaseType]" = SoftwareReleaseList()
+        for r in self._releases.values():
+            res.extend(r.filter_by_status(False))
 
-    def supported_releases(self) -> list["ReleaseType"]:
+        return res
+
+    def supported_releases(self) -> "SoftwareReleaseList[ReleaseType]":
         """
         Get a list of released that are currently supported.
 
@@ -172,7 +216,11 @@ class Software(Asset, Generic[ReleaseType]):
             list[SoftwareRelease]: A list of SoftwareRelease objects that are supported.
         """
 
-        return [r for r in self.releases.values() if r.is_supported()]
+        res: "SoftwareReleaseList[ReleaseType]" = SoftwareReleaseList()
+        for r in self._releases.values():
+            res.extend(r.filter_by_status())
+
+        return res
 
     def matching_editions(self, test_str: str) -> list["SoftwareEdition"]:
         """
@@ -215,7 +263,7 @@ class Software(Asset, Generic[ReleaseType]):
         return {
             **base_dict,
             "editor": self.editor,
-            "releases": {key: r.to_dict() for key, r in self._releases.items()},
+            "releases": self._releases.to_dict(),
         }
 
     # ****************************************************************

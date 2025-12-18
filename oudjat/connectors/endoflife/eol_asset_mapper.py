@@ -53,17 +53,32 @@ class EOLAssetMapper:
             release_label = rel_label_split[1] if len(rel_label_split) >= 2 else None
 
             rel_key = rel_version
-            os_rel = OSRelease(
-                release_id=f"{windows_eol['name']}-{rel_version}",
-                name=f"{software_name} {rel['label'].split(" ")[0]}",
-                os_name=software_name,
-                version=rel_version,
-                release_date=release_date,
-                release_label=release_label
-            )
+            rel_id = f"{windows_eol['name']}-{rel_version}"
 
-            os_rel.latest_version = SoftwareReleaseVersion(rel_version)
-            os_rel.add_custom_attr("link", rel["latest"]["link"])
+            if rel_key not in releases.keys():
+                releases[rel_key] = []
+
+            # If element with the same id already exist. Then don't add a new release
+            exist = next((i for i, el in enumerate(releases[rel_key]) if el.id == rel_id), None)
+            index = 0
+
+            if exist is None:
+                os_rel = OSRelease(
+                    release_id=rel_id,
+                    name=f"{software_name} {rel['label'].split(" ")[0]}",
+                    software_name=software_name,
+                    version=rel_version,
+                    release_date=release_date,
+                    release_label=release_label
+                )
+
+                os_rel.latest_version = SoftwareReleaseVersion(rel_version)
+                os_rel.add_custom_attr("link", rel["latest"]["link"])
+
+                releases[rel_key].append(os_rel)
+
+            else:
+                index = exist
 
             # Handle support
             rel_channel = "-".join(rel_name_split[2:]).upper()
@@ -79,12 +94,7 @@ class EOLAssetMapper:
                     long_term_support=rel["isLts"],
                 )
 
-                os_rel.add_support(ch, support)
-
-            if rel_key not in releases.keys():
-                releases[rel_key] = []
-
-            releases[rel_key].append(os_rel)
+                releases[rel_key][index].add_support(ch, support)
 
         return releases
 
@@ -113,17 +123,32 @@ class EOLAssetMapper:
             if "-sp" in rel["name"]:
                 rel_version += rel_name_split[1]
 
-            os_rel = OSRelease(
-                release_id=f"{windows_eol['name']}-{release_label.replace(' ', '-')}-{rel_version}",
-                name=f"{software_name} {rel_name_split[0]}",
-                os_name=software_name,
-                version=rel_version,
-                release_date=release_date,
-                release_label=release_label
-            )
+            rel_id = f"{windows_eol['name']}-{release_label.replace(' ', '-')}-{rel_version}"
 
-            os_rel.latest_version = SoftwareReleaseVersion(rel_version)
-            os_rel.add_custom_attr("link", rel["latest"]["link"])
+            if rel_key not in releases.keys():
+                releases[rel_key] = []
+
+            # If element with the same id already exist. Then don't add a new release
+            exist = next((i for i, el in enumerate(releases[rel_key]) if el.id == rel_id), None)
+            index = 0
+
+            if exist is None:
+                os_rel = OSRelease(
+                    release_id=rel_id,
+                    name=f"{software_name} {rel_name_split[0]}",
+                    software_name=software_name,
+                    version=rel_version,
+                    release_date=release_date,
+                    release_label=release_label
+                )
+
+                os_rel.latest_version = SoftwareReleaseVersion(rel_version)
+                os_rel.add_custom_attr("link", rel["latest"]["link"])
+
+                releases[rel_key].append(os_rel)
+
+            else:
+                index = exist
 
             # Handle support
             channel_search = re.search(r"(LTSC|SAC|AC)", rel["label"])
@@ -139,12 +164,7 @@ class EOLAssetMapper:
                     long_term_support=rel["isLts"],
                 )
 
-                os_rel.add_support(ch, support)
-
-            if rel_key not in releases.keys():
-                releases[rel_key] = []
-
-            releases[rel_key].append(os_rel)
+                releases[rel_key][index].add_support(ch, support)
 
         return releases
 
@@ -169,9 +189,9 @@ class EOLAssetMapper:
             release_label = rel["name"]
 
             os_rel = OSRelease(
-                release_id=f"{rhel_eol['name']}-{rel_version}",
+                release_id=f"{rhel_eol['name']}-{rel['name']}",
                 name=f"{software_name} {rel['name']}",
-                os_name=software_name,
+                software_name=software_name,
                 version=str(rel_version),
                 release_date=release_date,
                 release_label=release_label

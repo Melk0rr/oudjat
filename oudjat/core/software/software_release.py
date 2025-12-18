@@ -4,7 +4,7 @@ import logging
 import re
 from collections.abc import Iterator
 from datetime import datetime
-from typing import Any, Callable, Generic, TypeVar, override
+from typing import Any, Callable, Generic, TypeAlias, TypedDict, TypeVar, override
 
 from oudjat.core.generic_identifiable import GenericIdentifiable
 from oudjat.core.software.software_edition import SoftwareEdition
@@ -12,9 +12,28 @@ from oudjat.utils import Context
 from oudjat.utils.time_utils import TimeConverter
 
 from .software_release_version import SoftwareReleaseVersion
-from .software_support import SoftwareReleaseSupport
+from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportDict
 
 ReleaseType = TypeVar("ReleaseType", bound="SoftwareRelease")
+
+SoftwareReleaseImportDict: TypeAlias = dict[str, list["SoftwareReleaseDictProps"]]
+
+class SoftwareReleaseDictProps(TypedDict):
+    """
+    A helper class to handle software release dictionaries attribute types.
+    """
+
+    software: str
+    id: str
+    name: str
+    label: str
+    description: str | None
+    link: str
+    releaseDate: str
+    version: dict[str, str]
+    fullname: str
+    isSupported: bool
+    supportChannels: dict[str, "SoftwareReleaseSupportDict"]
 
 
 class SoftwareRelease(GenericIdentifiable):
@@ -294,6 +313,27 @@ class SoftwareRelease(GenericIdentifiable):
 
         return self.version <= other.version
 
+    def _software_dict(self) -> dict[str, Any]:
+        """
+        Return a dictionary with OS infos.
+
+        Returns:
+            dict: A dictionary containing innamen about the operating system, including software name, release name, version, full name, and support status.
+        """
+
+        version_dict = {
+            "initial": str(self._version),
+            "latest": str(self._latest_version),
+        }
+
+        return {
+            "software": self.software,
+            "name": self.name,
+            "version": version_dict,
+            "fullname": self.fullname,
+            "isSupported": self.is_supported(),
+        }
+
     @override
     def __str__(self, show_version: bool = False) -> str:
         """
@@ -313,22 +353,6 @@ class SoftwareRelease(GenericIdentifiable):
 
         return name.strip()
 
-    def _software_dict(self) -> dict[str, Any]:
-        """
-        Return a dictionary with OS infos.
-
-        Returns:
-            dict: A dictionary containing innamen about the operating system, including software name, release name, version, full name, and support status.
-        """
-
-        return {
-            "software": self.software,
-            "name": self.name,
-            "version": {"initial": str(self._version), "latest": str(self._latest_version)},
-            "fullname": self.fullname,
-            "isSupported": self.is_supported(),
-        }
-
     @override
     def to_dict(self) -> dict[str, Any]:
         """
@@ -346,6 +370,59 @@ class SoftwareRelease(GenericIdentifiable):
             **self._software_dict(),
             "supportChannels": {ch_k: s.to_dict() for ch_k, s in self._support_channels.items()},
         }
+
+    # ****************************************************************
+    # Class methods
+
+    @classmethod
+    def from_dict(cls: type["ReleaseType"], rel_dict: "SoftwareReleaseDictProps") -> "ReleaseType":
+        """
+        Return a new software release based on the provided dictionary.
+
+        Args:
+            rel_dict (SoftwareReleaseDict): The dictionary to generate the new release
+
+        Returns:
+            ReleaseType: New software release instance
+        """
+
+        new_release = cls(
+            release_id=rel_dict["id"],
+            name=rel_dict["name"],
+            software_name=rel_dict["software"],
+            version=rel_dict["version"]["initial"],
+            release_date=rel_dict["releaseDate"],
+            release_label=rel_dict["label"],
+        )
+
+        new_release.latest_version = SoftwareReleaseVersion(rel_dict["version"]["latest"])
+
+        for channel, support_dict in rel_dict["supportChannels"].items():
+            new_release.add_support(channel, SoftwareReleaseSupport.from_dict(support_dict))
+
+        return new_release
+
+    @classmethod
+    def gen_releases(
+        cls: type["ReleaseType"],
+        releases_dict: dict[str, list["SoftwareReleaseDictProps"]],
+    ) -> "SoftwareRelVersionDict[ReleaseType]":
+        """
+        Generate software releases based on the provided.
+
+        Args:
+            releases_dict (dict[str, list[SoftwareReleaseDict]]): The dictionary used to generate the releases
+
+        Returns:
+            SoftwareRelVersionDict[ReleaseType]: A software release version dictionary
+        """
+
+        releases: "SoftwareRelVersionDict[ReleaseType]" = SoftwareRelVersionDict()
+        for rel_k, rels in releases_dict.items():
+            for rel in rels:
+                releases.add(rel_k, cls.from_dict(rel))
+
+        return releases
 
 
 class SoftwareReleaseList(list, Generic[ReleaseType]):
