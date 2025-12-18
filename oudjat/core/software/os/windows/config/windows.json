@@ -1,0 +1,1243 @@
+{
+  "10.0.26200": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.26200",
+      "name": "Windows 11",
+      "label": "25H2",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
+      "releaseDate": "2025-09-30",
+      "version": {
+        "initial": "10.0.26200",
+        "latest": "10.0.26200"
+      },
+      "fullname": "Windows 25H2",
+      "isSupported": true,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2025-09-30",
+          "activeSupport": "2028-10-10",
+          "securitySupport": "2028-10-10",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": false,
+          "details": {
+            "start": "Started 79 days ago",
+            "end": "Ends in 1026 days",
+            "duration": 1106
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2025-09-30",
+          "activeSupport": "2027-10-12",
+          "securitySupport": "2027-10-12",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": false,
+          "details": {
+            "start": "Started 79 days ago",
+            "end": "Ends in 662 days",
+            "duration": 742
+          }
+        }
+      }
+    }
+  ],
+  "10.0.26100": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.26100",
+      "name": "Windows 11",
+      "label": "24H2",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/windows11-release-information#enterprise-and-iot-enterprise-ltsc-editions",
+      "releaseDate": "2024-10-01",
+      "version": {
+        "initial": "10.0.26100",
+        "latest": "10.0.26100"
+      },
+      "fullname": "Windows 24H2",
+      "isSupported": true,
+      "supportChannels": {
+        "IOT-LTS": {
+          "channel": "IOT-LTS",
+          "supportFrom": "2024-10-01",
+          "activeSupport": "2029-10-09",
+          "securitySupport": "2034-10-10",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": true,
+          "details": {
+            "start": "Started 443 days ago",
+            "end": "Ends in 3217 days",
+            "duration": 3661
+          }
+        },
+        "E-LTS": {
+          "channel": "E-LTS",
+          "supportFrom": "2024-10-01",
+          "activeSupport": "2029-10-09",
+          "securitySupport": "2029-10-09",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": true,
+          "details": {
+            "start": "Started 443 days ago",
+            "end": "Ends in 1390 days",
+            "duration": 1834
+          }
+        },
+        "E": {
+          "channel": "E",
+          "supportFrom": "2024-10-01",
+          "activeSupport": "2027-10-12",
+          "securitySupport": "2027-10-12",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": false,
+          "details": {
+            "start": "Started 443 days ago",
+            "end": "Ends in 662 days",
+            "duration": 1106
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2024-10-01",
+          "activeSupport": "2026-10-13",
+          "securitySupport": "2026-10-13",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": false,
+          "details": {
+            "start": "Started 443 days ago",
+            "end": "Ends in 298 days",
+            "duration": 742
+          }
+        }
+      }
+    }
+  ],
+  "10.0.22631": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.22631",
+      "name": "Windows 11",
+      "label": "23H2",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
+      "releaseDate": "2023-10-31",
+      "version": {
+        "initial": "10.0.22631",
+        "latest": "10.0.22631"
+      },
+      "fullname": "Windows 23H2",
+      "isSupported": true,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2023-10-31",
+          "activeSupport": "2026-11-10",
+          "securitySupport": "2026-11-10",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": false,
+          "details": {
+            "start": "Started 779 days ago",
+            "end": "Ends in 326 days",
+            "duration": 1106
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2023-10-31",
+          "activeSupport": "2025-11-11",
+          "securitySupport": "2025-11-11",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 779 days ago",
+            "end": "Ended 38 days ago",
+            "duration": 742
+          }
+        }
+      }
+    }
+  ],
+  "10.0.19045": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.19045",
+      "name": "Windows 10",
+      "label": "22H2",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/release-information",
+      "releaseDate": "2022-10-18",
+      "version": {
+        "initial": "10.0.19045",
+        "latest": "10.0.19045"
+      },
+      "fullname": "Windows 22H2",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2022-10-18",
+          "activeSupport": "2025-10-14",
+          "securitySupport": "2025-10-14",
+          "extendedSecuritySupport": "2025-10-14",
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1157 days ago",
+            "end": "Ended 66 days ago",
+            "duration": 1092
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2022-10-18",
+          "activeSupport": "2025-10-14",
+          "securitySupport": "2025-10-14",
+          "extendedSecuritySupport": "2025-10-14",
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1157 days ago",
+            "end": "Ended 66 days ago",
+            "duration": 1092
+          }
+        }
+      }
+    }
+  ],
+  "10.0.22621": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.22621",
+      "name": "Windows 11",
+      "label": "22H2",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
+      "releaseDate": "2022-09-20",
+      "version": {
+        "initial": "10.0.22621",
+        "latest": "10.0.22621"
+      },
+      "fullname": "Windows 22H2",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2022-09-20",
+          "activeSupport": "2025-10-14",
+          "securitySupport": "2025-10-14",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1185 days ago",
+            "end": "Ended 66 days ago",
+            "duration": 1120
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2022-09-20",
+          "activeSupport": "2024-10-08",
+          "securitySupport": "2024-10-08",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1185 days ago",
+            "end": "Ended 437 days ago",
+            "duration": 749
+          }
+        }
+      }
+    }
+  ],
+  "10.0.19044": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.19044",
+      "name": "Windows 10",
+      "label": "21H2",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/release-information#enterprise-and-iot-enterprise-ltsbltsc-editions",
+      "releaseDate": "2021-11-16",
+      "version": {
+        "initial": "10.0.19044",
+        "latest": "10.0.19044"
+      },
+      "fullname": "Windows 21H2",
+      "isSupported": true,
+      "supportChannels": {
+        "IOT-LTS": {
+          "channel": "IOT-LTS",
+          "supportFrom": "2021-11-16",
+          "activeSupport": "2027-01-12",
+          "securitySupport": "2032-01-13",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": true,
+          "details": {
+            "start": "Started 1493 days ago",
+            "end": "Ends in 2216 days",
+            "duration": 3710
+          }
+        },
+        "E-LTS": {
+          "channel": "E-LTS",
+          "supportFrom": "2021-11-16",
+          "activeSupport": "2027-01-12",
+          "securitySupport": "2027-01-12",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": true,
+          "details": {
+            "start": "Started 1493 days ago",
+            "end": "Ends in 389 days",
+            "duration": 1883
+          }
+        },
+        "E": {
+          "channel": "E",
+          "supportFrom": "2021-11-16",
+          "activeSupport": "2024-06-11",
+          "securitySupport": "2024-06-11",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1493 days ago",
+            "end": "Ended 556 days ago",
+            "duration": 938
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2021-11-16",
+          "activeSupport": "2023-06-13",
+          "securitySupport": "2023-06-13",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1493 days ago",
+            "end": "Ended 920 days ago",
+            "duration": 574
+          }
+        }
+      }
+    }
+  ],
+  "10.0.22000": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.22000",
+      "name": "Windows 11",
+      "label": "21H2",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/windows11-release-information",
+      "releaseDate": "2021-10-04",
+      "version": {
+        "initial": "10.0.22000",
+        "latest": "10.0.22000"
+      },
+      "fullname": "Windows 21H2",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2021-10-04",
+          "activeSupport": "2024-10-08",
+          "securitySupport": "2024-10-08",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1536 days ago",
+            "end": "Ended 437 days ago",
+            "duration": 1100
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2021-10-04",
+          "activeSupport": "2023-10-10",
+          "securitySupport": "2023-10-10",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1536 days ago",
+            "end": "Ended 801 days ago",
+            "duration": 736
+          }
+        }
+      }
+    }
+  ],
+  "10.0.19043": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.19043",
+      "name": "Windows 10",
+      "label": "21H1",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/status-windows-10-21h1",
+      "releaseDate": "2021-05-18",
+      "version": {
+        "initial": "10.0.19043",
+        "latest": "10.0.19043"
+      },
+      "fullname": "Windows 21H1",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2021-05-18",
+          "activeSupport": "2022-12-13",
+          "securitySupport": "2022-12-13",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1675 days ago",
+            "end": "Ended 1102 days ago",
+            "duration": 574
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2021-05-18",
+          "activeSupport": "2022-12-13",
+          "securitySupport": "2022-12-13",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1675 days ago",
+            "end": "Ended 1102 days ago",
+            "duration": 574
+          }
+        }
+      }
+    }
+  ],
+  "10.0.19042": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.19042",
+      "name": "Windows 10",
+      "label": "20H2",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/status-windows-10-20h2",
+      "releaseDate": "2020-10-20",
+      "version": {
+        "initial": "10.0.19042",
+        "latest": "10.0.19042"
+      },
+      "fullname": "Windows 20H2",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2020-10-20",
+          "activeSupport": "2023-05-09",
+          "securitySupport": "2023-05-09",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1885 days ago",
+            "end": "Ended 955 days ago",
+            "duration": 931
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2020-10-20",
+          "activeSupport": "2022-05-10",
+          "securitySupport": "2022-05-10",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1885 days ago",
+            "end": "Ended 1319 days ago",
+            "duration": 567
+          }
+        }
+      }
+    }
+  ],
+  "10.0.19041": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.19041",
+      "name": "Windows 10",
+      "label": "2004",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-version-2004-end-of-servicing",
+      "releaseDate": "2020-05-27",
+      "version": {
+        "initial": "10.0.19041",
+        "latest": "10.0.19041"
+      },
+      "fullname": "Windows 2004",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2020-05-27",
+          "activeSupport": "2021-12-14",
+          "securitySupport": "2021-12-14",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2031 days ago",
+            "end": "Ended 1466 days ago",
+            "duration": 566
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2020-05-27",
+          "activeSupport": "2021-12-14",
+          "securitySupport": "2021-12-14",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2031 days ago",
+            "end": "Ended 1466 days ago",
+            "duration": 566
+          }
+        }
+      }
+    }
+  ],
+  "10.0.18363": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.18363",
+      "name": "Windows 10",
+      "label": "1909",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1909-enterprise-education-eos",
+      "releaseDate": "2019-11-12",
+      "version": {
+        "initial": "10.0.18363",
+        "latest": "10.0.18363"
+      },
+      "fullname": "Windows 1909",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2019-11-12",
+          "activeSupport": "2022-05-10",
+          "securitySupport": "2022-05-10",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2228 days ago",
+            "end": "Ended 1319 days ago",
+            "duration": 910
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2019-11-12",
+          "activeSupport": "2021-05-11",
+          "securitySupport": "2021-05-11",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2228 days ago",
+            "end": "Ended 1683 days ago",
+            "duration": 546
+          }
+        }
+      }
+    }
+  ],
+  "10.0.18362": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.18362",
+      "name": "Windows 10",
+      "label": "1903",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1903-end-of-servicing",
+      "releaseDate": "2019-05-21",
+      "version": {
+        "initial": "10.0.18362",
+        "latest": "10.0.18362"
+      },
+      "fullname": "Windows 1903",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2019-05-21",
+          "activeSupport": "2020-12-08",
+          "securitySupport": "2020-12-08",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2403 days ago",
+            "end": "Ended 1837 days ago",
+            "duration": 567
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2019-05-21",
+          "activeSupport": "2020-12-08",
+          "securitySupport": "2020-12-08",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2403 days ago",
+            "end": "Ended 1837 days ago",
+            "duration": 567
+          }
+        }
+      }
+    }
+  ],
+  "10.0.17763": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.17763",
+      "name": "Windows 10",
+      "label": "1809",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/supported-versions-windows-client#enterprise-and-iot-enterprise-ltsbltsc-editions",
+      "releaseDate": "2018-11-13",
+      "version": {
+        "initial": "10.0.17763",
+        "latest": "10.0.17763"
+      },
+      "fullname": "Windows 1809",
+      "isSupported": true,
+      "supportChannels": {
+        "E-LTS": {
+          "channel": "E-LTS",
+          "supportFrom": "2018-11-13",
+          "activeSupport": "2024-01-09",
+          "securitySupport": "2029-01-09",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": true,
+          "details": {
+            "start": "Started 2592 days ago",
+            "end": "Ends in 1117 days",
+            "duration": 3710
+          }
+        },
+        "E": {
+          "channel": "E",
+          "supportFrom": "2018-11-13",
+          "activeSupport": "2021-05-11",
+          "securitySupport": "2021-05-11",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2592 days ago",
+            "end": "Ended 1683 days ago",
+            "duration": 910
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2018-11-13",
+          "activeSupport": "2020-11-10",
+          "securitySupport": "2020-11-10",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2592 days ago",
+            "end": "Ended 1865 days ago",
+            "duration": 728
+          }
+        }
+      }
+    }
+  ],
+  "10.0.17134": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.17134",
+      "name": "Windows 10",
+      "label": "1803",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1803-1809-end-of-servicing",
+      "releaseDate": "2018-04-30",
+      "version": {
+        "initial": "10.0.17134",
+        "latest": "10.0.17134"
+      },
+      "fullname": "Windows 1803",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2018-04-30",
+          "activeSupport": "2020-05-11",
+          "securitySupport": "2021-05-11",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2789 days ago",
+            "end": "Ended 1683 days ago",
+            "duration": 1107
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2018-04-30",
+          "activeSupport": "2019-11-12",
+          "securitySupport": "2019-11-12",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2789 days ago",
+            "end": "Ended 2229 days ago",
+            "duration": 561
+          }
+        }
+      }
+    }
+  ],
+  "10.0.16299": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.16299",
+      "name": "Windows 10",
+      "label": "1709",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1709-end-of-servicing",
+      "releaseDate": "2017-10-17",
+      "version": {
+        "initial": "10.0.16299",
+        "latest": "10.0.16299"
+      },
+      "fullname": "Windows 1709",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2017-10-17",
+          "activeSupport": "2020-10-13",
+          "securitySupport": "2020-10-13",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2984 days ago",
+            "end": "Ended 1893 days ago",
+            "duration": 1092
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2017-10-17",
+          "activeSupport": "2019-04-09",
+          "securitySupport": "2019-04-09",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2984 days ago",
+            "end": "Ended 2446 days ago",
+            "duration": 539
+          }
+        }
+      }
+    }
+  ],
+  "10.0.15063": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.15063",
+      "name": "Windows 10",
+      "label": "1703",
+      "description": null,
+      "link": "https://techcommunity.microsoft.com/t5/windows-it-pro-blog/end-of-service-reminders-for-windows-10-versions-1703-and-1803/ba-p/903715",
+      "releaseDate": "2017-04-11",
+      "version": {
+        "initial": "10.0.15063",
+        "latest": "10.0.15063"
+      },
+      "fullname": "Windows 1703",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2017-04-11",
+          "activeSupport": "2019-10-08",
+          "securitySupport": "2019-10-08",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 3173 days ago",
+            "end": "Ended 2264 days ago",
+            "duration": 910
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2017-04-11",
+          "activeSupport": "2018-10-09",
+          "securitySupport": "2018-10-09",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 3173 days ago",
+            "end": "Ended 2628 days ago",
+            "duration": 546
+          }
+        }
+      }
+    }
+  ],
+  "10.0.14393": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.14393",
+      "name": "Windows 10",
+      "label": "1607",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/supported-versions-windows-client#enterprise-and-iot-enterprise-ltsbltsc-editions",
+      "releaseDate": "2016-08-02",
+      "version": {
+        "initial": "10.0.14393",
+        "latest": "10.0.14393"
+      },
+      "fullname": "Windows 1607",
+      "isSupported": true,
+      "supportChannels": {
+        "E-LTS": {
+          "channel": "E-LTS",
+          "supportFrom": "2016-08-02",
+          "activeSupport": "2021-10-12",
+          "securitySupport": "2026-10-13",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": true,
+          "details": {
+            "start": "Started 3425 days ago",
+            "end": "Ends in 298 days",
+            "duration": 3724
+          }
+        },
+        "E": {
+          "channel": "E",
+          "supportFrom": "2016-08-02",
+          "activeSupport": "2019-04-09",
+          "securitySupport": "2019-04-09",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 3425 days ago",
+            "end": "Ended 2446 days ago",
+            "duration": 980
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2016-08-02",
+          "activeSupport": "2018-04-10",
+          "securitySupport": "2018-04-10",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 3425 days ago",
+            "end": "Ended 2810 days ago",
+            "duration": 616
+          }
+        }
+      }
+    }
+  ],
+  "10.0.10586": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.10586",
+      "name": "Windows 10",
+      "label": "1511",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/announcements/windows-10-1511-end-of-servicing",
+      "releaseDate": "2015-11-10",
+      "version": {
+        "initial": "10.0.10586",
+        "latest": "10.0.10586"
+      },
+      "fullname": "Windows 1511",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2015-11-10",
+          "activeSupport": "2017-10-10",
+          "securitySupport": "2017-10-10",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 3691 days ago",
+            "end": "Ended 2992 days ago",
+            "duration": 700
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2015-11-10",
+          "activeSupport": "2017-10-10",
+          "securitySupport": "2017-10-10",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 3691 days ago",
+            "end": "Ended 2992 days ago",
+            "duration": 700
+          }
+        }
+      }
+    }
+  ],
+  "10.0.10240": [
+    {
+      "software": "Windows",
+      "id": "windows-10.0.10240",
+      "name": "Windows 10",
+      "label": "1507",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/supported-versions-windows-client#enterprise-and-iot-enterprise-ltsbltsc-editions",
+      "releaseDate": "2015-07-29",
+      "version": {
+        "initial": "10.0.10240",
+        "latest": "10.0.10240"
+      },
+      "fullname": "Windows 1507",
+      "isSupported": false,
+      "supportChannels": {
+        "E-LTS": {
+          "channel": "E-LTS",
+          "supportFrom": "2015-07-29",
+          "activeSupport": "2020-10-13",
+          "securitySupport": "2025-10-14",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": true,
+          "details": {
+            "start": "Started 3795 days ago",
+            "end": "Ended 66 days ago",
+            "duration": 3730
+          }
+        },
+        "E": {
+          "channel": "E",
+          "supportFrom": "2015-07-29",
+          "activeSupport": "2017-05-09",
+          "securitySupport": "2017-05-09",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 3795 days ago",
+            "end": "Ended 3146 days ago",
+            "duration": 650
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2015-07-29",
+          "activeSupport": "2017-05-09",
+          "securitySupport": "2017-05-09",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 3795 days ago",
+            "end": "Ended 3146 days ago",
+            "duration": 650
+          }
+        },
+        "IOT": {
+          "channel": "IOT",
+          "supportFrom": "2015-04-29",
+          "activeSupport": "2020-11-10",
+          "securitySupport": "2020-11-10",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 3886 days ago",
+            "end": "Ended 1865 days ago",
+            "duration": 2022
+          }
+        }
+      }
+    }
+  ],
+  "6.3.9600": [
+    {
+      "software": "Windows",
+      "id": "windows-6.3.9600",
+      "name": "Windows 8.1",
+      "label": null,
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-81",
+      "releaseDate": "2013-11-13",
+      "version": {
+        "initial": "6.3.9600",
+        "latest": "6.3.9600"
+      },
+      "fullname": "Windows None",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2013-11-13",
+          "activeSupport": "2018-01-09",
+          "securitySupport": "2023-01-10",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 4418 days ago",
+            "end": "Ended 1074 days ago",
+            "duration": 3345
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2013-11-13",
+          "activeSupport": "2018-01-09",
+          "securitySupport": "2023-01-10",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 4418 days ago",
+            "end": "Ended 1074 days ago",
+            "duration": 3345
+          }
+        }
+      }
+    }
+  ],
+  "6.2.9200": [
+    {
+      "software": "Windows",
+      "id": "windows-6.2.9200",
+      "name": "Windows 8",
+      "label": null,
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-8",
+      "releaseDate": "2012-10-30",
+      "version": {
+        "initial": "6.2.9200",
+        "latest": "6.2.9200"
+      },
+      "fullname": "Windows None",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2012-10-30",
+          "activeSupport": "2016-01-12",
+          "securitySupport": "2016-01-12",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 4797 days ago",
+            "end": "Ended 3629 days ago",
+            "duration": 1169
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2012-10-30",
+          "activeSupport": "2016-01-12",
+          "securitySupport": "2016-01-12",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 4797 days ago",
+            "end": "Ended 3629 days ago",
+            "duration": 1169
+          }
+        }
+      }
+    }
+  ],
+  "6.1.7601": [
+    {
+      "software": "Windows",
+      "id": "windows-6.1.7601",
+      "name": "Windows 7",
+      "label": "SP1",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-7",
+      "releaseDate": "2011-02-22",
+      "version": {
+        "initial": "6.1.7601",
+        "latest": "6.1.7601"
+      },
+      "fullname": "Windows SP1",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2011-02-22",
+          "activeSupport": "2015-01-13",
+          "securitySupport": "2020-01-14",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 5413 days ago",
+            "end": "Ended 2166 days ago",
+            "duration": 3248
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2011-02-22",
+          "activeSupport": "2015-01-13",
+          "securitySupport": "2020-01-14",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 5413 days ago",
+            "end": "Ended 2166 days ago",
+            "duration": 3248
+          }
+        }
+      }
+    }
+  ],
+  "6.0.6200": [
+    {
+      "software": "Windows",
+      "id": "windows-6.0.6200",
+      "name": "Windows Vista",
+      "label": "SP2",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-vista",
+      "releaseDate": "2009-04-29",
+      "version": {
+        "initial": "6.0.6200",
+        "latest": "6.0.6200"
+      },
+      "fullname": "Windows SP2",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2009-04-29",
+          "activeSupport": "2012-04-10",
+          "securitySupport": "2017-04-11",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 6077 days ago",
+            "end": "Ended 3174 days ago",
+            "duration": 2904
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2009-04-29",
+          "activeSupport": "2012-04-10",
+          "securitySupport": "2017-04-11",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 6077 days ago",
+            "end": "Ended 3174 days ago",
+            "duration": 2904
+          }
+        }
+      }
+    }
+  ],
+  "5.1.2600": [
+    {
+      "software": "Windows",
+      "id": "windows-5.1.2600",
+      "name": "Windows XP",
+      "label": "SP3",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-xp",
+      "releaseDate": "2008-04-21",
+      "version": {
+        "initial": "5.1.2600",
+        "latest": "5.1.2600"
+      },
+      "fullname": "Windows SP3",
+      "isSupported": false,
+      "supportChannels": {
+        "E": {
+          "channel": "E",
+          "supportFrom": "2008-04-21",
+          "activeSupport": "2009-04-14",
+          "securitySupport": "2014-04-08",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 6450 days ago",
+            "end": "Ended 4273 days ago",
+            "duration": 2178
+          }
+        },
+        "W": {
+          "channel": "W",
+          "supportFrom": "2008-04-21",
+          "activeSupport": "2009-04-14",
+          "securitySupport": "2014-04-08",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 6450 days ago",
+            "end": "Ended 4273 days ago",
+            "duration": 2178
+          }
+        }
+      }
+    }
+  ]
+}
+

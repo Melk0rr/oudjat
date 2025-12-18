@@ -1,0 +1,625 @@
+{
+  "10.0.26100": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2025-10.0.26100",
+      "name": "Windows Server 2025",
+      "label": "2025",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/windows-server-release-info",
+      "releaseDate": "2024-11-01",
+      "version": {
+        "initial": "10.0.26100",
+        "latest": "10.0.26100"
+      },
+      "fullname": "Windows Server 2025",
+      "isSupported": true,
+      "supportChannels": {
+        "LTSC": {
+          "channel": "LTSC",
+          "supportFrom": "2024-11-01",
+          "activeSupport": "2029-10-09",
+          "securitySupport": "2034-10-10",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": true,
+          "details": {
+            "start": "Started 412 days ago",
+            "end": "Ends in 3217 days",
+            "duration": 3630
+          }
+        }
+      }
+    }
+  ],
+  "10.0.25398": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-23H2-10.0.25398",
+      "name": "Windows Server 23h2",
+      "label": "23H2",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-server-annual-channel",
+      "releaseDate": "2023-10-24",
+      "version": {
+        "initial": "10.0.25398",
+        "latest": "10.0.25398"
+      },
+      "fullname": "Windows Server 23H2",
+      "isSupported": false,
+      "supportChannels": {
+        "AC": {
+          "channel": "AC",
+          "supportFrom": "2023-10-24",
+          "activeSupport": "2025-04-24",
+          "securitySupport": "2025-10-24",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 786 days ago",
+            "end": "Ended 56 days ago",
+            "duration": 731
+          }
+        }
+      }
+    }
+  ],
+  "10.0.20348": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2022-10.0.20348",
+      "name": "Windows Server 2022",
+      "label": "2022",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/windows-server-release-info",
+      "releaseDate": "2021-08-18",
+      "version": {
+        "initial": "10.0.20348",
+        "latest": "10.0.20348"
+      },
+      "fullname": "Windows Server 2022",
+      "isSupported": true,
+      "supportChannels": {
+        "LTSC": {
+          "channel": "LTSC",
+          "supportFrom": "2021-08-18",
+          "activeSupport": "2026-10-13",
+          "securitySupport": "2031-10-14",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": true,
+          "details": {
+            "start": "Started 1583 days ago",
+            "end": "Ends in 2125 days",
+            "duration": 3709
+          }
+        }
+      }
+    }
+  ],
+  "10.0.19042": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-20H2-10.0.19042",
+      "name": "Windows Server 20h2",
+      "label": "20H2",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/announcements/windows-server-20h2-retiring",
+      "releaseDate": "2020-10-20",
+      "version": {
+        "initial": "10.0.19042",
+        "latest": "10.0.19042"
+      },
+      "fullname": "Windows Server 20H2",
+      "isSupported": false,
+      "supportChannels": {
+        "SAC": {
+          "channel": "SAC",
+          "supportFrom": "2020-10-20",
+          "activeSupport": "2022-08-09",
+          "securitySupport": "2022-08-09",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 1885 days ago",
+            "end": "Ended 1228 days ago",
+            "duration": 658
+          }
+        }
+      }
+    }
+  ],
+  "10.0.19041": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2004-10.0.19041",
+      "name": "Windows Server 2004",
+      "label": "2004",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/announcements/windows-server-version-2004-end-of-servicing",
+      "releaseDate": "2020-05-27",
+      "version": {
+        "initial": "10.0.19041",
+        "latest": "10.0.19041"
+      },
+      "fullname": "Windows Server 2004",
+      "isSupported": false,
+      "supportChannels": {
+        "SAC": {
+          "channel": "SAC",
+          "supportFrom": "2020-05-27",
+          "activeSupport": "2021-12-14",
+          "securitySupport": "2021-12-14",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2031 days ago",
+            "end": "Ended 1466 days ago",
+            "duration": 566
+          }
+        }
+      }
+    }
+  ],
+  "10.0.18363": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-1909-10.0.18363",
+      "name": "Windows Server 1909",
+      "label": "1909",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/announcements/windows-server-1909-end-of-servicing",
+      "releaseDate": "2019-11-12",
+      "version": {
+        "initial": "10.0.18363",
+        "latest": "10.0.18363"
+      },
+      "fullname": "Windows Server 1909",
+      "isSupported": false,
+      "supportChannels": {
+        "SAC": {
+          "channel": "SAC",
+          "supportFrom": "2019-11-12",
+          "activeSupport": "2021-05-11",
+          "securitySupport": "2021-05-11",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2228 days ago",
+            "end": "Ended 1683 days ago",
+            "duration": 546
+          }
+        }
+      }
+    }
+  ],
+  "10.0.18362": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-1903-10.0.18362",
+      "name": "Windows Server 1903",
+      "label": "1903",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-server-semiannual-channel",
+      "releaseDate": "2019-05-21",
+      "version": {
+        "initial": "10.0.18362",
+        "latest": "10.0.18362"
+      },
+      "fullname": "Windows Server 1903",
+      "isSupported": false,
+      "supportChannels": {
+        "SAC": {
+          "channel": "SAC",
+          "supportFrom": "2019-05-21",
+          "activeSupport": "2020-12-08",
+          "securitySupport": "2020-12-08",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2403 days ago",
+            "end": "Ended 1837 days ago",
+            "duration": 567
+          }
+        }
+      }
+    }
+  ],
+  "10.0.17763": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-1809-10.0.17763",
+      "name": "Windows Server 1809",
+      "label": "1809",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/announcements/windows-server-1809-end-of-servicing",
+      "releaseDate": "2018-11-13",
+      "version": {
+        "initial": "10.0.17763",
+        "latest": "10.0.17763"
+      },
+      "fullname": "Windows Server 1809",
+      "isSupported": true,
+      "supportChannels": {
+        "SAC": {
+          "channel": "SAC",
+          "supportFrom": "2018-11-13",
+          "activeSupport": "2020-11-10",
+          "securitySupport": "2020-11-10",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2592 days ago",
+            "end": "Ended 1865 days ago",
+            "duration": 728
+          }
+        },
+        "LTSC": {
+          "channel": "LTSC",
+          "supportFrom": "2018-11-13",
+          "activeSupport": "2024-01-09",
+          "securitySupport": "2029-01-09",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": true,
+          "details": {
+            "start": "Started 2592 days ago",
+            "end": "Ends in 1117 days",
+            "duration": 3710
+          }
+        }
+      }
+    },
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2019-10.0.17763",
+      "name": "Windows Server 2019",
+      "label": "2019",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/windows-server-release-info",
+      "releaseDate": "2018-11-13",
+      "version": {
+        "initial": "10.0.17763",
+        "latest": "10.0.17763"
+      },
+      "fullname": "Windows Server 2019",
+      "isSupported": false,
+      "supportChannels": {}
+    }
+  ],
+  "10.0.17134": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-1803-10.0.17134",
+      "name": "Windows Server 1803",
+      "label": "1803",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/announcements/windows-server-1803-end-of-servicing",
+      "releaseDate": "2018-04-30",
+      "version": {
+        "initial": "10.0.17134",
+        "latest": "10.0.17134"
+      },
+      "fullname": "Windows Server 1803",
+      "isSupported": false,
+      "supportChannels": {
+        "SAC": {
+          "channel": "SAC",
+          "supportFrom": "2018-04-30",
+          "activeSupport": "2019-11-12",
+          "securitySupport": "2019-11-12",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2789 days ago",
+            "end": "Ended 2229 days ago",
+            "duration": 561
+          }
+        }
+      }
+    }
+  ],
+  "10.0.16299": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-1709-10.0.16299",
+      "name": "Windows Server 1709",
+      "label": "1709",
+      "description": null,
+      "link": "https://techcommunity.microsoft.com/t5/windows-server-for-developers/windows-server-version-1709-lifecycle-announcement/m-p/379766",
+      "releaseDate": "2017-10-17",
+      "version": {
+        "initial": "10.0.16299",
+        "latest": "10.0.16299"
+      },
+      "fullname": "Windows Server 1709",
+      "isSupported": false,
+      "supportChannels": {
+        "SAC": {
+          "channel": "SAC",
+          "supportFrom": "2017-10-17",
+          "activeSupport": "2019-04-09",
+          "securitySupport": "2019-04-09",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": false,
+          "details": {
+            "start": "Started 2984 days ago",
+            "end": "Ended 2446 days ago",
+            "duration": 539
+          }
+        }
+      }
+    }
+  ],
+  "10.0.14393": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2016-10.0.14393",
+      "name": "Windows Server 2016",
+      "label": "2016",
+      "description": null,
+      "link": "https://learn.microsoft.com/windows/release-health/windows-server-release-info",
+      "releaseDate": "2016-10-15",
+      "version": {
+        "initial": "10.0.14393",
+        "latest": "10.0.14393"
+      },
+      "fullname": "Windows Server 2016",
+      "isSupported": true,
+      "supportChannels": {
+        "LTSC": {
+          "channel": "LTSC",
+          "supportFrom": "2016-10-15",
+          "activeSupport": "2022-01-11",
+          "securitySupport": "2027-01-12",
+          "extendedSecuritySupport": null,
+          "status": "ONGOING",
+          "lts": true,
+          "details": {
+            "start": "Started 3351 days ago",
+            "end": "Ends in 389 days",
+            "duration": 3741
+          }
+        }
+      }
+    }
+  ],
+  "6.3.9600": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2012-R2-6.3.9600",
+      "name": "Windows Server 2012",
+      "label": "2012 R2",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-server-2012-r2",
+      "releaseDate": "2013-11-25",
+      "version": {
+        "initial": "6.3.9600",
+        "latest": "6.3.9600"
+      },
+      "fullname": "Windows Server 2012 R2",
+      "isSupported": false,
+      "supportChannels": {
+        "LTSC": {
+          "channel": "LTSC",
+          "supportFrom": "2013-11-25",
+          "activeSupport": "2018-10-09",
+          "securitySupport": "2023-10-10",
+          "extendedSecuritySupport": "2023-10-10",
+          "status": "RETIRED",
+          "lts": true,
+          "details": {
+            "start": "Started 4406 days ago",
+            "end": "Ended 801 days ago",
+            "duration": 3606
+          }
+        }
+      }
+    }
+  ],
+  "6.2.9200": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2012-6.2.9200",
+      "name": "Windows Server 2012",
+      "label": "2012",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-server-2012",
+      "releaseDate": "2012-10-30",
+      "version": {
+        "initial": "6.2.9200",
+        "latest": "6.2.9200"
+      },
+      "fullname": "Windows Server 2012",
+      "isSupported": false,
+      "supportChannels": {
+        "LTSC": {
+          "channel": "LTSC",
+          "supportFrom": "2012-10-30",
+          "activeSupport": "2018-10-09",
+          "securitySupport": "2023-10-10",
+          "extendedSecuritySupport": "2023-10-10",
+          "status": "RETIRED",
+          "lts": true,
+          "details": {
+            "start": "Started 4797 days ago",
+            "end": "Ended 801 days ago",
+            "duration": 3997
+          }
+        }
+      }
+    }
+  ],
+  "6.1.7601": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2008-R2-SP1-6.1.7601r2",
+      "name": "Windows Server 2008",
+      "label": "2008 R2 SP1",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-server-2008-r2",
+      "releaseDate": "2011-02-22",
+      "version": {
+        "initial": "6.1.7601",
+        "latest": "6.1.7601"
+      },
+      "fullname": "Windows Server 2008 R2 SP1",
+      "isSupported": false,
+      "supportChannels": {
+        "LTSC": {
+          "channel": "LTSC",
+          "supportFrom": "2011-02-22",
+          "activeSupport": "2015-01-13",
+          "securitySupport": "2020-01-14",
+          "extendedSecuritySupport": "2020-01-14",
+          "status": "RETIRED",
+          "lts": true,
+          "details": {
+            "start": "Started 5413 days ago",
+            "end": "Ended 2166 days ago",
+            "duration": 3248
+          }
+        }
+      }
+    }
+  ],
+  "6.0.6003": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2008-SP2-6.0.6003sp2",
+      "name": "Windows Server 2008",
+      "label": "2008 SP2",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-server-2008",
+      "releaseDate": "2009-04-29",
+      "version": {
+        "initial": "6.0.6003sp2",
+        "latest": "6.0.6003sp2"
+      },
+      "fullname": "Windows Server 2008 SP2",
+      "isSupported": false,
+      "supportChannels": {
+        "LTSC": {
+          "channel": "LTSC",
+          "supportFrom": "2009-04-29",
+          "activeSupport": "2015-01-13",
+          "securitySupport": "2020-01-14",
+          "extendedSecuritySupport": "2020-01-14",
+          "status": "RETIRED",
+          "lts": true,
+          "details": {
+            "start": "Started 6077 days ago",
+            "end": "Ended 2166 days ago",
+            "duration": 3912
+          }
+        }
+      }
+    }
+  ],
+  "5.2.3790": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2003-SP2-5.2.3790sp2",
+      "name": "Windows Server 2003",
+      "label": "2003 SP2",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-server-2003-",
+      "releaseDate": "2007-03-13",
+      "version": {
+        "initial": "5.2.3790sp2",
+        "latest": "5.2.3790sp2"
+      },
+      "fullname": "Windows Server 2003 SP2",
+      "isSupported": false,
+      "supportChannels": {
+        "LTSC": {
+          "channel": "LTSC",
+          "supportFrom": "2007-03-13",
+          "activeSupport": "2010-07-13",
+          "securitySupport": "2015-07-14",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": true,
+          "details": {
+            "start": "Started 6855 days ago",
+            "end": "Ended 3811 days ago",
+            "duration": 3045
+          }
+        }
+      }
+    },
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2003-SP1-5.2.3790sp1",
+      "name": "Windows Server 2003",
+      "label": "2003 SP1",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-server-2003-",
+      "releaseDate": "2005-03-30",
+      "version": {
+        "initial": "5.2.3790sp1",
+        "latest": "5.2.3790sp1"
+      },
+      "fullname": "Windows Server 2003 SP1",
+      "isSupported": false,
+      "supportChannels": {}
+    },
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2003-5.2.3790",
+      "name": "Windows Server 2003",
+      "label": "2003",
+      "description": null,
+      "link": "https://learn.microsoft.com/lifecycle/products/windows-server-2003-",
+      "releaseDate": "2003-04-24",
+      "version": {
+        "initial": "5.2.3790",
+        "latest": "5.2.3790"
+      },
+      "fullname": "Windows Server 2003",
+      "isSupported": false,
+      "supportChannels": {}
+    }
+  ],
+  "5.0.2195": [
+    {
+      "software": "Windows Server",
+      "id": "windows-server-2000-5.0.2195",
+      "name": "Windows Server 2000",
+      "label": "2000",
+      "description": null,
+      "link": null,
+      "releaseDate": "2000-02-17",
+      "version": {
+        "initial": "5.0.2195",
+        "latest": "5.0.2195"
+      },
+      "fullname": "Windows Server 2000",
+      "isSupported": false,
+      "supportChannels": {
+        "LTSC": {
+          "channel": "LTSC",
+          "supportFrom": "2000-02-17",
+          "activeSupport": "2005-06-30",
+          "securitySupport": "2010-07-13",
+          "extendedSecuritySupport": null,
+          "status": "RETIRED",
+          "lts": true,
+          "details": {
+            "start": "Started 9436 days ago",
+            "end": "Ended 5638 days ago",
+            "duration": 3799
+          }
+        }
+      }
+    }
+  ]
+}
