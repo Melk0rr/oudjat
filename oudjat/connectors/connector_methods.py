@@ -16,7 +16,7 @@ class ConnectorMethod(Enum):
     PUT = "put"
 
     @property
-    def func(self) -> Callable[..., requests.Response]:
+    def func(self) -> Callable[..., "requests.Response"]:
         """
         Return the request method based on the element value.
 
@@ -26,7 +26,7 @@ class ConnectorMethod(Enum):
 
         return getattr(requests, self._value_)
 
-    def __call__(self, *args: Any, **kwargs: Any) -> requests.Response:
+    def __call__(self, *args: Any, **kwargs: Any) -> "requests.Response":
         """
         Make the ConnectorMethod element callable.
 
