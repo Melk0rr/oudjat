@@ -36,7 +36,7 @@ class EOLAssetMapper:
         Return a dictionary of MSOSRelease instances.
 
         Returns:
-            dict[str, MSOSRelease]: A dictionary of MSOSRelease for each windows instance retrieved from EOL API
+            dict[str, list[OSRelease]]: A dictionary of OSRelease for each windows instance retrieved from EOL API
         """
 
         releases: dict[str, list["OSRelease"]] = {}
@@ -103,7 +103,7 @@ class EOLAssetMapper:
         Return a dictionary of MSOSRelease instances.
 
         Returns:
-            dict[str, MSOSRelease]: A dictionary of MSOSRelease for each windows instance retrieved from EOL API
+            dict[str, list[OSRelease]]: A dictionary of OSRelease for each windows instance retrieved from EOL API
         """
 
         releases: dict[str, list["OSRelease"]] = {}
@@ -173,7 +173,7 @@ class EOLAssetMapper:
         Return a dictionary of MSOSRelease instances.
 
         Returns:
-            dict[str, MSOSRelease]: A dictionary of MSOSRelease for each windows instance retrieved from EOL API
+            dict[str, list[OSRelease]]: A dictionary of OSRelease for each windows instance retrieved from EOL API
         """
 
         releases: dict[str, list["OSRelease"]] = {}
