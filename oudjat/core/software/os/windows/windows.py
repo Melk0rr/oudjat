@@ -20,9 +20,7 @@ class WindowsEdition(Enum):
             "Enterprise": SoftwareEdition(
                 label="Enterprise", channel="E", pattern=r"Ent[er]{2}prise"
             ),
-            "Education": SoftwareEdition(
-                label="Education", channel="E", pattern=r"[EÉeé]ducation"
-            ),
+            "Education": SoftwareEdition(label="Education", channel="E", pattern=r"[EÉeé]ducation"),
             "IoT Enterprise": SoftwareEdition(
                 label="IoT Enterprise", channel="E", pattern=r"[Ii][Oo][Tt] Ent[er]{2}prise"
             ),
@@ -43,9 +41,7 @@ class WindowsEdition(Enum):
             "Enterprise": SoftwareEdition(
                 label="Enterprise", channel="LTSC", pattern=r"Ent[er]{2}prise"
             ),
-            "Standard": SoftwareEdition(
-                label="Standard", channel="LTSC", pattern=r"[Ss]tandard"
-            ),
+            "Standard": SoftwareEdition(label="Standard", channel="LTSC", pattern=r"[Ss]tandard"),
             "Datacenter": SoftwareEdition(
                 label="Datacenter", channel="LTSC", pattern=r"[Dd]atacenter"
             ),
@@ -57,4 +53,3 @@ class WindowsEdition(Enum):
         """The editions property."""
 
         return list(self._value_.values())
-
