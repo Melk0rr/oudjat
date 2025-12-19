@@ -2,6 +2,10 @@
 A module that handle LDAP entry mapping to asset elements.
 """
 
+import logging
+
+from oudjat.utils import Context
+
 from .ldap_connector import LDAPConnector
 from .objects.account.group.ldap_group import LDAPGroup
 from .objects.account.ldap_computer import LDAPComputer
@@ -29,6 +33,8 @@ class LDAPAssetMapper:
         Args:
             ldapco (LDAPConnector): The LDAP connector used to interact with LDAP server
         """
+
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         self._connector: "LDAPConnector" = ldapco
 
@@ -80,6 +86,8 @@ class LDAPAssetMapper:
             dict[str, LDAPComputer]: Mapped entries as a dictionary of LDAP objects
         """
 
+        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPObjects")
+
         def map_obj(entry: "LDAPEntry") -> "LDAPObject":
             if auto:
                 obj_type = LDAPObjectType.from_object_cls(entry)
@@ -106,6 +114,8 @@ class LDAPAssetMapper:
             dict[str, LDAPComputer]: Mapped entries as a dictionary of LDAP computers
         """
 
+        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPComputers")
+
         def map_cpt(entry: "LDAPEntry") -> "LDAPComputer":
             return LDAPComputer(entry, capabilities=self._CAPABILITIES)
 
@@ -123,6 +133,8 @@ class LDAPAssetMapper:
         Returns:
             dict[str, LDAPComputer]: Mapped entries as a dictionary of LDAP computers
         """
+
+        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPUsers")
 
         def map_usr(entry: "LDAPEntry") -> "LDAPUser":
             return LDAPUser(entry, capabilities=self._CAPABILITIES)
@@ -146,6 +158,8 @@ class LDAPAssetMapper:
         Returns:
             dict[str, LDAPGroup]: Mapped entries as a dictionary of LDAP computers
         """
+
+        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPGroups")
 
         def map_grp(entry: "LDAPEntry") -> "LDAPGroup":
             grp_instance = LDAPGroup(entry, self._CAPABILITIES)
@@ -192,6 +206,8 @@ class LDAPAssetMapper:
             dict[str, LDAPOrganizationalUnit]: Mapped entries as a dictionary of LDAP ous
         """
 
+        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPOrganizationalUnits")
+
         def map_ou(entry: "LDAPEntry") -> "LDAPOrganizationalUnit":
             ou_instance = LDAPOrganizationalUnit(entry, self._CAPABILITIES)
             if recursive:
@@ -213,6 +229,8 @@ class LDAPAssetMapper:
         Returns:
             dict[str, LDAPSubnet]: Mapped entries as a dictionary of LDAP ous
         """
+
+        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPSubnets")
 
         def map_net(entry: "LDAPEntry") -> "LDAPSubnet":
             return LDAPSubnet(entry, self._CAPABILITIES)
