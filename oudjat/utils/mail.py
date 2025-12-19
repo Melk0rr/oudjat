@@ -162,9 +162,7 @@ class Mail:
         """
 
         if re.match(EMAIL_REG, email):
-            if recipient_type.value not in self._recipients.keys():
-                self._recipients[recipient_type.value] = []
-
+            _ = self._recipients.setdefault(recipient_type.value, [])
             self._recipients[recipient_type.value].append(email)
 
         else:
