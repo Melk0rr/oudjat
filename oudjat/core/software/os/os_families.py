@@ -4,7 +4,33 @@ A simple module that lists OS families.
 
 import re
 from enum import Enum
-from typing import NamedTuple, override
+from typing import NamedTuple, TypeAlias, override
+
+OSFamilyOptMatch: TypeAlias = tuple["OSFamilyOptProps", str]
+
+class OSFamilyOptProps(NamedTuple):
+    """
+    A helper class to properly handle OSFamily props types.
+
+    Attributes:
+        pattern (str): The pattern matching the family
+    """
+
+    pattern: str
+    name: str
+
+    def to_dict(self) -> dict[str, str]:
+        """
+        Convert the current opt into a dictionary.
+
+        Returns:
+            dict[str, str]: A dictionary representation of the current family option
+        """
+
+        return {
+            "pattern": self.pattern,
+            "name": self.name
+        }
 
 
 class OSFamilyProps(NamedTuple):
@@ -15,53 +41,97 @@ class OSFamilyProps(NamedTuple):
         pattern (str): The pattern matching the family
     """
 
-    pattern: str
-    options: list[str]
-
+    options: list["OSFamilyOptProps"]
 
 class OSFamily(Enum):
     """OS family enumeration."""
 
     ANDROID = OSFamilyProps(
-        pattern=r"[Aa]ndroid|[Aa][Oo][Ss][Pp]|[Gg]raphene[Oo][Ss]|[Ll]ineage[Oo][Ss]|\/e\/[Oo][Ss]|[Cc]alyx[Oo][Ss]",
-        options=["ANDROID"],
+        options=[
+            OSFamilyOptProps(pattern=r"[Aa]ndroid(?: [Oo][Ss])?", name="ANDROIDOS"),
+            OSFamilyOptProps(pattern=r"[Gg]raphene[Oo][Ss]", name="GRAPHENEOS"),
+            OSFamilyOptProps(pattern=r"[Ll]ineage[Oo][Ss]|\/e\/[Oo][Ss]", name="LINEAGEOS"),
+        ]
     )
 
-    BSD = OSFamilyProps(pattern=r"[Bb][Ss][Dd]", options=["FREEBSD", "OPENBSD"])
+    BSD = OSFamilyProps(
+        options=[
+            OSFamilyOptProps(pattern=r"OpenBSD", name="OPENBSD"),
+            OSFamilyOptProps(pattern=r"FreeBSD", name="FREEBSD"),
+        ]
+    )
 
     LINUX = OSFamilyProps(
-        pattern=r"[Dd]ebian(?: Linux)?|[Uu]buntu(?: Linux)?|[Mm]int|[Nn]ix[Oo][Ss]|(?:[Oo]pen)?[Ss][Uu][Ss][Ee](?: Linux)?|[Ff]edora|[Rr](?:ed )?[Hh](?:at )?[Ee](?:nterprise )?[Ll](?:inux)?|[Oo]racle(?: Linux)?|[Rr]ocky(?: Linux)?",
-        options=["DEBIAN", "UBUNTU", "SUSE", "MINT", "REDHATENTERPRISELINUX", "ORACLELINUX"],
+        options=[
+            OSFamilyOptProps(pattern=r"[Cc]ent[Oo][Ss]", name="CENTOS"),
+            OSFamilyOptProps(pattern=r"[Dd]ebian(?: Linux)?", name="DEBIAN"),
+            OSFamilyOptProps(pattern=r"[Ff]edora(?: Linux)?", name="FEDORA"),
+            OSFamilyOptProps(pattern=r"Linux Mint(?: Debian Edition|\s*LMDE)?", name="MINT"),
+            OSFamilyOptProps(pattern=r"[Nn]ix[Oo][Ss]", name="NIXOS"),
+            OSFamilyOptProps(pattern=r"(?:[Oo]pen)?[Ss][Uu][Ss][Ee](?: Linux)?", name="OPENSUSE"),
+            OSFamilyOptProps(pattern=r"[Oo]racle(?: Linux)?", name="ORACLELINUX"),
+            OSFamilyOptProps(
+                pattern=r"[Rr](?:ed )?[Hh](?:at )?[Ee](?:nterprise )?[Ll](?:inux)?", name="RHEL"
+            ),
+            OSFamilyOptProps(pattern=r"[Rr]ocky(?: Linux)?", name="ROCKYLINUX"),
+            OSFamilyOptProps(pattern=r"[Ss][Uu][Ss][Ee](?: Linux)?", name="SUSELINUX"),
+            OSFamilyOptProps(pattern=r"[Uu]buntu(?: Linux)?", name="UBUNTU"),
+        ]
     )
 
-    MAC = OSFamilyProps(pattern=r"[Mm][Aa][Cc](?:[Oo][Ss])?", options=["IOS", "MACOS"])
+    APPLE = OSFamilyProps(
+        options=[
+            OSFamilyOptProps(pattern=r"[Mm][Aa][Cc]\s*OS\s*X|OS\s*X|Mac\s*OS", name="MACOS"),
+            OSFamilyOptProps(pattern=r"(?:Apple )?[Ii][Oo][Ss]", name="IOS"),
+        ]
+    )
 
     WINDOWS = OSFamilyProps(
-        pattern=r"[Ww]indows(?: [Ss]erver)?",
-        options=["WINDOWS", "WINDOWSSERVER"],
+        options=[
+            OSFamilyOptProps(pattern=r"[Ww]indows(?!\s+[Ss]erver)", name="WINDOWS"),
+            OSFamilyOptProps(pattern=r"[Ww]indows\s+[Ss]erver", name="WINDOWSSERVER"),
+        ]
     )
 
     @property
-    def pattern(self) -> str:
-        """
-        Get the regex pattern for the operating system family.
-
-        Returns:
-            str: The regex pattern as a string.
-        """
-
-        return self._value_.pattern
-
-    @property
-    def options(self) -> list[str]:
+    def options(self) -> list["OSFamilyOptProps"]:
         """
         Return the operating system options for this family.
 
         Returns:
-            list[str]: A list of OS option names bound to this family
+            list[OSFamilyOptProps]: A list of OSFamily option tuples
         """
 
         return self._value_.options
+
+    @property
+    def names(self) -> list[str]:
+        """
+        Return the names of the options in this family.
+
+        Returns:
+            list[str]: A list of the options names
+        """
+
+        return [opt.name for opt in self.options]
+
+    def match(self, test_str: str) -> "OSFamilyOptMatch | None":
+        """
+        Try to match any of this family option with the provided string.
+
+        Args:
+            test_str (str): The string to test
+
+        Returns:
+            tuple[OSFamilyOptProps, str] | None: A tuple containing the matching option and the matching substring
+        """
+
+        for opt in self.options:
+            search = re.search(opt.pattern, test_str)
+            if search is not None:
+                return (opt, search.group(0))
+
+        return None
 
     @override
     def __str__(self) -> str:
@@ -78,7 +148,7 @@ class OSFamily(Enum):
     # Static methods
 
     @staticmethod
-    def matching_family(test_str: str) -> "OSFamily | None":
+    def match_family_opt(test_str: str) -> "OSFamilyOptMatch | None":
         """
         Try to retrieve a substring of the provided string matching an OSFamily element.
 
@@ -90,7 +160,8 @@ class OSFamily(Enum):
         """
 
         for f in OSFamily:
-            if re.search(f.pattern, test_str) is not None:
-                return f
+            match = f.match(test_str)
+            if match:
+                return match
 
         return None
