@@ -4,12 +4,12 @@ from enum import Enum
 from typing import Any, NamedTuple
 
 from oudjat.core.computer.computer_type import ComputerType
-from oudjat.core.software.os.operating_system import OperatingSystem, OSRelease
-from oudjat.core.software.os.os_families import OSFamily
-from oudjat.core.software.os.windows import WINDOWS_RELEASES, WINDOWS_SERVER_RELEASES
-from oudjat.core.software.software_release import SoftwareReleaseImportDict
 
-from .windows.windows import WindowsEdition
+from ..software_release import SoftwareReleaseImportDict
+from .linux import RHEL_RELEASES, LinuxEdition
+from .operating_system import OperatingSystem, OSRelease
+from .os_families import OSFamily
+from .windows import WINDOWS_RELEASES, WINDOWS_SERVER_RELEASES, WindowsEdition
 
 
 class OSOptionProps(NamedTuple):
@@ -29,14 +29,32 @@ class OSOptionProps(NamedTuple):
 class OSOption(Enum):
     """An enumeration of OSes."""
 
+    RHEL = OSOptionProps(
+        cls=OperatingSystem,
+        attributes={
+            "os_id": "rhel",
+            "name": "Red Hat Enterprise Linux",
+            "label": "red-hat-enterprise-linux",
+            "editor": "Red Hat",
+            "os_family": OSFamily.LINUX,
+            "computer_type": ComputerType.SERVER,
+            "description": "Red Hat Enterprise Linux is a Linux distribution developed by Red Hat for the commercial market",
+            "editions": LinuxEdition.RHEL.value,
+            "tags": ["linux-distribution", "red-hat"],
+        },
+        releases=RHEL_RELEASES,
+    )
+
     WINDOWS = OSOptionProps(
         cls=OperatingSystem,
         attributes={
-            "msos_id": "ms-windows",
+            "os_id": "ms-windows",
             "name": "Windows",
             "label": "windows",
+            "editor": "Microsoft Corporation",
+            "os_family": OSFamily.WINDOWS,
             "computer_type": ComputerType.WORKSTATION,
-            "description": "Microsoft operating system for workstations",
+            "description": "Microsoft Windows is the operating system developed by Microsoft to run on workstations",
             "editions": WindowsEdition.WINDOWS.value,
             "tags": ["microsoft", "windows"],
         },
@@ -46,11 +64,13 @@ class OSOption(Enum):
     WINDOWSSERVER = OSOptionProps(
         cls=OperatingSystem,
         attributes={
-            "msos_id": "ms-windows-server",
+            "os_id": "ms-windows-server",
             "name": "Windows Server",
             "label": "windows-server",
+            "editor": "Microsoft Corporation",
+            "os_family": OSFamily.WINDOWS,
             "computer_type": ComputerType.SERVER,
-            "description": "Microsoft operating system for servers",
+            "description": "Microsoft Windows is the operating system developed by Microsoft to run on servers",
             "editions": WindowsEdition.WINDOWSSERVER.value,
             "tags": ["microsoft", "windows"],
         },
@@ -104,4 +124,4 @@ class OSOption(Enum):
             dict[str, OSOption]: A dictionary of OSOption bound to the provided family
         """
 
-        return {option.name: option for option in OSOption if option.name in family.options}
+        return {option.name: option for option in OSOption if option.name in family.names}
