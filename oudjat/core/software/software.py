@@ -80,6 +80,9 @@ class Software(Asset, Generic[ReleaseType]):
 
         self._editions: "SoftwareEditionDict" = SoftwareEditionDict()
 
+        if editions is not None:
+            self._editions = editions
+
     # ****************************************************************
     # Methods
 
