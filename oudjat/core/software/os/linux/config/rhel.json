@@ -1,13 +1,13 @@
 {
-  "10.0.0": [
+  "10": [
     {
-      "software": "Red Hat Enterprise Linux",
       "id": "rhel-10",
       "name": "Red Hat Enterprise Linux 10",
       "label": "10",
       "description": null,
       "link": "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/10/html/10.1_release_notes/index",
       "releaseDate": "2025-05-20",
+      "software": "Red Hat Enterprise Linux",
       "version": {
         "initial": "10.0.0",
         "latest": "10.1.0"
@@ -24,8 +24,8 @@
           "status": "ONGOING",
           "lts": false,
           "details": {
-            "start": "Started 212 days ago",
-            "end": "Ends in 3450 days",
+            "start": "Started 213 days ago",
+            "end": "Ends in 3449 days",
             "duration": 3663
           }
         },
@@ -38,23 +38,23 @@
           "status": "UPCOMING",
           "lts": false,
           "details": {
-            "start": "Starts in 3451 days",
-            "end": "Ends in 4546 days",
+            "start": "Starts in 3450 days",
+            "end": "Ends in 4545 days",
             "duration": 1096
           }
         }
       }
     }
   ],
-  "9.0.0": [
+  "9": [
     {
-      "software": "Red Hat Enterprise Linux",
       "id": "rhel-9",
       "name": "Red Hat Enterprise Linux 9",
       "label": "9",
       "description": null,
       "link": "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/9.7_release_notes/index",
       "releaseDate": "2022-05-18",
+      "software": "Red Hat Enterprise Linux",
       "version": {
         "initial": "9.0.0",
         "latest": "9.7.0"
@@ -71,8 +71,8 @@
           "status": "ONGOING",
           "lts": false,
           "details": {
-            "start": "Started 1310 days ago",
-            "end": "Ends in 2355 days",
+            "start": "Started 1311 days ago",
+            "end": "Ends in 2354 days",
             "duration": 3666
           }
         },
@@ -85,23 +85,23 @@
           "status": "UPCOMING",
           "lts": false,
           "details": {
-            "start": "Starts in 2356 days",
-            "end": "Ends in 3450 days",
+            "start": "Starts in 2355 days",
+            "end": "Ends in 3449 days",
             "duration": 1095
           }
         }
       }
     }
   ],
-  "8.0.0": [
+  "8": [
     {
-      "software": "Red Hat Enterprise Linux",
       "id": "rhel-8",
       "name": "Red Hat Enterprise Linux 8",
       "label": "8",
       "description": null,
       "link": "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/8.10_release_notes/index",
       "releaseDate": "2019-05-07",
+      "software": "Red Hat Enterprise Linux",
       "version": {
         "initial": "8.0.0",
         "latest": "8.10.0"
@@ -118,8 +118,8 @@
           "status": "ONGOING",
           "lts": false,
           "details": {
-            "start": "Started 2417 days ago",
-            "end": "Ends in 1259 days",
+            "start": "Started 2418 days ago",
+            "end": "Ends in 1258 days",
             "duration": 3677
           }
         },
@@ -132,23 +132,23 @@
           "status": "UPCOMING",
           "lts": false,
           "details": {
-            "start": "Starts in 1260 days",
-            "end": "Ends in 2355 days",
+            "start": "Starts in 1259 days",
+            "end": "Ends in 2354 days",
             "duration": 1096
           }
         }
       }
     }
   ],
-  "7.0.0": [
+  "7": [
     {
-      "software": "Red Hat Enterprise Linux",
       "id": "rhel-7",
       "name": "Red Hat Enterprise Linux 7",
       "label": "7",
       "description": null,
       "link": "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/7.9_release_notes/index",
       "releaseDate": "2014-06-10",
+      "software": "Red Hat Enterprise Linux",
       "version": {
         "initial": "7.0.0",
         "latest": "7.9.0"
@@ -165,8 +165,8 @@
           "status": "RETIRED",
           "lts": true,
           "details": {
-            "start": "Started 4209 days ago",
-            "end": "Ended 537 days ago",
+            "start": "Started 4210 days ago",
+            "end": "Ended 538 days ago",
             "duration": 3673
           }
         },
@@ -179,23 +179,23 @@
           "status": "ONGOING",
           "lts": true,
           "details": {
-            "start": "Started 536 days ago",
-            "end": "Ends in 1259 days",
+            "start": "Started 537 days ago",
+            "end": "Ends in 1258 days",
             "duration": 1796
           }
         }
       }
     }
   ],
-  "6.0.0": [
+  "6": [
     {
-      "software": "Red Hat Enterprise Linux",
       "id": "rhel-6",
       "name": "Red Hat Enterprise Linux 6",
       "label": "6",
       "description": null,
       "link": "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/6.10_release_notes/index",
       "releaseDate": "2010-11-10",
+      "software": "Red Hat Enterprise Linux",
       "version": {
         "initial": "6.0.0",
         "latest": "6.10.0"
@@ -212,8 +212,8 @@
           "status": "RETIRED",
           "lts": true,
           "details": {
-            "start": "Started 5517 days ago",
-            "end": "Ended 1845 days ago",
+            "start": "Started 5518 days ago",
+            "end": "Ended 1846 days ago",
             "duration": 3673
           }
         },
@@ -226,23 +226,23 @@
           "status": "RETIRED",
           "lts": true,
           "details": {
-            "start": "Started 1844 days ago",
-            "end": "Ended 537 days ago",
+            "start": "Started 1845 days ago",
+            "end": "Ended 538 days ago",
             "duration": 1308
           }
         }
       }
     }
   ],
-  "5.0.0": [
+  "5": [
     {
-      "software": "Red Hat Enterprise Linux",
       "id": "rhel-5",
       "name": "Red Hat Enterprise Linux 5",
       "label": "5",
       "description": null,
       "link": "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/5/html/5.11_release_notes/index",
       "releaseDate": "2007-03-15",
+      "software": "Red Hat Enterprise Linux",
       "version": {
         "initial": "5.0.0",
         "latest": "5.11.0"
@@ -259,8 +259,8 @@
           "status": "RETIRED",
           "lts": true,
           "details": {
-            "start": "Started 6853 days ago",
-            "end": "Ended 3185 days ago",
+            "start": "Started 6854 days ago",
+            "end": "Ended 3186 days ago",
             "duration": 3669
           }
         },
@@ -273,23 +273,23 @@
           "status": "RETIRED",
           "lts": true,
           "details": {
-            "start": "Started 3184 days ago",
-            "end": "Ended 1845 days ago",
+            "start": "Started 3185 days ago",
+            "end": "Ended 1846 days ago",
             "duration": 1340
           }
         }
       }
     }
   ],
-  "4.0.0": [
+  "4": [
     {
-      "software": "Red Hat Enterprise Linux",
       "id": "rhel-4",
       "name": "Red Hat Enterprise Linux 4",
       "label": "4",
       "description": null,
       "link": "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/4/html/4.9_release_notes/index",
       "releaseDate": "2005-02-15",
+      "software": "Red Hat Enterprise Linux",
       "version": {
         "initial": "4.0.0",
         "latest": "4.9.0"
@@ -306,8 +306,8 @@
           "status": "RETIRED",
           "lts": false,
           "details": {
-            "start": "Started 7611 days ago",
-            "end": "Ended 5042 days ago",
+            "start": "Started 7612 days ago",
+            "end": "Ended 5043 days ago",
             "duration": 2570
           }
         },
@@ -320,8 +320,8 @@
           "status": "RETIRED",
           "lts": false,
           "details": {
-            "start": "Started 5041 days ago",
-            "end": "Ended 3185 days ago",
+            "start": "Started 5042 days ago",
+            "end": "Ended 3186 days ago",
             "duration": 1857
           }
         }
