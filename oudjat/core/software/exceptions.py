@@ -1,5 +1,5 @@
 """
-A helper module to define asset exceptions.
+A helper module to define software exceptions.
 """
 
 
