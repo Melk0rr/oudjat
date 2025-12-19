@@ -49,8 +49,8 @@ class LDAPComputer(LDAPAccount):
             if os_family_opt_match is not None and self.os_ver is not None:
                 os_family_opt, os_family_str = os_family_opt_match
 
-                if os_family_opt.name not in OSOption:
-                    raise NotImplementedOSOption(f"{Context()}::{os_family_opt.name}({os_family_str}) is not implemented")
+                if os_family_opt.name not in OSOption._member_names_:
+                    raise NotImplementedOSOption(f"{Context()}::{os_family_opt.name}({os_family_str}) is not a valid OSOption")
 
                 os: "OperatingSystem" = OSOption[os_family_opt.name]()
                 os.add_custom_attr("match", os_family_opt.to_dict())
