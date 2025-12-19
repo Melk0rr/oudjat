@@ -148,7 +148,7 @@ class OSFamily(Enum):
     # Static methods
 
     @staticmethod
-    def match_family_opt(test_str: str) -> "OSFamilyOptMatch | None":
+    def find_matching_family_opt(test_str: str) -> "OSFamilyOptMatch | None":
         """
         Try to retrieve a substring of the provided string matching an OSFamily element.
 

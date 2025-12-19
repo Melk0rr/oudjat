@@ -1,7 +1,8 @@
 """A simple module that lists operating system options."""
 
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, NamedTuple
+from typing import Any
 
 from oudjat.core.computer.computer_type import ComputerType
 
@@ -12,7 +13,8 @@ from .os_families import OSFamily
 from .windows import WINDOWS_RELEASES, WINDOWS_SERVER_RELEASES, WindowsEdition
 
 
-class OSOptionProps(NamedTuple):
+@dataclass
+class OSOptionProps:
     """
     A helper class to define OSOption elements property types.
 
@@ -24,6 +26,7 @@ class OSOptionProps(NamedTuple):
     cls: type["OperatingSystem"]
     attributes: dict[str, Any]
     releases: "SoftwareReleaseImportDict"
+    instance: "OperatingSystem | None" = None
 
 
 class OSOption(Enum):
@@ -78,6 +81,17 @@ class OSOption(Enum):
     )
 
     @property
+    def instance(self) -> "OperatingSystem | None":
+        """
+        Return the instance of this option.
+
+        Returns:
+            OperatingSystem | None: OSOption instance
+        """
+
+        return self._value_.instance
+
+    @property
     def attributes(self) -> dict[str, Any]:
         """
         Return the attributes associated with the option.
@@ -107,10 +121,11 @@ class OSOption(Enum):
             OperatingSystem: The operating system that corresponds to the option
         """
 
-        os = self._value_.cls(**self.attributes)
-        os.releases = OSRelease.gen_releases(self.releases)
+        if self._value_.instance is None:
+            self._value_.instance = self._value_.cls(**self.attributes)
+            self._value_.instance.releases = OSRelease.gen_releases(self.releases)
 
-        return os
+        return self._value_.instance
 
     @staticmethod
     def per_family(family: "OSFamily") -> dict[str, "OSOption"]:

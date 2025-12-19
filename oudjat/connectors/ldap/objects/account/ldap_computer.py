@@ -122,7 +122,7 @@ class LDAPComputer(LDAPAccount):
 
         family_opt = None
         if self.os is not None:
-            family_opt = OSFamily.match_family_opt(self.os)
+            family_opt = OSFamily.find_matching_family_opt(self.os)
 
         return family_opt
 
