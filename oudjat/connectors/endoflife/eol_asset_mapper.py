@@ -182,7 +182,7 @@ class EOLAssetMapper:
 
         for rel in rhel_eol["releases"]:
             rel_version = SoftwareReleaseVersion(int(rel["name"]))
-            rel_key = str(rel_version)
+            rel_key = f"{rel_version.major}"
 
             # Create release
             release_date = rel["releaseDate"]
