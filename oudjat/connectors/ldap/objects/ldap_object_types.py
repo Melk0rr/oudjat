@@ -1,7 +1,7 @@
 """A module to list some attributes and infos related to different LDAP object types."""
 
 from enum import Enum
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, override
 
 from oudjat.connectors.ldap.objects.account.definitions import MS_ACCOUNT_CTL, MS_EXCH_RECIPIENT
 from oudjat.utils.types import StrType
@@ -193,6 +193,17 @@ class LDAPObjectType(Enum):
         """
 
         return self._value_.attributes
+
+    @override
+    def __str__(self) -> str:
+        """
+        Convert the LDAPObjectType into a string.
+
+        Returns:
+            str: A string representation of the LDAPObjectType
+        """
+
+        return self._name_
 
     # ****************************************************************
     # Static methods

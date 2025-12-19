@@ -299,6 +299,8 @@ class LDAPConnector(Connector):
                 f"{context}::You must initiate connection to {self.target} before running search !"
             )
 
+        self.logger.info(f"{context}::Fetching {search_type} from {self.domain}")
+
         if payload is None:
             payload = {}
 
