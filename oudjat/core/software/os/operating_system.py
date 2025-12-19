@@ -30,6 +30,7 @@ class OSRelease(SoftwareRelease):
 
         return self._software
 
+
 class OperatingSystem(Software[OSRelease]):
     """A class to describe operating systems."""
 
@@ -109,3 +110,20 @@ class OperatingSystem(Software[OSRelease]):
             "osFamily": self._os_family,
             "computerTypes": self._computer_type,
         }
+
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def os_family_by_name(os_family_name: str) -> "OSFamily":
+        """
+        Return an OSFamily based on its name.
+
+        Args:
+            os_family_name (str): The name of the supposed OSFamily
+
+        Returns:
+            OSFamily: The OSFamily enum element based on the provided name
+        """
+
+        return OSFamily(os_family_name.upper())
