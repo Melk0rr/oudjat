@@ -8,6 +8,8 @@ from oudjat.core.computer import Computer
 from oudjat.core.software import SoftwareEdition, SoftwareReleaseVersion
 from oudjat.core.software.exceptions import AmbiguousReleaseException
 from oudjat.core.software.os import OperatingSystem, OSFamily, OSOption, OSRelease
+from oudjat.core.software.os.exceptions import NotImplementedOSOption
+from oudjat.core.software.os.os_families import OSFamilyOptMatch
 from oudjat.utils import Context
 
 from .ldap_account import LDAPAccount
@@ -42,24 +44,21 @@ class LDAPComputer(LDAPAccount):
         cpt_type = None
 
         if self.os is not None:
-            os_family, os_family_str = self._os_family()
+            os_family_opt_match = self._os_family_opt_match()
 
-            if (os_family is not None and os_family_str is not None) and self.os_ver is not None:
-                os_family_options = OSOption.per_family(os_family)
-                os_opt_name = os_family_str.replace(" ", "").upper()
+            if os_family_opt_match is not None and self.os_ver is not None:
+                os_family_opt, os_family_str = os_family_opt_match
 
-                if (
-                    len(os_family_options.keys()) == 0
-                    or os_opt_name not in os_family_options.keys()
-                ):
-                    self.logger.error(f"{Context()}::Can't find {os_opt_name} in {os_family} OSes")
+                if os_family_opt.name not in OSOption:
+                    raise NotImplementedOSOption(f"{Context()}::{os_family_opt.name}({os_family_str}) is not implemented")
 
-                else:
-                    os: "OperatingSystem" = os_family_options[os_opt_name]()
-                    cpt_type = os.computer_type
+                os: "OperatingSystem" = OSOption[os_family_opt.name]()
+                os.add_custom_attr("match", os_family_opt.to_dict())
 
-                    os_edition = self._os_edition_from_os(os)
-                    os_release = self._os_release_from_ver(os)
+                cpt_type = os.computer_type
+
+                os_edition = self._os_edition_from_os(os)
+                os_release = self._os_release_from_ver(os)
 
         self._computer: "Computer" = Computer(
             computer_id=self._id,
@@ -113,7 +112,7 @@ class LDAPComputer(LDAPAccount):
 
         return self._ver_fmt(ver)
 
-    def _os_family(self) -> tuple["OSFamily | None", str | None]:
+    def _os_family_opt_match(self) -> "OSFamilyOptMatch | None":
         """
         Return the OSFamily matching the computer operatingSystem attribute, as well as its matching substring.
 
@@ -121,15 +120,11 @@ class LDAPComputer(LDAPAccount):
             tuple[OSFamily | None, str | None]: Both the OSFamily and substring matching computer operatingSystem attribute
         """
 
-        family, family_str = None, None
+        family_opt = None
         if self.os is not None:
-            family = OSFamily.matching_family(self.os)
+            family_opt = OSFamily.match_family_opt(self.os)
 
-            if family is not None:
-                family_str = re.search(family.pattern, self.os or "")
-                family_str = family_str.group(0) if family_str is not None else None
-
-        return family, family_str
+        return family_opt
 
     def _ver_fmt(self, version: str) -> str:
         """
