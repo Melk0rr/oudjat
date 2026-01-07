@@ -127,7 +127,7 @@ class NistConnector(CVEConnector):
 
         cvss_data = metric_data.get("cvssData", {})
 
-        unified_fmt: CVEDataFormat = {
+        unified_fmt: "CVEDataFormat" = {
             "id": cve_id,
             "status": cve.get("vulnStatus", ""),
             "dates": {
