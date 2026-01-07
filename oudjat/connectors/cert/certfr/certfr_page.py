@@ -101,7 +101,84 @@ class CERTFRPage:
             str: The title string of the page.
         """
 
-        return self._title
+        return self._meta.title if self._meta else None
+
+    @property
+    def date_initial(self) -> str | None:
+        """
+        Return the initial date of the page.
+
+        Returns:
+            str | None: Initial date string
+        """
+
+        return self._meta.date_initial if self._meta else None
+
+    @property
+    def date_last(self) -> str | None:
+        """
+        Return the last change date of the page.
+
+        Returns:
+            str | None: Last date string
+        """
+
+        return self._meta.date_last if self._meta else None
+
+    @property
+    def sources(self) -> list[str]:
+        """
+        Return the list of sources for this page.
+
+        Returns:
+            list[str]: Sources for this page
+        """
+
+        return self._meta.sources if self._meta else []
+
+    @property
+    def risks(self) -> set["RiskType"]:
+        """
+        Return the risks associated with the page.
+
+        Returns:
+            set[RiskType]: A set of risks
+        """
+
+        return self._content.risks if self._content else set()
+
+    @property
+    def products(self) -> list[str]:
+        """
+        Return the products concerned with the page.
+
+        Returns:
+            list[str]: A list of product strings
+        """
+
+        return self._content.products if self._content else []
+
+    @property
+    def description(self) -> str:
+        """
+        Return the description for this page.
+
+        Returns:
+            str: The description string
+        """
+
+        return self._content.description if self._content else ""
+
+    @property
+    def documentations(self) -> list[str]:
+        """
+        Return documentations for this page.
+
+        Returns:
+            list[str]: The list of documentations
+        """
+
+        return self._content.documentations if self._content else []
 
     @property
     def cves(self) -> list["CVE"]:
@@ -113,6 +190,17 @@ class CERTFRPage:
         """
 
         return list(self._content.cves.values()) if self._content else []
+
+    @property
+    def max_cves(self) -> list["CVE"]:
+        """
+        Return the highest CVES of the page.
+
+        Returns:
+            list[CVE]: List of highest CVEs mentionned in this page
+        """
+
+        return CVE.max_cve(self.cves)
 
     def connect(self) -> None:
         """
@@ -184,8 +272,6 @@ class CERTFRPage:
                     self._meta = CERTFRPageMeta(ref=self._ref, meta_section=sections[0])
                     self._meta.parse()
 
-                    self._title = self._meta.title
-
                     # Content parsing
                     self._content = CERTFRPageContent(ref=self._ref, content_section=sections[1])
                     self._content.parse()
@@ -217,9 +303,9 @@ class CERTFRPage:
 
         page_dict: dict[str, Any] = {
             "ref": self._ref,
-            "title": self._title,
             **meta_dict,
             **content_dict,
+            "highestCVEs": list(map(str, self.max_cves))
         }
 
         return page_dict
@@ -371,7 +457,7 @@ class CERTFRPageMeta:
 
         meta = {}
         for row in self._meta_table.find_all_next("tr"):
-            cells = row.find_all_next("td")
+            cells = row.find_all("td")
             c_name = cells[0].text.strip()
             c_value = cells[-1].text.strip()
 
@@ -389,6 +475,7 @@ class CERTFRPageMeta:
         """
 
         return {
+            "title": self.title,
             "dateInitial": self.date_initial,
             "dateLast": self.date_last,
             "sources": self.sources,
@@ -451,7 +538,7 @@ class CERTFRPageContent:
         return self._data.get("Systèmes affectés", [])
 
     @property
-    def description(self) -> str | None:
+    def description(self) -> str:
         """
         Getter / parser for description.
 
@@ -459,7 +546,7 @@ class CERTFRPageContent:
             str | None: A detailed description extracted from the content, or None if not available.
         """
 
-        return self._data.get("Résumé", None)
+        return self._data.get("Résumé", "")
 
     @property
     def solutions(self) -> list[str]:
@@ -485,7 +572,10 @@ class CERTFRPageContent:
 
         for cve in self._data.get("CVEs", []):
             if cve not in cves.keys():
-                cves[cve] = CVE(ref=cve)
+                cve_instance = CVE(ref=cve)
+                cve_instance.connector_parse()
+
+                cves[cve] = cve_instance
 
         return cves
 
@@ -558,7 +648,7 @@ class CERTFRPageContent:
         """
 
         return {
-            "risks": list(map(RiskType.risk_name, self.risks)),
+            "risks": list(map(str, self.risks)),
             "products": self.products,
             "description": self.description,
             "cves": [cve.ref for cve in self.cves.values()],
