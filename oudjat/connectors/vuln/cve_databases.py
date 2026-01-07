@@ -3,6 +3,8 @@
 from enum import Enum
 from typing import TYPE_CHECKING, NamedTuple
 
+from oudjat.connectors.vuln.circl.circl_connector import CirclConnector
+
 from .cveorg import CVEorgConnector
 from .nist import NistConnector
 
@@ -27,6 +29,7 @@ class CVEDatabase(Enum):
     """An enumeration of CVE connectors."""
 
     NIST = CVEDatabaseProps(db_name="Nist", connector=NistConnector)
+    CIRCL = CVEDatabaseProps(db_name="circl.lu", connector=CirclConnector)
     CVEORG = CVEDatabaseProps(db_name="CVE.org", connector=CVEorgConnector)
 
     @property
