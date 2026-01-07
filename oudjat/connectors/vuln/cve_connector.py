@@ -60,7 +60,10 @@ class CVEConnector(Connector, ABC):
         self._connection = None
 
         try:
-            headers = {"Accept": "application/json"}
+            headers = {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
             req = ConnectorMethod.GET(target, headers=headers, **kwargs)
 
             if req.status_code == 200:

@@ -8,7 +8,7 @@ from urllib.parse import ParseResult, urlparse
 from bs4 import BeautifulSoup
 from bs4.element import PageElement, ResultSet, Tag
 
-from oudjat.control.vulnerability import CVE, CVE_REGEX
+from oudjat.control.vulnerability import CVE_REGEX
 from oudjat.core.network import URL_REGEX
 from oudjat.utils import Context
 
@@ -181,7 +181,7 @@ class CERTFRPage:
         return self._content.documentations if self._content else []
 
     @property
-    def cves(self) -> list["CVE"]:
+    def cves(self) -> list[str]:
         """
         Retrieve the CVEs from the content section and returns them as a list. If no CVEs are found, it returns an empty list.
 
@@ -189,18 +189,7 @@ class CERTFRPage:
             list[CVE]: A list of CVE objects if available, otherwise an empty list.
         """
 
-        return list(self._content.cves.values()) if self._content else []
-
-    @property
-    def max_cves(self) -> list["CVE"]:
-        """
-        Return the highest CVES of the page.
-
-        Returns:
-            list[CVE]: List of highest CVEs mentionned in this page
-        """
-
-        return CVE.max_cve(self.cves)
+        return self._content.cves if self._content else []
 
     def connect(self) -> None:
         """
@@ -305,7 +294,6 @@ class CERTFRPage:
             "ref": self._ref,
             **meta_dict,
             **content_dict,
-            "highestCVEs": list(map(str, self.max_cves))
         }
 
         return page_dict
@@ -560,7 +548,7 @@ class CERTFRPageContent:
         return self._data.get("Solutions", [])
 
     @property
-    def cves(self) -> dict[str, "CVE"]:
+    def cves(self) -> list[str]:
         """
         Return the refs of all the related CVEs.
 
@@ -568,16 +556,7 @@ class CERTFRPageContent:
             dict[str, CVE]: A dictionary of CVE references that are linked in the content.
         """
 
-        cves = {}
-
-        for cve in self._data.get("CVEs", []):
-            if cve not in cves.keys():
-                cve_instance = CVE(ref=cve)
-                cve_instance.connector_parse()
-
-                cves[cve] = cve_instance
-
-        return cves
+        return self._data.get("CVEs", [])
 
     @property
     def documentations(self) -> list[str]:
@@ -651,7 +630,7 @@ class CERTFRPageContent:
             "risks": list(map(str, self.risks)),
             "products": self.products,
             "description": self.description,
-            "cves": [cve.ref for cve in self.cves.values()],
+            "cves": self.cves,
             "solutions": self.solutions,
             "documentations": self.filter_documentations(doc_filter="cve.org"),
         }
