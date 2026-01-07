@@ -101,7 +101,10 @@ class CirclConnector(CVEConnector):
         metrics: "DataType" = containers.get("metrics", [])
         metrics_data: dict[str, Any] = {}
         if len(metrics) > 0:
-            metrics_data = metrics[0].get(list(metrics[0].keys())[0], {})
+            valid_keys = self._cvss_metrics_keys(list(metrics[0].keys()))
+
+            if len(valid_keys) > 0:
+                metrics_data = metrics[0].get(valid_keys[0], {})
 
         raw_description = containers.get("descriptions", [])
 

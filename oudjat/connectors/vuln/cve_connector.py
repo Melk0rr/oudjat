@@ -120,6 +120,19 @@ class CVEConnector(Connector, ABC):
             f"{Context()}::Method must be implemented by the overloading class"
         )
 
+    def _cvss_metrics_keys(self, base_metrics_keys: list[str]) -> list[str]:
+        """
+        Filter metric keys to keep only cvss related ones.
+
+        Returns:
+            list[str]: Filtered metric keys
+        """
+
+        def check_key(k: str) -> bool:
+            return "cvssV" in k
+
+        return list(filter(check_key, base_metrics_keys))
+
     # ****************************************************************
     # Static methods
 
@@ -170,3 +183,4 @@ class CVEConnector(Connector, ABC):
         """
 
         return date_str[:-5].replace("T", " ")
+

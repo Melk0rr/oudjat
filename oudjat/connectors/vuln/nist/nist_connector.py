@@ -123,7 +123,10 @@ class NistConnector(CVEConnector):
         metrics = cve.get("metrics", {})
         metric_data = {}
         if len(metrics.keys()) > 0:
-            metric_data = metrics.get(list(metrics.keys())[0], [])[0]
+            valid_keys = self._cvss_metrics_keys(list(metrics[0].keys()))
+
+            if len(valid_keys) > 0:
+                metric_data = metrics.get(valid_keys[0], [])[0]
 
         cvss_data = metric_data.get("cvssData", {})
 
