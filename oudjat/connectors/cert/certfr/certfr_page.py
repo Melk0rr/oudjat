@@ -612,7 +612,7 @@ class CERTFRPageContent:
                 else:
                     data[t.text] = next_el.text
 
-        data["CVEs"] = set(re.findall(CVE_REGEX, self._content.text))
+        data["CVEs"] = list(set(re.findall(CVE_REGEX, self._content.text)))
         data["Documentation"] = re.findall(URL_REGEX, self._content.text)
 
         self._data = data
