@@ -99,7 +99,9 @@ class CVEorgConnector(CVEConnector):
 
         containers = cve.get("containers", {}).get("cna", {})
         metrics: "DataType" = containers.get("metrics", [])
-        metric_data: dict[str, Any] = metrics[0].get(list(metrics[0].keys())[0], {})
+        metrics_data: dict[str, Any] = {}
+        if len(metrics) > 0:
+            metrics_data = metrics[0].get(list(metrics[0].keys())[0], {})
 
         raw_description = containers.get("descriptions", [])
 
@@ -113,17 +115,17 @@ class CVEorgConnector(CVEConnector):
             "description": raw_description[0].get("value", "") if len(raw_description) > 0 else "",
             "sources": [r["url"] for r in containers.get("references", [])],
             "vectors": {
-                "vectorStr": metric_data.get("vectorString", ""),
-                "attackVector": metric_data.get("attackVector", ""),
+                "vectorStr": metrics_data.get("vectorString", ""),
+                "attackVector": metrics_data.get("attackVector", ""),
             },
             "metrics": {
-                "score": metric_data.get("baseScore", 0),
-                "version": float(metric_data.get("version", 4.0)),
-                "severity": metric_data.get("baseSeverity", "INFO"),
+                "score": metrics_data.get("baseScore", 0),
+                "version": float(metrics_data.get("version", 4.0)),
+                "severity": metrics_data.get("baseSeverity", "INFO"),
             },
             "requirements": {
-                "privilegesRequired": metric_data.get("privilegesRequired", "NONE"),
-                "attackRequirements": metric_data.get("attackRequirements", "NONE"),
+                "privilegesRequired": metrics_data.get("privilegesRequired", "NONE"),
+                "attackRequirements": metrics_data.get("attackRequirements", "NONE"),
             },
         }
 
