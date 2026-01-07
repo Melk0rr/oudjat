@@ -1,5 +1,6 @@
 """A module to describe different risk types."""
 from enum import Enum
+from typing import override
 
 
 class RiskType(Enum):
@@ -35,8 +36,8 @@ class RiskType(Enum):
         """
         return self._value_["fr"]
 
-    @staticmethod
-    def risk_name(risk: "RiskType") -> str:
+    @override
+    def __str__(risk: "RiskType") -> str:
         """
         Return the name of the given risk.
 
