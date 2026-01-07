@@ -131,8 +131,8 @@ class NistConnector(CVEConnector):
             "id": cve_id,
             "status": cve.get("vulnStatus", ""),
             "dates": {
-                "published": published_date,
-                "updated": updated_date,
+                "published": CVEConnector.format_date_str(published_date),
+                "updated": CVEConnector.format_date_str(updated_date),
             },
             "description": cve.get("descriptions", [])[0].get("value", ""),
             "sources": [r["url"] for r in cve.get("references", [])],

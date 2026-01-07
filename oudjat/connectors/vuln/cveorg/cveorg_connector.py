@@ -29,7 +29,7 @@ class CVEorgConnector(CVEConnector):
         cves: "StrType",
         attributes: "StrType | None" = None,
         raw: bool = False,
-        payload: dict[str, Any] | None = None
+        payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Search the API for CVEs.
@@ -109,8 +109,10 @@ class CVEorgConnector(CVEConnector):
             "id": cve_id,
             "status": cve_metadata.get("state", ""),
             "dates": {
-                "published": published_date,
-                "updated": cve_metadata.get("dateUpdated", published_date),
+                "published": CVEConnector.format_date_str(published_date),
+                "updated": CVEConnector.format_date_str(
+                    cve_metadata.get("dateUpdated", published_date)
+                ),
             },
             "description": raw_description[0].get("value", "") if len(raw_description) > 0 else "",
             "sources": [r["url"] for r in containers.get("references", [])],
