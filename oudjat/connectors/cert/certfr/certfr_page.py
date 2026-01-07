@@ -607,7 +607,7 @@ class CERTFRPageContent:
 
             if isinstance(next_el, Tag):
                 if next_el.name == "ul":
-                    data[t.text] = [li.text for li in next_el.find_all_next("li")]
+                    data[t.text] = [li.text for li in next_el.find_all("li")]
 
                 else:
                     data[t.text] = next_el.text
