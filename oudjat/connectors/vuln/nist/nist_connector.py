@@ -98,7 +98,7 @@ class NistConnector(CVEConnector):
         return res
 
     @override
-    def unify_cve_data(self, cve: dict[str, Any]) -> CVEDataFormat:
+    def unify_cve_data(self, cve: dict[str, Any]) -> "CVEDataFormat":
         """
         Filter and reorganize cve data properties in order to obtain a unified format accross CVE connectors.
 
@@ -121,7 +121,10 @@ class NistConnector(CVEConnector):
         updated_date: str = cve.get("lastModified", published_date)
 
         metrics = cve.get("metrics", {})
-        metric_data = metrics.get(list(metrics.keys())[0], [])[0]
+        metric_data = {}
+        if len(metrics.keys()) > 0:
+            metric_data = metrics.get(list(metrics.keys())[0], [])[0]
+
         cvss_data = metric_data.get("cvssData", {})
 
         unified_fmt: CVEDataFormat = {
