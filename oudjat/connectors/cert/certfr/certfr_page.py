@@ -184,6 +184,8 @@ class CERTFRPage:
                     self._meta = CERTFRPageMeta(ref=self._ref, meta_section=sections[0])
                     self._meta.parse()
 
+                    self._title = self._meta.title
+
                     # Content parsing
                     self._content = CERTFRPageContent(ref=self._ref, content_section=sections[1])
                     self._content.parse()
@@ -310,12 +312,23 @@ class CERTFRPageMeta:
     # Methods
 
     @property
+    def title(self) -> str | None:
+        """
+        Return the title of the page.
+
+        Returns:
+            str | None: The title string of the article
+        """
+
+        return self._data.get("Titre", None)
+
+    @property
     def date_initial(self) -> str | None:
         """
         Retrieve the initial release date from meta table, if not already set, and returns it.
 
         Returns:
-            str: The initial date of the page or None if not available.
+            str | None: The initial date of the page or None if not available.
         """
 
         return self._data.get("Date de la première version", None)
