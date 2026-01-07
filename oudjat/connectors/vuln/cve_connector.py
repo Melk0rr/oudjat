@@ -34,7 +34,7 @@ class CVEConnector(Connector, ABC):
         self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         self._target: "ParseResult"
-        super().__init__(target=CVEConnector.API_URL)
+        super().__init__(target=self.__class__.API_URL)
 
         self._connection: dict[str, Any] | None = None
 
