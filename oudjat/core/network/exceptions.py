@@ -18,3 +18,19 @@ class NetMaskInvalidCIDRError(ValueError):
 
         self.message: str = message
         super().__init__(self.message)
+
+class InvalidMACAddress(ValueError):
+    """
+    A helper class to handle invalid MAC address string errors.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of InvalidMACAddress.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
