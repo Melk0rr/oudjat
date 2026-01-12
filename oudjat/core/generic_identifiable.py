@@ -1,13 +1,14 @@
 """A module to describe a generic class that includes common properties among multiple asset types."""
 
 from abc import ABC, abstractmethod
-from typing import Any, TypedDict, TypeVar, override
+from typing import Any, Generic, TypedDict, TypeVar, override
 
-from oudjat.utils import Context
+from oudjat.utils import Context, UtilsDict
 
 from .exceptions import CustomAttributeError
 
 GenericBoundType = TypeVar("GenericBoundType", bound="GenericIdentifiable")
+
 
 class GenericIdentifiableBaseDict(TypedDict):
     """
@@ -26,7 +27,7 @@ class GenericIdentifiableBaseDict(TypedDict):
     description: str | None
 
 
-class GenericIdentifiable(ABC):
+class GenericIdentifiable(Generic[GenericBoundType], ABC):
     """Generic class for objects with common attributes like id, name, description and label."""
 
     # ****************************************************************
@@ -38,7 +39,7 @@ class GenericIdentifiable(ABC):
         name: str,
         label: str | None = None,
         description: str | None = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """
         Create a new instance of GenericIdentifiable.
@@ -57,7 +58,7 @@ class GenericIdentifiable(ABC):
         self._label: str | None = label
         self._description: str | None = description
 
-        self._custom_attributes: dict[str, Any] = { **kwargs }
+        self._custom_attributes: dict[str, Any] = {**kwargs}
 
     # ****************************************************************
     # Methods
@@ -218,6 +219,24 @@ class GenericIdentifiable(ABC):
 
         self.custom_attributes = {}
 
+    def merge(self, other: "GenericBoundType") -> None:
+        """
+        Merge the provided GenericIdentifiable data into the current one.
+
+        Args:
+            other (GenericIdentifiable): The other GenericIdentifiable to merge into this one
+        """
+
+        if self._label is None and other.label is not None:
+            self._label = other.label
+
+        if self._description is None and other.description is not None:
+            self._description = other.description
+
+        self._custom_attributes = UtilsDict.merge_dictionaries(
+            self._custom_attributes, other.custom_attributes
+        )
+
     @override
     @abstractmethod
     def __str__(self) -> str:
@@ -270,4 +289,4 @@ class GenericIdentifiable(ABC):
             dict[int | str, GenericIdentifiable]: mapped GenericIdentifiable instances as a dictionary
         """
 
-        return { g.id: g for g in generic_list }
+        return {g.id: g for g in generic_list}

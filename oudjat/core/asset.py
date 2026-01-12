@@ -1,13 +1,18 @@
 """A module that defines base Asset properties."""
 
 from abc import ABC
-from typing import TYPE_CHECKING, Any, TypedDict, override
+from typing import TYPE_CHECKING, Any, TypedDict, TypeVar, override
+
+from oudjat.core.exceptions import InvalidAssetTypeError
+from oudjat.utils import Context, UtilsDict
 
 from .asset_type import AssetType
 from .generic_identifiable import GenericIdentifiable
 
 if TYPE_CHECKING:
     from .location import Location
+
+AssetBoundType = TypeVar("AssetBoundType", bound="Asset")
 
 class AssetBaseDict(TypedDict):
     """
@@ -21,7 +26,7 @@ class AssetBaseDict(TypedDict):
     assetType: str
     location: dict[str, dict[str, Any]]
 
-class Asset(GenericIdentifiable, ABC):
+class Asset(GenericIdentifiable[AssetBoundType], ABC):
     """
     Generic asset class. Must be inherited by asset types.
 
@@ -48,13 +53,13 @@ class Asset(GenericIdentifiable, ABC):
         Also initializes the location attribute as an empty list and sets the given locations using the set_location method.
 
         Args:
-            asset_id (int | str)                              : The unique identifier for the asset.
-            name (str)                                        : The name of the asset.
-            asset_type (AssetType)                            : The type of the asset.
-            label (str | None)                                : A short description or label for the asset. Defaults to None.
-            description (str | None)                          : A detailed description of the asset. Defaults to None.
-            location (Location | list[Location] | None)       : The location(s) where the asset is situated. Defaults to None.
-            kwargs (Any)                                      : Any further arguments
+            asset_id (int | str)                        : The unique identifier for the asset.
+            name (str)                                  : The name of the asset.
+            asset_type (AssetType)                      : The type of the asset.
+            label (str | None)                          : A short description or label for the asset. Defaults to None.
+            description (str | None)                    : A detailed description of the asset. Defaults to None.
+            location (Location | list[Location] | None) : The location(s) where the asset is situated. Defaults to None.
+            kwargs (Any)                                : Any further arguments
         """
 
         super().__init__(gid=asset_id, name=name, label=label or "", description=description, **kwargs)
@@ -121,6 +126,17 @@ class Asset(GenericIdentifiable, ABC):
             new_location = [new_location]
 
         self._location = { f"{loc.id}": loc for loc in new_location }
+
+    @override
+    def merge(self, other: "AssetBoundType") -> None:
+
+        if other.asset_type is not self.asset_type:
+            raise InvalidAssetTypeError(f"{Context()}::Trying to merge two assets of different types")
+
+        super().merge(other)
+
+        self._location = UtilsDict.merge_dictionaries(self._location, other.location)
+
 
     @override
     def to_dict(self) -> dict[str, Any]:
