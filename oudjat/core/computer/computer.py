@@ -4,7 +4,7 @@ from enum import IntEnum
 from typing import TYPE_CHECKING, Any, NamedTuple, TypedDict, override
 
 from oudjat.core import Asset, AssetType
-from oudjat.core.network.ip import IP
+from oudjat.core.network import IP, NetInterface
 from oudjat.core.software import (
     SoftwareEdition,
     SoftwareRelease,
@@ -86,7 +86,6 @@ class Computer(Asset):
         machine_type: "str | MachineType | None" = None,
         os_release: "OSRelease | None" = None,
         os_edition: "SoftwareEdition | None" = None,
-        ip: "str | IP | None" = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -127,13 +126,13 @@ class Computer(Asset):
         self._computer_type: "ComputerType" = self._standardize_computer_type(computer_type)
         self._machine_type: "MachineType" = self._standardize_machine_type(machine_type)
 
-        self._ip: IP | None = None
-        if ip is not None:
-            self.ip = IP(ip) if not isinstance(ip, IP) else ip
+        self._ip: dict[str, "NetInterface"] = {}
 
         self._softwares: dict[str, SoftwareRelease] = {}
         self._protection_agent: SoftwareRelease | None = None
         self._status: "ComputerStatus" = ComputerStatus.UNKNOWN
+
+        self._interfaces: dict[str, "NetInterface"] = {}
 
     # ****************************************************************
     # Methods
@@ -275,28 +274,6 @@ class Computer(Asset):
         self._os = new_os
 
     @property
-    def ip(self) -> IP | None:
-        """
-        Return the current IP address of this computer.
-
-        Returns:
-            IPv4 | None: IPv4 instance associated with the current computer instance. Or none if no address is set
-        """
-
-        return self._ip
-
-    @ip.setter
-    def ip(self, new_ip: "IP") -> None:
-        """
-        Set a new ip address for this computer.
-
-        Args:
-            new_ip (IPv4): new ip address for the current computer instance
-        """
-
-        self._ip = new_ip
-
-    @property
     def os_support(self) -> "SoftwareReleaseSupport | None":
         """
         Get support for current computer os release and edition.
@@ -322,6 +299,17 @@ class Computer(Asset):
         """
 
         return self._softwares
+
+    @property
+    def interfaces(self) -> dict[str, "NetInterface"]:
+        """
+        Return the computer network interfaces.
+
+        Returns:
+            dict[str, NetInterface]: The network interfaces of the computer
+        """
+
+        return self._interfaces
 
     def _standardize_computer_type(self, computer_type: "str | ComputerType | None") -> "ComputerType":
         """
@@ -367,28 +355,6 @@ class Computer(Asset):
 
         return machine_type
 
-    def set_ip_from_str(self, new_ip_str: str) -> None:
-        """
-        Set a new ip address for this computer based on a string.
-
-        Args:
-            new_ip_str (str): The IPv4 instance representing the IP address of the computer.
-        """
-
-        self._ip = IP(new_ip_str)
-
-    def resolve_ip(self) -> None:
-        """
-        Attempt to resolve the IP address from the hostname.
-        """
-
-        resolved_ip: str | None = None
-        if self.label is not None:
-            resolved_ip = IP.resolve_from_hostname(hostname=self.label)
-
-        if resolved_ip is not None:
-            self._ip = IP(resolved_ip)
-
     def os_supported(self) -> bool:
         """
         Check if the operating system of the computer is supported.
@@ -401,6 +367,11 @@ class Computer(Asset):
             return False
 
         return self._os.release.is_supported(self._os.edition)
+
+    @override
+    def merge(self, other: "Computer") -> None:
+        super().merge(other)
+
 
     @override
     def __str__(self) -> str:
