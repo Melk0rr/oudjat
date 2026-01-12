@@ -137,3 +137,26 @@ class UtilsDict(dict):
                 res[el] = parent[0][1]
 
         return res
+
+    @staticmethod
+    def merge_dictionaries(d1: dict[str, Any], d2: dict[str, Any]) -> dict[str, Any]:
+        """
+        Merge two dictionaries.
+
+        Args:
+            d1 (dict[str, Any]): The initial dictionary
+            d2 (dict[str, Any]): The dictionary to merge
+
+        Returns:
+            dict[str, Any]: Merged custom attributes dictionary
+        """
+
+        for k, v in d2:
+            if k in d1 and isinstance(d1[k], dict) and isinstance(v, dict):
+                return UtilsDict.merge_dictionaries(d1[k], v)
+
+            else:
+                d1[k] = v
+
+        return d1
+
