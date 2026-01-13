@@ -116,12 +116,7 @@ class FileUtils:
             cls.logger.info(f"{context}::Exporting JSON data to {full_path}")
 
             with open(full_path, "wb", encoding="utf-8") as f:
-                _ = f.write(
-                    orjson.dumps(
-                        data,
-                        option=orjson.OPT_INDENT_2
-                    )
-                )
+                _ = f.write(orjson.dumps(data, option=orjson.OPT_INDENT_2))
 
             cls.logger.info(f"{context}::Successfully exported JSON data to {full_path}")
 
@@ -182,16 +177,25 @@ class FileUtils:
 
     @classmethod
     def export_csv(
-        cls, data: list[Any], filepath: str, delimiter: str = ",", append: bool = False
+        cls,
+        data: list[Any],
+        filepath: str,
+        delimiter: str = ",",
+        append: bool = False,
+        fieldnames: list[str] | None = None,
     ) -> None:
         """
         Export data into a CSV file.
 
+        By default, the headers are extracted from the first element keys.
+        You can specify a list of fieldnames to set the CSV headers.
+
         Args:
-            data (list of dicts)  : The data to be exported.
-            filepath (str)        : The path where the CSV file will be saved.
-            delimiter (str | None): The character used as a delimiter in the CSV file. Defaults to ",".
-            append (bool | None)  : Whether to append to an existing file or overwrite it.
+            data (list of dicts)         : The data to be exported.
+            filepath (str)               : The path where the CSV file will be saved.
+            delimiter (str | None)       : The character used as a delimiter in the CSV file. Defaults to ",".
+            append (bool | None)         : Whether to append to an existing file or overwrite it.
+            fieldnames (list[str] | None): A list of fieldnames to set CSV headers
         """
 
         context = Context()
@@ -208,7 +212,11 @@ class FileUtils:
 
             mode = "a" if append else "w"
             with open(full_path, mode, encoding="utf-8", newline="") as f:
-                writer = csv.DictWriter(f, fieldnames=data[0].keys(), delimiter=delimiter)
+                writer = csv.DictWriter(
+                    f,
+                    fieldnames=data[0].keys() if fieldnames is None else fieldnames,
+                    delimiter=delimiter,
+                )
 
                 # Write csv headers if not in append mode
                 if mode != "a":
