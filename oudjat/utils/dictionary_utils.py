@@ -161,9 +161,7 @@ class UtilsDict(dict):
         return d1
 
     @staticmethod
-    def flatten_dict(
-        d: dict[str, Any], parent_key: str = "", sep: str = ".", join_lists: bool = False
-    ) -> dict[str, Any]:
+    def flatten_dict(d: dict[str, Any], parent_key: str = "", sep: str = ".") -> dict[str, Any]:
         """
         Flatten a given dictionary based on the provided separator.
 
@@ -177,7 +175,6 @@ class UtilsDict(dict):
             d (dict[str, Any]): The dictionary to flatten
             parent_key (str)  : The parent key to prepend to the new key
             sep (str)         : The separator to join the parent key and the current key
-            join_lists (bool) : Whether to join list elements into a single value or not
 
         Returns:
             dict[str, Any]: Flattened dictionary
@@ -190,17 +187,13 @@ class UtilsDict(dict):
                 items.extend(UtilsDict.flatten_dict(v, new_key, sep).items())
 
             elif isinstance(v, list):
-                if join_lists:
-                    items.append((new_key, ",".join(v)))
+                for i, el in enumerate(v):
+                    list_key = f"{new_key}{sep}{i}"
+                    if isinstance(el, dict):
+                        items.extend(UtilsDict.flatten_dict(el, list_key, sep).items())
 
-                else:
-                    for i, el in enumerate(v):
-                        list_key = f"{new_key}{sep}{i}"
-                        if isinstance(el, dict):
-                            items.extend(UtilsDict.flatten_dict(el, list_key, sep).items())
-
-                        else:
-                            items.append((list_key, el))
+                    else:
+                        items.append((list_key, el))
 
             else:
                 items.append((new_key, v))
