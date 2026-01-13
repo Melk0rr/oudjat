@@ -115,7 +115,7 @@ class FileUtils:
             full_path = os.path.join(os.getcwd(), filepath)
             cls.logger.info(f"{context}::Exporting JSON data to {full_path}")
 
-            with open(full_path, "wb", encoding="utf-8") as f:
+            with open(full_path, "wb") as f:
                 _ = f.write(orjson.dumps(data, option=orjson.OPT_INDENT_2))
 
             cls.logger.info(f"{context}::Successfully exported JSON data to {full_path}")
