@@ -160,3 +160,42 @@ class UtilsDict(dict):
 
         return d1
 
+    @staticmethod
+    def flatten_dict(d: dict[str, Any], parent_key: str = "", sep: str = ".") -> dict[str, Any]:
+        """
+        Flatten a given dictionary based on the provided separator.
+
+        The method joins the sub dictionaries keys like this
+        <parent_key><separator><key>
+
+        The method joins the sub lists elements like this
+        <parent_key><separator><index>
+
+        Args:
+            d (dict[str, Any]): The dictionary to flatten
+            parent_key (str)  : The parent key to prepend to the new key
+            sep (str)         : The separator to join the parent key and the current key
+
+        Returns:
+            dict[str, Any]: Flattened dictionary
+        """
+
+        items = []
+        for k, v in d.items():
+            new_key = f"{parent_key}{sep}{k}" if parent_key else k
+            if isinstance(v, dict):
+                items.extend(UtilsDict.flatten_dict(v, new_key, sep).items())
+
+            elif isinstance(v, list):
+                for i, el in enumerate(v):
+                    list_key = f"{new_key}{sep}{i}"
+                    if isinstance(el, dict):
+                        items.extend(UtilsDict.flatten_dict(el, list_key, sep).items())
+
+                    else:
+                        items.append((list_key, el))
+
+            else:
+                items.append((new_key, v))
+
+        return dict(items)
