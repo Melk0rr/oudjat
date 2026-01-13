@@ -4,7 +4,7 @@ from enum import IntEnum
 from typing import TYPE_CHECKING, Any, NamedTuple, TypedDict, override
 
 from oudjat.core import Asset, AssetType
-from oudjat.core.network import IP, NetInterface
+from oudjat.core.network.net_interface import NetInterfaceIP
 from oudjat.core.software import (
     SoftwareEdition,
     SoftwareRelease,
@@ -14,6 +14,7 @@ from oudjat.core.software import (
 from .computer_type import ComputerType, MachineType
 
 if TYPE_CHECKING:
+    from oudjat.core.network import NetInterface
     from oudjat.core.software.os.operating_system import OSRelease
 
 
@@ -108,7 +109,6 @@ class Computer(Asset):
             machine_type (str | ComputerType | None) : The machine type of the computer
             os_release (OSRelease | None)            : The release version of the operating system installed on the computer. Defaults to None.
             os_edition (SoftwareEdition | None)      : The edition of the operating system for the given release. Defaults to None.
-            ip (str | IP | None)                     : The IP address assigned to the computer, which can be provided as either a string or an instance of IPv4 class
             **kwargs (Any)                           : Any further arguments
         """
 
@@ -311,7 +311,44 @@ class Computer(Asset):
 
         return self._interfaces
 
-    def _standardize_computer_type(self, computer_type: "str | ComputerType | None") -> "ComputerType":
+    def add_interface(self, interface: "NetInterface") -> None:
+        """
+        Add a new network interface to the computer.
+
+        Args:
+            interface (NetInterface): New interface to add
+        """
+
+        if interface.id not in self._interfaces:
+            self._interfaces[f"{interface.id}"] = interface
+
+    def ip(self, interface_id: str | None) -> "NetInterfaceIP | None":
+        """
+        Return the IP address of the current computer which is bound to the specified network interface.
+
+        By default, the method returns the ip of the first interface.
+        By default, the method returns the ipv4.
+
+        Args:
+            interface_id (str | None): The network interface to return the ip of
+            ip_ver (IPVersion)       : The ip version to return. IPV4 by default
+
+        Returns:
+            IP | None: Matching IP address
+        """
+
+        if len(self._interfaces.keys()) == 0:
+            return None
+
+        return (
+            self._interfaces[next(iter(self._interfaces))].ip
+            if interface_id is None
+            else self._interfaces[interface_id].ip
+        )
+
+    def _standardize_computer_type(
+        self, computer_type: "str | ComputerType | None"
+    ) -> "ComputerType":
         """
         Standardize provided argument into a ComputerType whether the input is provided as a string, a ComputerType or None.
 
@@ -345,8 +382,7 @@ class Computer(Asset):
         """
 
         if machine_type is None or (
-            isinstance(machine_type, str)
-            and machine_type.upper() not in MachineType._member_names_
+            isinstance(machine_type, str) and machine_type.upper() not in MachineType._member_names_
         ):
             machine_type = MachineType.UNKNOWN
 
@@ -371,7 +407,6 @@ class Computer(Asset):
     @override
     def merge(self, other: "Computer") -> None:
         super().merge(other)
-
 
     @override
     def __str__(self) -> str:
