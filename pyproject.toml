@@ -25,6 +25,7 @@ dependencies = [
   "docopt",
   "keyring",
   "lxml",
+  "orjson",
   "requests",
 ]
 
