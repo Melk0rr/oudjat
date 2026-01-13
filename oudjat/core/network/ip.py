@@ -128,7 +128,7 @@ class IP:
         This method removes all entries from the `ports` dictionary.
         """
 
-        for port in list(self._ports.keys()):
+        for port in self._ports:
             del self._ports[port]
 
     def set_open_ports(self, ports: list["Port"]) -> None:

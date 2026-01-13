@@ -215,7 +215,7 @@ class Mail:
 
         context = Context()
 
-        if len(list(self._recipients.keys())) == 0:
+        if len(self._recipients.keys()) == 0:
             raise EmptyMailRecipientError(f"{context}::No mail recipient provided")
 
         for recipient_type in self._recipients.keys():
