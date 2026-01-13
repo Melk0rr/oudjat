@@ -1,14 +1,13 @@
 """A module that gathers file utilities."""
 
 import csv
-import json
 import logging
 import os
 import re
 from enum import Enum
 from typing import Any, Callable, NamedTuple
 
-import commentjson
+import orjson
 
 from oudjat.utils.context import Context
 
@@ -80,7 +79,7 @@ class FileUtils:
             cls.logger.info(f"{context}::Importing JSON data from {full_path}")
 
             with open(full_path, "r", encoding="utf-8") as json_file:
-                json_data = commentjson.load(json_file)
+                json_data = orjson.loads(json_file.read())
 
             if callback is not None:
                 json_data = callback(json_data)
@@ -116,8 +115,13 @@ class FileUtils:
             full_path = os.path.join(os.getcwd(), filepath)
             cls.logger.info(f"{context}::Exporting JSON data to {full_path}")
 
-            with open(full_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
+            with open(full_path, "wb", encoding="utf-8") as f:
+                _ = f.write(
+                    orjson.dumps(
+                        data,
+                        option=orjson.OPT_INDENT_2
+                    )
+                )
 
             cls.logger.info(f"{context}::Successfully exported JSON data to {full_path}")
 
