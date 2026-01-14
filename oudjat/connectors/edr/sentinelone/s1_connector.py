@@ -295,7 +295,7 @@ class S1Connector(Connector):
         if net_statuses is not None:
             payload["netStatuses"] = self._unify_str_list(net_statuses)
 
-        return self.fetch(endpoint=S1Endpoint.AGENTS_EXPORT, payload=payload)
+        return self.fetch(endpoint=S1Endpoint.AGENTS_EXPORT, payload=payload, json=False)
 
     def move_agent_to_site(self, site_id: str, cpt_name: str) -> "DataType":
         """
