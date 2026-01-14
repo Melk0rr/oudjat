@@ -5,11 +5,13 @@ import logging
 import os
 import re
 from enum import Enum
+from io import StringIO
 from typing import Any, Callable, NamedTuple
 
 import orjson
 
 from oudjat.utils.context import Context
+from oudjat.utils.types import DataType
 
 
 class FileImportError(Exception):
@@ -313,6 +315,29 @@ class FileUtils:
 
     # ****************************************************************
     # Static methods
+
+    @staticmethod
+    def parse_csv_str(csv_str: str, delimiter: str | None = None) -> "DataType":
+        """
+        Convert a CSV string into a list of dictionaries.
+
+        Args:
+            csv_str (str)         : CSV string to convert
+            delimiter (str | None): The delimiter to use to parse the CSV string
+
+        Returns:
+            DataType: Parsed CSV string as a list of dictionaries
+        """
+
+        f = StringIO(csv_str)
+
+        if delimiter is None:
+            first_line = f.readline().strip("\n")
+            _ = f.seek(0)
+
+            delimiter = FileUtils.guess_csv_delimiter(first_line)
+
+        return list(csv.DictReader(f, delimiter=delimiter, skipinitialspace=True))
 
     @staticmethod
     def check_path(path: str) -> bool:
