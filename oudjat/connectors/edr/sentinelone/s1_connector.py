@@ -9,6 +9,7 @@ from urllib.parse import ParseResult, urlparse
 
 import requests
 
+from oudjat.utils import FileUtils
 from oudjat.utils.context import Context
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import DataType, StrType
@@ -131,6 +132,7 @@ class S1Connector(Connector):
                 raise NoCredentialsError(f"{context}::No API token provided")
 
             self.logger.info(f"{context}::Connected to {self._target.netloc}")
+
         else:
             self.logger.warning(
                 f"{context}::Connection to {self._target.netloc} is already initialized."
@@ -308,7 +310,7 @@ class S1Connector(Connector):
                 f"{Context()}::An error occured while fetching data from {endpoint}"
             )
 
-        return req.content.decode().split("\n")
+        return FileUtils.parse_csv_str(req.content.decode())
 
     def move_agent_to_site(self, site_id: str, cpt_name: str) -> "DataType":
         """
