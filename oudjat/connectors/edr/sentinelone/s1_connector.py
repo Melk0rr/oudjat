@@ -13,7 +13,7 @@ from oudjat.utils.context import Context
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import DataType, StrType
 
-from ... import Connector
+from ... import Connector, ConnectorMethod
 from .exceptions import SentinelOneAPIConnectionError
 from .s1_endpoints import S1Endpoint
 
@@ -89,7 +89,7 @@ class S1Connector(Connector):
 
         return headers
 
-    def _unify_str_list(self, str_list: "StrType") -> str:
+    def _unify_str_list(self, str_list: StrType) -> str:
         """
         Unify API query string array parameters.
 
@@ -136,6 +136,32 @@ class S1Connector(Connector):
                 f"{context}::Connection to {self._target.netloc} is already initialized."
             )
 
+    def _request_params(
+        self, payload: dict[str, Any], method: "ConnectorMethod", endpoint_path: str
+    ) -> dict[str, Any]:
+        """
+        Return request parameters dictionary based on the provided payload, method and formatted path.
+
+        Args:
+            payload (dict[str, Any]): Request payload
+            method (ConnectorMethod): Request method used for an endpoint connection
+            endpoint_path (str)     : Final endpoint path
+
+        Returns:
+            dict[str, Any]: Final parameters
+        """
+
+        r_params = {
+            "url": f"{self._target.geturl()}{endpoint_path}",
+            "headers": self._headers,
+            "json": payload,
+        }
+
+        if method is ConnectorMethod.GET:
+            r_params["params"] = r_params.pop("json")
+
+        return r_params
+
     @override
     def fetch(
         self,
@@ -143,7 +169,6 @@ class S1Connector(Connector):
         payload: dict[str, Any],
         attributes: list[str] | None = None,
         path_fmt: dict[str, str] | None = None,
-        json: bool = True
     ) -> "DataType":
         """
         Perform a search query through the API to retrieve data based on provided endpoint and .
@@ -153,7 +178,6 @@ class S1Connector(Connector):
             attributes (list[str] | None)   : List of attributes to keep per elements
             payload (dict[str, Any] | None) : Payload to send to the provided endpoint
             path_fmt (dict[str, Any] | None): A dictionary of variable names that will be replaced in the endpoint path
-            json (bool)                     : Whether to handle API response as JSON
 
         Returns:
             DataType: list of retrieved elements
@@ -173,44 +197,25 @@ class S1Connector(Connector):
             if next_cursor:
                 payload["cursor"] = next_cursor
 
-            r_params = {
-                "url": f"{self._target.geturl()}{endpoint_path}",
-                "headers": self._headers,
-                "json": payload,
-            }
-
-            if endpoint.method.name == "GET":
-                r_params["params"] = r_params.pop("json")
-
+            r_params = self._request_params(payload, endpoint.method, endpoint_path)
             req = endpoint.method(**r_params)
-            next_cursor = None
-            if json:
-                req_json = req.json()
+            req_json = req.json()
 
-                if "data" in req_json:
-                    if isinstance(req_json["data"], list):
-                        res.extend(req_json["data"])
+            if "data" in req_json:
+                if isinstance(req_json["data"], list):
+                    res.extend(req_json["data"])
 
-                    else:
-                        res.append(req_json["data"])
+                else:
+                    res.append(req_json["data"])
 
-                self.logger.debug(f"{context}::{endpoint} > {req_json}")
+            self.logger.debug(f"{context}::{endpoint} > {req_json}")
 
-                if req.status_code != 200:
-                    raise SentinelOneAPIConnectionError(
-                        f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
-                    )
+            if req.status_code != 200:
+                raise SentinelOneAPIConnectionError(
+                    f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
+                )
 
-                next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
-
-            else:
-                if req.status_code != 200:
-                    raise SentinelOneAPIConnectionError(
-                        f"{context}::An error occured while fetching data from {endpoint}"
-                    )
-
-                res.extend(req.content.decode())
-
+            next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
             if not next_cursor:
                 break
 
@@ -266,7 +271,7 @@ class S1Connector(Connector):
         net_statuses: "StrType | None" = None,
     ) -> "DataType":
         """
-        Export Agent data to a CSV, for Agents that match the filter.
+        Return the agents based on the provided filter.
 
         Possible response messages
         200 - Success
@@ -295,7 +300,15 @@ class S1Connector(Connector):
         if net_statuses is not None:
             payload["netStatuses"] = self._unify_str_list(net_statuses)
 
-        return self.fetch(endpoint=S1Endpoint.AGENTS_EXPORT, payload=payload, json=False)
+        endpoint = S1Endpoint.AGENTS_EXPORT
+        req = endpoint.method(**self._request_params(payload, endpoint.method, endpoint.path))
+
+        if req.status_code != 200:
+            raise SentinelOneAPIConnectionError(
+                f"{Context()}::An error occured while fetching data from {endpoint}"
+            )
+
+        return req.content.decode().split("\n")
 
     def move_agent_to_site(self, site_id: str, cpt_name: str) -> "DataType":
         """
