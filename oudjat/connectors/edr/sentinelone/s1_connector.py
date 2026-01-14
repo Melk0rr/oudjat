@@ -310,7 +310,7 @@ class S1Connector(Connector):
                 f"{Context()}::An error occured while fetching data from {endpoint}"
             )
 
-        return FileUtils.parse_csv_str(req.content.decode().replace('"', ''))
+        return FileUtils.parse_csv_str(req.content.decode().replace('"', ''), delimiter=",")
 
     def move_agent_to_site(self, site_id: str, cpt_name: str) -> "DataType":
         """
