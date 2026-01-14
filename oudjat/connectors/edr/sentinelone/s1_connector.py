@@ -89,7 +89,7 @@ class S1Connector(Connector):
 
         return headers
 
-    def _unify_str_list(self, str_list: StrType) -> str:
+    def _unify_str_list(self, str_list: "StrType") -> str:
         """
         Unify API query string array parameters.
 
@@ -225,7 +225,7 @@ class S1Connector(Connector):
         payload: dict[str, Any] | None = None,
         infected: bool = False,
         net_statuses: "StrType | None" = None,
-    ) -> DataType:
+    ) -> "DataType":
         """
         Return the agents based on the provided filter.
 
@@ -257,6 +257,45 @@ class S1Connector(Connector):
             payload["netStatuses"] = self._unify_str_list(net_statuses)
 
         return self.fetch(endpoint=S1Endpoint.AGENTS, payload=payload)
+
+    def agents_export(
+        self,
+        site_ids: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
+        infected: bool = False,
+        net_statuses: "StrType | None" = None,
+    ) -> "DataType":
+        """
+        Export Agent data to a CSV, for Agents that match the filter.
+
+        Possible response messages
+        200 - Success
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry.
+
+        Args:
+            site_ids (str | list[str] | None)    : List of site ids to filter
+            payload (dict[str, Any])             : Payload to send to the endpoint
+            infected (bool)                      : Whether to only include agents with at least one active threat
+            net_statuses (str | list[str] | None): Network statuses to filter
+
+        Returns:
+            DataType: response data with agentID
+        """
+
+        if payload is None:
+            payload = {}
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
+
+        if infected:
+            payload["infected"] = True
+
+        if net_statuses is not None:
+            payload["netStatuses"] = self._unify_str_list(net_statuses)
+
+        return self.fetch(endpoint=S1Endpoint.AGENTS_EXPORT, payload=payload)
 
     def move_agent_to_site(self, site_id: str, cpt_name: str) -> "DataType":
         """

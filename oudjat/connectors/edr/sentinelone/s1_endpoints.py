@@ -31,6 +31,7 @@ class S1Endpoint(Enum):
     )
     AGENTS_COUNT = S1EndpointsProps("/web/api/v2.1/agents/count", ConnectorMethod.GET)
     AGENTS = S1EndpointsProps("/web/api/v2.1/agents", ConnectorMethod.GET)
+    AGENTS_EXPORT = S1EndpointsProps("/web/api/v2.1/export/agents", ConnectorMethod.GET)
     AGENTS_ACTIONS_MOVE_TO_SITE = S1EndpointsProps(
         "/web/api/v2.1/agents/actions/move-to-site", ConnectorMethod.POST
     )
