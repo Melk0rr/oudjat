@@ -143,6 +143,7 @@ class S1Connector(Connector):
         payload: dict[str, Any],
         attributes: list[str] | None = None,
         path_fmt: dict[str, str] | None = None,
+        json: bool = True
     ) -> "DataType":
         """
         Perform a search query through the API to retrieve data based on provided endpoint and .
@@ -152,6 +153,7 @@ class S1Connector(Connector):
             attributes (list[str] | None)   : List of attributes to keep per elements
             payload (dict[str, Any] | None) : Payload to send to the provided endpoint
             path_fmt (dict[str, Any] | None): A dictionary of variable names that will be replaced in the endpoint path
+            json (bool)                     : Whether to handle API response as JSON
 
         Returns:
             DataType: list of retrieved elements
@@ -181,23 +183,34 @@ class S1Connector(Connector):
                 r_params["params"] = r_params.pop("json")
 
             req = endpoint.method(**r_params)
-            req_json = req.json()
+            next_cursor = None
+            if json:
+                req_json = req.json()
 
-            if "data" in req_json:
-                if isinstance(req_json["data"], list):
-                    res.extend(req_json["data"])
+                if "data" in req_json:
+                    if isinstance(req_json["data"], list):
+                        res.extend(req_json["data"])
 
-                else:
-                    res.append(req_json["data"])
+                    else:
+                        res.append(req_json["data"])
 
-            self.logger.debug(f"{context}::{endpoint} > {req_json}")
+                self.logger.debug(f"{context}::{endpoint} > {req_json}")
 
-            if req.status_code != 200:
-                raise SentinelOneAPIConnectionError(
-                    f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
-                )
+                if req.status_code != 200:
+                    raise SentinelOneAPIConnectionError(
+                        f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
+                    )
 
-            next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
+                next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
+
+            else:
+                if req.status_code != 200:
+                    raise SentinelOneAPIConnectionError(
+                        f"{context}::An error occured while fetching data from {endpoint}"
+                    )
+
+                res.extend(req.content.decode())
+
             if not next_cursor:
                 break
 
