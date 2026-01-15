@@ -1,7 +1,8 @@
 """A module that defines the Computer asset type."""
 
+from dataclasses import dataclass
 from enum import IntEnum
-from typing import TYPE_CHECKING, Any, NamedTuple, TypedDict, override
+from typing import TYPE_CHECKING, Any, TypedDict, override
 
 from oudjat.core import Asset, AssetType
 from oudjat.core.network.net_interface import NetInterfaceIP
@@ -10,6 +11,7 @@ from oudjat.core.software import (
     SoftwareRelease,
     SoftwareReleaseSupport,
 )
+from oudjat.utils import UtilsDict
 
 from .computer_type import ComputerType, MachineType
 
@@ -18,7 +20,8 @@ if TYPE_CHECKING:
     from oudjat.core.software.os.operating_system import OSRelease
 
 
-class ComputerOSProps(NamedTuple):
+@dataclass
+class ComputerOSProps:
     """
     A helper class to properly and conveniently handle computer os attributes types.
     """
@@ -67,7 +70,7 @@ class ComputerBaseDict(TypedDict):
     computerType: str
     machineType: str
     computerStatus: str
-    ip: str | None
+    inet: dict[str, Any]
     softwares: dict[str, Any]
 
 
@@ -125,12 +128,9 @@ class Computer(Asset):
 
         self._computer_type: "ComputerType" = self._standardize_computer_type(computer_type)
         self._machine_type: "MachineType" = self._standardize_machine_type(machine_type)
-
-        self._ip: dict[str, "NetInterface"] = {}
+        self._status: "ComputerStatus" = ComputerStatus.UNKNOWN
 
         self._softwares: dict[str, SoftwareRelease] = {}
-        self._protection_agent: SoftwareRelease | None = None
-        self._status: "ComputerStatus" = ComputerStatus.UNKNOWN
 
         self._interfaces: dict[str, "NetInterface"] = {}
 
@@ -408,6 +408,28 @@ class Computer(Asset):
     def merge(self, other: "Computer") -> None:
         super().merge(other)
 
+        if (
+            self._computer_type is ComputerType.UNKNOWN
+            and other.computer_type is not ComputerType.UNKNOWN
+        ):
+            self._computer_type = other.computer_type
+
+        if (
+            self._machine_type is MachineType.UNKNOWN
+            and other.machine_type is not MachineType.UNKNOWN
+        ):
+            self._machine_type = other.machine_type
+
+        if self._status is ComputerStatus.UNKNOWN and other.status is not ComputerStatus.UNKNOWN:
+            self._status = other.status
+
+        self._softwares = UtilsDict.merge_dictionaries(self._softwares, other.softwares)
+        if self._os.release is None and other.os.release is not None:
+            self._os.release = other.os.release
+
+        if self._os.edition is None and other.os.edition is not None:
+            self._os.edition = other.os.edition
+
     @override
     def __str__(self) -> str:
         """
@@ -442,7 +464,7 @@ class Computer(Asset):
             "computerType": str(self._computer_type),
             "machineType": str(self._machine_type),
             "computerStatus": str(self._status),
-            "ip": str(self._ip) if self._ip else None,
+            "inet": {inet_id: inet.to_dict() for inet_id, inet in self._interfaces.items()},
             "softwares": {sid: s.to_dict() for sid, s in self._softwares.items()},
         }
 

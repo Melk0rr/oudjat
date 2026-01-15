@@ -6,8 +6,6 @@ from oudjat.control.data.decision_tree import DecisionTree, DecisionTreeDictiona
 from oudjat.control.data.exceptions import DataSetPerimeterError
 from oudjat.utils import Context, DataType
 
-from .data_filter import DataFilter, DataFilterDictionaryProps
-
 DataSetType: TypeAlias = "DataType | DataSet"
 
 
