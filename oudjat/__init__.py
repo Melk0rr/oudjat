@@ -6,6 +6,8 @@ __version__ = "0.8.1a1"
 
 # TODO: from_dict methods
 # TODO: Asset merge methods
+# TODO: Make DataSet inherit from dictionary or use dictionary
+# TODO: Make DataSet work arround Asset
 # TODO: Operator overload methods
 # TODO: Base AssetMapper class + implement it as a base for more specific asset mappers
 # TODO: Move away OS guessing from LDAPComputer -> Leave it for external check or Asset mapper ?
