@@ -6,6 +6,7 @@ import logging
 
 from oudjat.utils import Context
 
+from ..asset_mapper import AssetMapper
 from .ldap_connector import LDAPConnector
 from .objects.account.group.ldap_group import LDAPGroup
 from .objects.account.ldap_computer import LDAPComputer
@@ -18,7 +19,7 @@ from .objects.ou.ldap_ou import LDAPOrganizationalUnit
 from .objects.subnet.ldap_subnet import LDAPSubnet
 
 
-class LDAPAssetMapper:
+class LDAPAssetMapper(AssetMapper):
     """
     A class that maps LDAPEntry instances into various assets.
     """
@@ -34,6 +35,7 @@ class LDAPAssetMapper:
             ldapco (LDAPConnector): The LDAP connector used to interact with LDAP server
         """
 
+        super().__init__()
         self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         self._connector: "LDAPConnector" = ldapco
@@ -131,7 +133,7 @@ class LDAPAssetMapper:
             entries (list[LDAPEntry]): LDAP entries to map
 
         Returns:
-            dict[str, LDAPComputer]: Mapped entries as a dictionary of LDAP computers
+            dict[str, LDAPUser]: Mapped entries as a dictionary of LDAP computers
         """
 
         self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPUsers")

@@ -7,10 +7,11 @@ import re
 from oudjat.core.software import SoftwareReleaseSupport, SoftwareReleaseVersion
 from oudjat.core.software.os import OSRelease
 
+from ..asset_mapper import AssetMapper
 from .eol_connector import EndOfLifeConnector
 
 
-class EOLAssetMapper:
+class EOLAssetMapper(AssetMapper):
     """
     A class that maps LDAPEntry instances into various assets.
     """
@@ -25,6 +26,8 @@ class EOLAssetMapper:
         Args:
             eolco (EndOfLifeConnector): The connector used to interact with endoflife.date API
         """
+
+        super().__init__()
 
         self._connector: "EndOfLifeConnector" = eolco
 
