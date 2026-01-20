@@ -1,12 +1,13 @@
 """A module to centralize common behavior accross all connectors."""
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, TypeVar
 
 from keyring.credentials import SimpleCredential
 
 from oudjat.utils import Context, CredentialUtils
 
+ConnectorBoundType = TypeVar("ConnectorBoundType", bound="Connector")
 
 class Connector(ABC):
     """
