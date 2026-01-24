@@ -3,31 +3,25 @@ A generic module that helps connectors to map data into assets.
 """
 
 import inspect
+import logging
+import re
 from ctypes import ArgumentError
-from dataclasses import dataclass
 from typing import Any, Callable, TypeAlias
 
 from oudjat.core.asset import AssetBoundType
+from oudjat.core.software import VERSION_REG, SoftwareEdition
+from oudjat.core.software.exceptions import AmbiguousReleaseException
+from oudjat.core.software.os import OperatingSystem, OSFamily, OSOption, OSRelease
+from oudjat.core.software.os.exceptions import NotImplementedOSOption
+from oudjat.core.software.os.operating_system import OSReleaseListFilter
+from oudjat.core.software.os.os_families import OSFamilyOptMatch
 from oudjat.utils import Context
 
-from .connector import Connector, ConnectorBoundType
+from .connector import ConnectorBoundType
 
-
-@dataclass
-class MappingValue:
-    """
-    AssetMapper mapping value tuple.
-
-    Attributes:
-        target_key (str)                : The new key to use that should match an Asset constructor argument.
-        transformer (Callable[Any], Any): The transformer function to transform the record value
-    """
-
-    target_key: str
-    transformer: Callable[[Any], Any] | None = None
-
-
+MappingValue: TypeAlias = tuple[str, Callable[[Any], Any] | None]
 MappingRegistry: TypeAlias = dict[str, "MappingValue"]
+MappingCallback: TypeAlias = Callable[["AssetBoundType", dict[str, Any]], None]
 
 
 class AssetMapper:
@@ -43,10 +37,11 @@ class AssetMapper:
         Create a new AssetMapper instance.
         """
 
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
         self._connector: "ConnectorBoundType | None" = None
 
     # ****************************************************************
-    # Methods
+    # Methods - engine
 
     def _merge_registries(self, registries: list["MappingRegistry"]) -> "MappingRegistry":
         """
@@ -111,10 +106,7 @@ class AssetMapper:
             if src_key not in mapping_registry:
                 continue
 
-            target_key, transform = (
-                mapping_registry[src_key].target_key,
-                mapping_registry[src_key].transformer,
-            )
+            target_key, transform = mapping_registry[src_key]
 
             # If target key is not a valid argument accepted by the constructor
             # and the constructor does not accept kwargs: continue
@@ -125,10 +117,12 @@ class AssetMapper:
                 self._transform(src_value, transform) if transform is not None else src_value
             )
 
-        required_params = { name for name, p in params.items() if p.default is p.empty }
+        required_params = {name for name, p in params.items() if p.default is p.empty}
         for p in required_params:
             if p not in kwargs:
-                raise ArgumentError(f"{Context()}::{asset_cls.__name__} constructor requires {p} argument")
+                raise ArgumentError(
+                    f"{Context()}::{asset_cls.__name__} constructor requires {p} argument"
+                )
 
         return kwargs
 
@@ -137,7 +131,7 @@ class AssetMapper:
         record: dict[str, Any],
         asset_cls: type["AssetBoundType"],
         mapping_registry: MappingRegistry | list["MappingRegistry"],
-        callback: Callable[..., None],
+        callback: "MappingCallback",
     ) -> "AssetBoundType":
         """
         Map a single data record into an instane of the provided asset class.
@@ -165,4 +159,139 @@ class AssetMapper:
 
         return asset
 
+    # ****************************************************************
+    # Methods - helpers
 
+    def _guess_os_edition(
+        self, os: "str | OperatingSystem", os_edition_str: str | None = None
+    ) -> "SoftwareEdition | None":
+        """
+        Return a SoftwareEdition instance based on the computer operatingSystem attribute.
+
+        Args:
+            os (OperatingSystem)       : The OS from which the edition should be retrieved
+            os_edition_str (str | None): The OS string that may contain the edition
+
+        Returns:
+            SoftwareEdition | None: The SoftwareEdition instance that matches the computer operatingSystem attribute if any
+        """
+
+        if os_edition_str is None:
+            return None
+
+        if not isinstance(os, OperatingSystem):
+            os_guess = self._guess_os(os)
+            if os_guess is None:
+                return None
+
+            os = os_guess
+
+        os_edition_match: list["SoftwareEdition"] = os.matching_editions(os_edition_str)
+        if len(os_edition_match) == 0 and "Standard" in os.editions.keys():
+            os_edition_match.append(os.editions["Standard"])
+
+        return os_edition_match[0] if len(os_edition_match) != 0 else None
+
+    def _guess_os(self, os_str: str) -> "OperatingSystem | None":
+        """
+        Try to guess the OperatingSystem from a string.
+
+        Args:
+            os_str (str): The string that may contain an operating system reference
+
+        Returns:
+            OperatingSystem | None: The OperatingSystem guessed from the provided string
+        """
+
+        context = Context()
+
+        os_family_opt_match = self._guess_os_family(os_str)
+        if os_family_opt_match is None:
+            self.logger.error(f"{context}::Could not guess OperatingSystem from {os_str}")
+            return None
+
+        os_family_opt, os_family_str = os_family_opt_match
+
+        if os_family_opt.name not in OSOption._member_names_:
+            raise NotImplementedOSOption(
+                f"{context}::{os_family_opt.name}({os_family_str}) is not a valid OSOption"
+            )
+
+        return OSOption[os_family_opt.name]()
+
+    def _guess_os_release(
+        self, os: "str | OperatingSystem", os_ver: str, filters: list["OSReleaseListFilter"]
+    ) -> "OSRelease | None":
+        """
+        Return an OS release instance based on the computer operatingSystemVersion attribute.
+
+        Args:
+            os (str)                           : Either a string from which guess OS infos or an OperatingSystem instance
+            os_ver (str)                       : A string that contain specifically the release version
+            filters (list[OSReleaseListFilter]): A list of filters to retrieve a unique release
+
+        Returns:
+            OSRelease | None: The OS release that matches the provided strings
+        """
+
+        context = Context()
+        if not isinstance(os, OperatingSystem):
+            os_guess = self._guess_os(os)
+            if os_guess is None:
+                return None
+
+            os = os_guess
+
+        candidates = os.release(os_ver)
+        if not isinstance(candidates, list):
+            return candidates
+
+        if candidates.is_empty():
+            return None
+
+        res = candidates.unique(*filters)
+        if res is None:
+            raise AmbiguousReleaseException(
+                f"{context}::Unable to resolve a unique release for {os_ver}"
+            )
+
+        return res
+
+    def _map_ldap_cpt_os(
+        self, os_str: str | None, os_ver: str | None = None, filters: list["OSReleaseListFilter"] | None = None
+    ) -> tuple["OperatingSystem | None", "OSRelease | None", "SoftwareEdition | None"]:
+        if filters is None:
+            filters = []
+
+        if os_ver is None:
+            os_ver = os_str
+
+        res = (None, None, None)
+        if os_str is not None:
+            os = self._guess_os(os_str)
+
+            if os is not None:
+                os_rel = self._guess_os_release(os, os_ver or os_str, filters=filters)
+                os_edition = self._guess_os_edition(os, os_str)
+
+                res = os, os_rel, os_edition
+
+        return res
+
+    def _guess_os_family(self, os_str: str | None = None) -> "OSFamilyOptMatch | None":
+        """
+        Return the OSFamily matching the computer operatingSystem attribute, as well as its matching substring.
+
+        Returns:
+            tuple[OSFamily | None, str | None]: Both the OSFamily and substring matching computer operatingSystem attribute
+        """
+
+        family_opt = None
+        if os_str is not None:
+            family_opt = OSFamily.find_matching_family_opt(os_str)
+
+        return family_opt
+
+    def _search_release_version(self, version_str: str) -> str | None:
+        search = re.search(VERSION_REG, version_str)
+        return search.group(0) if search else None

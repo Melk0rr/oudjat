@@ -3,7 +3,10 @@ A module that handle LDAP entry mapping to asset elements.
 """
 
 import logging
+from typing import TYPE_CHECKING, Any
 
+from oudjat.core.computer.computer import Computer
+from oudjat.core.software.os.operating_system import OSReleaseListFilter
 from oudjat.utils import Context
 
 from ..asset_mapper import AssetMapper
@@ -17,6 +20,9 @@ from .objects.ldap_object import LDAPCapabilities, LDAPObject, LDAPObjectOptions
 from .objects.ldap_object_types import LDAPObjectType
 from .objects.ou.ldap_ou import LDAPOrganizationalUnit
 from .objects.subnet.ldap_subnet import LDAPSubnet
+
+if TYPE_CHECKING:
+    from ..asset_mapper import MappingRegistry
 
 
 class LDAPAssetMapper(AssetMapper):
@@ -40,39 +46,15 @@ class LDAPAssetMapper(AssetMapper):
 
         self._connector: "LDAPConnector" = ldapco
 
-        self._MAP: dict[str, "LDAPObjectOptions"] = {
-            f"{LDAPObjectType.DEFAULT}": LDAPObjectOptions["LDAPObject"](
-                cls=LDAPObject, fetch=self._connector.objects
-            ),
-            f"{LDAPObjectType.COMPUTER}": LDAPObjectOptions["LDAPComputer"](
-                cls=LDAPComputer, fetch=self._connector.computers
-            ),
-            f"{LDAPObjectType.GPO}": LDAPObjectOptions["LDAPGroupPolicyObject"](
-                cls=LDAPGroupPolicyObject, fetch=self._connector.gpos
-            ),
-            f"{LDAPObjectType.GROUP}": LDAPObjectOptions["LDAPGroup"](
-                cls=LDAPGroup, fetch=self._connector.groups
-            ),
-            f"{LDAPObjectType.OU}": LDAPObjectOptions["LDAPOrganizationalUnit"](
-                cls=LDAPOrganizationalUnit, fetch=self._connector.ous
-            ),
-            f"{LDAPObjectType.SUBNET}": LDAPObjectOptions["LDAPSubnet"](
-                cls=LDAPSubnet, fetch=self._connector.subnets
-            ),
-            f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](
-                cls=LDAPUser, fetch=self._connector.users
-            ),
-        }
-
         self._CAPABILITIES: "LDAPCapabilities" = LDAPCapabilities(
             ldap_search=self._connector.fetch,
             ldap_obj_opt=self._object_opt,
         )
 
     # ****************************************************************
-    # Methods
+    # Methods - LDAP objects
 
-    def objects(
+    def _ldap_objects(
         self,
         entries: list["LDAPEntry"],
         auto: bool = False,
@@ -93,7 +75,7 @@ class LDAPAssetMapper(AssetMapper):
         def map_obj(entry: "LDAPEntry") -> "LDAPObject":
             if auto:
                 obj_type = LDAPObjectType.from_object_cls(entry)
-                LDAPDynamicObjectType = self._MAP[obj_type.name].cls
+                LDAPDynamicObjectType = self._object_opt(obj_type).cls
 
                 return LDAPDynamicObjectType(
                     self._connector.complete_partial_entry(entry), self._CAPABILITIES
@@ -105,7 +87,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return objects
 
-    def computers(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPComputer"]:
+    def _ldap_computers(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPComputer"]:
         """
         Map the provided LDAP entries into a dictionary of LDAPComputer instances.
 
@@ -125,7 +107,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return computers
 
-    def users(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPUser"]:
+    def _ldap_users(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPUser"]:
         """
         Map the provided LDAP entries into a dictionary of User instances.
 
@@ -145,7 +127,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return users
 
-    def groups(
+    def _ldap_groups(
         self,
         entries: list["LDAPEntry"],
         recursive: bool = False,
@@ -174,7 +156,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return groups
 
-    def gpos(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPGroupPolicyObject"]:
+    def _ldap_gpos(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPGroupPolicyObject"]:
         """
         Map the provided LDAP entries into a dictionary of LDAPGroupPolicyObject instances.
 
@@ -192,7 +174,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return gpos
 
-    def ous(
+    def _ldap_ous(
         self,
         entries: list["LDAPEntry"],
         recursive: bool = False,
@@ -208,7 +190,9 @@ class LDAPAssetMapper(AssetMapper):
             dict[str, LDAPOrganizationalUnit]: Mapped entries as a dictionary of LDAP ous
         """
 
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPOrganizationalUnits")
+        self.logger.info(
+            f"{Context()}::Mapping {len(entries)} entries into LDAPOrganizationalUnits"
+        )
 
         def map_ou(entry: "LDAPEntry") -> "LDAPOrganizationalUnit":
             ou_instance = LDAPOrganizationalUnit(entry, self._CAPABILITIES)
@@ -221,7 +205,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return ous
 
-    def subnets(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPSubnet"]:
+    def _ldap_subnets(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPSubnet"]:
         """
         Map the provided LDAP entries into a dictionary of LDAPSubnet instances.
 
@@ -252,4 +236,61 @@ class LDAPAssetMapper(AssetMapper):
             LDAPObjTypeAlias: The python class matching the provided entry
         """
 
-        return self._MAP[f"{ldap_obj_type}"]
+        obj_map: dict[str, "LDAPObjectOptions"] = {
+            f"{LDAPObjectType.DEFAULT}": LDAPObjectOptions["LDAPObject"](
+                cls=LDAPObject, fetch=self._connector.objects
+            ),
+            f"{LDAPObjectType.COMPUTER}": LDAPObjectOptions["LDAPComputer"](
+                cls=LDAPComputer, fetch=self._connector.computers
+            ),
+            f"{LDAPObjectType.GPO}": LDAPObjectOptions["LDAPGroupPolicyObject"](
+                cls=LDAPGroupPolicyObject, fetch=self._connector.gpos
+            ),
+            f"{LDAPObjectType.GROUP}": LDAPObjectOptions["LDAPGroup"](
+                cls=LDAPGroup, fetch=self._connector.groups
+            ),
+            f"{LDAPObjectType.OU}": LDAPObjectOptions["LDAPOrganizationalUnit"](
+                cls=LDAPOrganizationalUnit, fetch=self._connector.ous
+            ),
+            f"{LDAPObjectType.SUBNET}": LDAPObjectOptions["LDAPSubnet"](
+                cls=LDAPSubnet, fetch=self._connector.subnets
+            ),
+            f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](
+                cls=LDAPUser, fetch=self._connector.users
+            ),
+        }
+
+        return obj_map[f"{ldap_obj_type}"]
+
+    # ****************************************************************
+    # Methods - Asset mapping
+
+    ### Computer mappping
+
+    def computers(self, entries: list["LDAPEntry"]) -> dict[str, "Computer"]:
+        ldap_cpt = self._ldap_computers(entries)
+
+        mapping_registry: "MappingRegistry" = {
+            "id": ("computer_id", None),
+            "name": ("name", None),
+            "description": ("description", None),
+        }
+
+        def mapping_cb(asset: "Computer", record: dict[str, Any]) -> None:
+            release_filters: list["OSReleaseListFilter"] = [
+                lambda rl: rl.filter_max_version(),
+                lambda rl: rl.filter_by_label(record["os"]["name"]),
+            ]
+
+        computers = {}
+        for cpt_dn, cpt in ldap_cpt.items():
+            computer_asset = self.map_one(
+                cpt.to_dict(),
+                asset_cls=Computer,
+                mapping_registry=mapping_registry,
+                callback=mapping_cb,
+            )
+
+            computers[cpt_dn] = computer_asset
+
+        return computers
