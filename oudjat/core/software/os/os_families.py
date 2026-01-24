@@ -19,6 +19,16 @@ class OSFamilyOptProps(NamedTuple):
     pattern: str
     name: str
 
+    def to_tuple(self) -> tuple[str, str]:
+        """
+        Convert the current opt into a tuple.
+
+        Returns:
+            tuple[str, str]: A tuple representation of the current family option
+        """
+
+        return self.pattern, self.name
+
     def to_dict(self) -> dict[str, str]:
         """
         Convert the current opt into a dictionary.
