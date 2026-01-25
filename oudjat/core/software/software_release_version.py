@@ -86,6 +86,9 @@ class SoftwareReleaseVersion:
     The class handles version stage and version semantic parts major, minor and build.
     """
 
+    # ****************************************************************
+    # Attributes & Constructors
+
     def __init__(
         self,
         version: int | str,
@@ -133,6 +136,9 @@ class SoftwareReleaseVersion:
                 if stage_match:
                     self._stage = SoftwareReleaseStage.from_qualifier(stage_match.group(1))
                     self._stage_version = int(stage_match.group(2))
+
+    # ****************************************************************
+    # Methods
 
     @property
     def major(self) -> int:
@@ -264,13 +270,7 @@ class SoftwareReleaseVersion:
             tuple[int, int, int, int, int]: A tuple containing the values of the version that are used for comparison
         """
 
-        return (
-            self._major,
-            self._minor,
-            self._build,
-            self._stage.factor,
-            self._stage_version
-        )
+        return (self._major, self._minor, self._build, self._stage.factor, self._stage_version)
 
     def __gt__(self, other: "SoftwareReleaseVersion") -> bool:
         """
@@ -408,3 +408,30 @@ class SoftwareReleaseVersion:
                 "value": f"{self._stage}{self._stage_version}",
             },
         }
+
+    # ****************************************************************
+    # Class Methods
+
+    @classmethod
+    def search_release_version(cls, version_str: str, pattern: str | None = None) -> str | None:
+        """
+        Search and extract a valid Software release version from the provided string based on a provided pattern.
+
+        By default, it uses the built-in release version regex.
+
+        Args:
+            version_str (str): The string that may contain the release version
+            pattern (str)    : The patttern that will be used to search the version substring
+
+        Returns:
+            str: The valid release version substring
+        """
+
+        if pattern is None:
+            pattern = VERSION_REG
+
+        search = re.search(pattern, version_str)
+        if search:
+            return str(cls(search.group(0)))
+
+        return None
