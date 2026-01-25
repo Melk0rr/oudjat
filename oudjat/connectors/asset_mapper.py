@@ -8,11 +8,11 @@ from ctypes import ArgumentError
 from typing import Any, Callable, TypeAlias
 
 from oudjat.core.asset import AssetBoundType
-from oudjat.core.software import SoftwareEdition
 from oudjat.core.software.exceptions import AmbiguousReleaseException
 from oudjat.core.software.os import OperatingSystem, OSFamily, OSOption, OSRelease
 from oudjat.core.software.os.exceptions import NotImplementedOSOption
 from oudjat.core.software.os.operating_system import OSReleaseListFilter
+from oudjat.core.software.software_edition import SoftwareEdition
 from oudjat.core.software.software_release_version import SoftwareReleaseVersion
 from oudjat.utils import Context
 
