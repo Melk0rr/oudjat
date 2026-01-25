@@ -4,17 +4,16 @@ A generic module that helps connectors to map data into assets.
 
 import inspect
 import logging
-import re
 from ctypes import ArgumentError
 from typing import Any, Callable, TypeAlias
 
 from oudjat.core.asset import AssetBoundType
-from oudjat.core.software import VERSION_REG, SoftwareEdition
+from oudjat.core.software import SoftwareEdition
 from oudjat.core.software.exceptions import AmbiguousReleaseException
 from oudjat.core.software.os import OperatingSystem, OSFamily, OSOption, OSRelease
 from oudjat.core.software.os.exceptions import NotImplementedOSOption
 from oudjat.core.software.os.operating_system import OSReleaseListFilter
-from oudjat.core.software.os.os_families import OSFamilyOptMatch
+from oudjat.core.software.software_release_version import SoftwareReleaseVersion
 from oudjat.utils import Context
 
 from .connector import ConnectorBoundType
@@ -205,7 +204,7 @@ class AssetMapper:
 
         context = Context()
 
-        os_family_opt_match = self._guess_os_family(os_str)
+        os_family_opt_match = OSFamily.search_os_family_opt(os_str)
         if os_family_opt_match is None:
             self.logger.error(f"{context}::Could not guess OperatingSystem from {os_str}")
             return None
@@ -257,17 +256,40 @@ class AssetMapper:
 
         return res
 
-    def _map_ldap_cpt_os(
-        self, os_str: str | None, os_ver: str | None = None, filters: list["OSReleaseListFilter"] | None = None
+    def _map_os_(
+        self,
+        os_str: str | None = None,
+        os_ver: str | None = None,
+        filters: list["OSReleaseListFilter"] | None = None,
     ) -> tuple["OperatingSystem | None", "OSRelease | None", "SoftwareEdition | None"]:
+        """
+        Return a tuple with 3 OS elements guessed from an OS string, and a release version.
+
+        The final tuple contains those 3 elements
+        1 - An OperatingSystem instance, or None if it can't be guessed from the provided argument
+        2 - An OSRelease instance, or None if it can't be guessed from the provided argument
+        3 - A SoftwareEdition instance, or None if it can't be guessed from the provided argument
+
+        Args:
+            os_str (str | None)                : A string that may contain operating system, edition and optionaly release details
+            os_ver (str | None)                : A software release version string
+            filters (list[OSReleaseListFilter]): A list of filter function to apply on a SoftwareReleaseList to narrow it down to a unique release
+
+        Returns:
+            tuple["OperatingSystem | None", "OSRelease | None", "SoftwareEdition | None"]: A tuple containing the 3 mentioned elements
+
+        Example:
+            _map_os("Windows 11 Enterprise", "10.0.26200", [])
+        """
+
         if filters is None:
             filters = []
 
-        if os_ver is None:
-            os_ver = os_str
-
         res = (None, None, None)
         if os_str is not None:
+            if os_ver is None:
+                os_ver = SoftwareReleaseVersion.search_release_version(os_str)
+
             os = self._guess_os(os_str)
 
             if os is not None:
@@ -278,20 +300,3 @@ class AssetMapper:
 
         return res
 
-    def _guess_os_family(self, os_str: str | None = None) -> "OSFamilyOptMatch | None":
-        """
-        Return the OSFamily matching the computer operatingSystem attribute, as well as its matching substring.
-
-        Returns:
-            tuple[OSFamily | None, str | None]: Both the OSFamily and substring matching computer operatingSystem attribute
-        """
-
-        family_opt = None
-        if os_str is not None:
-            family_opt = OSFamily.find_matching_family_opt(os_str)
-
-        return family_opt
-
-    def _search_release_version(self, version_str: str) -> str | None:
-        search = re.search(VERSION_REG, version_str)
-        return search.group(0) if search else None
