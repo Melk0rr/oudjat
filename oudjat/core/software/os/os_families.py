@@ -155,10 +155,10 @@ class OSFamily(Enum):
         return self._name_
 
     # ****************************************************************
-    # Static methods
+    # Class methods
 
-    @staticmethod
-    def find_matching_family_opt(test_str: str) -> "OSFamilyOptMatch | None":
+    @classmethod
+    def search_os_family_opt(cls, test_str: str) -> "OSFamilyOptMatch | None":
         """
         Try to retrieve a substring of the provided string matching an OSFamily element.
 
@@ -169,7 +169,7 @@ class OSFamily(Enum):
             str: substring that match an OSFamily element
         """
 
-        for f in OSFamily:
+        for f in cls:
             match = f.match(test_str)
             if match:
                 return match
