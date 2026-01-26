@@ -123,7 +123,7 @@ class UtilsDict(dict):
             dict[str, Any]: The final dictionary with transformed keys
         """
 
-        return { transform(k): v for k,v in base_dict.items() }
+        return { transform(str(k)): v for k,v in base_dict.items() }
 
     @staticmethod
     def from_tuple(
