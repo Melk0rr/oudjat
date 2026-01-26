@@ -95,13 +95,15 @@ class UtilsDict(dict):
         """
         Map a list into a dictionary using the provided key.
 
+        The final dictionary keys are the values of the provided key for each element.
+
         Args:
             list_to_map (list[dict[str, Any]]) : The input list of dictionaries or objects that have the specified key.
             key (str)                          : The key to use for mapping values in the list to a new dictionary.
             key_callback (Callable[[str], str]): Optional callback to transform the key
 
         Returns:
-            dict[Any, dict[str, Any]]: A dictionary where each element in the list is mapped by the specified key as the key and the entire element as the value.
+            dict[Any, dict[str, Any]]: The mapped dictionary
 
         Example:
             >>> map_list_to_dict([{'id': 1, 'name': 'Alice'}, {'id': 2, 'name': 'Bob'}], 'id')
