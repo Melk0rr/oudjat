@@ -111,6 +111,21 @@ class UtilsDict(dict):
         return {(key_callback(el[key]) if key_callback else el[key]): el for el in list_to_map}
 
     @staticmethod
+    def edit_keys(base_dict: dict[str, Any], transform: Callable[[str], str]) -> dict[str, Any]:
+        """
+        Transform the keys of the given dictionary based on the provided function.
+
+        Args:
+            base_dict (dict[str, Any])      : The dictionary to transform
+            transform (Callable[[str], str]): The transform operation to apply
+
+        Returns:
+            dict[str, Any]: The final dictionary with transformed keys
+        """
+
+        return { transform(k): v for k,v in base_dict.items() }
+
+    @staticmethod
     def from_tuple(
         input_tuple: tuple[str], parent: tuple[str], res: dict[str, Any] | None = None
     ) -> dict[str, Any]:
