@@ -22,6 +22,10 @@ MappingValue: TypeAlias = tuple[str, Callable[[Any], Any] | None]
 MappingRegistry: TypeAlias = dict[str, "MappingValue"]
 MappingCallback: TypeAlias = Callable[["AssetBoundType", dict[str, Any]], None]
 
+MappingOSTuple: TypeAlias = tuple[
+    "OperatingSystem | None", "OSRelease | None", "SoftwareEdition | None"
+]
+
 
 class AssetMapper:
     """
@@ -31,12 +35,13 @@ class AssetMapper:
     # ****************************************************************
     # Attributes & Constructors
 
+    logger: "logging.Logger" = logging.getLogger(__name__)
+
     def __init__(self) -> None:
         """
         Create a new AssetMapper instance.
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__name__)
         self._connector: "ConnectorBoundType | None" = None
 
     # ****************************************************************
@@ -159,10 +164,11 @@ class AssetMapper:
         return asset
 
     # ****************************************************************
-    # Methods - helpers
+    # Static methods
 
-    def _guess_os_edition(
-        self, os: "str | OperatingSystem", os_edition_str: str | None = None
+    @staticmethod
+    def guess_os_edition(
+        os: "str | OperatingSystem", os_edition_str: str | None = None
     ) -> "SoftwareEdition | None":
         """
         Return a SoftwareEdition instance based on the computer operatingSystem attribute.
@@ -179,7 +185,7 @@ class AssetMapper:
             return None
 
         if not isinstance(os, OperatingSystem):
-            os_guess = self._guess_os(os)
+            os_guess = AssetMapper.guess_os(os)
             if os_guess is None:
                 return None
 
@@ -191,7 +197,8 @@ class AssetMapper:
 
         return os_edition_match[0] if len(os_edition_match) != 0 else None
 
-    def _guess_os(self, os_str: str) -> "OperatingSystem | None":
+    @staticmethod
+    def guess_os(os_str: str) -> "OperatingSystem | None":
         """
         Try to guess the OperatingSystem from a string.
 
@@ -206,7 +213,7 @@ class AssetMapper:
 
         os_family_opt_match = OSFamily.search_os_family_opt(os_str)
         if os_family_opt_match is None:
-            self.logger.error(f"{context}::Could not guess OperatingSystem from {os_str}")
+            AssetMapper.logger.error(f"{context}::Could not guess OperatingSystem from {os_str}")
             return None
 
         os_family_opt, os_family_str = os_family_opt_match
@@ -218,8 +225,9 @@ class AssetMapper:
 
         return OSOption[os_family_opt.name]()
 
-    def _guess_os_release(
-        self, os: "str | OperatingSystem", os_ver: str, filters: list["OSReleaseListFilter"]
+    @staticmethod
+    def guess_os_release(
+        os: "str | OperatingSystem", os_ver: str, filters: list["OSReleaseListFilter"]
     ) -> "OSRelease | None":
         """
         Return an OS release instance based on the computer operatingSystemVersion attribute.
@@ -235,7 +243,7 @@ class AssetMapper:
 
         context = Context()
         if not isinstance(os, OperatingSystem):
-            os_guess = self._guess_os(os)
+            os_guess = AssetMapper.guess_os(os)
             if os_guess is None:
                 return None
 
@@ -256,12 +264,12 @@ class AssetMapper:
 
         return res
 
-    def _map_os_(
-        self,
+    @staticmethod
+    def map_os(
         os_str: str | None = None,
         os_ver: str | None = None,
         filters: list["OSReleaseListFilter"] | None = None,
-    ) -> tuple["OperatingSystem | None", "OSRelease | None", "SoftwareEdition | None"]:
+    ) -> "MappingOSTuple":
         """
         Return a tuple with 3 OS elements guessed from an OS string, and a release version.
 
@@ -279,7 +287,7 @@ class AssetMapper:
             tuple["OperatingSystem | None", "OSRelease | None", "SoftwareEdition | None"]: A tuple containing the 3 mentioned elements
 
         Example:
-            _map_os("Windows 11 Enterprise", "10.0.26200", [])
+            map_os("Windows 11 Enterprise", "10.0.26200", [])
         """
 
         if filters is None:
@@ -290,13 +298,12 @@ class AssetMapper:
             if os_ver is None:
                 os_ver = SoftwareReleaseVersion.search_release_version(os_str)
 
-            os = self._guess_os(os_str)
+            os = AssetMapper.guess_os(os_str)
 
             if os is not None:
-                os_rel = self._guess_os_release(os, os_ver or os_str, filters=filters)
-                os_edition = self._guess_os_edition(os, os_str)
+                os_rel = AssetMapper.guess_os_release(os, os_ver or os_str, filters=filters)
+                os_edition = AssetMapper.guess_os_edition(os, os_str)
 
                 res = os, os_rel, os_edition
 
         return res
-
