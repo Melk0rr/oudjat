@@ -185,6 +185,8 @@ class AssetMapper:
 
         res = {}
         for record in records:
+            self.__class__.logger.debug(f"{Context()}::Mapping record > {record}")
+
             a = self.map_one(
                 record,
                 asset_cls,
