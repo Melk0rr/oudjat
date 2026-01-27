@@ -236,7 +236,7 @@ class LDAPObject:
             "domain": self.domain,
             "creationDate": LDAPObject._format_acc_date_str(self.creation_date),
             "changedDate": LDAPObject._format_acc_date_str(self.change_date),
-            "ldapObjFlags": list(self._ldap_obj_flags),
+            "flags": list(self._ldap_obj_flags),
         }
 
     # ****************************************************************
