@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Any
 
 from oudjat.core.software.os import OSFamily
+from oudjat.utils.context import Context
 
 from .asset_mapper import AssetMapper
 
@@ -55,4 +56,8 @@ class MappingFunction(Enum):
             Any: Whatever the called function returns
         """
 
-        return self._value_[func.upper()](**kwargs)
+        mapping_func = getattr(self._value_, func.upper(), None)
+        if mapping_func is None:
+            raise KeyError(f"{Context()}::{func} is not a valid {self._name_} mapping function")
+
+        return mapping_func(**kwargs)
