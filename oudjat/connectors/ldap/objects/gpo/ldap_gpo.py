@@ -144,7 +144,7 @@ class LDAPGroupPolicyObject(LDAPObject):
         obj_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.OU)
         LDAPOUCls = obj_opt.cls
 
-        obj_filter = LDAPFilter(f"(gPLink={f'*{self.name}*'})") & LDAPFilter.name(ou)
+        obj_filter = LDAPFilter(f"(gPLink={f'*{self._name}*'})") & LDAPFilter.name(ou)
 
         res = {}
         for entry in obj_opt.fetch(search_filter=obj_filter, attributes=attributes):
