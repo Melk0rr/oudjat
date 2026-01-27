@@ -49,6 +49,20 @@ class UtilsDict(dict):
     # Static methods
 
     @staticmethod
+    def keys_list(dictionary: dict[str, Any]) -> list[str]:
+        """
+        Convert the provided dictionary keys into a regular list.
+
+        Args:
+            dictionary (dict[str, Any]): The dictionary of which the keys will be returned
+
+        Returns:
+            list[str]: Regular list of dictionary keys
+        """
+
+        return list(dictionary.keys())
+
+    @staticmethod
     def join_dictionary_items(dictionary: dict[str, Any], char: str) -> str:
         """
         Join dictionary items with the provided character.
@@ -125,7 +139,7 @@ class UtilsDict(dict):
             dict[str, Any]: The final dictionary with transformed keys
         """
 
-        return { transform(str(k)): v for k,v in base_dict.items() }
+        return {transform(str(k)): v for k, v in base_dict.items()}
 
     @staticmethod
     def from_tuple(
