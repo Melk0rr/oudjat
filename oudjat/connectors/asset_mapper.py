@@ -123,7 +123,7 @@ class AssetMapper:
 
         required_params = {name for name, p in params.items() if p.default is p.empty}
         for p in required_params:
-            if p not in kwargs:
+            if p != "kwargs" and p not in kwargs:
                 raise ArgumentError(
                     f"{Context()}::{asset_cls.__name__} constructor requires {p} argument"
                 )

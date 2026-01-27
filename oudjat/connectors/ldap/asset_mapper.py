@@ -280,6 +280,8 @@ class LDAPAssetMapper(AssetMapper):
 
         ldap_cpt = self._ldap_computers(entries)
 
+        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into final Computer asset")
+
         mapping_registry: "MappingRegistry" = {
             "id": ("computer_id", None),
             "name": ("name", None),
