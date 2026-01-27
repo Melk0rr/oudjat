@@ -5,11 +5,12 @@ A module that handle LDAP entry mapping to asset elements.
 import logging
 from typing import TYPE_CHECKING, Any
 
+from oudjat.connectors.mapping_functions import MappingFunction
 from oudjat.core.computer.computer import Computer
 from oudjat.core.software.os.operating_system import OSReleaseListFilter
 from oudjat.utils import Context
 
-from ..asset_mapper import AssetMapper
+from ..asset_mapper import AssetMapper, MappingOSTuple
 from .ldap_connector import LDAPConnector
 from .objects.account.group.ldap_group import LDAPGroup
 from .objects.account.ldap_computer import LDAPComputer
@@ -54,7 +55,7 @@ class LDAPAssetMapper(AssetMapper):
     # ****************************************************************
     # Methods - LDAP objects
 
-    def _ldap_objects(
+    def ldap_objects(
         self,
         entries: list["LDAPEntry"],
         auto: bool = False,
@@ -156,7 +157,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return groups
 
-    def _ldap_gpos(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPGroupPolicyObject"]:
+    def ldap_gpos(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPGroupPolicyObject"]:
         """
         Map the provided LDAP entries into a dictionary of LDAPGroupPolicyObject instances.
 
@@ -174,7 +175,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return gpos
 
-    def _ldap_ous(
+    def ldap_ous(
         self,
         entries: list["LDAPEntry"],
         recursive: bool = False,
@@ -266,14 +267,24 @@ class LDAPAssetMapper(AssetMapper):
     # Methods - Asset mapping
 
     ### Computer mappping
-
     def computers(self, entries: list["LDAPEntry"]) -> dict[str, "Computer"]:
+        """
+        Map LDAP entries into Computer instances.
+
+        Args:
+            entries (list[LDAPEntry]): Entries to map
+
+        Returns:
+            dict[str, Computer]: A dictionary Computer instances
+        """
+
         ldap_cpt = self._ldap_computers(entries)
 
         mapping_registry: "MappingRegistry" = {
             "id": ("computer_id", None),
             "name": ("name", None),
             "description": ("description", None),
+            "hostname": ("label", None),
         }
 
         def mapping_cb(asset: "Computer", record: dict[str, Any]) -> None:
@@ -282,15 +293,25 @@ class LDAPAssetMapper(AssetMapper):
                 lambda rl: rl.filter_by_label(record["os"]["name"]),
             ]
 
-        computers = {}
-        for cpt_dn, cpt in ldap_cpt.items():
-            computer_asset = self.map_one(
-                cpt.to_dict(),
-                asset_cls=Computer,
-                mapping_registry=mapping_registry,
-                callback=mapping_cb,
+            os: "MappingOSTuple" = MappingFunction.OS(
+                "os_details_from_str",
+                os_str=record["os"]["name"],
+                os_ver=record["os"]["version"],
+                filters=release_filters,
             )
 
-            computers[cpt_dn] = computer_asset
+            os_instance, os_rel, os_edition = os
+            if os_instance is not None:
+                asset.computer_type = next(iter(os_instance.computer_type))
 
-        return computers
+            asset.os_release = os_rel
+            asset.os_edition = os_edition
+            asset.add_custom_attr("ldap", record)
+
+        return self.map_many(
+            [ cpt.to_dict() for cpt in ldap_cpt.values() ],
+            asset_cls=Computer,
+            mapping_registry=mapping_registry,
+            callback=mapping_cb,
+            key_callback=lambda r: r["dn"],
+        )

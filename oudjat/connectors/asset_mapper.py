@@ -14,7 +14,7 @@ from oudjat.core.software.os.exceptions import NotImplementedOSOption
 from oudjat.core.software.os.operating_system import OSReleaseListFilter
 from oudjat.core.software.software_edition import SoftwareEdition
 from oudjat.core.software.software_release_version import SoftwareReleaseVersion
-from oudjat.utils import Context
+from oudjat.utils import Context, DataType
 
 from .connector import ConnectorBoundType
 
@@ -118,7 +118,7 @@ class AssetMapper:
                 continue
 
             kwargs[target_key] = (
-                self._transform(src_value, transform) if transform is not None else src_value
+                self._transform(src_value, transform) if transform else src_value
             )
 
         required_params = {name for name, p in params.items() if p.default is p.empty}
@@ -134,34 +134,67 @@ class AssetMapper:
         self,
         record: dict[str, Any],
         asset_cls: type["AssetBoundType"],
-        mapping_registry: MappingRegistry | list["MappingRegistry"],
-        callback: "MappingCallback",
+        mapping_registry: "MappingRegistry" | list["MappingRegistry"],
+        callback: "MappingCallback | None" = None,
     ) -> "AssetBoundType":
         """
-        Map a single data record into an instane of the provided asset class.
+        Map a single data record into an instance of the provided asset class.
 
         Args:
             record (dict[str, Any])               : The data record to map
             asset_cls (type[AssetBoundType])      : The class the record will be mapped into
             mapping_registry (list[MappingValue]) : The mapping registry used to map the record
-            callback (Callable[..., Any])         : A list of callback functions to run after the asset has been mapped
+            callback (Callable[..., Any])         : A callback function to run after the asset has been mapped
 
         Returns:
             AssetBoundType: The mapped asset
         """
 
-        if not isinstance(mapping_registry, list):
-            mapping_registry = [mapping_registry]
+        if isinstance(mapping_registry, list):
+            mapping_registry = self._merge_registries(mapping_registry)
 
-        merged_registry = self._merge_registries(mapping_registry)
-        kwargs = self._build_kwargs(record, asset_cls, merged_registry)
-
+        kwargs = self._build_kwargs(record, asset_cls, mapping_registry)
         asset = asset_cls(**kwargs)
 
         if callback is not None:
             callback(asset, record)
 
         return asset
+
+    def map_many(
+        self,
+        records: "DataType",
+        asset_cls: type["AssetBoundType"],
+        mapping_registry: "MappingRegistry" | list["MappingRegistry"],
+        callback: "MappingCallback | None" = None,
+        key_callback: Callable[[dict[str, Any]], str] | None = None,
+    ) -> dict[str, "AssetBoundType"]:
+        """
+        Map multiple data record into instances of the provided asset class.
+
+        Args:
+            records (dict[str, Any])                       : The data record to map
+            asset_cls (type[AssetBoundType])               : The class the record will be mapped into
+            mapping_registry (list[MappingValue])          : The mapping registry used to map the record
+            callback (MappingCallback)                     : A callback function to run after the asset has been mapped
+            key_callback (Callable[..., str] | None)       : A callback function to provide a key to associate wih the mapped asset
+
+        Returns:
+            dict[str, AssetBoundType]: A dictionary of mapped Assets
+        """
+
+        res = {}
+        for record in records:
+            a = self.map_one(
+                record,
+                asset_cls,
+                mapping_registry,
+                callback,
+            )
+
+            res[key_callback(record) if key_callback else a.id] = a
+
+        return res
 
     # ****************************************************************
     # Static methods
