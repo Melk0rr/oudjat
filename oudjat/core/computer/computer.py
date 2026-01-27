@@ -108,10 +108,10 @@ class Computer(Asset):
             name (str)                               : The name of the computer.
             label (str | None)                       : A short description or tag for the computer.
             description (str | None)                 : A detailed description of the computer and its purpose.
-            computer_type (str | ComputerType | None): Specifies the type of the computer, which can be provided either as a string or an instance of ComputerType enum.
-            machine_type (str | ComputerType | None) : The machine type of the computer
-            os_release (OSRelease | None)            : The release version of the operating system installed on the computer. Defaults to None.
-            os_edition (SoftwareEdition | None)      : The edition of the operating system for the given release. Defaults to None.
+            computer_type (str | ComputerType | None): Specifies the type of the computer, provided either as a string or a ComputerType
+            machine_type (str | MachineType | None)  : The machine type of the computer
+            os_release (OSRelease | None)            : The release of the operating system installed on the computer.
+            os_edition (SoftwareEdition | None)      : The edition of the operating system for the given release.
             **kwargs (Any)                           : Any further arguments
         """
 
@@ -215,7 +215,7 @@ class Computer(Asset):
         return self._os.release
 
     @os_release.setter
-    def os_release(self, new_os_release: "OSRelease") -> None:
+    def os_release(self, new_os_release: "OSRelease | None") -> None:
         """
         Set the os release of the current computer instance.
 
@@ -223,9 +223,8 @@ class Computer(Asset):
             new_os_release (OSRelease): os release instance to set to this computer
         """
 
-        # Reset computer type. It must be set again afterwards
-        self.computer_type = ComputerType.UNKNOWN
-        self._os = ComputerOSProps(new_os_release, self._os.edition)
+        if new_os_release is not None:
+            self._os = ComputerOSProps(new_os_release, self._os.edition)
 
     @property
     def os_edition(self) -> SoftwareEdition | None:
@@ -239,7 +238,7 @@ class Computer(Asset):
         return self._os.edition
 
     @os_edition.setter
-    def os_edition(self, new_edition: SoftwareEdition) -> None:
+    def os_edition(self, new_edition: "SoftwareEdition | None") -> None:
         """
         Set the os edition of the current computer instance.
 
@@ -247,7 +246,8 @@ class Computer(Asset):
             new_edition (SoftwareEdition): software edition to set as the os edition for this computer
         """
 
-        self._os = ComputerOSProps(self._os.release, new_edition)
+        if new_edition is not None:
+            self._os = ComputerOSProps(self._os.release, new_edition)
 
     @property
     def os(self) -> ComputerOSProps:
