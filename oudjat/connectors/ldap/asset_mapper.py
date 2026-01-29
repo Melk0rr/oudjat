@@ -71,8 +71,6 @@ class LDAPAssetMapper(AssetMapper):
             dict[str, LDAPComputer]: Mapped entries as a dictionary of LDAP objects
         """
 
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPObjects")
-
         def map_obj(entry: "LDAPEntry") -> "LDAPObject":
             if auto:
                 obj_type = LDAPObjectType.from_object_cls(entry)
@@ -99,8 +97,6 @@ class LDAPAssetMapper(AssetMapper):
             dict[str, LDAPComputer]: Mapped entries as a dictionary of LDAP computers
         """
 
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPComputers")
-
         def map_cpt(entry: "LDAPEntry") -> "LDAPComputer":
             return LDAPComputer(entry, capabilities=self._CAPABILITIES)
 
@@ -118,8 +114,6 @@ class LDAPAssetMapper(AssetMapper):
         Returns:
             dict[str, LDAPUser]: Mapped entries as a dictionary of LDAP computers
         """
-
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPUsers")
 
         def map_usr(entry: "LDAPEntry") -> "LDAPUser":
             return LDAPUser(entry, capabilities=self._CAPABILITIES)
@@ -143,8 +137,6 @@ class LDAPAssetMapper(AssetMapper):
         Returns:
             dict[str, LDAPGroup]: Mapped entries as a dictionary of LDAP computers
         """
-
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPGroups")
 
         def map_grp(entry: "LDAPEntry") -> "LDAPGroup":
             grp_instance = LDAPGroup(entry, self._CAPABILITIES)
@@ -190,10 +182,6 @@ class LDAPAssetMapper(AssetMapper):
         Returns:
             dict[str, LDAPOrganizationalUnit]: Mapped entries as a dictionary of LDAP ous
         """
-
-        self.logger.info(
-            f"{Context()}::Mapping {len(entries)} entries into LDAPOrganizationalUnits"
-        )
 
         def map_ou(entry: "LDAPEntry") -> "LDAPOrganizationalUnit":
             ou_instance = LDAPOrganizationalUnit(entry, self._CAPABILITIES)

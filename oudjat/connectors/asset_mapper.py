@@ -151,6 +151,7 @@ class AssetMapper:
             AssetBoundType: The mapped asset
         """
 
+        self.__class__.logger.debug(f"{Context()}::Maping {record} > {asset_cls.__name__} : {mapping_registry}")
         if isinstance(mapping_registry, list):
             mapping_registry = self._merge_registries(mapping_registry)
 
