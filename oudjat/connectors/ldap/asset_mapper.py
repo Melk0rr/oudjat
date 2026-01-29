@@ -278,8 +278,6 @@ class LDAPAssetMapper(AssetMapper):
             dict[str, Computer]: A dictionary Computer instances
         """
 
-        ldap_cpt = self._ldap_computers(entries)
-
         self.logger.info(f"{Context()}::Mapping {len(entries)} entries into final Computer asset")
 
         mapping_registry: "MappingRegistry" = {
@@ -289,14 +287,18 @@ class LDAPAssetMapper(AssetMapper):
             "hostname": ("label", None),
         }
 
-        def mapping_cb(asset: "Computer", record: dict[str, Any]) -> None:
+        # Record callback to first convert the entry into an LDAPComputer instance
+        def record_cb(record: "LDAPEntry") -> dict[str, Any]:
+            return next(iter(self._ldap_computers([record]).values())).to_dict()
+
+        def asset_cb(asset: "Computer", record: dict[str, Any]) -> None:
             release_filters: list["OSReleaseListFilter"] = [
                 lambda rl: rl.filter_max_version(),
                 lambda rl: rl.filter_by_label(record["os"]["name"]),
             ]
 
             os: "MappingOSTuple" = MappingFunction.OS(
-                "os_details_from_str",
+                func="os_details_from_str",
                 os_str=record["os"]["name"],
                 os_ver=record["os"]["version"],
                 filters=release_filters,
@@ -311,9 +313,10 @@ class LDAPAssetMapper(AssetMapper):
             asset.add_custom_attr("ldap", record)
 
         return self.map_many(
-            [ cpt.to_dict() for cpt in ldap_cpt.values() ],
+            records=entries,
             asset_cls=Computer,
             mapping_registry=mapping_registry,
-            callback=mapping_cb,
-            key_callback=lambda r: r["dn"],
+            record_cb=record_cb,
+            asset_cb=asset_cb,
+            key_cb=lambda r: r["dn"],
         )

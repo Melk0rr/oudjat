@@ -4,6 +4,7 @@ A generic module that helps connectors to map data into assets.
 
 import inspect
 import logging
+from collections.abc import Sequence
 from ctypes import ArgumentError
 from typing import Any, Callable, TypeAlias
 
@@ -14,7 +15,7 @@ from oudjat.core.software.os.exceptions import NotImplementedOSOption
 from oudjat.core.software.os.operating_system import OSReleaseListFilter
 from oudjat.core.software.software_edition import SoftwareEdition
 from oudjat.core.software.software_release_version import SoftwareReleaseVersion
-from oudjat.utils import Context, DataType
+from oudjat.utils import Context
 
 from .connector import ConnectorBoundType
 
@@ -163,21 +164,23 @@ class AssetMapper:
 
     def map_many(
         self,
-        records: "DataType",
+        records: Sequence[dict[str, Any]],
         asset_cls: type["AssetBoundType"],
         mapping_registry: "MappingRegistry" | list["MappingRegistry"],
-        callback: "MappingCallback | None" = None,
-        key_callback: Callable[[dict[str, Any]], str] | None = None,
+        record_cb: Callable[..., dict[str, Any]] | None = None,
+        asset_cb: "MappingCallback | None" = None,
+        key_cb: Callable[[dict[str, Any]], str] | None = None,
     ) -> dict[str, "AssetBoundType"]:
         """
         Map multiple data record into instances of the provided asset class.
 
         Args:
-            records (dict[str, Any])                       : The data record to map
-            asset_cls (type[AssetBoundType])               : The class the record will be mapped into
-            mapping_registry (list[MappingValue])          : The mapping registry used to map the record
-            callback (MappingCallback)                     : A callback function to run after the asset has been mapped
-            key_callback (Callable[..., str] | None)       : A callback function to provide a key to associate wih the mapped asset
+            records (dict[str, Any])                              : The data record to map
+            asset_cls (type[AssetBoundType])                      : The class the record will be mapped into
+            mapping_registry (list[MappingValue])                 : The mapping registry used to map the record
+            record_cb (Callable[[dict[str, Any]], dict[str, Any]]): A callback function to run after the asset has been mapped
+            asset_cb (MappingCallback)                            : A callback function to run after the asset has been mapped
+            key_cb (Callable[dict[str, Any], str] | None)         : A callback function to provide a key to associate wih the mapped asset
 
         Returns:
             dict[str, AssetBoundType]: A dictionary of mapped Assets
@@ -188,13 +191,13 @@ class AssetMapper:
             self.__class__.logger.debug(f"{Context()}::Mapping record > {record}")
 
             a = self.map_one(
-                record,
-                asset_cls,
-                mapping_registry,
-                callback,
+                record=(record_cb(record) if record_cb else record),
+                asset_cls=asset_cls,
+                mapping_registry=mapping_registry,
+                callback=asset_cb,
             )
 
-            res[key_callback(record) if key_callback else a.id] = a
+            res[key_cb(record) if key_cb else a.id] = a
 
         return res
 
