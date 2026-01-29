@@ -4,13 +4,7 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, override
 
-from oudjat.core.computer import Computer
-from oudjat.core.software import SoftwareEdition, SoftwareReleaseVersion
-from oudjat.core.software.exceptions import AmbiguousReleaseException
-from oudjat.core.software.os import OperatingSystem, OSFamily, OSOption, OSRelease
-from oudjat.core.software.os.exceptions import NotImplementedOSOption
-from oudjat.core.software.os.os_families import OSFamilyOptMatch
-from oudjat.utils import Context
+from oudjat.core.software import SoftwareReleaseVersion
 
 from .ldap_account import LDAPAccount
 
@@ -37,40 +31,6 @@ class LDAPComputer(LDAPAccount):
 
         self.logger: "logging.Logger" = logging.getLogger(__name__)
         super().__init__(ldap_entry=ldap_entry, **kwargs)
-
-        # Retrieve OS and OS edition informations
-        os_release = None
-        os_edition = None
-        cpt_type = None
-
-        if self.os is not None:
-            os_family_opt_match = self._os_family_opt_match()
-
-            if os_family_opt_match is not None and self.os_ver is not None:
-                os_family_opt, os_family_str = os_family_opt_match
-
-                if os_family_opt.name not in OSOption._member_names_:
-                    raise NotImplementedOSOption(f"{Context()}::{os_family_opt.name}({os_family_str}) is not a valid OSOption")
-
-                os: "OperatingSystem" = OSOption[os_family_opt.name]()
-                os.add_custom_attr("match", os_family_opt.to_dict())
-
-                cpt_type = os.computer_type
-
-                os_edition = self._os_edition_from_os(os)
-                os_release = self._os_release_from_ver(os)
-
-        self._computer: "Computer" = Computer(
-            computer_id=self._id,
-            name=self._name,
-            label=self.hostname,
-            description=self._description,
-            os_release=os_release,
-            os_edition=os_edition,
-        )
-
-        if cpt_type is not None:
-            self._computer.computer_type = cpt_type[0]
 
     # ****************************************************************
     # Methods
@@ -112,20 +72,6 @@ class LDAPComputer(LDAPAccount):
 
         return self._ver_fmt(ver)
 
-    def _os_family_opt_match(self) -> "OSFamilyOptMatch | None":
-        """
-        Return the OSFamily matching the computer operatingSystem attribute, as well as its matching substring.
-
-        Returns:
-            tuple[OSFamily | None, str | None]: Both the OSFamily and substring matching computer operatingSystem attribute
-        """
-
-        family_opt = None
-        if self.os is not None:
-            family_opt = OSFamily.find_matching_family_opt(self.os)
-
-        return family_opt
-
     def _ver_fmt(self, version: str) -> str:
         """
         Format the given windows version if it matches the specific regex.
@@ -146,89 +92,12 @@ class LDAPComputer(LDAPAccount):
 
         return str(formated_version)
 
-    def _os_release_from_ver(self, os: "OperatingSystem") -> "OSRelease | None":
-        """
-        Return an OS release instance based on the computer operatingSystemVersion attribute.
-
-        Args:
-            os (OperatingSystem): The operating system from which retrieve the release
-
-        Returns:
-            OSRelease | None: The OS release that matches the computer operatingSystemVersion if any
-        """
-
-        os_name, os_ver = self.os, self.os_ver
-        if os_ver is None or os_name is None:
-            return None
-
-        candidates = os.release(os_ver)
-        if not isinstance(candidates, list):
-            return candidates
-
-        if candidates.is_empty():
-            return None
-
-        res = candidates.unique(
-            lambda rl: rl.filter_max_version(),
-            lambda rl: rl.filter_by_label(os_name)
-        )
-
-        if res is None:
-            raise AmbiguousReleaseException(
-                f"{Context()}::Unable to resolve a unique release for {self.os_ver}"
-            )
-
-        return res
-
-    def _os_edition_from_os(self, os: "OperatingSystem") -> "SoftwareEdition | None":
-        """
-        Return a SoftwareEdition instance based on the computer operatingSystem attribute.
-
-        Args:
-            os (OperatingSystem): The OS from which the edition should be retrieved
-
-        Returns:
-            SoftwareEdition | None: The SoftwareEdition instance that matches the computer operatingSystem attribute if any
-        """
-
-        if self.os is None:
-            return None
-
-        os_edition_match: list["SoftwareEdition"] = os.matching_editions(self.os)
-        if len(os_edition_match) == 0 and "Standard" in os.editions.keys():
-            os_edition_match.append(os.editions["Standard"])
-
-        return os_edition_match[0] if len(os_edition_match) != 0 else None
-
-    def _ldap_dict(self) -> dict[str, Any]:
-        """
-        Return a dictionary that contains only LDAP attributes of the computer.
-
-        Returns:
-            dict[str, Any]: A dictionary of LDAP attributes
-        """
+    @override
+    def to_dict(self) -> dict[str, Any]:
+        """Convert the current instance into a dictionary."""
 
         return {
             **super().to_dict(),
             "hostname": self.hostname,
             "os": {"name": self.os, "version": self.os_ver},
         }
-
-    def to_computer(self) -> "Computer":
-        """
-        Convert the current LDAPComputer into a regular Computer instance.
-
-        Returns:
-            Computer: A regular computer asset based on the current LDAPComputer
-        """
-
-        cpt = self._computer
-        cpt.add_custom_attr("ldap", self._ldap_dict())
-
-        return cpt
-
-    @override
-    def to_dict(self) -> dict[str, Any]:
-        """Convert the current instance into a dictionary."""
-
-        return {**self._ldap_dict(), **self._computer.to_dict()}

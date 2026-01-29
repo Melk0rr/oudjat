@@ -3,7 +3,6 @@
 from typing import TYPE_CHECKING, Any, override
 
 from oudjat.connectors.ldap.objects.account.ms_exch_flags import MSExchFlag
-from oudjat.core.user import User
 
 from .definitions import MS_ACCOUNT_CTL, MS_EXCH_RECIPIENT
 from .ldap_account import LDAPAccount
@@ -44,16 +43,6 @@ class LDAPUser(LDAPAccount):
         self._exchange_flags: set[str] = set()
         if self.ms_exchange_recipient_details is not None:
             self._exchange_flags.update(MSExchFlag.flags(self.ms_exchange_recipient_details))
-
-        self._user: "User" = User(
-            user_id=self.id,
-            name=self.name,
-            firstname=self.givenname,
-            lastname=self.surname,
-            email=self.email,
-            login=self.san,
-            description=self.description,
-        )
 
     # ****************************************************************
     # Methods
@@ -175,31 +164,13 @@ class LDAPUser(LDAPAccount):
 
         return is_admin
 
-    def to_user(self) -> "User":
+    @override
+    def to_dict(self) -> dict[str, Any]:
         """
-        Convert the current LDAPUser into a regular User instance.
+        Convert the current instance into a dictionary.
 
         Returns:
-            User: A regular User instance based on the current LDAPUser
-        """
-
-        usr = self._user
-        ldap_dict = self.ldap_dict()
-        _ = ldap_dict.pop("id")
-        _ = ldap_dict.pop("name")
-        _ = ldap_dict.pop("label")
-        _ = ldap_dict.pop("description")
-
-        usr.add_custom_attr("ldap", ldap_dict)
-
-        return usr
-
-    def ldap_dict(self) -> dict[str, Any]:
-        """
-        Return a dictionary of the LDAP properties.
-
-        Returns:
-            dict[str, Any]: A dictionary of the user LDAP properties
+            dict[str, Any]: The current user represented as a dictionary
         """
 
         base = super().to_dict()
@@ -215,14 +186,3 @@ class LDAPUser(LDAPAccount):
             },
             "extensionAttributes": self.extension_attr,
         }
-
-    @override
-    def to_dict(self) -> dict[str, Any]:
-        """
-        Convert the current instance into a dictionary.
-
-        Returns:
-            dict[str, Any]: The current user represented as a dictionary
-        """
-
-        return {**self.ldap_dict(), **self._user.to_dict()}

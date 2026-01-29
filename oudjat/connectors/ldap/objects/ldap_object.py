@@ -3,7 +3,6 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Generic, NamedTuple, TypeVar, override
 
-from oudjat.core.generic_identifiable import GenericIdentifiable
 from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
 
 from ..ldap_utils import parse_dn
@@ -42,7 +41,7 @@ class LDAPCapabilities(NamedTuple):
     ldap_obj_opt: Callable[["LDAPObjectType"], "LDAPObjectOptions"]
 
 
-class LDAPObject(GenericIdentifiable):
+class LDAPObject:
     """
     Defines common properties and behavior accross LDAP objects.
     """
@@ -65,11 +64,10 @@ class LDAPObject(GenericIdentifiable):
         """
 
         self._entry: "LDAPEntry" = ldap_entry
-        super().__init__(
-            gid=self.entry.id,
-            name=self.entry.name,
-            description=self.entry.description,
-        )
+
+        self._id: str = self._entry.id
+        self._name: str = self._entry.name
+        self._description: str = self._entry.description
 
         self._ldap_obj_flags: set[str] = set()
         self._capabilities: "LDAPCapabilities" = capabilities
@@ -207,7 +205,7 @@ class LDAPObject(GenericIdentifiable):
             bool: True if the object is contained in the given OU; otherwise, False.
         """
 
-        return ou_name in self.dn if recursive else f"{self.name}OU={ou_name}" in self.dn
+        return ou_name in self.dn if recursive else f"{self._name}OU={ou_name}" in self.dn
 
     @override
     def __str__(self) -> str:
@@ -220,7 +218,6 @@ class LDAPObject(GenericIdentifiable):
 
         return self.dn
 
-    @override
     def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
@@ -230,14 +227,16 @@ class LDAPObject(GenericIdentifiable):
         """
 
         return {
-            **super().to_dict(),
+            "id": self._id,
+            "name": self._name,
+            "description": self._description,
             "dn": self.dn,
             "sid": self.sid,
             "classes": self.classes,
             "domain": self.domain,
             "creationDate": LDAPObject._format_acc_date_str(self.creation_date),
             "changedDate": LDAPObject._format_acc_date_str(self.change_date),
-            "ldapObjFlags": list(self._ldap_obj_flags),
+            "flags": list(self._ldap_obj_flags),
         }
 
     # ****************************************************************

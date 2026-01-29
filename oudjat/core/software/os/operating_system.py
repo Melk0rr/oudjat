@@ -1,6 +1,6 @@
 """A module defining operating system behavior."""
 
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, Any, Callable, TypeAlias, override
 
 from ..software import Software, SoftwareType
 from ..software_release import SoftwareRelease
@@ -9,6 +9,10 @@ from .os_families import OSFamily
 if TYPE_CHECKING:
     from oudjat.core.computer.computer_type import ComputerType
 
+    from ..software_release import SoftwareReleaseList
+
+OSReleaseList: TypeAlias = "SoftwareReleaseList[OSRelease]"
+OSReleaseListFilter: TypeAlias = Callable[["OSReleaseList"], "OSReleaseList"]
 
 class OSRelease(SoftwareRelease):
     """Specific software release for OperatingSystem."""

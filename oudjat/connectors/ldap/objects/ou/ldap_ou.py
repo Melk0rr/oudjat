@@ -63,6 +63,19 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         return self._objects
 
+    def contains_object(self, dn: str) -> bool:
+        """
+        Check if the provided object (represented by its DN) is in the current OU.
+
+        Args:
+            dn (str): The object's dn to check
+
+        Returns:
+            bool: True if the object is in the current OU. False otherwise
+        """
+
+        return dn in self.dn
+
     def fetch_objects(self, recursive: bool = False) -> None:
         """
         Return the objects contained in the current OU.

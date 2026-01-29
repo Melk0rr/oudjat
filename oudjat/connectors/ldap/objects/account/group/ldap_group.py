@@ -7,7 +7,6 @@ from ldap3.utils.conv import escape_filter_chars
 
 from oudjat.connectors.ldap.ldap_filter import LDAPFilter
 from oudjat.connectors.ldap.objects.ldap_object_types import LDAPObjectType
-from oudjat.core.group import Group
 from oudjat.utils.context import Context
 
 from ...ldap_object import LDAPObject
@@ -41,13 +40,7 @@ class LDAPGroup(LDAPObject):
 
         super().__init__(ldap_entry, capabilities)
         self.logger: "logging.Logger" = logging.getLogger(__name__)
-
-        self._group: "Group[LDAPObject]" = Group[LDAPObject](
-            group_id=self.entry.get("objectGUID"),
-            name=self.entry.get("name"),
-            label=self.entry.dn,
-            description=self.entry.get("description"),
-        )
+        self._members: dict[str, "LDAPObject"] = {}
 
     # ****************************************************************
     # Methods
@@ -61,7 +54,7 @@ class LDAPGroup(LDAPObject):
             dict[str, LDAPObject]: members as a dictionary of LDAPObject instances
         """
 
-        return self._group.members
+        return self._members
 
     def _group_type_raw(self) -> int:
         """
@@ -84,19 +77,6 @@ class LDAPGroup(LDAPObject):
 
         return LDAPGroupType(self._group_type_raw())
 
-    def to_group(self) -> "Group":
-        """
-        Return a group instance based on the current LDAPGroup.
-
-        Returns:
-            Group: The group asset instance bound to this LDAPGroup
-        """
-
-        grp = self._group
-        grp.add_custom_attr("ldap", {**super().to_dict(), "groupType": str(self.group_type)})
-
-        return grp
-
     def member_refs(self) -> list[str]:
         """
         Return member refs.
@@ -115,7 +95,7 @@ class LDAPGroup(LDAPObject):
             member (LDAPObject): member to add
         """
 
-        self._group.add_member(key=member.dn, member=member)
+        self._members[member.dn] = member
 
     def fetch_members(
         self,
@@ -241,8 +221,8 @@ class LDAPGroup(LDAPObject):
         Check if the provided object is a member of the current group.
 
         Args:
-            ldap_object (LDAPObject)      : Object to search
-            extended (bool)               : Either to check if the object is a member of sub groups
+            ldap_object (LDAPObject): Object to search
+            extended (bool)         : Either to check if the object is a member of sub groups
 
         Returns:
             bool: True if the group contains the given object. False otherwise
@@ -260,4 +240,7 @@ class LDAPGroup(LDAPObject):
             dict[str, Any]: The current instance converted into a dictionary
         """
 
-        return self._group.to_dict()
+        return {
+            **super().to_dict(),
+            "members": list(self._members.keys())
+        }

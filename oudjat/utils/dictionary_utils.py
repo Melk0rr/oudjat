@@ -49,6 +49,20 @@ class UtilsDict(dict):
     # Static methods
 
     @staticmethod
+    def keys_list(dictionary: dict[str, Any]) -> list[str]:
+        """
+        Convert the provided dictionary keys into a regular list.
+
+        Args:
+            dictionary (dict[str, Any]): The dictionary of which the keys will be returned
+
+        Returns:
+            list[str]: Regular list of dictionary keys
+        """
+
+        return list(dictionary.keys())
+
+    @staticmethod
     def join_dictionary_items(dictionary: dict[str, Any], char: str) -> str:
         """
         Join dictionary items with the provided character.
@@ -95,13 +109,15 @@ class UtilsDict(dict):
         """
         Map a list into a dictionary using the provided key.
 
+        The final dictionary keys are the values of the provided key for each element.
+
         Args:
             list_to_map (list[dict[str, Any]]) : The input list of dictionaries or objects that have the specified key.
             key (str)                          : The key to use for mapping values in the list to a new dictionary.
             key_callback (Callable[[str], str]): Optional callback to transform the key
 
         Returns:
-            dict[Any, dict[str, Any]]: A dictionary where each element in the list is mapped by the specified key as the key and the entire element as the value.
+            dict[Any, dict[str, Any]]: The mapped dictionary
 
         Example:
             >>> map_list_to_dict([{'id': 1, 'name': 'Alice'}, {'id': 2, 'name': 'Bob'}], 'id')
@@ -109,6 +125,21 @@ class UtilsDict(dict):
         """
 
         return {(key_callback(el[key]) if key_callback else el[key]): el for el in list_to_map}
+
+    @staticmethod
+    def edit_keys(base_dict: dict[str, Any], transform: Callable[[str], str]) -> dict[str, Any]:
+        """
+        Transform the keys of the given dictionary based on the provided function.
+
+        Args:
+            base_dict (dict[str, Any])      : The dictionary to transform
+            transform (Callable[[str], str]): The transform operation to apply
+
+        Returns:
+            dict[str, Any]: The final dictionary with transformed keys
+        """
+
+        return {transform(str(k)): v for k, v in base_dict.items()}
 
     @staticmethod
     def from_tuple(
