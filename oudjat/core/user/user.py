@@ -178,8 +178,8 @@ class User(Asset):
             str: the current user represented by a string
 
         Example:
-            rick = User(firstname="Roy", lastname="Batty", login="r.batty"...)
-            print(rick) -> "r.batty"
+            roy = User(firstname="Roy", lastname="Batty", login="r.batty"...)
+            print(roy) -> "r.batty"
         """
 
         return self._login

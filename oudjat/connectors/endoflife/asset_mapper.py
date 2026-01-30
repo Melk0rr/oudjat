@@ -7,7 +7,7 @@ import re
 from oudjat.core.software import SoftwareReleaseSupport, SoftwareReleaseVersion
 from oudjat.core.software.os import OSRelease
 
-from ..asset_mapper import AssetMapper
+from ..asset_mapper import AssetMapper, MappingRegistry
 from .eol_connector import EndOfLifeConnector
 
 
@@ -46,6 +46,22 @@ class EOLAssetMapper(AssetMapper):
         windows_eol = self._connector.windows()[0]
         software_name = " ".join(str(windows_eol["label"]).split(" ")[1:])
 
+
+        def rel_label(label: str) -> str | None:
+            label_split = label.split(" ")
+            return label_split[1] if len(label_split) >= 2 else None
+
+        mapping_registry: "MappingRegistry" = {
+            "release_id": ("latest", lambda latest: f"{windows_eol['name']}{latest['name']}"),
+            "name": ("label", lambda label: f"{software_name} {label.split(' ')[0]}"),
+            "software_name": lambda _: software_name,
+            "version": ("latest", lambda latest: latest["name"]),
+            "release_date": "releaseDate",
+            "release_label": ("label", lambda label: rel_label(label))
+        }
+
+        # TODO: Finish AssetMapper implementation + find a way to handle conditional map
+
         for rel in windows_eol["releases"]:
             rel_version = rel["latest"]["name"]
             rel_name_split = str(rel["name"]).split("-")
@@ -68,11 +84,11 @@ class EOLAssetMapper(AssetMapper):
             if exist is None:
                 os_rel = OSRelease(
                     release_id=rel_id,
-                    name=f"{software_name} {rel['label'].split(" ")[0]}",
+                    name=f"{software_name} {rel['label'].split(' ')[0]}",
                     software_name=software_name,
                     version=rel_version,
                     release_date=release_date,
-                    release_label=release_label
+                    release_label=release_label,
                 )
 
                 os_rel.latest_version = SoftwareReleaseVersion(rel_version)
@@ -119,7 +135,12 @@ class EOLAssetMapper(AssetMapper):
 
             # Create release
             release_date = rel["releaseDate"]
-            release_label = " ".join(str(rel["label"]).split(" ")[2:]).replace(" (LTSC)", "").replace(" SAC", "").replace(" AC", "")
+            release_label = (
+                " ".join(str(rel["label"]).split(" ")[2:])
+                .replace(" (LTSC)", "")
+                .replace(" SAC", "")
+                .replace(" AC", "")
+            )
 
             rel_key = rel_version
 
@@ -142,7 +163,7 @@ class EOLAssetMapper(AssetMapper):
                     software_name=software_name,
                     version=rel_version,
                     release_date=release_date,
-                    release_label=release_label
+                    release_label=release_label,
                 )
 
                 os_rel.latest_version = SoftwareReleaseVersion(rel_version)
@@ -197,7 +218,7 @@ class EOLAssetMapper(AssetMapper):
                 software_name=software_name,
                 version=str(rel_version),
                 release_date=release_date,
-                release_label=release_label
+                release_label=release_label,
             )
 
             os_rel.latest_version = SoftwareReleaseVersion(rel["latest"]["name"])
