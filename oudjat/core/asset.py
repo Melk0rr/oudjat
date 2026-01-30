@@ -3,6 +3,7 @@
 from abc import ABC
 from typing import TYPE_CHECKING, Any, TypedDict, TypeVar, override
 
+from oudjat.control.risk.risk import Risk
 from oudjat.core.exceptions import InvalidAssetTypeError
 from oudjat.utils import Context, UtilsDict
 
@@ -69,6 +70,8 @@ class Asset(GenericIdentifiable[AssetBoundType], ABC):
 
         if location is not None:
             self._set_location_from_instances(location)
+
+        self.risks: dict[str, "Risk"] = {}
 
     # ****************************************************************
     # Methods
