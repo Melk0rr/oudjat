@@ -177,6 +177,9 @@ class LDAPUser(LDAPAccount):
         base["account"][MS_ACCOUNT_CTL.replace("-", "")] = self.ms_account_ctl
         return {
             **base,
+            "givenname": self.givenname,
+            "surname": self.surname,
+            "email": self.email,
             "employeeId": self.employee_id,
             "manager": self.manager,
             "isAdmin": self.is_admin,
