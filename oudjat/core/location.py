@@ -2,13 +2,14 @@
 
 from typing import Any, override
 
+from oudjat.core.asset_type import AssetType
 from oudjat.utils import Context
 
 from ..core.network.subnet import Subnet
-from .generic_identifiable import GenericIdentifiable
+from .asset import Asset
 
 
-class Location(GenericIdentifiable):
+class Location(Asset):
     """A class to describe generic location with subnets, assets, users."""
 
     # ****************************************************************
@@ -38,7 +39,13 @@ class Location(GenericIdentifiable):
             subnet (Subnet | dict[int | str, Subnet] | None): The subnet or subnets associated with this location.
         """
 
-        super().__init__(gid=location_id, name=name, label=label, description=description)
+        super().__init__(
+            asset_id=location_id,
+            name=name,
+            label=label,
+            description=description,
+            asset_type=AssetType.LOCATION,
+        )
 
         self._subnet: dict[int | str, Subnet] = {}
 

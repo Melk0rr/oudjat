@@ -6,7 +6,8 @@ from collections.abc import Iterator
 from datetime import datetime
 from typing import Any, Callable, Generic, TypeAlias, TypedDict, TypeVar, override
 
-from oudjat.core.generic_identifiable import GenericIdentifiable
+from oudjat.core import Asset
+from oudjat.core.asset_type import AssetType
 from oudjat.core.software.software_edition import SoftwareEdition
 from oudjat.utils import Context
 from oudjat.utils.time_utils import TimeConverter
@@ -36,7 +37,7 @@ class SoftwareReleaseDictProps(TypedDict):
     supportChannels: dict[str, "SoftwareReleaseSupportDict"]
 
 
-class SoftwareRelease(GenericIdentifiable):
+class SoftwareRelease(Asset):
     """A class to describe software releases."""
 
     # ****************************************************************
@@ -73,7 +74,7 @@ class SoftwareRelease(GenericIdentifiable):
         self._version: "SoftwareReleaseVersion" = SoftwareReleaseVersion(version)
         self._latest_version: "SoftwareReleaseVersion" = self._version
 
-        super().__init__(gid=release_id, name=name, label=release_label)
+        super().__init__(asset_id=release_id, name=name, label=release_label, asset_type=AssetType.SOFTWARE_RELEASE)
 
         try:
             if not isinstance(release_date, datetime):
