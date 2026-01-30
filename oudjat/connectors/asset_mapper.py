@@ -19,7 +19,7 @@ from oudjat.utils import Context
 
 from .connector import ConnectorBoundType
 
-MappingValue: TypeAlias = tuple[str, Callable[[Any], Any] | None]
+MappingValue: TypeAlias = str | tuple[str | list[str], Callable[[Any], Any] | None] | Callable[[Any], Any]
 MappingRegistry: TypeAlias = dict[str, "MappingValue"]
 MappingCallback: TypeAlias = Callable[["AssetBoundType", dict[str, Any]], None]
 
@@ -65,26 +65,6 @@ class AssetMapper:
 
         return registry
 
-    def _transform(self, value: Any, transform: Callable[[Any], Any]) -> Any:
-        """
-        Transform the provided value based on the transform function.
-
-        Args:
-            value (Any)                     : The value to transform
-            transform (Callable[[Any], Any]): The transform function used to transform the profided value
-
-        Returns:
-            Any: The transformed value
-        """
-
-        try:
-            return transform(value)
-
-        except Exception as e:
-            raise ValueError(
-                f"{Context()}::Could not transform {value} based on profided transform function"
-            ) from e
-
     def _build_kwargs(
         self,
         record: dict[str, Any],
@@ -103,31 +83,43 @@ class AssetMapper:
             dict[str, Any]: A dictionary of the resulting constructor arguments
         """
 
+        context = Context()
+
         constructor_sig = inspect.signature(asset_cls.__init__)
         params = {name: p for name, p in constructor_sig.parameters.items() if name != "self"}
+        required_params = {name for name, p in params.items() if p.default is p.empty}
 
         kwargs: dict[str, Any] = {}
-        for src_key, src_value in record.items():
-            if src_key not in mapping_registry:
-                continue
-
-            target_key, transform = mapping_registry[src_key]
+        for target_key, map_val in mapping_registry.items():
 
             # If target key is not a valid argument accepted by the constructor
             # and the constructor does not accept kwargs: continue
             if target_key not in params and "kwargs" not in params:
+                self.__class__.logger.warning(f"{context}::{target_key} is not accepted by {asset_cls.__name__} constructor")
                 continue
 
-            kwargs[target_key] = (
-                self._transform(src_value, transform) if transform else src_value
-            )
+            if isinstance(map_val, str):
+                kwargs[target_key] = record.get(map_val)
 
-        required_params = {name for name, p in params.items() if p.default is p.empty}
-        for p in required_params:
-            if p != "kwargs" and p not in kwargs:
-                raise ArgumentError(
-                    f"{Context()}::{asset_cls.__name__} constructor requires {p} argument"
-                )
+            elif callable(map_val) and not isinstance(map_val, tuple):
+                kwargs[target_key] = map_val(record)
+
+            else:
+                src_key, transform = map_val
+
+                if not isinstance(src_key, (list, tuple)):
+                    src_key = [src_key]
+
+                src_vals = [record.get(k) for k in src_key]
+                kwargs[target_key] = transform(record, *src_vals) if transform else src_vals[0]
+
+            if target_key in required_params:
+                required_params.remove(target_key)
+
+        if len(required_params) > 0:
+            raise ArgumentError(
+                f"{context}::{asset_cls.__name__} constructor requires {list(required_params)} argument"
+            )
 
         return kwargs
 

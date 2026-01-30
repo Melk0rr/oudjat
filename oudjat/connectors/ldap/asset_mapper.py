@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 from oudjat.connectors.mapping_functions import MappingFunction
 from oudjat.core.computer.computer import Computer
 from oudjat.core.software.os.operating_system import OSReleaseListFilter
+from oudjat.core.user.user import User
 from oudjat.utils import Context
 
 from ..asset_mapper import AssetMapper, MappingOSTuple
@@ -86,7 +87,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return objects
 
-    def _ldap_computers(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPComputer"]:
+    def ldap_computers(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPComputer"]:
         """
         Map the provided LDAP entries into a dictionary of LDAPComputer instances.
 
@@ -104,7 +105,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return computers
 
-    def _ldap_users(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPUser"]:
+    def ldap_users(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPUser"]:
         """
         Map the provided LDAP entries into a dictionary of User instances.
 
@@ -122,7 +123,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return users
 
-    def _ldap_groups(
+    def ldap_groups(
         self,
         entries: list["LDAPEntry"],
         recursive: bool = False,
@@ -255,29 +256,39 @@ class LDAPAssetMapper(AssetMapper):
     # Methods - Asset mapping
 
     ### Computer mappping
-    def computers(self, entries: list["LDAPEntry"]) -> dict[str, "Computer"]:
+    def computers(
+        self, entries: list["LDAPEntry"], mapping_registry: "MappingRegistry | None" = None
+    ) -> dict[str, "Computer"]:
         """
         Map LDAP entries into Computer instances.
 
+        You can specify a custom mapping registry. By default, the mapping registry is:
+            "computer_id": "id"
+            "name": "name"
+            "description": "description"
+            "label": "hostname"
+
         Args:
-            entries (list[LDAPEntry]): Entries to map
+            entries (list[LDAPEntry])                : Entries to map
+            mapping_registry (MappingRegistry | None): Optional mapping registry
 
         Returns:
-            dict[str, Computer]: A dictionary Computer instances
+            dict[str, Computer]: A dictionary of Computer instances
         """
 
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into final Computer asset")
+        self.logger.info(f"{Context()}::Mapping {len(entries)} LDAP entries into Computer asset")
 
-        mapping_registry: "MappingRegistry" = {
-            "id": ("computer_id", None),
-            "name": ("name", None),
-            "description": ("description", None),
-            "hostname": ("label", None),
-        }
+        if mapping_registry is None:
+            mapping_registry = {
+                "computer_id": "id",
+                "name": "name",
+                "description": "description",
+                "label": "hostname",
+            }
 
         # Record callback to first convert the entry into an LDAPComputer instance
         def record_cb(record: "LDAPEntry") -> dict[str, Any]:
-            return next(iter(self._ldap_computers([record]).values())).to_dict()
+            return next(iter(self.ldap_computers([record]).values())).to_dict()
 
         def asset_cb(asset: "Computer", record: dict[str, Any]) -> None:
             release_filters: list["OSReleaseListFilter"] = [
@@ -307,4 +318,47 @@ class LDAPAssetMapper(AssetMapper):
             record_cb=record_cb,
             asset_cb=asset_cb,
             key_cb=lambda r: r["dn"],
+        )
+
+    ### User mappping
+    def users(
+        self, entries: list["LDAPEntry"], mapping_registry: "MappingRegistry | None" = None
+    ) -> dict[str, "User"]:
+        """
+        Map LDAP entries into User instances.
+
+        You can specify a custom mapping registry. By default, the mapping registry is:
+            "user_id": "user_id"
+            "name": "name"
+            "login": "san"
+            "firstname": "givenname"
+            "lastname": "surname"
+            "email": "email"
+
+        Args:
+            entries (list[LDAPEntry])                : Entries to map
+            mapping_registry (MappingRegistry | None): Optional mapping registry that will replace the default one to map Computers
+
+        Returns:
+            dict[str, Computer]: A dictionary of User instances
+        """
+
+        if mapping_registry is None:
+            mapping_registry = {
+                "user_id": "user_id",
+                "name": "name",
+                "login": "san",
+                "firstname": "givenname",
+                "lastname": "surname",
+                "email": "email",
+            }
+
+        def asset_cb(asset: "User", record: dict[str, Any]) -> None:
+            asset.add_custom_attr("ldap", record)
+
+        return self.map_many(
+            records=entries,
+            asset_cls=User,
+            mapping_registry=mapping_registry,
+            asset_cb=asset_cb,
         )
