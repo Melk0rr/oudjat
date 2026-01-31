@@ -3,6 +3,7 @@ A module to map EndOfLife.date results into actual assets.
 """
 
 import re
+from typing import Any
 
 from oudjat.core.software import SoftwareReleaseSupport, SoftwareReleaseVersion
 from oudjat.core.software.os import OSRelease
@@ -60,6 +61,10 @@ class EOLAssetMapper(AssetMapper):
             "release_label": ("label", lambda label: rel_label(label))
         }
 
+        def rel_cb(rel: "OSRelease", record: dict[str, Any]) -> None:
+            rel.latest_version = SoftwareReleaseVersion(record["latest"]["name"])
+            rel.add_custom_attr("link", record["latest"]["link"])
+
         # TODO: Finish AssetMapper implementation + find a way to handle conditional map
 
         for rel in windows_eol["releases"]:
@@ -68,33 +73,24 @@ class EOLAssetMapper(AssetMapper):
 
             # Create release
             release_date = rel["releaseDate"]
-            rel_label_split = str(rel["label"]).split(" ")
-            release_label = rel_label_split[1] if len(rel_label_split) >= 2 else None
 
-            rel_key = rel_version
             rel_id = f"{windows_eol['name']}-{rel_version}"
 
-            if rel_key not in releases.keys():
-                releases[rel_key] = []
+            _ = releases.setdefault(rel_version, [])
 
             # If element with the same id already exist. Then don't add a new release
-            exist = next((i for i, el in enumerate(releases[rel_key]) if el.id == rel_id), None)
+            exist = next((i for i, el in enumerate(releases[rel_version]) if el.id == rel_id), None)
             index = 0
 
             if exist is None:
-                os_rel = OSRelease(
-                    release_id=rel_id,
-                    name=f"{software_name} {rel['label'].split(' ')[0]}",
-                    software_name=software_name,
-                    version=rel_version,
-                    release_date=release_date,
-                    release_label=release_label,
+                os_rel = self.map_one(
+                    record=rel,
+                    asset_cls=OSRelease,
+                    mapping_registry=mapping_registry,
+                    callback=rel_cb,
                 )
 
-                os_rel.latest_version = SoftwareReleaseVersion(rel_version)
-                os_rel.add_custom_attr("link", rel["latest"]["link"])
-
-                releases[rel_key].append(os_rel)
+                releases[rel_version].append(os_rel)
 
             else:
                 index = exist
@@ -113,7 +109,7 @@ class EOLAssetMapper(AssetMapper):
                     long_term_support=rel["isLts"],
                 )
 
-                releases[rel_key][index].add_support(ch, support)
+                releases[rel_version][index].add_support(ch, support)
 
         return releases
 
