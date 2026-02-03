@@ -683,6 +683,20 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
 
         return self._releases.get(key, default_value)
 
+    def find_unique_index(self, rel_version: str, rel_id: str) -> int | None:
+        """
+        Find a release in a release dictionary based on a provided version and id.
+
+        Args:
+            rel_version (str): The version of the sought release
+            rel_id (str)     : The id of the sought release
+
+        Returns:
+            int | None: The index of the release in the version list if it exists
+        """
+
+        return next((i for i, el in enumerate(self[rel_version]) if el.id == rel_id), None)
+
     def keys(self):
         """
         Return the keys of the data dict.
