@@ -627,7 +627,33 @@ class S1Connector(Connector):
             DataType: Data of the site matching the provided ID
         """
 
-        return self.fetch(S1Endpoint.SITES, payload=payload or {})
+        req = self.fetch(S1Endpoint.SITES, payload=payload or {})
+        return next(iter(req))["sites"]
+
+    def sites_by_name(self, names: list[str], payload: dict[str, Any] | None = None) -> "DataType":
+        """
+        Retrieve sites based on the provided name list.
+
+        The response includes the IDs of Sites, which you can use in other commands.
+
+        Possible response messages:
+        200 - Success
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry.
+
+        Args:
+            names (list[str])       : A list of site names to retrieve
+            payload (dict[str, Any]): Payload to send to the endpoint
+
+        Returns:
+            DataType: Data of the site matching the provided ID
+        """
+
+        def filter_by_name(site: dict[str, Any]) -> bool:
+            return site["name"] in names
+
+        return list(filter(filter_by_name, self.sites(payload)))
+
 
     def threats(
         self,
