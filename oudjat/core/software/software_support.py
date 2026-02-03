@@ -21,6 +21,7 @@ class SoftwareReleaseSupportDetailsDict(TypedDict):
     end: str
     duration: int
 
+
 class SoftwareReleaseSupportDict(TypedDict):
     """
     A helper class to properly handle support dictionary types.
@@ -123,6 +124,17 @@ class SoftwareReleaseSupport:
     # Methods
 
     @property
+    def channel(self) -> str:
+        """
+        Return the support channel name.
+
+        Returns:
+            str: The name of the channel associated with the current support
+        """
+
+        return self._channel
+
+    @property
     def status(self) -> "SoftwareReleaseSupportStatus":
         """
         Return a string representing the current support status.
@@ -178,11 +190,7 @@ class SoftwareReleaseSupport:
         end = f"{abs(support_days)} days"
         end = f"Ends in {end}" if support_days > 0 else f"Ended {end} ago"
 
-        return {
-            "start": start,
-            "end": end,
-            "duration": self.duration
-        }
+        return {"start": start, "end": end, "duration": self.duration}
 
     @property
     def lts(self) -> bool:
