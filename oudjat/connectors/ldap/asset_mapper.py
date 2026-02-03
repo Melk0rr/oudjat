@@ -24,7 +24,7 @@ from .objects.ou.ldap_ou import LDAPOrganizationalUnit
 from .objects.subnet.ldap_subnet import LDAPSubnet
 
 if TYPE_CHECKING:
-    from ..asset_mapper import MappingRegistry
+    from oudjat.core.mapper import MappingRegistry
 
 
 class LDAPAssetMapper(AssetMapper):
@@ -280,17 +280,17 @@ class LDAPAssetMapper(AssetMapper):
 
         if mapping_registry is None:
             mapping_registry = {
-                "computer_id": "id",
-                "name": "name",
-                "description": "description",
-                "label": "hostname",
+                "computer_id": lambda c: c["id"],
+                "name": lambda c: c["name"],
+                "description": lambda c: c["description"],
+                "label": lambda c: c["hostname"],
             }
 
         # Record callback to first convert the entry into an LDAPComputer instance
         def record_cb(record: "LDAPEntry") -> dict[str, Any]:
             return next(iter(self.ldap_computers([record]).values())).to_dict()
 
-        def asset_cb(asset: "Computer", record: dict[str, Any]) -> None:
+        def asset_cb(asset: "Computer", record: dict[str, Any], _: "MappingRegistry") -> None:
             release_filters: list["OSReleaseListFilter"] = [
                 lambda rl: rl.filter_max_version(),
                 lambda rl: rl.filter_by_label(record["os"]["name"]),
@@ -313,7 +313,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return self.map_many(
             records=entries,
-            asset_cls=Computer,
+            map_cls=Computer,
             mapping_registry=mapping_registry,
             record_cb=record_cb,
             asset_cb=asset_cb,
@@ -345,20 +345,21 @@ class LDAPAssetMapper(AssetMapper):
 
         if mapping_registry is None:
             mapping_registry = {
-                "user_id": "user_id",
-                "name": "name",
-                "login": "san",
-                "firstname": "givenname",
-                "lastname": "surname",
-                "email": "email",
+                "user_id": lambda u: u["id"],
+                "name": lambda u: u["name"],
+                "login": lambda u: u["san"],
+                "firstname": lambda u: u["givenname"],
+                "lastname": lambda u: u["surname"],
+                "email": lambda u: u["email"],
             }
 
-        def asset_cb(asset: "User", record: dict[str, Any]) -> None:
+        def asset_cb(asset: "User", record: dict[str, Any], _: "MappingRegistry") -> None:
             asset.add_custom_attr("ldap", record)
 
         return self.map_many(
             records=entries,
-            asset_cls=User,
+            map_cls=User,
             mapping_registry=mapping_registry,
             asset_cb=asset_cb,
+            key_cb=lambda r: r["id"]
         )
