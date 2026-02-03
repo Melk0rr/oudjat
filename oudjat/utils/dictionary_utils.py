@@ -192,6 +192,21 @@ class UtilsDict(dict):
         return d1
 
     @staticmethod
+    def filter_keys(d: dict[str, Any], keys: list[str]) -> dict[str, Any]:
+        """
+        Filter the keys of a dictionary.
+
+        Args:
+            d (dict[str, Any]): The dictionary, which keys will be filtered
+            keys (list[str])  : A list of keys to keep
+
+        Returns:
+            dict[str, Any]: Filtered dictionary
+        """
+
+        return {k: v for k, v in d.items() if k in keys}
+
+    @staticmethod
     def flatten_dict(d: dict[str, Any], parent_key: str = "", sep: str = ".") -> dict[str, Any]:
         """
         Flatten a given dictionary based on the provided separator.
