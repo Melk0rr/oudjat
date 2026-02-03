@@ -2,13 +2,11 @@
 A generic module that helps connectors to map data into assets.
 """
 
-import inspect
-import logging
 from collections.abc import Sequence
-from ctypes import ArgumentError
-from typing import Any, Callable, TypeAlias
+from typing import Any, Callable, TypeAlias, override
 
 from oudjat.core.asset import AssetBoundType
+from oudjat.core.mapper import Mapper, MappingRegistry
 from oudjat.core.software.exceptions import AmbiguousReleaseException
 from oudjat.core.software.os import OperatingSystem, OSFamily, OSOption, OSRelease
 from oudjat.core.software.os.exceptions import NotImplementedOSOption
@@ -17,182 +15,93 @@ from oudjat.core.software.software_edition import SoftwareEdition
 from oudjat.core.software.software_release_version import SoftwareReleaseVersion
 from oudjat.utils import Context
 
-from .connector import ConnectorBoundType
-
-MappingValue: TypeAlias = str | tuple[str | list[str], Callable[[Any], Any] | None] | Callable[[Any], Any]
-MappingRegistry: TypeAlias = dict[str, "MappingValue"]
-MappingCallback: TypeAlias = Callable[["AssetBoundType", dict[str, Any]], None]
-
 MappingOSTuple: TypeAlias = tuple[
     "OperatingSystem | None", "OSRelease | None", "SoftwareEdition | None"
 ]
 
+AssetMappingCallback: TypeAlias = Callable[["AssetBoundType", dict[str, Any], "MappingRegistry"], None]
 
-class AssetMapper:
+class AssetMapper(Mapper):
     """
     A generic mapper that turns data (dict or list of dicts) into Asset instances.
     """
 
     # ****************************************************************
-    # Attributes & Constructors
+    # Class methods - engine
 
-    logger: "logging.Logger" = logging.getLogger(__name__)
-
-    def __init__(self) -> None:
-        """
-        Create a new AssetMapper instance.
-        """
-
-        self._connector: "ConnectorBoundType | None" = None
-
-    # ****************************************************************
-    # Methods - engine
-
-    def _merge_registries(self, registries: list["MappingRegistry"]) -> "MappingRegistry":
-        """
-        Merge several registries into a single one.
-
-        Args:
-            registries (list[MappingRegistry]): Registries to merge
-
-        Returns:
-            dict[str, MappingValue]: Merged mapping registry
-        """
-
-        registry: "MappingRegistry" = {}
-        for md in registries:
-            registry.update(md)
-
-        return registry
-
+    @override
+    @classmethod
     def _build_kwargs(
-        self,
+        cls,
         record: dict[str, Any],
-        asset_cls: type["AssetBoundType"],
+        map_cls: type["AssetBoundType"],
         mapping_registry: "MappingRegistry",
     ) -> dict[str, Any]:
         """
         Return parameters required to instanciate the provided Asset class.
 
         Args:
-            record (dict[str, Any])         : The base data record from which the Asset class will be instanciated.
-            asset_cls (type[AssetBoundType]): The Asset class that will be instanciated
+            record (dict[str, Any])           : The base data record from which the Asset class will be instanciated.
+            map_cls (type[AssetBoundType])    : The Asset class that will be instanciated
             mapping_registry (MappingRegistry): The mapping registry used to set the constructor parameter: value tuples
 
         Returns:
             dict[str, Any]: A dictionary of the resulting constructor arguments
         """
 
-        context = Context()
+        return super()._build_kwargs(record, map_cls, mapping_registry)
 
-        constructor_sig = inspect.signature(asset_cls.__init__)
-        params = {name: p for name, p in constructor_sig.parameters.items() if name != "self"}
-        required_params = {name for name, p in params.items() if p.default is p.empty}
-
-        kwargs: dict[str, Any] = {}
-        for target_key, map_val in mapping_registry.items():
-
-            # If target key is not a valid argument accepted by the constructor
-            # and the constructor does not accept kwargs: continue
-            if target_key not in params and "kwargs" not in params:
-                self.__class__.logger.warning(f"{context}::{target_key} is not accepted by {asset_cls.__name__} constructor")
-                continue
-
-            if isinstance(map_val, str):
-                kwargs[target_key] = record.get(map_val)
-
-            elif callable(map_val) and not isinstance(map_val, tuple):
-                kwargs[target_key] = map_val(record)
-
-            else:
-                src_key, transform = map_val
-
-                if not isinstance(src_key, (list, tuple)):
-                    src_key = [src_key]
-
-                src_vals = [record.get(k) for k in src_key]
-                kwargs[target_key] = transform(record, *src_vals) if transform else src_vals[0]
-
-            if target_key in required_params:
-                required_params.remove(target_key)
-
-        if len(required_params) > 0:
-            raise ArgumentError(
-                f"{context}::{asset_cls.__name__} constructor requires {list(required_params)} argument"
-            )
-
-        return kwargs
-
+    @override
+    @classmethod
     def map_one(
-        self,
+        cls,
         record: dict[str, Any],
-        asset_cls: type["AssetBoundType"],
+        map_cls: type["AssetBoundType"],
         mapping_registry: "MappingRegistry" | list["MappingRegistry"],
-        callback: "MappingCallback | None" = None,
+        callback: "AssetMappingCallback | None" = None,
     ) -> "AssetBoundType":
         """
         Map a single data record into an instance of the provided asset class.
 
         Args:
             record (dict[str, Any])               : The data record to map
-            asset_cls (type[AssetBoundType])      : The class the record will be mapped into
+            map_cls (type[AssetBoundType])        : The class the record will be mapped into
             mapping_registry (list[MappingValue]) : The mapping registry used to map the record
-            callback (Callable[..., Any])         : A callback function to run after the asset has been mapped
+            callback (AssetMappingCallback | None): A callback function to run after the asset has been mapped
 
         Returns:
             AssetBoundType: The mapped asset
         """
 
-        self.__class__.logger.debug(f"{Context()}::Maping {record} > {asset_cls.__name__} : {mapping_registry}")
-        if isinstance(mapping_registry, list):
-            mapping_registry = self._merge_registries(mapping_registry)
+        return super().map_one(record, map_cls, mapping_registry, callback)
 
-        kwargs = self._build_kwargs(record, asset_cls, mapping_registry)
-        asset = asset_cls(**kwargs)
-
-        if callback is not None:
-            callback(asset, record)
-
-        return asset
-
+    @override
+    @classmethod
     def map_many(
-        self,
+        cls,
         records: Sequence[dict[str, Any]],
-        asset_cls: type["AssetBoundType"],
+        map_cls: type["AssetBoundType"],
         mapping_registry: "MappingRegistry" | list["MappingRegistry"],
+        key_cb: Callable[[dict[str, Any]], str],
         record_cb: Callable[..., dict[str, Any]] | None = None,
-        asset_cb: "MappingCallback | None" = None,
-        key_cb: Callable[[dict[str, Any]], str] | None = None,
+        asset_cb: "AssetMappingCallback | None" = None,
     ) -> dict[str, "AssetBoundType"]:
         """
         Map multiple data record into instances of the provided asset class.
 
         Args:
             records (dict[str, Any])                              : The data record to map
-            asset_cls (type[AssetBoundType])                      : The class the record will be mapped into
+            map_cls (type[AssetBoundType])                        : The class the record will be mapped into
             mapping_registry (list[MappingValue])                 : The mapping registry used to map the record
             record_cb (Callable[[dict[str, Any]], dict[str, Any]]): A callback function to run after the asset has been mapped
-            asset_cb (MappingCallback)                            : A callback function to run after the asset has been mapped
+            asset_cb (AssetMappingCallback)                       : A callback function to run after the asset has been mapped
             key_cb (Callable[dict[str, Any], str] | None)         : A callback function to provide a key to associate wih the mapped asset
 
         Returns:
             dict[str, AssetBoundType]: A dictionary of mapped Assets
         """
 
-        res = {}
-        for record in records:
-            self.__class__.logger.debug(f"{Context()}::Mapping record > {record}")
-
-            a = self.map_one(
-                record=(record_cb(record) if record_cb else record),
-                asset_cls=asset_cls,
-                mapping_registry=mapping_registry,
-                callback=asset_cb,
-            )
-
-            res[key_cb(record) if key_cb else a.id] = a
-
-        return res
+        return super().map_many(records, map_cls, mapping_registry, key_cb, record_cb, asset_cb)
 
     # ****************************************************************
     # Static methods
