@@ -13,7 +13,6 @@ class AssetType(Enum):
     SOFTWARE_RELEASE = "software_release"
     URL = "url"
     USER = "user"
-    LOCATION = "location"
 
     @override
     def __str__(self) -> str:
