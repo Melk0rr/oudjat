@@ -216,16 +216,18 @@ class TenableSCConnector(Connector):
         *severities: int,
         tool: "TSCVulnTool" = TSCVulnTool.VULNDETAILS,
         exploitable: bool = True,
+        filters: list["TSCFilter"] | None = None,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Retrieve the current vulnerabilities.
 
         Args:
-            severities (int)               : Vuln severities to include
-            tool (TSCVulnTool)             : Tool to use for the search
-            exploitable (bool)             : Wheither to search only for exploitable vulnerabilities or not
-            payload (dict[str, Any] | None): Payload to send to the endpoint
+            severities (int)                : Vuln severities to include
+            tool (TSCVulnTool)              : Tool to use for the search
+            exploitable (bool)              : Wheither to search only for exploitable vulnerabilities or not
+            filters (list[TSCFilter] | None): Additional filters that will be passed to the final query
+            payload (dict[str, Any] | None) : Payload to send to the endpoint
 
         Returns:
             DataType: Vulnerabilities matching arguments
@@ -236,7 +238,9 @@ class TenableSCConnector(Connector):
 
         payload["tool"] = tool.value
 
-        filters: list["TSCFilter"] = []
+        if filters is None:
+            filters = []
+
         if exploitable:
             filters.append(TSCBuiltinFilter.VULNS_EXPLOITABLE.value)
 
