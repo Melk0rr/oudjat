@@ -58,7 +58,6 @@ class DecisionTreeNode:
 
         self._flag: "DecisionNodeFlagType" = node_dict.get("flag", None)
         self._node_filter: "DataFilter" = DataFilter.from_dict(node_dict)
-        self._node_filter.negate = node_dict.get("negate", False)
         self._value: bool | None = None
 
     # ****************************************************************
