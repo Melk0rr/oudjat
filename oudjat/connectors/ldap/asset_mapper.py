@@ -195,7 +195,7 @@ class LDAPAssetMapper(AssetMapper):
 
         return ous
 
-    def _ldap_subnets(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPSubnet"]:
+    def ldap_subnets(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPSubnet"]:
         """
         Map the provided LDAP entries into a dictionary of LDAPSubnet instances.
 
