@@ -57,7 +57,11 @@ class S1Connector(Connector):
         super().__init__(target=urlparse(target), username=username, password=api_token)
 
         self._connection: "requests.Session | None" = None
-        self._DEFAULT_HEADERS: dict[str, str] = {"Content-Type": "application/json"}
+
+        self._DEFAULT_HEADERS: dict[str, str] = {
+            "accept": "application/json",
+            "content-type": "application/json",
+        }
 
     # ****************************************************************
     # Methods

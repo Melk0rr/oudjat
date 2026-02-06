@@ -4,7 +4,7 @@ A helper module to define S1 exceptions.
 
 class SentinelOneAPIConnectionError(ConnectionError):
     """
-    A helper error class to handle request errors to the Cybereason API.
+    A helper error class to handle request errors to the SentinelOne API.
     """
 
     def __init__(self, message: str) -> None:
