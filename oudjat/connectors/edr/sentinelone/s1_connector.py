@@ -631,7 +631,7 @@ class S1Connector(Connector):
             "analystVerdict": str(verdict)
         }
 
-        return self.fetch(S1Endpoint.ALERTS_ANALYST_VERDICT, {"filter": alert_filter, "data": data})
+        return self.fetch(S1Endpoint.THREATS_INCIDENT, {"filter": alert_filter, "data": data})
 
     # ****************************************************************
     # Methods: Applications
