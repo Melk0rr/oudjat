@@ -618,7 +618,7 @@ class S1Connector(Connector):
             incident_status = list(set(map(check_status, incident_status)))
 
         if file_path is not None:
-            alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(file_path)
+            alert_filter["filePath__contains"] = self._unify_str_list(file_path)
 
         if not isinstance(status, S1IncidentStatus):
             status = S1IncidentStatus[status.upper()]
