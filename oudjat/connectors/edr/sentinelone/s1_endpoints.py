@@ -35,6 +35,9 @@ class S1Endpoint(Enum):
     AGENTS_ACTIONS_MOVE_TO_SITE = S1EndpointsProps(
         "/web/api/v2.1/agents/actions/move-to-site", ConnectorMethod.POST
     )
+    ALERTS_ANALYST_VERDICT = S1EndpointsProps(
+        "/web/api/v2.1/cloud-detection/alerts/analyst-verdict", ConnectorMethod.POST
+    )
     APPLICATIONS_INVENTORY = S1EndpointsProps(
         "/web/api/v2.1/application-management/inventory", ConnectorMethod.GET
     )
