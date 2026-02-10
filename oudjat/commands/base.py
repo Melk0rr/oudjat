@@ -5,7 +5,7 @@ from typing import Any
 from oudjat.utils import Context
 
 
-class Base(object):
+class Base:
     """A base command."""
 
     # ****************************************************************
