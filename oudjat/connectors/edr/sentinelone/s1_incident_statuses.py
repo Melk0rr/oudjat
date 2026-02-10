@@ -24,5 +24,5 @@ class S1IncidentStatus(Enum):
             str: A string representation of the incident status
         """
 
-        return self._name_
+        return self._value_
 
