@@ -436,6 +436,68 @@ class S1Connector(Connector):
 
         return self.fetch(S1Endpoint.ALERTS_ANALYST_VERDICT, {"filter": alert_filter, "data": data})
 
+    def update_incident_status(
+        self,
+        status: "str | S1IncidentStatus",
+        alert_ids: "StrType | None" = None,
+        site_ids: "StrType | None" = None,
+        incident_status: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = None,
+        process_path: "StrType | None" = None,
+        alert_filter: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Change the verdict of an alert.
+
+        Response Messages
+        200 - Threats incident successfully updated
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry
+
+        Args:
+            status (str | S1IncidentStatus)                                               : The verdict to assign to the filtered alerts
+            alert_ids (str | list[str] | None)                                            : Ids of the alert to change verdict of
+            site_ids (str | list[str] | None)                                             : Site ids of the alerts
+            incident_status (str | S1IncidentStatus | list[str | S1IncidentStatus] | None): Status of the alerts
+            process_path (str | list[str] | None)                                         : Path of the process which triggered the alert
+            alert_filter (dict[str, Any])                                                 : A dictionary of alert filters
+
+        Returns:
+            DataType: Response containing the number of affected verdicts and eventual errors
+        """
+
+        if alert_filter is None:
+            alert_filter = {}
+
+        if alert_ids is not None:
+            if not isinstance(alert_ids, list):
+                alert_ids = [alert_ids]
+
+            alert_filter["ids"] = self._unify_str_list(alert_ids)
+
+        if site_ids is not None:
+            alert_filter["siteIds"] = self._unify_str_list(site_ids)
+
+        if incident_status is not None:
+            if not isinstance(incident_status, list):
+                incident_status = [incident_status]
+
+            def check_status(s: "str | S1IncidentStatus") -> str:
+                return (
+                    str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
+                )
+
+            incident_status = list(set(map(check_status, incident_status)))
+
+        if process_path is not None:
+            alert_filter["process_path"] = self._unify_str_list(process_path)
+
+        if not isinstance(status, S1IncidentStatus):
+            status = S1IncidentStatus[status.upper()]
+
+        data = {"incidentStatus": str(status)}
+
+        return self.fetch(S1Endpoint.ALERTS_ANALYST_VERDICT, {"filter": alert_filter, "data": data})
+
     # ****************************************************************
     # Methods: Applications
 
