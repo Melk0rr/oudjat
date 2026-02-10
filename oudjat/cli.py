@@ -5,6 +5,8 @@ Usage:
     oudjat -h | --help
     oudjat -l=LOGGING | --log=LOGLEVEL
     oudjat -V | --version
+    
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) [Connector-Options]
 
 Commands
 
@@ -16,25 +18,20 @@ Options:
     -l --log=LOGLEVEL               specify the log level
     -o --output=FILENAME            save execution logs to the specified file
     -S --silent                     simple output, one per line
-    -t --target                     set target (comma separated, no spaces, if multiple)
+    -t --target=TARGET              set target (comma separated, no spaces, if multiple)
     -v --verbose                    print debug info and full request output
     -V --version                    show version and exit
-    -x --export-csv=CSV             save results as csv
+    --csv=CSV                       save results as csv
+    --json=JSON                     save results as json
 
-Cert-options:
-    --feed                          run cert mode from a feed
-    --filter=FILTER                 date filter to apply with feed option (e.g. 2023-03-10)
-    --keywords=KEYWORDS             set keywords to track (comma separated, no spaces, if multiple)
-    --keywordfile=KEYWORDFILE       set keywords to track (file, one keyword per line)
-
-Exemples:
-    oudjat cert -t https://cert.ssi.gouv.fr/alerte/feed/ --feed --filter "2023-03-13"
-    oudjat cert -f ./tests/certfr.txt --export-csv ./tests/certfr_20230315.csv --keywordfile ./tests/keywords.txt
-    oudjat vuln -f ./tests/cve.txt --export-csv ./tests/cve_20230313.csv
+Connector-Options:
+    -u --username=USER              username to use with the connector
+    -p --password=PASS              password to use with the connector
+    --creds-service=SERVICE         service name to retrieve the credentials from
 
 Help:
     For help using this tool, please open an issue on the Github repository:
-    https://github.com/Melk0rr/Oudjat
+    https://codeberg.org/me1k0r/oudjat
 """
 
 import logging
