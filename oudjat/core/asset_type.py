@@ -8,7 +8,6 @@ class AssetType(Enum):
     """Asset types enumeration."""
 
     COMPUTER = "computer"
-    GROUP = "group"
     SOFTWARE = "software"
     SOFTWARE_RELEASE = "software_release"
     URL = "url"

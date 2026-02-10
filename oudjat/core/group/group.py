@@ -4,13 +4,10 @@ from typing import Any, Generic, TypeVar, override
 
 from oudjat.core.generic_identifiable import GenericIdentifiable
 
-from ..asset import Asset
-from ..asset_type import AssetType
-
 MemberType = TypeVar("MemberType", bound=GenericIdentifiable)
 
 
-class Group(Asset, Generic[MemberType]):
+class Group(GenericIdentifiable, Generic[MemberType]):
     """A class to handle groups of assets."""
 
     # ****************************************************************
@@ -36,11 +33,10 @@ class Group(Asset, Generic[MemberType]):
         """
 
         super().__init__(
-            asset_id=group_id,
+            gid=group_id,
             name=name,
             label=label,
             description=description,
-            asset_type=AssetType.GROUP,
             **kwargs,
         )
 
