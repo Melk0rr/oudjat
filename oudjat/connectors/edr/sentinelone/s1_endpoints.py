@@ -126,6 +126,12 @@ class S1Endpoint(Enum):
     SYSTEM_INFO = S1EndpointsProps("/web/api/v2.1/system/info", ConnectorMethod.GET)
     SYSTEM_STATUS = S1EndpointsProps("/web/api/v2.1/system/status", ConnectorMethod.GET)
     THREATS = S1EndpointsProps("/web/api/v2.1/threats", ConnectorMethod.GET)
+    THREATS_ANALYST_VERDICT = S1EndpointsProps(
+        "/web/api/v2.1/threats/analyst-verdict", ConnectorMethod.POST
+    )
+    THREATS_INCIDENT = S1EndpointsProps(
+        "/web/api/v2.1/threats/incident", ConnectorMethod.POST
+    )
 
     @property
     def path(self) -> str:
