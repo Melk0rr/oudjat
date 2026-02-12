@@ -2,15 +2,18 @@
 A command module to handle interactions to Sentinel One API through the dedicated connector.
 """
 
-from typing import Any
+from ctypes import ArgumentError
+from typing import Any, override
 
 from oudjat.connectors.edr.sentinelone import S1Connector
-from oudjat.utils.context import Context
+from oudjat.core.mapper import Mapper
+from oudjat.utils import Context
+from oudjat.utils.file_utils import FileUtils
 
-from .base import Base
+from .connector_command import CommandOpts, ConnectorCommand
 
 
-class S1ConnectorCommand(Base):
+class S1ConnectorCommand(ConnectorCommand):
     """
     A class to provide an access to the S1Connector.
     """
@@ -23,19 +26,61 @@ class S1ConnectorCommand(Base):
             options (dict[str, Any]): Provided options
         """
 
-        super().__init__(options)
+        super().__init__(options, True)
 
-        context = Context()
+        credentials = {}
+        if "--password" in self.options:
+            credentials = {
+                "username": self.options["--username"],
+                "password": self.options["--password"]
+            }
 
-        self.connector: "S1Connector" = S1Connector(target=self.options["target"])
+        self.connector: "S1Connector" = S1Connector(target=self.options["target"], **credentials)
 
-        if not (
-            "username" in self.options
-            and "password" in self.options
-            or "creds-service" in self.options
-        ):
-            raise ConnectorCredentialError(
-                f"{context}::No credentials were provided for the connector"
+        if "--creds-service" in self.options:
+            self.connector.set_creds_from_svc_name(self.options["--creds-service"])
+
+        self.connector.connect()
+
+        self._command_opt: "CommandOpts" = {
+            "--agents": (
+                self.connector.agents,
+                {
+                    "site_ids": self.options["--site-list"].split(","),
+                    "payload": self.options["--payload"],
+                    "infected": self.options["--infected"],
+                    "net_statuses": self.options["--net-status"],
+                }
+            ),
+
+            "--move-agent-site": (
+                self.connector.move_agent_to_site,
+                {
+                    "site_id": self.options["--site-list"],
+                    "agent_name": self.options["--agent-list"]
+                }
             )
+        }
 
+
+    @override
+    def run(self) -> None:
+        """
+        Run the command main process.
+        """
+
+        cmd_name = self._find_cmd_name()
+        cmd, params = self._command_opt[cmd_name]
+        req_params = Mapper.required_params(Mapper.signature_params(cmd))
+
+        if not bool(set(params) & req_params):
+            raise ArgumentError(f"{Context()}::{cmd_name} command requires {req_params}")
+
+        data = cmd(**params)
+
+        if "--csv" in self.options:
+            FileUtils.export_csv(data, self.options["--csv"], delimiter="|")
+
+        elif "--json" in self.options:
+            FileUtils.export_json(data, self.options["--json"])
 

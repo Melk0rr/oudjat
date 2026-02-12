@@ -5,29 +5,33 @@ Usage:
     oudjat -h | --help
     oudjat -l=LOGGING | --log=LOGLEVEL
     oudjat -V | --version
-    
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) [Connector-Options]
+
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) [Connector-Options] [Options]
 
 Commands
+    connectors.edr.sentinelone          interact with sentinelone api
 
 Options:
-    -a --append                     append to the output file
-    -c --config=CONFIG              specify config file
-    -f --file                       set target (reads from file, one domain per line)
-    -h --help                       show this help message and exit
-    -l --log=LOGLEVEL               specify the log level
-    -o --output=FILENAME            save execution logs to the specified file
-    -S --silent                     simple output, one per line
-    -t --target=TARGET              set target (comma separated, no spaces, if multiple)
-    -v --verbose                    print debug info and full request output
-    -V --version                    show version and exit
-    --csv=CSV                       save results as csv
-    --json=JSON                     save results as json
+    -a --append                         append to the output file
+    -c --config=CONFIG                  specify config file
+    -f --file                           set target (reads from file, one domain per line)
+    -h --help                           show this help message and exit
+    -l --log=LOGLEVEL                   specify the log level
+    -o --output=FILENAME                save execution logs to the specified file
+    -S --silent                         simple output, one per line
+    -t --target=TARGET                  set target (comma separated, no spaces, if multiple)
+    -v --verbose                        print debug info and full request output
+    -V --version                        show version and exit
+    --csv=CSV                           save results as csv
+    --json=JSON                         save results as json
 
 Connector-Options:
-    -u --username=USER              username to use with the connector
-    -p --password=PASS              password to use with the connector
-    --creds-service=SERVICE         service name to retrieve the credentials from
+    -u --username=USER                  username to use with the connector
+    -p --password=PASS                  password to use with the connector
+    --creds-service=SERVICE             service name to retrieve the credentials from
+
+[S1Co-Options]
+    --agents                            retrieve S1 agents
 
 Help:
     For help using this tool, please open an issue on the Github repository:
@@ -41,8 +45,8 @@ from typing import Any
 
 from docopt import docopt
 
-import oudjat.commands
 from oudjat.banner import banner
+from oudjat.commands.s1_connector_command import S1ConnectorCommand
 from oudjat.utils import ColorPrint, StdOutHook, TimeConverter
 from oudjat.utils.logging import oudjatLogger
 
@@ -67,7 +71,6 @@ def config_logging(options: dict[str, str]) -> "logging.Logger":
 
     return oudjatLogger(level=LOGGING_LEVELS.get(options["--log"], LOGGING_LEVELS["INFO"]))
 
-
 def command_switch(options: dict[str, str]) -> Any:
     """
     Script command switch case.
@@ -76,7 +79,9 @@ def command_switch(options: dict[str, str]) -> Any:
         options (dict[str, str]): CLI options
     """
 
-    COMMAND_OPTIONS = {}
+    COMMAND_OPTIONS = {
+        "connectors.edr.sentinelone": S1ConnectorCommand
+    }
 
     command_name = next(command for command in COMMAND_OPTIONS.keys() if options[command])
     return COMMAND_OPTIONS[command_name](options)

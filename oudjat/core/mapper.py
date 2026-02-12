@@ -14,6 +14,7 @@ MappingRegistry: TypeAlias = dict[str, "MappingValue"]
 MappingRegistryFunc: TypeAlias = Callable[..., "MappingRegistry"]
 MappingCallback: TypeAlias = Callable[[Any, dict[str, Any], "MappingRegistry"], None]
 
+
 class Mapper:
     """
     A generic class to map any data record into any class.
@@ -61,7 +62,6 @@ class Mapper:
 
         return map_val
 
-
     @classmethod
     def _build_kwargs(
         cls,
@@ -84,17 +84,17 @@ class Mapper:
 
         context = Context()
 
-        constructor_sig = inspect.signature(map_cls.__init__)
-        params = {name: p for name, p in constructor_sig.parameters.items() if name != "self"}
-        required_params = {name for name, p in params.items() if p.default is p.empty}
+        params = Mapper.signature_params(map_cls.__init__)
+        required_params = Mapper.required_params(params)
 
         kwargs: dict[str, Any] = {}
         for target_key, map_val in mapping_registry.items():
-
             # If target key is not a valid argument accepted by the constructor
             # and the constructor does not accept kwargs: continue
             if target_key not in params and "kwargs" not in params:
-                cls.logger.warning(f"{context}::{target_key} is not accepted by {map_cls.__name__} constructor")
+                cls.logger.warning(
+                    f"{context}::{target_key} is not accepted by {map_cls.__name__} constructor"
+                )
                 continue
 
             kwargs[target_key] = cls.map_value(map_val, record)
@@ -182,3 +182,31 @@ class Mapper:
 
         return res
 
+    @staticmethod
+    def signature_params(fn: Callable) -> dict[str, "inspect.Parameter"]:
+        """
+        Return a callable parameters.
+
+        Args:
+            fn (Callable): Callable to return the parameters of
+
+        Returns:
+            dict[str, Parameter]: Parameters of a callable element
+        """
+
+        sig = inspect.signature(fn)
+        return {name: p for name, p in sig.parameters.items() if name != "self"}
+
+    @staticmethod
+    def required_params(params: dict[str, "inspect.Parameter"]) -> set[str]:
+        """
+        Filter a dictionary of parameter and return a set of the required ones.
+
+        Args:
+            params (dict[str, Parameter]): Parameters to filter
+
+        Returns:
+            set[str]: A set of required parameters
+        """
+
+        return {name for name, p in params.items() if p.default is p.empty}

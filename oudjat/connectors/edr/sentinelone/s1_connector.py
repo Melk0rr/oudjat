@@ -314,7 +314,7 @@ class S1Connector(Connector):
 
         return FileUtils.parse_csv_str(req.content.decode().replace('"', ""), delimiter=",")
 
-    def move_agent_to_site(self, site_id: str, cpt_name: str) -> "DataType":
+    def move_agent_to_site(self, site_id: str, agent_name: "StrType") -> "DataType":
         """
         Move an agent that matches the filter to a specified site based on its ID.
 
@@ -325,15 +325,28 @@ class S1Connector(Connector):
         403 - User has insufficient permissions to perform the requested action
 
         Args:
-            site_id (str) : The site to move the agent on
-            cpt_name (str): The computer to move
+            site_id (str)   : The site to move the agent on
+            agent_name (str): The agents to move
 
         Returns:
             DataType: response data
         """
 
-        payload = {"data": {"targetSiteId": site_id}, "filter": {"computerName__like": cpt_name}}
-        return self.fetch(endpoint=S1Endpoint.AGENTS_ACTIONS_MOVE_TO_SITE, payload=payload)
+        if not isinstance(agent_name, list):
+            agent_name = [agent_name]
+
+        data = []
+        for name in agent_name:
+            payload = {
+                "data": {"targetSiteId": site_id},
+                "filter": {"computerName__like": name},
+            }
+
+            data.extend(
+                self.fetch(endpoint=S1Endpoint.AGENTS_ACTIONS_MOVE_TO_SITE, payload=payload)
+            )
+
+        return data
 
     # ****************************************************************
     # Methods: Users
