@@ -11,7 +11,7 @@ import requests
 
 from oudjat.connectors.connector import Connector
 from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoint
-from oudjat.utils import Context
+from oudjat.utils.context import Context
 from oudjat.utils.time_utils import TimeConverter
 from oudjat.utils.types import StrType
 
@@ -249,12 +249,15 @@ class CybereasonConnector(Connector):
             list[CybereasonEntry]: API query response
         """
 
-
         if not isinstance(sensor_ids, list):
             sensor_ids = [sensor_ids]
 
         payload = {"sensorsIds": sensor_ids, "keepManualOverrides": False}
-        return self.fetch(endpoint=CybereasonEndpoint.POLICIES, endpoint_arg=f"{policy_id}/assign", payload=payload)
+        return self.fetch(
+            endpoint=CybereasonEndpoint.POLICIES,
+            endpoint_arg=f"{policy_id}/assign",
+            payload=payload,
+        )
 
     # ****************************************************************
     # Methods: Sensors
@@ -288,12 +291,11 @@ class CybereasonConnector(Connector):
             payload["offset"] = i
             res.extend(self.fetch(endpoint=endpoint, payload=payload))
 
-        print(f"{len(res)} {endpoint.name.lower()} found")
         return res
 
     def _sensor_action(
         self,
-        action: CybereasonSensorAction,
+        action: "CybereasonSensorAction",
         sensor_ids: StrType | None = None,
         payload: dict[str, Any] | None = None,
     ) -> list["CybereasonEntry"]:
@@ -327,7 +329,7 @@ class CybereasonConnector(Connector):
             payload=payload,
         )
 
-    def sensor_remove_group(self, sensor_ids: StrType) -> list["CybereasonEntry"]:
+    def sensor_remove_group(self, sensor_ids: "StrType") -> list["CybereasonEntry"]:
         """
         Remove given sensors from group optionally specified.
 
