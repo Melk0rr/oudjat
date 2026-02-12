@@ -374,6 +374,19 @@ class S1Connector(Connector):
     # ****************************************************************
     # Methods: Threats
 
+    def _unify_status(self, s: "str | S1IncidentStatus") -> str:
+        """
+        Unify an incident status value into a valid status string.
+
+        Args:
+            s (str | S1IncidentStatus): Status to unify
+
+        Returns:
+            str: Unified status value
+        """
+
+        return str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
+
     def alert_verdict(
         self,
         verdict: "str | S1AnalystVerdict",
@@ -419,12 +432,7 @@ class S1Connector(Connector):
             if not isinstance(incident_status, list):
                 incident_status = [incident_status]
 
-            def check_status(s: "str | S1IncidentStatus") -> str:
-                return (
-                    str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
-                )
-
-            incident_status = list(set(map(check_status, incident_status)))
+            incident_status = list(set(map(self._unify_status, incident_status)))
 
         if process_path is not None:
             alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(process_path)
@@ -481,12 +489,7 @@ class S1Connector(Connector):
             if not isinstance(incident_status, list):
                 incident_status = [incident_status]
 
-            def check_status(s: "str | S1IncidentStatus") -> str:
-                return (
-                    str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
-                )
-
-            incident_status = list(set(map(check_status, incident_status)))
+            incident_status = list(set(map(self._unify_status, incident_status)))
 
         if process_path is not None:
             alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(process_path)
@@ -546,12 +549,7 @@ class S1Connector(Connector):
             if not isinstance(incident_status, list):
                 incident_status = [incident_status]
 
-            def check_status(s: "str | S1IncidentStatus") -> str:
-                return (
-                    str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
-                )
-
-            incident_status = list(set(map(check_status, incident_status)))
+            incident_status = list(set(map(self._unify_status, incident_status)))
 
         if file_path is not None:
             alert_filter["filePath__contains"] = self._unify_str_list(file_path)
@@ -561,7 +559,9 @@ class S1Connector(Connector):
 
         data = {"analystVerdict": str(verdict)}
 
-        return self.fetch(S1Endpoint.THREATS_ANALYST_VERDICT, {"filter": alert_filter, "data": data})
+        return self.fetch(
+            S1Endpoint.THREATS_ANALYST_VERDICT, {"filter": alert_filter, "data": data}
+        )
 
     def threat_incident(
         self,
@@ -610,12 +610,7 @@ class S1Connector(Connector):
             if not isinstance(incident_status, list):
                 incident_status = [incident_status]
 
-            def check_status(s: "str | S1IncidentStatus") -> str:
-                return (
-                    str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
-                )
-
-            incident_status = list(set(map(check_status, incident_status)))
+            incident_status = list(set(map(self._unify_status, incident_status)))
 
         if file_path is not None:
             alert_filter["filePath__contains"] = self._unify_str_list(file_path)
@@ -626,10 +621,7 @@ class S1Connector(Connector):
         if not isinstance(verdict, S1AnalystVerdict):
             verdict = S1AnalystVerdict[verdict.upper()]
 
-        data = {
-            "incidentStatus": str(status),
-            "analystVerdict": str(verdict)
-        }
+        data = {"incidentStatus": str(status), "analystVerdict": str(verdict)}
 
         return self.fetch(S1Endpoint.THREATS_INCIDENT, {"filter": alert_filter, "data": data})
 
@@ -894,7 +886,7 @@ class S1Connector(Connector):
         req = self.fetch(S1Endpoint.SITES, payload=payload or {})
         return next(iter(req))["sites"]
 
-    def sites_by_name(self, names: list[str], payload: dict[str, Any] | None = None) -> "DataType":
+    def sites_by_name(self, names: "StrType", payload: dict[str, Any] | None = None) -> "DataType":
         """
         Retrieve sites based on the provided name list.
 
@@ -913,6 +905,9 @@ class S1Connector(Connector):
             DataType: Data of the site matching the provided ID
         """
 
+        if not isinstance(names, list):
+            names = [names]
+
         def filter_by_name(site: dict[str, Any]) -> bool:
             return site["name"] in names
 
@@ -920,8 +915,8 @@ class S1Connector(Connector):
 
     def threats(
         self,
-        incident_statuses: "StrType | None" = None,
-        incident_statuses_nin: "StrType | None" = None,
+        incident_statuses: "str | list[str | S1IncidentStatus] | None" = None,
+        incident_statuses_nin: "str | list[str | S1IncidentStatus] | None" = None,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
@@ -945,9 +940,13 @@ class S1Connector(Connector):
             payload = {}
 
         if incident_statuses is not None:
-            payload["incidentStatuses"] = self._unify_str_list(incident_statuses)
+            payload["incidentStatuses"] = self._unify_str_list(
+                list(map(self._unify_status, incident_statuses))
+            )
 
         if incident_statuses_nin is not None:
-            payload["incidentStatusesNin"] = self._unify_str_list(incident_statuses_nin)
+            payload["incidentStatusesNin"] = self._unify_str_list(
+                list(map(self._unify_status, incident_statuses_nin))
+            )
 
         return self.fetch(S1Endpoint.THREATS, payload)
