@@ -8,8 +8,8 @@ from urllib.parse import ParseResult, urlparse
 from bs4 import BeautifulSoup
 
 from oudjat.connectors import Connector, ConnectorMethod
-from oudjat.utils import Context
-from oudjat.utils.types import StrType
+from oudjat.utils.context import Context
+from oudjat.utils.types import DataType, StrType
 
 from .certfr_page import CERTFRPage
 from .exceptions import CERTFRParsingError
@@ -65,7 +65,7 @@ class CERTFRConnector(Connector):
             raise ConnectionError(f"{Context()}::Could not connect to {self._target.netloc}\n{e}")
 
     @override
-    def fetch(self, search_filter: "StrType") -> list["CERTFRPage"]:
+    def fetch(self, search_filter: "StrType") -> list["DataType"]:
         """
         Fetch the CERTFR website using a filter.
 
@@ -96,7 +96,7 @@ class CERTFRConnector(Connector):
             page.connect()
             page.parse()
 
-            res.append(page)
+            res.append(page.to_dict())
 
         return res
 
