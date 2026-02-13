@@ -37,7 +37,7 @@ Help:
 
 import logging
 import sys
-import time
+from datetime import datetime
 from typing import Any
 
 from docopt import docopt
@@ -68,6 +68,7 @@ def config_logging(options: dict[str, str]) -> "logging.Logger":
 
     return oudjatLogger(level=LOGGING_LEVELS.get(options["--log"], LOGGING_LEVELS["INFO"]))
 
+
 def command_switch(options: dict[str, str]) -> Any:
     """
     Script command switch case.
@@ -76,9 +77,7 @@ def command_switch(options: dict[str, str]) -> Any:
         options (dict[str, str]): CLI options
     """
 
-    COMMAND_OPTIONS = {
-        "connectors.edr.sentinelone": S1ConnectorCommand
-    }
+    COMMAND_OPTIONS = {"connectors.edr.sentinelone": S1ConnectorCommand}
 
     command_name = next(command for command in COMMAND_OPTIONS.keys() if options[command])
     return COMMAND_OPTIONS[command_name](options)
@@ -94,7 +93,7 @@ def main() -> None:
             sys.stdout.write("Sorry, requires Python 3.x\n")
             sys.exit(1)
 
-        start_time = time.time()
+        start_time = datetime.now().timestamp()
         options = docopt(__doc__, version=VERSION)
 
         original_stdout = sys.stdout
@@ -114,12 +113,12 @@ def main() -> None:
 
         ColorPrint.blue(banner)
 
-        logger.info(f"{Context()}::Oudjat starts -  {start_time} ")
+        logger.info(f"{Context()}::Oudjat starts -  {datetime.fromtimestamp(start_time).strftime("%Y-%m-%d %H:%M:%S")} ")
 
         command = command_switch(options)
         command.run()
 
-        logger.info(f"Oudjat runtime -  {TimeConverter.seconds_to_str(time.time() - start_time)}s")
+        logger.info(f"Oudjat runtime -  {TimeConverter.seconds_to_str(datetime.now().timestamp() - start_time)}s")
 
         sys.stdout = original_stdout
 
