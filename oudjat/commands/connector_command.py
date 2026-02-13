@@ -13,9 +13,11 @@ from oudjat.utils.types import DataType
 
 from .base import Base
 
-CommandMappingValue: TypeAlias = tuple[str, Callable[[str, Any], Any] | None]
+CommandMappingCallback: TypeAlias = Callable[[str, Any], Any]
+CommandMappingValue: TypeAlias = "CommandMappingCallback | None"
 CommandMappingRegistry: TypeAlias = dict[str, "CommandMappingValue"]
-CommandOpts: TypeAlias = dict[str, tuple[Callable[..., "DataType"], "CommandMappingRegistry"]]
+CommandMappingOpts: TypeAlias = dict[str, str]
+CommandOpts: TypeAlias = dict[str, tuple[Callable[..., "DataType"], "CommandMappingOpts"]]
 
 class ConnectorCommand(Base):
     """
@@ -46,13 +48,16 @@ class ConnectorCommand(Base):
                 f"{context}::No credentials were provided for the connector"
             )
 
-        self.data: "DataType" = []
+        # A mapping of all the available options for this connector, and their mapped value
+        self._opt_map: "CommandMappingRegistry" = {}
+
+        # A mapping of all the main commands for this connector and their options
         self._command_opt: "CommandOpts" = {}
 
     # ****************************************************************
     # Methods
 
-    def _resolve_arg_value(self, val: "CommandMappingValue") -> Any:
+    def _resolve_arg_value(self, val: str) -> Any:
         """
         Resolve the option value based on option name and optional transform function.
 
@@ -63,12 +68,12 @@ class ConnectorCommand(Base):
             Any: Either the raw option value or a transformed value based on the provided function
         """
 
-        opt, trans = val
-        raw = self.options.get(opt, None)
+        raw = self.options.get(val, None)
+        trans = self._opt_map[val]
 
-        return trans(opt, raw) if trans else raw
+        return trans(val, raw) if callable(trans) else raw
 
-    def _build_cmd_kwargs(self, args: "CommandMappingRegistry") -> dict[str, Any]:
+    def _build_cmd_kwargs(self, args: "CommandMappingOpts") -> dict[str, Any]:
         """
         Build command arguments based on its mapping registry.
 
@@ -79,7 +84,7 @@ class ConnectorCommand(Base):
             dict[str, Any]: The command kwargs
         """
 
-        return {k: self._resolve_arg_value(v) for k,v in args.items() if self._is_opt_present(v[0])}
+        return {k: self._resolve_arg_value(v) for k,v in args.items() if self._is_opt_present(v)}
 
     def _find_cmd_name(self) -> str:
         """
