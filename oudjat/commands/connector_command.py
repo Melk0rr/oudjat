@@ -100,20 +100,24 @@ class ConnectorCommand(Base):
         Run the command main process.
         """
 
+        # Prepare the command
         cmd_name = self._find_cmd_name()
         cmd, params = self._command_opt[cmd_name]
         args = self._build_cmd_kwargs(params)
 
         req_params = Mapper.required_params(Mapper.signature_params(cmd))
 
+        # Check if no required parameters were ommited
         if not bool(set(args.keys()) & req_params) and len(req_params) > 0:
             raise ArgumentError(f"{Context()}::{cmd_name} command requires {list(req_params)}")
 
+        # Run the command
         data = cmd(**args)
 
-        if "--csv" in self.options:
+        # Post operations
+        if self.options["--csv"]:
             FileUtils.export_csv(data, self.options["--csv"], delimiter="|")
 
-        elif "--json" in self.options:
+        if self.options["--json"]:
             FileUtils.export_json(data, self.options["--json"])
 
