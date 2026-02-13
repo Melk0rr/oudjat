@@ -277,6 +277,7 @@ class S1Connector(Connector):
     def agents_export(
         self,
         site_ids: "StrType | None" = None,
+        limit: int = 1000,
         payload: dict[str, Any] | None = None,
         infected: bool = False,
         net_statuses: "StrType | None" = None,
@@ -291,6 +292,7 @@ class S1Connector(Connector):
 
         Args:
             site_ids (str | list[str] | None)    : List of site ids to filter
+            limit (int)                          : The number of agents per cursor call
             payload (dict[str, Any])             : Payload to send to the endpoint
             infected (bool)                      : Whether to only include agents with at least one active threat
             net_statuses (str | list[str] | None): Network statuses to filter
@@ -301,6 +303,11 @@ class S1Connector(Connector):
 
         if payload is None:
             payload = {}
+
+        payload["limit"] = limit
+
+        if "skipCount" not in payload:
+            payload["skipCount"] = True
 
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
