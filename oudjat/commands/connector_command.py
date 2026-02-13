@@ -2,10 +2,13 @@
 A command module to address some shared behaviors accross connector commands.
 """
 
-from typing import Any, Callable, TypeAlias
+from ctypes import ArgumentError
+from typing import Any, Callable, TypeAlias, override
 
 from oudjat.connectors.exceptions import ConnectorCredentialError
+from oudjat.core.mapper import Mapper
 from oudjat.utils.context import Context
+from oudjat.utils.file_utils import FileUtils
 from oudjat.utils.types import DataType
 
 from .base import Base
@@ -90,3 +93,27 @@ class ConnectorCommand(Base):
             return cmd in self.options
 
         return next(filter(cmd_in_options, self._command_opt.keys()))
+
+    @override
+    def run(self) -> None:
+        """
+        Run the command main process.
+        """
+
+        cmd_name = self._find_cmd_name()
+        cmd, params = self._command_opt[cmd_name]
+        args = self._build_cmd_kwargs(params)
+
+        req_params = Mapper.required_params(Mapper.signature_params(cmd))
+
+        if not bool(set(args.keys()) & req_params) and len(req_params) > 0:
+            raise ArgumentError(f"{Context()}::{cmd_name} command requires {list(req_params)}")
+
+        data = cmd(**args)
+
+        if "--csv" in self.options:
+            FileUtils.export_csv(data, self.options["--csv"], delimiter="|")
+
+        elif "--json" in self.options:
+            FileUtils.export_json(data, self.options["--json"])
+
