@@ -35,7 +35,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "password": self.options["--password"],
             }
 
-        self.connector: "S1Connector" = S1Connector(target=self.options["target"], **credentials)
+        self.connector: "S1Connector" = S1Connector(target=self.options["--target"], **credentials)
 
         if "--creds-service" in self.options:
             self.connector.set_creds_from_svc_name(self.options["--creds-service"])

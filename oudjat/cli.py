@@ -5,7 +5,7 @@ Usage:
     oudjat -h | --help
     oudjat -l=LOGGING | --log=LOGLEVEL
     oudjat -V | --version
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents [Options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents [options]
 
 Commands
     connectors.edr.sentinelone          interact with sentinelone api
