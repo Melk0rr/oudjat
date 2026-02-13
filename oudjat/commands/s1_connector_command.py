@@ -28,14 +28,16 @@ class S1ConnectorCommand(ConnectorCommand):
 
         super().__init__(options, True)
 
-        credentials = {}
-        if "--password" in self.options:
-            credentials = {
-                "username": self.options["--username"],
-                "password": self.options["--password"],
-            }
+        con_args = {"target": self.options["--target"]}
+        if self.options["--username"] and self.options["--password"]:
+            con_args.update(
+                {
+                    "username": self.options["--username"],
+                    "password": self.options["--password"],
+                }
+            )
 
-        self.connector: "S1Connector" = S1Connector(target=self.options["--target"], **credentials)
+        self.connector: "S1Connector" = S1Connector(**con_args)
 
         if "--creds-service" in self.options:
             self.connector.set_creds_from_svc_name(self.options["--creds-service"])

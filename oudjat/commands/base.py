@@ -75,7 +75,7 @@ class Base:
             bool: True if the option is present. False otherwise
         """
 
-        return opt in self.options
+        return bool(self.options.get(opt) or False)
 
     def _unify_str_opt(self, str_opt: str, file_opt: str) -> list[str]:
         """
