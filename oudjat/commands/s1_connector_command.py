@@ -72,13 +72,14 @@ class S1ConnectorCommand(ConnectorCommand):
 
         cmd_name = self._find_cmd_name()
         cmd, params = self._command_opt[cmd_name]
+        args = self._build_cmd_kwargs(params)
 
         req_params = Mapper.required_params(Mapper.signature_params(cmd))
 
-        if not bool(set(params) & req_params):
+        if not bool(set(args) & req_params):
             raise ArgumentError(f"{Context()}::{cmd_name} command requires {req_params}")
 
-        data = cmd(**params)
+        data = cmd(**args)
 
         if "--csv" in self.options:
             FileUtils.export_csv(data, self.options["--csv"], delimiter="|")
