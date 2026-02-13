@@ -6,7 +6,7 @@ Usage:
     oudjat -l=LOGGING | --log=LOGLEVEL
     oudjat -V | --version
 
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) [Connector-Options] [Options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents [Options]
 
 Commands
     connectors.edr.sentinelone          interact with sentinelone api
@@ -18,17 +18,15 @@ Options:
     -h --help                           show this help message and exit
     -l --log=LOGLEVEL                   specify the log level
     -o --output=FILENAME                save execution logs to the specified file
+    -p --password=PASS                  password to use with the connector
     -S --silent                         simple output, one per line
     -t --target=TARGET                  set target (comma separated, no spaces, if multiple)
+    -u --username=USER                  username to use with the connector
     -v --verbose                        print debug info and full request output
     -V --version                        show version and exit
+    --creds-service=SERVICE             service name to retrieve the credentials from
     --csv=CSV                           save results as csv
     --json=JSON                         save results as json
-
-Connector-Options:
-    -u --username=USER                  username to use with the connector
-    -p --password=PASS                  password to use with the connector
-    --creds-service=SERVICE             service name to retrieve the credentials from
 
 [S1Co-Options]
     --agents                            retrieve S1 agents
