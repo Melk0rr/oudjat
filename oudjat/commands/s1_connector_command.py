@@ -78,8 +78,8 @@ class S1ConnectorCommand(ConnectorCommand):
 
         req_params = Mapper.required_params(Mapper.signature_params(cmd))
 
-        if not bool(set(args) & req_params):
-            raise ArgumentError(f"{Context()}::{cmd_name} command requires {req_params}")
+        if not bool(set(args.keys()) & req_params) or len(req_params) == 0:
+            raise ArgumentError(f"{Context()}::{cmd_name} command requires {list(req_params)}")
 
         data = cmd(**args)
 
