@@ -44,7 +44,7 @@ from docopt import docopt
 
 from oudjat.banner import banner
 from oudjat.commands.s1_connector_command import S1ConnectorCommand
-from oudjat.utils import ColorPrint, StdOutHook, TimeConverter
+from oudjat.utils import ColorPrint, Context, StdOutHook, TimeConverter
 from oudjat.utils.logging import oudjatLogger
 
 from . import __version__ as VERSION
@@ -113,6 +113,8 @@ def main() -> None:
             return
 
         ColorPrint.blue(banner)
+
+        logger.info(f"{Context()}::Oudjat starts -  {start_time} ")
 
         command = command_switch(options)
         command.run()
