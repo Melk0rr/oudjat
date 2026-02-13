@@ -3,6 +3,7 @@
 from typing import Any
 
 from oudjat.utils import Context
+from oudjat.utils.file_utils import FileUtils
 
 
 class Base:
@@ -52,7 +53,6 @@ class Base:
 
         return self._args
 
-
     @property
     def kwargs(self) -> dict[str, Any]:
         """
@@ -63,6 +63,39 @@ class Base:
         """
 
         return self._kwargs
+
+    def _is_opt_present(self, opt: str) -> bool:
+        """
+        Check if the option is present.
+
+        Args:
+            opt (str): Option to check the presence of
+
+        Returns:
+            bool: True if the option is present. False otherwise
+        """
+
+        return opt in self.options
+
+    def _unify_str_opt(self, str_opt: str, file_opt: str) -> list[str]:
+        """
+        Unify option case where a list of information can be passed either as a string, a list of strings or a txt file.
+
+        Args:
+            str_opt (str) : The key in the `self.options` dictionary where the resulting list should be stored.
+            file_opt (str): The key in the `self.options` dictionary that, if exists, points to a file path.
+
+        Returns:
+            list[str]: A cleaned list of strings
+        """
+
+        args = (
+            FileUtils.import_txt(filepath=self.options[file_opt])
+            if self.options[file_opt]
+            else self.options[str_opt].split(",")
+        )
+
+        return list(filter(None, args))
 
     def run(self) -> None:
         """
