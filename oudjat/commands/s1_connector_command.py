@@ -32,7 +32,7 @@ class S1ConnectorCommand(ConnectorCommand):
         if "--password" in self.options:
             credentials = {
                 "username": self.options["--username"],
-                "password": self.options["--password"]
+                "password": self.options["--password"],
             }
 
         self.connector: "S1Connector" = S1Connector(target=self.options["target"], **credentials)
@@ -46,22 +46,23 @@ class S1ConnectorCommand(ConnectorCommand):
             "--agents": (
                 self.connector.agents,
                 {
-                    "site_ids": self.options["--site-list"].split(","),
-                    "payload": self.options["--payload"],
-                    "infected": self.options["--infected"],
-                    "net_statuses": self.options["--net-status"],
-                }
+                    "site_ids": (
+                        "--site-list",
+                        lambda opt, _: self._unify_str_opt(opt, "--site-file"),
+                    ),
+                    "payload": ("--payload", None),
+                    "infected": ("--infected", lambda opt, _: self._is_opt_present(opt)),
+                    "net_statuses": ("--net-status", None),
+                },
             ),
-
             "--move-agent-site": (
                 self.connector.move_agent_to_site,
                 {
-                    "site_id": self.options["--site-list"],
-                    "agent_name": self.options["--agent-list"]
-                }
-            )
+                    "site_id": ("--site-list", lambda _, v: v.split(",")),
+                    "agent_name": ("--agent-list", None),
+                },
+            ),
         }
-
 
     @override
     def run(self) -> None:
@@ -71,6 +72,7 @@ class S1ConnectorCommand(ConnectorCommand):
 
         cmd_name = self._find_cmd_name()
         cmd, params = self._command_opt[cmd_name]
+
         req_params = Mapper.required_params(Mapper.signature_params(cmd))
 
         if not bool(set(params) & req_params):
@@ -83,4 +85,3 @@ class S1ConnectorCommand(ConnectorCommand):
 
         elif "--json" in self.options:
             FileUtils.export_json(data, self.options["--json"])
-

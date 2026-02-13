@@ -5,13 +5,14 @@ A command module to address some shared behaviors accross connector commands.
 from typing import Any, Callable, TypeAlias
 
 from oudjat.connectors.exceptions import ConnectorCredentialError
-from oudjat.core.mapper import MappingRegistry
 from oudjat.utils.context import Context
 from oudjat.utils.types import DataType
 
 from .base import Base
 
-CommandOpts: TypeAlias = dict[str, tuple[Callable[..., "DataType"], "MappingRegistry"]]
+CommandMappingValue: TypeAlias = tuple[str, Callable[[str, Any], Any] | None]
+CommandMappingRegistry: TypeAlias = dict[str, "CommandMappingValue"]
+CommandOpts: TypeAlias = dict[str, tuple[Callable[..., "DataType"], "CommandMappingRegistry"]]
 
 class ConnectorCommand(Base):
     """
@@ -48,19 +49,34 @@ class ConnectorCommand(Base):
     # ****************************************************************
     # Methods
 
-    def _build_cmd_kwargs(self, cmd_name: str) -> dict[str, Any]:
+    def _resolve_arg_value(self, val: "CommandMappingValue") -> Any:
+        """
+        Resolve the option value based on option name and optional transform function.
+
+        Args:
+            val (CommandMappingValue): A tuple containing at least the option name and a transform function
+
+        Returns:
+            Any: Either the raw option value or a transformed value based on the provided function
+        """
+
+        opt, trans = val
+        raw = self.options.get(opt, None)
+
+        return trans(opt, raw) if trans else raw
+
+    def _build_cmd_kwargs(self, args: "CommandMappingRegistry") -> dict[str, Any]:
         """
         Build command arguments based on its mapping registry.
 
         Args:
-            cmd_name (str): The name of the command being used
+            args (str): The name of the command being used
 
         Returns:
             dict[str, Any]: The command kwargs
         """
 
-        _, args_map = self._command_opt[cmd_name]
-        return {k: self.options[v] for k, v in args_map if v in self.options}
+        return {k: self._resolve_arg_value(v) for k,v in args.items() if self._is_opt_present(v[0])}
 
     def _find_cmd_name(self) -> str:
         """
