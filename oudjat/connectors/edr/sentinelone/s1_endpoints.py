@@ -60,6 +60,7 @@ class S1Endpoint(Enum):
     GROUPS_MOVE_AGENTS = S1EndpointsProps(
         "/web/api/v2.1/groups/{groupId}/move-agents", ConnectorMethod.PUT
     )
+    GROUPS_POLICY_UPDATE = S1EndpointsProps("/web/api/v2.1/groups/{groupId}/policy", ConnectorMethod.PUT)
     CLOUD_DETECTION_ALERTS = S1EndpointsProps(
         "/web/api/v2.1/cloud-detection/alerts", ConnectorMethod.GET
     )

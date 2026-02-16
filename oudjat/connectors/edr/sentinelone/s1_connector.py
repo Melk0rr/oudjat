@@ -9,6 +9,7 @@ from urllib.parse import ParseResult, urlparse
 
 import requests
 
+from oudjat.connectors.edr.sentinelone.s1_mitigation_modes import S1MitigationMode
 from oudjat.utils import FileUtils
 from oudjat.utils.context import Context
 from oudjat.utils.credentials import NoCredentialsError
@@ -950,6 +951,34 @@ class S1Connector(Connector):
 
         payload = {"filter": {"siteId": site_id}}
         return self.fetch(S1Endpoint.GROUPS, payload)
+
+    def group_policy_update(
+        self,
+        group_id: "StrType",
+        malicious_mitigation: "S1MitigationMode | None" = None,
+        suspicious_mitigation: "S1MitigationMode | None" = None,
+        payload: dict[str, Any] | None = None
+    ) -> "DataType":
+
+        if not isinstance(group_id, list):
+            group_id = [group_id]
+
+        if payload is None:
+            payload = {}
+            payload["data"] = {}
+
+        if malicious_mitigation is not None:
+            payload["data"]["mitigationMode"] = str(malicious_mitigation)
+
+        if suspicious_mitigation is not None:
+            payload["data"]["mitigationModeSuspicious"] = str(suspicious_mitigation)
+
+        res = []
+        for gid in group_id:
+            res.extend(self.fetch(S1Endpoint.GROUPS_POLICY_UPDATE, payload, ))
+
+        return res
+
 
     def move_agent_to_group(
         self, group_id: str, cpt_name: str | None = None, cpt_ids: "StrType | None" = None
