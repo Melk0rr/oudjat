@@ -262,7 +262,7 @@ class CybereasonConnector(Connector):
     # ****************************************************************
     # Methods: Sensors
 
-    def sensors(
+    def agents(
         self, payload: dict[str, Any] | None = None, limit: int | None = None
     ) -> list["CybereasonEntry"]:
         """
@@ -293,7 +293,7 @@ class CybereasonConnector(Connector):
 
         return res
 
-    def _sensor_action(
+    def _agent_action(
         self,
         action: "CybereasonSensorAction",
         sensor_ids: StrType | None = None,
@@ -329,7 +329,7 @@ class CybereasonConnector(Connector):
             payload=payload,
         )
 
-    def sensor_remove_group(self, sensor_ids: "StrType") -> list["CybereasonEntry"]:
+    def agent_remove_group(self, sensor_ids: "StrType") -> list["CybereasonEntry"]:
         """
         Remove given sensors from group optionally specified.
 
@@ -340,13 +340,13 @@ class CybereasonConnector(Connector):
             list[CybereasonEntry]: API query response
         """
 
-        return self._sensor_action(
+        return self._agent_action(
             action=CybereasonSensorAction.REMOVEFROMGROUP,
             sensor_ids=sensor_ids,
             payload=self._DEFAULT_PAYLOAD,
         )
 
-    def sensor_assign_group(
+    def agent_assign_group(
         self, sensor_ids: StrType, group_id: str, payload: dict[str, Any] | None = None
     ) -> list["CybereasonEntry"]:
         """
@@ -366,13 +366,13 @@ class CybereasonConnector(Connector):
 
         payload["argument"] = group_id
 
-        return self._sensor_action(
+        return self._agent_action(
             action=CybereasonSensorAction.ADDTOGROUP,
             sensor_ids=sensor_ids,
             payload=payload,
         )
 
-    def sensor_restart(
+    def agent_restart(
         self, sensor_ids: StrType | None = None, payload: dict[str, Any] | None = None
     ) -> list["CybereasonEntry"]:
         """
@@ -395,7 +395,7 @@ class CybereasonConnector(Connector):
         elif sensor_ids is not None:
             payload = {}
 
-        return self._sensor_action(
+        return self._agent_action(
             action=CybereasonSensorAction.RESTART,
             sensor_ids=sensor_ids,
             payload=payload,
