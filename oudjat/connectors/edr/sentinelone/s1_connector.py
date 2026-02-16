@@ -205,14 +205,14 @@ class S1Connector(Connector):
             req = endpoint.method(**r_params)
             req_json = req.json()
 
+            self.logger.debug(f"{context}::{endpoint} > {req_json}")
+
             if "data" in req_json:
                 if isinstance(req_json["data"], list):
                     res.extend(req_json["data"])
 
                 else:
                     res.append(req_json["data"])
-
-            self.logger.debug(f"{context}::{endpoint} > {req_json}")
 
             if req.status_code != 200:
                 raise SentinelOneAPIConnectionError(
@@ -399,27 +399,91 @@ class S1Connector(Connector):
         return self.fetch(S1Endpoint.USERS_LOGOUT, payload or {})
 
     # ****************************************************************
-    # Methods: Threats
+    # Methods: Alerts
 
     def _unify_status(self, s: "str | S1IncidentStatus") -> str:
+        """
+        Unify incident status type into a valid string.
+
+        Args:
+            s (str | S1IncidentStatus): Incident status to unify
+
+        Returns:
+            str: A valid S1 incident status string value
+        """
+
+        return str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
+
+    def _unify_verdict(self, v: "str | S1AnalystVerdict") -> str:
+        """
+        Unify incident analyst verdict type into a valid string.
+
+        Args:
+            v (str | S1AnalystVerdict): Incident analyst verdict to unify
+
+        Returns:
+            str: A valid S1 incident analyst verdict string value
+        """
+
+        return str(v) if isinstance(v, S1AnalystVerdict) else str(S1AnalystVerdict[v.upper()])
+
+    def _update_filter_status(
+        self,
+        incident_filter: dict[str, Any],
+        status: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None",
+        exclude: bool = True,
+    ) -> None:
         """
         Unify an incident status value into a valid status string.
 
         Args:
-            s (str | S1IncidentStatus): Status to unify
-
-        Returns:
-            str: Unified status value
+            incident_filter (dict[str, Any])                                     : The incident filter to update if a status is provided
+            status (str | S1IncidentStatus | list[str | S1IncidentStatus] | None): Status to filter
+            exclude (bool)                                                       : If true, the provided status will be excluded from the search.
         """
 
-        return str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
+        if status is not None:
+            if not isinstance(status, list):
+                status = [status]
+
+            status = list(set(map(self._unify_status, status)))
+
+            if len(status) > 0:
+                mode = "incidentStatusesNin" if exclude else "incidentStatuses"
+                incident_filter[mode] = status
+
+    def _update_filter_verdict(
+        self,
+        incident_filter: dict[str, Any],
+        verdict: "str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None",
+        exclude: bool = True,
+    ) -> None:
+        """
+        Unify an incident status value into a valid status string.
+
+        Args:
+            incident_filter (dict[str, Any])                                      : The incident filter to update if a status is provided
+            verdict (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None): Status to filter
+            exclude (bool)                                                        : If true, the provided status will be excluded from the search.
+        """
+
+        if verdict is not None:
+            if not isinstance(verdict, list):
+                verdict = [verdict]
+
+            verdict = list(set(map(self._unify_verdict, verdict)))
+
+            if len(verdict) > 0:
+                mode = "analystVerdictsNin" if exclude else "analystVerdicts"
+                incident_filter[mode] = verdict
 
     def alert_verdict(
         self,
         verdict: "str | S1AnalystVerdict",
         alert_ids: "StrType | None" = None,
         site_ids: "StrType | None" = None,
-        incident_status: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = None,
+        status_filter: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None" = S1AnalystVerdict.UNDEFINED,
         process_path: "StrType | None" = None,
         alert_filter: dict[str, Any] | None = None,
     ) -> "DataType":
@@ -435,7 +499,8 @@ class S1Connector(Connector):
             verdict (str | S1AnalystVerdict)                                              : The verdict to assign to the filtered alerts
             alert_ids (str | list[str] | None)                                            : Ids of the alert to change verdict of
             site_ids (str | list[str] | None)                                             : Site ids of the alerts
-            incident_status (str | S1IncidentStatus | list[str | S1IncidentStatus] | None): Status of the alerts
+            status_filter (str | S1IncidentStatus | list[str | S1IncidentStatus] | None)  : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None) : Treat only the alerts with the provided verdict. Default UNDEFINED
             process_path (str | list[str] | None)                                         : Path of the process which triggered the alert
             alert_filter (dict[str, Any])                                                 : A dictionary of alert filters
 
@@ -455,11 +520,11 @@ class S1Connector(Connector):
         if site_ids is not None:
             alert_filter["siteIds"] = self._unify_str_list(site_ids)
 
-        if incident_status is not None:
-            if not isinstance(incident_status, list):
-                incident_status = [incident_status]
+        # Set status filter
+        self._update_filter_status(alert_filter, status_filter)
 
-            incident_status = list(set(map(self._unify_status, incident_status)))
+        # Set verdict filter
+        self._update_filter_verdict(alert_filter, verdict_filter)
 
         if process_path is not None:
             alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(process_path)
@@ -476,7 +541,8 @@ class S1Connector(Connector):
         status: "str | S1IncidentStatus",
         alert_ids: "StrType | None" = None,
         site_ids: "StrType | None" = None,
-        incident_status: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = None,
+        status_filter: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None" = S1AnalystVerdict.UNDEFINED,
         process_path: "StrType | None" = None,
         alert_filter: dict[str, Any] | None = None,
     ) -> "DataType":
@@ -492,7 +558,8 @@ class S1Connector(Connector):
             status (str | S1IncidentStatus)                                               : The verdict to assign to the filtered alerts
             alert_ids (str | list[str] | None)                                            : Ids of the alert to change verdict of
             site_ids (str | list[str] | None)                                             : Site ids of the alerts
-            incident_status (str | S1IncidentStatus | list[str | S1IncidentStatus] | None): Status of the alerts
+            status_filter (str | S1IncidentStatus | list[str | S1IncidentStatus] | None)  : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None) : Treat only the alerts with the provided verdict. Default UNDEFINED
             process_path (str | list[str] | None)                                         : Path of the process which triggered the alert
             alert_filter (dict[str, Any])                                                 : A dictionary of alert filters
 
@@ -512,11 +579,11 @@ class S1Connector(Connector):
         if site_ids is not None:
             alert_filter["siteIds"] = self._unify_str_list(site_ids)
 
-        if incident_status is not None:
-            if not isinstance(incident_status, list):
-                incident_status = [incident_status]
+        # Set status filter
+        self._update_filter_status(alert_filter, status_filter)
 
-            incident_status = list(set(map(self._unify_status, incident_status)))
+        # Set verdict filter
+        self._update_filter_verdict(alert_filter, verdict_filter)
 
         if process_path is not None:
             alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(process_path)
@@ -526,17 +593,50 @@ class S1Connector(Connector):
 
         data = {"incidentStatus": str(status)}
 
-        return self.fetch(S1Endpoint.ALERTS_ANALYST_VERDICT, {"filter": alert_filter, "data": data})
+        return self.fetch(S1Endpoint.ALERTS_INCIDENT, {"filter": alert_filter, "data": data})
 
     # ****************************************************************
     # Methods: Threats
+
+    def threats(
+        self,
+        status_filter: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None" = S1AnalystVerdict.UNDEFINED,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Get data of threats that match the filter.
+
+        Possible response messages:
+        200 - Success
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry.
+
+        Args:
+            status_filter (str | S1IncidentStatus | list[str | S1IncidentStatus] | None)  : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None) : Treat only the alerts with the provided verdict. Default UNDEFINED
+            loop (bool)                                                                   : If true, will loop until there is no results left
+            payload (dict[str, Any])                                                      : Payload to send to the endpoint
+
+        Returns:
+            DataType: Threats data based on the provided filters
+        """
+
+        if payload is None:
+            payload = {}
+
+        self._update_filter_status(payload, status_filter)
+        self._update_filter_verdict(payload, verdict_filter)
+
+        return self.fetch(S1Endpoint.THREATS, payload)
 
     def threat_verdict(
         self,
         verdict: "str | S1AnalystVerdict",
         alert_ids: "StrType | None" = None,
         site_ids: "StrType | None" = None,
-        incident_status: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = None,
+        status_filter: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None" = S1AnalystVerdict.UNDEFINED,
         file_path: "StrType | None" = None,
         alert_filter: dict[str, Any] | None = None,
     ) -> "DataType":
@@ -552,7 +652,8 @@ class S1Connector(Connector):
             verdict (str | S1AnalystVerdict)                                              : The verdict to assign to the filtered threats
             alert_ids (str | list[str] | None)                                            : Ids of the threat to change verdict of
             site_ids (str | list[str] | None)                                             : Site ids of the threats
-            incident_status (str | S1IncidentStatus | list[str | S1IncidentStatus] | None): Status of the threats
+            status_filter (str | S1IncidentStatus | list[str | S1IncidentStatus] | None)  : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None) : Treat only the alerts with the provided verdict. Default UNDEFINED
             file_path (str | list[str] | None)                                            : Path of the process which triggered the threat
             alert_filter (dict[str, Any])                                                 : A dictionary of threat filters
 
@@ -572,11 +673,11 @@ class S1Connector(Connector):
         if site_ids is not None:
             alert_filter["siteIds"] = self._unify_str_list(site_ids)
 
-        if incident_status is not None:
-            if not isinstance(incident_status, list):
-                incident_status = [incident_status]
+        # Set status filter
+        self._update_filter_status(alert_filter, status_filter)
 
-            incident_status = list(set(map(self._unify_status, incident_status)))
+        # Set verdict filter
+        self._update_filter_verdict(alert_filter, verdict_filter)
 
         if file_path is not None:
             alert_filter["filePath__contains"] = self._unify_str_list(file_path)
@@ -596,8 +697,10 @@ class S1Connector(Connector):
         verdict: "str | S1AnalystVerdict",
         threat_ids: "StrType | None" = None,
         site_ids: "StrType | None" = None,
-        incident_status: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = None,
+        status_filter: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None" = S1AnalystVerdict.UNDEFINED,
         file_path: "StrType | None" = None,
+        loop: bool = False,
         alert_filter: dict[str, Any] | None = None,
     ) -> "DataType":
         """
@@ -613,8 +716,10 @@ class S1Connector(Connector):
             verdict (str | S1AnalystVerdict)                                              : The verdict to assign to the filtered threats
             threat_ids (str | list[str] | None)                                           : Ids of the alert to change verdict of
             site_ids (str | list[str] | None)                                             : Site ids of the alerts
-            incident_status (str | S1IncidentStatus | list[str | S1IncidentStatus] | None): Status of the alerts
+            status_filter (str | S1IncidentStatus | list[str | S1IncidentStatus] | None)  : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None) : Treat only the alerts with the provided verdict. Default UNDEFINED
             file_path (str | list[str] | None)                                            : Path of the process which triggered the alert
+            loop (bool)                                                                   : If true, loop until there is no threat to process
             alert_filter (dict[str, Any])                                                 : A dictionary of alert filters
 
         Returns:
@@ -633,11 +738,11 @@ class S1Connector(Connector):
         if site_ids is not None:
             alert_filter["siteIds"] = self._unify_str_list(site_ids)
 
-        if incident_status is not None:
-            if not isinstance(incident_status, list):
-                incident_status = [incident_status]
+        # Set status filter
+        self._update_filter_status(alert_filter, status_filter)
 
-            incident_status = list(set(map(self._unify_status, incident_status)))
+        # Set verdict filter
+        self._update_filter_verdict(alert_filter, verdict_filter)
 
         if file_path is not None:
             alert_filter["filePath__contains"] = self._unify_str_list(file_path)
@@ -648,9 +753,28 @@ class S1Connector(Connector):
         if not isinstance(verdict, S1AnalystVerdict):
             verdict = S1AnalystVerdict[verdict.upper()]
 
-        data = {"incidentStatus": str(status), "analystVerdict": str(verdict)}
+        input_data = {"incidentStatus": str(status), "analystVerdict": str(verdict)}
 
-        return self.fetch(S1Endpoint.THREATS_INCIDENT, {"filter": alert_filter, "data": data})
+        res = []
+        if loop:
+            while True:
+                q = self.fetch(
+                    S1Endpoint.THREATS_INCIDENT, {"filter": alert_filter, "data": input_data}
+                )
+
+                if q[0]["affected"] == 0:
+                    break
+
+                res.extend(q)
+
+        else:
+            res.extend(
+                self.fetch(
+                    S1Endpoint.THREATS_INCIDENT, {"filter": alert_filter, "data": input_data}
+                )
+            )
+
+        return res
 
     # ****************************************************************
     # Methods: Applications
@@ -939,41 +1063,3 @@ class S1Connector(Connector):
             return site["name"] in names
 
         return list(filter(filter_by_name, self.sites(payload)))
-
-    def threats(
-        self,
-        incident_statuses: "str | list[str | S1IncidentStatus] | None" = None,
-        incident_statuses_nin: "str | list[str | S1IncidentStatus] | None" = None,
-        payload: dict[str, Any] | None = None,
-    ) -> "DataType":
-        """
-        Get data of threats that match the filter.
-
-        Possible response messages:
-        200 - Success
-        400 - Invalid user input received. See error details for further information.
-        401 - Unauthorized access - please sign in and retry.
-
-        Args:
-            incident_statuses (str | list[str] | None)    : Filter threats with specific incident statuses
-            incident_statuses_nin (str | list[str] | None): Exclude threats with specific incident statuses
-            payload (dict[str, Any])                      : Payload to send to the endpoint
-
-        Returns:
-            DataType: Threats data based on the provided filters
-        """
-
-        if payload is None:
-            payload = {}
-
-        if incident_statuses is not None:
-            payload["incidentStatuses"] = self._unify_str_list(
-                list(map(self._unify_status, incident_statuses))
-            )
-
-        if incident_statuses_nin is not None:
-            payload["incidentStatusesNin"] = self._unify_str_list(
-                list(map(self._unify_status, incident_statuses_nin))
-            )
-
-        return self.fetch(S1Endpoint.THREATS, payload)
