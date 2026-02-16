@@ -16,8 +16,9 @@ from .base import Base
 CommandMappingCallback: TypeAlias = Callable[[str, Any], Any]
 CommandMappingValue: TypeAlias = "CommandMappingCallback | None"
 CommandMappingRegistry: TypeAlias = dict[str, "CommandMappingValue"]
-CommandMappingOpts: TypeAlias = dict[str, str]
+CommandMappingOpts: TypeAlias = dict[str, str | tuple[str, Callable[[Any], Any]]]
 CommandOpts: TypeAlias = dict[str, tuple[Callable[..., "DataType"], "CommandMappingOpts"]]
+
 
 class ConnectorCommand(Base):
     """
@@ -84,7 +85,19 @@ class ConnectorCommand(Base):
             dict[str, Any]: The command kwargs
         """
 
-        return {k: self._resolve_arg_value(v) for k,v in args.items() if self._is_opt_present(v)}
+        res = {}
+        for k,v in args.items():
+
+            opt_k = v[0] if isinstance(v, tuple) else v
+            opt_v = self._resolve_arg_value(opt_k)
+
+            if isinstance(v, tuple):
+                _, trs = v
+                opt_v = trs(opt_v)
+
+            res[k] = opt_v
+
+        return res
 
     def _find_cmd_name(self) -> str:
         """
@@ -125,4 +138,3 @@ class ConnectorCommand(Base):
 
         if self.options["--json"]:
             FileUtils.export_json(data, self.options["--json"])
-

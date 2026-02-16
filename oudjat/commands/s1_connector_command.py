@@ -41,11 +41,13 @@ class S1ConnectorCommand(ConnectorCommand):
         self.connector.connect()
 
         self._opt_map: "CommandMappingRegistry" = {
-            "--site-list": lambda opt, _: self._unify_str_opt(opt, "--site-file"),
-            "--payload": None,
             "--agent-list": lambda opt, _: self._unify_str_opt(opt, "--agent-file"),
+            "--group-list": lambda opt, _: self._unify_str_opt(opt, "--group-file"),
             "--infected": lambda opt, _: self._is_opt_present(opt),
-            "--net-status": None,
+            "--payload": None,
+            "--site-list": lambda opt, _: self._unify_str_opt(opt, "--site-file"),
+            "--status-filters": lambda opt, v: v.split(","),
+            "--verdict-filters": lambda opt, v: v.split(","),
         }
 
         self._command_opt: "CommandOpts" = {
@@ -57,19 +59,39 @@ class S1ConnectorCommand(ConnectorCommand):
                     "limit": "--limit",
                     "payload": "--payload",
                     "infected": "--infected",
-                    "net_statuses": "--net-status",
                 },
             ),
+
+            # Export flat agent data
+            "--agents-export": (
+                self.connector.agents_export,
+                {
+                    "site_ids": "--site-list",
+                    "payload": "--payload",
+                    "infected": "--infected",
+                }
+            ),
+
             # Move one or multiple agents to a site based on its id
             "--move-agent-site": (
                 self.connector.move_agent_to_site,
                 {
-                    "site_id": "--site-list",
+                    "site_id": ("--site-list", lambda lst: next(iter(lst))),
                     "agent_name": "--agent-list",
                 },
             ),
+
             # Retrieve CVEs detected by S1
             "--cves": (
+                self.connector.cves,
+                {
+                    "site_ids": "--site-list",
+                    "payload": "--payload",
+                },
+            ),
+
+            # Retrieve threats detected by S1
+            "--threats": (
                 self.connector.cves,
                 {
                     "site_ids": "--site-list",
