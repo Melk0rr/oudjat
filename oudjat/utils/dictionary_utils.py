@@ -192,17 +192,21 @@ class UtilsDict(dict):
         return d1
 
     @staticmethod
-    def filter_keys(d: dict[str, Any], keys: list[str]) -> dict[str, Any]:
+    def filter_keys(d: dict[str, Any], keys: list[str], exclude: bool = False) -> dict[str, Any]:
         """
         Filter the keys of a dictionary.
 
         Args:
             d (dict[str, Any]): The dictionary, which keys will be filtered
             keys (list[str])  : A list of keys to keep
+            exclude (bool)    : If true, the provided keys will be excluded from the final dictionary instead of included
 
         Returns:
             dict[str, Any]: Filtered dictionary
         """
+
+        if exclude:
+            return {k: v for k, v in d.items() if k not in keys}
 
         return {k: v for k, v in d.items() if k in keys}
 
