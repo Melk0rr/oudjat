@@ -66,7 +66,7 @@ class S1Connector(Connector):
         self._DEFAULT_HEADERS: dict[str, str] = {"Content-Type": "application/json"}
 
     # ****************************************************************
-    # Methods
+    # Methods - helpers
 
     @property
     def _api_token(self) -> str | None:
@@ -112,38 +112,6 @@ class S1Connector(Connector):
 
         return ",".join(str_list) if isinstance(str_list, list) else str_list
 
-    @override
-    def connect(self) -> None:
-        """
-        Connect to the target.
-        """
-
-        context = Context()
-
-        if self._credentials is None:
-            raise NoCredentialsError(f"{context}::No password provided")
-
-        if not self._connection:
-            self.logger.info(f"{context}::Connecting to {self._target.netloc} with user API token")
-
-            if self._api_token:
-                try:
-                    data = self.login_by_api_token()
-                    self._connection = data[0]["token"]
-
-                except SentinelOneAPIConnectionError as e:
-                    raise SentinelOneAPIConnectionError(f"{context}::{e}")
-
-            else:
-                raise NoCredentialsError(f"{context}::No API token provided")
-
-            self.logger.info(f"{context}::Connected to {self._target.netloc}")
-
-        else:
-            self.logger.warning(
-                f"{context}::Connection to {self._target.netloc} is already initialized."
-            )
-
     def _request_params(
         self, payload: dict[str, Any], method: "ConnectorMethod", endpoint_path: str
     ) -> dict[str, Any]:
@@ -169,228 +137,6 @@ class S1Connector(Connector):
             r_params["params"] = r_params.pop("json")
 
         return r_params
-
-    @override
-    def fetch(
-        self,
-        endpoint: "S1Endpoint",
-        payload: dict[str, Any],
-        path_fmt: dict[str, str] | None = None,
-    ) -> "DataType":
-        """
-        Perform a search query through the API to retrieve data based on provided endpoint and .
-
-        Args:
-            endpoint (S1Endpoints)          : SentinelOne endpoint the query payload will be send to
-            payload (dict[str, Any] | None) : Payload to send to the provided endpoint
-            path_fmt (dict[str, Any] | None): A dictionary of variable names that will be replaced in the endpoint path
-
-        Returns:
-            DataType: list of retrieved elements
-        """
-
-        context = Context()
-
-        res = []
-        next_cursor = None
-
-        endpoint_path = endpoint.path
-
-        if "{" and "}" in endpoint_path and path_fmt is None:
-            raise SentinelOneEndpointFormatError(f"{context}::SentinelOne endpoint {endpoint} needs formatting")
-
-        if path_fmt:
-            endpoint_path = endpoint_path.format(**path_fmt)
-
-        self.logger.debug(f"{context}::{endpoint} > {payload}")
-        while True:
-            if next_cursor:
-                payload["cursor"] = next_cursor
-
-            r_params = self._request_params(payload, endpoint.method, endpoint_path)
-            req = endpoint.method(**r_params)
-            req_json = req.json()
-
-            self.logger.debug(f"{context}::{endpoint} > {req_json}")
-
-            if "data" in req_json:
-                if isinstance(req_json["data"], list):
-                    res.extend(req_json["data"])
-
-                else:
-                    res.append(req_json["data"])
-
-            if req.status_code != 200:
-                raise SentinelOneAPIConnectionError(
-                    f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
-                )
-
-            next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
-            if not next_cursor:
-                break
-
-        return res
-
-    # ****************************************************************
-    # Methods: Agents
-
-    def agents(
-        self,
-        site_ids: "StrType | None" = None,
-        limit: int = 1000,
-        payload: dict[str, Any] | None = None,
-        infected: bool = False,
-    ) -> "DataType":
-        """
-        Return the agents based on the provided filter.
-
-        Possible response messages
-        200 - Success
-        400 - Invalid user input received. See error details for further information.
-        401 - Unauthorized access - please sign in and retry.
-
-        Args:
-            site_ids (str | list[str] | None): List of site ids to filter
-            limit (int)                      : The number of agents per cursor call
-            payload (dict[str, Any])         : Payload to send to the endpoint
-            infected (bool)                  : Whether to only include agents with at least one active threat
-
-        Returns:
-            DataType: response data with agentID
-        """
-
-        if payload is None:
-            payload = {}
-
-        payload["limit"] = limit
-
-        if "skipCount" not in payload:
-            payload["skipCount"] = True
-
-        if site_ids is not None:
-            payload["siteIds"] = self._unify_str_list(site_ids)
-
-        if infected:
-            payload["infected"] = True
-
-        return self.fetch(endpoint=S1Endpoint.AGENTS, payload=payload)
-
-    def agents_export(
-        self,
-        site_ids: "StrType | None" = None,
-        payload: dict[str, Any] | None = None,
-        infected: bool = False,
-    ) -> "DataType":
-        """
-        Return the agents based on the provided filter.
-
-        Possible response messages
-        200 - Success
-        400 - Invalid user input received. See error details for further information.
-        401 - Unauthorized access - please sign in and retry.
-
-        Args:
-            site_ids (str | list[str] | None)    : List of site ids to filter
-            limit (int)                          : The number of agents per cursor call
-            payload (dict[str, Any])             : Payload to send to the endpoint
-            infected (bool)                      : Whether to only include agents with at least one active threat
-            net_statuses (str | list[str] | None): Network statuses to filter
-
-        Returns:
-            DataType: response data with agentID
-        """
-
-        if payload is None:
-            payload = {}
-
-        if site_ids is not None:
-            payload["siteIds"] = self._unify_str_list(site_ids)
-
-        if infected:
-            payload["infected"] = True
-
-        endpoint = S1Endpoint.AGENTS_EXPORT
-        req = endpoint.method(**self._request_params(payload, endpoint.method, endpoint.path))
-
-        if req.status_code != 200:
-            raise SentinelOneAPIConnectionError(
-                f"{Context()}::An error occured while fetching data from {endpoint}"
-            )
-
-        return FileUtils.parse_csv_str(req.content.decode().replace('"', ""), delimiter=",")
-
-    def move_agent_to_site(self, site_id: str, agent_name: "StrType") -> "DataType":
-        """
-        Move an agent that matches the filter to a specified site based on its ID.
-
-        Possible response messages
-        200 - Success
-        400 - Invalid user input received. See error details for further information
-        401 - Unauthorized access - please sign in and retry
-        403 - User has insufficient permissions to perform the requested action
-
-        Args:
-            site_id (str)   : The site to move the agent on
-            agent_name (str): The agents to move
-
-        Returns:
-            DataType: response data
-        """
-
-        if not isinstance(agent_name, list):
-            agent_name = [agent_name]
-
-        data = []
-        for name in agent_name:
-            payload = {
-                "data": {"targetSiteId": site_id},
-                "filter": {"computerName__like": name},
-            }
-
-            data.extend(
-                self.fetch(endpoint=S1Endpoint.AGENTS_ACTIONS_MOVE_TO_SITE, payload=payload)
-            )
-
-        return data
-
-    # ****************************************************************
-    # Methods: Users
-
-    def login_by_api_token(self) -> "DataType":
-        """
-        Log in to the API with an API token.
-
-        Possible response messages
-        200 - user logged in
-        400 - Invalid user input received. See error details for further information.
-        401 - User authentication failed
-
-        Returns:
-            DataType: data with user token and user name
-        """
-
-        payload = {"data": {"apiToken": self._api_token}}
-        return self.fetch(endpoint=S1Endpoint.USERS_LOGIN_BY_API_TOKEN, payload=payload)
-
-    def logout(self, payload: dict[str, Any] | None = None) -> "DataType":
-        """
-        Log out the authenticated user.
-
-        Possible response messages:
-        200 - User logged out successfully.
-        401 - Unauthorized access - please sign in and retry.
-
-        Args:
-            payload (dict[str, Any]): Payload to send to the endpoint
-
-        Returns:
-            DataType: Logout response data
-        """
-
-        return self.fetch(S1Endpoint.USERS_LOGOUT, payload or {})
-
-    # ****************************************************************
-    # Methods: Alerts
 
     def _unify_status(self, s: "str | S1IncidentStatus") -> str:
         """
@@ -467,6 +213,267 @@ class S1Connector(Connector):
             if len(verdict) > 0:
                 mode = "analystVerdictsNin" if exclude else "analystVerdicts"
                 incident_filter[mode] = verdict
+
+    # ****************************************************************
+    # Methods - access
+
+    def login_by_api_token(self) -> "DataType":
+        """
+        Log in to the API with an API token.
+
+        Possible response messages
+        200 - user logged in
+        400 - Invalid user input received. See error details for further information.
+        401 - User authentication failed
+
+        Returns:
+            DataType: data with user token and user name
+        """
+
+        payload = {"data": {"apiToken": self._api_token}}
+        return self.fetch(endpoint=S1Endpoint.USERS_LOGIN_BY_API_TOKEN, payload=payload)
+
+    def logout(self, payload: dict[str, Any] | None = None) -> "DataType":
+        """
+        Log out the authenticated user.
+
+        Possible response messages:
+        200 - User logged out successfully.
+        401 - Unauthorized access - please sign in and retry.
+
+        Args:
+            payload (dict[str, Any]): Payload to send to the endpoint
+
+        Returns:
+            DataType: Logout response data
+        """
+
+        return self.fetch(S1Endpoint.USERS_LOGOUT, payload or {})
+
+    @override
+    def connect(self) -> None:
+        """
+        Connect to the target.
+        """
+
+        context = Context()
+
+        if self._credentials is None:
+            raise NoCredentialsError(f"{context}::No password provided")
+
+        if not self._connection:
+            self.logger.info(f"{context}::Connecting to {self._target.netloc} with user API token")
+
+            if self._api_token:
+                try:
+                    data = self.login_by_api_token()
+                    self._connection = data[0]["token"]
+
+                except SentinelOneAPIConnectionError as e:
+                    raise SentinelOneAPIConnectionError(f"{context}::{e}")
+
+            else:
+                raise NoCredentialsError(f"{context}::No API token provided")
+
+            self.logger.info(f"{context}::Connected to {self._target.netloc}")
+
+        else:
+            self.logger.warning(
+                f"{context}::Connection to {self._target.netloc} is already initialized."
+            )
+
+    # ****************************************************************
+    # Methods - main
+
+    @override
+    def fetch(
+        self,
+        endpoint: "S1Endpoint",
+        payload: dict[str, Any],
+        path_fmt: dict[str, str] | None = None,
+    ) -> "DataType":
+        """
+        Perform a search query through the API to retrieve data based on provided endpoint and .
+
+        Args:
+            endpoint (S1Endpoints)          : SentinelOne endpoint the query payload will be send to
+            payload (dict[str, Any] | None) : Payload to send to the provided endpoint
+            path_fmt (dict[str, Any] | None): A dictionary of variable names that will be replaced in the endpoint path
+
+        Returns:
+            DataType: list of retrieved elements
+        """
+
+        context = Context()
+
+        res = []
+        next_cursor = None
+
+        endpoint_path = endpoint.path
+
+        if "{" and "}" in endpoint_path and path_fmt is None:
+            raise SentinelOneEndpointFormatError(f"{context}::SentinelOne endpoint {endpoint} needs formatting")
+
+        if path_fmt:
+            endpoint_path = endpoint_path.format(**path_fmt)
+
+        self.logger.debug(f"{context}::{endpoint} > {payload}")
+        while True:
+            if next_cursor:
+                payload["cursor"] = next_cursor
+
+            r_params = self._request_params(payload, endpoint.method, endpoint_path)
+            req = endpoint.method(**r_params)
+            req_json = req.json()
+
+            self.logger.debug(f"{context}::{endpoint} > {req_json}")
+
+            if "data" in req_json:
+                if isinstance(req_json["data"], list):
+                    res.extend(req_json["data"])
+
+                else:
+                    res.append(req_json["data"])
+
+            if req.status_code != 200:
+                raise SentinelOneAPIConnectionError(
+                    f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
+                )
+
+            next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
+            if not next_cursor:
+                break
+
+        return res
+
+    # ****************************************************************
+    # Methods: Agents
+
+    def agents(
+        self,
+        site_ids: "StrType | None" = None,
+        limit: int = 1000,
+        payload: dict[str, Any] | None = None,
+        infected: bool = False,
+    ) -> "DataType":
+        """
+        Retrieve agents based on the provided filter.
+
+        Retrieve every agent details.
+
+        Possible response messages
+        200 - Success
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry.
+
+        Args:
+            site_ids (str | list[str] | None): List of site ids to filter
+            limit (int)                      : The number of agents per cursor call
+            payload (dict[str, Any])         : Payload to send to the endpoint
+            infected (bool)                  : Whether to only include agents with at least one active threat
+
+        Returns:
+            DataType: response data with agentID
+        """
+
+        if payload is None:
+            payload = {}
+
+        payload["limit"] = limit
+
+        if "skipCount" not in payload:
+            payload["skipCount"] = True
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
+
+        if infected:
+            payload["infected"] = True
+
+        return self.fetch(endpoint=S1Endpoint.AGENTS, payload=payload)
+
+    def agents_export(
+        self,
+        site_ids: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
+        infected: bool = False,
+    ) -> "DataType":
+        """
+        Return a flat agent export.
+
+        This endpoint is intended to do CSV exports.
+
+        Possible response messages
+        200 - Success
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry.
+
+        Args:
+            site_ids (str | list[str] | None)    : List of site ids to filter
+            limit (int)                          : The number of agents per cursor call
+            payload (dict[str, Any])             : Payload to send to the endpoint
+            infected (bool)                      : Whether to only include agents with at least one active threat
+            net_statuses (str | list[str] | None): Network statuses to filter
+
+        Returns:
+            DataType: response data with agentID
+        """
+
+        if payload is None:
+            payload = {}
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
+
+        if infected:
+            payload["infected"] = True
+
+        endpoint = S1Endpoint.AGENTS_EXPORT
+        req = endpoint.method(**self._request_params(payload, endpoint.method, endpoint.path))
+
+        if req.status_code != 200:
+            raise SentinelOneAPIConnectionError(
+                f"{Context()}::An error occured while fetching data from {endpoint}"
+            )
+
+        return FileUtils.parse_csv_str(req.content.decode().replace('"', ""), delimiter=",")
+
+    def move_agent_to_site(self, site_id: str, agent_name: "StrType") -> "DataType":
+        """
+        Move an agent that matches the filter to a specified site based on its ID.
+
+        Possible response messages
+        200 - Success
+        400 - Invalid user input received. See error details for further information
+        401 - Unauthorized access - please sign in and retry
+        403 - User has insufficient permissions to perform the requested action
+
+        Args:
+            site_id (str)   : The site to move the agent on
+            agent_name (str): The agents to move
+
+        Returns:
+            DataType: response data
+        """
+
+        if not isinstance(agent_name, list):
+            agent_name = [agent_name]
+
+        data = []
+        for name in agent_name:
+            payload = {
+                "data": {"targetSiteId": site_id},
+                "filter": {"computerName__like": name},
+            }
+
+            data.extend(
+                self.fetch(endpoint=S1Endpoint.AGENTS_ACTIONS_MOVE_TO_SITE, payload=payload)
+            )
+
+        return data
+
+    # ****************************************************************
+    # Methods: Alerts
 
     def alert_verdict(
         self,
@@ -1097,7 +1104,7 @@ class S1Connector(Connector):
         if not isinstance(names, list):
             names = [names]
 
-        def filter_by_name(site: dict[str, Any]) -> bool:
+        def _filter_by_name(site: dict[str, Any]) -> bool:
             return site["name"] in names
 
-        return list(filter(filter_by_name, self.sites(payload)))
+        return list(filter(_filter_by_name, self.sites(payload)))
