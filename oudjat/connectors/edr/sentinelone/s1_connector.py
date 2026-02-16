@@ -4,23 +4,25 @@ A module that handles SentinelOne API connection and interactions.
 
 import logging
 import re
-from typing import Any, override
+from typing import Any, TypeAlias, override
 from urllib.parse import ParseResult, urlparse
 
 import requests
 
-from oudjat.connectors.edr.sentinelone.s1_mitigation_modes import S1MitigationMode
 from oudjat.utils import FileUtils
 from oudjat.utils.context import Context
 from oudjat.utils.credentials import NoCredentialsError
 from oudjat.utils.types import DataType, StrType
 
 from ... import Connector, ConnectorMethod
-from .exceptions import SentinelOneAPIConnectionError
+from .exceptions import SentinelOneAPIConnectionError, SentinelOneEndpointFormatError
 from .s1_analyst_verdicts import S1AnalystVerdict
 from .s1_endpoints import S1Endpoint
 from .s1_incident_statuses import S1IncidentStatus
+from .s1_mitigation_modes import S1MitigationMode
 
+S1IncidentStatusType: TypeAlias = "str | S1IncidentStatus | list[str | S1IncidentStatus]"
+S1AnalystVerdictType: TypeAlias = "str | S1AnalystVerdict | list[str | S1AnalystVerdict]"
 
 class S1Connector(Connector):
     """
@@ -29,6 +31,7 @@ class S1Connector(Connector):
 
     # ****************************************************************
     # Attributes & Constructors
+
     def __init__(
         self,
         target: str,
@@ -172,7 +175,6 @@ class S1Connector(Connector):
         self,
         endpoint: "S1Endpoint",
         payload: dict[str, Any],
-        attributes: list[str] | None = None,
         path_fmt: dict[str, str] | None = None,
     ) -> "DataType":
         """
@@ -180,7 +182,6 @@ class S1Connector(Connector):
 
         Args:
             endpoint (S1Endpoints)          : SentinelOne endpoint the query payload will be send to
-            attributes (list[str] | None)   : List of attributes to keep per elements
             payload (dict[str, Any] | None) : Payload to send to the provided endpoint
             path_fmt (dict[str, Any] | None): A dictionary of variable names that will be replaced in the endpoint path
 
@@ -194,6 +195,10 @@ class S1Connector(Connector):
         next_cursor = None
 
         endpoint_path = endpoint.path
+
+        if "{" and "}" in endpoint_path and path_fmt is None:
+            raise SentinelOneEndpointFormatError(f"{context}::SentinelOne endpoint {endpoint} needs formatting")
+
         if path_fmt:
             endpoint_path = endpoint_path.format(**path_fmt)
 
@@ -235,7 +240,6 @@ class S1Connector(Connector):
         limit: int = 1000,
         payload: dict[str, Any] | None = None,
         infected: bool = False,
-        net_statuses: "StrType | None" = None,
     ) -> "DataType":
         """
         Return the agents based on the provided filter.
@@ -246,11 +250,10 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry.
 
         Args:
-            site_ids (str | list[str] | None)    : List of site ids to filter
-            limit (int)                          : The number of agents per cursor call
-            payload (dict[str, Any])             : Payload to send to the endpoint
-            infected (bool)                      : Whether to only include agents with at least one active threat
-            net_statuses (str | list[str] | None): Network statuses to filter
+            site_ids (str | list[str] | None): List of site ids to filter
+            limit (int)                      : The number of agents per cursor call
+            payload (dict[str, Any])         : Payload to send to the endpoint
+            infected (bool)                  : Whether to only include agents with at least one active threat
 
         Returns:
             DataType: response data with agentID
@@ -270,9 +273,6 @@ class S1Connector(Connector):
         if infected:
             payload["infected"] = True
 
-        if net_statuses is not None:
-            payload["netStatuses"] = self._unify_str_list(net_statuses)
-
         return self.fetch(endpoint=S1Endpoint.AGENTS, payload=payload)
 
     def agents_export(
@@ -280,7 +280,6 @@ class S1Connector(Connector):
         site_ids: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
         infected: bool = False,
-        net_statuses: "StrType | None" = None,
     ) -> "DataType":
         """
         Return the agents based on the provided filter.
@@ -309,9 +308,6 @@ class S1Connector(Connector):
 
         if infected:
             payload["infected"] = True
-
-        if net_statuses is not None:
-            payload["netStatuses"] = self._unify_str_list(net_statuses)
 
         endpoint = S1Endpoint.AGENTS_EXPORT
         req = endpoint.method(**self._request_params(payload, endpoint.method, endpoint.path))
@@ -425,7 +421,7 @@ class S1Connector(Connector):
     def _update_filter_status(
         self,
         incident_filter: dict[str, Any],
-        status: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None",
+        status: "S1IncidentStatusType | None",
         exclude: bool = True,
     ) -> None:
         """
@@ -433,7 +429,7 @@ class S1Connector(Connector):
 
         Args:
             incident_filter (dict[str, Any])                                     : The incident filter to update if a status is provided
-            status (str | S1IncidentStatus | list[str | S1IncidentStatus] | None): Status to filter
+            status (S1IncidentStatusType | None): Status to filter
             exclude (bool)                                                       : If true, the provided status will be excluded from the search.
         """
 
@@ -450,7 +446,7 @@ class S1Connector(Connector):
     def _update_filter_verdict(
         self,
         incident_filter: dict[str, Any],
-        verdict: "str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None",
+        verdict: "S1AnalystVerdictType | None",
         exclude: bool = True,
     ) -> None:
         """
@@ -477,8 +473,8 @@ class S1Connector(Connector):
         verdict: "str | S1AnalystVerdict",
         alert_ids: "StrType | None" = None,
         site_ids: "StrType | None" = None,
-        status_filter: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = S1IncidentStatus.UNRESOLVED,
-        verdict_filter: "str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None" = S1AnalystVerdict.UNDEFINED,
+        status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
         process_path: "StrType | None" = None,
         alert_filter: dict[str, Any] | None = None,
     ) -> "DataType":
@@ -491,13 +487,13 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry
 
         Args:
-            verdict (str | S1AnalystVerdict)                                              : The verdict to assign to the filtered alerts
-            alert_ids (str | list[str] | None)                                            : Ids of the alert to change verdict of
-            site_ids (str | list[str] | None)                                             : Site ids of the alerts
-            status_filter (str | S1IncidentStatus | list[str | S1IncidentStatus] | None)  : Treat only the alerts with the provided status. Default UNRESOLVED
-            verdict_filter (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None) : Treat only the alerts with the provided verdict. Default UNDEFINED
-            process_path (str | list[str] | None)                                         : Path of the process which triggered the alert
-            alert_filter (dict[str, Any])                                                 : A dictionary of alert filters
+            verdict (str | S1AnalystVerdict)            : The verdict to assign to the filtered alerts
+            alert_ids (str | list[str] | None)          : Ids of the alert to change verdict of
+            site_ids (str | list[str] | None)           : Site ids of the alerts
+            status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
+            process_path (str | list[str] | None)       : Path of the process which triggered the alert
+            alert_filter (dict[str, Any])               : A dictionary of alert filters
 
         Returns:
             DataType: Response containing the number of affected verdicts and eventual errors
@@ -536,8 +532,8 @@ class S1Connector(Connector):
         status: "str | S1IncidentStatus",
         alert_ids: "StrType | None" = None,
         site_ids: "StrType | None" = None,
-        status_filter: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = S1IncidentStatus.UNRESOLVED,
-        verdict_filter: "str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None" = S1AnalystVerdict.UNDEFINED,
+        status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
         process_path: "StrType | None" = None,
         alert_filter: dict[str, Any] | None = None,
     ) -> "DataType":
@@ -550,13 +546,13 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry
 
         Args:
-            status (str | S1IncidentStatus)                                               : The verdict to assign to the filtered alerts
-            alert_ids (str | list[str] | None)                                            : Ids of the alert to change verdict of
-            site_ids (str | list[str] | None)                                             : Site ids of the alerts
-            status_filter (str | S1IncidentStatus | list[str | S1IncidentStatus] | None)  : Treat only the alerts with the provided status. Default UNRESOLVED
-            verdict_filter (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None) : Treat only the alerts with the provided verdict. Default UNDEFINED
-            process_path (str | list[str] | None)                                         : Path of the process which triggered the alert
-            alert_filter (dict[str, Any])                                                 : A dictionary of alert filters
+            status (str | S1IncidentStatus)             : The verdict to assign to the filtered alerts
+            alert_ids (str | list[str] | None)          : Ids of the alert to change verdict of
+            site_ids (str | list[str] | None)           : Site ids of the alerts
+            status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
+            process_path (str | list[str] | None)       : Path of the process which triggered the alert
+            alert_filter (dict[str, Any])               : A dictionary of alert filters
 
         Returns:
             DataType: Response containing the number of affected verdicts and eventual errors
@@ -595,8 +591,8 @@ class S1Connector(Connector):
 
     def threats(
         self,
-        status_filter: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = S1IncidentStatus.UNRESOLVED,
-        verdict_filter: "str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None" = S1AnalystVerdict.UNDEFINED,
+        status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
@@ -608,10 +604,10 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry.
 
         Args:
-            status_filter (str | S1IncidentStatus | list[str | S1IncidentStatus] | None)  : Treat only the alerts with the provided status. Default UNRESOLVED
-            verdict_filter (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None) : Treat only the alerts with the provided verdict. Default UNDEFINED
-            loop (bool)                                                                   : If true, will loop until there is no results left
-            payload (dict[str, Any])                                                      : Payload to send to the endpoint
+            status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
+            loop (bool)                                 : If true, will loop until there is no results left
+            payload (dict[str, Any])                    : Payload to send to the endpoint
 
         Returns:
             DataType: Threats data based on the provided filters
@@ -630,8 +626,8 @@ class S1Connector(Connector):
         verdict: "str | S1AnalystVerdict",
         alert_ids: "StrType | None" = None,
         site_ids: "StrType | None" = None,
-        status_filter: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = S1IncidentStatus.UNRESOLVED,
-        verdict_filter: "str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None" = S1AnalystVerdict.UNDEFINED,
+        status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
         file_path: "StrType | None" = None,
         alert_filter: dict[str, Any] | None = None,
     ) -> "DataType":
@@ -644,13 +640,13 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry
 
         Args:
-            verdict (str | S1AnalystVerdict)                                              : The verdict to assign to the filtered threats
-            alert_ids (str | list[str] | None)                                            : Ids of the threat to change verdict of
-            site_ids (str | list[str] | None)                                             : Site ids of the threats
-            status_filter (str | S1IncidentStatus | list[str | S1IncidentStatus] | None)  : Treat only the alerts with the provided status. Default UNRESOLVED
-            verdict_filter (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None) : Treat only the alerts with the provided verdict. Default UNDEFINED
-            file_path (str | list[str] | None)                                            : Path of the process which triggered the threat
-            alert_filter (dict[str, Any])                                                 : A dictionary of threat filters
+            verdict (str | S1AnalystVerdict)            : The verdict to assign to the filtered threats
+            alert_ids (str | list[str] | None)          : Ids of the threat to change verdict of
+            site_ids (str | list[str] | None)           : Site ids of the threats
+            status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
+            file_path (str | list[str] | None)          : Path of the process which triggered the threat
+            alert_filter (dict[str, Any])               : A dictionary of threat filters
 
         Returns:
             DataType: Response containing the number of affected verdicts and eventual errors
@@ -692,8 +688,8 @@ class S1Connector(Connector):
         verdict: "str | S1AnalystVerdict",
         threat_ids: "StrType | None" = None,
         site_ids: "StrType | None" = None,
-        status_filter: "str | S1IncidentStatus | list[str | S1IncidentStatus] | None" = S1IncidentStatus.UNRESOLVED,
-        verdict_filter: "str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None" = S1AnalystVerdict.UNDEFINED,
+        status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
         file_path: "StrType | None" = None,
         loop: bool = False,
         alert_filter: dict[str, Any] | None = None,
@@ -707,15 +703,15 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry
 
         Args:
-            status (str | S1IncidentStatus)                                               : The verdict to assign to the filtered threats
-            verdict (str | S1AnalystVerdict)                                              : The verdict to assign to the filtered threats
-            threat_ids (str | list[str] | None)                                           : Ids of the alert to change verdict of
-            site_ids (str | list[str] | None)                                             : Site ids of the alerts
-            status_filter (str | S1IncidentStatus | list[str | S1IncidentStatus] | None)  : Treat only the alerts with the provided status. Default UNRESOLVED
-            verdict_filter (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None) : Treat only the alerts with the provided verdict. Default UNDEFINED
-            file_path (str | list[str] | None)                                            : Path of the process which triggered the alert
-            loop (bool)                                                                   : If true, loop until there is no threat to process
-            alert_filter (dict[str, Any])                                                 : A dictionary of alert filters
+            status (str | S1IncidentStatus)             : The verdict to assign to the filtered threats
+            verdict (str | S1AnalystVerdict)            : The verdict to assign to the filtered threats
+            threat_ids (str | list[str] | None)         : Ids of the alert to change verdict of
+            site_ids (str | list[str] | None)           : Site ids of the alerts
+            status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
+            file_path (str | list[str] | None)          : Path of the process which triggered the alert
+            loop (bool)                                 : If true, loop until there is no threat to process
+            alert_filter (dict[str, Any])               : A dictionary of alert filters
 
         Returns:
             DataType: Response containing the number of affected verdicts and eventual errors
@@ -923,7 +919,7 @@ class S1Connector(Connector):
     # ****************************************************************
     # Methods: Groups
 
-    def groups(self, site_id: str | None, payload: dict[str, Any] | None = None) -> "DataType":
+    def groups(self, site_ids: "StrType | None", payload: dict[str, Any] | None = None) -> "DataType":
         """
         Get data of groups that match the filter.
 
@@ -933,8 +929,8 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry
 
         Args:
-            site_id (str)           : The site to remove groups from
-            payload (dict[str, Any]): Payload to send to the endpoint
+            site_ids (str)           : The site to remove groups from
+            payload (dict[str, Any]) : Payload to send to the endpoint
 
         Returns:
             DataType: Groups data based on the provided filters
@@ -943,7 +939,13 @@ class S1Connector(Connector):
         if payload is None:
             payload = {}
 
-        payload = {"filter": {"siteId": site_id}}
+        if site_ids is not None:
+            if not isinstance(site_ids, list):
+                site_ids = [site_ids]
+
+            payload["siteIds"] = site_ids
+
+
         return self.fetch(S1Endpoint.GROUPS, payload)
 
     def group_policy_update(
@@ -951,8 +953,20 @@ class S1Connector(Connector):
         group_id: "StrType",
         malicious_mitigation: "S1MitigationMode | None" = None,
         suspicious_mitigation: "S1MitigationMode | None" = None,
-        payload: dict[str, Any] | None = None
+        payload: dict[str, Any] | None = None,
     ) -> "DataType":
+        """
+        Update the provided groups (by id) policy.
+
+        Args:
+            group_id (str | list[str])                     : Group to update the policy of
+            malicious_mitigation (S1MitigationMode | None) : Malicious policy to set
+            suspicious_mitigation (S1MitigationMode | None): Suspicious policy to set
+            payload (dict[str, Any])                       : Payload to send
+
+        Returns:
+            DataType: Update result
+        """
 
         if not isinstance(group_id, list):
             group_id = [group_id]
@@ -969,10 +983,11 @@ class S1Connector(Connector):
 
         res = []
         for gid in group_id:
-            res.extend(self.fetch(S1Endpoint.GROUPS_POLICY_UPDATE, payload, ))
+            res.extend(
+                self.fetch(S1Endpoint.GROUPS_POLICY_UPDATE, payload, path_fmt={"groupId": gid})
+            )
 
         return res
-
 
     def move_agent_to_group(
         self, group_id: str, cpt_name: str | None = None, cpt_ids: "StrType | None" = None
