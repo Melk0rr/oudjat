@@ -24,6 +24,7 @@ from .s1_mitigation_modes import S1MitigationMode
 S1IncidentStatusType: TypeAlias = "str | S1IncidentStatus | list[str | S1IncidentStatus]"
 S1AnalystVerdictType: TypeAlias = "str | S1AnalystVerdict | list[str | S1AnalystVerdict]"
 
+
 class S1Connector(Connector):
     """
     A class that handles SentinelOne API connections and interactions.
@@ -312,7 +313,9 @@ class S1Connector(Connector):
         endpoint_path = endpoint.path
 
         if "{" and "}" in endpoint_path and path_fmt is None:
-            raise SentinelOneEndpointFormatError(f"{context}::SentinelOne endpoint {endpoint} needs formatting")
+            raise SentinelOneEndpointFormatError(
+                f"{context}::SentinelOne endpoint {endpoint} needs formatting"
+            )
 
         if path_fmt:
             endpoint_path = endpoint_path.format(**path_fmt)
@@ -631,12 +634,12 @@ class S1Connector(Connector):
     def threat_verdict(
         self,
         verdict: "str | S1AnalystVerdict",
-        alert_ids: "StrType | None" = None,
+        threat_ids: "StrType | None" = None,
         site_ids: "StrType | None" = None,
         status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
         verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
         file_path: "StrType | None" = None,
-        alert_filter: dict[str, Any] | None = None,
+        threat_filter: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Change the verdict of a threat.
@@ -648,37 +651,37 @@ class S1Connector(Connector):
 
         Args:
             verdict (str | S1AnalystVerdict)            : The verdict to assign to the filtered threats
-            alert_ids (str | list[str] | None)          : Ids of the threat to change verdict of
+            threat_ids (str | list[str] | None)        : Ids of the threat to change verdict of
             site_ids (str | list[str] | None)           : Site ids of the threats
             status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
             verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
             file_path (str | list[str] | None)          : Path of the process which triggered the threat
-            alert_filter (dict[str, Any])               : A dictionary of threat filters
+            threat_filter (dict[str, Any])              : A dictionary of threat filters
 
         Returns:
             DataType: Response containing the number of affected verdicts and eventual errors
         """
 
-        if alert_filter is None:
-            alert_filter = {}
+        if threat_filter is None:
+            threat_filter = {}
 
-        if alert_ids is not None:
-            if not isinstance(alert_ids, list):
-                alert_ids = [alert_ids]
+        if threat_ids is not None:
+            if not isinstance(threat_ids, list):
+                threat_ids = [threat_ids]
 
-            alert_filter["ids"] = self._unify_str_list(alert_ids)
+            threat_filter["ids"] = self._unify_str_list(threat_ids)
 
         if site_ids is not None:
-            alert_filter["siteIds"] = self._unify_str_list(site_ids)
+            threat_filter["siteIds"] = self._unify_str_list(site_ids)
 
         # Set status filter
-        self._update_filter_status(alert_filter, status_filter)
+        self._update_filter_status(threat_filter, status_filter)
 
         # Set verdict filter
-        self._update_filter_verdict(alert_filter, verdict_filter)
+        self._update_filter_verdict(threat_filter, verdict_filter)
 
         if file_path is not None:
-            alert_filter["filePath__contains"] = self._unify_str_list(file_path)
+            threat_filter["filePath__contains"] = self._unify_str_list(file_path)
 
         if not isinstance(verdict, S1AnalystVerdict):
             verdict = S1AnalystVerdict[verdict.upper()]
@@ -686,7 +689,7 @@ class S1Connector(Connector):
         data = {"analystVerdict": str(verdict)}
 
         return self.fetch(
-            S1Endpoint.THREATS_ANALYST_VERDICT, {"filter": alert_filter, "data": data}
+            S1Endpoint.THREATS_ANALYST_VERDICT, {"filter": threat_filter, "data": data}
         )
 
     def threat_incident(
@@ -698,8 +701,8 @@ class S1Connector(Connector):
         status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
         verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
         file_path: "StrType | None" = None,
-        loop: bool = False,
-        alert_filter: dict[str, Any] | None = None,
+        auto: bool = False,
+        threat_filter: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Change the verdict and status of a threat.
@@ -717,33 +720,33 @@ class S1Connector(Connector):
             status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
             verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
             file_path (str | list[str] | None)          : Path of the process which triggered the alert
-            loop (bool)                                 : If true, loop until there is no threat to process
-            alert_filter (dict[str, Any])               : A dictionary of alert filters
+            auto (bool)                                 : If true, loop until there is no threat to process
+            threat_filter (dict[str, Any])              : A dictionary of alert filters
 
         Returns:
             DataType: Response containing the number of affected verdicts and eventual errors
         """
 
-        if alert_filter is None:
-            alert_filter = {}
+        if threat_filter is None:
+            threat_filter = {}
 
         if threat_ids is not None:
             if not isinstance(threat_ids, list):
                 threat_ids = [threat_ids]
 
-            alert_filter["ids"] = self._unify_str_list(threat_ids)
+            threat_filter["ids"] = self._unify_str_list(threat_ids)
 
         if site_ids is not None:
-            alert_filter["siteIds"] = self._unify_str_list(site_ids)
+            threat_filter["siteIds"] = self._unify_str_list(site_ids)
 
         # Set status filter
-        self._update_filter_status(alert_filter, status_filter)
+        self._update_filter_status(threat_filter, status_filter)
 
         # Set verdict filter
-        self._update_filter_verdict(alert_filter, verdict_filter)
+        self._update_filter_verdict(threat_filter, verdict_filter)
 
         if file_path is not None:
-            alert_filter["filePath__contains"] = self._unify_str_list(file_path)
+            threat_filter["filePath__contains"] = self._unify_str_list(file_path)
 
         if not isinstance(status, S1IncidentStatus):
             status = S1IncidentStatus[status.upper()]
@@ -754,10 +757,10 @@ class S1Connector(Connector):
         input_data = {"incidentStatus": str(status), "analystVerdict": str(verdict)}
 
         res = []
-        if loop:
+        if auto:
             while True:
                 q = self.fetch(
-                    S1Endpoint.THREATS_INCIDENT, {"filter": alert_filter, "data": input_data}
+                    S1Endpoint.THREATS_INCIDENT, {"filter": threat_filter, "data": input_data}
                 )
 
                 if q[0]["affected"] == 0:
@@ -768,7 +771,7 @@ class S1Connector(Connector):
         else:
             res.extend(
                 self.fetch(
-                    S1Endpoint.THREATS_INCIDENT, {"filter": alert_filter, "data": input_data}
+                    S1Endpoint.THREATS_INCIDENT, {"filter": threat_filter, "data": input_data}
                 )
             )
 
@@ -884,7 +887,7 @@ class S1Connector(Connector):
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
-        Get CVEs for a specific appliation.
+        Retrieve CVEs for a specific appliation.
 
         Possible response messages
         200 - Success
@@ -926,7 +929,9 @@ class S1Connector(Connector):
     # ****************************************************************
     # Methods: Groups
 
-    def groups(self, site_ids: "StrType | None", payload: dict[str, Any] | None = None) -> "DataType":
+    def groups(
+        self, site_ids: "StrType | None", payload: dict[str, Any] | None = None
+    ) -> "DataType":
         """
         Get data of groups that match the filter.
 
@@ -951,7 +956,6 @@ class S1Connector(Connector):
                 site_ids = [site_ids]
 
             payload["siteIds"] = site_ids
-
 
         return self.fetch(S1Endpoint.GROUPS, payload)
 
@@ -996,8 +1000,12 @@ class S1Connector(Connector):
 
         return res
 
-    def move_agent_to_group(
-        self, group_id: str, cpt_name: str | None = None, cpt_ids: "StrType | None" = None
+    def group_move_agent(
+        self,
+        group_id: str,
+        agent_name: str | None = None,
+        agent_ids: "StrType | None" = None,
+        agent_filter: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Move an Agent that matches the filter to a specified group in the same site.
@@ -1012,31 +1020,58 @@ class S1Connector(Connector):
         409 - Conflict
 
         Args:
-            group_id (str)                  : The ID of th group the agent must be moved in
-            cpt_name (str | None)           : The name of the computer whose agent will be moved
-            cpt_ids (str | list[str] | None): A list of IDs of computer whose agent will be moved
+            group_id (str)                    : The ID of th group the agent must be moved in
+            agent_name (str | None)           : The name of the agent that will be moved
+            agent_ids (str | list[str] | None): A list of IDs of agents that will be moved
+            agent_filter (dict[str, Any])     : A dictionary of filters to select agents that will be moved
 
         Returns:
             DataType: Response data
         """
 
-        if cpt_ids is not None:
-            payload = {"filter": {"ids": self._unify_str_list(cpt_ids)}}
+        if agent_filter is None:
+            agent_filter = {}
 
-        elif cpt_name is not None:
-            payload = {"filter": {"computerName__like": cpt_name}}
+        if agent_ids is not None:
+            agent_filter["ids"] = self._unify_str_list(agent_ids)
 
-        else:
+        elif agent_name is not None:
+            agent_filter["computerName__contains"] = agent_name
+
+        elif len(agent_filter.keys()) == 0:
             raise ValueError(
-                f"{Context()}.move_agent_to_group::Neither computer_name nor cpt_ids specified"
+                f"{Context()}::No agent filter was specified"
             )
 
         return self.fetch(
-            S1Endpoint.GROUPS_MOVE_AGENTS, payload=payload, path_fmt={"groupId": group_id}
+            S1Endpoint.GROUPS_MOVE_AGENTS,
+            payload={"filter": agent_filter},
+            path_fmt={"groupId": group_id},
         )
 
     # ****************************************************************
     # Methods: Sites
+
+    def sites(self, payload: dict[str, Any] | None = None) -> "DataType":
+        """
+        Retrieve the sites that match the provided filters.
+
+        The response includes the IDs of Sites, which you can use in other commands.
+
+        Possible response messages:
+        200 - Success
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry.
+
+        Args:
+            payload (dict[str, Any]): Payload to send to the endpoint
+
+        Returns:
+            DataType: Data of the site matching the provided ID
+        """
+
+        req = self.fetch(S1Endpoint.SITES, payload=payload or {})
+        return next(iter(req))["sites"]
 
     def sites_by_id(self, site_id: str, payload: dict[str, Any] | None = None) -> "DataType":
         """
@@ -1061,28 +1096,7 @@ class S1Connector(Connector):
             S1Endpoint.SITES_BY_ID, payload=payload or {}, path_fmt={"siteId": site_id}
         )
 
-    def sites(self, payload: dict[str, Any] | None = None) -> "DataType":
-        """
-        Retrieve the sites that match the provided filters.
-
-        The response includes the IDs of Sites, which you can use in other commands.
-
-        Possible response messages:
-        200 - Success
-        400 - Invalid user input received. See error details for further information.
-        401 - Unauthorized access - please sign in and retry.
-
-        Args:
-            payload (dict[str, Any]): Payload to send to the endpoint
-
-        Returns:
-            DataType: Data of the site matching the provided ID
-        """
-
-        req = self.fetch(S1Endpoint.SITES, payload=payload or {})
-        return next(iter(req))["sites"]
-
-    def sites_by_name(self, names: "StrType", payload: dict[str, Any] | None = None) -> "DataType":
+    def sites_by_name(self, site_name: "StrType", payload: dict[str, Any] | None = None) -> "DataType":
         """
         Retrieve sites based on the provided name list.
 
@@ -1094,17 +1108,17 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry.
 
         Args:
-            names (list[str])       : A list of site names to retrieve
+            site_name (list[str])   : A list of site names to retrieve
             payload (dict[str, Any]): Payload to send to the endpoint
 
         Returns:
             DataType: Data of the site matching the provided ID
         """
 
-        if not isinstance(names, list):
-            names = [names]
+        if not isinstance(site_name, list):
+            site_name = [site_name]
 
         def _filter_by_name(site: dict[str, Any]) -> bool:
-            return site["name"] in names
+            return site["name"] in site_name
 
         return list(filter(_filter_by_name, self.sites(payload)))
