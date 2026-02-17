@@ -33,35 +33,38 @@ Usage:
     oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --sites-by-name [options]
 
 Options:
-    --agents                         retrieve S1 agents details
-    --agents-export                  export flat agent data
-    --move-agent-site                move one or multiple agents to a site based on its id
-    --cves                           retrieve CVEs detected by S1
-    --threats                        retrieve threats detected by S1
-    --threats-verdict                change the verdict of filtered threats
-    --threats-incident               change the verdict and status of filtered threats
-    --applications                   retrieve an inventory of applications detected by S1
-    --applications-with-risks        retrieve an inventory of applications detected by S1 that present a security risk
-    --applications-cves              retrieve CVEs for specific application(s)
-    --groups                         retrieve groups
-    --group-policy                   update the policy of the specified groups
-    --group-move-agent               move agents into specified group
-    --sites                          retrieve sites
-    --sites-by-name                  retrieve sites by name
-    --auto                           trigger auto mode. See the doc for full usage details
-    --filter                         provide a JSON filter to narrow down selection
-    --ids                            a list of IDs to narrow down selection. See the doc for full usage details
-    --malicious-policy               specify the malicious policy for a group or agent
-    --names                          a list of names to narrow down selection. See the doc for full usage details
-    --path                           a path of a file or process to narrow down selection, See the doc for full usage details
-    --payload                        a JSON payload to pass additional query parameters
-    --sites-list                     a list of site IDs or names
-    --status                         specify an incident status to an alert or a threat
-    --status-filters                 a list of incident statuses for alert/threat selection. See the doc for full usage details
-    --suspicious-policy              specify the suspicious policy for a group or agent
-    --vendor                         a list of application vendor for CVEs/application selection.
-    --verdict                        specify an incident analyst verdict to an alert or a threat
-    --verdict-filters                a list of incident statuses for alert/threat selection. See the doc for full usage details
+    --agents                            retrieve S1 agents details
+    --agents-export                     export flat agent data
+    --move-agent-site                   move one or multiple agents to a site based on its id
+    --cves                              retrieve CVEs detected by S1
+    --threats                           retrieve threats detected by S1
+    --threats-verdict                   change the verdict of filtered threats
+    --threats-incident                  change the verdict and status of filtered threats
+    --applications                      retrieve an inventory of applications detected by S1
+    --applications-with-risks           retrieve an inventory of applications detected by S1 that present a security risk
+    --applications-cves                 retrieve CVEs for specific application(s)
+    --groups                            retrieve groups
+    --group-policy                      update the policy of the specified groups
+    --group-move-agent                  move agents into specified group
+    --sites                             retrieve sites
+    --sites-by-name                     retrieve sites by name
+    --auto                              trigger auto mode. See the doc for full usage details
+    --filter=FILTER                     provide a JSON filter to narrow down selection
+    --ids=IDS                           a list of IDs to narrow down selection. See the doc for full usage details
+    --ids-file=IDS_FILE                 a list of IDs (as a file) to narrow down selection. See the doc for full usage details
+    --malicious-policy=MALPOLICY        specify the malicious policy for a group or agent
+    --names=NAMES                       a list of names to narrow down selection. See the doc for full usage details
+    --names-file=NAMES_FILE             a list of names (as a file) to narrow down selection. See the doc for full usage details
+    --path=PATH                         a path of a file or process to narrow down selection, See the doc for full usage details
+    --payload=PAYLOAD                   a JSON payload to pass additional query parameters
+    --sites-list=SITELIST               a list of site IDs or names
+    --status=STATUS                     specify an incident status to an alert or a threat
+    --status-filters=STATUS_FILTER      a list of incident statuses for alert/threat selection. See the doc for full usage details
+    --suspicious-policy=SUPOLICY        specify the suspicious policy for a group or agent
+    --vendor=VENDOR                     a list of application vendor for CVEs/application selection.
+    --vendor-file=VENDOR_FILE           a list of application vendor (as a file) for CVEs/application selection.
+    --verdict=VERDICT                   specify an incident analyst verdict to an alert or a threat
+    --verdict-filters=VERDICT_FILTER    a list of incident statuses for alert/threat selection. See the doc for full usage details
 """
 
     def __init__(self, options: dict[str, Any]) -> None:
