@@ -49,7 +49,7 @@ Usage:
                                                                     [--status-filter=STATUSFILTER] \\
                                                                     [--verdict-filter=VERDICTFILTER] \\
                                                                     [--path=PATH] \\
-                                                                    [--auto=AUTO] \\
+                                                                    [--auto] \\
                                                                     [--filter=FILTER] \\
                                                                     [options]
     oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications \\
