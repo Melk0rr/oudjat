@@ -16,21 +16,85 @@ class S1ConnectorCommand(ConnectorCommand):
 
     __doc__ = """
 Usage:
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents-export [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --move-agent-site [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --cves [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents \\
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE] \\
+                                                                    [--payload=PAYLOAD] \\
+                                                                    [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents-export \\
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE] \\
+                                                                    [--payload=PAYLOAD] \\
+                                                                    [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --move-agent-site \\
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE] \\
+                                                                    [--names=NAMES | --names-file=NAMESFILE] \\
+                                                                    [options]
     oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats-verdict [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats-incident [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications [options]
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE] \\
+                                                                    [--payload=PAYLOAD] \\
+                                                                    [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats-verdict \\
+                                                                    [--verdict=VERDICT] \\
+                                                                    [--ids=IDS | --ids-file=IDSFILE] \\
+                                                                    [--sites-list=SITELIST | --site-file=SITEFILE] \\
+                                                                    [--status-filter=STATUSFILTER] \\
+                                                                    [--verdict-filter=VERDICTFILTER] \\
+                                                                    [--path=PATH] \\
+                                                                    [--filter=FILTER] \\
+                                                                    [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats-incident \\
+                                                                    [--status=STATUS] \\
+                                                                    [--verdict=VERDICT] \\
+                                                                    [--ids=IDS | --ids-file=IDSFILE] \\
+                                                                    [--sites-list=SITELIST | --site-file=SITEFILE] \\
+                                                                    [--status-filter=STATUSFILTER] \\
+                                                                    [--verdict-filter=VERDICTFILTER] \\
+                                                                    [--path=PATH] \\
+                                                                    [--auto=AUTO] \\
+                                                                    [--filter=FILTER] \\
+                                                                    [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications \\
+                                                                    [--vendor=VENDOR | --vendor-file=VENDORFILE]
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE] \\
+                                                                    [--payload=PAYLOAD] \\
+                                                                    [options]
     oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications-with-risks [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications-cves [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --groups [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --group-policy [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --group-move-agent [options]
+                                                                    [--vendor=VENDOR | --vendor-file=VENDORFILE]
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE] \\
+                                                                    [--payload=PAYLOAD] \\
+                                                                    [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications-cves \\
+                                                                    [--ids=IDS | --ids-file=IDSFILE] \\
+                                                                    [--names=NAMES | --names-file=NAMESFILE] \\
+                                                                    [--vendor=VENDOR | --vendor-file=VENDORFILE]
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE] \\
+                                                                    [--payload=PAYLOAD] \\
+                                                                    [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --cves \\
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE] \\
+                                                                    [--payload=PAYLOAD] \\
+                                                                    [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --groups \\
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE] \\
+                                                                    [--payload=PAYLOAD] \\
+                                                                    [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --group-policy \\
+                                                                    [--ids=IDS | --ids-file=IDSFILE] \\
+                                                                    [--malicious-policy=MALPOLICY] \\
+                                                                    [--suspicious-policy=SUPOLICY] \\
+                                                                    [--payload=PAYLOAD] \\
+                                                                    [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --group-move-agent \\
+                                                                    [--ids=IDS | --ids-file=IDSFILE] \\
+                                                                    [--names=NAMES | --names-file=NAMESFILE] \\
+                                                                    [--payload=PAYLOAD] \\
+                                                                    [options]
     oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --sites [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --sites-by-name [options]
+                                                                    [--payload=PAYLOAD] \\
+                                                                    [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --sites-by-name \\
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE] \\
+                                                                    [--payload=PAYLOAD] \\
+                                                                    [options]
 
 Options:
     --agents                            retrieve S1 agents details
@@ -51,20 +115,21 @@ Options:
     --auto                              trigger auto mode. See the doc for full usage details
     --filter=FILTER                     provide a JSON filter to narrow down selection
     --ids=IDS                           a list of IDs to narrow down selection. See the doc for full usage details
-    --ids-file=IDS_FILE                 a list of IDs (as a file) to narrow down selection. See the doc for full usage details
+    --ids-file=IDSFILE                  a list of IDs (as a file) to narrow down selection. See the doc for full usage details
     --malicious-policy=MALPOLICY        specify the malicious policy for a group or agent
     --names=NAMES                       a list of names to narrow down selection. See the doc for full usage details
-    --names-file=NAMES_FILE             a list of names (as a file) to narrow down selection. See the doc for full usage details
+    --names-file=NAMESFILE              a list of names (as a file) to narrow down selection. See the doc for full usage details
     --path=PATH                         a path of a file or process to narrow down selection, See the doc for full usage details
     --payload=PAYLOAD                   a JSON payload to pass additional query parameters
     --sites-list=SITELIST               a list of site IDs or names
+    --sites-file=SITEFILE               a list of site IDs or names (as file)
     --status=STATUS                     specify an incident status to an alert or a threat
-    --status-filters=STATUS_FILTER      a list of incident statuses for alert/threat selection. See the doc for full usage details
+    --status-filters=STATUSFILTER       a list of incident statuses for alert/threat selection. See the doc for full usage details
     --suspicious-policy=SUPOLICY        specify the suspicious policy for a group or agent
     --vendor=VENDOR                     a list of application vendor for CVEs/application selection.
-    --vendor-file=VENDOR_FILE           a list of application vendor (as a file) for CVEs/application selection.
+    --vendor-file=VENDORFILE            a list of application vendor (as a file) for CVEs/application selection.
     --verdict=VERDICT                   specify an incident analyst verdict to an alert or a threat
-    --verdict-filters=VERDICT_FILTER    a list of incident statuses for alert/threat selection. See the doc for full usage details
+    --verdict-filters=VERDICTFILTER     a list of incident statuses for alert/threat selection. See the doc for full usage details
 """
 
     def __init__(self, options: dict[str, Any]) -> None:
@@ -101,7 +166,7 @@ Options:
             "--names": lambda opt, _: self._unify_str_opt(opt, "--names-file"),
             "--path": None,
             "--payload": None,
-            "--sites-list": lambda opt, _: self._unify_str_opt(opt, "--ids-file"),
+            "--sites-list": lambda opt, _: self._unify_str_opt(opt, "--site-file"),
             "--status": None,
             "--status-filters": lambda opt, v: v.split(","),
             "--suspicious-policy": None,
@@ -133,14 +198,6 @@ Options:
                 {
                     "site_id": ("--sites-list", lambda lst: next(iter(lst))),
                     "agent_name": "--names",
-                },
-            ),
-            # Retrieve CVEs detected by S1
-            "--cves": (
-                self.connector.cves,
-                {
-                    "site_ids": "--sites-list",
-                    "payload": "--payload",
                 },
             ),
             # Retrieve threats detected by S1
@@ -204,6 +261,14 @@ Options:
                     "appliation_ids": "--ids",
                     "appliation_name": "--names",
                     "application_vendor": "--vendor",
+                    "site_ids": "--sites-list",
+                    "payload": "--payload",
+                },
+            ),
+            # Retrieve CVEs detected by S1
+            "--cves": (
+                self.connector.cves,
+                {
                     "site_ids": "--sites-list",
                     "payload": "--payload",
                 },
