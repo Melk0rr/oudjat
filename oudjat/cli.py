@@ -23,8 +23,6 @@ Usage:
     oudjat -h | --help
     oudjat -l=LOGGING | --log=LOGLEVEL
     oudjat -V | --version
-
-Commands:
 """
 
 _OPT_DOC = """
@@ -47,7 +45,6 @@ Options:
 """
 
 _HELP_DOC = """
-
 Help:
     For help using this tool, please open an issue on the Github repository:
     https://codeberg.org/me1k0r/oudjat
@@ -98,7 +95,7 @@ def _get_cmd_doc(command_name: str) -> str:
 
     return _COMMAND_OPTIONS[command_name].__doc__ or ""
 
-def _build_doc() -> str:
+def _build_doc(cmd_name: str) -> str:
     """
     Build docopt doc.
 
@@ -107,12 +104,7 @@ def _build_doc() -> str:
     """
 
     full_doc = _BASE_DOC
-    for cmd_name in _COMMAND_OPTIONS:
-        full_doc += f"  {cmd_name}\n"
-
-    for cmd_name in _COMMAND_OPTIONS:
-        full_doc += _get_cmd_doc(cmd_name)
-
+    full_doc += "\n".join(_get_cmd_doc(cmd_name).split("\n")[2:])
     full_doc += _OPT_DOC
     full_doc += _HELP_DOC
 
@@ -124,12 +116,8 @@ def main() -> None:
     """
 
     try:
-        if sys.version_info < (3, 0):
-            sys.stdout.write("Sorry, requires Python 3.x\n")
-            sys.exit(1)
-
         start_time = datetime.now().timestamp()
-        options = docopt(_build_doc(), version=VERSION)
+        options = docopt(_build_doc(sys.argv[1]), version=VERSION)
 
         original_stdout = sys.stdout
 
