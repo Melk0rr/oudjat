@@ -16,84 +16,84 @@ class S1ConnectorCommand(ConnectorCommand):
 
     __doc__ = """
 Usage:
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents \\
-                                                                    [--site-list SITELIST | --site-file SITEFILE] \\
-                                                                    [--payload PAYLOAD] \\
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE]
+                                                                    [--payload=PAYLOAD]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents-export \\
-                                                                    [--site-list SITELIST | --site-file SITEFILE] \\
-                                                                    [--payload PAYLOAD] \\
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents-export
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE]
+                                                                    [--payload=PAYLOAD]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --move-agent-site \\
-                                                                    [--site-list SITELIST | --site-file SITEFILE] \\
-                                                                    [--names NAMES | --names-file NAMESFILE] \\
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --move-agent-site
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE]
+                                                                    [--names=NAMES | --names-file=NAMESFILE]
                                                                     [options]
     oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats [options]
-                                                                    [--site-list SITELIST | --site-file SITEFILE] \\
-                                                                    [--payload PAYLOAD] \\
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE]
+                                                                    [--payload=PAYLOAD]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats-verdict \\
-                                                                    [--verdict VERDICT] \\
-                                                                    [--ids IDS | --ids-file IDSFILE] \\
-                                                                    [--sites-list SITELIST | --site-file SITEFILE] \\
-                                                                    [--status-filter STATUSFILTER] \\
-                                                                    [--verdict-filter VERDICTFILTER] \\
-                                                                    [--path PATH] \\
-                                                                    [--filter FILTER] \\
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats-verdict
+                                                                    [--verdict=VERDICT]
+                                                                    [--ids=IDS | --ids-file=IDSFILE]
+                                                                    [--sites-list=SITELIST | --site-file=SITEFILE]
+                                                                    [--status-filter=STATUSFILTER]
+                                                                    [--verdict-filter=VERDICTFILTER]
+                                                                    [--path=PATH]
+                                                                    [--filter=FILTER]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats-incident \\
-                                                                    [--status STATUS] \\
-                                                                    [--verdict VERDICT] \\
-                                                                    [--ids IDS | --ids-file IDSFILE] \\
-                                                                    [--sites-list SITELIST | --site-file SITEFILE] \\
-                                                                    [--status-filter STATUSFILTER] \\
-                                                                    [--verdict-filter VERDICTFILTER] \\
-                                                                    [--path PATH] \\
-                                                                    [--auto] \\
-                                                                    [--filter FILTER] \\
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats-incident
+                                                                    [--status=STATUS]
+                                                                    [--verdict=VERDICT]
+                                                                    [--ids=IDS | --ids-file=IDSFILE]
+                                                                    [--sites-list=SITELIST | --site-file=SITEFILE]
+                                                                    [--status-filter=STATUSFILTER]
+                                                                    [--verdict-filter=VERDICTFILTER]
+                                                                    [--path=PATH]
+                                                                    [--auto]
+                                                                    [--filter=FILTER]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications \\
-                                                                    [--vendor VENDOR | --vendor-file VENDORFILE]
-                                                                    [--site-list SITELIST | --site-file SITEFILE] \\
-                                                                    [--payload PAYLOAD] \\
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications
+                                                                    [--vendor=VENDOR | --vendor-file=VENDORFILE]
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE]
+                                                                    [--payload=PAYLOAD]
                                                                     [options]
     oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications-with-risks [options]
-                                                                    [--vendor VENDOR | --vendor-file VENDORFILE]
-                                                                    [--site-list SITELIST | --site-file SITEFILE] \\
-                                                                    [--payload PAYLOAD] \\
+                                                                    [--vendor=VENDOR | --vendor-file=VENDORFILE]
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE]
+                                                                    [--payload=PAYLOAD]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications-cves \\
-                                                                    [--ids IDS | --ids-file IDSFILE] \\
-                                                                    [--names NAMES | --names-file NAMESFILE] \\
-                                                                    [--vendor VENDOR | --vendor-file VENDORFILE]
-                                                                    [--site-list SITELIST | --site-file SITEFILE] \\
-                                                                    [--payload PAYLOAD] \\
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications-cves
+                                                                    [--ids=IDS | --ids-file=IDSFILE]
+                                                                    [--names=NAMES | --names-file=NAMESFILE]
+                                                                    [--vendor=VENDOR | --vendor-file=VENDORFILE]
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE]
+                                                                    [--payload=PAYLOAD]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --cves \\
-                                                                    [--site-list SITELIST | --site-file SITEFILE] \\
-                                                                    [--payload PAYLOAD] \\
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --cves
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE]
+                                                                    [--payload=PAYLOAD]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --groups \\
-                                                                    [--site-list SITELIST | --site-file SITEFILE] \\
-                                                                    [--payload PAYLOAD] \\
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --groups
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE]
+                                                                    [--payload=PAYLOAD]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --group-policy \\
-                                                                    [--ids IDS | --ids-file IDSFILE] \\
-                                                                    [--malicious-policy MALPOLICY] \\
-                                                                    [--suspicious-policy SUPOLICY] \\
-                                                                    [--payload PAYLOAD] \\
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --group-policy
+                                                                    [--ids=IDS | --ids-file=IDSFILE]
+                                                                    [--malicious-policy=MALPOLICY]
+                                                                    [--suspicious-policy=SUPOLICY]
+                                                                    [--payload=PAYLOAD]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --group-move-agent \\
-                                                                    [--ids IDS | --ids-file IDSFILE] \\
-                                                                    [--names NAMES | --names-file NAMESFILE] \\
-                                                                    [--payload PAYLOAD] \\
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --group-move-agent
+                                                                    [--ids=IDS | --ids-file=IDSFILE]
+                                                                    [--names=NAMES | --names-file=NAMESFILE]
+                                                                    [--payload=PAYLOAD]
                                                                     [options]
     oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --sites [options]
-                                                                    [--payload PAYLOAD] \\
+                                                                    [--payload=PAYLOAD]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --sites-by-name \\
-                                                                    [--site-list SITELIST | --site-file SITEFILE] \\
-                                                                    [--payload PAYLOAD] \\
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --sites-by-name
+                                                                    [--site-list=SITELIST | --site-file=SITEFILE]
+                                                                    [--payload=PAYLOAD]
                                                                     [options]
 
 Options:
@@ -153,7 +153,7 @@ Options:
 
         self.connector: "S1Connector" = S1Connector(**con_args)
 
-        if "--creds-service" in self.options:
+        if self._is_opt_present("--creds-service"):
             self.connector.set_creds_from_svc_name(self.options["--creds-service"])
 
         self.connector.connect()
