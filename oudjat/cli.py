@@ -26,7 +26,6 @@ Usage:
 """
 
 _OPT_DOC = """
-Options:
     -a --append                       append to the output file
     -c --config=CONFIG                specify config file
     -f --file                         set target (reads from file, one domain per line)
@@ -104,15 +103,18 @@ def _build_doc(cmd_name: str) -> str:
     """
 
     full_doc = _BASE_DOC
-
-    full_doc += "Commands:\n"
-    for k in _COMMAND_OPTIONS:
-        full_doc += f"  {k}\n"
+    #
+    # full_doc += "Commands:\n"
+    # for k in _COMMAND_OPTIONS:
+    #     full_doc += f"      {k}\n"
 
     if cmd_name in _COMMAND_OPTIONS and cmd_name != "--help":
         full_doc += "\n".join(_get_cmd_doc(cmd_name).split("\n")[2:])
 
-    full_doc += _OPT_DOC
+    else:
+        full_doc += "Options:\n"
+
+    full_doc += "\n".join(_OPT_DOC.split("\n")[1:])
     full_doc += _HELP_DOC
 
     return full_doc
