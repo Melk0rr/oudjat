@@ -126,7 +126,8 @@ def main() -> None:
 
     try:
         start_time = datetime.now().timestamp()
-        options = docopt(_build_doc(sys.argv[1]), version=VERSION)
+        docoptions = _build_doc(sys.argv[1])
+        options = docopt(docoptions, version=VERSION)
 
         original_stdout = sys.stdout
 
