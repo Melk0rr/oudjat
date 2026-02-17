@@ -30,3 +30,18 @@ class StringUtils:
 
         base = re.sub(r"[\W]([a-zA-Z])", lambda x: x[1].upper(), s)
         return f"{base[0].lower()}{base[1:]}"
+
+    @staticmethod
+    def jsonify(s: str) -> str:
+        """
+        Ensure the provided string is a valid json string.
+
+        Args:
+            s (str): string to JSONify
+
+        Returns:
+            str: Valid JSON string
+        """
+
+        return re.sub(r'(\w+)(?=\s*:)', r'"\1"', s)
+

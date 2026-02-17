@@ -7,6 +7,7 @@ from typing import Any
 import orjson
 
 from oudjat.connectors.edr.sentinelone import S1Connector
+from oudjat.utils.string_utils import StringUtils
 
 from .connector_command import CommandMappingRegistry, CommandOpts, ConnectorCommand
 
@@ -162,12 +163,12 @@ Options:
 
         self._opt_map: "CommandMappingRegistry" = {
             "--auto": lambda opt, _: self._is_opt_present(opt),
-            "--filter": lambda _, v: orjson.loads(self._ensure_json(v)),
+            "--filter": lambda _, v: orjson.loads(StringUtils.jsonify(v)),
             "--ids": lambda opt, _: self._unify_str_opt(opt, "--ids-file"),
             "--malicious-policy": None,
             "--names": lambda opt, _: self._unify_str_opt(opt, "--names-file"),
             "--path": None,
-            "--payload": lambda _, v: orjson.loads(self._ensure_json(v)),
+            "--payload": lambda _, v: orjson.loads(StringUtils.jsonify(v)),
             "--sites-list": lambda opt, _: self._unify_str_opt(opt, "--site-file"),
             "--status": None,
             "--status-filters": lambda opt, v: v.split(","),
