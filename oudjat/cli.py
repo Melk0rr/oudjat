@@ -104,7 +104,14 @@ def _build_doc(cmd_name: str) -> str:
     """
 
     full_doc = _BASE_DOC
-    full_doc += "\n".join(_get_cmd_doc(cmd_name).split("\n")[2:])
+
+    full_doc += "Commands:\n"
+    for k in _COMMAND_OPTIONS:
+        full_doc += f"  {k}\n"
+
+    if cmd_name in _COMMAND_OPTIONS and cmd_name != "--help":
+        full_doc += "\n".join(_get_cmd_doc(cmd_name).split("\n")[2:])
+
     full_doc += _OPT_DOC
     full_doc += _HELP_DOC
 
