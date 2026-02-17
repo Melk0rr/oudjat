@@ -55,7 +55,7 @@ Options:
     --names                          a list of names to narrow down selection. See the doc for full usage details
     --path                           a path of a file or process to narrow down selection, See the doc for full usage details
     --payload                        a JSON payload to pass additional query parameters
-    --sites                          a list of site IDs or names
+    --sites-list                     a list of site IDs or names
     --status                         specify an incident status to an alert or a threat
     --status-filters                 a list of incident statuses for alert/threat selection. See the doc for full usage details
     --suspicious-policy              specify the suspicious policy for a group or agent
@@ -98,7 +98,7 @@ Options:
             "--names": lambda opt, _: self._unify_str_opt(opt, "--names-file"),
             "--path": None,
             "--payload": None,
-            "--sites": lambda opt, _: self._unify_str_opt(opt, "--ids-file"),
+            "--sites-list": lambda opt, _: self._unify_str_opt(opt, "--ids-file"),
             "--status": None,
             "--status-filters": lambda opt, v: v.split(","),
             "--suspicious-policy": None,
@@ -112,7 +112,7 @@ Options:
             "--agents": (
                 self.connector.agents,
                 {
-                    "site_ids": "--sites",
+                    "site_ids": "--sites-list",
                     "payload": "--payload",
                 },
             ),
@@ -120,7 +120,7 @@ Options:
             "--agents-export": (
                 self.connector.agents_export,
                 {
-                    "site_ids": "--sites",
+                    "site_ids": "--sites-list",
                     "payload": "--payload",
                 },
             ),
@@ -128,7 +128,7 @@ Options:
             "--move-agent-site": (
                 self.connector.move_agent_to_site,
                 {
-                    "site_id": ("--sites", lambda lst: next(iter(lst))),
+                    "site_id": ("--sites-list", lambda lst: next(iter(lst))),
                     "agent_name": "--names",
                 },
             ),
@@ -136,7 +136,7 @@ Options:
             "--cves": (
                 self.connector.cves,
                 {
-                    "site_ids": "--sites",
+                    "site_ids": "--sites-list",
                     "payload": "--payload",
                 },
             ),
@@ -144,7 +144,7 @@ Options:
             "--threats": (
                 self.connector.threats,
                 {
-                    "site_ids": "--sites",
+                    "site_ids": "--sites-list",
                     "payload": "--payload",
                 },
             ),
@@ -154,7 +154,7 @@ Options:
                 {
                     "verdict": "--verdict",
                     "threat_ids": "--ids",
-                    "site_ids": "--sites",
+                    "site_ids": "--sites-list",
                     "status_filter": "--status-filter",
                     "verdict_filter": "--verdict-filter",
                     "file_path": "--path",
@@ -168,7 +168,7 @@ Options:
                     "status": "--status",
                     "verdict": "--verdict",
                     "threat_ids": "--ids",
-                    "site_ids": "--sites",
+                    "site_ids": "--sites-list",
                     "status_filter": "--status-filter",
                     "verdict_filter": "--verdict-filter",
                     "file_path": "--path",
@@ -190,7 +190,7 @@ Options:
                 self.connector.applications_with_risks,
                 {
                     "vendors": "--vendor",
-                    "site_ids": "--sites",
+                    "site_ids": "--sites-list",
                     "payload": "--payload",
                 },
             ),
@@ -201,7 +201,7 @@ Options:
                     "appliation_ids": "--ids",
                     "appliation_name": "--names",
                     "application_vendor": "--vendor",
-                    "site_ids": "--sites",
+                    "site_ids": "--sites-list",
                     "payload": "--payload",
                 },
             ),
@@ -209,7 +209,7 @@ Options:
             "--groups": (
                 self.connector.groups,
                 {
-                    "site_ids": "--sites",
+                    "site_ids": "--sites-list",
                     "payload": "--payload",
                 },
             ),
@@ -243,7 +243,7 @@ Options:
             "--sites-by-name": (
                 self.connector.sites_by_name,
                 {
-                    "site_name": "--sites",
+                    "site_name": "--sites-list",
                     "payload": "--payload",
                 },
             ),
