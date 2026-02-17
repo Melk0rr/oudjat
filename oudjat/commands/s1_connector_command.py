@@ -4,6 +4,8 @@ A command module to handle interactions to Sentinel One API through the dedicate
 
 from typing import Any
 
+import orjson
+
 from oudjat.connectors.edr.sentinelone import S1Connector
 
 from .connector_command import CommandMappingRegistry, CommandOpts, ConnectorCommand
@@ -28,7 +30,7 @@ Usage:
                                                                     [--site-list=SITELIST | --site-file=SITEFILE]
                                                                     [--names=NAMES | --names-file=NAMESFILE]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats
                                                                     [--site-list=SITELIST | --site-file=SITEFILE]
                                                                     [--payload=PAYLOAD]
                                                                     [options]
@@ -57,7 +59,7 @@ Usage:
                                                                     [--site-list=SITELIST | --site-file=SITEFILE]
                                                                     [--payload=PAYLOAD]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications-with-risks [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications-with-risks
                                                                     [--vendor=VENDOR | --vendor-file=VENDORFILE]
                                                                     [--site-list=SITELIST | --site-file=SITEFILE]
                                                                     [--payload=PAYLOAD]
@@ -88,7 +90,7 @@ Usage:
                                                                     [--names=NAMES | --names-file=NAMESFILE]
                                                                     [--payload=PAYLOAD]
                                                                     [options]
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --sites [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --sites
                                                                     [--payload=PAYLOAD]
                                                                     [options]
     oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --sites-by-name
@@ -124,12 +126,12 @@ Options:
     --sites-list=SITELIST               a list of site IDs or names
     --sites-file=SITEFILE               a list of site IDs or names (as file)
     --status=STATUS                     specify an incident status to an alert or a threat
-    --status-filters=STATUSFILTER       a list of incident statuses for alert/threat selection. See the doc for full usage details
+    --status-filter=STATUSFILTER       a list of incident statuses for alert/threat selection. See the doc for full usage details
     --suspicious-policy=SUPOLICY        specify the suspicious policy for a group or agent
     --vendor=VENDOR                     a list of application vendor for CVEs/application selection.
     --vendor-file=VENDORFILE            a list of application vendor (as a file) for CVEs/application selection.
     --verdict=VERDICT                   specify an incident analyst verdict to an alert or a threat
-    --verdict-filters=VERDICTFILTER     a list of incident statuses for alert/threat selection. See the doc for full usage details
+    --verdict-filter=VERDICTFILTER     a list of incident statuses for alert/threat selection. See the doc for full usage details
 """
 
     def __init__(self, options: dict[str, Any]) -> None:
@@ -160,12 +162,12 @@ Options:
 
         self._opt_map: "CommandMappingRegistry" = {
             "--auto": lambda opt, _: self._is_opt_present(opt),
-            "--filter": None,
+            "--filter": lambda _, v: orjson.loads(self._ensure_json(v)),
             "--ids": lambda opt, _: self._unify_str_opt(opt, "--ids-file"),
             "--malicious-policy": None,
             "--names": lambda opt, _: self._unify_str_opt(opt, "--names-file"),
             "--path": None,
-            "--payload": None,
+            "--payload": lambda _, v: orjson.loads(self._ensure_json(v)),
             "--sites-list": lambda opt, _: self._unify_str_opt(opt, "--site-file"),
             "--status": None,
             "--status-filters": lambda opt, v: v.split(","),

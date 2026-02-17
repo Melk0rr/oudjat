@@ -1,5 +1,6 @@
 """A module that defines common command behaviors."""
 
+import re
 from typing import Any
 
 from oudjat.utils import Context
@@ -96,6 +97,19 @@ class Base:
         )
 
         return list(filter(None, args))
+
+    def _ensure_json(self, json_str: str) -> str:
+        """
+        Ensure the provided string is a valid json string.
+
+        Args:
+            json_str (str): string to JSONify
+
+        Returns:
+            str: Valid JSON string
+        """
+
+        return re.sub(r'(\w+)(?=\s*:)', r'"\1"', json_str)
 
     def run(self) -> None:
         """
