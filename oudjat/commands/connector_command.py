@@ -87,15 +87,15 @@ class ConnectorCommand(Base):
 
         res = {}
         for k,v in args.items():
-
             opt_k = v[0] if isinstance(v, tuple) else v
-            opt_v = self._resolve_arg_value(opt_k)
+            if self._is_opt_present(opt_k):
+                opt_v = self._resolve_arg_value(opt_k)
 
-            if isinstance(v, tuple):
-                _, trs = v
-                opt_v = trs(opt_v)
+                if isinstance(v, tuple):
+                    _, trs = v
+                    opt_v = trs(opt_v)
 
-            res[k] = opt_v
+                res[k] = opt_v
 
         return res
 
