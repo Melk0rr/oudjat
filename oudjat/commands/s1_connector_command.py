@@ -14,6 +14,56 @@ class S1ConnectorCommand(ConnectorCommand):
     A class to provide an access to the S1Connector.
     """
 
+    __doc__ = """
+Usage:
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents-export [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --move-agent-site [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --cves [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats-verdict [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --threats-incident [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications-with-risks [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --applications-cves [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --groups [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --group-policy [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --group-move-agent [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --sites [options]
+    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --sites-by-name [options]
+
+Options:
+    --agents                         retrieve S1 agents details
+    --agents-export                  export flat agent data
+    --move-agent-site                move one or multiple agents to a site based on its id
+    --cves                           retrieve CVEs detected by S1
+    --threats                        retrieve threats detected by S1
+    --threats-verdict                change the verdict of filtered threats
+    --threats-incident               change the verdict and status of filtered threats
+    --applications                   retrieve an inventory of applications detected by S1
+    --applications-with-risks        retrieve an inventory of applications detected by S1 that present a security risk
+    --applications-cves              retrieve CVEs for specific application(s)
+    --groups                         retrieve groups
+    --group-policy                   update the policy of the specified groups
+    --group-move-agent               move agents into specified group
+    --sites                          retrieve sites
+    --sites-by-name                  retrieve sites by name
+    --auto                           trigger auto mode. See the doc for full usage details
+    --filter                         provide a JSON filter to narrow down selection
+    --ids                            a list of IDs to narrow down selection. See the doc for full usage details
+    --malicious-policy               specify the malicious policy for a group or agent
+    --names                          a list of names to narrow down selection. See the doc for full usage details
+    --path                           a path of a file or process to narrow down selection, See the doc for full usage details
+    --payload                        a JSON payload to pass additional query parameters
+    --sites                          a list of site IDs or names
+    --status                         specify an incident status to an alert or a threat
+    --status-filters                 a list of incident statuses for alert/threat selection. See the doc for full usage details
+    --suspicious-policy              specify the suspicious policy for a group or agent
+    --vendor                         a list of application vendor for CVEs/application selection.
+    --verdict                        specify an incident analyst verdict to an alert or a threat
+    --verdict-filters                a list of incident statuses for alert/threat selection. See the doc for full usage details
+"""
+
     def __init__(self, options: dict[str, Any]) -> None:
         """
         Create a new S1ConnectorCommand.
@@ -44,7 +94,6 @@ class S1ConnectorCommand(ConnectorCommand):
             "--auto": lambda opt, _: self._is_opt_present(opt),
             "--filter": None,
             "--ids": lambda opt, _: self._unify_str_opt(opt, "--ids-file"),
-            "--infected": lambda opt, _: self._is_opt_present(opt),
             "--malicious-policy": None,
             "--names": lambda opt, _: self._unify_str_opt(opt, "--names-file"),
             "--path": None,
@@ -65,7 +114,6 @@ class S1ConnectorCommand(ConnectorCommand):
                 {
                     "site_ids": "--sites",
                     "payload": "--payload",
-                    "infected": "--infected",
                 },
             ),
             # Export flat agent data
@@ -74,7 +122,6 @@ class S1ConnectorCommand(ConnectorCommand):
                 {
                     "site_ids": "--sites",
                     "payload": "--payload",
-                    "infected": "--infected",
                 },
             ),
             # Move one or multiple agents to a site based on its id
@@ -147,7 +194,6 @@ class S1ConnectorCommand(ConnectorCommand):
                     "payload": "--payload",
                 },
             ),
-
             # Retrieve CVEs for specific application(s)
             "--applications-cves": (
                 self.connector.application_cves,
@@ -159,7 +205,6 @@ class S1ConnectorCommand(ConnectorCommand):
                     "payload": "--payload",
                 },
             ),
-
             # Retrieve groups
             "--groups": (
                 self.connector.groups,
@@ -168,7 +213,6 @@ class S1ConnectorCommand(ConnectorCommand):
                     "payload": "--payload",
                 },
             ),
-
             # Update the policy of the specified groups
             "--group-policy": (
                 self.connector.group_policy_update,
@@ -179,7 +223,6 @@ class S1ConnectorCommand(ConnectorCommand):
                     "payload": "--payload",
                 },
             ),
-
             # Move agents into specified group
             "--group-move-agent": (
                 self.connector.group_move_agent,
@@ -189,7 +232,6 @@ class S1ConnectorCommand(ConnectorCommand):
                     "payload": "--payload",
                 },
             ),
-
             # Retrieve sites
             "--sites": (
                 self.connector.sites,
@@ -197,7 +239,6 @@ class S1ConnectorCommand(ConnectorCommand):
                     "payload": "--payload",
                 },
             ),
-
             # Retrieve sites by names
             "--sites-by-name": (
                 self.connector.sites_by_name,

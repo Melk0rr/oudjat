@@ -1,38 +1,5 @@
 """
-A SOC toolbox and maybe more if I have the time.
-
-Usage:
-    oudjat -h | --help
-    oudjat -l=LOGGING | --log=LOGLEVEL
-    oudjat -V | --version
-    oudjat connectors.edr.sentinelone (-t TARGET | --target TARGET) --agents [options]
-
-Commands
-    connectors.edr.sentinelone          interact with sentinelone api
-
-Options:
-    -a --append                         append to the output file
-    -c --config=CONFIG                  specify config file
-    -f --file                           set target (reads from file, one domain per line)
-    -h --help                           show this help message and exit
-    -l --log=LOGLEVEL                   specify the log level
-    -o --output=FILENAME                save execution logs to the specified file
-    -p --password=PASS                  password to use with the connector
-    -S --silent                         simple output, one per line
-    -t --target=TARGET                  set target (comma separated, no spaces, if multiple)
-    -u --username=USER                  username to use with the connector
-    -v --verbose                        print debug info and full request output
-    -V --version                        show version and exit
-    --creds-service=SERVICE             service name to retrieve the credentials from
-    --csv=CSV                           save results as csv
-    --json=JSON                         save results as json
-
-[S1Co-Options]
-    --agents                            retrieve S1 agents
-
-Help:
-    For help using this tool, please open an issue on the Github repository:
-    https://codeberg.org/me1k0r/oudjat
+Oudjat main entry point.
 """
 
 import logging
@@ -49,8 +16,46 @@ from oudjat.utils.logging import oudjatLogger
 
 from . import __version__ as VERSION
 
+_BASE_DOC = """
+A SOC toolbox and maybe more if I have the time.
 
-def config_logging(options: dict[str, str]) -> "logging.Logger":
+Usage:
+    oudjat -h | --help
+    oudjat -l=LOGGING | --log=LOGLEVEL
+    oudjat -V | --version
+
+Commands:
+"""
+
+_OPT_DOC = """
+Options:
+    -a --append                       append to the output file
+    -c --config=CONFIG                specify config file
+    -f --file                         set target (reads from file, one domain per line)
+    -h --help                         show this help message and exit
+    -l --log=LOGLEVEL                 specify the log level
+    -o --output=FILENAME              save execution logs to the specified file
+    -p --password=PASS                password to use with the connector
+    -S --silent                       simple output, one per line
+    -t --target=TARGET                set target (comma separated, no spaces, if multiple)
+    -u --username=USER                username to use with the connector
+    -v --verbose                      print debug info and full request output
+    -V --version                      show version and exit
+    --creds-service=SERVICE           service name to retrieve the credentials from
+    --csv=CSV                         save results as csv
+    --json=JSON                       save results as json
+"""
+
+_HELP_DOC = """
+
+Help:
+    For help using this tool, please open an issue on the Github repository:
+    https://codeberg.org/me1k0r/oudjat
+"""
+
+_COMMAND_OPTIONS = {"connectors.edr.sentinelone": S1ConnectorCommand}
+
+def _config_logging(options: dict[str, str]) -> "logging.Logger":
     """
     Set the logging level.
 
@@ -69,7 +74,7 @@ def config_logging(options: dict[str, str]) -> "logging.Logger":
     return oudjatLogger(level=LOGGING_LEVELS.get(options["--log"], LOGGING_LEVELS["INFO"]))
 
 
-def command_switch(options: dict[str, str]) -> Any:
+def _command_switch(options: dict[str, str]) -> Any:
     """
     Script command switch case.
 
@@ -77,11 +82,41 @@ def command_switch(options: dict[str, str]) -> Any:
         options (dict[str, str]): CLI options
     """
 
-    COMMAND_OPTIONS = {"connectors.edr.sentinelone": S1ConnectorCommand}
+    command_name = next(command for command in _COMMAND_OPTIONS.keys() if options[command])
+    return _COMMAND_OPTIONS[command_name](options)
 
-    command_name = next(command for command in COMMAND_OPTIONS.keys() if options[command])
-    return COMMAND_OPTIONS[command_name](options)
+def _get_cmd_doc(command_name: str) -> str:
+    """
+    Return the doc of the given command name.
 
+    Args:
+        command_name (str): The name of the command to retrieve the doc of
+
+    Returns:
+        type and description of the returned object.
+    """
+
+    return _COMMAND_OPTIONS[command_name].__doc__ or ""
+
+def _build_doc() -> str:
+    """
+    Build docopt doc.
+
+    Returns:
+        str: Final documentation
+    """
+
+    full_doc = _BASE_DOC
+    for cmd_name in _COMMAND_OPTIONS:
+        full_doc += f"  {cmd_name}\n"
+
+    for cmd_name in _COMMAND_OPTIONS:
+        full_doc += _get_cmd_doc(cmd_name)
+
+    full_doc += _OPT_DOC
+    full_doc += _HELP_DOC
+
+    return full_doc
 
 def main() -> None:
     """
@@ -94,11 +129,11 @@ def main() -> None:
             sys.exit(1)
 
         start_time = datetime.now().timestamp()
-        options = docopt(__doc__, version=VERSION)
+        options = docopt(_build_doc(), version=VERSION)
 
         original_stdout = sys.stdout
 
-        logger = config_logging(options)
+        logger = _config_logging(options)
 
         if options["--output"] and options["--silent"]:
             sys.stdout = StdOutHook(options["FILENAME"], options["--silent"], options["--output"])
@@ -115,7 +150,7 @@ def main() -> None:
 
         logger.info(f"{Context()}::Oudjat starts -  {datetime.fromtimestamp(start_time).strftime("%Y-%m-%d %H:%M:%S")} ")
 
-        command = command_switch(options)
+        command = _command_switch(options)
         command.run()
 
         logger.info(f"Oudjat runtime -  {TimeConverter.seconds_to_str(datetime.now().timestamp() - start_time)}s")
