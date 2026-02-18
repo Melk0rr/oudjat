@@ -3,6 +3,7 @@ A command module to address some shared behaviors accross connector commands.
 """
 
 from ctypes import ArgumentError
+from dataclasses import dataclass, field
 from typing import Any, Callable, TypeAlias, override
 
 from oudjat.connectors.exceptions import ConnectorCredentialError
@@ -12,12 +13,56 @@ from oudjat.utils.file_utils import FileUtils
 from oudjat.utils.types import DataType
 
 from .base import Base
+from .exceptions import ConnectorCommandInvalidBackend
 
-CommandMappingCallback: TypeAlias = Callable[[str, Any], Any]
-CommandMappingValue: TypeAlias = "CommandMappingCallback | None"
-CommandMappingRegistry: TypeAlias = dict[str, "CommandMappingValue"]
-CommandMappingOpts: TypeAlias = dict[str, str | tuple[str, Callable[[Any], Any]]]
-CommandOpts: TypeAlias = dict[str, tuple[Callable[..., "DataType"], "CommandMappingOpts"]]
+CmdMappingCallback: TypeAlias = Callable[[str, Any], Any]
+
+@dataclass
+class CmdUsageOpt:
+    """
+    A helper class to handle command usage options.
+    """
+
+    opt: str
+    transform: Callable[[Any], Any] | None = None
+    required: bool = False
+    repeatable: bool = False
+
+@dataclass
+class CmdOpt:
+    """
+    A dataclass to handle main command options.
+    """
+
+    description: str
+    mapping_opts: "CommandMappingOpts"
+    backend: Callable[..., "DataType"] | None = None
+    callback: Callable[..., "DataType"] | None = None
+
+@dataclass
+class OptMappingValue:
+    """
+    A dataclass to handle option mapping value.
+    """
+
+    description: str
+    shortname: str = ""
+    arg: str = ""
+    transform: "CmdMappingCallback | None" = None
+
+@dataclass
+class ConnectorOptions:
+    """
+    A dataclass that stores connector command options.
+    """
+
+    base: "CommandMappingOpts" = field(default_factory=lambda : {})
+    shared: "CmdMappingRegistry" = field(default_factory=lambda : {})
+    main: "CommandOpts" = field(default_factory=lambda : {})
+
+CmdMappingRegistry: TypeAlias = dict[str, "OptMappingValue"]
+CommandMappingOpts: TypeAlias = dict[str, "CmdUsageOpt"]
+CommandOpts: TypeAlias = dict[str, "CmdOpt"]
 
 
 class ConnectorCommand(Base):
@@ -26,7 +71,9 @@ class ConnectorCommand(Base):
     """
 
     # ****************************************************************
-    # Constructor
+    # Constructor & Attributes
+
+    _opt: "ConnectorOptions" = ConnectorOptions()
 
     def __init__(self, options: dict[str, Any], need_credentials: bool = False) -> None:
         """
@@ -38,7 +85,6 @@ class ConnectorCommand(Base):
         """
 
         super().__init__(options)
-
         context = Context()
 
         if need_credentials and not (
@@ -48,12 +94,6 @@ class ConnectorCommand(Base):
             raise ConnectorCredentialError(
                 f"{context}::No credentials were provided for the connector"
             )
-
-        # A mapping of all the available options for this connector, and their mapped value
-        self._opt_map: "CommandMappingRegistry" = {}
-
-        # A mapping of all the main commands for this connector and their options
-        self._command_opt: "CommandOpts" = {}
 
     # ****************************************************************
     # Methods
@@ -70,9 +110,9 @@ class ConnectorCommand(Base):
         """
 
         raw = self.options.get(val, None)
-        trans = self._opt_map[val]
+        shared_opt = self._opt.shared[val]
 
-        return trans(val, raw) if callable(trans) else raw
+        return shared_opt.transform(val, raw) if callable(shared_opt.transform) else raw
 
     def _build_cmd_kwargs(self, args: "CommandMappingOpts") -> dict[str, Any]:
         """
@@ -87,15 +127,13 @@ class ConnectorCommand(Base):
 
         res = {}
         for k,v in args.items():
-            opt_k = v[0] if isinstance(v, tuple) else v
-            if self._is_opt_present(opt_k):
-                opt_v = self._resolve_arg_value(opt_k)
+            if self._is_opt_present(v.opt):
+                value = self._resolve_arg_value(v.opt)
 
-                if isinstance(v, tuple):
-                    _, trs = v
-                    opt_v = trs(opt_v)
+                if callable(v.transform):
+                    value = v.transform(value)
 
-                res[k] = opt_v
+                res[k] = value
 
         return res
 
@@ -110,7 +148,7 @@ class ConnectorCommand(Base):
         def cmd_in_options(cmd: str) -> bool:
             return cmd in self.options
 
-        return next(filter(cmd_in_options, self._command_opt.keys()))
+        return next(filter(cmd_in_options, self._opt.main.keys()))
 
     @override
     def run(self) -> None:
@@ -118,19 +156,24 @@ class ConnectorCommand(Base):
         Run the command main process.
         """
 
+        context = Context()
+
         # Prepare the command
         cmd_name = self._find_cmd_name()
-        cmd, params = self._command_opt[cmd_name]
-        args = self._build_cmd_kwargs(params)
+        cmd_opt = self._opt.main[cmd_name]
+        args = self._build_cmd_kwargs(cmd_opt.mapping_opts)
 
-        req_params = Mapper.required_params(Mapper.signature_params(cmd))
+        if cmd_opt.backend is None:
+            raise ConnectorCommandInvalidBackend(f"{context}::No backend function defined for {cmd_name} command.")
+
+        req_params = Mapper.required_params(Mapper.signature_params(cmd_opt.backend))
 
         # Check if no required parameters were ommited
         if not bool(set(args.keys()) & req_params) and len(req_params) > 0:
-            raise ArgumentError(f"{Context()}::{cmd_name} command requires {list(req_params)}")
+            raise ArgumentError(f"{context}::{cmd_name} command requires {list(req_params)}")
 
         # Run the command
-        data = cmd(**args)
+        data = cmd_opt.backend(**args)
 
         # Post operations
         if self.options["--csv"]:
@@ -138,3 +181,22 @@ class ConnectorCommand(Base):
 
         if self.options["--json"]:
             FileUtils.export_json(data, self.options["--json"])
+
+
+    @staticmethod
+    def _gen_doc(connector_opts: "ConnectorOptions") -> str:
+        """
+        Gen the connector command doc from the connector options.
+
+        Args:
+            connector_opts (ConnectorOptions): Connector options
+
+        Returns:
+            str: __doc__ string to pass to docopt
+        """
+
+        all_opts = connector_opts.main | connector_opts.shared
+        longest_opt = len(max(all_opts, key=len))
+
+        opt_desc = """Options:"""
+
