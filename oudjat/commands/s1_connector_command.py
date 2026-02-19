@@ -9,7 +9,8 @@ import orjson
 from oudjat.connectors.edr.sentinelone import S1Connector
 from oudjat.utils.string_utils import StringUtils
 
-from .connector_command import CmdMappingRegistry, CommandOpts, ConnectorCommand
+from .base import CmdOptRegistry, CmdUsageRegistry
+from .connector_command import ConnectorCommand
 
 
 class S1ConnectorCommand(ConnectorCommand):
@@ -128,7 +129,7 @@ Options:
 
         self.connector.connect()
 
-        self._opt_map: "CmdMappingRegistry" = {
+        self._opt_map: "CmdOptRegistry" = {
             "--auto": lambda opt, _: self._is_opt_present(opt),
             "--filter": lambda _, v: orjson.loads(StringUtils.jsonify(v)),
             "--ids": lambda opt, _: self._unify_str_opt(opt, "--ids-file"),
@@ -145,7 +146,7 @@ Options:
             "--verdict-filters": lambda opt, v: v.split(","),
         }
 
-        self._command_opt: "CommandOpts" = {
+        self._command_opt: "CmdUsageRegistry" = {
             # Export S1 agents details
             "--agents": (
                 self.connector.agents,

@@ -3,66 +3,16 @@ A command module to address some shared behaviors accross connector commands.
 """
 
 from ctypes import ArgumentError
-from dataclasses import dataclass, field
-from typing import Any, Callable, TypeAlias, override
+from typing import Any, override
 
 from oudjat.connectors.exceptions import ConnectorCredentialError
 from oudjat.core.mapper import Mapper
 from oudjat.utils.context import Context
+from oudjat.utils.doc_builder import DocBuilder
 from oudjat.utils.file_utils import FileUtils
-from oudjat.utils.types import DataType
 
-from .base import Base
+from .base import Base, CmdHub, CmdOptUsageRegistry
 from .exceptions import ConnectorCommandInvalidBackend
-
-CmdMappingCallback: TypeAlias = Callable[[str, Any], Any]
-
-@dataclass
-class CmdUsageOpt:
-    """
-    A helper class to handle command usage options.
-    """
-
-    opt: str
-    transform: Callable[[Any], Any] | None = None
-    required: bool = False
-    repeatable: bool = False
-
-@dataclass
-class CmdOpt:
-    """
-    A dataclass to handle main command options.
-    """
-
-    description: str
-    mapping_opts: "CommandMappingOpts"
-    backend: Callable[..., "DataType"] | None = None
-    callback: Callable[..., "DataType"] | None = None
-
-@dataclass
-class OptMappingValue:
-    """
-    A dataclass to handle option mapping value.
-    """
-
-    description: str
-    shortname: str = ""
-    arg: str = ""
-    transform: "CmdMappingCallback | None" = None
-
-@dataclass
-class ConnectorOptions:
-    """
-    A dataclass that stores connector command options.
-    """
-
-    base: "CommandMappingOpts" = field(default_factory=lambda : {})
-    shared: "CmdMappingRegistry" = field(default_factory=lambda : {})
-    main: "CommandOpts" = field(default_factory=lambda : {})
-
-CmdMappingRegistry: TypeAlias = dict[str, "OptMappingValue"]
-CommandMappingOpts: TypeAlias = dict[str, "CmdUsageOpt"]
-CommandOpts: TypeAlias = dict[str, "CmdOpt"]
 
 
 class ConnectorCommand(Base):
@@ -73,7 +23,7 @@ class ConnectorCommand(Base):
     # ****************************************************************
     # Constructor & Attributes
 
-    _opt: "ConnectorOptions" = ConnectorOptions()
+    _opt: "CmdHub" = CmdHub()
 
     def __init__(self, options: dict[str, Any], need_credentials: bool = False) -> None:
         """
@@ -110,11 +60,11 @@ class ConnectorCommand(Base):
         """
 
         raw = self.options.get(val, None)
-        shared_opt = self._opt.shared[val]
+        shared_opt = self._opt.options[val]
 
         return shared_opt.transform(val, raw) if callable(shared_opt.transform) else raw
 
-    def _build_cmd_kwargs(self, args: "CommandMappingOpts") -> dict[str, Any]:
+    def _build_cmd_kwargs(self, args: "CmdOptUsageRegistry") -> dict[str, Any]:
         """
         Build command arguments based on its mapping registry.
 
@@ -126,9 +76,9 @@ class ConnectorCommand(Base):
         """
 
         res = {}
-        for k,v in args.items():
-            if self._is_opt_present(v.opt):
-                value = self._resolve_arg_value(v.opt)
+        for k, v in args.items():
+            if self._is_opt_present(v.option):
+                value = self._resolve_arg_value(v.option)
 
                 if callable(v.transform):
                     value = v.transform(value)
@@ -148,7 +98,7 @@ class ConnectorCommand(Base):
         def cmd_in_options(cmd: str) -> bool:
             return cmd in self.options
 
-        return next(filter(cmd_in_options, self._opt.main.keys()))
+        return next(filter(cmd_in_options, self._opt.usages.keys()))
 
     @override
     def run(self) -> None:
@@ -160,11 +110,13 @@ class ConnectorCommand(Base):
 
         # Prepare the command
         cmd_name = self._find_cmd_name()
-        cmd_opt = self._opt.main[cmd_name]
+        cmd_opt = self._opt.usages[cmd_name]
         args = self._build_cmd_kwargs(cmd_opt.mapping_opts)
 
         if cmd_opt.backend is None:
-            raise ConnectorCommandInvalidBackend(f"{context}::No backend function defined for {cmd_name} command.")
+            raise ConnectorCommandInvalidBackend(
+                f"{context}::No backend function defined for {cmd_name} command."
+            )
 
         req_params = Mapper.required_params(Mapper.signature_params(cmd_opt.backend))
 
@@ -182,9 +134,8 @@ class ConnectorCommand(Base):
         if self.options["--json"]:
             FileUtils.export_json(data, self.options["--json"])
 
-
     @staticmethod
-    def _gen_doc(connector_opts: "ConnectorOptions") -> str:
+    def _gen_doc(connector_opts: "CmdHub", description: str = "") -> str:
         """
         Gen the connector command doc from the connector options.
 
@@ -195,8 +146,6 @@ class ConnectorCommand(Base):
             str: __doc__ string to pass to docopt
         """
 
-        all_opts = connector_opts.main | connector_opts.shared
-        longest_opt = len(max(all_opts, key=len))
+        builder = DocBuilder("oudjat", description)
 
-        opt_desc = """Options:"""
-
+        all_opts = connector_opts.usages | connector_opts.options

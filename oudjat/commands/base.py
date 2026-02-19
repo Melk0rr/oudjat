@@ -1,10 +1,82 @@
 """A module that defines common command behaviors."""
 
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Callable, TypeAlias
 
 from oudjat.utils import Context
 from oudjat.utils.file_utils import FileUtils
+from oudjat.utils.types import DataType
 
+CmdMappingCallback: TypeAlias = Callable[[str, Any], Any]
+
+
+@dataclass
+class CmdUsageOpt:
+    """
+    A dataclass which holds the name of the option which is mapped to a backend parameter.
+
+    The class also holds an optional transform function which is applied to the option value before passing it as backend argument.
+
+    Attributes:
+        option (str)                           : The name of the option which will be mapped to backend parameter
+        transform (Callable[[Any], Any] | None): The transform function that may be applied to the option value
+    """
+
+    option: str
+    transform: Callable[[Any], Any] | None = None
+
+
+@dataclass
+class CmdUsage:
+    """
+    A dataclass to handle command usages.
+
+    Attributes:
+        option (CmdOpt)                   : The option the usage is focused on
+        usage_str (str)                   : The usage string that will be passed to docopt
+        mapping_opts (CmdOptUsageRegistry): The registry that maps backend parameters with command options
+        backend (Callable[..., DataType]) : The backend function / method which is called by this usage
+
+    """
+
+    option: "CmdOpt"
+    usage_str: str
+    mapping_opts: "CmdOptUsageRegistry"
+    backend: Callable[..., "DataType"] | None = None
+
+
+@dataclass
+class CmdOpt:
+    """
+    A dataclass that holds a command option details that will be passed to docopt string.
+
+    Attributes:
+        description (str) : A description passed
+        short (str | None): An optional short version of the option name
+        arg (str | None)  : An optional argument name
+        transform         : An optional transform function that will be given the option name and the option value
+    """
+
+    description: str
+    short: str | None = None
+    arg: str | None = None
+    transform: "CmdMappingCallback | None" = None
+
+
+@dataclass
+class CmdHub:
+    """
+    A dataclass that stores connector command options and usages.
+    """
+
+    base: "CmdUsageRegistry" = field(default_factory=lambda: {})
+    options: "CmdOptRegistry" = field(default_factory=lambda: {})
+    usages: "CmdUsageRegistry" = field(default_factory=lambda: {})
+
+
+CmdOptRegistry: TypeAlias = dict[str, "CmdOpt"]
+CmdOptUsageRegistry: TypeAlias = dict[str, "CmdUsageOpt"]
+CmdUsageRegistry: TypeAlias = dict[str, "CmdUsage"]
 
 class Base:
     """A base command."""

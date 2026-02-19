@@ -6,13 +6,13 @@ from typing import Any
 
 from oudjat.connectors.endoflife import EndOfLifeConnector
 
-from .connector_command import (
+from .base import (
+    CmdHub,
     CmdOpt,
+    CmdUsage,
     CmdUsageOpt,
-    ConnectorCommand,
-    ConnectorOptions,
-    OptMappingValue,
 )
+from .connector_command import ConnectorCommand
 
 
 class EOLConnectorCommand(ConnectorCommand):
@@ -49,74 +49,74 @@ Options:
     --releases-name=RELNAME                 specify a release name (its version)
     --tag=TAG                               specify one or several tag (repeatable)
 """
-    _opt: "ConnectorOptions" = ConnectorOptions()
-    _opt.shared = {
-        "--category-name": OptMappingValue(
+    _opt: "CmdHub" = CmdHub()
+    _opt.options = {
+        "--category-name": CmdOpt(
             "Specify a category name",
             arg="CTGNAME",
         ),
-        "--full": OptMappingValue(
+        "--full": CmdOpt(
             "If specified, retrieve full product data",
         ),
-        "--product-name": OptMappingValue(
+        "--product-name": CmdOpt(
             "Specify a product name",
             arg="PRODUCTNAME",
         ),
-        "--release-name": OptMappingValue(
+        "--release-name": CmdOpt(
             "Specify a release name (its version)",
             arg="RELNAME",
         ),
-        "--tag": OptMappingValue(
+        "--tag": CmdOpt(
             "Specify one or several tag (repeatable)",
             arg="TAG",
         ),
     }
 
-    _opt.main = {
-        "--products": CmdOpt(
+    _opt.usages = {
+        "--products": CmdUsage(
             "Retrieve all or a specific product from EOL",
             {
                 "product": CmdUsageOpt("--product-name"),
-                "tags": CmdUsageOpt("--tag", repeatable=True),
+                "tags": CmdUsageOpt("--tag"),
                 "full": CmdUsageOpt("--full"),
             },
         ),
-        "--product-releases": CmdOpt(
+        "--product-releases": CmdUsage(
             "Retrieve a product release from EOL",
             {
                 "product": CmdUsageOpt("--product-name"),
                 "release": CmdUsageOpt("--release-name"),
             },
         ),
-        "--linux": CmdOpt(
+        "--linux": CmdUsage(
             "Retrieve linux related products",
             {
                 "full": CmdUsageOpt("--full"),
             },
         ),
-        "--windows": CmdOpt(
+        "--windows": CmdUsage(
             "Retrieve windows related products",
             {},
         ),
-        "--windows-server": CmdOpt(
+        "--windows-server": CmdUsage(
             "Retrieve windows server related products",
             {},
         ),
-        "--categories": CmdOpt(
+        "--categories": CmdUsage(
             "Retrieve product categories",
             {
                 "category": CmdUsageOpt("--category-name"),
             },
         ),
-        "--apps": CmdOpt(
+        "--apps": CmdUsage(
             "Retrieve app category products",
             {},
         ),
-        "--oses": CmdOpt(
+        "--oses": CmdUsage(
             "Retrieve os category products",
             {},
         ),
-        "--tags": CmdOpt(
+        "--tags": CmdUsage(
             "Retrieve all available tags",
             {
                 "tag": CmdUsageOpt("--tag", lambda lst: next(iter(lst))),
@@ -142,14 +142,14 @@ Options:
 
         self.connector.connect()
 
-        self._opt.shared["--full"].transform = lambda opt, _: self._is_opt_present(opt)
+        self._opt.options["--full"].transform = lambda opt, _: self._is_opt_present(opt)
 
-        self._opt.main["--products"].backend = self.connector.products
-        self._opt.main["--product-releases"].backend = self.connector.product_releases
-        self._opt.main["--linux"].backend = self.connector.linux
-        self._opt.main["--windows"].backend = self.connector.windows
-        self._opt.main["--windows-server"].backend = self.connector.windows_server
-        self._opt.main["--categories"].backend = self.connector.categories
-        self._opt.main["--apps"].backend = self.connector.apps
-        self._opt.main["--oses"].backend = self.connector.oses
-        self._opt.main["--tags"].backend = self.connector.tags
+        self._opt.usages["--products"].backend = self.connector.products
+        self._opt.usages["--product-releases"].backend = self.connector.product_releases
+        self._opt.usages["--linux"].backend = self.connector.linux
+        self._opt.usages["--windows"].backend = self.connector.windows
+        self._opt.usages["--windows-server"].backend = self.connector.windows_server
+        self._opt.usages["--categories"].backend = self.connector.categories
+        self._opt.usages["--apps"].backend = self.connector.apps
+        self._opt.usages["--oses"].backend = self.connector.oses
+        self._opt.usages["--tags"].backend = self.connector.tags
