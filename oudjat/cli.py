@@ -15,7 +15,7 @@ from oudjat.commands import (
     S1ConnectorCommand,
 )
 from oudjat.utils import ColorPrint, Context, StdOutHook, TimeConverter
-from oudjat.utils.doc_builder import DocBuilder, DocCommand, DocOption
+from oudjat.utils.doc_builder import DocBuilder
 from oudjat.utils.logging import oudjatLogger
 
 from . import __version__ as VERSION
