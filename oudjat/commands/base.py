@@ -7,8 +7,6 @@ from oudjat.utils import Context
 from oudjat.utils.file_utils import FileUtils
 from oudjat.utils.types import DataType
 
-CmdMappingCallback: TypeAlias = Callable[[str, Any], Any]
-
 
 @dataclass
 class CmdUsageOpt:
@@ -41,7 +39,7 @@ class CmdUsage:
 
     option: "CmdOpt"
     usage_str: str
-    mapping_opts: "CmdOptUsageRegistry"
+    mapping_opts: "CmdOptUsageRegistry" = field(default_factory=lambda: {})
     backend: Callable[..., "DataType"] | None = None
 
 
@@ -64,16 +62,54 @@ class CmdOpt:
 
 
 @dataclass
-class CmdHub:
+class CmdProps:
     """
     A dataclass that stores connector command options and usages.
+
+    Attributes:
+        name (str)               : The name of the command
+        description (str)        : A description of the command
+        base (CmdUsageRegistry)  : A registry of usages that will be appended to all usages strings
+        options (CmdOptRegistry) : A registry of available options
+        usages (CmdUsageRegistry): A registry of available command usages
     """
 
+    name: str
+    description: str
     base: "CmdUsageRegistry" = field(default_factory=lambda: {})
     options: "CmdOptRegistry" = field(default_factory=lambda: {})
     usages: "CmdUsageRegistry" = field(default_factory=lambda: {})
 
+    def backends(self, registry: dict[str, Callable[..., "DataType"] | None]) -> None:
+        """
+        Set usages backend functions based on the provided registry.
 
+        The registry must contain couples of usage key / transform function.
+
+        Args:
+            registry (dict[str, Callable[..., DataType]]): A registry which contains usage keys and their transform function
+        """
+
+        for usage, backend in registry.items():
+            if usage in self.usages:
+                self.usages[usage].backend = backend
+
+    def opts_transform(self, registry: dict[str, "CmdMappingCallback | None"]) -> None:
+        """
+        Set options transform functions based on the provided registry.
+
+        The registry must contain couples of option key / transform function.
+
+        Args:
+            registry (dict[str, CmdMappingCallback | None]): A registry which contains option keys and their transform function
+        """
+
+        for opt, tr in registry.items():
+            if opt in self.options:
+                self.options[opt].transform = tr
+
+
+CmdMappingCallback: TypeAlias = Callable[[str, Any], Any]
 CmdOptRegistry: TypeAlias = dict[str, "CmdOpt"]
 CmdOptUsageRegistry: TypeAlias = dict[str, "CmdUsageOpt"]
 CmdUsageRegistry: TypeAlias = dict[str, "CmdUsage"]

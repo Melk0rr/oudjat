@@ -5,10 +5,11 @@ A command module to handle interactions to Sentinel One API through the dedicate
 from typing import Any
 
 from oudjat.connectors.endoflife import EndOfLifeConnector
+from oudjat.utils.doc_builder import DocBuilder
 
 from .base import (
-    CmdHub,
     CmdOpt,
+    CmdProps,
     CmdUsage,
     CmdUsageOpt,
 )
@@ -20,39 +21,13 @@ class EOLConnectorCommand(ConnectorCommand):
     A class to provide an access to the S1Connector.
     """
 
-    _CMD_NAME: str = "connectors.endoflife"
-    __doc__ = f"""
-Usage:
-    oudjat {_CMD_NAME} --products [--product-name=PRODUCTNAME] [--tag=TAG...] [--full] [options]
-    oudjat {_CMD_NAME} --product-releases [--product-name=PRODUCTNAME] [--release-name=RELNAME] [options]
-    oudjat {_CMD_NAME} --linux [--full] [options]
-    oudjat {_CMD_NAME} --windows [options]
-    oudjat {_CMD_NAME} --windows-server [options]
-    oudjat {_CMD_NAME} --categories [--category-name=CTGNAME] [options]
-    oudjat {_CMD_NAME} --apps [options]
-    oudjat {_CMD_NAME} --oses [options]
-    oudjat {_CMD_NAME} --tags [--tag=TAG] [options]
-
-Options:
-    --products                              retrieve all or a specific product
-    --product-releases                      retrieve a product release
-    --linux                                 retrieve linux related products
-    --windows                               retrieve windows related products
-    --windows-server                        retrieve windows server related products
-    --categories                            retrieve product categories
-    --apps                                  retrieve app category products
-    --oses                                  retrieve os category products
-    --tags                                  retrieve all available tags or a specific one
-    --category-name=CTGNAME                 specify a category name
-    --full                                  if specified, retrieve full product data
-    --product-name=PRODUCTNAME              specify a product name
-    --releases-name=RELNAME                 specify a release name (its version)
-    --tag=TAG                               specify one or several tag (repeatable)
-"""
-    _opt: "CmdHub" = CmdHub()
-    _opt.options = {
+    __cmd_props__: "CmdProps" = CmdProps(
+        "connectors.endoflife",
+        "A command to interact with endoflife.date API through the oudjat EndOfLifeConnector",
+    )
+    __cmd_props__.options = {
         "--category-name": CmdOpt(
-            "Specify a category name",
+            "Specify a product category name",
             arg="CTGNAME",
         ),
         "--full": CmdOpt(
@@ -72,9 +47,12 @@ Options:
         ),
     }
 
-    _opt.usages = {
+    __cmd_props__.usages = {
         "--products": CmdUsage(
-            "Retrieve all or a specific product from EOL",
+            CmdOpt(
+                "Retrieve all or a specific product from EOL",
+            ),
+            "--products [--product-name=PRODUCTNAME] [--tag=TAG]... [--full] [options]",
             {
                 "product": CmdUsageOpt("--product-name"),
                 "tags": CmdUsageOpt("--tag"),
@@ -82,47 +60,47 @@ Options:
             },
         ),
         "--product-releases": CmdUsage(
-            "Retrieve a product release from EOL",
+            CmdOpt("Retrieve a product release from EOL"),
+            "--product-releases [--product-name=PRODUCTNAME] [--release-name=RELNAME] [options]",
             {
                 "product": CmdUsageOpt("--product-name"),
                 "release": CmdUsageOpt("--release-name"),
             },
         ),
         "--linux": CmdUsage(
-            "Retrieve linux related products",
+            CmdOpt("Retrieve linux related products"),
+            "--linux [--full] [options]",
             {
                 "full": CmdUsageOpt("--full"),
             },
         ),
         "--windows": CmdUsage(
-            "Retrieve windows related products",
-            {},
+            CmdOpt("Retrieve windows related products"),
+            "--windows [options]",
         ),
         "--windows-server": CmdUsage(
-            "Retrieve windows server related products",
-            {},
+            CmdOpt("Retrieve windows server related products"),
+            "--windows-server [options]",
         ),
         "--categories": CmdUsage(
-            "Retrieve product categories",
+            CmdOpt("Retrieve product categories"),
+            "--categories [--category-name=CTGNAME] [options]",
             {
                 "category": CmdUsageOpt("--category-name"),
             },
         ),
-        "--apps": CmdUsage(
-            "Retrieve app category products",
-            {},
-        ),
-        "--oses": CmdUsage(
-            "Retrieve os category products",
-            {},
-        ),
+        "--apps": CmdUsage(CmdOpt("Retrieve app category products"), "--apps [options]"),
+        "--oses": CmdUsage(CmdOpt("Retrieve os category products"), "--oses [options]"),
         "--tags": CmdUsage(
-            "Retrieve all available tags",
+            CmdOpt("Retrieve all, or a specific tag"),
+            "--tags [--tag=TAG] [options]",
             {
                 "tag": CmdUsageOpt("--tag", lambda lst: next(iter(lst))),
             },
         ),
     }
+
+    __doc_builder__: "DocBuilder" = ConnectorCommand._gen_doc("oudjat", __cmd_props__, "")
 
     def __init__(self, options: dict[str, Any]) -> None:
         """
@@ -142,14 +120,24 @@ Options:
 
         self.connector.connect()
 
-        self._opt.options["--full"].transform = lambda opt, _: self._is_opt_present(opt)
+        # Options transform based on instance
+        self.__cmd_props__.opts_transform(
+            {
+                "--full": lambda opt, _: self._is_opt_present(opt),
+            }
+        )
 
-        self._opt.usages["--products"].backend = self.connector.products
-        self._opt.usages["--product-releases"].backend = self.connector.product_releases
-        self._opt.usages["--linux"].backend = self.connector.linux
-        self._opt.usages["--windows"].backend = self.connector.windows
-        self._opt.usages["--windows-server"].backend = self.connector.windows_server
-        self._opt.usages["--categories"].backend = self.connector.categories
-        self._opt.usages["--apps"].backend = self.connector.apps
-        self._opt.usages["--oses"].backend = self.connector.oses
-        self._opt.usages["--tags"].backend = self.connector.tags
+        # Usage backends
+        self.__cmd_props__.backends(
+            {
+                "--products": self.connector.products,
+                "--product-releases": self.connector.product_releases,
+                "--linux": self.connector.linux,
+                "--windows": self.connector.windows,
+                "--windows-server": self.connector.windows_server,
+                "--categories": self.connector.categories,
+                "--apps": self.connector.apps,
+                "--oses": self.connector.oses,
+                "--tags": self.connector.tags,
+            }
+        )

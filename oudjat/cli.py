@@ -10,46 +10,21 @@ from typing import Any
 from docopt import docopt
 
 from oudjat.banner import banner
-from oudjat.commands.s1_connector_command import S1ConnectorCommand
+from oudjat.commands import (
+    EOLConnectorCommand,
+    S1ConnectorCommand,
+)
 from oudjat.utils import ColorPrint, Context, StdOutHook, TimeConverter
+from oudjat.utils.doc_builder import DocBuilder, DocCommand, DocOption
 from oudjat.utils.logging import oudjatLogger
 
 from . import __version__ as VERSION
 
-_BASE_DOC = """
-A SOC toolbox and maybe more if I have the time.
+_COMMAND_OPTIONS = {
+    "connectors.edr.sentinelone": S1ConnectorCommand,
+    "connectors.endoflife": EOLConnectorCommand,
+}
 
-Usage:
-    oudjat -h | --help
-    oudjat -l=LOGGING | --log=LOGLEVEL
-    oudjat -V | --version
-"""
-
-_OPT_DOC = """
-    -a --append                       append to the output file
-    -c --config=CONFIG                specify config file
-    -f --file                         set target (reads from file, one domain per line)
-    -h --help                         show this help message and exit
-    -l --log=LOGLEVEL                 specify the log level
-    -o --output=FILENAME              save execution logs to the specified file
-    -p --password=PASS                password to use with the connector
-    -S --silent                       simple output, one per line
-    -t --target=TARGET                set target (comma separated, no spaces, if multiple)
-    -u --username=USER                username to use with the connector
-    -v --verbose                      print debug info and full request output
-    -V --version                      show version and exit
-    --creds-service=SERVICE           service name to retrieve the credentials from
-    --csv=CSV                         save results as csv
-    --json=JSON                       save results as json
-"""
-
-_HELP_DOC = """
-Help:
-    For help using this tool, please open an issue on the Github repository:
-    https://codeberg.org/me1k0r/oudjat
-"""
-
-_COMMAND_OPTIONS = {"connectors.edr.sentinelone": S1ConnectorCommand}
 
 def _config_logging(options: dict[str, str]) -> "logging.Logger":
     """
@@ -81,43 +56,65 @@ def _command_switch(options: dict[str, str]) -> Any:
     command_name = next(command for command in _COMMAND_OPTIONS.keys() if options[command])
     return _COMMAND_OPTIONS[command_name](options)
 
-def _get_cmd_doc(command_name: str) -> str:
-    """
-    Return the doc of the given command name.
 
-    Args:
-        command_name (str): The name of the command to retrieve the doc of
+def _base_doc() -> "DocBuilder":
+    """
+    Return the base doc builder.
 
     Returns:
-        type and description of the returned object.
+        DocBuilder: A doc builder instance containing the base program options and usages
     """
 
-    return _COMMAND_OPTIONS[command_name].__doc__ or ""
+    description = """
+Oudjat is a SOC toolbox that provides an entry point to various data sources.
+It also allows for complex data consolidation and mapping through a config file system.
 
-def _build_doc(cmd_name: str) -> str:
+** The following doc string is dynamically generated based on the command you chose **"""
+
+    builder = DocBuilder("oudjat", description)
+
+    # builder.commands = {
+    #     cmd.__cmd_props__.name: DocCommand(cmd.__cmd_props__.name, cmd.__cmd_props__.description)
+    #     for cmd in _COMMAND_OPTIONS.values()
+    # }
+
+    builder.usages = [
+        "-h | --help",
+        "-V | --version",
+    ]
+
+    builder.add_option("append", "Append to the output fileappend to the output file", short="a")
+    builder.add_option("help", "Print the doc string", short="h")
+    builder.add_option("log", "Specify the logging level", arg="LOGGING", short="l", default="INFO")
+    builder.add_option("output", "Specify a file to save the execution logs to", arg="LOGFILE", short="o")
+    builder.add_option("silent", "Simple output", short="S")
+    builder.add_option("version", "Show the program version and exit", short="V")
+    builder.add_option("csv", "Save results as a CSV file", arg="CSV")
+    builder.add_option("json", "Save results as a JSON file", arg="JSON")
+
+    builder.help_content = [
+        "For help using this tool, please open an issue on the Codeberg repository:",
+        "https://codeberg.org/me1k0r/oudjat",
+    ]
+
+    return builder
+
+
+def _build_doc(cmd_name: str) -> "DocBuilder":
     """
-    Build docopt doc.
+    Return the final doc builder to be converted as a string and passed to docopt.
 
     Returns:
-        str: Final documentation
+        DocBuilder: Final doc builder based on base doc and merged with the chosen command builder
     """
 
-    full_doc = _BASE_DOC
-    #
-    # full_doc += "Commands:\n"
-    # for k in _COMMAND_OPTIONS:
-    #     full_doc += f"      {k}\n"
+    doc = _base_doc()
+    cmd_builder = _COMMAND_OPTIONS[cmd_name].__doc_builder__
 
-    if cmd_name in _COMMAND_OPTIONS and cmd_name != "--help":
-        full_doc += "\n".join(_get_cmd_doc(cmd_name).split("\n")[2:])
+    doc.merge(cmd_builder)
 
-    else:
-        full_doc += "Options:\n"
+    return doc
 
-    full_doc += "\n".join(_OPT_DOC.split("\n")[1:])
-    full_doc += _HELP_DOC
-
-    return full_doc
 
 def main() -> None:
     """
@@ -126,8 +123,9 @@ def main() -> None:
 
     try:
         start_time = datetime.now().timestamp()
-        docoptions = _build_doc(sys.argv[1])
-        options = docopt(docoptions, version=VERSION)
+
+        __doc__ = _build_doc(sys.argv[1])
+        options = docopt(str(__doc__), version=VERSION)
 
         original_stdout = sys.stdout
 
@@ -146,12 +144,16 @@ def main() -> None:
 
         ColorPrint.blue(banner)
 
-        logger.info(f"{Context()}::Oudjat starts -  {datetime.fromtimestamp(start_time).strftime("%Y-%m-%d %H:%M:%S")} ")
+        logger.info(
+            f"{Context()}::Oudjat starts -  {datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')} "
+        )
 
         command = _command_switch(options)
         command.run()
 
-        logger.info(f"Oudjat runtime -  {TimeConverter.seconds_to_str(datetime.now().timestamp() - start_time)}s")
+        logger.info(
+            f"Oudjat runtime -  {TimeConverter.seconds_to_str(datetime.now().timestamp() - start_time)}s"
+        )
 
         sys.stdout = original_stdout
 

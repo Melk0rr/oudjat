@@ -11,7 +11,7 @@ from oudjat.utils.context import Context
 from oudjat.utils.doc_builder import DocBuilder
 from oudjat.utils.file_utils import FileUtils
 
-from .base import Base, CmdHub, CmdOptUsageRegistry
+from .base import Base, CmdOptUsageRegistry, CmdProps
 from .exceptions import ConnectorCommandInvalidBackend
 
 
@@ -23,7 +23,8 @@ class ConnectorCommand(Base):
     # ****************************************************************
     # Constructor & Attributes
 
-    _opt: "CmdHub" = CmdHub()
+    __cmd_props__: "CmdProps" = CmdProps("connectors", "Oudjat connectors parent command")
+    __doc_builder__: "DocBuilder" = DocBuilder("oudjat", "")
 
     def __init__(self, options: dict[str, Any], need_credentials: bool = False) -> None:
         """
@@ -60,7 +61,7 @@ class ConnectorCommand(Base):
         """
 
         raw = self.options.get(val, None)
-        shared_opt = self._opt.options[val]
+        shared_opt = self.__cmd_props__.options[val]
 
         return shared_opt.transform(val, raw) if callable(shared_opt.transform) else raw
 
@@ -98,7 +99,7 @@ class ConnectorCommand(Base):
         def cmd_in_options(cmd: str) -> bool:
             return cmd in self.options
 
-        return next(filter(cmd_in_options, self._opt.usages.keys()))
+        return next(filter(cmd_in_options, self.__cmd_props__.usages.keys()))
 
     @override
     def run(self) -> None:
@@ -110,7 +111,7 @@ class ConnectorCommand(Base):
 
         # Prepare the command
         cmd_name = self._find_cmd_name()
-        cmd_opt = self._opt.usages[cmd_name]
+        cmd_opt = self.__cmd_props__.usages[cmd_name]
         args = self._build_cmd_kwargs(cmd_opt.mapping_opts)
 
         if cmd_opt.backend is None:
@@ -129,23 +130,45 @@ class ConnectorCommand(Base):
 
         # Post operations
         if self.options["--csv"]:
-            FileUtils.export_csv(data, self.options["--csv"], delimiter="|")
+            if not isinstance(self.options["--csv"], list):
+                self.options["--csv"] = [self.options["--csv"]]
+
+            for p in self.options["--csv"]:
+                FileUtils.export_csv(data, p, delimiter="|")
 
         if self.options["--json"]:
             FileUtils.export_json(data, self.options["--json"])
 
     @staticmethod
-    def _gen_doc(connector_opts: "CmdHub", description: str = "") -> str:
+    def _gen_doc(program: str, cmd_hub: "CmdProps", description: str = "") -> "DocBuilder":
         """
         Gen the connector command doc from the connector options.
 
         Args:
-            connector_opts (ConnectorOptions): Connector options
+            program (str)    : The name of the program running
+            cmd_hub (CmdHub) : Connector options hub
+            description (str): The program's description
 
         Returns:
-            str: __doc__ string to pass to docopt
+            DocBuilder: a doc builder instance that can be converted to a string
         """
 
-        builder = DocBuilder("oudjat", description)
+        builder = DocBuilder(program, description)
 
-        all_opts = connector_opts.usages | connector_opts.options
+        builder.add_command(cmd_hub.name, cmd_hub.description)
+
+        base_usg_str = ""
+        for busg_k, busg in cmd_hub.base.items():
+            if len(busg.usage_str) > 0:
+                base_usg_str += f"{busg.usage_str} "
+
+            builder.add_option(busg_k, busg.option.description, busg.option.arg, busg.option.short)
+
+        for opt_k, opt in cmd_hub.options.items():
+            builder.add_option(opt_k, opt.description, opt.arg, opt.short)
+
+        for usg_k, usg in cmd_hub.usages.items():
+            builder.add_option(usg_k, usg.option.description, usg.option.arg, usg.option.short)
+            builder.add_usage(f"{cmd_hub.name} {base_usg_str}{usg.usage_str}")
+
+        return builder

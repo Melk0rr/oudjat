@@ -1,5 +1,9 @@
 """A package that gather oudjat command options."""
 
-__all__ = []
+from .eol_connector_command import EOLConnectorCommand
+from .s1_connector_command import S1ConnectorCommand
 
-# TODO: Rewrite every command based on changes
+__all__ = [
+    "EOLConnectorCommand",
+    "S1ConnectorCommand",
+]
