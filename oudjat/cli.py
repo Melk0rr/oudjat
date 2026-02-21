@@ -11,9 +11,11 @@ from docopt import docopt
 
 from oudjat.banner import banner
 from oudjat.commands import (
+    CERTFRConnectorCommand,
     EOLConnectorCommand,
     S1ConnectorCommand,
 )
+from oudjat.commands.exceptions import UnknownCommand
 from oudjat.utils import ColorPrint, Context, StdOutHook, TimeConverter
 from oudjat.utils.doc_builder import DocBuilder
 from oudjat.utils.logging import oudjatLogger
@@ -23,6 +25,7 @@ from . import __version__ as VERSION
 _COMMAND_OPTIONS = {
     "connectors.edr.sentinelone": S1ConnectorCommand,
     "connectors.endoflife": EOLConnectorCommand,
+    "connectors.cert.certfr": CERTFRConnectorCommand
 }
 
 
@@ -121,6 +124,8 @@ def main() -> None:
     Program entry point that runs each time the 'oudjat' command line is executed.
     """
 
+    context = Context()
+
     try:
         start_time = datetime.now().timestamp()
 
@@ -134,21 +139,13 @@ def main() -> None:
 
         logger = _config_logging(options)
 
-        if options["--output"] and options["--silent"]:
-            sys.stdout = StdOutHook(options["FILENAME"], options["--silent"], options["--output"])
-
-        if not options["--target"] and not options["--file"] and not options["--directory"]:
-            logger.error("Target required! Use -h to see usage. Either -f or -t")
-            return
-
-        if options["--target"] and options["--file"]:
-            logger.error("Please only supply one target method - either -f or -t.")
-            return
+        if options["--output"]:
+            sys.stdout = StdOutHook(options["--output"], output=options["--output"])
 
         ColorPrint.blue(banner)
 
         logger.info(
-            f"{Context()}::Oudjat starts -  {datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')} "
+            f"{context}::Oudjat starts -  {datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')} "
         )
 
         command = _command_switch(options)
