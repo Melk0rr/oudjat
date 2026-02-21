@@ -27,26 +27,27 @@ class S1ConnectorCommand(ConnectorCommand):
         "A command to interact with SentinelOne API through oudjat S1Connector",
     )
 
-    __cmd_props__.base = {
-        "--target": CmdUsage(
-            CmdOpt("Specify the SentinelOne URL to query", short="t", arg="TARGET"),
-            "(-t=TARGET | --target TARGET)",
-        ),
-        "--username": CmdUsage(
-            CmdOpt("The username used for authentication", short="u", arg="USER"),
-            "(--username=USER --password=PASS | --creds-service=SERVICE)",
-        ),
-        "--password": CmdUsage(
-            CmdOpt("The password used for authentication", short="p", arg="PASS"),
-            "",
-        ),
-        "--creds-service": CmdUsage(
-            CmdOpt("A credential service name to retrieve username and password from", short="c", arg="SERVICE"),
-            "",
-        ),
-    }
-
     __cmd_props__.options = {
+        "--target": CmdOpt(
+            "Specify the SentinelOne URL to query",
+            short="t",
+            arg="TARGET",
+        ),
+        "--username": CmdOpt(
+            "The username used for authentication",
+            short="u",
+            arg="USER",
+        ),
+        "--password": CmdOpt(
+            "The password used for authentication",
+            short="p",
+            arg="PASS",
+        ),
+        "--creds-service": CmdOpt(
+            "A credential service name to retrieve username and password from",
+            short="c",
+            arg="SERVICE",
+        ),
         "--auto": CmdOpt(
             "Trigger auto mode. See the doc for full usage details",
         ),
@@ -268,6 +269,10 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
     }
 
+    __cmd_props__.prepend_usages(
+        "(-t=TARGET | --target TARGET) (--username=USER --password=PASS | --creds-service=SERVICE)"
+    )
+
     __doc_builder__: "DocBuilder" = ConnectorCommand._gen_doc("oudjat", __cmd_props__, "")
 
     def __init__(self, options: dict[str, Any]) -> None:
@@ -301,13 +306,13 @@ class S1ConnectorCommand(ConnectorCommand):
             {
                 "--auto": lambda opt, _: self._is_opt_present(opt),
                 "--ids": lambda opt, _: self._unify_str_opt(opt, "--ids-file"),
-                "--ids-file": lambda opt, _: self._unify_str_opt(opt, "--ids-list"),
+                "--ids-file": lambda opt, _: self._unify_str_opt("--ids", opt),
                 "--names": lambda opt, _: self._unify_str_opt(opt, "--names-file"),
-                "--names-file": lambda opt, _: self._unify_str_opt(opt, "--names-list"),
+                "--names-file": lambda opt, _: self._unify_str_opt("--names-list", opt),
                 "--sites-list": lambda opt, _: self._unify_str_opt(opt, "--sites-file"),
-                "--sites-file": lambda opt, _: self._unify_str_opt(opt, "--sites-list"),
+                "--sites-file": lambda opt, _: self._unify_str_opt("--sites-list", opt),
                 "--vendors": lambda opt, _: self._unify_str_opt(opt, "--vendor-file"),
-                "--vendors-file": lambda opt, _: self._unify_str_opt(opt, "--vendor-list"),
+                "--vendors-file": lambda opt, _: self._unify_str_opt("--vendor-list", opt),
             }
         )
 

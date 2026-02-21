@@ -76,7 +76,6 @@ class CmdProps:
 
     name: str
     description: str
-    base: "CmdUsageRegistry" = field(default_factory=lambda: {})
     options: "CmdOptRegistry" = field(default_factory=lambda: {})
     usages: "CmdUsageRegistry" = field(default_factory=lambda: {})
 
@@ -108,11 +107,65 @@ class CmdProps:
             if opt in self.options:
                 self.options[opt].transform = tr
 
+    def append_usages(
+        self, append_str: str, inc: set[str] | None = None, exc: set[str] | None = None
+    ) -> None:
+        """
+        Append the provided usage string to usages `usage_str` attribute.
+
+        If no include nor exlude key sets are provided, the string will be appended to all usages.
+        If you provide an include set, the string will be appended only to usages which key is included.
+        If you provide an exclude set, its keys will be substracted to those in the initial scope (all or included usages).
+
+        Args:
+            append_str (str)     : New usage string to append to all others
+            inc (set[str] | None): Include key set
+            exc (set[str] | None): Exclude key set
+        """
+
+        target_keys = (
+            {k for k in self.usages if k in inc} if inc is not None else set(self.usages.keys())
+        )
+
+        if exc:
+            target_keys -= exc
+
+        for k in target_keys:
+            usg = self.usages[k]
+            usg.usage_str = f"{usg.usage_str} {append_str}"
+
+    def prepend_usages(
+        self, prepend_str: str, inc: set[str] | None = None, exc: set[str] | None = None
+    ) -> None:
+        """
+        Prepend the provided usage string to usages `usage_str` attribute.
+
+        If no include nor exlude key sets are provided, the string will be prepended to all usages.
+        If you provide an include set, the string will be prepended only to usages which key is included.
+        If you provide an exclude set, its keys will be substracted to those in the initial scope (all or included usages).
+
+        Args:
+            prepend_str (str)     : New usage string to append to all others
+            inc (set[str] | None): Include key set
+            exc (set[str] | None): Exclude key set
+        """
+
+        target_keys = (
+            {k for k in self.usages if k in inc} if inc is not None else set(self.usages.keys())
+        )
+
+        if exc:
+            target_keys -= exc
+
+        for k in target_keys:
+            usg = self.usages[k]
+            usg.usage_str = f"{prepend_str} {usg.usage_str}"
 
 CmdMappingCallback: TypeAlias = Callable[[str, Any], Any]
 CmdOptRegistry: TypeAlias = dict[str, "CmdOpt"]
 CmdOptUsageRegistry: TypeAlias = dict[str, "CmdUsageOpt"]
 CmdUsageRegistry: TypeAlias = dict[str, "CmdUsage"]
+
 
 class Base:
     """A base command."""

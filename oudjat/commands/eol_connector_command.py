@@ -114,9 +114,8 @@ class EOLConnectorCommand(ConnectorCommand):
         """
 
         super().__init__(options, False)
-        con_args = {"target": self.options["--target"]}
 
-        self.connector: "EndOfLifeConnector" = EndOfLifeConnector(**con_args)
+        self.connector: "EndOfLifeConnector" = EndOfLifeConnector()
 
         if self._is_opt_present("--creds-service"):
             self.connector.set_creds_from_svc_name(self.options["--creds-service"])

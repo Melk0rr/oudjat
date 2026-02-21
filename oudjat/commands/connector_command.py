@@ -157,18 +157,11 @@ class ConnectorCommand(Base):
 
         builder.add_command(cmd_hub.name, cmd_hub.description)
 
-        base_usg_str = ""
-        for busg_k, busg in cmd_hub.base.items():
-            if len(busg.usage_str) > 0:
-                base_usg_str += f"{busg.usage_str} "
-
-            builder.add_option(busg_k, busg.option.description, busg.option.arg, busg.option.short)
-
         for opt_k, opt in cmd_hub.options.items():
             builder.add_option(opt_k, opt.description, opt.arg, opt.short)
 
         for usg_k, usg in cmd_hub.usages.items():
             builder.add_option(usg_k, usg.option.description, usg.option.arg, usg.option.short)
-            builder.add_usage(f"{cmd_hub.name} {base_usg_str}{usg.usage_str}")
+            builder.add_usage(f"{cmd_hub.name} {usg.usage_str}")
 
         return builder
