@@ -204,7 +204,7 @@ class DocBuilder:
         """
 
         default = f"[default: {option.default}]" if option.default else ""
-        return f"    {option}{self._pad_opt(str(option), pad_len)}    {option.description}{default}"
+        return f"    {option}{self._pad_opt(str(option), pad_len)}    {option.description} {default}"
 
     # ****************************************************************
     # Methods - content appenders
