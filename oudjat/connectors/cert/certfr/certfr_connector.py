@@ -116,15 +116,15 @@ class CERTFRConnector(Connector):
 
         return res
 
-    def feed(self, date_filter: str | None = None, keywords: list[str] | None = None) -> "DataType":
+    def feed(self, date_filter_str: str | None = None, keywords: list[str] | None = None) -> "DataType":
         """
         Parse the content of the provided feed URL.
 
         Uses BeautifulSoup to extract items based on optional filtering by date string.
 
         Args:
-            date_filter (str | None)   : A date string used for filtering extracted items. Defaults to None.
-            keywords (list[str] | None): A list of keywords to compare to the pages
+            date_filter_str (str | None): A date string used for filtering extracted items. Defaults to None.
+            keywords (list[str] | None) : A list of keywords to compare to the pages
 
         Returns:
             list[str]: A list of references extracted from the CERTFR feed page that match the date filter criteria if any provided.
@@ -145,18 +145,18 @@ class CERTFRConnector(Connector):
                 item_link = item.find_next("link")
 
                 certfr_ref = ""
-                try:
-                    if item_link:
+                if item_link:
+                    try:
                         certfr_ref = CERTFRPage.ref_from_link(item_link.text)
 
-                except CERTFRInvalidLinkError as link_err:
-                    logger.error(f"{context}::{link_err}")
-                    continue
+                    except CERTFRInvalidLinkError:
+                        logger.error(f"{context}::Invalid CERTFR link {item_link.text} - continue")
+                        continue
 
-                if date_filter:
+                if date_filter_str:
                     try:
                         valid_date_format = "%Y-%m-%d"
-                        date_filter = datetime.strptime(date_filter, valid_date_format)
+                        date_filter = datetime.strptime(date_filter_str, valid_date_format)
 
                         item_pubdate = item.find_next("pubDate")
                         if item_pubdate:

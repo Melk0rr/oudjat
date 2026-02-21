@@ -214,16 +214,10 @@ class CERTFRPage:
                 raise ConnectionError(f"{context}::Error while trying to connect to {self.ref}")
 
             self._raw_content = BeautifulSoup(req.content, "html.parser")
-
-            if self._raw_content is None:
-                raise CERTFRParsingError(f"{context}::Could not parse {self._ref} page content")
-
             title = self._raw_content.find_next("title")
 
             if title:
                 self._title = title.text
-
-            self.logger.info(f"{context}::Connected to {self._link.netloc}")
 
         except ConnectionError:
             self.logger.error(
@@ -285,13 +279,19 @@ class CERTFRPage:
         if not self._content and not self._title:
             return
 
-        products_str = "".join(self._content.products) if self._content else ""
+        context = Context()
+
+        products_str = ("".join(self._content.products) if self._content else "").lower()
         title = (self._title or "").lower()
 
         matches = {
             kw for kw in keywords
             if kw.lower() in title or kw.lower() in products_str
         }
+
+        self.logger.info(f"{context}::{self._ref} matched {len(matches)} keywords")
+        if len(matches) > 0:
+            self.logger.debug(f"{context}::{'\n'.join(matches)}")
 
         self._matches.update(matches)
 
