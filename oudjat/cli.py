@@ -53,7 +53,7 @@ def _command_switch(options: dict[str, str]) -> Any:
         options (dict[str, str]): CLI options
     """
 
-    command_name = next(command for command in _COMMAND_OPTIONS.keys() if options[command])
+    command_name = next(command for command in _COMMAND_OPTIONS.keys() if options.get(command))
     return _COMMAND_OPTIONS[command_name](options)
 
 
@@ -109,9 +109,9 @@ def _build_doc(cmd_name: str) -> "DocBuilder":
     """
 
     doc = _base_doc()
-    cmd_builder = _COMMAND_OPTIONS[cmd_name].__doc_builder__
-
-    doc.merge(cmd_builder)
+    if _COMMAND_OPTIONS.get(cmd_name):
+        cmd_builder = _COMMAND_OPTIONS[cmd_name].__doc_builder__
+        doc.merge(cmd_builder)
 
     return doc
 
@@ -123,6 +123,9 @@ def main() -> None:
 
     try:
         start_time = datetime.now().timestamp()
+
+        if sys.argv[1] not in _COMMAND_OPTIONS and sys.argv[1] not in ("-h", "--help", "-V", "--version"):
+            raise UnknownCommand(f"{context}::Invalid command provided '{sys.argv[1]}'")
 
         __doc__ = _build_doc(sys.argv[1])
         options = docopt(str(__doc__), version=VERSION)
