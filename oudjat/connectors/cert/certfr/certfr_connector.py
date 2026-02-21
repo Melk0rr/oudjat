@@ -77,7 +77,7 @@ class CERTFRConnector(Connector):
             raise ConnectionError(f"{Context()}::Could not connect to {self._target.netloc}\n{e}")
 
     @override
-    def fetch(self, search_filter: "StrType", keywords: list[str] | None = None) -> list["DataType"]:
+    def fetch(self, search_filter: "StrType", keywords: list[str] | None = None) -> "DataType":
         """
         Fetch the CERTFR website using a filter.
 
@@ -116,18 +116,15 @@ class CERTFRConnector(Connector):
 
         return res
 
-    # ****************************************************************
-    # Static methods
-
-    @staticmethod
-    def parse_feed(date_str_filter: str | None = None) -> list[str]:
+    def feed(self, date_filter: str | None = None, keywords: list[str] | None = None) -> "DataType":
         """
         Parse the content of the provided feed URL.
 
         Uses BeautifulSoup to extract items based on optional filtering by date string.
 
         Args:
-            date_str_filter (str | None): A date string used for filtering extracted items. Defaults to None.
+            date_filter (str | None)   : A date string used for filtering extracted items. Defaults to None.
+            keywords (list[str] | None): A list of keywords to compare to the pages
 
         Returns:
             list[str]: A list of references extracted from the CERTFR feed page that match the date filter criteria if any provided.
@@ -156,10 +153,10 @@ class CERTFRConnector(Connector):
                     logger.error(f"{context}::{link_err}")
                     continue
 
-                if date_str_filter:
+                if date_filter:
                     try:
                         valid_date_format = "%Y-%m-%d"
-                        date_filter = datetime.strptime(date_str_filter, valid_date_format)
+                        date_filter = datetime.strptime(date_filter, valid_date_format)
 
                         item_pubdate = item.find_next("pubDate")
                         if item_pubdate:
@@ -181,4 +178,8 @@ class CERTFRConnector(Connector):
             logger.error(f"{context}::A parsing error occured for {target}: {e}")
 
 
-        return filtered_feed
+        res = []
+        for ref in filtered_feed:
+            res.extend(self.fetch(ref, keywords))
+
+        return res
