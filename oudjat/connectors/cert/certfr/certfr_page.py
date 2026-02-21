@@ -16,7 +16,7 @@ from ...connector_methods import ConnectorMethod
 from ..risk_types import RiskType
 from .certfr_page_types import CERTFRPageType
 from .definitions import CERTFR_LINK_REGEX, CERTFR_REF_REGEX, REF_TYPES
-from .exceptions import CERTFRInvalidLinkError, CERTFRReferenceError
+from .exceptions import CERTFRInvalidLinkError, CERTFRParsingError, CERTFRReferenceError
 
 
 def clean_str(str_to_clean: str) -> str:
@@ -77,6 +77,8 @@ class CERTFRPage:
         self._link: "ParseResult" = urlparse(
             f"{self.BASE_LINK}/{CERTFRPageType[ref_type].value}/{self._ref}/"
         )
+
+        self._matches: set[str] = set()
 
     # ****************************************************************
     # Methods
@@ -212,6 +214,10 @@ class CERTFRPage:
                 raise ConnectionError(f"{context}::Error while trying to connect to {self.ref}")
 
             self._raw_content = BeautifulSoup(req.content, "html.parser")
+
+            if self._raw_content is None:
+                raise CERTFRParsingError(f"{context}::Could not parse {self._ref} page content")
+
             title = self._raw_content.find_next("title")
 
             if title:
@@ -265,8 +271,29 @@ class CERTFRPage:
                     self._content = CERTFRPageContent(ref=self._ref, content_section=sections[1])
                     self._content.parse()
 
-            except Exception as e:
+            except CERTFRParsingError as e:
                 self.logger.error(f"{context}::A parsing error occured for {self._ref}\n{e}")
+
+    def match(self, keywords: list[str]) -> None:
+        """
+        Check if any of the provided keywords match the page content.
+
+        Args:
+            keywords (list[str]): A list of keywords to search
+        """
+
+        if not self._content and not self._title:
+            return
+
+        products_str = "".join(self._content.products) if self._content else ""
+        title = (self._title or "").lower()
+
+        matches = {
+            kw for kw in keywords
+            if kw.lower() in title or kw.lower() in products_str
+        }
+
+        self._matches.update(matches)
 
     @override
     def __str__(self) -> str:
@@ -294,6 +321,7 @@ class CERTFRPage:
             "ref": self._ref,
             **meta_dict,
             **content_dict,
+            "matches": list(self._matches),
         }
 
         return page_dict

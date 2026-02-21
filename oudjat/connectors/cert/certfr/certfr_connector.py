@@ -1,6 +1,7 @@
 """Module to connect to the CERTFR and initialize parsing."""
 
 import logging
+from dataclasses import dataclass
 from datetime import datetime
 from typing import override
 from urllib.parse import ParseResult, urlparse
@@ -12,8 +13,17 @@ from oudjat.utils.context import Context
 from oudjat.utils.types import DataType, StrType
 
 from .certfr_page import CERTFRPage
-from .exceptions import CERTFRParsingError
+from .exceptions import CERTFRInvalidLinkError, CERTFRParsingError
 
+
+@dataclass
+class CERTFRFeedItem:
+    """
+    A simple data class to store basic CERTFR feed item infos.
+    """
+
+    title: str
+    ref: str
 
 class CERTFRConnector(Connector):
     """
@@ -22,6 +32,8 @@ class CERTFRConnector(Connector):
 
     # ****************************************************************
     # Attributes & Constructors
+
+    FEED_URL: "ParseResult" = urlparse("https://www.cert.ssi.gouv.fr/feed/")
 
     def __init__(self) -> None:
         """
@@ -65,7 +77,7 @@ class CERTFRConnector(Connector):
             raise ConnectionError(f"{Context()}::Could not connect to {self._target.netloc}\n{e}")
 
     @override
-    def fetch(self, search_filter: "StrType") -> list["DataType"]:
+    def fetch(self, search_filter: "StrType", keywords: list[str] | None = None) -> list["DataType"]:
         """
         Fetch the CERTFR website using a filter.
 
@@ -74,6 +86,7 @@ class CERTFRConnector(Connector):
 
         Args:
             search_filter (str | list[str]): A single string or a list of strings used as filters for searching within CERTFR pages.
+            keywords (list[str] | None)    : A list of keywords to compare to the pages
 
         Returns:
             list[CERTFRPage]: A list of CERTFRPage objects that match the search criteria.
@@ -96,6 +109,9 @@ class CERTFRConnector(Connector):
             page.connect()
             page.parse()
 
+            if keywords is not None:
+                page.match(keywords)
+
             res.append(page.to_dict())
 
         return res
@@ -104,27 +120,27 @@ class CERTFRConnector(Connector):
     # Static methods
 
     @staticmethod
-    def parse_feed(feed_url: str, date_str_filter: str | None = None) -> list[str]:
+    def parse_feed(date_str_filter: str | None = None) -> list[str]:
         """
         Parse the content of the provided feed URL.
 
         Uses BeautifulSoup to extract items based on optional filtering by date string.
 
         Args:
-            feed_url (str)              : The URL of the RSS feed to be parsed.
             date_str_filter (str | None): A date string used for filtering extracted items. Defaults to None.
 
         Returns:
-            list[str]: A list of references extracted from the CERTFR feed page that match the date filter criteria if provided.
+            list[str]: A list of references extracted from the CERTFR feed page that match the date filter criteria if any provided.
         """
 
         context = Context()
         logger = logging.getLogger(__name__)
 
+        target = CERTFRConnector.FEED_URL.geturl()
         filtered_feed = []
 
         try:
-            feed_req = ConnectorMethod.GET(feed_url)
+            feed_req = ConnectorMethod.GET(target)
             feed_soup = BeautifulSoup(feed_req.content, "xml")
             feed_items = feed_soup.find_all("item")
 
@@ -132,8 +148,13 @@ class CERTFRConnector(Connector):
                 item_link = item.find_next("link")
 
                 certfr_ref = ""
-                if item_link:
-                    certfr_ref = CERTFRPage.ref_from_link(item_link.text)
+                try:
+                    if item_link:
+                        certfr_ref = CERTFRPage.ref_from_link(item_link.text)
+
+                except CERTFRInvalidLinkError as link_err:
+                    logger.error(f"{context}::{link_err}")
+                    continue
 
                 if date_str_filter:
                     try:
@@ -157,6 +178,7 @@ class CERTFRConnector(Connector):
                     filtered_feed.append(certfr_ref)
 
         except CERTFRParsingError as e:
-            logger.error(f"{context}::A parsing error occured for {feed_url}: {e}")
+            logger.error(f"{context}::A parsing error occured for {target}: {e}")
+
 
         return filtered_feed
