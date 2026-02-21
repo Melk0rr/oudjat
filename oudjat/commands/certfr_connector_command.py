@@ -47,6 +47,8 @@ class CERTFRConnectorCommand(ConnectorCommand):
         "--target": CmdUsage(
             CmdOpt(
                 "Specify CERTFR page references for parsing (comma separated, no space)",
+                short="t",
+                arg="TARGET"
             ),
             "(-t=TARGET | --target=TARGET) [--keywords=KEYWORDS | --keywords-file=KEYWORDSFILE] [options]",
             {
@@ -57,8 +59,9 @@ class CERTFRConnectorCommand(ConnectorCommand):
         "--target-file": CmdUsage(
             CmdOpt(
                 "Specify CERTFR page references for parsing (comma separated, no space)",
+                arg="TARGETFILE"
             ),
-            "--target-file=TARGETFILE [--keywords=KEYWORDS | --keywords-file=KEYWORDSFILE] [options]",
+            "(--target-file=TARGETFILE) [--keywords=KEYWORDS | --keywords-file=KEYWORDSFILE] [options]",
             {
                 "search_filter": CmdUsageOpt("--target-file"),
                 "keywords": CmdUsageOpt("--keywords"),
@@ -68,9 +71,9 @@ class CERTFRConnectorCommand(ConnectorCommand):
             CmdOpt(
                 "Automatically retrieve and parse CERTFR pages from RSS feed",
             ),
-            "--feed [--feed-filter] [--keywords=KEYWORDS | --keywords-file=KEYWORDSFILE] [options]",
+            "--feed [--feed-filter=FEEDFILTER] [--keywords=KEYWORDS | --keywords-file=KEYWORDSFILE] [options]",
             {
-                "date_filter": CmdUsageOpt("--feed-filter"),
+                "date_filter_str": CmdUsageOpt("--feed-filter"),
                 "keywords": CmdUsageOpt("--keywords"),
             },
         ),
