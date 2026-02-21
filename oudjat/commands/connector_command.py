@@ -97,7 +97,7 @@ class ConnectorCommand(Base):
         """
 
         def cmd_in_options(cmd: str) -> bool:
-            return cmd in self.options
+            return self._is_opt_present(cmd)
 
         return next(filter(cmd_in_options, self.__cmd_props__.usages.keys()))
 
