@@ -19,6 +19,9 @@ class S1ConnectorCommand(ConnectorCommand):
     A class to provide an access to the S1Connector.
     """
 
+    # ****************************************************************
+    # Constructor & Attributes
+
     __cmd_props__: "CmdProps" = CmdProps(
         "connectors.edr.sentinelone",
         "A command to interact with SentinelOne API through oudjat S1Connector",

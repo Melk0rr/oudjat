@@ -21,6 +21,9 @@ class EOLConnectorCommand(ConnectorCommand):
     A class to provide an access to the S1Connector.
     """
 
+    # ****************************************************************
+    # Constructor & Attributes
+
     __cmd_props__: "CmdProps" = CmdProps(
         "connectors.endoflife",
         "A command to interact with endoflife.date API through the oudjat EndOfLifeConnector",
