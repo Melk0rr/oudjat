@@ -294,7 +294,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--sites-by-name": CmdUsage(
             CmdOpt("Retrieve sites by names"),
-            "--sites-by-name [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
+            "--sites-by-name [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
             {
                 "site_name": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
