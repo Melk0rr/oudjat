@@ -520,9 +520,15 @@ class S1Connector(Connector):
             alert_filter["siteIds"] = self._unify_str_list(site_ids)
 
         # Set status filter
+        if isinstance(status_filter, list):
+            status_filter = next(iter(status_filter))
+
         self._update_filter_status(alert_filter, status_filter, mode="incidentStatus")
 
         # Set verdict filter
+        if isinstance(verdict_filter, list):
+            verdict_filter = next(iter(verdict_filter))
+
         self._update_filter_verdict(alert_filter, verdict_filter, "analystVerdict")
 
         if file_path is not None:
