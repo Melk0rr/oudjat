@@ -199,7 +199,9 @@ class S1Connector(Connector):
 
             if len(statuses) > 0:
                 prop = filter_props[incident_type][exclude]
-                incident_filter[prop] = statuses if incident_type is S1IncidentType.THREAT else next(iter(statuses))
+                incident_filter[prop] = (
+                    statuses if incident_type is S1IncidentType.THREAT else next(iter(statuses))
+                )
 
     def _update_filter_verdict(
         self,
@@ -234,7 +236,9 @@ class S1Connector(Connector):
 
             if len(verdicts) > 0:
                 prop = filter_props[incident_type][exclude]
-                incident_filter[prop] = verdicts if incident_type is S1IncidentType.THREAT else next(iter(verdicts))
+                incident_filter[prop] = (
+                    verdicts if incident_type is S1IncidentType.THREAT else next(iter(verdicts))
+                )
 
     # ****************************************************************
     # Methods - access
@@ -552,8 +556,9 @@ class S1Connector(Connector):
             verdict = S1AnalystVerdict[verdict.upper()]
 
         data = {"analystVerdict": str(verdict)}
+        payload = {"filter": alert_filter, "data": data}
 
-        return self.fetch(S1Endpoint.ALERTS_ANALYST_VERDICT, {"filter": alert_filter, "data": data})
+        return self.fetch(S1Endpoint.ALERTS_ANALYST_VERDICT, payload)
 
     def alert_incident(
         self,
@@ -608,8 +613,9 @@ class S1Connector(Connector):
             status = S1IncidentStatus[status.upper()]
 
         data = {"incidentStatus": str(status)}
+        payload = {"filter": alert_filter, "data": data}
 
-        return self.fetch(S1Endpoint.ALERTS_INCIDENT, {"filter": alert_filter, "data": data})
+        return self.fetch(S1Endpoint.ALERTS_INCIDENT, payload)
 
     # ****************************************************************
     # Methods: Threats
@@ -699,10 +705,9 @@ class S1Connector(Connector):
             verdict = S1AnalystVerdict[verdict.upper()]
 
         data = {"analystVerdict": str(verdict)}
+        payload = {"filter": threat_filter, "data": data}
 
-        return self.fetch(
-            S1Endpoint.THREATS_ANALYST_VERDICT, {"filter": threat_filter, "data": data}
-        )
+        return self.fetch(S1Endpoint.THREATS_ANALYST_VERDICT, payload)
 
     def threat_incident(
         self,
@@ -764,13 +769,12 @@ class S1Connector(Connector):
             verdict = S1AnalystVerdict[verdict.upper()]
 
         input_data = {"incidentStatus": str(status), "analystVerdict": str(verdict)}
+        payload = {"filter": threat_filter, "data": input_data}
 
         res = []
         if auto:
             while True:
-                q = self.fetch(
-                    S1Endpoint.THREATS_INCIDENT, {"filter": threat_filter, "data": input_data}
-                )
+                q = self.fetch(S1Endpoint.THREATS_INCIDENT, payload)
 
                 if q[0]["affected"] == 0:
                     break
