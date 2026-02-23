@@ -25,5 +25,5 @@ class S1AnalystVerdict(Enum):
             str: A string representation of the analyst verdict
         """
 
-        return self._value_
+        return self._name_
 
