@@ -485,7 +485,7 @@ class S1Connector(Connector):
         site_ids: "StrType | None" = None,
         status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
         verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
-        process_path: "StrType | None" = None,
+        file_path: "StrType | None" = None,
         alert_filter: dict[str, Any] | None = None,
     ) -> "DataType":
         """
@@ -502,7 +502,7 @@ class S1Connector(Connector):
             site_ids (str | list[str] | None)           : Site ids of the alerts
             status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
             verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
-            process_path (str | list[str] | None)       : Path of the process which triggered the alert
+            file_path (str | list[str] | None)          : Path of the process file which triggered the alert
             alert_filter (dict[str, Any])               : A dictionary of alert filters
 
         Returns:
@@ -527,8 +527,8 @@ class S1Connector(Connector):
         # Set verdict filter
         self._update_filter_verdict(alert_filter, verdict_filter)
 
-        if process_path is not None:
-            alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(process_path)
+        if file_path is not None:
+            alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(file_path)
 
         if not isinstance(verdict, S1AnalystVerdict):
             verdict = S1AnalystVerdict[verdict.upper()]
@@ -544,7 +544,7 @@ class S1Connector(Connector):
         site_ids: "StrType | None" = None,
         status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
         verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
-        process_path: "StrType | None" = None,
+        file_path: "StrType | None" = None,
         alert_filter: dict[str, Any] | None = None,
     ) -> "DataType":
         """
@@ -561,7 +561,7 @@ class S1Connector(Connector):
             site_ids (str | list[str] | None)           : Site ids of the alerts
             status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
             verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
-            process_path (str | list[str] | None)       : Path of the process which triggered the alert
+            file_path (str | list[str] | None)          : Path of the process file which triggered the alert
             alert_filter (dict[str, Any])               : A dictionary of alert filters
 
         Returns:
@@ -586,8 +586,8 @@ class S1Connector(Connector):
         # Set verdict filter
         self._update_filter_verdict(alert_filter, verdict_filter)
 
-        if process_path is not None:
-            alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(process_path)
+        if file_path is not None:
+            alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(file_path)
 
         if not isinstance(status, S1IncidentStatus):
             status = S1IncidentStatus[status.upper()]
