@@ -193,7 +193,7 @@ class S1Connector(Connector):
         self,
         incident_filter: dict[str, Any],
         verdict: "S1AnalystVerdictType | None",
-        exclude: bool = True,
+        mode: str = "analystVerdictsNin",
     ) -> None:
         """
         Unify an incident status value into a valid status string.
@@ -201,7 +201,7 @@ class S1Connector(Connector):
         Args:
             incident_filter (dict[str, Any])                                      : The incident filter to update if a status is provided
             verdict (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None): Status to filter
-            exclude (bool)                                                        : If true, the provided status will be excluded from the search.
+            mode (str)                                                            : Analyst verdict property to use
         """
 
         if verdict is not None:
@@ -211,7 +211,6 @@ class S1Connector(Connector):
             verdict = list(set(map(self._unify_verdict, verdict)))
 
             if len(verdict) > 0:
-                mode = "analystVerdictsNin" if exclude else "analystVerdicts"
                 incident_filter[mode] = verdict
 
     # ****************************************************************
@@ -524,7 +523,7 @@ class S1Connector(Connector):
         self._update_filter_status(alert_filter, status_filter, mode="incidentStatus")
 
         # Set verdict filter
-        self._update_filter_verdict(alert_filter, verdict_filter)
+        self._update_filter_verdict(alert_filter, verdict_filter, "analystVerdict")
 
         if file_path is not None:
             alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(file_path)
@@ -580,10 +579,10 @@ class S1Connector(Connector):
             alert_filter["siteIds"] = self._unify_str_list(site_ids)
 
         # Set status filter
-        self._update_filter_status(alert_filter, status_filter)
+        self._update_filter_status(alert_filter, status_filter, mode="incidentStatus")
 
         # Set verdict filter
-        self._update_filter_verdict(alert_filter, verdict_filter)
+        self._update_filter_verdict(alert_filter, verdict_filter, "analystVerdict")
 
         if file_path is not None:
             alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(file_path)
