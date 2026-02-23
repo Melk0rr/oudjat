@@ -481,8 +481,8 @@ class S1Connector(Connector):
         verdict: "str | S1AnalystVerdict",
         alert_ids: "StrType | None" = None,
         site_ids: "StrType | None" = None,
-        status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
-        verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
+        status_filter: "S1IncidentStatusType | None" = None,
+        verdict_filter: "S1AnalystVerdictType | None" = None,
         file_path: "StrType | None" = None,
         alert_filter: dict[str, Any] | None = None,
     ) -> "DataType":
@@ -540,8 +540,8 @@ class S1Connector(Connector):
         status: "str | S1IncidentStatus",
         alert_ids: "StrType | None" = None,
         site_ids: "StrType | None" = None,
-        status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
-        verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
+        status_filter: "S1IncidentStatusType | None" = None,
+        verdict_filter: "S1AnalystVerdictType | None" = None,
         file_path: "StrType | None" = None,
         alert_filter: dict[str, Any] | None = None,
     ) -> "DataType":
@@ -579,6 +579,7 @@ class S1Connector(Connector):
             alert_filter["siteIds"] = self._unify_str_list(site_ids)
 
         # Set status filter
+
         self._update_filter_status(alert_filter, status_filter, mode="incidentStatus")
 
         # Set verdict filter
