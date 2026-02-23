@@ -129,7 +129,7 @@ class S1ConnectorCommand(ConnectorCommand):
         # Agents
         "--agents": CmdUsage(
             CmdOpt("Export S1 agents details"),
-            "--agents [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
+            "--agents [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
             {
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
@@ -137,7 +137,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--agents-export": CmdUsage(
             CmdOpt("Export flat agent data"),
-            "--agents-export [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
+            "--agents-export [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
             {
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
@@ -145,7 +145,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--move-agent-site": CmdUsage(
             CmdOpt("Move one or multiple agents to a site based on its id"),
-            "--move-agent-site [--sites-list=SITELIST | --sites-file=SITEFILE] [--names=NAMES | --names-file=NAMESFILE] [options]",
+            "--move-agent-site [--sites-list=SITELIST | --sites-file=SITEFILE] [--names=NAMES | --names-file=NAMESFILE]",
             {
                 "site_id": CmdUsageOpt("--sites-list", lambda lst: next(iter(lst))),
                 "agent_name": CmdUsageOpt("--names"),
@@ -154,7 +154,7 @@ class S1ConnectorCommand(ConnectorCommand):
         # Threats
         "--threats": CmdUsage(
             CmdOpt("Retrieve threats detected by S1"),
-            "--threats [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
+            "--threats [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
             {
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
@@ -162,7 +162,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--threats-verdict": CmdUsage(
             CmdOpt("Change the verdict of filtered threats"),
-            "--threats-verdict [--verdict=VERDICT] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER] [options]",
+            "--threats-verdict [--verdict=VERDICT] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER]",
             {
                 "verdict": CmdUsageOpt("--verdict"),
                 "threat_ids": CmdUsageOpt("--ids"),
@@ -175,7 +175,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--threats-incident": CmdUsage(
             CmdOpt("Change the verdict and status of filtered threats"),
-            "--threats-incident (--status=STATUS --verdict=VERDICT) [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER] [options]",
+            "--threats-incident (--status=STATUS --verdict=VERDICT) [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER]",
             {
                 "status": CmdUsageOpt("--status"),
                 "verdict": CmdUsageOpt("--verdict"),
@@ -191,7 +191,7 @@ class S1ConnectorCommand(ConnectorCommand):
         # Alerts
         "--alert-verdict": CmdUsage(
             CmdOpt("Change the verdict of filtered alerts"),
-            "--alert-verdict [--verdict=VERDICT] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER] [options]",
+            "--alert-verdict [--verdict=VERDICT] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER]",
             {
                 "verdict": CmdUsageOpt("--verdict"),
                 "alert_ids": CmdUsageOpt("--ids"),
@@ -204,7 +204,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--alert-incident": CmdUsage(
             CmdOpt("Change the status of filtered alerts (threats:malicious / alerts:suspicious)"),
-            "--alert-incident [--status=STATUS] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER] [options]",
+            "--alert-incident [--status=STATUS] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER]",
             {
                 "status": CmdUsageOpt("--status"),
                 "alert_ids": CmdUsageOpt("--ids"),
@@ -219,7 +219,7 @@ class S1ConnectorCommand(ConnectorCommand):
         # Applications
         "--applications": CmdUsage(
             CmdOpt("Retrieve an inventory of applications detected by S1"),
-            "--applications [--vendors=VENDOR | --vendors-file=VENDORFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
+            "--applications [--vendors=VENDOR | --vendors-file=VENDORFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
             {
                 "vendors": CmdUsageOpt("--vendors"),
                 "site_ids": CmdUsageOpt("--sites"),
@@ -230,7 +230,7 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt(
                 "Retrieve an inventory of applications detected by S1 that present a security risk"
             ),
-            "--applications-with-risks [--vendors=VENDOR | --vendors-file=VENDORFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
+            "--applications-with-risks [--vendors=VENDOR | --vendors-file=VENDORFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
             {
                 "vendors": CmdUsageOpt("--vendors"),
                 "site_ids": CmdUsageOpt("--sites-list"),
@@ -239,7 +239,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--applications-cves": CmdUsage(
             CmdOpt("Retrieve CVEs for specific application(s)"),
-            "--applications-cves [--ids=IDS | --ids-file=IDSFILE] [--names=NAMES | --names-file=NAMESFILE] [--vendors=VENDOR | --vendors-file=VENDORFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
+            "--applications-cves [--ids=IDS | --ids-file=IDSFILE] [--names=NAMES | --names-file=NAMESFILE] [--vendors=VENDOR | --vendors-file=VENDORFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
             {
                 "appliation_ids": CmdUsageOpt("--ids"),
                 "appliation_name": CmdUsageOpt("--names"),
@@ -250,7 +250,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--cves": CmdUsage(
             CmdOpt("Retrieve CVEs detected by S1"),
-            "--cves [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
+            "--cves [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
             {
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
@@ -259,7 +259,7 @@ class S1ConnectorCommand(ConnectorCommand):
         # Groups
         "--groups": CmdUsage(
             CmdOpt("Retrieve groups"),
-            "--groups [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
+            "--groups [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
             {
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
@@ -267,7 +267,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--group-policy": CmdUsage(
             CmdOpt("Update the policy of the specified groups"),
-            "--group-policy [--ids=IDS | --ids-file=IDSFILE] [--malicious-policy=MALPOLICY] [--suspicious-policy=SUPOLICY] [--payload=PAYLOAD] [options]",
+            "--group-policy [--ids=IDS | --ids-file=IDSFILE] [--malicious-policy=MALPOLICY] [--suspicious-policy=SUPOLICY] [--payload=PAYLOAD]",
             {
                 "group_id": CmdUsageOpt("--ids"),
                 "malicious_mitigation": CmdUsageOpt("--malicious-policy"),
@@ -277,7 +277,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--group-move-agent": CmdUsage(
             CmdOpt("Move agents into specified group"),
-            "--group-move-agent [--ids=IDS | --ids-file=IDSFILE] [--names=NAMES | --names-file=NAMESFILE] [--payload=PAYLOAD] [options]",
+            "--group-move-agent [--ids=IDS | --ids-file=IDSFILE] [--names=NAMES | --names-file=NAMESFILE] [--payload=PAYLOAD]",
             {
                 "group_id": CmdUsageOpt("--ids", lambda lst: next(iter(lst))),
                 "agent_name": CmdUsageOpt("--names"),
@@ -287,7 +287,7 @@ class S1ConnectorCommand(ConnectorCommand):
         # Sites
         "--sites": CmdUsage(
             CmdOpt("Retrieve sites"),
-            "--sites [--payload=PAYLOAD] [options]",
+            "--sites [--payload=PAYLOAD]",
             {
                 "payload": CmdUsageOpt("--payload"),
             },
@@ -305,6 +305,7 @@ class S1ConnectorCommand(ConnectorCommand):
     __cmd_props__.prepend_usages(
         "(-t=TARGET | --target TARGET) (--username=USER --password=PASS | --creds-service=SERVICE)"
     )
+    __cmd_props__.append_usages("[options]")
 
     __doc_builder__: "DocBuilder" = ConnectorCommand._gen_doc("oudjat", __cmd_props__, "")
 
