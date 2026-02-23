@@ -169,15 +169,15 @@ class S1Connector(Connector):
         self,
         incident_filter: dict[str, Any],
         status: "S1IncidentStatusType | None",
-        exclude: bool = True,
+        mode: str = "incidentStatusesNin",
     ) -> None:
         """
         Unify an incident status value into a valid status string.
 
         Args:
-            incident_filter (dict[str, Any])                                     : The incident filter to update if a status is provided
+            incident_filter (dict[str, Any])    : The incident filter to update if a status is provided
             status (S1IncidentStatusType | None): Status to filter
-            exclude (bool)                                                       : If true, the provided status will be excluded from the search.
+            mode (bool)                         : The filter property to use
         """
 
         if status is not None:
@@ -187,7 +187,6 @@ class S1Connector(Connector):
             status = list(set(map(self._unify_status, status)))
 
             if len(status) > 0:
-                mode = "incidentStatusesNin" if exclude else "incidentStatuses"
                 incident_filter[mode] = status
 
     def _update_filter_verdict(
@@ -522,7 +521,7 @@ class S1Connector(Connector):
             alert_filter["siteIds"] = self._unify_str_list(site_ids)
 
         # Set status filter
-        self._update_filter_status(alert_filter, status_filter)
+        self._update_filter_status(alert_filter, status_filter, mode="incidentStatus")
 
         # Set verdict filter
         self._update_filter_verdict(alert_filter, verdict_filter)
