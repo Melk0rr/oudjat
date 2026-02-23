@@ -25,7 +25,7 @@ from . import __version__ as VERSION
 _COMMAND_OPTIONS = {
     "connectors.edr.sentinelone": S1ConnectorCommand,
     "connectors.endoflife": EOLConnectorCommand,
-    "connectors.cert.certfr": CERTFRConnectorCommand
+    "connectors.cert.certfr": CERTFRConnectorCommand,
 }
 
 
@@ -89,7 +89,9 @@ It also allows for complex data consolidation and mapping through a config file 
     builder.add_option("append", "Append to the output fileappend to the output file", short="a")
     builder.add_option("help", "Print the doc string", short="h")
     builder.add_option("log", "Specify the logging level", arg="LOGGING", short="l", default="INFO")
-    builder.add_option("output", "Specify a file to save the execution logs to", arg="LOGFILE", short="o")
+    builder.add_option(
+        "output", "Specify a file to save the execution logs to", arg="LOGFILE", short="o"
+    )
     builder.add_option("silent", "Simple output", short="S")
     builder.add_option("version", "Show the program version and exit", short="V")
     builder.add_option("csv", "Save results as a CSV file", arg="CSV")
@@ -130,7 +132,12 @@ def main() -> None:
     try:
         start_time = datetime.now().timestamp()
 
-        if sys.argv[1] not in _COMMAND_OPTIONS and sys.argv[1] not in ("-h", "--help", "-V", "--version"):
+        if sys.argv[1] not in _COMMAND_OPTIONS and sys.argv[1] not in (
+            "-h",
+            "--help",
+            "-V",
+            "--version",
+        ):
             raise UnknownCommand(f"{context}::Invalid command provided '{sys.argv[1]}'")
 
         __doc__ = _build_doc(sys.argv[1])
@@ -140,8 +147,10 @@ def main() -> None:
 
         logger = _config_logging(options)
 
-        if options["--output"]:
-            sys.stdout = StdOutHook(options["--output"], output=options["--output"])
+        if options["--output"] or options["--silent"]:
+            sys.stdout = StdOutHook(
+                options["--output"], options["--silent"], output=options["--output"]
+            )
 
         ColorPrint.blue(banner)
 
@@ -155,6 +164,10 @@ def main() -> None:
         logger.info(
             f"Oudjat runtime -  {TimeConverter.seconds_to_str(datetime.now().timestamp() - start_time)}s"
         )
+
+        if options["--output"]:
+            assert isinstance(sys.stdout, StdOutHook)
+            sys.stdout.write_out()
 
         sys.stdout = original_stdout
 
