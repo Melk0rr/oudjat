@@ -145,12 +145,13 @@ def main() -> None:
 
         original_stdout = sys.stdout
 
-        logger = _config_logging(options)
-
         if options["--output"] or options["--silent"]:
             sys.stdout = StdOutHook(
                 options["--output"], options["--silent"], output=options["--output"]
             )
+
+        logger = _config_logging(options)
+
 
         ColorPrint.blue(banner)
 
