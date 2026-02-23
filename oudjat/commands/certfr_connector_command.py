@@ -1,5 +1,5 @@
 """
-A command module to handle interactions to Sentinel One API through the dedicated connector.
+A command module to handle interactions with the CERTFR website.
 """
 
 from typing import Any
@@ -18,7 +18,7 @@ from .connector_command import ConnectorCommand
 
 class CERTFRConnectorCommand(ConnectorCommand):
     """
-    A class to provide an access to the S1Connector.
+    A class to provide an access to the CERTFRConnector.
     """
 
     # ****************************************************************
@@ -92,10 +92,6 @@ class CERTFRConnectorCommand(ConnectorCommand):
         super().__init__(options, False)
 
         self.connector: "CERTFRConnector" = CERTFRConnector()
-
-        if self._is_opt_present("--creds-service"):
-            self.connector.set_creds_from_svc_name(self.options["--creds-service"])
-
         self.connector.connect()
 
         # Options transform based on instance

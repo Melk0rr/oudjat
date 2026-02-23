@@ -1,5 +1,5 @@
 """
-A command module to handle interactions to Sentinel One API through the dedicated connector.
+A command module to handle interactions with endoflife.date API.
 """
 
 from typing import Any
@@ -18,7 +18,7 @@ from .connector_command import ConnectorCommand
 
 class EOLConnectorCommand(ConnectorCommand):
     """
-    A class to provide an access to the S1Connector.
+    A class to provide an access to the EndOfLifeConnector.
     """
 
     # ****************************************************************
@@ -116,10 +116,6 @@ class EOLConnectorCommand(ConnectorCommand):
         super().__init__(options, False)
 
         self.connector: "EndOfLifeConnector" = EndOfLifeConnector()
-
-        if self._is_opt_present("--creds-service"):
-            self.connector.set_creds_from_svc_name(self.options["--creds-service"])
-
         self.connector.connect()
 
         # Options transform based on instance
