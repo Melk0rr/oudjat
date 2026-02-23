@@ -9,6 +9,7 @@ from urllib.parse import ParseResult, urlparse
 
 import requests
 
+from oudjat.connectors.edr.sentinelone.s1_incident_types import S1IncidentType
 from oudjat.utils import FileUtils
 from oudjat.utils.context import Context
 from oudjat.utils.credentials import NoCredentialsError
@@ -168,50 +169,72 @@ class S1Connector(Connector):
     def _update_filter_status(
         self,
         incident_filter: dict[str, Any],
-        status: "S1IncidentStatusType | None",
-        mode: str = "incidentStatusesNin",
+        statuses: "S1IncidentStatusType | None",
+        incident_type: "S1IncidentType",
+        exclude: bool = True,
     ) -> None:
         """
         Unify an incident status value into a valid status string.
 
         Args:
-            incident_filter (dict[str, Any])    : The incident filter to update if a status is provided
-            status (S1IncidentStatusType | None): Status to filter
-            mode (bool)                         : The filter property to use
+            incident_filter (dict[str, Any])      : The incident filter to update if a status is provided
+            statuses (S1IncidentStatusType | None): Status to filter
+            incident_type (S1IncidentType)        : The type of incident
+            exclude (bool)                        : Whether to exclude the provided status
         """
 
-        if status is not None:
-            if not isinstance(status, list):
-                status = [status]
+        if statuses is not None:
+            filter_props = {
+                S1IncidentType.ALERT: {True: "incidentStatus", False: "incidentStatus"},
+                S1IncidentType.THREAT: {True: "incidentStatusesNin", False: "incidentStatuses"},
+            }
 
-            status = list(set(map(self._unify_status, status)))
+            if incident_type is S1IncidentType.ALERT:
+                exclude = False
 
-            if len(status) > 0:
-                incident_filter[mode] = status
+            if not isinstance(statuses, list):
+                statuses = [statuses]
+
+            statuses = list(set(map(self._unify_status, statuses)))
+
+            if len(statuses) > 0:
+                prop = filter_props[incident_type][exclude]
+                incident_filter[prop] = statuses if incident_type is S1IncidentType.THREAT else next(iter(statuses))
 
     def _update_filter_verdict(
         self,
         incident_filter: dict[str, Any],
-        verdict: "S1AnalystVerdictType | None",
-        mode: str = "analystVerdictsNin",
+        verdicts: "S1AnalystVerdictType | None",
+        incident_type: "S1IncidentType",
+        exclude: bool = True,
     ) -> None:
         """
         Unify an incident status value into a valid status string.
 
         Args:
-            incident_filter (dict[str, Any])                                      : The incident filter to update if a status is provided
-            verdict (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None): Status to filter
-            mode (str)                                                            : Analyst verdict property to use
+            incident_filter (dict[str, Any])                                       : The incident filter to update if a status is provided
+            verdicts (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None): Status to filter
+            incident_type (S1IncidentType)                                         : The type of incident
+            exclude (bool)                                                         : Whether to exclude the provided status
         """
 
-        if verdict is not None:
-            if not isinstance(verdict, list):
-                verdict = [verdict]
+        if verdicts is not None:
+            filter_props = {
+                S1IncidentType.ALERT: {True: "analystVerdict", False: "analystVerdict"},
+                S1IncidentType.THREAT: {True: "analystVerdictsNin", False: "analystVerdicts"},
+            }
 
-            verdict = list(set(map(self._unify_verdict, verdict)))
+            if incident_type is S1IncidentType.ALERT:
+                exclude = False
 
-            if len(verdict) > 0:
-                incident_filter[mode] = verdict
+            if not isinstance(verdicts, list):
+                verdicts = [verdicts]
+
+            verdicts = list(set(map(self._unify_verdict, verdicts)))
+
+            if len(verdicts) > 0:
+                prop = filter_props[incident_type][exclude]
+                incident_filter[prop] = verdicts if incident_type is S1IncidentType.THREAT else next(iter(verdicts))
 
     # ****************************************************************
     # Methods - access
@@ -519,17 +542,8 @@ class S1Connector(Connector):
         if site_ids is not None:
             alert_filter["siteIds"] = self._unify_str_list(site_ids)
 
-        # Set status filter
-        if isinstance(status_filter, list):
-            status_filter = next(iter(status_filter))
-
-        self._update_filter_status(alert_filter, status_filter, mode="incidentStatus")
-
-        # Set verdict filter
-        if isinstance(verdict_filter, list):
-            verdict_filter = next(iter(verdict_filter))
-
-        self._update_filter_verdict(alert_filter, verdict_filter, "analystVerdict")
+        self._update_filter_status(alert_filter, status_filter, S1IncidentType.ALERT)
+        self._update_filter_verdict(alert_filter, verdict_filter, S1IncidentType.ALERT)
 
         if file_path is not None:
             alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(file_path)
@@ -584,12 +598,8 @@ class S1Connector(Connector):
         if site_ids is not None:
             alert_filter["siteIds"] = self._unify_str_list(site_ids)
 
-        # Set status filter
-
-        self._update_filter_status(alert_filter, status_filter, mode="incidentStatus")
-
-        # Set verdict filter
-        self._update_filter_verdict(alert_filter, verdict_filter, "analystVerdict")
+        self._update_filter_status(alert_filter, status_filter, S1IncidentType.ALERT)
+        self._update_filter_verdict(alert_filter, verdict_filter, S1IncidentType.ALERT)
 
         if file_path is not None:
             alert_filter["sourceProcessFilePath__contains"] = self._unify_str_list(file_path)
@@ -631,8 +641,8 @@ class S1Connector(Connector):
         if payload is None:
             payload = {}
 
-        self._update_filter_status(payload, status_filter)
-        self._update_filter_verdict(payload, verdict_filter)
+        self._update_filter_status(payload, status_filter, S1IncidentType.THREAT)
+        self._update_filter_verdict(payload, verdict_filter, S1IncidentType.THREAT)
 
         return self.fetch(S1Endpoint.THREATS, payload)
 
@@ -679,11 +689,8 @@ class S1Connector(Connector):
         if site_ids is not None:
             threat_filter["siteIds"] = self._unify_str_list(site_ids)
 
-        # Set status filter
-        self._update_filter_status(threat_filter, status_filter)
-
-        # Set verdict filter
-        self._update_filter_verdict(threat_filter, verdict_filter)
+        self._update_filter_status(threat_filter, status_filter, S1IncidentType.THREAT)
+        self._update_filter_verdict(threat_filter, verdict_filter, S1IncidentType.THREAT)
 
         if file_path is not None:
             threat_filter["filePath__contains"] = self._unify_str_list(file_path)
@@ -744,11 +751,8 @@ class S1Connector(Connector):
         if site_ids is not None:
             threat_filter["siteIds"] = self._unify_str_list(site_ids)
 
-        # Set status filter
-        self._update_filter_status(threat_filter, status_filter)
-
-        # Set verdict filter
-        self._update_filter_verdict(threat_filter, verdict_filter)
+        self._update_filter_status(threat_filter, status_filter, S1IncidentType.THREAT)
+        self._update_filter_verdict(threat_filter, verdict_filter, S1IncidentType.THREAT)
 
         if file_path is not None:
             threat_filter["filePath__contains"] = self._unify_str_list(file_path)
@@ -1044,9 +1048,7 @@ class S1Connector(Connector):
             agent_filter["computerName__contains"] = agent_name
 
         elif len(agent_filter.keys()) == 0:
-            raise ValueError(
-                f"{Context()}::No agent filter was specified"
-            )
+            raise ValueError(f"{Context()}::No agent filter was specified")
 
         return self.fetch(
             S1Endpoint.GROUPS_MOVE_AGENTS,
@@ -1101,7 +1103,9 @@ class S1Connector(Connector):
             S1Endpoint.SITES_BY_ID, payload=payload or {}, path_fmt={"siteId": site_id}
         )
 
-    def sites_by_name(self, site_name: "StrType", payload: dict[str, Any] | None = None) -> "DataType":
+    def sites_by_name(
+        self, site_name: "StrType", payload: dict[str, Any] | None = None
+    ) -> "DataType":
         """
         Retrieve sites based on the provided name list.
 

@@ -126,6 +126,7 @@ class S1ConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.usages = {
+        # Agents
         "--agents": CmdUsage(
             CmdOpt("Export S1 agents details"),
             "--agents [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
@@ -215,6 +216,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "alert_filter": CmdUsageOpt("--filter"),
             },
         ),
+        # Applications
         "--applications": CmdUsage(
             CmdOpt("Retrieve an inventory of applications detected by S1"),
             "--applications [--vendors=VENDOR | --vendors-file=VENDORFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
@@ -254,6 +256,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
+        # Groups
         "--groups": CmdUsage(
             CmdOpt("Retrieve groups"),
             "--groups [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
@@ -281,6 +284,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
+        # Sites
         "--sites": CmdUsage(
             CmdOpt("Retrieve sites"),
             "--sites [--payload=PAYLOAD] [options]",
