@@ -238,7 +238,7 @@ class Base:
 
         return bool(self.options.get(opt) or False)
 
-    def _unify_str_opt(self, str_opt: str, file_opt: str) -> list[str]:
+    def _unify_str_opt(self, str_opt: str, file_opt: str | None = None) -> list[str]:
         """
         Unify option case where a list of information can be passed either as a string, a list of strings or a txt file.
 
@@ -252,7 +252,7 @@ class Base:
 
         args = (
             FileUtils.import_txt(filepath=self.options[file_opt])
-            if self.options[file_opt]
+            if (file_opt and self.options[file_opt])
             else self.options[str_opt].split(",")
         )
 
