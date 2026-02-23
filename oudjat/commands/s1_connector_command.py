@@ -161,7 +161,7 @@ class S1ConnectorCommand(ConnectorCommand):
             },
         ),
         "--threats-verdict": CmdUsage(
-            CmdOpt("Change the verdict of filtered threats (threats:malicious / alerts:suspicious)"),
+            CmdOpt("Change the verdict of filtered threats"),
             "--threats-verdict [--verdict=VERDICT] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER] [options]",
             {
                 "verdict": CmdUsageOpt("--verdict"),
@@ -174,8 +174,8 @@ class S1ConnectorCommand(ConnectorCommand):
             },
         ),
         "--threats-incident": CmdUsage(
-            CmdOpt("Change the verdict and status of filtered threats (threats:malicious / alerts:suspicious)"),
-            "--threats-incident [--status=STATUS] [--verdict=VERDICT] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER] [options]",
+            CmdOpt("Change the verdict and status of filtered threats"),
+            "--threats-incident (--status=STATUS --verdict=VERDICT) [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER] [options]",
             {
                 "status": CmdUsageOpt("--status"),
                 "verdict": CmdUsageOpt("--verdict"),
@@ -190,7 +190,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         # Alerts
         "--alert-verdict": CmdUsage(
-            CmdOpt("Change the verdict of filtered alerts (threats:malicious / alerts:suspicious)"),
+            CmdOpt("Change the verdict of filtered alerts"),
             "--alert-verdict [--verdict=VERDICT] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER] [options]",
             {
                 "verdict": CmdUsageOpt("--verdict"),
