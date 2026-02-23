@@ -97,7 +97,7 @@ class S1ConnectorCommand(ConnectorCommand):
             "Specify an incident status to an alert or a threat",
             arg="STATUS",
         ),
-        "--status-filters": CmdOpt(
+        "--status-filter": CmdOpt(
             "A list of incident statuses for alert/threat selection",
             arg="STATUSFILTER",
             transform=lambda opt, v: v.split(","),
