@@ -53,7 +53,7 @@ class StdOutHook:
         if not self.output:
             return
 
-        with open(self.filename, "w") as file:
+        with open(self.filename, "w", encoding="utf-8") as file:
             for line in self.lines:
                 # INFO: Cleaning stdout colors
                 clean_line = (
