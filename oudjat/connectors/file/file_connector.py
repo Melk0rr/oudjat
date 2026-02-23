@@ -118,7 +118,6 @@ class FileConnector(Connector):
         """
 
         context = Context()
-        self.logger.info(f"{context}::Connecting to {self._filetype} file {self._target}")
 
         if payload is None:
             payload = {}
@@ -127,12 +126,12 @@ class FileConnector(Connector):
             self._data = self._filetype.f_import(filepath=self._target, **payload)
             self._connection = True
 
-            self.logger.info(f"{context}::Connected to {self._filetype} file {self._target}")
-            self.logger.debug(f"{context}::{self._data}")
+            self.logger.info(f"Connected to {self._filetype} file {self._target}")
+            self.logger.debug(f"{context}::Imported > {self._data}")
 
         except FileExistsError as e:
             raise FileExistsError(
-                f"{context}::Error connecting to file {self.target}\n{e}"
+                f"{context}::Error connecting to file {self._target}\n{e}"
             )
 
     def disconnect(self) -> None:
@@ -140,7 +139,7 @@ class FileConnector(Connector):
         'Disconnects' from the targeted file by resetting data and connection status.
         """
 
-        self.logger.warning(f"{Context()}::Disconnected from {self._target}")
+        self.logger.warning(f"Disconnected from {self._target}")
 
         self._data = None
         self._connection = False

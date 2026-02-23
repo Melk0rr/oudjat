@@ -73,12 +73,10 @@ class FileUtils:
             dict or list: The content of the imported JSON file.
         """
 
-        context = Context()
-
         json_data = None
         try:
             full_path = os.path.join(os.getcwd(), filepath)
-            cls.logger.info(f"{context}::Importing JSON data from {full_path}")
+            cls.logger.info(f"Importing JSON data from {full_path}")
 
             with open(full_path, "r", encoding="utf-8") as json_file:
                 json_data = orjson.loads(json_file.read())
@@ -86,11 +84,11 @@ class FileUtils:
             if callback is not None:
                 json_data = callback(json_data)
 
-            cls.logger.info(f"{context}::Successfully imported JSON data from {full_path}")
-            cls.logger.debug(f"{context}::{json_data}")
+            cls.logger.info(f"Successfully imported JSON data from {full_path}")
+            cls.logger.debug(f"{json_data}")
 
         except FileImportError as e:
-            raise FileImportError(f"{context}::{e}")
+            raise FileImportError(f"{e}")
 
         if isinstance(json_data, dict):
             json_data = [json_data]
@@ -110,17 +108,17 @@ class FileUtils:
         context = Context()
 
         if len(data) == 0:
-            cls.logger.error(f"{context}::No data to export !")
+            cls.logger.error(f"{context}::No data to export as JSON!")
             return
 
         try:
             full_path = os.path.join(os.getcwd(), filepath)
-            cls.logger.info(f"{context}::Exporting JSON data to {full_path}")
+            cls.logger.info(f"Exporting JSON data to {full_path}")
 
             with open(full_path, "wb") as f:
                 _ = f.write(orjson.dumps(data, option=orjson.OPT_INDENT_2))
 
-            cls.logger.info(f"{context}::Successfully exported JSON data to {full_path}")
+            cls.logger.info(f"Successfully exported JSON data to {full_path}")
 
         except FileExportError as e:
             raise FileExportError(f"{context}::{e}")
@@ -142,8 +140,7 @@ class FileUtils:
             list of dicts: The content of the CSV file parsed into a list of dictionaries.
         """
 
-        context = Context()
-        cls.logger.info(f"{context}::Importing CSV file {filepath}")
+        cls.logger.info(f"Importing CSV file {filepath}")
 
         data: list[Any] = []
         try:
@@ -158,7 +155,7 @@ class FileUtils:
                         delimiter = FileUtils.guess_csv_delimiter(first_line)
 
                     cls.logger.warning(
-                        f"{context}::No delimiter specified, guessed '{delimiter}' as a delimiter"
+                        f"No delimiter specified, guessed '{delimiter}' as a delimiter"
                     )
 
                 reader = csv.DictReader(f, delimiter=delimiter, skipinitialspace=True)
@@ -169,11 +166,11 @@ class FileUtils:
 
                 data = raw_data
 
-            cls.logger.info(f"{context}::Successfully imported data from {filepath}")
-            cls.logger.debug(f"{context}::{data}")
+            cls.logger.info(f"Successfully imported data from {filepath}")
+            cls.logger.debug(f"{data}")
 
         except FileImportError as e:
-            raise FileImportError(f"{context}::{e}")
+            raise FileImportError(f"{e}")
 
         return data
 
@@ -202,11 +199,11 @@ class FileUtils:
 
         context = Context()
 
-        cls.logger.info(f"{context}::Exporting CSV data to {filepath}")
-        cls.logger.debug(f"{context}::{len(data)} elements to export")
+        cls.logger.info(f"Exporting CSV data to {filepath}")
+        cls.logger.debug(f"{len(data)} elements to export")
 
         if len(data) == 0:
-            cls.logger.error(f"{context}::No data to export !")
+            cls.logger.error(f"{context}::No data to export as CSV!")
             return
 
         try:
@@ -226,7 +223,7 @@ class FileUtils:
 
                 writer.writerows(data)
 
-            cls.logger.info(f"{context}::Successfully exported CSV data to {filepath}")
+            cls.logger.info(f"Successfully exported CSV data to {filepath}")
 
         except FileExportError as e:
             raise FileExportError(f"{context}::{e}")
@@ -253,8 +250,7 @@ class FileUtils:
             list: The content of the text file as a list of strings.
         """
 
-        context = Context()
-        cls.logger.info(f"{context}::Importing TXT file {filepath}")
+        cls.logger.info(f"Importing TXT file {filepath}")
 
         data = None
         try:
@@ -271,11 +267,11 @@ class FileUtils:
             if callback is not None:
                 data = callback(data)
 
-            cls.logger.info(f"{context}::Successfully imported TXT data from {filepath}")
-            cls.logger.debug(f"{context}::{data}")
+            cls.logger.info(f"Successfully imported TXT data from {filepath}")
+            cls.logger.debug(f"{Context()}::Imported > {data}")
 
         except FileImportError as e:
-            raise FileImportError(f"{context}::{e}")
+            raise FileImportError(f"{e}")
 
         return data if isinstance(data, list) else [data]
 
@@ -292,6 +288,7 @@ class FileUtils:
         """
 
         context = Context()
+
         if len(data) == 0:
             cls.logger.error(f"{context}::No data to export !")
             return
@@ -308,10 +305,10 @@ class FileUtils:
                     for line in data:
                         _ = f.write(f"{line}" + "\n")
 
-            cls.logger.info(f"{Context()}::Successfully exported TXT data to {filepath}")
+            cls.logger.info(f"Successfully exported{raw and ' raw'} TXT data to {filepath}")
 
         except FileExportError as e:
-            raise FileExportError(f"{context}::{e}")
+            raise FileExportError(f"{e}")
 
     # ****************************************************************
     # Static methods

@@ -84,7 +84,7 @@ class NistConnector(CVEConnector):
                     vuln = vuln[0].get("cve", {})
 
                 else:
-                    self.logger.warning(f"{context}::No data for vulnerability {cve}")
+                    self.logger.warning(f"No data for vulnerability {cve}")
                     continue
 
                 if not raw:

@@ -46,7 +46,6 @@ class EndOfLifeConnector(Connector):
         """
 
         context = Context()
-        self.logger.info(f"{context}::Connecting to {self._target.netloc}")
 
         self._connection = None
 
@@ -56,7 +55,7 @@ class EndOfLifeConnector(Connector):
 
             if req.status_code == 200:
                 self._connection = req.json()
-                self.logger.info(f"{context}::Connected to {self._target.netloc}")
+                self.logger.info(f"Connected to {self._target.netloc}")
 
         except EndOfLifeAPIConnectionError as e:
             raise EndOfLifeAPIConnectionError(

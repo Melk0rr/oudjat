@@ -174,7 +174,6 @@ class LDAPConnector(Connector):
         """
 
         context = Context()
-        self.logger.info(f"{context}::Connecting to {self._target}")
 
         if self._credentials is None:
             raise NoCredentialsError(
@@ -191,7 +190,7 @@ class LDAPConnector(Connector):
 
             except LDAPSocketOpenError as e:
                 if not self._use_tls:
-                    self.logger.warning(f"{context}::Error while trying to connect to LDAP: {e}")
+                    self.logger.warning(f"Error while trying to connect to LDAP: {e}")
 
                 self.connect(version=LDAPTLSVersion.TLSv1)
 
@@ -255,7 +254,7 @@ class LDAPConnector(Connector):
             if ldap_server.schema is None:
                 raise LDAPSchemaError(f"{context}::Failed to get LDAP schema")
 
-        self.logger.info(f"{context}::Bound to {ldap_server}")
+        self.logger.info(f"Bound to {ldap_server}")
 
         self._ldap_server = ldap_server
         self._connection = ldap_connection
@@ -299,7 +298,7 @@ class LDAPConnector(Connector):
                 f"{context}::You must initiate connection to {self.target} before running search !"
             )
 
-        self.logger.info(f"{context}::Fetching {search_type} from {self.domain}")
+        self.logger.info(f"Fetching {search_type} from {self.domain}")
 
         if payload is None:
             payload = {}

@@ -93,7 +93,7 @@ class Mapper:
             # and the constructor does not accept kwargs: continue
             if target_key not in params and "kwargs" not in params:
                 cls.logger.warning(
-                    f"{context}::{target_key} is not accepted by {map_cls.__name__} constructor"
+                    f"{target_key} is not accepted by {map_cls.__name__} constructor"
                 )
                 continue
 

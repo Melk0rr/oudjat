@@ -119,7 +119,6 @@ class TenableSCConnector(Connector):
         """
 
         context = Context()
-        self.logger.info(f"{context}::Connecting to {self._target.netloc}")
 
         if self._credentials is None:
             raise NoCredentialsError(
@@ -133,7 +132,7 @@ class TenableSCConnector(Connector):
                 secret_key=self._credentials.password,
             )
 
-            self.logger.info(f"{context}::Connected to {self._target.netloc}")
+            self.logger.info(f"Connected to {self._target.netloc}")
             self._repos = self._connection.repositories.list()
 
         except TenableSCConnectionError as e:
@@ -146,7 +145,7 @@ class TenableSCConnector(Connector):
         Disconnect from API.
         """
 
-        self.logger.warning(f"{Context()}::Disconnected from {self._target.netloc}")
+        self.logger.warning(f"Disconnected from {self._target.netloc}")
 
         del self._connection
         self._connection = None

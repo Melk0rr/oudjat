@@ -45,8 +45,6 @@ class CVRFDocument:
         if url_resp.status_code != 200:
             raise ConnectionError(f"{context}::Could not connect to {self._url}")
 
-        self.logger.info(f"{context}::{self._url}")
-
         self._content: dict[str, Any] = json.loads(url_resp.content)
         self._products: dict[str, "CVRFProduct"] = {}
         self._vulns: dict[str, "CVRFVuln"] = {}

@@ -176,7 +176,7 @@ class IP:
             self._ports[port.number] = port
 
         else:
-            self.logger.warning(f"{Context()}::{port} is already in the list of {str(self)} open ports")
+            self.logger.warning(f"{str(self)}:{port} is already open")
 
     def remove_port(self, port: int) -> None:
         """

@@ -229,7 +229,7 @@ class CERTFRPage:
         Reset the parsing state of the CERTFRPage instance by setting raw_content, meta, and content to None.
         """
 
-        self.logger.warning(f"{Context()}::Disconnected from {self._link.geturl()}")
+        self.logger.warning(f"Disconnected from {self._link.geturl()}")
 
         self._raw_content = None
         self._meta = None
@@ -289,7 +289,7 @@ class CERTFRPage:
             if kw.lower() in title or kw.lower() in products_str
         }
 
-        self.logger.info(f"{context}::{self._ref} matched {len(matches)} keywords")
+        self.logger.info(f"{self._ref} matched {len(matches)} keywords")
         if len(matches) > 0:
             self.logger.debug(f"{context}::{'\n'.join(matches)}")
 

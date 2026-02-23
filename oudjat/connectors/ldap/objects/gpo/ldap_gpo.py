@@ -5,7 +5,6 @@ import re
 from enum import Enum, IntEnum
 from typing import TYPE_CHECKING, Any, override
 
-from oudjat.utils import Context
 from oudjat.utils.types import StrType
 
 from ...ldap_filter import LDAPFilter
@@ -139,16 +138,14 @@ class LDAPGroupPolicyObject(LDAPObject):
             list["LDAPObject"]: A list of LDAPOrganizationalUnit instances that are linked to the current GPO.
         """
 
-        self.logger.info(f"{Context()}::Retrieving linked object of {self.display_name}")
+        self.logger.info(f"Retrieving linked object of {self.display_name}")
 
         obj_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.OU)
-        LDAPOUCls = obj_opt.cls
-
         obj_filter = LDAPFilter(f"(gPLink={f'*{self._name}*'})") & LDAPFilter.name(ou)
 
         res = {}
         for entry in obj_opt.fetch(search_filter=obj_filter, attributes=attributes):
-            res[entry.dn] = LDAPOUCls(entry, capabilities=self.capabilities)
+            res[entry.dn] = obj_opt.cls(entry, capabilities=self.capabilities)
 
         return res
 

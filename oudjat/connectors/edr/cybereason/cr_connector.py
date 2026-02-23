@@ -115,7 +115,6 @@ class CybereasonConnector(Connector):
         """
 
         context = Context()
-        self.logger.info(f"{context}::Connecting to {self._target.netloc}")
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         session = requests.session()
@@ -131,12 +130,14 @@ class CybereasonConnector(Connector):
                 f"{self._target.geturl()}/login.html", data=creds, headers=headers, verify=True
             )
 
+            self.logger.info(f"Connected to {self._target.netloc}")
+
         except CybereasonAPIConnectionError as e:
             raise CybereasonAPIConnectionError(
                 f"{context}::An error occured while trying to connect to Cybereason API at {self.target.netloc}: {e}"
             )
 
-        self.logger.info(f"{context}::Connected to {self._target.netloc}")
+        self.logger.info(f"Connected to {self._target.netloc}")
         self._connection = session
 
     def disconnect(self) -> None:
@@ -146,7 +147,7 @@ class CybereasonConnector(Connector):
 
         if self._connection is not None:
             self._connection.close()
-            self.logger.warning(f"{Context()}::Connection to {self._target.netloc} is now closed")
+            self.logger.warning(f"Connection to {self._target.netloc} is now closed")
 
     def _endpoint_url(self, endpoint: CybereasonEndpoint) -> str:
         """

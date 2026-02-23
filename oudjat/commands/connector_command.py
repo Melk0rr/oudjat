@@ -2,8 +2,8 @@
 A command module to address some shared behaviors accross connector commands.
 """
 
-from ctypes import ArgumentError
 import logging
+from ctypes import ArgumentError
 from typing import Any, override
 
 from oudjat.connectors.exceptions import ConnectorCredentialError
@@ -40,7 +40,7 @@ class ConnectorCommand(Base):
         context = Context()
 
         self.logger: "logging.Logger" = logging.getLogger(__name__)
-        self.logger.info(f"{context}::Running connector command {self.__cmd_props__.name}")
+        self.logger.info(f"Running connector command {self.__cmd_props__.name}")
 
         if need_credentials and not (
             ("--username" in self.options and "--password" in self.options)
@@ -118,7 +118,7 @@ class ConnectorCommand(Base):
         cmd_usg = self.__cmd_props__.usages[cmd_name]
         args = self._build_cmd_kwargs(cmd_usg.mapping_opts)
 
-        self.logger.info(f"{context}::Command usage > {cmd_name}")
+        self.logger.info(f"Command usage > {cmd_name} - {cmd_usg.option.description}")
 
         if cmd_usg.backend is None:
             raise ConnectorCommandInvalidBackend(

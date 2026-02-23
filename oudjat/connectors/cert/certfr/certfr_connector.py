@@ -66,12 +66,12 @@ class CERTFRConnector(Connector):
             None
         """
 
-        self.logger.info(f"{Context()}::Connecting to {self._target.netloc}")
         try:
             req = ConnectorMethod.GET(self._target.geturl())
 
             if req.status_code == 200:
                 self._connection: bool = True
+                self.logger.info(f"Connected to {self._target.netloc}")
 
         except ConnectionError as e:
             raise ConnectionError(f"{Context()}::Could not connect to {self._target.netloc}\n{e}")
@@ -103,7 +103,7 @@ class CERTFRConnector(Connector):
         search_filter = list(set(search_filter))
 
         for ref in search_filter:
-            self.logger.info(f"{Context()}::Fetching {ref}")
+            self.logger.info(f"Parsint {ref}")
 
             page = CERTFRPage(ref)
             page.connect()

@@ -93,7 +93,6 @@ class SCCMConnector(Connector):
         """
 
         context = Context()
-        self.logger.info(f"{context}::Connecting to {self._target}::{self._database}({self._port})")
 
         if not self._trusted_connection and self._credentials is None:
             raise NoCredentialsError(
@@ -120,7 +119,7 @@ class SCCMConnector(Connector):
             self._connection.setencoding("utf-8")
             self._cursor = self._connection.cursor()
 
-            self.logger.info(f"{context}::Connected to {self._target}::{self._database}({self._port})")
+            self.logger.info(f"Connected to {self._target}::{self._database}({self._port})")
 
         except SCCMServerConnectionError as e:
             raise SCCMServerConnectionError(

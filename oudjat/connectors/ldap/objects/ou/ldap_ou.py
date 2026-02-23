@@ -4,7 +4,6 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, override
 
-from oudjat.utils import Context
 from oudjat.utils.types import StrType
 
 from ..definitions import UUID_REG
@@ -84,7 +83,7 @@ class LDAPOrganizationalUnit(LDAPObject):
             recursive (bool): Whether to retrieve objects recursively or not
         """
 
-        self.logger.info(f"{Context()}::Fetching object of {self.dn}")
+        self.logger.info(f"Fetching object of {self.dn}")
 
         search_args: dict[str, Any] = {"search_base": self.dn}
         entries = self.capabilities.ldap_search(attributes="*", **search_args)
@@ -113,7 +112,7 @@ class LDAPOrganizationalUnit(LDAPObject):
         if len(self.objects.keys()) == 0:
             self.fetch_objects(recursive)
 
-        self.logger.info(f"{Context()}::Retrieving sub OUs of {self.dn}")
+        self.logger.info(f"Retrieving sub OUs of {self.dn}")
 
         return {
             obj_id: obj
@@ -133,7 +132,7 @@ class LDAPOrganizationalUnit(LDAPObject):
         """
 
         cls_msg = f" {object_cls}" if object_cls else ""
-        self.logger.info(f"{Context()}::Retrieving{cls_msg} objects of {self.dn}")
+        self.logger.info(f"Retrieving{cls_msg} objects of {self.dn}")
 
         if len(self.objects.values()) == 0:
             self.fetch_objects()
@@ -163,7 +162,7 @@ class LDAPOrganizationalUnit(LDAPObject):
             dict[str, LDAPObject]: a dictionary of LDAPGroupPolicyObject instances based on the UUIDs in the gpLink attribute
         """
 
-        self.logger.info(f"{Context()}::Retrieving GPO applying to {self.dn}")
+        self.logger.info(f"Retrieving GPO applying to {self.dn}")
 
         gpo_refs = re.findall(UUID_REG, self.gplink)
         if len(gpo_refs) == 0:

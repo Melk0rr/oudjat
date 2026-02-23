@@ -69,7 +69,7 @@ class CredentialUtils:
 
         try:
             keyring.set_password(service, username, password)
-            cls.logger.info(f"{context}::Saved credentials for {service}")
+            cls.logger.info(f"Saved credentials for {service}")
 
         except PasswordSetError as e:
             raise PasswordSetError(
@@ -116,7 +116,7 @@ class CredentialUtils:
         except KeyringError as e:
             raise KeyringError(f"{context}::Could not retrieve credentials for {service}\n{e}")
 
-        cls.logger.info(f"{context}::Retrieved credentials for {service}")
+        cls.logger.info(f"Retrieved credentials for {service}")
         return cred
 
     @classmethod
@@ -138,7 +138,7 @@ class CredentialUtils:
 
         try:
             keyring.delete_password(service, username)
-            cls.logger.info(f"{context}::Deleted credentials for {service}@{username}")
+            cls.logger.info(f"Deleted credentials for {service}@{username}")
 
         except PasswordDeleteError as e:
             raise PasswordDeleteError(

@@ -663,7 +663,7 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
 
         else:
             self.logger.warning(
-                f"{Context()}::A release with same id ({release.id}) already exists for version {key}"
+                f"A release with id ({release.id}) already exists for version {key}"
             )
 
     def get(self, key: str, default_value: Any = None) -> "SoftwareReleaseList[ReleaseType] | None":

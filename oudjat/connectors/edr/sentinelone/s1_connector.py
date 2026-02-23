@@ -288,7 +288,7 @@ class S1Connector(Connector):
             raise NoCredentialsError(f"{context}::No password provided")
 
         if not self._connection:
-            self.logger.info(f"{context}::Connecting to {self._target.netloc} with user API token")
+            self.logger.info(f"Connecting to {self._target.netloc} with user API token")
 
             if self._api_token:
                 try:
@@ -301,11 +301,11 @@ class S1Connector(Connector):
             else:
                 raise NoCredentialsError(f"{context}::No API token provided")
 
-            self.logger.info(f"{context}::Connected to {self._target.netloc}")
+            self.logger.info(f"Connected to {self._target.netloc}")
 
         else:
             self.logger.warning(
-                f"{context}::Connection to {self._target.netloc} is already initialized."
+                f"Connection to {self._target.netloc} is already initialized."
             )
 
     # ****************************************************************

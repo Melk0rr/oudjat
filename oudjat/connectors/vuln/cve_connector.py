@@ -55,8 +55,6 @@ class CVEConnector(Connector, ABC):
         """
 
         context = Context()
-        self.logger.info(f"{context}::Connecting to {target}")
-
         self._connection = None
 
         try:
@@ -68,7 +66,7 @@ class CVEConnector(Connector, ABC):
 
             if req.status_code == 200:
                 self._connection = json.loads(req.content.decode("utf-8"))
-                self.logger.info(f"{context}::Connected to {target}")
+                self.logger.info(f"Connected to {target}")
 
         except CVEDatabaseConnectionError as e:
             raise CVEDatabaseConnectionError(f"{context}::Could not connect to {target}\n{e}")

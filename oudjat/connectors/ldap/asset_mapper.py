@@ -206,7 +206,7 @@ class LDAPAssetMapper(AssetMapper):
             dict[str, LDAPSubnet]: Mapped entries as a dictionary of LDAP ous
         """
 
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPSubnets")
+        self.logger.info(f"Mapping {len(entries)} entries into LDAPSubnets")
 
         def map_net(entry: "LDAPEntry") -> "LDAPSubnet":
             return LDAPSubnet(entry, self._CAPABILITIES)
@@ -276,7 +276,7 @@ class LDAPAssetMapper(AssetMapper):
             dict[str, Computer]: A dictionary of Computer instances
         """
 
-        self.logger.info(f"{Context()}::Mapping {len(entries)} LDAP entries into Computer asset")
+        self.logger.info(f"Mapping {len(entries)} LDAP entries into Computer asset")
 
         if mapping_registry is None:
             mapping_registry = {

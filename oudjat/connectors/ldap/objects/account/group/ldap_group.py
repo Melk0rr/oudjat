@@ -109,10 +109,10 @@ class LDAPGroup(LDAPObject):
         """
 
         context = Context()
-        self.logger.info(f"{context}::Fetching members of {self.dn}{recursive and ' recursively'}")
+        self.logger.info(f"Fetching members of {self.dn}{recursive and ' recursively'}")
 
         for ref in self.member_refs():
-            self.logger.info(f"{context}::Fetching member data for {ref}")
+            self.logger.info(f"Fetching member data for {ref}")
 
             # INFO: Search for the ref in LDAP server
             escaped_ref = escape_filter_chars(ref)
@@ -134,7 +134,7 @@ class LDAPGroup(LDAPObject):
                 self.add_member(new_member)
 
             else:
-                self.logger.warning(f"{context}::Could not find data for {ref}")
+                self.logger.warning(f"Could not find data for {ref}")
 
     def sub_groups(self, recursive: bool = False) -> dict[str, "LDAPGroup"]:
         """
@@ -204,7 +204,7 @@ class LDAPGroup(LDAPObject):
         if len(self.members.keys()) == 0:
             self.fetch_members(recursive=True)
 
-        self.logger.info(f"{Context()}::Flattening members of {self.dn}")
+        self.logger.info(f"Flattening members of {self.dn}")
 
         members = {}
         for member in self.members.values():
