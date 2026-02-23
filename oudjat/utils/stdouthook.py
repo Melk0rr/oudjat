@@ -62,7 +62,7 @@ class StdOutHook:
                     .replace("\033[93m", "")
                     .replace("\033[94m", "")
                     .replace("\033[95m", "")
-                    .replace("\034[21m", "")
+                    .replace("\033[34;21m", "")
                     .replace("\033[0m", "")
                 )
                 _ = file.write(clean_line)
