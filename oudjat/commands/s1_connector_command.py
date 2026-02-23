@@ -150,6 +150,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "agent_name": CmdUsageOpt("--names"),
             },
         ),
+        # Threats
         "--threats": CmdUsage(
             CmdOpt("Retrieve threats detected by S1"),
             "[--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD] [options]",
@@ -159,7 +160,7 @@ class S1ConnectorCommand(ConnectorCommand):
             },
         ),
         "--threats-verdict": CmdUsage(
-            CmdOpt("Change the verdict of filtered threats"),
+            CmdOpt("Change the verdict of filtered threats (threats:malicious / alerts:suspicious)"),
             "[--verdict=VERDICT] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER] [options]",
             {
                 "verdict": CmdUsageOpt("--verdict"),
@@ -172,7 +173,7 @@ class S1ConnectorCommand(ConnectorCommand):
             },
         ),
         "--threats-incident": CmdUsage(
-            CmdOpt("Change the verdict and status of filtered threats"),
+            CmdOpt("Change the verdict and status of filtered threats (threats:malicious / alerts:suspicious)"),
             "[--status=STATUS] [--verdict=VERDICT] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER] [options]",
             {
                 "status": CmdUsageOpt("--status"),
@@ -184,6 +185,34 @@ class S1ConnectorCommand(ConnectorCommand):
                 "file_path": CmdUsageOpt("--path"),
                 "auto": CmdUsageOpt("--auto"),
                 "threat_filter": CmdUsageOpt("--filter"),
+            },
+        ),
+        # Alerts
+        "--alert-verdict": CmdUsage(
+            CmdOpt("Change the verdict of filtered alerts (threats:malicious / alerts:suspicious)"),
+            "[--verdict=VERDICT] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER] [options]",
+            {
+                "verdict": CmdUsageOpt("--verdict"),
+                "alert_ids": CmdUsageOpt("--ids"),
+                "site_ids": CmdUsageOpt("--sites-list"),
+                "status_filter": CmdUsageOpt("--status-filter"),
+                "verdict_filter": CmdUsageOpt("--verdict-filter"),
+                "file_path": CmdUsageOpt("--path"),
+                "alert_filter": CmdUsageOpt("--filter"),
+            },
+        ),
+        "--alert-incident": CmdUsage(
+            CmdOpt("Change the status of filtered alerts (threats:malicious / alerts:suspicious)"),
+            "[--status=STATUS] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER] [options]",
+            {
+                "status": CmdUsageOpt("--status"),
+                "alert_ids": CmdUsageOpt("--ids"),
+                "site_ids": CmdUsageOpt("--sites-list"),
+                "status_filter": CmdUsageOpt("--status-filter"),
+                "verdict_filter": CmdUsageOpt("--verdict-filter"),
+                "file_path": CmdUsageOpt("--path"),
+                "auto": CmdUsageOpt("--auto"),
+                "alert_filter": CmdUsageOpt("--filter"),
             },
         ),
         "--applications": CmdUsage(
@@ -296,6 +325,7 @@ class S1ConnectorCommand(ConnectorCommand):
 
         self.connector: "S1Connector" = S1Connector(**con_args)
 
+        # Retrieve credentials from credential service if provided
         if self._is_opt_present("--creds-service"):
             self.connector.set_creds_from_svc_name(self.options["--creds-service"])
 
