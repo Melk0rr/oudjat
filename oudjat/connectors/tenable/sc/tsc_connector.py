@@ -75,7 +75,7 @@ class TenableSCConnector(Connector):
         self._repos: list[str] | None = None
 
     # ****************************************************************
-    # Methods
+    # Methods - getters/setters
 
     @property
     def repos(self) -> list[str] | None:
@@ -87,6 +87,9 @@ class TenableSCConnector(Connector):
         """
 
         return self._repos
+
+    # ****************************************************************
+    # Methods - helpers
 
     def _severity_filter(self, *severities: int) -> "TSCFilter":
         """
@@ -102,7 +105,9 @@ class TenableSCConnector(Connector):
         severity_str: str = ",".join([f"{Severity.from_score(sev).score}" for sev in severities])
         return (*TSCBuiltinFilter.VULNS_CRITICAL.value[:2], severity_str)
 
-    # INFO: Base connector methods
+    # ****************************************************************
+    # Methods - access
+
     @override
     def connect(self) -> None:
         """
@@ -209,12 +214,13 @@ class TenableSCConnector(Connector):
         return res
 
     # ****************************************************************
-    # Methods: Vulns
+    # Methods - vulns
 
     def vulns(
         self,
         *severities: int,
         tool: "TSCVulnTool" = TSCVulnTool.VULNDETAILS,
+        product: str | None = None,
         exploitable: bool = True,
         filters: list["TSCFilter"] | None = None,
         payload: dict[str, Any] | None = None,
@@ -225,6 +231,7 @@ class TenableSCConnector(Connector):
         Args:
             severities (int)                : Vuln severities to include
             tool (TSCVulnTool)              : Tool to use for the search
+            product (str)                   : A specific product name to search (e.g. openssl)
             exploitable (bool)              : Wheither to search only for exploitable vulnerabilities or not
             filters (list[TSCFilter] | None): Additional filters that will be passed to the final query
             payload (dict[str, Any] | None) : Payload to send to the endpoint
@@ -244,11 +251,14 @@ class TenableSCConnector(Connector):
         if exploitable:
             filters.append(TSCBuiltinFilter.VULNS_EXPLOITABLE.value)
 
+        if product:
+            filters.append(("pluginName", "=", product))
+
         filters.append(self._severity_filter(*severities))
         return self.fetch(endpoint=TSCEndpoint.VULNS, filters=filters, payload=payload)
 
     # ****************************************************************
-    # Methods: Asset lists
+    # Methods - asset lists
 
     def asset_lists_create(
         self,
@@ -381,7 +391,7 @@ class TenableSCConnector(Connector):
     # TODO: Edit asset list
 
     # ****************************************************************
-    # Methods: Scans
+    # Methods - scans
 
     def scans(
         self,
