@@ -225,6 +225,7 @@ class DocBuilder:
             description (str): The description of the option
             arg (str | None) : The option argument if any
             short(str | None): The shortname of the option if any - basically a single letter like -u
+            default (Any)    : The default value of the option
         """
 
         context = Context()
