@@ -139,6 +139,9 @@ class ConnectorCommand(Base):
         if self.options["--json"]:
             FileUtils.export_json(data, self.options["--json"])
 
+        if self.options["--print"]:
+            print(data)
+
     @staticmethod
     def _gen_doc(program: str, cmd_hub: "CmdProps", description: str = "") -> "DocBuilder":
         """
