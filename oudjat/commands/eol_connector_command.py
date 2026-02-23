@@ -107,7 +107,7 @@ class EOLConnectorCommand(ConnectorCommand):
 
     def __init__(self, options: dict[str, Any]) -> None:
         """
-        Create a new S1ConnectorCommand.
+        Create a new EOLConnectorCommand.
 
         Args:
             options (dict[str, Any]): Provided options

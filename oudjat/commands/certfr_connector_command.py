@@ -83,7 +83,7 @@ class CERTFRConnectorCommand(ConnectorCommand):
 
     def __init__(self, options: dict[str, Any]) -> None:
         """
-        Create a new S1ConnectorCommand.
+        Create a new CERTFRConnectorCommand.
 
         Args:
             options (dict[str, Any]): Provided options
