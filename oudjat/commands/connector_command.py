@@ -3,6 +3,7 @@ A command module to address some shared behaviors accross connector commands.
 """
 
 from ctypes import ArgumentError
+import logging
 from typing import Any, override
 
 from oudjat.connectors.exceptions import ConnectorCredentialError
@@ -37,6 +38,9 @@ class ConnectorCommand(Base):
 
         super().__init__(options)
         context = Context()
+
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
+        self.logger.info(f"{context}::Running connector command {self.__cmd_props__.name}")
 
         if need_credentials and not (
             ("--username" in self.options and "--password" in self.options)
@@ -111,22 +115,24 @@ class ConnectorCommand(Base):
 
         # Prepare the command
         cmd_name = self._find_cmd_name()
-        cmd_opt = self.__cmd_props__.usages[cmd_name]
-        args = self._build_cmd_kwargs(cmd_opt.mapping_opts)
+        cmd_usg = self.__cmd_props__.usages[cmd_name]
+        args = self._build_cmd_kwargs(cmd_usg.mapping_opts)
 
-        if cmd_opt.backend is None:
+        self.logger.info(f"{context}::Command usage > {cmd_name}")
+
+        if cmd_usg.backend is None:
             raise ConnectorCommandInvalidBackend(
                 f"{context}::No backend function defined for {cmd_name} command."
             )
 
-        req_params = Mapper.required_params(Mapper.signature_params(cmd_opt.backend))
+        req_params = Mapper.required_params(Mapper.signature_params(cmd_usg.backend))
 
         # Check if no required parameters were ommited
         if not bool(set(args.keys()) & req_params) and len(req_params) > 0:
             raise ArgumentError(f"{context}::{cmd_name} command requires {list(req_params)}")
 
         # Run the command
-        data = cmd_opt.backend(**args)
+        data = cmd_usg.backend(**args)
 
         # Post operations
         if self.options["--csv"]:

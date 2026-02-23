@@ -95,7 +95,6 @@ class CredentialUtils:
         """
 
         context = Context()
-        cls.logger.info(f"{context}::Retrieving credentials for {service}")
 
         try:
             cred = keyring.get_credential(service, "")
@@ -115,10 +114,9 @@ class CredentialUtils:
                 cred = SimpleCredential(cred.username, cred.password)
 
         except KeyringError as e:
-            raise KeyringError(
-                f"{context}::An error occured while retreiving credentials for {service}\n{e}"
-            )
+            raise KeyringError(f"{context}::Could not retrieve credentials for {service}\n{e}")
 
+        cls.logger.info(f"{context}::Retrieved credentials for {service}")
         return cred
 
     @classmethod
