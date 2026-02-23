@@ -118,7 +118,7 @@ class S1ConnectorCommand(ConnectorCommand):
             "Specify an incident analyst verdict to an alert or a threat",
             arg="VERDICT",
         ),
-        "--verdict-filters": CmdOpt(
+        "--verdict-filter": CmdOpt(
             "a list of incident statuses for alert/threat selection",
             arg="VERDICTFILTER",
             transform=lambda opt, v: v.split(","),
@@ -355,6 +355,8 @@ class S1ConnectorCommand(ConnectorCommand):
                 "--threats": self.connector.threats,
                 "--threats-verdict": self.connector.threat_verdict,
                 "--threats-incident": self.connector.threat_incident,
+                "--alert-verdict": self.connector.alert_verdict,
+                "--alert-incident": self.connector.alert_incident,
                 "--applications": self.connector.applications,
                 "--applications-with-risks": self.connector.applications_with_risks,
                 "--applications-cves": self.connector.application_cves,
