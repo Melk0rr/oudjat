@@ -761,7 +761,11 @@ class S1Connector(Connector):
         if site_ids is not None:
             threat_filter["siteIds"] = self._unify_str_list(site_ids)
 
-        self._update_filter_status(threat_filter, status_filter, S1IncidentType.THREAT, )
+        self._update_filter_status(
+            threat_filter,
+            status_filter,
+            S1IncidentType.THREAT,
+        )
         self._update_filter_verdict(threat_filter, verdict_filter, S1IncidentType.THREAT)
 
         if "limit" not in threat_filter:
@@ -784,17 +788,13 @@ class S1Connector(Connector):
             while True:
                 q = self.fetch(S1Endpoint.THREATS_INCIDENT, payload)
 
-                if q[0]["affected"] == 0:
+                if next(iter(q))["affected"] == 0:
                     break
 
                 res.extend(q)
 
         else:
-            res.extend(
-                self.fetch(
-                    S1Endpoint.THREATS_INCIDENT, {"filter": threat_filter, "data": input_data}
-                )
-            )
+            res.extend(self.fetch(S1Endpoint.THREATS_INCIDENT, payload))
 
         return res
 
