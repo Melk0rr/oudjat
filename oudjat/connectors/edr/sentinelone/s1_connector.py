@@ -195,12 +195,14 @@ class S1Connector(Connector):
             if not isinstance(statuses, list):
                 statuses = [statuses]
 
-            statuses = list(set(map(self._unify_status, statuses)))
+            unified_statuses = list(set(map(self._unify_status, statuses)))
 
-            if len(statuses) > 0:
+            if len(unified_statuses) > 0:
                 prop = filter_props[incident_type][exclude]
-                incident_filter[prop] = (
-                    statuses if incident_type is S1IncidentType.THREAT else next(iter(statuses))
+                incident_filter[prop] = self._unify_str_list(
+                    unified_statuses
+                    if incident_type is S1IncidentType.THREAT
+                    else next(iter(unified_statuses))
                 )
 
     def _update_filter_verdict(
@@ -232,12 +234,14 @@ class S1Connector(Connector):
             if not isinstance(verdicts, list):
                 verdicts = [verdicts]
 
-            verdicts = list(set(map(self._unify_verdict, verdicts)))
+            unified_verdicts: list[str] = list(set(map(self._unify_verdict, verdicts)))
 
-            if len(verdicts) > 0:
+            if len(unified_verdicts) > 0:
                 prop = filter_props[incident_type][exclude]
-                incident_filter[prop] = (
-                    verdicts if incident_type is S1IncidentType.THREAT else next(iter(verdicts))
+                incident_filter[prop] = self._unify_str_list(
+                    unified_verdicts
+                    if incident_type is S1IncidentType.THREAT
+                    else next(iter(unified_verdicts))
                 )
 
     # ****************************************************************
@@ -304,9 +308,7 @@ class S1Connector(Connector):
             self.logger.info(f"Connected to {self._target.netloc}")
 
         else:
-            self.logger.warning(
-                f"Connection to {self._target.netloc} is already initialized."
-            )
+            self.logger.warning(f"Connection to {self._target.netloc} is already initialized.")
 
     # ****************************************************************
     # Methods - main
