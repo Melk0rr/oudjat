@@ -41,7 +41,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
             CmdOpt("Retrieve vulnerabilities that match the provided severities and filters"),
             "--vulns [--severities=SEVERITIES]",
             {
-                "": CmdUsageOpt("--sites-list"),
+                "*severities": CmdUsageOpt("--severities"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),

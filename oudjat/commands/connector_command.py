@@ -105,6 +105,26 @@ class ConnectorCommand(Base):
 
         return next(filter(cmd_in_options, self.__cmd_props__.usages.keys()))
 
+    def _prepare_backend(
+        self, mapped_args: dict[str, Any]
+    ) -> tuple[tuple[Any] | list[Any], dict[str, Any]]:
+
+        args = []
+        kwargs = {}
+
+        for key, value in mapped_args.items():
+            if key.startswith("*"):
+                if isinstance(value, (list, tuple)):
+                    args.extend(value)
+
+                else:
+                    args.append(value)
+
+            else:
+                kwargs[key] = value
+
+        return (args, kwargs)
+
     @override
     def run(self) -> None:
         """
@@ -132,7 +152,8 @@ class ConnectorCommand(Base):
             raise ArgumentError(f"{context}::{cmd_name} command requires {list(req_params)}")
 
         # Run the command
-        data = cmd_usg.backend(**args)
+        args, kwargs = self._prepare_backend(args)
+        data = cmd_usg.backend(*args, **kwargs)
 
         # Post operations
         if self.options["--csv"]:

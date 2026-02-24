@@ -161,6 +161,7 @@ class CmdProps:
             usg = self.usages[k]
             usg.usage_str = f"{prepend_str} {usg.usage_str}"
 
+
 CmdMappingCallback: TypeAlias = Callable[[str, Any], Any]
 CmdOptRegistry: TypeAlias = dict[str, "CmdOpt"]
 CmdOptUsageRegistry: TypeAlias = dict[str, "CmdUsageOpt"]
@@ -238,7 +239,7 @@ class Base:
 
         return bool(self.options.get(opt) or False)
 
-    def _unify_str_opt(self, str_opt: str, file_opt: str | None = None) -> list[str]:
+    def _unify_str_opt(self, str_opt: str) -> list[str]:
         """
         Unify option case where a list of information can be passed either as a string, a list of strings or a txt file.
 
@@ -250,13 +251,20 @@ class Base:
             list[str]: A cleaned list of strings
         """
 
-        args = (
-            FileUtils.import_txt(filepath=self.options[file_opt])
-            if (file_opt and self.options[file_opt])
-            else self.options[str_opt].split(",")
-        )
+        values = []
 
-        return list(filter(None, args))
+        if self.options[str_opt].startwith("@"):
+            path = self.options[str_opt][1:]
+
+            if not FileUtils.check_path(path):
+                raise FileNotFoundError(f"{Context()}::Could not find {path}")
+
+            values = [v.strip() for v in FileUtils.import_txt(path)]
+
+        else:
+            values = [v.strip() for v in self.options[str_opt].split(",")]
+
+        return list(filter(None, values))
 
     def run(self) -> None:
         """
