@@ -11,7 +11,7 @@ class S1AnalystVerdict(Enum):
     A simple enumeration of available Sentinel One analyst verdicts.
     """
 
-    UNDEFINED = "undefinded"
+    UNDEFINED = "undefined"
     FALSE_POSITIVE = "false_positive"
     TRUE_POSITIVE = "true_positive"
     SUSPICIOUS = "suspicious"
