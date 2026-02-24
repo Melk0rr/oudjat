@@ -114,7 +114,7 @@ class Mapper:
         cls,
         record: dict[str, Any],
         map_cls: type[Any],
-        mapping_registry: "MappingRegistry" | list["MappingRegistry"],
+        mapping_registry: "MappingRegistry | list[MappingRegistry]",
         callback: "MappingCallback | None" = None,
     ) -> Any:
         """
@@ -131,6 +131,7 @@ class Mapper:
         """
 
         cls.logger.debug(f"{Context()}::Mapping {record} > {map_cls.__name__} : {mapping_registry}")
+
         if isinstance(mapping_registry, list):
             mapping_registry = cls._merge_registries(mapping_registry)
 
