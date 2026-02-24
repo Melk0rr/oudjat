@@ -140,38 +140,52 @@ class S1Connector(Connector):
 
         return r_params
 
-    def _unify_status(self, s: "str | S1IncidentStatus") -> str:
+    def _unify_status(
+        self, s: "str | S1IncidentStatus", incident_type: "S1IncidentType" = S1IncidentType.THREAT
+    ) -> str:
         """
         Unify incident status type into a valid string.
 
         Args:
-            s (str | S1IncidentStatus): Incident status to unify
+            s (str | S1IncidentStatus)    : Incident status to unify
+            incident_type (S1IncidentType): The type of incident
 
         Returns:
             str: A valid S1 incident status string value
         """
 
-        return str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
+        if incident_type is S1IncidentType.THREAT:
+            return str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
 
-    def _unify_verdict(self, v: "str | S1AnalystVerdict") -> str:
+        else:
+            return s.name if isinstance(s, S1IncidentStatus) else S1IncidentStatus[s.upper()].name
+
+    def _unify_verdict(
+        self, v: "str | S1AnalystVerdict", incident_type: "S1IncidentType" = S1IncidentType.THREAT
+    ) -> str:
         """
         Unify incident analyst verdict type into a valid string.
 
         Args:
-            v (str | S1AnalystVerdict): Incident analyst verdict to unify
+            v (str | S1AnalystVerdict)    : Incident analyst verdict to unify
+            incident_type (S1IncidentType): The type of incident
 
         Returns:
             str: A valid S1 incident analyst verdict string value
         """
 
-        return str(v) if isinstance(v, S1AnalystVerdict) else str(S1AnalystVerdict[v.upper()])
+        if incident_type is S1IncidentType.THREAT:
+            return str(v) if isinstance(v, S1AnalystVerdict) else str(S1AnalystVerdict[v.upper()])
+
+        else:
+            return v.name if isinstance(v, S1AnalystVerdict) else S1AnalystVerdict[v.upper()].name
 
     def _update_filter_status(
         self,
         incident_filter: dict[str, Any],
         statuses: "S1IncidentStatusType | None",
         incident_type: "S1IncidentType",
-        exclude: bool = True,
+        exclude: bool = False,
     ) -> None:
         """
         Unify an incident status value into a valid status string.
@@ -195,7 +209,9 @@ class S1Connector(Connector):
             if not isinstance(statuses, list):
                 statuses = [statuses]
 
-            unified_statuses = list(set(map(self._unify_status, statuses)))
+            unified_statuses = list(
+                set(map(lambda s: self._unify_status(s, incident_type), statuses))
+            )
 
             if len(unified_statuses) > 0:
                 prop = filter_props[incident_type][exclude]
@@ -210,7 +226,7 @@ class S1Connector(Connector):
         incident_filter: dict[str, Any],
         verdicts: "S1AnalystVerdictType | None",
         incident_type: "S1IncidentType",
-        exclude: bool = True,
+        exclude: bool = False,
     ) -> None:
         """
         Unify an incident status value into a valid status string.
@@ -234,7 +250,9 @@ class S1Connector(Connector):
             if not isinstance(verdicts, list):
                 verdicts = [verdicts]
 
-            unified_verdicts: list[str] = list(set(map(self._unify_verdict, verdicts)))
+            unified_verdicts: list[str] = list(
+                set(map(lambda v: self._unify_verdict(v, incident_type), verdicts))
+            )
 
             if len(unified_verdicts) > 0:
                 prop = filter_props[incident_type][exclude]
@@ -758,7 +776,11 @@ class S1Connector(Connector):
         if site_ids is not None:
             threat_filter["siteIds"] = self._unify_str_list(site_ids)
 
-        self._update_filter_status(threat_filter, status_filter, S1IncidentType.THREAT)
+        self._update_filter_status(
+            threat_filter,
+            status_filter,
+            S1IncidentType.THREAT,
+        )
         self._update_filter_verdict(threat_filter, verdict_filter, S1IncidentType.THREAT)
 
         if file_path is not None:
