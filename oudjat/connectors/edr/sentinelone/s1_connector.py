@@ -140,45 +140,31 @@ class S1Connector(Connector):
 
         return r_params
 
-    def _unify_status(
-        self, s: "str | S1IncidentStatus", incident_type: "S1IncidentType" = S1IncidentType.THREAT
-    ) -> str:
+    def _unify_status(self, s: "str | S1IncidentStatus") -> str:
         """
         Unify incident status type into a valid string.
 
         Args:
-            s (str | S1IncidentStatus)    : Incident status to unify
-            incident_type (S1IncidentType): The type of incident
+            s (str | S1IncidentStatus): Incident status to unify
 
         Returns:
             str: A valid S1 incident status string value
         """
 
-        if incident_type is S1IncidentType.THREAT:
-            return str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
+        return str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
 
-        else:
-            return s.name if isinstance(s, S1IncidentStatus) else S1IncidentStatus[s.upper()].name
-
-    def _unify_verdict(
-        self, v: "str | S1AnalystVerdict", incident_type: "S1IncidentType" = S1IncidentType.THREAT
-    ) -> str:
+    def _unify_verdict(self, v: "str | S1AnalystVerdict") -> str:
         """
         Unify incident analyst verdict type into a valid string.
 
         Args:
-            v (str | S1AnalystVerdict)    : Incident analyst verdict to unify
-            incident_type (S1IncidentType): The type of incident
+            v (str | S1AnalystVerdict): Incident analyst verdict to unify
 
         Returns:
             str: A valid S1 incident analyst verdict string value
         """
 
-        if incident_type is S1IncidentType.THREAT:
-            return str(v) if isinstance(v, S1AnalystVerdict) else str(S1AnalystVerdict[v.upper()])
-
-        else:
-            return v.name if isinstance(v, S1AnalystVerdict) else S1AnalystVerdict[v.upper()].name
+        return str(v) if isinstance(v, S1AnalystVerdict) else str(S1AnalystVerdict[v.upper()])
 
     def _update_filter_status(
         self,
@@ -209,9 +195,7 @@ class S1Connector(Connector):
             if not isinstance(statuses, list):
                 statuses = [statuses]
 
-            unified_statuses = list(
-                set(map(lambda s: self._unify_status(s, incident_type), statuses))
-            )
+            unified_statuses = list(set(map(self._unify_status, statuses)))
 
             if len(unified_statuses) > 0:
                 prop = filter_props[incident_type][exclude]
@@ -250,9 +234,7 @@ class S1Connector(Connector):
             if not isinstance(verdicts, list):
                 verdicts = [verdicts]
 
-            unified_verdicts: list[str] = list(
-                set(map(lambda v: self._unify_verdict(v, incident_type), verdicts))
-            )
+            unified_verdicts: list[str] = list(set(map(self._unify_verdict, verdicts)))
 
             if len(unified_verdicts) > 0:
                 prop = filter_props[incident_type][exclude]
@@ -718,6 +700,9 @@ class S1Connector(Connector):
         self._update_filter_status(threat_filter, status_filter, S1IncidentType.THREAT)
         self._update_filter_verdict(threat_filter, verdict_filter, S1IncidentType.THREAT)
 
+        if "limit" not in threat_filter:
+            threat_filter["limit"] = 1000
+
         if file_path is not None:
             threat_filter["filePath__contains"] = self._unify_str_list(file_path)
 
@@ -776,12 +761,11 @@ class S1Connector(Connector):
         if site_ids is not None:
             threat_filter["siteIds"] = self._unify_str_list(site_ids)
 
-        self._update_filter_status(
-            threat_filter,
-            status_filter,
-            S1IncidentType.THREAT,
-        )
+        self._update_filter_status(threat_filter, status_filter, S1IncidentType.THREAT, )
         self._update_filter_verdict(threat_filter, verdict_filter, S1IncidentType.THREAT)
+
+        if "limit" not in threat_filter:
+            threat_filter["limit"] = 1000
 
         if file_path is not None:
             threat_filter["filePath__contains"] = self._unify_str_list(file_path)
