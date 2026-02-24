@@ -9,7 +9,6 @@ from oudjat.connectors.mapping_functions import MappingFunction
 from oudjat.core.computer.computer import Computer
 from oudjat.core.software.os.operating_system import OSReleaseListFilter
 from oudjat.core.user.user import User
-from oudjat.utils import Context
 
 from ..asset_mapper import AssetMapper, MappingOSTuple
 from .ldap_connector import LDAPConnector
