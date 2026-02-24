@@ -84,7 +84,18 @@ class LDAPObject:
             str: The distinguished name (DN) of the LDAP object.
         """
 
-        return self.entry.dn
+        return self.entry.get("dn")
+
+    @property
+    def id(self) -> str:
+        """
+        Return the GUID of the current LDAP entry.
+
+        Returns:
+            str: object GUID string
+        """
+
+        return self.entry.get("objectGUID")
 
     @property
     def sid(self) -> str:
