@@ -5,8 +5,6 @@ A helper module to handle __doc__ and docopt strings.
 from dataclasses import dataclass
 from typing import Any, override
 
-from oudjat.utils import Context
-
 
 @dataclass
 class DocOption:
@@ -228,19 +226,17 @@ class DocBuilder:
             default (Any)    : The default value of the option
         """
 
-        context = Context()
-
         if name.lower() == name.upper():
-            raise ValueError(f"{context}::Invalid option name provided")
+            raise ValueError("Invalid option name provided")
 
         if "-" not in name:
             name = f"--{name}"
 
         if short and (short.lower() == short.upper()):
-            raise ValueError(f"{context}::Invalid option shortname provided")
+            raise ValueError("Invalid option shortname provided")
 
         if short is not None and (len(short) > 2 or len(short.replace("-", "")) != 1):
-            raise ValueError(f"{context}::Option shortname must be a single character")
+            raise ValueError("Option shortname must be a single character")
 
         if short and "-" not in short:
             short = f"-{short}"
