@@ -118,13 +118,6 @@ class EOLConnectorCommand(ConnectorCommand):
         self.connector: "EndOfLifeConnector" = EndOfLifeConnector()
         self.connector.connect()
 
-        # Options transform based on instance
-        self.__cmd_props__.opts_transform(
-            {
-                "--full": lambda opt, _: self._is_opt_present(opt),
-            }
-        )
-
         # Usage backends
         self.__cmd_props__.backends(
             {
