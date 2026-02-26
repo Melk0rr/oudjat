@@ -4,11 +4,8 @@ A command module to handle interactions to Sentinel One API through the dedicate
 
 from typing import Any
 
-import orjson
-
 from oudjat.connectors.edr.sentinelone import S1Connector
 from oudjat.utils.doc_builder import DocBuilder
-from oudjat.utils.string_utils import StringUtils
 
 from .base import CmdOpt, CmdProps, CmdUsage, CmdUsageOpt
 from .connector_command import ConnectorCommand
@@ -28,33 +25,17 @@ class S1ConnectorCommand(ConnectorCommand):
     )
 
     __cmd_props__.options = {
-        "--target": CmdOpt(
-            "Specify the SentinelOne URL to query",
-            short="t",
-            arg="TARGET",
-        ),
-        "--username": CmdOpt(
-            "The username used for authentication",
-            short="u",
-            arg="USER",
-        ),
-        "--password": CmdOpt(
-            "The password used for authentication",
-            short="p",
-            arg="PASS",
+        "--auto": CmdOpt(
+            "Trigger auto mode. See the doc for full usage details",
         ),
         "--creds-service": CmdOpt(
             "A credential service name to retrieve username and password from",
             short="c",
             arg="SERVICE",
         ),
-        "--auto": CmdOpt(
-            "Trigger auto mode. See the doc for full usage details",
-        ),
         "--filter": CmdOpt(
             "Provide a JSON filter to narrow down selection",
             arg="FILTER",
-            transform=lambda _, v: orjson.loads(StringUtils.jsonify(v)),
         ),
         "--ids": CmdOpt(
             "A list of IDs to narrow down selection. See the doc for full usage details",
@@ -68,6 +49,11 @@ class S1ConnectorCommand(ConnectorCommand):
             "A list of names to narrow down selection",
             arg="NAMES",
         ),
+        "--password": CmdOpt(
+            "The password used for authentication",
+            short="p",
+            arg="PASS",
+        ),
         "--path": CmdOpt(
             "A path of a file or process to narrow down selection",
             arg="PATH",
@@ -75,7 +61,6 @@ class S1ConnectorCommand(ConnectorCommand):
         "--payload": CmdOpt(
             "A JSON payload to pass additional query parameters",
             arg="PAYLOAD",
-            transform=lambda _, v: orjson.loads(StringUtils.jsonify(v)),
         ),
         "--sites": CmdOpt(
             "A list of site IDs or names",
@@ -88,11 +73,20 @@ class S1ConnectorCommand(ConnectorCommand):
         "--status-filter": CmdOpt(
             "A list of incident statuses for alert/threat selection",
             arg="STATUSFILTER",
-            transform=lambda opt, v: v.split(","),
         ),
         "--suspicious-policy": CmdOpt(
             "Specify the suspicious policy for a group or agent",
             arg="SUPOLICY",
+        ),
+        "--target": CmdOpt(
+            "Specify the SentinelOne URL to query",
+            short="t",
+            arg="TARGET",
+        ),
+        "--username": CmdOpt(
+            "The username used for authentication",
+            short="u",
+            arg="USER",
         ),
         "--vendors": CmdOpt(
             "A list of application vendor for CVEs/application selection",
@@ -105,7 +99,6 @@ class S1ConnectorCommand(ConnectorCommand):
         "--verdict-filter": CmdOpt(
             "a list of incident statuses for alert/threat selection",
             arg="VERDICTFILTER",
-            transform=lambda opt, v: v.split(","),
         ),
     }
 
@@ -325,9 +318,13 @@ class S1ConnectorCommand(ConnectorCommand):
             {
                 "--auto": lambda opt, _: self._is_opt_present(opt),
                 "--ids": lambda opt, _: self._unify_str_opt(opt),
+                "--filter": lambda _, v: self._parse_payload(v),
                 "--names": lambda opt, _: self._unify_str_opt(opt),
+                "--payload": lambda _, v: self._parse_payload(v),
                 "--sites": lambda opt, _: self._unify_str_opt(opt),
+                "--status-filter": lambda _, v: self._unify_str_opt(v),
                 "--vendors": lambda opt, _: self._unify_str_opt(opt),
+                "--verdict-filter": lambda _, v: self._unify_str_opt(v),
             }
         )
 
