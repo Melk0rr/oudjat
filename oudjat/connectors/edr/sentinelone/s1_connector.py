@@ -9,17 +9,14 @@ from urllib.parse import ParseResult, urlparse
 
 import requests
 
-from oudjat.connectors.edr.sentinelone.s1_incident_types import S1IncidentType
-from oudjat.utils import FileUtils
-from oudjat.utils.context import Context
-from oudjat.utils.credentials import NoCredentialsError
-from oudjat.utils.types import DataType, StrType
+from oudjat.utils import Context, DataType, FileUtils, NoCredentialsError, StrType
 
 from ... import Connector, ConnectorMethod
 from .exceptions import SentinelOneAPIConnectionError, SentinelOneEndpointFormatError
 from .s1_analyst_verdicts import S1AnalystVerdict
 from .s1_endpoints import S1Endpoint
 from .s1_incident_statuses import S1IncidentStatus
+from .s1_incident_types import S1IncidentType
 from .s1_mitigation_modes import S1MitigationMode
 
 S1IncidentStatusType: TypeAlias = "str | S1IncidentStatus | list[str | S1IncidentStatus]"
