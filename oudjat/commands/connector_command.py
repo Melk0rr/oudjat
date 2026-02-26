@@ -8,6 +8,7 @@ from typing import Any, override
 
 from oudjat.connectors.exceptions import ConnectorCredentialError
 from oudjat.core.mapper import Mapper
+from oudjat.utils import UtilsDict
 from oudjat.utils.context import Context
 from oudjat.utils.doc_builder import DocBuilder
 from oudjat.utils.file_utils import FileUtils
@@ -51,7 +52,7 @@ class ConnectorCommand(Base):
             )
 
     # ****************************************************************
-    # Methods
+    # Methods - helpers
 
     def _resolve_arg_value(self, val: str) -> Any:
         """
@@ -125,6 +126,10 @@ class ConnectorCommand(Base):
 
         return (args, kwargs)
 
+    # ****************************************************************
+    # Methods - main
+
+    # TODO: Allow multiple command execution
     @override
     def run(self) -> None:
         """
@@ -155,6 +160,9 @@ class ConnectorCommand(Base):
         args, kwargs = self._prepare_backend(args)
         data = cmd_usg.backend(*args, **kwargs)
 
+        if self.options["--key-filter"]:
+            data = [UtilsDict.filter_keys(d, self.options["--key-filter"]) for d in data]
+
         # Post operations
         if self.options["--csv"]:
             if not isinstance(self.options["--csv"], list):
@@ -169,6 +177,8 @@ class ConnectorCommand(Base):
         if self.options["--print"]:
             print(data)
 
+    # ****************************************************************
+    # Static methods
     @staticmethod
     def _gen_doc(program: str, cmd_hub: "CmdProps", description: str = "") -> "DocBuilder":
         """
@@ -188,7 +198,7 @@ class ConnectorCommand(Base):
         builder.add_command(cmd_hub.name, cmd_hub.description)
 
         for opt_k, opt in cmd_hub.options.items():
-            builder.add_option(opt_k, opt.description, opt.arg, opt.short)
+            builder.add_option(opt_k, opt.description, opt.arg, opt.short, default=opt.default)
 
         for usg_k, usg in cmd_hub.usages.items():
             builder.add_option(usg_k, usg.option.description, usg.option.arg, usg.option.short)
