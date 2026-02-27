@@ -581,6 +581,7 @@ class LDAPConnector(Connector):
 
     # ****************************************************************
     # Methods - core
+    # TODO: Change return type to DataType
 
     def objects(
         self,
@@ -590,11 +591,14 @@ class LDAPConnector(Connector):
         payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
-        Specific method to retrieve LDAP User instances.
+        Return generic LDAP object data.
+
+        Filters no object class nor categories.
+        First convert found entries into LDAPObject instances to compute some values.
 
         Args:
-            search_filter (str)            : Filter to reduce search results
-            attributes (str | list[str])   : Attributes to include in result
+            search_filter (str)            : LDAP Filter to reduce search results
+            attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
             payload (dict[str, Any] | None): Payload to send to the server
 
@@ -625,9 +629,11 @@ class LDAPConnector(Connector):
         """
         Specific method to retrieve LDAP Computer instances.
 
+        First convert found entries into LDAPComputer instances to compute some values.
+
         Args:
-            search_filter (str)            : filter to reduce search results
-            attributes (str | list[str])   : attributes to include in result
+            search_filter (str)            : LDAP Filter to reduce search results
+            attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : where to base the search on in terms of directory location
             payload (dict[str, Any] | None): Payload to send to the server
 
@@ -662,8 +668,8 @@ class LDAPConnector(Connector):
         First convert the found entries into LDAPUser instances in order to compute some values.
 
         Args:
-            search_filter (str)            : Filter to reduce search results
-            attributes (str | list[str])   : Attributes to include in result
+            search_filter (str)            : LDAP Filter to reduce search results
+            attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
             payload (dict[str, Any] | None): Payload to send to the server
             extension_attr (bool)          : Whether to include extension attributes
@@ -695,6 +701,7 @@ class LDAPConnector(Connector):
 
         return {d["dn"]: d for d in list(map(_usr_dict, entries))}
 
+    # TODO: Add more options to retrieve different levels of members.
     def groups(
         self,
         search_filter: "LDAPFilter | str | None" = None,
@@ -703,11 +710,13 @@ class LDAPConnector(Connector):
         payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
-        Specific method to retrieve LDAP group objects.
+        Return LDAP group data.
+
+        First convert found entries into LDAPGroup instances to compute some values.
 
         Args:
-            search_filter (str)            : Filter to reduce search results
-            attributes (str | list[str])   : Attrbutes to include in result
+            search_filter (str)            : LDAP Filter to reduce search results
+            attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
             payload (dict[str, Any] | None): Payload to send to the server
 
@@ -736,11 +745,13 @@ class LDAPConnector(Connector):
         payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
-        Specific method to retrieve LDAP GPO instances.
+        Return GPOs data.
+
+        First convert found entries into LDAPGroupPolicyObject instances to compute some values.
 
         Args:
             displayName (str)              : GPO display name
-            name (StrType)                 : GPO name
+            name (StrType)                 : GPO name (link)
             attributes (str | list[str])   : Attributes to include in result
             payload (dict[str, Any] | None): Payload to send to the server
 
@@ -779,12 +790,14 @@ class LDAPConnector(Connector):
         payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
-        Specific method to retrieve LDAP organizational unit objects.
+        Return OU data.
+
+        First convert found entries into LDAPOrganizationalUnit instances to compute some values.
 
         Args:
             dn (str):                      : Optional distinguished name to search
-            search_filter (str)            : Filter to reduce search results
-            attributes (str | list[str])   : Attrbutes to include in result
+            search_filter (str)            : LDAP Filter to reduce search results
+            attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
             payload (dict[str, Any] | None): Payload to send to the server
 
@@ -812,11 +825,13 @@ class LDAPConnector(Connector):
         payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
-        Specific method to retrieve LDAP subnet instances.
+        Return LDAP subnet data.
+
+        First convert found entries into LDAPSubnet instances to compute some values.
 
         Args:
-            search_filter (str)            : Filter to reduce search results
-            attributes (str | list[str])   : Attributes to include in result
+            search_filter (str)            : LDAP Filter to reduce search results
+            attributes (str | list[str])   : Additional attributes to include in result
             payload (dict[str, Any] | None): Payload to send to the server
 
         Returns:

@@ -28,9 +28,51 @@ class LDAPConnectorCommand(ConnectorCommand):
         "connectors.ldap",
         "A command to interact with an LDAP server through the oudjat LDAPConnector",
     )
-    __cmd_props__.options = {}
+    __cmd_props__.options = {
+        "--attributes": CmdOpt(
+            "Provide additional attributes to retrieve from server", arg="ATTRIBUTES"
+        ),
+        "--filter": CmdOpt("Provide an LDAP filter string to narrow down results", arg="FILTER"),
+        "--search-base": CmdOpt(
+            "Where to base the search on in terms of directory location", arg="SEARCHBASE"
+        ),
+    }
 
-    __cmd_props__.usages = {}
+    __cmd_props__.usages = {
+        "--computers": CmdUsage(
+            CmdOpt(
+                "Retrieve computer accounts from an LDAP directory",
+            ),
+            "--computers [--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
+            {
+                "search_filter": CmdUsageOpt("--filter"),
+                "attributes": CmdUsageOpt("--atributes"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
+        "--groups": CmdUsage(
+            CmdOpt(
+                "Retrieve group objects from an LDAP directory",
+            ),
+            "--groups [--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
+            {
+                "search_filter": CmdUsageOpt("--filter"),
+                "attributes": CmdUsageOpt("--atributes"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
+        "--users": CmdUsage(
+            CmdOpt(
+                "Retrieve user accounts from an LDAP directory",
+            ),
+            "--users [--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
+            {
+                "attributes": CmdUsageOpt("--atributes"),
+                "search_base": CmdUsageOpt("--search-base"),
+                "search_filter": CmdUsageOpt("--filter"),
+            },
+        ),
+    }
 
     __doc_builder__: "DocBuilder" = ConnectorCommand._gen_doc("oudjat", __cmd_props__, "")
 
@@ -62,4 +104,14 @@ class LDAPConnectorCommand(ConnectorCommand):
         self.connector.connect()
 
         # Usage backends
-        self.__cmd_props__.backends({})
+        self.__cmd_props__.backends(
+            {
+                "--computers": self.connector.computers,
+                "--gpos": self.connector.gpos,
+                "--groups": self.connector.groups,
+                "--objects": self.connector.objects,
+                "--ous": self.connector.ous,
+                "--subnets": self.connector.subnets,
+                "--users": self.connector.users,
+            }
+        )
