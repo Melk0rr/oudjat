@@ -25,7 +25,7 @@ class LDAPObjectOptions(NamedTuple, Generic[LDAPObjectBoundType]):
     """
 
     cls: type[LDAPObjectBoundType]
-    fetch: Callable[..., list["LDAPEntry"]]
+    fetch: Callable[..., dict[str, "LDAPObjectBoundType"]]
 
 
 class LDAPCapabilities(NamedTuple):
