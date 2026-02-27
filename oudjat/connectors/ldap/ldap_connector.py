@@ -87,11 +87,12 @@ class LDAPConnector(Connector):
         Create a new LDAPConnector.
 
         Args:
-            server (str)      : Server name
-            username (str)    : Username to use for the connection
-            password (str)    : Password to use for the connection
-            service_name (str): Service name used to store credentials
-            use_tls (bool)    : Should the connector use TLS for LDAPS connection
+            server (str)             : Server name
+            username (str)           : Username to use for the connection
+            password (str)           : Password to use for the connection
+            service_name (str)       : Service name used to store credentials
+            use_tls (bool)           : Should the connector use TLS for LDAPS connection
+            is_active_directory(bool): Indicates if the target directory is an MS Active Directory. Defaults to True
         """
 
         self._use_tls: bool = use_tls
@@ -452,11 +453,12 @@ class LDAPConnector(Connector):
 
         if extension_attr:
             if attributes is None:
-                attributes = LDAPObjectType.USER.attributes
+                attributes = []
 
-            attributes = list(attributes)
-            attributes.extend([ f"extensionAttribute{i}" for i in range(1, 16) ])
+            if not isinstance(attributes, list):
+                attributes = [attributes]
 
+            attributes.extend([f"extensionAttribute{i}" for i in range(1, 16)])
             attributes = list(set(attributes))
 
         entries = self.fetch(
