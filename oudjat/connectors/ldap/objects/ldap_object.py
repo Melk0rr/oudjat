@@ -257,13 +257,13 @@ class LDAPObject:
         """
 
         base = self._entry.attr
-        base.pop("objectGUID")
-        base.pop("name")
-        base.pop("description")
-        base.pop("objectSid")
-        base.pop("objectClass")
-        base.pop("whenCreated")
-        base.pop("whenChanged")
+        base.pop("objectGUID", None)
+        base.pop("name", None)
+        base.pop("description", None)
+        base.pop("objectSid", None)
+        base.pop("objectClass", None)
+        base.pop("whenCreated", None)
+        base.pop("whenChanged", None)
 
         return {
             "id": self.id,
