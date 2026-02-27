@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, override
 
 from oudjat.connectors.ldap.objects.account.ms_exch_flags import MSExchFlag
 
-from .definitions import MS_ACCOUNT_CTL, MS_EXCH_RECIPIENT
 from .ldap_account import LDAPAccount
 from .ldap_account_flags import LDAPAccountFlag
 
@@ -31,21 +30,18 @@ class LDAPUser(LDAPAccount):
 
         # Check additional account control bits
         # see https://learn.microsoft.com/en-us/windows/win32/adschema/a-msds-user-account-control-computed
-        if self.ms_account_ctl is not None:
-            self._enabled: bool = not LDAPAccountFlag.is_disabled(self.ms_account_ctl)
-            self._pwd_expires: bool = LDAPAccountFlag.pwd_expires(self.ms_account_ctl)
-            self._pwd_expired: bool = LDAPAccountFlag.pwd_expired(self.ms_account_ctl)
-            self._pwd_required: bool = LDAPAccountFlag.pwd_required(self.ms_account_ctl)
-            self._is_locked: bool = LDAPAccountFlag.is_locked(self.ms_account_ctl)
+        ms_acc_ctl = self.ms_account_ctl["value"]
+        if ms_acc_ctl is not None:
+            self._enabled: bool = not LDAPAccountFlag.is_disabled(ms_acc_ctl)
+            self._pwd_expires: bool = LDAPAccountFlag.pwd_expires(ms_acc_ctl)
+            self._pwd_expired: bool = LDAPAccountFlag.pwd_expired(ms_acc_ctl)
+            self._pwd_required: bool = LDAPAccountFlag.pwd_required(ms_acc_ctl)
+            self._is_locked: bool = LDAPAccountFlag.is_locked(ms_acc_ctl)
 
-            self._account_flags.update(LDAPAccountFlag.flags(self.ms_account_ctl))
-
-        self._exchange_flags: set[str] = set()
-        if self.ms_exchange_recipient_details is not None:
-            self._exchange_flags.update(MSExchFlag.flags(self.ms_exchange_recipient_details))
+            self._account_flags.update(LDAPAccountFlag.flags(ms_acc_ctl))
 
     # ****************************************************************
-    # Methods
+    # Methods - getters/setters
 
     @property
     def givenname(self) -> str:
@@ -83,30 +79,6 @@ class LDAPUser(LDAPAccount):
             email = email.lower()
 
         return email
-
-    @property
-    def ms_account_ctl(self) -> int | None:
-        """
-        Return the AD specific account control property.
-
-        This property contains additional computed bits over the base userAccountControl.
-
-        Returns:
-            int | None: The computed account control as a bit flag
-        """
-
-        return self.entry.get(MS_ACCOUNT_CTL)
-
-    @property
-    def ms_exchange_recipient_details(self) -> int | None:
-        """
-        Return the Exchange recipient type stored as a bitmask.
-
-        Returns:
-            int | None: The bitmask giving Exchange recipient type details if set
-        """
-
-        return self.entry.get(MS_EXCH_RECIPIENT)
 
     @property
     def employee_id(self) -> str:
@@ -164,6 +136,67 @@ class LDAPUser(LDAPAccount):
 
         return is_admin
 
+    # ****************************************************************
+    # Methods - getters/setters for AD context
+
+    @property
+    def ms_account_ctl(self) -> dict[str, Any]:
+        """
+        Return the AD specific account control property.
+
+        This property contains additional computed bits over the base userAccountControl.
+        Available only in Active Directory.
+
+        Returns:
+            dict[str, Any]: The computed account control details dictionary
+        """
+
+        details = {}
+        details["attr"] = "msDS-User-Account-Control-Computed"
+        details["value"] = self.entry.get(details["attr"])
+
+        return details
+
+    @property
+    def ms_exchange_recipient_details(self) -> dict[str, Any]:
+        """
+        Return Exchange recipient type details.
+
+        Available only in Active Directory.
+
+        Returns:
+            dict[str, Any]: Exchange recipient type details dictionary
+        """
+
+        details = {}
+
+        details["attr"] = "msExchRecipientTypeDetails"
+        details["value"] = self.entry.get(details["attr"])
+        details["flags"] = set()
+
+        if details["value"] is not None:
+            details["flags"].update(MSExchFlag.flags(details["value"]))
+
+        details["flags"] = list(details["flags"])
+
+        return details
+
+    @property
+    def pso(self) -> str:
+        """
+        Return the password settings for the current user .
+
+        Available only in Active Directory.
+
+        Returns:
+            str: Password setting string
+        """
+
+        return self.entry.get("msDS-ResultantPSO")
+
+    # ****************************************************************
+    # Methods - convertes
+
     @override
     def to_dict(self) -> dict[str, Any]:
         """
@@ -174,7 +207,12 @@ class LDAPUser(LDAPAccount):
         """
 
         base = super().to_dict()
-        base["account"][MS_ACCOUNT_CTL.replace("-", "")] = self.ms_account_ctl
+        ms_acc_ctl = self.ms_account_ctl
+        base["account"][ms_acc_ctl["attr"]] = ms_acc_ctl["value"]
+
+        exch_details = self.ms_exchange_recipient_details
+        exch_details.pop("attr")
+
         return {
             **base,
             "givenname": self.givenname,
@@ -183,9 +221,6 @@ class LDAPUser(LDAPAccount):
             "employeeId": self.employee_id,
             "manager": self.manager,
             "isAdmin": self.is_admin,
-            "exchange": {
-                "recipientDetails": self.ms_exchange_recipient_details,
-                "flags": list(self._exchange_flags),
-            },
+            "exchange": exch_details,
             "extensionAttributes": self.extension_attr,
         }

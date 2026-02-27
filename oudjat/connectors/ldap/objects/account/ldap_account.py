@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, override
 from oudjat.utils.time_utils import TimeConverter
 
 from ..ldap_object import LDAPObject
+from .ad_encryption_types import ADEncryptionType
 from .ldap_account_flags import LDAPAccountFlag
 
 if TYPE_CHECKING:
@@ -83,7 +84,7 @@ class LDAPAccount(LDAPObject, ABC):
             self._ldap_obj_flags.add("MISSING-USR-ACC-CTL")
 
     # ****************************************************************
-    # Methods
+    # Methods - getters/setters
 
     @property
     def san(self) -> str:
@@ -268,6 +269,49 @@ class LDAPAccount(LDAPObject, ABC):
 
         return self._is_locked
 
+    # ****************************************************************
+    # Methods - getters/setters for AD context
+
+    @property
+    def supported_encryption(self) -> dict[str, Any]:
+        """
+        Return account supported encryption details.
+
+        Available only in Active Directory.
+
+        Returns:
+            dict[str, Any]: Encryption support details
+        """
+
+        details = {}
+
+        details["attr"] = "msDS-SupportedEncryptionTypes"
+        details["value"] = self.entry.get(details["attr"])
+
+        details["flags"] = set()
+        if details["value"] is not None:
+            details["flags"].update(ADEncryptionType.flags(details["value"]))
+
+        details["flags"] = list(details["flags"])
+
+        return details
+
+    @property
+    def key_version(self) -> str:
+        """
+        Return the kerberos version number of the current key for this account.
+
+        Available only in Active Directory.
+
+        Returns:
+            str: Kerberos version number
+        """
+
+        return self.entry.get("msDS-KeyVersionNumber")
+
+    # ****************************************************************
+    # Methods - converters
+
     @override
     def to_dict(self) -> dict[str, Any]:
         """
@@ -278,6 +322,10 @@ class LDAPAccount(LDAPObject, ABC):
         """
 
         base_dict = super().to_dict()
+        encryption_details = self.supported_encryption
+        encryption_details.pop("attr")
+        encryption_details["keyVersion"] = self.key_version
+
         return {
             **base_dict,
             "san": self.san,
@@ -299,4 +347,5 @@ class LDAPAccount(LDAPObject, ABC):
                 "lastLogon": LDAPObject._format_acc_date_str(self.last_logon),
                 "lastLogonDays": self.last_logon_in_days,
             },
+            "encryption": self.supported_encryption
         }
