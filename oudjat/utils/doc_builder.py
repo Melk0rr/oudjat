@@ -209,7 +209,7 @@ class DocBuilder:
 
     def add_option(
         self,
-        name: str,
+        long: str,
         description: str,
         arg: str | None = None,
         short: str | None = None,
@@ -219,18 +219,18 @@ class DocBuilder:
         Add a new option.
 
         Args:
-            name (str)       : The name of the option - basically its fullname like --user
+            long (str)       : The name of the option - basically its fullname like --user
             description (str): The description of the option
             arg (str | None) : The option argument if any
             short(str | None): The shortname of the option if any - basically a single letter like -u
             default (Any)    : The default value of the option
         """
 
-        if name.lower() == name.upper():
+        if long.lower() == long.upper():
             raise ValueError("Invalid option name provided")
 
-        if "-" not in name:
-            name = f"--{name}"
+        if not long.startswith("--"):
+            long = f"--{long}"
 
         if short and (short.lower() == short.upper()):
             raise ValueError("Invalid option shortname provided")
@@ -238,13 +238,13 @@ class DocBuilder:
         if short is not None and (len(short) > 2 or len(short.replace("-", "")) != 1):
             raise ValueError("Option shortname must be a single character")
 
-        if short and "-" not in short:
+        if short and not short.startswith("-"):
             short = f"-{short}"
 
         if arg is not None:
             arg = arg.upper()
 
-        self._options[name] = DocOption(name, description, short, arg, default)
+        self._options[long] = DocOption(long, description, short, arg, default)
 
     def add_command(self, name: str, description: str) -> None:
         """
