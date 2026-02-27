@@ -108,7 +108,7 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt("Export S1 agents details"),
             "--agents [--sites=SITES] [--payload=PAYLOAD]",
             {
-                "site_ids": CmdUsageOpt("--sites-list"),
+                "site_ids": CmdUsageOpt("--sites"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
@@ -116,7 +116,7 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt("Export flat agent data"),
             "--agents-export [--sites=SITES] [--payload=PAYLOAD]",
             {
-                "site_ids": CmdUsageOpt("--sites-list"),
+                "site_ids": CmdUsageOpt("--sites"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
@@ -124,7 +124,7 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt("Move one or multiple agents to a site based on its id"),
             "--move-agent-site [--sites=SITES] [--names=NAMES]",
             {
-                "site_id": CmdUsageOpt("--sites-list", lambda lst: next(iter(lst))),
+                "site_id": CmdUsageOpt("--sites", lambda lst: next(iter(lst))),
                 "agent_name": CmdUsageOpt("--names"),
             },
         ),
@@ -133,7 +133,7 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt("Retrieve threats detected by S1"),
             "--threats [--sites=SITES] [--payload=PAYLOAD]",
             {
-                "site_ids": CmdUsageOpt("--sites-list"),
+                "site_ids": CmdUsageOpt("--sites"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
@@ -143,7 +143,7 @@ class S1ConnectorCommand(ConnectorCommand):
             {
                 "verdict": CmdUsageOpt("--verdict"),
                 "threat_ids": CmdUsageOpt("--ids"),
-                "site_ids": CmdUsageOpt("--sites-list"),
+                "site_ids": CmdUsageOpt("--sites"),
                 "status_filter": CmdUsageOpt("--status-filter"),
                 "verdict_filter": CmdUsageOpt("--verdict-filter"),
                 "file_path": CmdUsageOpt("--path"),
@@ -157,7 +157,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "status": CmdUsageOpt("--status"),
                 "verdict": CmdUsageOpt("--verdict"),
                 "threat_ids": CmdUsageOpt("--ids"),
-                "site_ids": CmdUsageOpt("--sites-list"),
+                "site_ids": CmdUsageOpt("--sites"),
                 "status_filter": CmdUsageOpt("--status-filter"),
                 "verdict_filter": CmdUsageOpt("--verdict-filter"),
                 "file_path": CmdUsageOpt("--path"),
@@ -172,7 +172,7 @@ class S1ConnectorCommand(ConnectorCommand):
             {
                 "verdict": CmdUsageOpt("--verdict"),
                 "alert_ids": CmdUsageOpt("--ids"),
-                "site_ids": CmdUsageOpt("--sites-list"),
+                "site_ids": CmdUsageOpt("--sites"),
                 "status_filter": CmdUsageOpt("--status-filter"),
                 "verdict_filter": CmdUsageOpt("--verdict-filter"),
                 "file_path": CmdUsageOpt("--path"),
@@ -185,7 +185,7 @@ class S1ConnectorCommand(ConnectorCommand):
             {
                 "status": CmdUsageOpt("--status"),
                 "alert_ids": CmdUsageOpt("--ids"),
-                "site_ids": CmdUsageOpt("--sites-list"),
+                "site_ids": CmdUsageOpt("--sites"),
                 "status_filter": CmdUsageOpt("--status-filter"),
                 "verdict_filter": CmdUsageOpt("--verdict-filter"),
                 "file_path": CmdUsageOpt("--path"),
@@ -210,7 +210,7 @@ class S1ConnectorCommand(ConnectorCommand):
             "--applications-with-risks [--vendors=VENDOR] [--sites=SITES] [--payload=PAYLOAD]",
             {
                 "vendors": CmdUsageOpt("--vendors"),
-                "site_ids": CmdUsageOpt("--sites-list"),
+                "site_ids": CmdUsageOpt("--sites"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
@@ -221,7 +221,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "appliation_ids": CmdUsageOpt("--ids"),
                 "appliation_name": CmdUsageOpt("--names"),
                 "application_vendor": CmdUsageOpt("--vendors"),
-                "site_ids": CmdUsageOpt("--sites-list"),
+                "site_ids": CmdUsageOpt("--sites"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
@@ -229,17 +229,17 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt("Retrieve CVEs detected by S1"),
             "--cves [--sites=SITES] [--payload=PAYLOAD]",
             {
-                "site_ids": CmdUsageOpt("--sites-list"),
+                "site_ids": CmdUsageOpt("--sites"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
         # Groups
         "--groups": CmdUsage(
             CmdOpt("Retrieve groups"),
-            "--groups [--sites=SITES] [--payload=PAYLOAD]",
+            "--groups [--names=NAMES] [--sites=SITES] [--payload=PAYLOAD]",
             {
                 "name": CmdUsageOpt("--names", transform=lambda v: next(iter(v))),
-                "site_ids": CmdUsageOpt("--sites-list"),
+                "site_ids": CmdUsageOpt("--sites"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
@@ -274,7 +274,7 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt("Retrieve sites by names"),
             "--sites-by-name [--sites=SITES] [--payload=PAYLOAD]",
             {
-                "site_name": CmdUsageOpt("--sites-list"),
+                "site_name": CmdUsageOpt("--sites"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
