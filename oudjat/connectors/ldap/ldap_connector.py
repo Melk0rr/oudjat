@@ -81,6 +81,7 @@ class LDAPConnector(Connector):
         username: str | None = None,
         password: str | None = None,
         use_tls: bool = False,
+        is_active_directory: bool = True,
     ) -> None:
         """
         Create a new LDAPConnector.
@@ -99,16 +100,21 @@ class LDAPConnector(Connector):
         super().__init__(target=server, username=username, password=password)
 
         self.logger = logging.getLogger(__name__)
+
         self._domain: str = ""
         self._default_search_base: str = ""
+
         self._ldap_server: ldap3.Server
         self._connection: ldap3.Connection | None = None
 
         context = Context()
+
         self.logger.debug(f"{context}::New LDAPConnector - {self._target}:{self._port}")
 
+        self._is_active_directory: bool = is_active_directory
+
     # ****************************************************************
-    # Methods
+    # Methods - getters/setters
 
     @property
     def domain(self) -> str:
@@ -143,6 +149,9 @@ class LDAPConnector(Connector):
         """
 
         return self._default_search_base
+
+    # ****************************************************************
+    # Methods - access
 
     def set_tls_usage(self, use_tls: bool = True) -> None:
         """
@@ -319,7 +328,17 @@ class LDAPConnector(Connector):
 
         payload["search_filter"] = str(formated_filter)
         payload["search_base"] = search_base or self.default_search_base
-        payload["attributes"] = attributes or search_type.attributes
+
+        attributes_complete = []
+        attributes_complete.extend(search_type.attributes)
+
+        if self._is_active_directory and search_type.ad_attributes:
+            attributes_complete.extend(search_type.ad_attributes)
+
+        if attributes is not None:
+            attributes_complete.extend(attributes)
+
+        payload["attributes"] = list(set(attributes_complete))
 
         self.logger.debug(f"{context}::{search_type} > {payload}")
 
@@ -345,6 +364,9 @@ class LDAPConnector(Connector):
         self.logger.debug(f"{context}::Retrieved {len(res)} entries")
 
         return res
+
+    # ****************************************************************
+    # Methods - core
 
     def objects(
         self,
