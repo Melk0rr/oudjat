@@ -146,7 +146,7 @@ class LDAPOrganizationalUnit(LDAPObject):
         return {
             obj_id: obj
             for obj_id, obj in self.objects.items()
-            if set(obj.entry.object_cls) & set(object_cls)
+            if set(obj.classes) & set(object_cls)
         }
 
     def gpo_from_gplink(self) -> dict[str, "LDAPObject"]:
