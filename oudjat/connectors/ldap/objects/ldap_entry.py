@@ -20,39 +20,6 @@ class LDAPEntry(dict[str, Any]):
         return self.__getitem__("dn")
 
     @property
-    def id(self) -> str:
-        """
-        Return the GUID of the current LDAP entry.
-
-        Returns:
-            str: object GUID string
-        """
-
-        return self.get("objectGUID")
-
-    @property
-    def name(self) -> str:
-        """
-        Return the name of the current LDAP entry.
-
-        Returns:
-            str: object name
-        """
-
-        return self.get("name")
-
-    @property
-    def description(self) -> str:
-        """
-        Return the description of the current LDAP entry.
-
-        Returns:
-            str: object description string
-        """
-
-        return self.get("description")
-
-    @property
     def attr(self) -> dict[str, Any]:
         """
         Return the "attributes" dictionary of the LDAP entry.
@@ -62,17 +29,6 @@ class LDAPEntry(dict[str, Any]):
         """
 
         return self.__getitem__("attributes")
-
-    @property
-    def object_cls(self) -> list[str]:
-        """
-        Return current entry object classes.
-
-        Returns:
-            list[str]: object classes represented by a list of strings
-        """
-
-        return self.get("objectClass", [])
 
     @override
     def get(self, key: str, default_value: Any = None) -> Any:

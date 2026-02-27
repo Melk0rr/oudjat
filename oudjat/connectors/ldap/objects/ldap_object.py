@@ -25,7 +25,7 @@ class LDAPObjectOptions(NamedTuple, Generic[LDAPObjectBoundType]):
     """
 
     cls: type[LDAPObjectBoundType]
-    fetch: Callable[..., list["LDAPEntry"]]
+    fetch: Callable[..., dict[str, "LDAPObjectBoundType"]]
 
 
 class LDAPCapabilities(NamedTuple):
@@ -65,10 +65,6 @@ class LDAPObject:
 
         self._entry: "LDAPEntry" = ldap_entry
 
-        self._id: str = self._entry.id
-        self._name: str = self._entry.name
-        self._description: str = self._entry.description
-
         self._ldap_obj_flags: set[str] = set()
         self._capabilities: "LDAPCapabilities" = capabilities
 
@@ -84,7 +80,41 @@ class LDAPObject:
             str: The distinguished name (DN) of the LDAP object.
         """
 
-        return self.entry.dn
+        return self._entry["dn"]
+
+    @property
+    def id(self) -> str:
+        """
+        Return the GUID of the current LDAP object.
+
+        Returns:
+            str: Object GUID string
+        """
+
+        return self._entry.get("objectGUID")
+
+    @property
+    def name(self) -> str:
+        """
+        Return the name of the current LDAP object.
+
+        Returns:
+            str: Object name
+        """
+
+        return self._entry.get("name")
+
+    @property
+    def description(self) -> str:
+        """
+        Return the description of the current LDAP entry.
+
+        Returns:
+            str: object description string
+        """
+
+        return self._entry.get("description")
+
 
     @property
     def sid(self) -> str:
@@ -95,7 +125,7 @@ class LDAPObject:
             str: The security identifier (SID) of the LDAP object.
         """
 
-        return self.entry.get("objectSid")
+        return self._entry.get("objectSid")
 
     @property
     def entry(self) -> "LDAPEntry":
@@ -117,7 +147,7 @@ class LDAPObject:
             list of str: The 'objectClass' attribute values from the LDAP entry dictionary.
         """
 
-        return self.entry.object_cls
+        return self._entry.get("objectClass", [])
 
     @property
     def capabilities(self) -> "LDAPCapabilities":
@@ -161,7 +191,7 @@ class LDAPObject:
             list[str]: The groups this account is a member of, as specified in the 'memberOf' attribute.
         """
 
-        return self.entry.get("memberOf", [])
+        return self._entry.get("memberOf", [])
 
     @property
     def creation_date(self) -> datetime | None:
@@ -172,7 +202,7 @@ class LDAPObject:
             str: The timestamp of when the LDAP object was created.
         """
 
-        attr_value = self.entry.get("whenCreated")
+        attr_value = self._entry.get("whenCreated")
         if attr_value is None:
             return attr_value
 
@@ -187,7 +217,7 @@ class LDAPObject:
             str: The timestamp of the last modification to the LDAP object.
         """
 
-        attr_value = self.entry.get("whenChanged")
+        attr_value = self._entry.get("whenChanged")
         if attr_value is None:
             return attr_value
 
@@ -205,7 +235,7 @@ class LDAPObject:
             bool: True if the object is contained in the given OU; otherwise, False.
         """
 
-        return ou_name in self.dn if recursive else f"{self._name}OU={ou_name}" in self.dn
+        return ou_name in self.dn if recursive else f"{self.name}OU={ou_name}" in self.dn
 
     @override
     def __str__(self) -> str:
@@ -226,10 +256,19 @@ class LDAPObject:
             dict: A dictionary containing the attributes of the LDAP object in a structured format
         """
 
+        base = self._entry.attr
+        base.pop("objectGUID", None)
+        base.pop("name", None)
+        base.pop("description", None)
+        base.pop("objectSid", None)
+        base.pop("objectClass", None)
+        base.pop("whenCreated", None)
+        base.pop("whenChanged", None)
+
         return {
-            "id": self._id,
-            "name": self._name,
-            "description": self._description,
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
             "dn": self.dn,
             "sid": self.sid,
             "classes": self.classes,
@@ -237,6 +276,7 @@ class LDAPObject:
             "creationDate": LDAPObject._format_acc_date_str(self.creation_date),
             "changedDate": LDAPObject._format_acc_date_str(self.change_date),
             "flags": list(self._ldap_obj_flags),
+            **base
         }
 
     # ****************************************************************
