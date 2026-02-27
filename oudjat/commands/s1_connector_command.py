@@ -238,6 +238,7 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt("Retrieve groups"),
             "--groups [--sites=SITES] [--payload=PAYLOAD]",
             {
+                "name": CmdUsageOpt("--names", transform=lambda v: next(iter(v))),
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
             },

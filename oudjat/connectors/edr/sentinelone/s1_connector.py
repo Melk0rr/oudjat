@@ -948,7 +948,10 @@ class S1Connector(Connector):
     # Methods: Groups
 
     def groups(
-        self, site_ids: "StrType | None", payload: dict[str, Any] | None = None
+        self,
+        name: str | None = None,
+        site_ids: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Get data of groups that match the filter.
@@ -959,8 +962,9 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry
 
         Args:
-            site_ids (str)           : The site to remove groups from
-            payload (dict[str, Any]) : Payload to send to the endpoint
+            name (str | None)       : The name of the groups to retrieve
+            site_ids (str | None)   : List of site IDs to filter
+            payload (dict[str, Any]): Payload to send to the endpoint
 
         Returns:
             DataType: Groups data based on the provided filters
@@ -968,6 +972,9 @@ class S1Connector(Connector):
 
         if payload is None:
             payload = {}
+
+        if name is not None:
+            payload["name"] = name
 
         if site_ids is not None:
             if not isinstance(site_ids, list):
