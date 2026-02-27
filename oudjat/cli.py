@@ -97,7 +97,7 @@ It also allows for complex data consolidation and mapping through a config file 
     builder.add_option("csv", "Save results as a CSV file", arg="CSV")
     builder.add_option("json", "Save results as a JSON file", arg="JSON")
     builder.add_option("print", "Print the results in the terminal")
-    builder.add_option("key-filter", "Filter the final result keys")
+    builder.add_option("key-filter", "Filter the final result keys", arg="KEYFILTER")
 
     builder.help_content = [
         "For help using this tool, please open an issue on the Codeberg repository:",
