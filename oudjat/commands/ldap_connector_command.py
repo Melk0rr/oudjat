@@ -30,11 +30,24 @@ class LDAPConnectorCommand(ConnectorCommand):
     )
     __cmd_props__.options = {
         "--attributes": CmdOpt(
-            "Provide additional attributes to retrieve from server", arg="ATTRIBUTES"
+            "Provide additional attributes to retrieve from server",
+            arg="ATTRIBUTES",
         ),
-        "--filter": CmdOpt("Provide an LDAP filter string to narrow down results", arg="FILTER"),
+        "--displayname": CmdOpt(
+            "The GPO display name",
+            arg="DISPLAYNAME",
+        ),
+        "--filter": CmdOpt(
+            "Provide an LDAP filter string to narrow down results",
+            arg="FILTER",
+        ),
+        "--name": CmdOpt(
+            "The GPO name (link)",
+            arg="NAME",
+        ),
         "--search-base": CmdOpt(
-            "Where to base the search on in terms of directory location", arg="SEARCHBASE"
+            "Where to base the search on in terms of directory location",
+            arg="SEARCHBASE",
         ),
     }
 
@@ -50,11 +63,57 @@ class LDAPConnectorCommand(ConnectorCommand):
                 "search_base": CmdUsageOpt("--search-base"),
             },
         ),
+        "--gpos": CmdUsage(
+            CmdOpt(
+                "Retrieve GPO objects from an LDAP directory",
+            ),
+            "--gpos [--displayname=DISPLAYNAME] [--name=NAME] [--search-base=SEARCHBASE] [--filter=FILTER] [--attributes=ATTRIBUTES]",
+            {
+                "attributes": CmdUsageOpt("--atributes"),
+                "displayName": CmdUsageOpt("--displayname"),
+                "name": CmdUsageOpt("--name"),
+                "search_filter": CmdUsageOpt("--filter"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
         "--groups": CmdUsage(
             CmdOpt(
                 "Retrieve group objects from an LDAP directory",
             ),
             "--groups [--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
+            {
+                "search_filter": CmdUsageOpt("--filter"),
+                "attributes": CmdUsageOpt("--atributes"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
+        "--objects": CmdUsage(
+            CmdOpt(
+                "Retrieve any objects from an LDAP directory",
+            ),
+            "--objects [--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
+            {
+                "search_filter": CmdUsageOpt("--filter"),
+                "attributes": CmdUsageOpt("--atributes"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
+        "--ous": CmdUsage(
+            CmdOpt(
+                "Retrieve organizational unit objects from an LDAP directory",
+            ),
+            "--ous [--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
+            {
+                "search_filter": CmdUsageOpt("--filter"),
+                "attributes": CmdUsageOpt("--atributes"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
+        "--subnets": CmdUsage(
+            CmdOpt(
+                "Retrieve subnet objects from an LDAP directory",
+            ),
+            "--subnets [--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
             {
                 "search_filter": CmdUsageOpt("--filter"),
                 "attributes": CmdUsageOpt("--atributes"),
