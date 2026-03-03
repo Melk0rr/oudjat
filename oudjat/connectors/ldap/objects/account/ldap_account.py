@@ -86,6 +86,9 @@ class LDAPAccount(LDAPObject, ABC):
         if self.pwd_last_set_in_days >= 180:
             self._ldap_obj_flags.add((str(LDAPFlag.OLD_PASSWORD)))
 
+        if self.pwd_last_set_in_days >= 1095:
+            self._ldap_obj_flags.add((str(LDAPFlag.VERY_OLD_PASSWORD)))
+
     # ****************************************************************
     # Methods - getters/setters
 

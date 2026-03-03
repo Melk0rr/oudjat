@@ -9,6 +9,7 @@ class LDAPFlag(BitFlag):
     """A simple enumeration of some custom flags that may be assigned to LDAP objects."""
 
     OLD_PASSWORD = 1
-    POTENTIAL_CLEARTXT_PWD = 2
-    WEAK_ENCRYPTION_SUPPORTED = 4
-    IS_ADMIN = 8
+    VERY_OLD_PASSWORD = 2
+    POTENTIAL_CLEARTXT_PWD = 4
+    WEAK_ENCRYPTION_SUPPORTED = 8
+    IS_ADMIN = 16
