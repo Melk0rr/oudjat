@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 AssetBoundType = TypeVar("AssetBoundType", bound="Asset")
 
+
 class AssetBaseDict(TypedDict):
     """
     A helper class to properly handle Asset base dictionary attributes.
@@ -26,6 +27,7 @@ class AssetBaseDict(TypedDict):
 
     assetType: str
     location: dict[str, dict[str, Any]]
+
 
 class Asset(GenericIdentifiable[AssetBoundType], ABC):
     """
@@ -63,7 +65,9 @@ class Asset(GenericIdentifiable[AssetBoundType], ABC):
             kwargs (Any)                                : Any further arguments
         """
 
-        super().__init__(gid=asset_id, name=name, label=label or "", description=description, **kwargs)
+        super().__init__(
+            gid=asset_id, name=name, label=label or "", description=description, **kwargs
+        )
 
         self._asset_type: "AssetType" = asset_type
         self._location: dict[str, "Location"] = {}
@@ -128,18 +132,19 @@ class Asset(GenericIdentifiable[AssetBoundType], ABC):
         if not isinstance(new_location, list):
             new_location = [new_location]
 
-        self._location = { f"{loc.id}": loc for loc in new_location }
+        self._location = {f"{loc.id}": loc for loc in new_location}
 
     @override
     def merge(self, other: "AssetBoundType") -> None:
 
         if other.asset_type is not self.asset_type:
-            raise InvalidAssetTypeError(f"{Context()}::Trying to merge two assets of different types")
+            raise InvalidAssetTypeError(
+                f"{Context()}::Trying to merge two assets of different types"
+            )
 
         super().merge(other)
 
         self._location = UtilsDict.merge_dictionaries(self._location, other.location)
-
 
     @override
     def to_dict(self) -> dict[str, Any]:
@@ -150,12 +155,13 @@ class Asset(GenericIdentifiable[AssetBoundType], ABC):
             dict[str, Any]: A dictionary representation of the Asset object including its id, name, label, description, asset type, and location.
         """
 
-        base_dict: "AssetBaseDict" = {
+        base = super().to_dict()
+        formatted: "AssetBaseDict" = {
             "assetType": str(self._asset_type),
             "location": {loc_k: loc.to_dict() for loc_k, loc in self._location.items()},
         }
 
         return {
-            **super().to_dict(),
-            **base_dict
+            **base,
+            **formatted,
         }

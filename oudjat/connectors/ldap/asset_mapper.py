@@ -92,6 +92,10 @@ class LDAPAssetMapper(AssetMapper):
 
             asset.os_release = os_rel
             asset.os_edition = os_edition
+
+            asset.flags.update(record["flags"])
+            record.pop("flags", None)
+
             asset.add_custom_attr("ldap", record)
 
         return self.map_many(
@@ -136,6 +140,9 @@ class LDAPAssetMapper(AssetMapper):
             }
 
         def asset_cb(asset: "User", record: dict[str, Any], _: "MappingRegistry") -> None:
+            asset.flags.update(record["flags"])
+            record.pop("flags", None)
+
             asset.add_custom_attr("ldap", record)
 
         return self.map_many(

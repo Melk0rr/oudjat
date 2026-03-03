@@ -76,9 +76,7 @@ class LDAPAccount(LDAPObject, ABC):
             self._pwd_required = LDAPAccountFlag.pwd_required(self.account_ctl)
             self._is_locked = LDAPAccountFlag.is_locked(self.account_ctl)
 
-            for flag in list(LDAPAccountFlag):
-                if LDAPAccountFlag.check_flag(self.account_ctl, flag):
-                    self._ldap_obj_flags.add(flag.name)
+            self._ldap_obj_flags.update(LDAPAccountFlag.flags(self.account_ctl))
 
         else:
             self._ldap_obj_flags.add("MISSING-USR-ACC-CTL")
