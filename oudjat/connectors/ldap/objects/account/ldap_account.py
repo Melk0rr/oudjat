@@ -67,8 +67,6 @@ class LDAPAccount(LDAPObject, ABC):
         self._pwd_required: bool = True
         self._is_locked: bool = False
 
-        self._account_flags: set[str] = set()
-
         if self.account_ctl is not None:
             self._status = LDAPAccountStatus(not LDAPAccountFlag.is_disabled(self.account_ctl))
             self._pwd_expires = LDAPAccountFlag.pwd_expires(self.account_ctl)
@@ -78,7 +76,7 @@ class LDAPAccount(LDAPObject, ABC):
 
             for flag in list(LDAPAccountFlag):
                 if LDAPAccountFlag.check_flag(self.account_ctl, flag):
-                    self.account_flags.add(flag.name)
+                    self._ldap_obj_flags.add(flag.name)
 
         else:
             self._ldap_obj_flags.add("MISSING-USR-ACC-CTL")
@@ -204,17 +202,6 @@ class LDAPAccount(LDAPObject, ABC):
         return TimeConverter.days_diff(self.pwd_last_set) if self.pwd_last_set else -1
 
     @property
-    def account_flags(self) -> set[str]:
-        """
-        Retrieve account flags.
-
-        Returns:
-            set[str]: A list of strings representing the account flags.
-        """
-
-        return self._account_flags
-
-    @property
     def account_expires(self) -> bool:
         """
         Check whether the account expires.
@@ -288,11 +275,11 @@ class LDAPAccount(LDAPObject, ABC):
         details["attr"] = "msDS-SupportedEncryptionTypes"
         details["value"] = self.entry.get(details["attr"])
 
-        details["flags"] = set()
+        details["protocols"] = set()
         if details["value"] is not None:
-            details["flags"].update(ADEncryptionType.flags(details["value"]))
+            details["protocols"].update(ADEncryptionType.flags(details["value"]))
 
-        details["flags"] = list(details["flags"])
+        details["protocols"] = list(details["flags"])
 
         return details
 
@@ -333,7 +320,6 @@ class LDAPAccount(LDAPObject, ABC):
                 "expires": self.account_expires,
                 "expirationDate": LDAPObject._format_acc_date_str(self.account_expiration),
                 "ctl": self.account_ctl,
-                "flags": list(self.account_flags),
             },
             "pwd": {
                 "expires": self.pwd_expires,

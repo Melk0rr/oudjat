@@ -38,7 +38,7 @@ class LDAPUser(LDAPAccount):
             self._pwd_required: bool = LDAPAccountFlag.pwd_required(ms_acc_ctl)
             self._is_locked: bool = LDAPAccountFlag.is_locked(ms_acc_ctl)
 
-            self._account_flags.update(LDAPAccountFlag.flags(ms_acc_ctl))
+            self._ldap_obj_flags.update(LDAPAccountFlag.flags(ms_acc_ctl))
 
     # ****************************************************************
     # Methods - getters/setters
