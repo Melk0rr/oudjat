@@ -276,12 +276,13 @@ class LDAPAccount(LDAPObject, ABC):
         details["value"] = self.entry.get(details["attr"])
 
         details["protocols"] = set()
+
         if details["value"] is not None:
             details["protocols"].update(ADEncryptionType.flags(details["value"]))
 
-        # TODO: Maybe store the weak value somewere
-        if ADEncryptionType.check_flag(details["value"], 7):
-            self._ldap_obj_flags.add(str(LDAPObjectFlag.WEAK_ENCRYPTION_SUPPORTED))
+            # TODO: Maybe store the weak value somewere
+            if ADEncryptionType.check_flag(details["value"], 7):
+                self._ldap_obj_flags.add(str(LDAPObjectFlag.WEAK_ENCRYPTION_SUPPORTED))
 
         details["protocols"] = list(details["protocols"])
 
