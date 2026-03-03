@@ -13,7 +13,9 @@ from oudjat.banner import banner
 from oudjat.commands import (
     CERTFRConnectorCommand,
     EOLConnectorCommand,
+    LDAPConnectorCommand,
     S1ConnectorCommand,
+    TenableSCConnectorCommand,
 )
 from oudjat.commands.exceptions import UnknownCommand
 from oudjat.utils import ColorPrint, Context, StdOutHook, TimeConverter
@@ -26,6 +28,8 @@ _COMMAND_OPTIONS = {
     "connectors.edr.sentinelone": S1ConnectorCommand,
     "connectors.endoflife": EOLConnectorCommand,
     "connectors.cert.certfr": CERTFRConnectorCommand,
+    "connectors.ldap": LDAPConnectorCommand,
+    "connectors.tenable.sc": TenableSCConnectorCommand,
 }
 
 
@@ -85,6 +89,9 @@ It also allows for complex data consolidation and mapping through a config file 
         "-h | --help",
         "-V | --version",
     ]
+
+    for cmd_name, cmd in _COMMAND_OPTIONS.items():
+        builder.add_command(cmd_name, cmd.__cmd_props__.description)
 
     builder.add_option("append", "Append to the output fileappend to the output file", short="a")
     builder.add_option("help", "Print the doc string", short="h")
@@ -152,7 +159,6 @@ def main() -> None:
             )
 
         logger = _config_logging(options)
-
 
         ColorPrint.blue(banner)
 
