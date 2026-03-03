@@ -45,9 +45,24 @@ class LDAPConnectorCommand(ConnectorCommand):
             "The GPO name (link)",
             arg="NAME",
         ),
+        "--password": CmdOpt(
+            "The password used for authentication",
+            short="p",
+            arg="PASS",
+        ),
         "--search-base": CmdOpt(
             "Where to base the search on in terms of directory location",
             arg="SEARCHBASE",
+        ),
+        "--target": CmdOpt(
+            "Specify the SentinelOne URL to query",
+            short="t",
+            arg="TARGET",
+        ),
+        "--username": CmdOpt(
+            "The username used for authentication",
+            short="u",
+            arg="USER",
         ),
     }
 
@@ -134,7 +149,7 @@ class LDAPConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.prepend_usages(
-        "(-t=TARGET | --target TARGET) (--username=USER --password=PASS | --creds-service=SERVICE)"
+        "(-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE)"
     )
     __cmd_props__.append_usages("[options]")
 

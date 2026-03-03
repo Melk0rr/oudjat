@@ -281,7 +281,7 @@ class S1ConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.prepend_usages(
-        "(-t=TARGET | --target TARGET) (--username=USER --password=PASS | --creds-service=SERVICE)"
+        "(-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE)"
     )
     __cmd_props__.append_usages("[options]")
 
