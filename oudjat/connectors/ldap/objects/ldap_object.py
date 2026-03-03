@@ -115,7 +115,6 @@ class LDAPObject:
 
         return self._entry.get("description")
 
-
     @property
     def sid(self) -> str:
         """
@@ -206,7 +205,11 @@ class LDAPObject:
         if attr_value is None:
             return attr_value
 
-        return attr_value if isinstance(attr_value, datetime) else TimeConverter.str_to_date(attr_value)
+        return (
+            attr_value
+            if isinstance(attr_value, datetime)
+            else TimeConverter.str_to_date(attr_value)
+        )
 
     @property
     def change_date(self) -> datetime | None:
@@ -221,7 +224,11 @@ class LDAPObject:
         if attr_value is None:
             return attr_value
 
-        return attr_value if isinstance(attr_value, datetime) else TimeConverter.str_to_date(attr_value)
+        return (
+            attr_value
+            if isinstance(attr_value, datetime)
+            else TimeConverter.str_to_date(attr_value)
+        )
 
     def is_in_ou(self, ou_name: str, recursive: bool = True) -> bool:
         """
@@ -257,16 +264,8 @@ class LDAPObject:
         """
 
         base = self._entry.attr
-        base.pop("distinguishedName", None)
-        base.pop("objectGUID", None)
-        base.pop("name", None)
-        base.pop("description", None)
-        base.pop("objectSid", None)
-        base.pop("objectClass", None)
-        base.pop("whenCreated", None)
-        base.pop("whenChanged", None)
 
-        return {
+        formatted = {
             "id": self.id,
             "name": self.name,
             "description": self.description,
@@ -277,7 +276,20 @@ class LDAPObject:
             "creationDate": LDAPObject._format_acc_date_str(self.creation_date),
             "changedDate": LDAPObject._format_acc_date_str(self.change_date),
             "flags": list(self._ldap_obj_flags),
-            **base
+        }
+
+        base.pop("distinguishedName", None)
+        base.pop("objectGUID", None)
+        base.pop("name", None)
+        base.pop("description", None)
+        base.pop("objectSid", None)
+        base.pop("objectClass", None)
+        base.pop("whenCreated", None)
+        base.pop("whenChanged", None)
+
+        return {
+            **formatted,
+            **base,
         }
 
     # ****************************************************************
