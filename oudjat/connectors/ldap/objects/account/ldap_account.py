@@ -1,5 +1,6 @@
 """A module to describe generic properties shared by more specific account objects like user or computer."""
 
+import re
 from abc import ABC
 from datetime import datetime
 from enum import IntEnum
@@ -7,6 +8,7 @@ from typing import TYPE_CHECKING, Any, override
 
 from oudjat.utils.time_utils import TimeConverter
 
+from ...ldap_flags import LDAPObjectFlag
 from ..ldap_object import LDAPObject
 from .ad_encryption_types import ADEncryptionType
 from .ldap_account_flags import LDAPAccountFlag
@@ -279,7 +281,11 @@ class LDAPAccount(LDAPObject, ABC):
         if details["value"] is not None:
             details["protocols"].update(ADEncryptionType.flags(details["value"]))
 
-        details["protocols"] = list(details["flags"])
+        # TODO: Maybe store the weak value somewere
+        if ADEncryptionType.check_flag(details["value"], 7):
+            self._ldap_obj_flags.add(str(LDAPObjectFlag.WEAK_ENCRYPTION_SUPPORTED))
+
+        details["protocols"] = list(details["protocols"])
 
         return details
 
@@ -295,6 +301,29 @@ class LDAPAccount(LDAPObject, ABC):
         """
 
         return self.entry.get("msDS-KeyVersionNumber")
+
+    # ****************************************************************
+    # Methods - security checks
+
+    def find_clear_txt_pwd(self) -> bool:
+        """
+        Search for potential clear text password in account description.
+
+        Returns:
+            bool: True if a potential match is found. False otherwise
+        """
+
+        PWD_PATTERNS = [
+            r"[A-Za-z0-9]{6,}",
+            r"(?i)password\s*=\s*\w+",
+            r"(?i)mdp\s*=\s*\w+",
+        ]
+
+        check = any([re.search(p, self.description) for p in PWD_PATTERNS])
+        if check:
+            self._ldap_obj_flags.add(str(LDAPObjectFlag.POTENTIAL_CLEARTXT_PWD))
+
+        return check
 
     # ****************************************************************
     # Methods - converters
