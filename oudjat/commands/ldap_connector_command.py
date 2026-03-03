@@ -133,6 +133,11 @@ class LDAPConnectorCommand(ConnectorCommand):
         ),
     }
 
+    __cmd_props__.prepend_usages(
+        "(-t=TARGET | --target TARGET) (--username=USER --password=PASS | --creds-service=SERVICE)"
+    )
+    __cmd_props__.append_usages("[options]")
+
     __doc_builder__: "DocBuilder" = ConnectorCommand._gen_doc("oudjat", __cmd_props__, "")
 
     def __init__(self, options: dict[str, Any]) -> None:
