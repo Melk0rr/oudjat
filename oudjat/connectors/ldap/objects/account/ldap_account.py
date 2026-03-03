@@ -312,6 +312,9 @@ class LDAPAccount(LDAPObject, ABC):
             bool: True if a potential match is found. False otherwise
         """
 
+        if len(self.description) == 0:
+            return False
+
         PWD_PATTERNS = [
             r"[A-Za-z0-9]{6,}",
             r"(?i)password\s*=\s*\w+",

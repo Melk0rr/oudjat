@@ -113,7 +113,7 @@ class LDAPObject:
             str: object description string
         """
 
-        return " - ".join(self._entry.get("description", []))
+        return self._entry.get("description")
 
     @property
     def sid(self) -> str:
