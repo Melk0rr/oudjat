@@ -314,7 +314,7 @@ class LDAPAccount(LDAPObject, ABC):
             bool: True if a potential match is found. False otherwise
         """
 
-        if len(self.description) == 0:
+        if not self.description or len(self.description) == 0:
             return False
 
         PWD_PATTERNS = [
