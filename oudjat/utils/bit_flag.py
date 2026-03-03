@@ -19,7 +19,7 @@ class BitFlag(IntEnum):
         return self._name_
 
     @staticmethod
-    def check_flag(value: int, flag: "BitFlag") -> int:
+    def check_flag(value: int, flag: int) -> int:
         """
         Compare given value to the chosen flag.
 
