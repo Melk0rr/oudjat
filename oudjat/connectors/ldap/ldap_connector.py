@@ -581,7 +581,6 @@ class LDAPConnector(Connector):
 
     # ****************************************************************
     # Methods - core
-    # TODO: Change return type to DataType
 
     def objects(
         self,
@@ -613,6 +612,8 @@ class LDAPConnector(Connector):
             attributes=attributes,
             payload=payload,
         )
+
+        self.logger.info(f"Processing {len(entries)} generic object entries...")
 
         def _obj_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPObject(e, capabilities=self._CAPABILITIES).to_dict()
@@ -648,6 +649,8 @@ class LDAPConnector(Connector):
             attributes=attributes,
             payload=payload,
         )
+
+        self.logger.info(f"Processing {len(entries)} computer entries...")
 
         def _cpt_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPComputer(e, capabilities=self._CAPABILITIES).to_dict()
@@ -696,6 +699,8 @@ class LDAPConnector(Connector):
             payload=payload,
         )
 
+        self.logger.info(f"Processing {len(entries)} user entries...")
+
         def _usr_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPUser(e, capabilities=self._CAPABILITIES).to_dict()
 
@@ -731,6 +736,8 @@ class LDAPConnector(Connector):
             attributes=attributes,
             payload=payload,
         )
+
+        self.logger.info(f"Processing {len(entries)} group entries...")
 
         def _grp_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPGroup(e, capabilities=self._CAPABILITIES).to_dict()
@@ -789,6 +796,8 @@ class LDAPConnector(Connector):
             payload=payload,
         )
 
+        self.logger.info(f"Processing {len(entries)} gpo entries...")
+
         def _gpo_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPGroupPolicyObject(e, capabilities=self._CAPABILITIES).to_dict()
 
@@ -825,6 +834,8 @@ class LDAPConnector(Connector):
             payload=payload,
         )
 
+        self.logger.info(f"Processing {len(entries)} ou entries...")
+
         def _ou_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPOrganizationalUnit(e, capabilities=self._CAPABILITIES).to_dict()
 
@@ -859,6 +870,8 @@ class LDAPConnector(Connector):
             attributes=attributes,
             payload=payload,
         )
+
+        self.logger.info(f"Processing {len(entries)} subnet entries...")
 
         def _net_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPSubnet(e, capabilities=self._CAPABILITIES).to_dict()
