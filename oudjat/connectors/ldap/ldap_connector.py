@@ -88,7 +88,7 @@ class LDAPConnector(Connector):
 
     def __init__(
         self,
-        server: str,
+        target: str,
         username: str | None = None,
         password: str | None = None,
         use_tls: bool = False,
@@ -98,7 +98,7 @@ class LDAPConnector(Connector):
         Create a new LDAPConnector.
 
         Args:
-            server (str)             : Server name
+            target (str)             : Server name
             username (str)           : Username to use for the connection
             password (str)           : Password to use for the connection
             service_name (str)       : Service name used to store credentials
@@ -109,7 +109,7 @@ class LDAPConnector(Connector):
         self._use_tls: bool = use_tls
         self._port: "LDAPPort" = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
 
-        super().__init__(target=server, username=username, password=password)
+        super().__init__(target=target, username=username, password=password)
 
         self.logger = logging.getLogger(__name__)
 
