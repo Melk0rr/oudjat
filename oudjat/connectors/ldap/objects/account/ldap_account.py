@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, override
 
 from oudjat.utils.time_utils import TimeConverter
 
-from ...ldap_flags import LDAPObjectFlag
+from ...ldap_flags import LDAPFlag
 from ..ldap_object import LDAPObject
 from .ad_encryption_types import ADEncryptionType
 from .ldap_account_flags import LDAPAccountFlag
@@ -84,7 +84,7 @@ class LDAPAccount(LDAPObject, ABC):
         _ = self.find_clear_txt_pwd()
 
         if self.pwd_last_set_in_days >= 180:
-            self._ldap_obj_flags.add((str(LDAPObjectFlag.OLD_PASSWORD)))
+            self._ldap_obj_flags.add((str(LDAPFlag.OLD_PASSWORD)))
 
     # ****************************************************************
     # Methods - getters/setters
@@ -287,7 +287,7 @@ class LDAPAccount(LDAPObject, ABC):
 
             # TODO: Maybe store the weak value somewere
             if ADEncryptionType.check_flag(details["value"], 7):
-                self._ldap_obj_flags.add(str(LDAPObjectFlag.WEAK_ENCRYPTION_SUPPORTED))
+                self._ldap_obj_flags.add(str(LDAPFlag.WEAK_ENCRYPTION_SUPPORTED))
 
         details["protocols"] = list(details["protocols"])
 
@@ -327,7 +327,7 @@ class LDAPAccount(LDAPObject, ABC):
 
         check = any([re.search(p, self.description) for p in PWD_PATTERNS])
         if check:
-            self._ldap_obj_flags.add(str(LDAPObjectFlag.POTENTIAL_CLEARTXT_PWD))
+            self._ldap_obj_flags.add(str(LDAPFlag.POTENTIAL_CLEARTXT_PWD))
 
         return check
 
