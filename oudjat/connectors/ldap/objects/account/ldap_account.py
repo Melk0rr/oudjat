@@ -81,6 +81,8 @@ class LDAPAccount(LDAPObject, ABC):
         else:
             self._ldap_obj_flags.add("MISSING-USR-ACC-CTL")
 
+        _ = self.find_clear_txt_pwd()
+
     # ****************************************************************
     # Methods - getters/setters
 
@@ -339,10 +341,11 @@ class LDAPAccount(LDAPObject, ABC):
             dict[str, Any]: A dictionary containing various account details including sAMAccountName, status, expiration date, etc.
         """
 
-        base = super().to_dict()
         encryption_details = self.supported_encryption
         encryption_details.pop("attr")
         encryption_details["keyVersion"] = self.key_version
+
+        base = super().to_dict()
 
         formatted = {
             "san": self.san,
