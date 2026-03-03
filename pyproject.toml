@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oudjat"
-version = "0.7.2a1"
+version = "0.8.1a1"
 description = "Oudjat is a SOC toolbox and maybe more if I have the time"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -24,18 +24,16 @@ dependencies = [
   "commentjson",
   "docopt",
   "keyring",
+  "ldap3",
   "lxml",
   "orjson",
+  "pytenable",
   "requests",
 ]
 
 [project.urls]
-homepage = "https://github.com/Melk0rr/Oudjat"
-repository = "https://github.com/Melk0rr/Oudjat"
-
-[project.optional-dependencies]
-tenable = ["pytenable"]
-ldap = ["ldap3"]
+homepage = "https://codeberg.org/me1k0r/oudjat"
+repository = "https://codeberg.org/me1k0r/oudjat"
 
 [project.scripts]
 oudjat = "oudjat.cli:main"
