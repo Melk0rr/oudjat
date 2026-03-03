@@ -91,7 +91,7 @@ class LDAPConnector(Connector):
         target: str,
         username: str | None = None,
         password: str | None = None,
-        use_tls: bool = False,
+        use_tls: bool = True,
         is_active_directory: bool = True,
     ) -> None:
         """
