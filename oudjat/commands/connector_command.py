@@ -195,8 +195,6 @@ class ConnectorCommand(Base):
 
         builder = DocBuilder(program, description)
 
-        builder.add_command(cmd_hub.name, cmd_hub.description)
-
         for opt_k, opt in cmd_hub.options.items():
             builder.add_option(opt_k, opt.description, opt.arg, opt.short, default=opt.default)
 
