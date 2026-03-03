@@ -96,8 +96,13 @@ class LDAPComputer(LDAPAccount):
     def to_dict(self) -> dict[str, Any]:
         """Convert the current instance into a dictionary."""
 
+        base = super().to_dict()
+        base.pop("dNSHostName", None)
+        base.pop("operatingSystem", None)
+        base.pop("operatingSystemVersion", None)
+
         return {
-            **super().to_dict(),
+            **base,
             "hostname": self.hostname,
             "os": {"name": self.os, "version": self.os_ver},
         }

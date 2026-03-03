@@ -321,13 +321,19 @@ class LDAPAccount(LDAPObject, ABC):
             dict[str, Any]: A dictionary containing various account details including sAMAccountName, status, expiration date, etc.
         """
 
-        base_dict = super().to_dict()
+        base = super().to_dict()
         encryption_details = self.supported_encryption
         encryption_details.pop("attr")
+
         encryption_details["keyVersion"] = self.key_version
+        base.pop("msDS-KeyVersionNumber", None)
+
+        base.pop("accountExpires", None)
+        base.pop("pwdLastSet", None)
+        base.pop("userAccountControl", None)
 
         return {
-            **base_dict,
+            **base,
             "san": self.san,
             "account": {
                 "status": str(self._status),
@@ -347,5 +353,5 @@ class LDAPAccount(LDAPObject, ABC):
                 "lastLogon": LDAPObject._format_acc_date_str(self.last_logon),
                 "lastLogonDays": self.last_logon_in_days,
             },
-            "encryption": self.supported_encryption
+            "encryption": encryption_details
         }
