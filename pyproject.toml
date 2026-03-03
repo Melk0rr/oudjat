@@ -27,6 +27,7 @@ dependencies = [
   "ldap3",
   "lxml",
   "orjson",
+  "pycryptodome",
   "pytenable",
   "requests",
 ]
