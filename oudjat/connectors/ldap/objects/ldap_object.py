@@ -69,7 +69,7 @@ class LDAPObject:
         self._capabilities: "LDAPCapabilities" = capabilities
 
     # ****************************************************************
-    # Methods
+    # Methods - getters/setters
 
     @property
     def dn(self) -> str:
@@ -236,6 +236,20 @@ class LDAPObject:
             else TimeConverter.str_to_date(attr_value)
         )
 
+    @property
+    def flags(self) -> set[str]:
+        """
+        Return the object flags.
+
+        Returns:
+            set[str]: The object flags set
+        """
+
+        return self._ldap_obj_flags
+
+    # ****************************************************************
+    # Methods - checks
+
     def is_in_ou(self, ou_name: str, recursive: bool = True) -> bool:
         """
         Check whether the current object is contained directly or indirectly in the given OU.
@@ -249,6 +263,9 @@ class LDAPObject:
         """
 
         return ou_name in self.dn if recursive else f"{self.name}OU={ou_name}" in self.dn
+
+    # ****************************************************************
+    # Methods - convertion
 
     @override
     def __str__(self) -> str:
