@@ -213,8 +213,7 @@ class LDAPUser(LDAPAccount):
         exch_details = self.ms_exchange_recipient_details
         exch_details.pop("attr")
 
-        return {
-            **base,
+        formatted = {
             "givenname": self.givenname,
             "surname": self.surname,
             "email": self.email,
@@ -223,4 +222,9 @@ class LDAPUser(LDAPAccount):
             "isAdmin": self.is_admin,
             "exchange": exch_details,
             "extensionAttributes": self.extension_attr,
+        }
+
+        return {
+            **base,
+            **formatted,
         }

@@ -69,7 +69,9 @@ class LDAPSubnet(LDAPObject):
             dict[str, Any]: dictionary representation of the current instance
         """
 
+        base = super().to_dict()
+
         return {
-            **super().to_dict(),
-            **self._subnet.to_dict()
+            **base,
+            **self._subnet.to_dict(),
         }

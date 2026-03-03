@@ -324,16 +324,9 @@ class LDAPAccount(LDAPObject, ABC):
         base = super().to_dict()
         encryption_details = self.supported_encryption
         encryption_details.pop("attr")
-
         encryption_details["keyVersion"] = self.key_version
-        base.pop("msDS-KeyVersionNumber", None)
 
-        base.pop("accountExpires", None)
-        base.pop("pwdLastSet", None)
-        base.pop("userAccountControl", None)
-
-        return {
-            **base,
+        formatted = {
             "san": self.san,
             "account": {
                 "status": str(self._status),
@@ -353,5 +346,15 @@ class LDAPAccount(LDAPObject, ABC):
                 "lastLogon": LDAPObject._format_acc_date_str(self.last_logon),
                 "lastLogonDays": self.last_logon_in_days,
             },
-            "encryption": encryption_details
+            "encryption": encryption_details,
+        }
+
+        base.pop("msDS-KeyVersionNumber", None)
+        base.pop("accountExpires", None)
+        base.pop("pwdLastSet", None)
+        base.pop("userAccountControl", None)
+
+        return {
+            **base,
+            **formatted,
         }
