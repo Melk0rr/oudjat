@@ -342,7 +342,7 @@ class DocBuilder:
 
         # Commands section
         if len(self._commands) > 0:
-            lines.append("\nCommands")
+            lines.append("\nCommands:")
             lines.extend(self.commands_lines())
 
         # Usage section
