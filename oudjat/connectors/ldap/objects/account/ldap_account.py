@@ -83,6 +83,9 @@ class LDAPAccount(LDAPObject, ABC):
 
         _ = self.find_clear_txt_pwd()
 
+        if self.pwd_last_set_in_days >= 180:
+            self._ldap_obj_flags.add((str(LDAPObjectFlag.OLD_PASSWORD)))
+
     # ****************************************************************
     # Methods - getters/setters
 
@@ -318,9 +321,8 @@ class LDAPAccount(LDAPObject, ABC):
             return False
 
         PWD_PATTERNS = [
-            r"[A-Za-z0-9]{6,}",
-            r"(?i)password\s*=\s*\w+",
-            r"(?i)mdp\s*=\s*\w+",
+            r"(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{6,}",
+            r"(pass(word)?|pwd|secret|token|api[_-]?key|cred|mdp)",
         ]
 
         check = any([re.search(p, self.description) for p in PWD_PATTERNS])

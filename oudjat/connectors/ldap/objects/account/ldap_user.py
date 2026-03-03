@@ -2,10 +2,10 @@
 
 from typing import TYPE_CHECKING, Any, override
 
-from oudjat.connectors.ldap.objects.account.ms_exch_flags import MSExchFlag
-
+from ...ldap_flags import LDAPFlag
 from .ldap_account import LDAPAccount
 from .ldap_account_flags import LDAPAccountFlag
+from .ms_exch_flags import MSExchFlag
 
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
@@ -39,6 +39,9 @@ class LDAPUser(LDAPAccount):
             self._is_locked: bool = LDAPAccountFlag.is_locked(ms_acc_ctl)
 
             self._ldap_obj_flags.update(LDAPAccountFlag.flags(ms_acc_ctl))
+
+        if self.is_admin:
+            self._ldap_obj_flags.add(str(LDAPFlag.IS_ADMIN))
 
     # ****************************************************************
     # Methods - getters/setters
