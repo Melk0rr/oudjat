@@ -108,7 +108,7 @@ class LDAPAssetMapper(AssetMapper):
 
     ### User mappping
     def users(
-            self, entries: "DataType", mapping_registry: "MappingRegistry | None" = None
+        self, entries: "DataType", mapping_registry: "MappingRegistry | None" = None
     ) -> dict[str, "User"]:
         """
         Map LDAP entries into User instances.
@@ -150,5 +150,5 @@ class LDAPAssetMapper(AssetMapper):
             map_cls=User,
             mapping_registry=mapping_registry,
             asset_cb=asset_cb,
-            key_cb=lambda r: r["id"]
+            key_cb=lambda r: r["id"],
         )
