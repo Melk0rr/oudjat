@@ -32,6 +32,7 @@ from .objects import (
     LDAPSubnet,
     LDAPUser,
 )
+from .objects.account import LDAPComputerFlag, LDAPUserFlag
 from .objects.ldap_entry import LDAPEntry
 from .objects.ldap_object_types import LDAPObjectType
 
@@ -463,7 +464,10 @@ class LDAPConnector(Connector):
         """
 
         def _map_cpt(entry: "LDAPEntry") -> "LDAPComputer":
-            return LDAPComputer(entry, capabilities=self._CAPABILITIES)
+            cpt = LDAPComputer(entry, capabilities=self._CAPABILITIES)
+            cpt.flags.update(LDAPComputerFlag.flags(cpt))
+
+            return cpt
 
         computers = {cpt.dn: cpt for cpt in list(map(_map_cpt, entries))}
 
@@ -481,7 +485,10 @@ class LDAPConnector(Connector):
         """
 
         def _map_usr(entry: "LDAPEntry") -> "LDAPUser":
-            return LDAPUser(entry, capabilities=self._CAPABILITIES)
+            usr = LDAPUser(entry, capabilities=self._CAPABILITIES)
+            usr.flags.update(LDAPUserFlag.flags(usr))
+
+            return usr
 
         users = {usr.dn: usr for usr in list(map(_map_usr, entries))}
 
@@ -653,7 +660,10 @@ class LDAPConnector(Connector):
         self.logger.info(f"Processing {len(entries)} computer entries...")
 
         def _cpt_dict(e: "LDAPEntry") -> dict[str, Any]:
-            return LDAPComputer(e, capabilities=self._CAPABILITIES).to_dict()
+            cpt = LDAPComputer(e, capabilities=self._CAPABILITIES)
+            cpt.flags.update(LDAPComputerFlag.flags(cpt))
+
+            return cpt.to_dict()
 
         return list(map(_cpt_dict, entries))
 
@@ -702,7 +712,10 @@ class LDAPConnector(Connector):
         self.logger.info(f"Processing {len(entries)} user entries...")
 
         def _usr_dict(e: "LDAPEntry") -> dict[str, Any]:
-            return LDAPUser(e, capabilities=self._CAPABILITIES).to_dict()
+            usr = LDAPUser(e, capabilities=self._CAPABILITIES)
+            usr.flags.update(LDAPUserFlag.flags(usr))
+
+            return usr.to_dict()
 
         return list(map(_usr_dict, entries))
 

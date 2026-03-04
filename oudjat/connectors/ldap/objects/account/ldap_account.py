@@ -4,19 +4,19 @@ import re
 from abc import ABC
 from datetime import datetime
 from enum import IntEnum
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, Any, TypeVar, override
 
 from oudjat.utils.time_utils import TimeConverter
 
-from ...ldap_flags import LDAPFlag
 from ..ldap_object import LDAPObject
 from .ad_encryption_types import ADEncryptionType
-from .ldap_account_flags import LDAPAccountFlag
+from .ldap_account_ctl_flags import LDAPAccountCtlFlag
 
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
     from ..ldap_object import LDAPCapabilities
 
+LDAPAccountBoundType = TypeVar("LDAPAccountBoundType", bound="LDAPAccount")
 
 class LDAPAccountStatus(IntEnum):
     """
@@ -70,25 +70,16 @@ class LDAPAccount(LDAPObject, ABC):
         self._is_locked: bool = False
 
         if self.account_ctl is not None:
-            self._status = LDAPAccountStatus(not LDAPAccountFlag.is_disabled(self.account_ctl))
-            self._pwd_expires = LDAPAccountFlag.pwd_expires(self.account_ctl)
-            self._pwd_expired = LDAPAccountFlag.pwd_expired(self.account_ctl)
-            self._pwd_required = LDAPAccountFlag.pwd_required(self.account_ctl)
-            self._is_locked = LDAPAccountFlag.is_locked(self.account_ctl)
+            self._status = LDAPAccountStatus(not LDAPAccountCtlFlag.is_disabled(self.account_ctl))
+            self._pwd_expires = LDAPAccountCtlFlag.pwd_expires(self.account_ctl)
+            self._pwd_expired = LDAPAccountCtlFlag.pwd_expired(self.account_ctl)
+            self._pwd_required = LDAPAccountCtlFlag.pwd_required(self.account_ctl)
+            self._is_locked = LDAPAccountCtlFlag.is_locked(self.account_ctl)
 
-            self._ldap_obj_flags.update(LDAPAccountFlag.flags(self.account_ctl))
+            self._ldap_obj_flags.update(LDAPAccountCtlFlag.flags(self.account_ctl))
 
         else:
             self._ldap_obj_flags.add("MISSING-USR-ACC-CTL")
-
-        _ = self.find_clear_txt_pwd()
-
-        if self.pwd_last_set_in_days >= 1095:
-            self._ldap_obj_flags.add((str(LDAPFlag.VERY_OLD_PASSWORD)))
-
-        elif self.pwd_last_set_in_days >= 180:
-            self._ldap_obj_flags.add((str(LDAPFlag.OLD_PASSWORD)))
-
 
     # ****************************************************************
     # Methods - getters/setters
@@ -289,10 +280,6 @@ class LDAPAccount(LDAPObject, ABC):
         if details["value"] is not None:
             details["protocols"].update(ADEncryptionType.flags(details["value"]))
 
-            # TODO: Maybe store the weak value somewere
-            if ADEncryptionType.check_flag(details["value"], 7):
-                self._ldap_obj_flags.add(str(LDAPFlag.WEAK_ENCRYPTION_SUPPORTED))
-
         details["protocols"] = list(details["protocols"])
 
         return details
@@ -313,7 +300,7 @@ class LDAPAccount(LDAPObject, ABC):
     # ****************************************************************
     # Methods - security checks
 
-    def find_clear_txt_pwd(self) -> bool:
+    def search_clear_txt_pwd(self) -> bool:
         """
         Search for potential clear text password in account description.
 
@@ -329,11 +316,7 @@ class LDAPAccount(LDAPObject, ABC):
             r"(pass(word)?|pwd|secret|token|api[_-]?key|cred|mdp)",
         ]
 
-        check = any([re.search(p, self.description) for p in PWD_PATTERNS])
-        if check:
-            self._ldap_obj_flags.add(str(LDAPFlag.POTENTIAL_CLEARTXT_PWD))
-
-        return check
+        return any([re.search(p, self.description) for p in PWD_PATTERNS])
 
     # ****************************************************************
     # Methods - converters
@@ -384,3 +367,6 @@ class LDAPAccount(LDAPObject, ABC):
             **base,
             **formatted,
         }
+
+    # ****************************************************************
+    # Static methods
