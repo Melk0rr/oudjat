@@ -23,11 +23,7 @@ class LDAPObjectFlag(Enum):
             bool: True if the check passed. False otherwise
         """
 
-        fn = self._value_
-        args = []
-        if len(fn) > 1:
-            fn, args = self._value_
-
+        fn, *args = self._value_
         return fn(obj, *args)
 
     @classmethod
