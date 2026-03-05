@@ -457,7 +457,7 @@ class LDAPConnector(Connector):
 
             return LDAPObject(entry, capabilities=self._CAPABILITIES)
 
-        objects = {obj.dn: obj for obj in list(map(_map_obj, entries))}
+        objects = {obj.dn: obj for obj in [_map_obj(e) for e in tqdm(entries, ncols=100)]}
 
         return objects
 
@@ -478,7 +478,7 @@ class LDAPConnector(Connector):
 
             return cpt
 
-        computers = {cpt.dn: cpt for cpt in list(map(_map_cpt, entries))}
+        computers = {cpt.dn: cpt for cpt in [_map_cpt(e) for e in tqdm(entries, ncols=100)]}
 
         return computers
 
@@ -499,7 +499,7 @@ class LDAPConnector(Connector):
 
             return usr
 
-        users = {usr.dn: usr for usr in list(map(_map_usr, entries))}
+        users = {usr.dn: usr for usr in [_map_usr(e) for e in tqdm(entries, ncols=100)]}
 
         return users
 
@@ -526,7 +526,7 @@ class LDAPConnector(Connector):
 
             return grp_instance
 
-        groups = {grp.dn: grp for grp in list(map(_map_grp, entries))}
+        groups = {grp.dn: grp for grp in [_map_grp(e) for e in tqdm(entries, ncols=100)]}
 
         return groups
 
@@ -544,7 +544,7 @@ class LDAPConnector(Connector):
         def _map_gpo(entry: "LDAPEntry") -> "LDAPGroupPolicyObject":
             return LDAPGroupPolicyObject(entry, self._CAPABILITIES)
 
-        gpos = {gpo.dn: gpo for gpo in list(map(_map_gpo, entries))}
+        gpos = {gpo.dn: gpo for gpo in [_map_gpo(e) for e in tqdm(entries, ncols=100)]}
 
         return gpos
 
@@ -571,7 +571,7 @@ class LDAPConnector(Connector):
 
             return ou_instance
 
-        ous = {ou.dn: ou for ou in list(map(_map_ou, entries))}
+        ous = {ou.dn: ou for ou in [_map_ou(e) for e in tqdm(entries, ncols=100)]}
 
         return ous
 
@@ -591,7 +591,7 @@ class LDAPConnector(Connector):
         def _map_net(entry: "LDAPEntry") -> "LDAPSubnet":
             return LDAPSubnet(entry, self._CAPABILITIES)
 
-        subnets = {net.dn: net for net in list(map(_map_net, entries))}
+        subnets = {net.dn: net for net in [_map_net(e) for e in tqdm(entries, ncols=100)]}
 
         return subnets
 
@@ -635,7 +635,7 @@ class LDAPConnector(Connector):
         def _obj_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPObject(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = list(map(_obj_dict, entries))
+        processed = [_obj_dict(e) for e in tqdm(entries, ncols=100)]
         return processed
 
     def computers(
@@ -677,7 +677,7 @@ class LDAPConnector(Connector):
 
             return cpt.to_dict()
 
-        processed = [ _cpt_dict(e) for e in tqdm(entries) ]
+        processed = [_cpt_dict(e) for e in tqdm(entries, ncols=100)]
         return processed
 
     def users(
@@ -731,7 +731,7 @@ class LDAPConnector(Connector):
 
             return usr.to_dict()
 
-        processed = list(map(_usr_dict, entries))
+        processed = [_usr_dict(e) for e in tqdm(entries, ncols=100)]
         return processed
 
     # TODO: Add more options to retrieve different levels of members.
@@ -771,7 +771,7 @@ class LDAPConnector(Connector):
         def _grp_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPGroup(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = list(map(_grp_dict, entries))
+        processed = [_grp_dict(e) for e in tqdm(entries, ncols=100)]
         return processed
 
     def gpos(
@@ -832,7 +832,7 @@ class LDAPConnector(Connector):
         def _gpo_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPGroupPolicyObject(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = list(map(_gpo_dict, entries))
+        processed = [_gpo_dict(e) for e in tqdm(entries, ncols=100)]
         return processed
 
     def ous(
@@ -872,7 +872,7 @@ class LDAPConnector(Connector):
         def _ou_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPOrganizationalUnit(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = list(map(_ou_dict, entries))
+        processed = [_ou_dict(e) for e in tqdm(entries, ncols=100)]
         return processed
 
     def subnets(
@@ -911,7 +911,7 @@ class LDAPConnector(Connector):
         def _net_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPSubnet(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = list(map(_net_dict, entries))
+        processed = [_net_dict(e) for e in tqdm(entries, ncols=100)]
         return processed
 
     def complete_partial_entry(self, ldap_entry: "LDAPEntry") -> "LDAPEntry":
