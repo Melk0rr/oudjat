@@ -30,6 +30,7 @@ dependencies = [
   "pycryptodome",
   "pytenable",
   "requests",
+  "tqdm",
 ]
 
 [project.urls]
