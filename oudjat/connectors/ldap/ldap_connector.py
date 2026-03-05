@@ -8,6 +8,8 @@ from typing import Any, TypedDict, final, override
 
 import ldap3
 from ldap3.core.exceptions import LDAPSocketOpenError
+from tqdm import tqdm
+from yaspin import yaspin
 
 from oudjat.utils import Context
 from oudjat.utils.credentials import NoCredentialsError
@@ -143,7 +145,7 @@ class LDAPConnector(Connector):
             str: domain name
         """
 
-        return self._domain
+        return self._domain.lower()
 
     @property
     @override
@@ -361,7 +363,14 @@ class LDAPConnector(Connector):
         self.logger.debug(f"{context}::{search_type} > {payload}")
 
         # Actual request
-        results = self.connection.extend.standard.paged_search(**payload)
+        with yaspin(text=f"Fetching {search_type} from {self.domain}") as spinner:
+            results = self.connection.extend.standard.paged_search(**payload)
+
+            if results:
+                spinner.ok(f"✅ Retrieved {len(results)} {search_type} entries")
+
+            else:
+                spinner.fail(f"❌ No {search_type} entries could be retrieved")
 
         def ldap_entry_from_dict(entry: dict[str, Any]) -> "LDAPEntry":
             if entry.get("attributes", None) is None:
@@ -668,7 +677,7 @@ class LDAPConnector(Connector):
 
             return cpt.to_dict()
 
-        processed = list(map(_cpt_dict, entries))
+        processed = [ _cpt_dict(e) for e in tqdm(entries) ]
         return processed
 
     def users(
