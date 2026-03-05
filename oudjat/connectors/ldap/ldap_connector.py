@@ -622,10 +622,12 @@ class LDAPConnector(Connector):
 
         self.logger.info(f"Processing {len(entries)} generic object entries...")
 
+        # Processing raw LDAP entries into LDAP object instances
         def _obj_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPObject(e, capabilities=self._CAPABILITIES).to_dict()
 
-        return list(map(_obj_dict, entries))
+        processed = list(map(_obj_dict, entries))
+        return processed
 
     def computers(
         self,
@@ -659,13 +661,15 @@ class LDAPConnector(Connector):
 
         self.logger.info(f"Processing {len(entries)} computer entries...")
 
+        # Processing raw LDAP entries into LDAP computer instances
         def _cpt_dict(e: "LDAPEntry") -> dict[str, Any]:
             cpt = LDAPComputer(e, capabilities=self._CAPABILITIES)
             cpt.flags.update(LDAPComputerFlag.flags(cpt))
 
             return cpt.to_dict()
 
-        return list(map(_cpt_dict, entries))
+        processed = list(map(_cpt_dict, entries))
+        return processed
 
     def users(
         self,
@@ -711,13 +715,15 @@ class LDAPConnector(Connector):
 
         self.logger.info(f"Processing {len(entries)} user entries...")
 
+        # Processing raw LDAP entries into LDAP user instances
         def _usr_dict(e: "LDAPEntry") -> dict[str, Any]:
             usr = LDAPUser(e, capabilities=self._CAPABILITIES)
             usr.flags.update(LDAPUserFlag.flags(usr))
 
             return usr.to_dict()
 
-        return list(map(_usr_dict, entries))
+        processed = list(map(_usr_dict, entries))
+        return processed
 
     # TODO: Add more options to retrieve different levels of members.
     def groups(
@@ -752,10 +758,12 @@ class LDAPConnector(Connector):
 
         self.logger.info(f"Processing {len(entries)} group entries...")
 
+        # Processing raw LDAP entries into LDAP group instances
         def _grp_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPGroup(e, capabilities=self._CAPABILITIES).to_dict()
 
-        return list(map(_grp_dict, entries))
+        processed = list(map(_grp_dict, entries))
+        return processed
 
     def gpos(
         self,
@@ -793,7 +801,7 @@ class LDAPConnector(Connector):
         else:
             name_filter = LDAPFilter(f"(name={name})")
 
-        entries_filter = (LDAPFilter(f"(displayName={displayName})") & name_filter)
+        entries_filter = LDAPFilter(f"(displayName={displayName})") & name_filter
 
         if search_filter:
             if not isinstance(search_filter, LDAPFilter):
@@ -811,10 +819,12 @@ class LDAPConnector(Connector):
 
         self.logger.info(f"Processing {len(entries)} gpo entries...")
 
+        # Processing raw LDAP entries into LDAP gpo instances
         def _gpo_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPGroupPolicyObject(e, capabilities=self._CAPABILITIES).to_dict()
 
-        return list(map(_gpo_dict, entries))
+        processed = list(map(_gpo_dict, entries))
+        return processed
 
     def ous(
         self,
@@ -849,10 +859,12 @@ class LDAPConnector(Connector):
 
         self.logger.info(f"Processing {len(entries)} ou entries...")
 
+        # Processing raw LDAP entries into LDAP ous instances
         def _ou_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPOrganizationalUnit(e, capabilities=self._CAPABILITIES).to_dict()
 
-        return list(map(_ou_dict, entries))
+        processed = list(map(_ou_dict, entries))
+        return processed
 
     def subnets(
         self,
@@ -886,10 +898,12 @@ class LDAPConnector(Connector):
 
         self.logger.info(f"Processing {len(entries)} subnet entries...")
 
+        # Processing raw LDAP entries into LDAP subnet instances
         def _net_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPSubnet(e, capabilities=self._CAPABILITIES).to_dict()
 
-        return list(map(_net_dict, entries))
+        processed = list(map(_net_dict, entries))
+        return processed
 
     def complete_partial_entry(self, ldap_entry: "LDAPEntry") -> "LDAPEntry":
         """
