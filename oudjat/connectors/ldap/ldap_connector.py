@@ -4,7 +4,7 @@ import logging
 import socket
 import ssl
 from enum import IntEnum
-from typing import Any, TypedDict, final, override
+from typing import Any, TypedDict, override
 
 import ldap3
 from ldap3.core.exceptions import LDAPSocketOpenError
@@ -73,7 +73,6 @@ class LDAPPort(IntEnum):
     TLS = 636
 
 
-@final
 class LDAPConnector(Connector):
     """
     LDAP connector to interact and query LDAP servers.
@@ -114,7 +113,7 @@ class LDAPConnector(Connector):
 
         super().__init__(target=target, username=username, password=password)
 
-        self.logger = logging.getLogger(__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         self._domain: str = ""
         self._default_search_base: str = ""
@@ -169,6 +168,22 @@ class LDAPConnector(Connector):
         """
 
         return self._default_search_base
+
+    # ****************************************************************
+    # Methods - helpers
+
+    def _check_search_res_entry(self, entry: dict[str, Any]) -> bool:
+        """
+        Check if the provided entry is a searchResEntry.
+
+        Args:
+            entry (dict[str, Any]): entry to check
+
+        Returns:
+            bool: True if the entry is a searchResEntry. False otherwise
+        """
+
+        return entry["type"] == "searchResEntry"
 
     # ****************************************************************
     # Methods - access
@@ -327,8 +342,6 @@ class LDAPConnector(Connector):
                 f"{context}::You must initiate connection to {self.target} before running search !"
             )
 
-        self.logger.info(f"Fetching {search_type} from {self.domain}")
-
         if payload is None:
             payload = {}
 
@@ -360,35 +373,36 @@ class LDAPConnector(Connector):
 
         payload["attributes"] = list(set(attributes_complete))
 
+        self.logger.info(f"Fetching {search_type} from {self.domain}")
         self.logger.debug(f"{context}::{search_type} > {payload}")
 
         # Actual request
-        with yaspin(text=f"Fetching {search_type} from {self.domain}") as spinner:
-            results = self.connection.extend.standard.paged_search(**payload)
+        res = []
+        with yaspin(text=f"Fetching {search_type} data...") as spinner:
+            req = self.connection.extend.standard.paged_search(**payload)
 
-            if results:
-                spinner.ok(f"✅ Retrieved {len(results)} {search_type} entries")
+            def _ldap_entry_from_dict(entry: dict[str, Any]) -> "LDAPEntry":
+                if entry.get("attributes", None) is None:
+                    raise InvalidLDAPEntryError(
+                        f"{context}::Invalid entry provided. No attribute found"
+                    )
+
+                return LDAPEntry(**entry)
+
+            res = list(
+                map(
+                    _ldap_entry_from_dict,
+                    filter(self._check_search_res_entry, req),
+                )
+            )
+
+            if len(res) > 0:
+                spinner.ok(f"✅ Retrieved {len(res)} {search_type} entries")
 
             else:
                 spinner.fail(f"❌ No {search_type} entries could be retrieved")
 
-        def ldap_entry_from_dict(entry: dict[str, Any]) -> "LDAPEntry":
-            if entry.get("attributes", None) is None:
-                raise InvalidLDAPEntryError(
-                    f"{context}::Invalid entry provided. No attribute found"
-                )
-
-            return LDAPEntry(**entry)
-
-        res = list(
-            map(
-                ldap_entry_from_dict,
-                filter(LDAPConnector._check_search_res_entry, results),
-            )
-        )
-
         self.logger.debug(f"{context}::{search_type} > {[el.dn for el in res]}")
-        self.logger.debug(f"{context}::Retrieved {len(res)} entries")
 
         return res
 
@@ -947,20 +961,6 @@ class LDAPConnector(Connector):
 
     # ****************************************************************
     # Static methods
-
-    @staticmethod
-    def _check_search_res_entry(entry: dict[str, Any]) -> bool:
-        """
-        Check if the provided entry is a searchResEntry.
-
-        Args:
-            entry (dict[str, Any]): entry to check
-
-        Returns:
-            bool: True if the entry is a searchResEntry. False otherwise
-        """
-
-        return entry["type"] == "searchResEntry"
 
     @staticmethod
     def ldap_entry_from_dict(entry: dict[str, Any]) -> "LDAPEntry":

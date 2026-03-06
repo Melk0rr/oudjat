@@ -8,6 +8,7 @@ from typing import Any, TypeAlias, override
 from urllib.parse import ParseResult, urlparse
 
 import requests
+from yaspin import yaspin
 
 from oudjat.utils import Context, DataType, FileUtils, NoCredentialsError, StrType
 
@@ -331,7 +332,6 @@ class S1Connector(Connector):
 
         context = Context()
 
-        res = []
         next_cursor = None
 
         endpoint_path = endpoint.path
@@ -344,32 +344,49 @@ class S1Connector(Connector):
         if path_fmt:
             endpoint_path = endpoint_path.format(**path_fmt)
 
+        action_str = (
+            "Retrieving data from"
+            if endpoint.method.name == "GET"
+            else "Updating elements with"
+        )
+
+        self.logger.info(f"{action_str} {endpoint} S1 endpoint")
         self.logger.debug(f"{context}::{endpoint} > {payload}")
-        while True:
-            if next_cursor:
-                payload["cursor"] = next_cursor
 
-            r_params = self._request_params(payload, endpoint.method, endpoint_path)
-            req = endpoint.method(**r_params)
-            req_json = req.json()
+        res = []
+        with yaspin(text=f"{action_str} {endpoint}...") as spinner:
+            try:
+                while True:
+                    if next_cursor:
+                        payload["cursor"] = next_cursor
 
-            self.logger.debug(f"{context}::{endpoint} > {req_json}")
+                    r_params = self._request_params(payload, endpoint.method, endpoint_path)
+                    req = endpoint.method(**r_params)
+                    req_json = req.json()
 
-            if "data" in req_json:
-                if isinstance(req_json["data"], list):
-                    res.extend(req_json["data"])
+                    self.logger.debug(f"{context}::{endpoint} > {req_json}")
 
-                else:
-                    res.append(req_json["data"])
+                    if "data" in req_json:
+                        if isinstance(req_json["data"], list):
+                            res.extend(req_json["data"])
 
-            if req.status_code != 200:
-                raise SentinelOneAPIConnectionError(
-                    f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
-                )
+                        else:
+                            res.append(req_json["data"])
 
-            next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
-            if not next_cursor:
-                break
+                    if req.status_code != 200:
+                        raise SentinelOneAPIConnectionError(
+                            f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
+                        )
+
+                    next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
+                    if not next_cursor:
+                        break
+
+                spinner.ok(f"✅ Done {action_str.lower()} {endpoint}")
+
+            except Exception as e:
+                spinner.fail(f"❌ Error while {action_str.lower()} {endpoint}")
+                raise e
 
         return res
 
@@ -456,12 +473,17 @@ class S1Connector(Connector):
             payload["infected"] = True
 
         endpoint = S1Endpoint.AGENTS_EXPORT
-        req = endpoint.method(**self._request_params(payload, endpoint.method, endpoint.path))
 
-        if req.status_code != 200:
-            raise SentinelOneAPIConnectionError(
-                f"{Context()}::An error occured while fetching data from {endpoint}"
-            )
+        with yaspin(text=f"Exporting agents data using {endpoint}...") as spinner:
+            req = endpoint.method(**self._request_params(payload, endpoint.method, endpoint.path))
+
+            if req.status_code != 200:
+                spinner.fail("❌ Error while exporting agents")
+                raise SentinelOneAPIConnectionError(
+                    f"{Context()}::An error occured while fetching data from {endpoint}"
+                )
+
+            spinner.ok("✅ Done exporting agents")
 
         return FileUtils.parse_csv_str(req.content.decode().replace('"', ""), delimiter=",")
 

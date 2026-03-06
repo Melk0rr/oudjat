@@ -4,6 +4,8 @@ import re
 from typing import Any, override
 from urllib.parse import ParseResult, urlparse
 
+from yaspin import yaspin
+
 from oudjat.utils.context import Context
 from oudjat.utils.types import DataType, StrType
 
@@ -59,20 +61,29 @@ class CirclConnector(CVEConnector):
         if payload is None:
             payload = {}
 
+        self.logger.info(f"Fetching data for {len(cves)} CVEs from {self.URL}")
+
         res = []
-        for cve in cves:
-            if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
-                continue
+        with yaspin(text="Fetching CVE data...") as spinner:
+            for cve in cves:
+                if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
+                    continue
 
-            cve_target = CirclConnector.cve_api_url(cve)
+                cve_target = CirclConnector.cve_api_url(cve)
 
-            self.logger.debug(f"{context}::{cve_target} > {payload}")
-            self.connect(cve_target, **payload)
+                self.logger.debug(f"{context}::{cve_target} > {payload}")
+                self.connect(cve_target, **payload)
 
-            vuln = self._connection
-            if vuln is not None:
-                self.logger.debug(f"{context}::{cve_target} > {vuln}")
-                res.append(self.unify_cve_data(vuln) if not raw else vuln)
+                vuln = self._connection
+                if vuln is not None:
+                    self.logger.debug(f"{context}::{cve_target} > {vuln}")
+                    res.append(self.unify_cve_data(vuln) if not raw else vuln)
+
+            if len(res) > 0:
+                spinner.ok(f"✅ Retrieved data for {len(res)} CVEs")
+
+            else:
+                spinner.fail("❌ Could not retrieve any CVE data")
 
         return res
 

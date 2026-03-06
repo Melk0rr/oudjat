@@ -3,6 +3,7 @@ A helper module to list ODBC drivers.
 """
 
 from enum import Enum
+from typing import override
 
 
 class ODBCDriver(Enum):
@@ -19,3 +20,14 @@ class ODBCDriver(Enum):
     ODBC_13_1  = "{ODBC Driver 13.1 for SQL Server}"
     ODBC_17 = "{ODBC Driver 17 for SQL Server}"
     ODBC_18 = "{ODBC Driver 18 for SQL Server}"
+
+    @override
+    def __str__(self) -> str:
+        """
+        Convert an odbc driver into a string.
+
+        Returns:
+            str: A string representation of the odbc driver
+        """
+
+        return self._value_
