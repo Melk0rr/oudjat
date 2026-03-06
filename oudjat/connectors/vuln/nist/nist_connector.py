@@ -5,6 +5,8 @@ from decimal import Context
 from typing import Any, override
 from urllib.parse import ParseResult, urlparse
 
+from yaspin import yaspin
+
 from oudjat.utils import DataType
 from oudjat.utils.types import StrType
 
@@ -66,34 +68,43 @@ class NistConnector(CVEConnector):
         def key_in_attr(item: tuple) -> bool:
             return item[0] in attributes
 
+        self.logger.info(f"Fetching data for {len(cves)} CVEs from {self.URL}")
+
         res = []
-        for cve in cves:
-            if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
-                continue
-
-            cve_target = NistConnector.cve_api_url(cve)
-
-            self.logger.debug(f"{context}::{cve_target} > {payload}")
-            self.connect(cve_target, **payload)
-
-            if self._connection:
-                vuln = self._connection.get("vulnerabilities", [])
-
-                self.logger.debug(f"{context}::{cve_target} > {vuln}")
-                if len(vuln) > 0:
-                    vuln = vuln[0].get("cve", {})
-
-                else:
-                    self.logger.warning(f"No data for vulnerability {cve}")
+        with yaspin(text="Fetching CVE data...") as spinner:
+            for cve in cves:
+                if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
                     continue
 
-                if not raw:
-                    vuln = self.unify_cve_data(vuln)
+                cve_target = NistConnector.cve_api_url(cve)
 
-                if attributes is not None:
-                    vuln = dict(filter(key_in_attr, vuln.items()))
+                self.logger.debug(f"{context}::{cve_target} > {payload}")
+                self.connect(cve_target, **payload)
 
-                res.append(vuln)
+                if self._connection:
+                    vuln = self._connection.get("vulnerabilities", [])
+
+                    self.logger.debug(f"{context}::{cve_target} > {vuln}")
+                    if len(vuln) > 0:
+                        vuln = vuln[0].get("cve", {})
+
+                    else:
+                        self.logger.warning(f"No data for vulnerability {cve}")
+                        continue
+
+                    if not raw:
+                        vuln = self.unify_cve_data(vuln)
+
+                    if attributes is not None:
+                        vuln = dict(filter(key_in_attr, vuln.items()))
+
+                    res.append(vuln)
+
+            if len(res) > 0:
+                spinner.ok(f"✅ Retrieved data for {len(res)} CVEs")
+
+            else:
+                spinner.fail("❌ Could not retrieve any CVE data")
 
         return res
 

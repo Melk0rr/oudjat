@@ -6,6 +6,8 @@ from enum import Enum
 from typing import Any, Callable, TypeAlias, override
 from urllib.parse import ParseResult, urlparse
 
+from yaspin import yaspin
+
 from tenable.sc import TenableSC
 
 from oudjat.connectors.connector import Connector
@@ -194,24 +196,31 @@ class TenableSCConnector(Connector):
         payload = { **payload, **kwargs }
 
         res = []
-        try:
-            endpoint_api_name, endpoint_api_method = endpoint.value.split(".")
-            endpoint_api = getattr(self._connection, endpoint_api_name)
+        with yaspin(text=f"Retrieving / updating {endpoint.name.lower()} elements") as spinner:
+            try:
+                endpoint_api_name, endpoint_api_method = endpoint.value.split(".")
+                endpoint_api = getattr(self._connection, endpoint_api_name)
 
-            self.logger.debug(f"{context}::{endpoint.value} > {payload}")
-            endpoint_func: Callable[..., "DatumDataType"] = getattr(
-                endpoint_api, endpoint_api_method
-            )
+                self.logger.debug(f"{context}::{endpoint.value} > {payload}")
+                endpoint_func: Callable[..., "DatumDataType"] = getattr(
+                    endpoint_api, endpoint_api_method
+                )
 
-            req = endpoint_func(*filters, **payload)
-            UtilsList.append_flat(res, list(req))
+                req = endpoint_func(*filters, **payload)
+                UtilsList.append_flat(res, list(req))
 
-            self.logger.debug(f"{context}::{endpoint.value} > {req}")
+                self.logger.debug(f"{context}::{endpoint.value} > {req}")
 
-        except TenableSCConnectionError as e:
-            raise TenableSCConnectionError(
-                f"{context}::Could not retrieve data from {self._target.netloc}/{endpoint.value}\n{e}"
-            )
+            except TenableSCConnectionError as e:
+                raise TenableSCConnectionError(
+                    f"{context}::Could not retrieve data from {self._target.netloc}/{endpoint.value}\n{e}"
+                )
+
+            if len(res) > 0:
+                spinner.ok(f"✅ Retrieved / updated {len(res)} elements")
+
+            else:
+                spinner.fail("❌ No elements could be retrieved / updated")
 
         return res
 

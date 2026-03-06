@@ -7,6 +7,7 @@ from typing import override
 from urllib.parse import ParseResult, urlparse
 
 from bs4 import BeautifulSoup
+from yaspin import yaspin
 
 from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.utils.context import Context
@@ -24,6 +25,7 @@ class CERTFRFeedItem:
 
     title: str
     ref: str
+
 
 class CERTFRConnector(Connector):
     """
@@ -92,8 +94,6 @@ class CERTFRConnector(Connector):
             list[CERTFRPage]: A list of CERTFRPage objects that match the search criteria.
         """
 
-        res = []
-
         if not self.connection:
             self.connect()
 
@@ -102,21 +102,41 @@ class CERTFRConnector(Connector):
 
         search_filter = list(set(search_filter))
 
-        for ref in search_filter:
-            self.logger.info(f"Parsint {ref}")
+        self.logger.info(f"Parsing {len(search_filter)} CERTFR pages")
 
-            page = CERTFRPage(ref)
-            page.connect()
-            page.parse()
+        # Parsing
+        with yaspin(text="Parsing CERTFR pages...") as spinner:
+            res = []
 
-            if keywords is not None:
-                page.match(keywords)
+            for ref in search_filter:
+                self.logger.info(f"Parsint {ref}")
 
-            res.append(page.to_dict())
+                try:
+                    page = CERTFRPage(ref)
+                    page.connect()
+                    page.parse()
+
+                    # Keyword match check
+                    if keywords is not None:
+                        page.match(keywords)
+
+                    res.append(page.to_dict())
+
+                except Exception as e:
+                    self.logger.error(f"{Context()}::{e}")
+                    continue
+
+            if len(res) == len(search_filter):
+                spinner.ok(f"✅ Completed parsing of {len(res)} CERTFR pages")
+
+            else:
+                spinner.fail(f"❌ Parsing failed for {len(search_filter) - len(res)} CERTFR pages")
 
         return res
 
-    def feed(self, date_filter_str: str | None = None, keywords: list[str] | None = None) -> "DataType":
+    def feed(
+        self, date_filter_str: str | None = None, keywords: list[str] | None = None
+    ) -> "DataType":
         """
         Parse the content of the provided feed URL.
 
@@ -176,7 +196,6 @@ class CERTFRConnector(Connector):
 
         except CERTFRParsingError as e:
             logger.error(f"{context}::A parsing error occured for {target}: {e}")
-
 
         res = []
         for ref in filtered_feed:

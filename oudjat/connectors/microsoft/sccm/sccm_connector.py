@@ -3,9 +3,10 @@ A module that handles SCCM server connection and interractions.
 """
 
 import logging
-from typing import override
+from typing import Any, override
 
 import pyodbc
+from yaspin import yaspin
 
 from oudjat.connectors.microsoft.sccm.exceptions import SCCMQueryError, SCCMServerConnectionError
 from oudjat.utils import Context, DataType
@@ -58,8 +59,8 @@ class SCCMConnector(Connector):
         self._port: int = port
         self._database: str = db_name
 
-        self._connection: pyodbc.Connection
-        self._cursor: pyodbc.Cursor
+        self._connection: "pyodbc.Connection"
+        self._cursor: "pyodbc.Cursor"
 
     # ****************************************************************
     # Methods
@@ -108,7 +109,7 @@ class SCCMConnector(Connector):
                 }
 
             self._connection = pyodbc.connect(
-                driver=self._driver.value,
+                driver=str(self._driver),
                 server=self._target,
                 port=self._port,
                 database=self._database,
@@ -130,6 +131,7 @@ class SCCMConnector(Connector):
     def fetch(
         self,
         payload: str,
+        payload_fmt: dict[str, Any] | None = None,
         attributes: "StrType | None" = None,
     ) -> "DataType":
         """
@@ -138,25 +140,41 @@ class SCCMConnector(Connector):
         Detailed description.
 
         Args:
-            payload (str)              : A way to narrow search scope or search results. It may be a string, a tuple, or even a callback function
-            attributes (StrType | None): A list of attributes to keep in the search results
+            payload (str)                      : A way to narrow search scope or search results. It may be a string, a tuple, or even a callback function
+            payload_fmt (dict[str, Any] | None): An optional dictionary to format the provided payload
+            attributes (StrType | None)        : A list of attributes to keep in the search results
 
         Returns:
             list[Any]: list of found element based on provided search filter
         """
 
         context = Context()
-        try:
-            _ = self._cursor.execute(payload)
 
-        except SCCMQueryError as e:
-            raise SCCMQueryError(
-                f"{context}::An error occured while searching in {self._target}::{self._database}: \n{e}"
-            )
+        self.logger.info(f"Fetching elements from {self._target}")
+        self.logger.debug(f"{context}::{payload}")
 
-        res_columns: list[str] = [column[0] for column in self._cursor.description]
-        res = [dict(zip(res_columns, row)) for row in self._cursor.fetchall()]
+        res = []
+        with yaspin(text="Fetching data from server...") as spinner:
+            try:
+                if payload_fmt is not None:
+                    payload = payload.format(**payload_fmt)
 
-        self.logger.debug(f"{context}::{res}")
+                _ = self._cursor.execute(payload)
+
+            except SCCMQueryError as e:
+                raise SCCMQueryError(
+                    f"{context}::An error occured while searching in {self._target}::{self._database}: \n{e}"
+                )
+
+            res_columns: list[str] = [column[0] for column in self._cursor.description]
+            res = [dict(zip(res_columns, row)) for row in self._cursor.fetchall()]
+
+            if len(res) > 0:
+                spinner.ok(f"✅ Fetched {len(res)} elements")
+
+            else:
+                spinner.fail("❌ Could not retrieve any data")
+
+        self.logger.debug(f"{context}::Retrieved {len(res)} elements")
 
         return res
