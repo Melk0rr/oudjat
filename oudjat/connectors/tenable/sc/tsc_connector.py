@@ -8,6 +8,7 @@ from urllib.parse import ParseResult, urlparse
 
 from yaspin import yaspin
 
+from oudjat.utils.logging import spinner_log
 from tenable.sc import TenableSC
 
 from oudjat.connectors.connector import Connector
@@ -193,7 +194,7 @@ class TenableSCConnector(Connector):
         if filters is None:
             filters = []
 
-        payload = { **payload, **kwargs }
+        payload = {**payload, **kwargs}
 
         res = []
         with yaspin(text=f"Retrieving / updating {endpoint.name.lower()} elements") as spinner:
@@ -201,7 +202,7 @@ class TenableSCConnector(Connector):
                 endpoint_api_name, endpoint_api_method = endpoint.value.split(".")
                 endpoint_api = getattr(self._connection, endpoint_api_name)
 
-                self.logger.debug(f"{context}::{endpoint.value} > {payload}")
+                spinner_log(f"{context}::{endpoint.value} > {payload}", self.logger.debug, spinner)
                 endpoint_func: Callable[..., "DatumDataType"] = getattr(
                     endpoint_api, endpoint_api_method
                 )
@@ -209,7 +210,7 @@ class TenableSCConnector(Connector):
                 req = endpoint_func(*filters, **payload)
                 UtilsList.append_flat(res, list(req))
 
-                self.logger.debug(f"{context}::{endpoint.value} > {req}")
+                spinner_log(f"{context}::{endpoint.value} > {req}", self.logger.debug, spinner)
 
             except TenableSCConnectionError as e:
                 raise TenableSCConnectionError(
@@ -256,7 +257,9 @@ class TenableSCConnector(Connector):
 
         if not isinstance(tool, TSCVulnTool):
             if tool.upper() not in TSCVulnTool:
-                raise TenableSCInvalidAnalysisTool(f"{Context()}::Invalid analysis tool provided {tool}")
+                raise TenableSCInvalidAnalysisTool(
+                    f"{Context()}::Invalid analysis tool provided {tool}"
+                )
 
             tool = TSCVulnTool[tool.upper()]
 

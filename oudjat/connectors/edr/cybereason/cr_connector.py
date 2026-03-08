@@ -238,7 +238,6 @@ class CybereasonConnector(Connector):
 
                 res.extend(list(map(map_cr_entry, req_json)))
 
-
             except CybereasonAPIRequestError as e:
                 raise CybereasonAPIRequestError(
                     f"{context}::An error occured while retriving data from {self._endpoint_url(endpoint)}\n{e}"

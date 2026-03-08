@@ -11,6 +11,7 @@ import requests
 from yaspin import yaspin
 
 from oudjat.utils import Context, DataType, FileUtils, NoCredentialsError, StrType
+from oudjat.utils.logging import spinner_log
 
 from ... import Connector, ConnectorMethod
 from .exceptions import SentinelOneAPIConnectionError, SentinelOneEndpointFormatError
@@ -345,9 +346,7 @@ class S1Connector(Connector):
             endpoint_path = endpoint_path.format(**path_fmt)
 
         action_str = (
-            "Retrieving data from"
-            if endpoint.method.name == "GET"
-            else "Updating elements with"
+            "Retrieving data from" if endpoint.method.name == "GET" else "Updating elements with"
         )
 
         self.logger.info(f"{action_str} {endpoint} S1 endpoint")
@@ -364,7 +363,7 @@ class S1Connector(Connector):
                     req = endpoint.method(**r_params)
                     req_json = req.json()
 
-                    self.logger.debug(f"{context}::{endpoint} > {req_json}")
+                    spinner_log(f"{context}::{endpoint} > {req_json}", self.logger.debug, spinner)
 
                     if "data" in req_json:
                         if isinstance(req_json["data"], list):

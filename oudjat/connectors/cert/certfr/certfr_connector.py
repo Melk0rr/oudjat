@@ -11,6 +11,7 @@ from yaspin import yaspin
 
 from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.utils.context import Context
+from oudjat.utils.logging import spinner_log
 from oudjat.utils.types import DataType, StrType
 
 from .certfr_page import CERTFRPage
@@ -109,7 +110,7 @@ class CERTFRConnector(Connector):
             res = []
 
             for ref in search_filter:
-                self.logger.info(f"Parsint {ref}")
+                spinner_log(f"Parsint {ref}", self.logger.info, spinner)
 
                 try:
                     page = CERTFRPage(ref)
@@ -123,11 +124,11 @@ class CERTFRConnector(Connector):
                     res.append(page.to_dict())
 
                 except Exception as e:
-                    self.logger.error(f"{Context()}::{e}")
+                    spinner_log(f"{Context()}::{e}", self.logger.error, spinner)
                     continue
 
             if len(res) == len(search_filter):
-                spinner.ok(f"✅ Completed parsing of {len(res)} CERTFR pages")
+                spinner.ok(f"✅ Parsed of {len(res)} CERTFR pages")
 
             else:
                 spinner.fail(f"❌ Parsing failed for {len(search_filter) - len(res)} CERTFR pages")

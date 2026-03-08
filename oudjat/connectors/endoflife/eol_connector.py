@@ -9,6 +9,7 @@ from yaspin import yaspin
 from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.connectors.endoflife.eol_endpoints import EndOfLifeEndpoint
 from oudjat.utils import Context, DataType, UtilsList
+from oudjat.utils.logging import spinner_log
 from oudjat.utils.types import StrType
 
 from .definitions import EOL_API_URL
@@ -109,7 +110,9 @@ class EndOfLifeConnector(Connector):
 
                 if req.status_code == 200:
                     req_json = req.json()
-                    self.logger.debug(f"{context}::{endpoint}/{filter} > {req_json}")
+                    spinner_log(
+                        f"{context}::{endpoint}/{filter} > {req_json}", self.logger.debug, spinner
+                    )
 
                     UtilsList.append_flat(res, req_json.get("result", []))
 
