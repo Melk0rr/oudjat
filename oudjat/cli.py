@@ -31,7 +31,7 @@ _COMMAND_OPTIONS = {
     "connectors.cert.certfr": CERTFRConnectorCommand,
     "connectors.ldap": LDAPConnectorCommand,
     "connectors.tenable.sc": TenableSCConnectorCommand,
-    "connectors.vuln": VulnConnectorCommand,
+    "connectors.vulns": VulnConnectorCommand,
 }
 
 

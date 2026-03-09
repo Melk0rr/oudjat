@@ -19,7 +19,7 @@ from .connector_command import ConnectorCommand
 
 class VulnConnectorCommand(ConnectorCommand):
     """
-    A class to provide an access to the EndOfLifeConnector.
+    A class to provide an access to various CVE databases.
     """
 
     # ****************************************************************
@@ -40,6 +40,10 @@ class VulnConnectorCommand(ConnectorCommand):
             "Specify cve references to retrieve data for",
             arg="CVES",
         ),
+        "--payload": CmdOpt(
+            "A JSON payload to pass additional query parameters",
+            arg="PAYLOAD",
+        ),
     }
 
     __cmd_props__.usages = {
@@ -47,18 +51,20 @@ class VulnConnectorCommand(ConnectorCommand):
             CmdOpt(
                 "Use a specific database to retrieve CVE data. Keep in mind APIs are requests/min restricted",
             ),
-            "--db (-t=TARGET | --target=TARGET) (--cves=CVES) [options]",
+            "--db (-t=TARGET | --target=TARGET) (--cves=CVES) [--payload=PAYLOAD] [options]",
             {
                 "cves": CmdUsageOpt("--cves"),
+                "payload": CmdUsageOpt("--payload"),
             },
         ),
         "--auto": CmdUsage(
             CmdOpt(
                 "Use load balancing to retrieve data dynamically from available CVE APIs",
             ),
-            "--auto (--cves=CVES) [options]",
+            "--auto (--cves=CVES) [--payload=PAYLOAD] [options]",
             {
                 "cves": CmdUsageOpt("--cves"),
+                "payload": CmdUsageOpt("--payload"),
             },
         ),
     }
@@ -67,7 +73,7 @@ class VulnConnectorCommand(ConnectorCommand):
 
     def __init__(self, options: dict[str, Any]) -> None:
         """
-        Create a new EOLConnectorCommand.
+        Create a new VulnConnectorCommand.
 
         Args:
             options (dict[str, Any]): Provided options
@@ -84,6 +90,7 @@ class VulnConnectorCommand(ConnectorCommand):
         self.__cmd_props__.opts_transform(
             {
                 "--cves": lambda opt, _: self._unify_str_opt(opt),
+                "--payload": lambda _, v: self._parse_payload(v),
             },
         )
 
