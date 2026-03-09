@@ -6,7 +6,9 @@ from enum import Enum
 from typing import Any, Callable
 
 import requests
+from requests.packages import urllib3  # pyright: ignore[reportAttributeAccessIssue]
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class ConnectorMethod(Enum):
     """An enumeration of valid connector method values."""

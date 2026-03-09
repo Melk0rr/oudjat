@@ -2,6 +2,7 @@
 
 import json
 import logging
+import re
 import threading
 from abc import ABC, abstractmethod
 from time import time
@@ -105,7 +106,7 @@ class CVEConnector(Connector, ABC):
         """
 
         def check_key(k: str) -> bool:
-            return "cvssV" in k
+            return re.match(r"cvss(?:Metric)?V[0-9](?:.*)?", k) is not None
 
         return list(filter(check_key, base_metrics_keys))
 

@@ -83,8 +83,11 @@ class NistConnector(CVEConnector):
         self.logger.info(f"Fetching data for {len(cves)} CVEs from {self.URL}")
 
         res = []
-        with yaspin(text=f"Fetching CVE data from {self.URL.netloc}...") as spinner:
-            for cve in cves:
+        spinner_txt = f"Fetching CVE data from {self.URL.netloc}"
+        with yaspin(text=f"{spinner_txt}...") as spinner:
+            for i, cve in enumerate(cves):
+                spinner.text = f"{spinner_txt} ({i+1}/{len(cves)})..."
+
                 if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
                     continue
 
@@ -118,6 +121,8 @@ class NistConnector(CVEConnector):
                         spinner_log(
                             f"No data for vulnerability {cve}", self.logger.warning, spinner
                         )
+
+                    break
 
             if len(res) > 0:
                 spinner.ok(f"✅ Retrieved data for {len(res)} CVEs")
@@ -175,7 +180,7 @@ class NistConnector(CVEConnector):
             },
             "metrics": {
                 "score": cvss_data.get("baseScore", 0),
-                "version": float(cvss_data.get("version", 4.0)),
+                "version": float(cvss_data.get("version", -1.0)),
                 "severity": cvss_data.get("baseSeverity", "INFO"),
             },
             "requirements": {

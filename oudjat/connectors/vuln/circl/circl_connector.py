@@ -72,8 +72,11 @@ class CirclConnector(CVEConnector):
         self.logger.info(f"Fetching data for {len(cves)} CVEs from {self.URL}")
 
         res = []
-        with yaspin(text=f"Fetching CVE data from {self.URL.netloc}...") as spinner:
-            for cve in cves:
+        spinner_txt = f"Fetching CVE data from {self.URL.netloc}"
+        with yaspin(text=f"{spinner_txt}...") as spinner:
+            for i, cve in enumerate(cves):
+                spinner.text = f"{spinner_txt} ({i+1}/{len(cves)})..."
+
                 if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
                     continue
 
@@ -107,6 +110,8 @@ class CirclConnector(CVEConnector):
                             f"No data for vulnerability {cve}", self.logger.warning, spinner
                         )
 
+                    break
+
             if len(res) > 0:
                 spinner.ok(f"✅ Retrieved data for {len(res)} CVEs")
 
@@ -136,8 +141,11 @@ class CirclConnector(CVEConnector):
                 f"{Context()}::Invalid CVE provided {cve} missing mandatory informations"
             )
 
-        containers = cve.get("containers", {}).get("cna", {})
-        metrics: "DataType" = containers.get("metrics", [])
+        containers = cve.get("containers", {})
+        adp_container = containers.get("adp", [])
+        cna_container = containers.get("cna", {})
+
+        metrics: "DataType" = next(iter(adp_container), {}).get("metrics", [])
         metrics_data: dict[str, Any] = {}
         if len(metrics) > 0:
             valid_keys = self._cvss_metrics_keys(list(metrics[0].keys()))
@@ -145,7 +153,7 @@ class CirclConnector(CVEConnector):
             if len(valid_keys) > 0:
                 metrics_data = metrics[0].get(valid_keys[0], {})
 
-        raw_description = containers.get("descriptions", [])
+        raw_description = cna_container.get("descriptions", [])
 
         unified_fmt: "CVEDataFormat" = {
             "id": cve_id,
@@ -157,7 +165,7 @@ class CirclConnector(CVEConnector):
                 ),
             },
             "description": raw_description[0].get("value", "") if len(raw_description) > 0 else "",
-            "sources": [r["url"] for r in containers.get("references", [])],
+            "sources": [r["url"] for r in cna_container.get("references", [])],
             "vectors": {
                 "vectorStr": metrics_data.get("vectorString", ""),
                 "attackVector": metrics_data.get("attackVector", ""),

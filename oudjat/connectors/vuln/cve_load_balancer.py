@@ -88,10 +88,15 @@ class CVELoadBalancer:
         self.logger.debug(f"{context}::{','.join([db.dbname for db in CVEDatabase])}")
 
         res = []
-        with yaspin(text=f"Fetching CVE data from {len(self._apis)} APIs...") as spinner:
-            for cve in cves:
+        spinner_txt = f"Fetching CVE data from {len(self._apis)} APIs"
+        with yaspin(text=f"{spinner_txt}...") as spinner:
+            for i, cve in enumerate(cves):
+                spinner.text = f"{spinner_txt} ({i+1}/{len(cves)})..."
+
                 if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
                     continue
+
+                api_count = 0
 
                 while True:
                     api = self._next_api()
@@ -100,7 +105,7 @@ class CVELoadBalancer:
                         wait_time = self._time_to_wait()
 
                         spinner_log(
-                            f"No API available, waiting {wait_time}...",
+                            f"No API available, waiting {round(wait_time, ndigits=2)}s...",
                             self.logger.warning,
                             spinner,
                         )
@@ -108,6 +113,7 @@ class CVELoadBalancer:
                         sleep(wait_time)
                         continue
 
+                    api_count += 1
                     spinner_log(f"Using {api.URL.netloc} for {cve}", self.logger.info, spinner)
 
                     cve_url = api.cve_api_url(cve)
@@ -128,6 +134,10 @@ class CVELoadBalancer:
                                 self.logger.warning,
                                 spinner,
                             )
+
+                            if api_count == len(self._apis):
+                                break
+
                             continue
 
                     except CVEDatabaseConnectionError as e:
