@@ -16,7 +16,6 @@ from oudjat.utils.types import StrType
 from .cve_formats import CVEDataFormat
 
 
-# TODO: implement token usage on each connector
 class CVEConnector(Connector, ABC):
     """A class that handles connection with Nist API to retrieve CVE informations."""
 
@@ -83,6 +82,17 @@ class CVEConnector(Connector, ABC):
 
         return self._limit_per_minute / 60.0
 
+    @property
+    def interval(self) -> float:
+        """
+        Return the minimum interval between each request.
+
+        Returns:
+            float: Minimum interval value
+        """
+
+        return 60.0 / self._limit_per_minute
+
     # ****************************************************************
     # Methods - helpers
 
@@ -98,6 +108,16 @@ class CVEConnector(Connector, ABC):
             return "cvssV" in k
 
         return list(filter(check_key, base_metrics_keys))
+
+    def time_to_wait(self) -> float:
+        """
+        Return the current time to wait before the connector API is available.
+
+        Returns:
+            float: Time to wait before a request can be sent again
+        """
+
+        return max(0.0, self.interval - (time() - self._last_token_time) + 0.1)
 
     @abstractmethod
     def vuln_from_connection(self) -> dict[str, Any] | None:

@@ -4,7 +4,8 @@ A module to dynamically retrieve CVE data by switching between available APIs.
 
 import logging
 import re
-from time import sleep, time
+from time import sleep
+from typing import Any
 
 from yaspin import yaspin
 
@@ -55,25 +56,33 @@ class CVELoadBalancer:
             float: Time to wait before a new API can be used
         """
 
-        return min(api.rate - ((time() - api.last_token_time) * api.rate) for api in self._apis)
+        return min(api.time_to_wait() for api in self._apis)
 
     # ****************************************************************
     # Methods - helpers
 
-    def fetch(self, cves: "StrType") -> "DataType":
+    def fetch(
+        self,
+        cves: "StrType",
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
         """
         Fetch CVE data by dynamically switching between the available APIs.
 
         Auto switch between the APIs when one limit is reached.
 
         Args:
-            cves (str | list[str]): A single CVE ID or a list of CVE IDs to be searched.
+            cves (str | list[str])         : A single CVE ID or a list of CVE IDs to be searched.
+            payload (dict[str, Any] | None): Payload to send to the target CVE API url
 
         Returns:
             DataType: A list of dictionaries containing filtered vulnerability information for each provided CVE ID.
         """
 
         context = Context()
+
+        if payload is None:
+            payload = {}
 
         self.logger.info(f"{len(cves)} CVEs to resolve")
         self.logger.debug(f"{context}::{','.join([db.dbname for db in CVEDatabase])}")
@@ -88,7 +97,7 @@ class CVELoadBalancer:
                     api = self._next_api()
 
                     if not api:
-                        wait_time = max(self._time_to_wait(), 0.1)
+                        wait_time = self._time_to_wait()
 
                         spinner_log(
                             f"No API available, waiting {wait_time}...",
@@ -103,11 +112,13 @@ class CVELoadBalancer:
 
                     cve_url = api.cve_api_url(cve)
                     try:
-                        api.connect(cve_url)
+                        api.connect(cve_url, **payload)
                         vuln = api.vuln_from_connection()
 
                         if vuln:
-                            spinner_log(f"{context}::{cve_url} > {vuln}", self.logger.debug, spinner)
+                            spinner_log(
+                                f"{context}::{cve_url} > {vuln}", self.logger.debug, spinner
+                            )
                             res.append(api.unify_cve_data(vuln))
                             break
 
