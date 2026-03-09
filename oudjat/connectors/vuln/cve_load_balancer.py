@@ -120,10 +120,7 @@ class CVELoadBalancer:
                             continue
 
                     except CVEDatabaseConnectionError as e:
-                        spinner.hide()
-                        self.logger.error(e)
-                        spinner.show()
-
+                        spinner_log(f"{e}", self.logger.error, spinner)
                         continue
 
             if len(res) > 0:

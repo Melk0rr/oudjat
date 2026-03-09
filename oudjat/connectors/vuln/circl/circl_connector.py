@@ -1,6 +1,7 @@
 """A module that handles the connection to circl.lu API."""
 
 import re
+from time import sleep, time
 from typing import Any, override
 from urllib.parse import ParseResult, urlparse
 
@@ -76,18 +77,35 @@ class CirclConnector(CVEConnector):
                 if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
                     continue
 
-                cve_target = CirclConnector.cve_api_url(cve)
+                while True:
+                    if not self.token():
+                        wait_time = max(
+                            self.rate - ((time() - self.last_token_time) * self.rate), 0.1
+                        )
 
-                spinner_log(f"{context}::{cve_target} > {payload}", self.logger.debug, spinner)
-                self.connect(cve_target, **payload)
+                        spinner_log(
+                            f"API not available, waiting {wait_time}...",
+                            self.logger.warning,
+                            spinner,
+                        )
 
-                vuln = self.vuln_from_connection()
-                if vuln:
-                    spinner_log(f"{context}::{cve_target} > {vuln}", self.logger.debug, spinner)
-                    res.append(self.unify_cve_data(vuln) if not raw else vuln)
+                        sleep(wait_time)
+                        continue
 
-                else:
-                    spinner_log(f"No data for vulnerability {cve}", self.logger.warning, spinner)
+                    cve_target = CirclConnector.cve_api_url(cve)
+
+                    spinner_log(f"{context}::{cve_target} > {payload}", self.logger.debug, spinner)
+                    self.connect(cve_target, **payload)
+
+                    vuln = self.vuln_from_connection()
+                    if vuln:
+                        spinner_log(f"{context}::{cve_target} > {vuln}", self.logger.debug, spinner)
+                        res.append(self.unify_cve_data(vuln) if not raw else vuln)
+
+                    else:
+                        spinner_log(
+                            f"No data for vulnerability {cve}", self.logger.warning, spinner
+                        )
 
             if len(res) > 0:
                 spinner.ok(f"✅ Retrieved data for {len(res)} CVEs")
@@ -189,4 +207,3 @@ class CirclConnector(CVEConnector):
         """
 
         return f"{CirclConnector.API_URL.geturl()}{cve}"
-

@@ -2,6 +2,7 @@
 
 import re
 from decimal import Context
+from time import sleep, time
 from typing import Any, override
 from urllib.parse import ParseResult, urlparse
 
@@ -87,19 +88,36 @@ class NistConnector(CVEConnector):
                 if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
                     continue
 
-                cve_target = NistConnector.cve_api_url(cve)
+                while True:
+                    if not self.token():
+                        wait_time = max(
+                            self.rate - ((time() - self.last_token_time) * self.rate), 0.1
+                        )
 
-                spinner_log(f"{context}::{cve_target} > {payload}", self.logger.debug, spinner)
-                self.connect(cve_target, **payload)
+                        spinner_log(
+                            f"API not available, waiting {wait_time}...",
+                            self.logger.warning,
+                            spinner,
+                        )
 
-                vuln = self.vuln_from_connection()
+                        sleep(wait_time)
+                        continue
 
-                if vuln:
-                    spinner_log(f"{context}::{cve_target} > {vuln}", self.logger.debug, spinner)
-                    res.append(self.unify_cve_data(vuln) if not raw else vuln)
+                    cve_url = NistConnector.cve_api_url(cve)
 
-                else:
-                    spinner_log(f"No data for vulnerability {cve}", self.logger.warning, spinner)
+                    spinner_log(f"{context}::{cve_url} > {payload}", self.logger.debug, spinner)
+                    self.connect(cve_url, **payload)
+
+                    vuln = self.vuln_from_connection()
+
+                    if vuln:
+                        spinner_log(f"{context}::{cve_url} > {vuln}", self.logger.debug, spinner)
+                        res.append(self.unify_cve_data(vuln) if not raw else vuln)
+
+                    else:
+                        spinner_log(
+                            f"No data for vulnerability {cve}", self.logger.warning, spinner
+                        )
 
             if len(res) > 0:
                 spinner.ok(f"✅ Retrieved data for {len(res)} CVEs")
