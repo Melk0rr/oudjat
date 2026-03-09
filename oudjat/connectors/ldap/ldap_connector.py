@@ -4,16 +4,18 @@ import logging
 import socket
 import ssl
 from enum import IntEnum
-from typing import Any, TypedDict, final, override
+from typing import Any, TypedDict, override
 
 import ldap3
 from ldap3.core.exceptions import LDAPSocketOpenError
+from tqdm import tqdm
+from yaspin import yaspin
 
-from oudjat.connectors.connector import Connector
 from oudjat.utils import Context
 from oudjat.utils.credentials import NoCredentialsError
-from oudjat.utils.types import StrType
+from oudjat.utils.types import DataType, StrType
 
+from ..connector import Connector
 from .exceptions import (
     InvalidLDAPEntryError,
     LDAPConnectionError,
@@ -21,6 +23,18 @@ from .exceptions import (
     LDAPUnreachableServerError,
 )
 from .ldap_filter import LDAPFilter, LDAPFilterStrFormat
+from .objects import (
+    LDAPCapabilities,
+    LDAPComputer,
+    LDAPGroup,
+    LDAPGroupPolicyObject,
+    LDAPObject,
+    LDAPObjectOptions,
+    LDAPOrganizationalUnit,
+    LDAPSubnet,
+    LDAPUser,
+)
+from .objects.account import LDAPComputerFlag, LDAPUserFlag
 from .objects.ldap_entry import LDAPEntry
 from .objects.ldap_object_types import LDAPObjectType
 
@@ -59,7 +73,6 @@ class LDAPPort(IntEnum):
     TLS = 636
 
 
-@final
 class LDAPConnector(Connector):
     """
     LDAP connector to interact and query LDAP servers.
@@ -77,38 +90,50 @@ class LDAPConnector(Connector):
 
     def __init__(
         self,
-        server: str,
+        target: str,
         username: str | None = None,
         password: str | None = None,
-        use_tls: bool = False,
+        use_tls: bool = True,
+        is_active_directory: bool = True,
     ) -> None:
         """
         Create a new LDAPConnector.
 
         Args:
-            server (str)      : Server name
-            username (str)    : Username to use for the connection
-            password (str)    : Password to use for the connection
-            service_name (str): Service name used to store credentials
-            use_tls (bool)    : Should the connector use TLS for LDAPS connection
+            target (str)             : Server name
+            username (str)           : Username to use for the connection
+            password (str)           : Password to use for the connection
+            service_name (str)       : Service name used to store credentials
+            use_tls (bool)           : Should the connector use TLS for LDAPS connection
+            is_active_directory(bool): Indicates if the target directory is an MS Active Directory. Defaults to True
         """
 
         self._use_tls: bool = use_tls
         self._port: "LDAPPort" = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
 
-        super().__init__(target=server, username=username, password=password)
+        super().__init__(target=target, username=username, password=password)
 
-        self.logger = logging.getLogger(__name__)
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
+
         self._domain: str = ""
         self._default_search_base: str = ""
+
         self._ldap_server: ldap3.Server
         self._connection: ldap3.Connection | None = None
 
         context = Context()
+
         self.logger.debug(f"{context}::New LDAPConnector - {self._target}:{self._port}")
 
+        self._is_active_directory: bool = is_active_directory
+
+        self._CAPABILITIES: "LDAPCapabilities" = LDAPCapabilities(
+            ldap_search=self.fetch,
+            ldap_obj_opt=self._object_opt,
+        )
+
     # ****************************************************************
-    # Methods
+    # Methods - getters/setters
 
     @property
     def domain(self) -> str:
@@ -119,7 +144,7 @@ class LDAPConnector(Connector):
             str: domain name
         """
 
-        return self._domain
+        return self._domain.lower()
 
     @property
     @override
@@ -143,6 +168,25 @@ class LDAPConnector(Connector):
         """
 
         return self._default_search_base
+
+    # ****************************************************************
+    # Methods - helpers
+
+    def _check_search_res_entry(self, entry: dict[str, Any]) -> bool:
+        """
+        Check if the provided entry is a searchResEntry.
+
+        Args:
+            entry (dict[str, Any]): entry to check
+
+        Returns:
+            bool: True if the entry is a searchResEntry. False otherwise
+        """
+
+        return entry["type"] == "searchResEntry"
+
+    # ****************************************************************
+    # Methods - access
 
     def set_tls_usage(self, use_tls: bool = True) -> None:
         """
@@ -298,8 +342,6 @@ class LDAPConnector(Connector):
                 f"{context}::You must initiate connection to {self.target} before running search !"
             )
 
-        self.logger.info(f"Fetching {search_type} from {self.domain}")
-
         if payload is None:
             payload = {}
 
@@ -319,32 +361,256 @@ class LDAPConnector(Connector):
 
         payload["search_filter"] = str(formated_filter)
         payload["search_base"] = search_base or self.default_search_base
-        payload["attributes"] = attributes or search_type.attributes
 
+        attributes_complete = []
+        attributes_complete.extend(search_type.attributes)
+
+        if self._is_active_directory and search_type.ad_attributes:
+            attributes_complete.extend(search_type.ad_attributes)
+
+        if attributes is not None:
+            attributes_complete.extend(attributes)
+
+        payload["attributes"] = list(set(attributes_complete))
+
+        self.logger.info(f"Fetching {search_type} from {self.domain}")
         self.logger.debug(f"{context}::{search_type} > {payload}")
 
         # Actual request
-        results = self.connection.extend.standard.paged_search(**payload)
+        res = []
+        with yaspin(text=f"Fetching {search_type} data...") as spinner:
+            req = self.connection.extend.standard.paged_search(**payload)
 
-        def ldap_entry_from_dict(entry: dict[str, Any]) -> "LDAPEntry":
-            if entry.get("attributes", None) is None:
-                raise InvalidLDAPEntryError(
-                    f"{context}::Invalid entry provided. No attribute found"
+            def _ldap_entry_from_dict(entry: dict[str, Any]) -> "LDAPEntry":
+                if entry.get("attributes", None) is None:
+                    raise InvalidLDAPEntryError(
+                        f"{context}::Invalid entry provided. No attribute found"
+                    )
+
+                return LDAPEntry(**entry)
+
+            res = list(
+                map(
+                    _ldap_entry_from_dict,
+                    filter(self._check_search_res_entry, req),
                 )
-
-            return LDAPEntry(**entry)
-
-        res = list(
-            map(
-                ldap_entry_from_dict,
-                filter(LDAPConnector._check_search_res_entry, results),
             )
-        )
+
+            if len(res) > 0:
+                spinner.ok(f"✅ Retrieved {len(res)} {search_type} entries")
+
+            else:
+                spinner.fail(f"❌ No {search_type} entries could be retrieved")
 
         self.logger.debug(f"{context}::{search_type} > {[el.dn for el in res]}")
-        self.logger.debug(f"{context}::Retrieved {len(res)} entries")
 
         return res
+
+    # ****************************************************************
+    # Methods - ldap objects
+
+    def _object_opt(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOptions[LDAPObject]":
+        """
+        Return an LDAP object based on a given type.
+
+        Args:
+            ldap_obj_type (LDAPObjectType): The LDAPObjectType element that will determine the output object
+
+        Returns:
+            LDAPObjTypeAlias: The python class matching the provided entry
+        """
+
+        obj_map: dict[str, "LDAPObjectOptions"] = {
+            f"{LDAPObjectType.DEFAULT}": LDAPObjectOptions["LDAPObject"](
+                cls=LDAPObject, fetch=self.ldap_objects
+            ),
+            f"{LDAPObjectType.COMPUTER}": LDAPObjectOptions["LDAPComputer"](
+                cls=LDAPComputer, fetch=self.ldap_computers
+            ),
+            f"{LDAPObjectType.GPO}": LDAPObjectOptions["LDAPGroupPolicyObject"](
+                cls=LDAPGroupPolicyObject, fetch=self.ldap_gpos
+            ),
+            f"{LDAPObjectType.GROUP}": LDAPObjectOptions["LDAPGroup"](
+                cls=LDAPGroup, fetch=self.ldap_groups
+            ),
+            f"{LDAPObjectType.OU}": LDAPObjectOptions["LDAPOrganizationalUnit"](
+                cls=LDAPOrganizationalUnit, fetch=self.ldap_ous
+            ),
+            f"{LDAPObjectType.SUBNET}": LDAPObjectOptions["LDAPSubnet"](
+                cls=LDAPSubnet, fetch=self.ldap_subnets
+            ),
+            f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](
+                cls=LDAPUser, fetch=self.ldap_users
+            ),
+        }
+
+        return obj_map[f"{ldap_obj_type}"]
+
+    def ldap_objects(
+        self,
+        entries: list["LDAPEntry"],
+        auto: bool = False,
+    ) -> dict[str, "LDAPObject"]:
+        """
+        Map the provided LDAP entries into a dictionary of LDAPObject instances.
+
+        Args:
+            entries (list[LDAPEntry]): LDAP entries to map
+            auto (bool)              : Auto map the objects dynamically per type
+
+        Returns:
+            dict[str, LDAPComputer]: Mapped entries as a dictionary of LDAP objects
+        """
+
+        def _map_obj(entry: "LDAPEntry") -> "LDAPObject":
+            if auto:
+                obj_type = LDAPObjectType.from_object_cls(entry)
+                LDAPDynamicObjectType = self._object_opt(obj_type).cls
+
+                return LDAPDynamicObjectType(self.complete_partial_entry(entry), self._CAPABILITIES)
+
+            return LDAPObject(entry, capabilities=self._CAPABILITIES)
+
+        objects = {obj.dn: obj for obj in [_map_obj(e) for e in tqdm(entries, ncols=100)]}
+
+        return objects
+
+    def ldap_computers(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPComputer"]:
+        """
+        Map the provided LDAP entries into a dictionary of LDAPComputer instances.
+
+        Args:
+            entries (list[LDAPEntry]): LDAP entries to map
+
+        Returns:
+            dict[str, LDAPComputer]: Mapped entries as a dictionary of LDAP computers
+        """
+
+        def _map_cpt(entry: "LDAPEntry") -> "LDAPComputer":
+            cpt = LDAPComputer(entry, capabilities=self._CAPABILITIES)
+            cpt.flags.update(LDAPComputerFlag.flags(cpt))
+
+            return cpt
+
+        computers = {cpt.dn: cpt for cpt in [_map_cpt(e) for e in tqdm(entries, ncols=100)]}
+
+        return computers
+
+    def ldap_users(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPUser"]:
+        """
+        Map the provided LDAP entries into a dictionary of User instances.
+
+        Args:
+            entries (list[LDAPEntry]): LDAP entries to map
+
+        Returns:
+            dict[str, LDAPUser]: Mapped entries as a dictionary of LDAP computers
+        """
+
+        def _map_usr(entry: "LDAPEntry") -> "LDAPUser":
+            usr = LDAPUser(entry, capabilities=self._CAPABILITIES)
+            usr.flags.update(LDAPUserFlag.flags(usr))
+
+            return usr
+
+        users = {usr.dn: usr for usr in [_map_usr(e) for e in tqdm(entries, ncols=100)]}
+
+        return users
+
+    def ldap_groups(
+        self,
+        entries: list["LDAPEntry"],
+        recursive: bool = False,
+    ) -> dict[str, "LDAPGroup"]:
+        """
+        Map the provided LDAP entries into a dictionary of LDAPGroup instances.
+
+        Args:
+            entries (list[LDAPEntry]): LDAP entries to map
+            recursive (bool)         : Whether to retrieve group members recursively or not
+
+        Returns:
+            dict[str, LDAPGroup]: Mapped entries as a dictionary of LDAP computers
+        """
+
+        def _map_grp(entry: "LDAPEntry") -> "LDAPGroup":
+            grp_instance = LDAPGroup(entry, self._CAPABILITIES)
+            if recursive:
+                grp_instance.fetch_members(recursive)
+
+            return grp_instance
+
+        groups = {grp.dn: grp for grp in [_map_grp(e) for e in tqdm(entries, ncols=100)]}
+
+        return groups
+
+    def ldap_gpos(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPGroupPolicyObject"]:
+        """
+        Map the provided LDAP entries into a dictionary of LDAPGroupPolicyObject instances.
+
+        Args:
+            entries (list[LDAPEntry]): LDAP entries to map
+
+        Returns:
+            dict[str, LDAPGroup]: Mapped entries as a dictionary of LDAP gpos
+        """
+
+        def _map_gpo(entry: "LDAPEntry") -> "LDAPGroupPolicyObject":
+            return LDAPGroupPolicyObject(entry, self._CAPABILITIES)
+
+        gpos = {gpo.dn: gpo for gpo in [_map_gpo(e) for e in tqdm(entries, ncols=100)]}
+
+        return gpos
+
+    def ldap_ous(
+        self,
+        entries: list["LDAPEntry"],
+        recursive: bool = False,
+    ) -> dict[str, "LDAPOrganizationalUnit"]:
+        """
+        Map the provided LDAP entries into a dictionary of LDAPOrganizationalUnit instances.
+
+        Args:
+            entries (list[LDAPEntry]): LDAP entries to map
+            recursive (bool)         : Retrieve OUs recursively if set to True
+
+        Returns:
+            dict[str, LDAPOrganizationalUnit]: Mapped entries as a dictionary of LDAP ous
+        """
+
+        def _map_ou(entry: "LDAPEntry") -> "LDAPOrganizationalUnit":
+            ou_instance = LDAPOrganizationalUnit(entry, self._CAPABILITIES)
+            if recursive:
+                ou_instance.fetch_objects(recursive)
+
+            return ou_instance
+
+        ous = {ou.dn: ou for ou in [_map_ou(e) for e in tqdm(entries, ncols=100)]}
+
+        return ous
+
+    def ldap_subnets(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPSubnet"]:
+        """
+        Map the provided LDAP entries into a dictionary of LDAPSubnet instances.
+
+        Args:
+            entries (list[LDAPEntry]): LDAP entries to map
+
+        Returns:
+            dict[str, LDAPSubnet]: Mapped entries as a dictionary of LDAP ous
+        """
+
+        self.logger.info(f"Mapping {len(entries)} entries into LDAPSubnets")
+
+        def _map_net(entry: "LDAPEntry") -> "LDAPSubnet":
+            return LDAPSubnet(entry, self._CAPABILITIES)
+
+        subnets = {net.dn: net for net in [_map_net(e) for e in tqdm(entries, ncols=100)]}
+
+        return subnets
+
+    # ****************************************************************
+    # Methods - core
 
     def objects(
         self,
@@ -352,18 +618,21 @@ class LDAPConnector(Connector):
         attributes: "StrType | None" = None,
         search_base: str | None = None,
         payload: dict[str, Any] | None = None,
-    ) -> list["LDAPEntry"]:
+    ) -> "DataType":
         """
-        Specific method to retrieve LDAP User instances.
+        Return generic LDAP object data.
+
+        Filters no object class nor categories.
+        First convert found entries into LDAPObject instances to compute some values.
 
         Args:
-            search_filter (str)            : Filter to reduce search results
-            attributes (str | list[str])   : Attributes to include in result
+            search_filter (str)            : LDAP Filter to reduce search results
+            attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
             payload (dict[str, Any] | None): Payload to send to the server
 
         Returns:
-            list[LDAPEntry]: A list of entries based on the provided arguments and payload
+            DataType: A list of entries based on the provided arguments and payload
         """
 
         entries = self.fetch(
@@ -374,7 +643,14 @@ class LDAPConnector(Connector):
             payload=payload,
         )
 
-        return entries
+        self.logger.info(f"Processing {len(entries)} generic object entries...")
+
+        # Processing raw LDAP entries into LDAP object instances
+        def _obj_dict(e: "LDAPEntry") -> dict[str, Any]:
+            return LDAPObject(e, capabilities=self._CAPABILITIES).to_dict()
+
+        processed = [_obj_dict(e) for e in tqdm(entries, ncols=100)]
+        return processed
 
     def computers(
         self,
@@ -382,18 +658,20 @@ class LDAPConnector(Connector):
         attributes: "StrType | None" = None,
         search_base: str | None = None,
         payload: dict[str, Any] | None = None,
-    ) -> list["LDAPEntry"]:
+    ) -> "DataType":
         """
         Specific method to retrieve LDAP Computer instances.
 
+        First convert found entries into LDAPComputer instances to compute some values.
+
         Args:
-            search_filter (str)            : filter to reduce search results
-            attributes (str | list[str])   : attributes to include in result
+            search_filter (str)            : LDAP Filter to reduce search results
+            attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : where to base the search on in terms of directory location
             payload (dict[str, Any] | None): Payload to send to the server
 
         Returns:
-            list[LDAPEntry]: A list of entries based on the provided arguments and payload
+            DataType: A list of entries based on the provided arguments and payload
         """
 
         entries = self.fetch(
@@ -404,7 +682,17 @@ class LDAPConnector(Connector):
             payload=payload,
         )
 
-        return entries
+        self.logger.info(f"Processing {len(entries)} computer entries...")
+
+        # Processing raw LDAP entries into LDAP computer instances
+        def _cpt_dict(e: "LDAPEntry") -> dict[str, Any]:
+            cpt = LDAPComputer(e, capabilities=self._CAPABILITIES)
+            cpt.flags.update(LDAPComputerFlag.flags(cpt))
+
+            return cpt.to_dict()
+
+        processed = [_cpt_dict(e) for e in tqdm(entries, ncols=100)]
+        return processed
 
     def users(
         self,
@@ -413,28 +701,31 @@ class LDAPConnector(Connector):
         search_base: str | None = None,
         payload: dict[str, Any] | None = None,
         extension_attr: bool = True,
-    ) -> list["LDAPEntry"]:
+    ) -> "DataType":
         """
-        Specific method to retrieve LDAP User instances.
+        Return LDAP user data.
+
+        First convert the found entries into LDAPUser instances in order to compute some values.
 
         Args:
-            search_filter (str)            : Filter to reduce search results
-            attributes (str | list[str])   : Attributes to include in result
+            search_filter (str)            : LDAP Filter to reduce search results
+            attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
             payload (dict[str, Any] | None): Payload to send to the server
             extension_attr (bool)          : Whether to include extension attributes
 
         Returns:
-            list[LDAPEntry]: A list of entries based on the provided arguments and payload
+            DataType: A list of entries based on the provided arguments and payload
         """
 
         if extension_attr:
             if attributes is None:
-                attributes = LDAPObjectType.USER.attributes
+                attributes = []
 
-            attributes = list(attributes)
-            attributes.extend([ f"extensionAttribute{i}" for i in range(1, 16) ])
+            if not isinstance(attributes, list):
+                attributes = [attributes]
 
+            attributes.extend([f"extensionAttribute{i}" for i in range(1, 16)])
             attributes = list(set(attributes))
 
         entries = self.fetch(
@@ -445,26 +736,39 @@ class LDAPConnector(Connector):
             payload=payload,
         )
 
-        return entries
+        self.logger.info(f"Processing {len(entries)} user entries...")
 
+        # Processing raw LDAP entries into LDAP user instances
+        def _usr_dict(e: "LDAPEntry") -> dict[str, Any]:
+            usr = LDAPUser(e, capabilities=self._CAPABILITIES)
+            usr.flags.update(LDAPUserFlag.flags(usr))
+
+            return usr.to_dict()
+
+        processed = [_usr_dict(e) for e in tqdm(entries, ncols=100)]
+        return processed
+
+    # TODO: Add more options to retrieve different levels of members.
     def groups(
         self,
         search_filter: "LDAPFilter | str | None" = None,
         search_base: str | None = None,
         attributes: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
-    ) -> list["LDAPEntry"]:
+    ) -> "DataType":
         """
-        Specific method to retrieve LDAP group objects.
+        Return LDAP group data.
+
+        First convert found entries into LDAPGroup instances to compute some values.
 
         Args:
-            search_filter (str)            : Filter to reduce search results
-            attributes (str | list[str])   : Attrbutes to include in result
+            search_filter (str)            : LDAP Filter to reduce search results
+            attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
             payload (dict[str, Any] | None): Payload to send to the server
 
         Returns:
-            list[LDAPEntry]: A list of entries based on the provided arguments and payload
+            DataType: A list of entries based on the provided arguments and payload
         """
 
         entries = self.fetch(
@@ -475,26 +779,39 @@ class LDAPConnector(Connector):
             payload=payload,
         )
 
-        return entries
+        self.logger.info(f"Processing {len(entries)} group entries...")
+
+        # Processing raw LDAP entries into LDAP group instances
+        def _grp_dict(e: "LDAPEntry") -> dict[str, Any]:
+            return LDAPGroup(e, capabilities=self._CAPABILITIES).to_dict()
+
+        processed = [_grp_dict(e) for e in tqdm(entries, ncols=100)]
+        return processed
 
     def gpos(
         self,
         displayName: str = "*",
-        name: StrType = "*",
+        name: "StrType" = "*",
+        search_filter: "LDAPFilter | str | None" = None,
+        search_base: str | None = None,
         attributes: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
-    ) -> list["LDAPEntry"]:
+    ) -> "DataType":
         """
-        Specific method to retrieve LDAP GPO instances.
+        Return GPOs data.
+
+        First convert found entries into LDAPGroupPolicyObject instances to compute some values.
 
         Args:
-            displayName (str)              : GPO display name
-            name (StrType)                 : GPO name
-            attributes (str | list[str])   : Attributes to include in result
-            payload (dict[str, Any] | None): Payload to send to the server
+            displayName (str)                      : GPO display name
+            name (StrType)                         : GPO name (link)
+            search_filter (str | LDAPFilter | None): LDAP Filter to reduce search results
+            search_base (str)                      : Where to base the search on in terms of directory location
+            attributes (str | list[str])           : Attributes to include in result
+            payload (dict[str, Any] | None)        : Payload to send to the server
 
         Returns:
-            list[LDAPEntry]: A list of entries based on the provided arguments and payload
+            DataType: A list of entries based on the provided arguments and payload
         """
 
         name_filter = LDAPFilter()
@@ -507,15 +824,30 @@ class LDAPConnector(Connector):
         else:
             name_filter = LDAPFilter(f"(name={name})")
 
+        entries_filter = LDAPFilter(f"(displayName={displayName})") & name_filter
+
+        if search_filter:
+            if not isinstance(search_filter, LDAPFilter):
+                search_filter = LDAPFilter(search_filter)
+
+            entries_filter = entries_filter & search_filter
+
         entries = self.fetch(
             search_type=LDAPObjectType.GPO,
-            search_base=None,
-            search_filter=(LDAPFilter(f"(displayName={displayName})") & name_filter),
+            search_base=search_base,
+            search_filter=entries_filter,
             attributes=attributes,
             payload=payload,
         )
 
-        return entries
+        self.logger.info(f"Processing {len(entries)} gpo entries...")
+
+        # Processing raw LDAP entries into LDAP gpo instances
+        def _gpo_dict(e: "LDAPEntry") -> dict[str, Any]:
+            return LDAPGroupPolicyObject(e, capabilities=self._CAPABILITIES).to_dict()
+
+        processed = [_gpo_dict(e) for e in tqdm(entries, ncols=100)]
+        return processed
 
     def ous(
         self,
@@ -523,19 +855,21 @@ class LDAPConnector(Connector):
         search_base: str | None = None,
         attributes: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
-    ) -> list["LDAPEntry"]:
+    ) -> "DataType":
         """
-        Specific method to retrieve LDAP organizational unit objects.
+        Return OU data.
+
+        First convert found entries into LDAPOrganizationalUnit instances to compute some values.
 
         Args:
-            dn (str):                      : Optional distinguished name to search
-            search_filter (str)            : Filter to reduce search results
-            attributes (str | list[str])   : Attrbutes to include in result
-            search_base (str)              : Where to base the search on in terms of directory location
-            payload (dict[str, Any] | None): Payload to send to the server
+            dn (str):                       : Optional distinguished name to search
+            search_filter (str | LDAPFilter): LDAP Filter to reduce search results
+            attributes (str | list[str])    : Additional attributes to include in result
+            search_base (str)               : Where to base the search on in terms of directory location
+            payload (dict[str, Any] | None) : Payload to send to the server
 
         Returns:
-            list[LDAPEntry]: A list of entries based on the provided arguments and payload
+            DataType: A list of entries based on the provided arguments and payload
         """
 
         entries = self.fetch(
@@ -546,24 +880,33 @@ class LDAPConnector(Connector):
             payload=payload,
         )
 
-        return entries
+        self.logger.info(f"Processing {len(entries)} ou entries...")
+
+        # Processing raw LDAP entries into LDAP ous instances
+        def _ou_dict(e: "LDAPEntry") -> dict[str, Any]:
+            return LDAPOrganizationalUnit(e, capabilities=self._CAPABILITIES).to_dict()
+
+        processed = [_ou_dict(e) for e in tqdm(entries, ncols=100)]
+        return processed
 
     def subnets(
         self,
         search_filter: "LDAPFilter | str | None" = None,
         attributes: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
-    ) -> list["LDAPEntry"]:
+    ) -> "DataType":
         """
-        Specific method to retrieve LDAP subnet instances.
+        Return LDAP subnet data.
+
+        First convert found entries into LDAPSubnet instances to compute some values.
 
         Args:
-            search_filter (str)            : Filter to reduce search results
-            attributes (str | list[str])   : Attributes to include in result
+            search_filter (str)            : LDAP Filter to reduce search results
+            attributes (str | list[str])   : Additional attributes to include in result
             payload (dict[str, Any] | None): Payload to send to the server
 
         Returns:
-            list[LDAPEntry]: A list of entries based on the provided arguments and payload
+            DataType: A list of entries based on the provided arguments and payload
         """
 
         sb_dc = ",".join([f"DC={dc.lower()}" for dc in self.domain.split(".")])
@@ -576,7 +919,14 @@ class LDAPConnector(Connector):
             payload=payload,
         )
 
-        return entries
+        self.logger.info(f"Processing {len(entries)} subnet entries...")
+
+        # Processing raw LDAP entries into LDAP subnet instances
+        def _net_dict(e: "LDAPEntry") -> dict[str, Any]:
+            return LDAPSubnet(e, capabilities=self._CAPABILITIES).to_dict()
+
+        processed = [_net_dict(e) for e in tqdm(entries, ncols=100)]
+        return processed
 
     def complete_partial_entry(self, ldap_entry: "LDAPEntry") -> "LDAPEntry":
         """
@@ -597,12 +947,12 @@ class LDAPConnector(Connector):
             search_filter=LDAPFilterStrFormat.DN(ldap_entry.dn),
         )[0]
 
-    def domain_admins(self) -> list["LDAPEntry"]:
+    def domain_admins(self) -> "DataType":
         """
         Return a list of the domain and enterprise admins.
 
         Returns:
-            dict[int | str, LDAPUser]: a list of LDAPEntry instances representing the domain admins
+            DataType: a list of LDAPEntry instances representing the domain admins
         """
 
         return self.users(
@@ -611,20 +961,6 @@ class LDAPConnector(Connector):
 
     # ****************************************************************
     # Static methods
-
-    @staticmethod
-    def _check_search_res_entry(entry: dict[str, Any]) -> bool:
-        """
-        Check if the provided entry is a searchResEntry.
-
-        Args:
-            entry (dict[str, Any]): entry to check
-
-        Returns:
-            bool: True if the entry is a searchResEntry. False otherwise
-        """
-
-        return entry["type"] == "searchResEntry"
 
     @staticmethod
     def ldap_entry_from_dict(entry: dict[str, Any]) -> "LDAPEntry":

@@ -37,10 +37,6 @@ class CERTFRConnectorCommand(ConnectorCommand):
             "A list of keywords (comma separated, no space)",
             arg="KEYWORDS",
         ),
-        "--keywords-file": CmdOpt(
-            "A list of keywords (as a file)",
-            arg="KEYWORDSFILE",
-        ),
     }
 
     __cmd_props__.usages = {
@@ -50,20 +46,9 @@ class CERTFRConnectorCommand(ConnectorCommand):
                 short="t",
                 arg="TARGET"
             ),
-            "(-t=TARGET | --target=TARGET) [--keywords=KEYWORDS | --keywords-file=KEYWORDSFILE] [options]",
+            "(-t=TARGET | --target=TARGET) [--keywords=KEYWORDS] [options]",
             {
                 "search_filter": CmdUsageOpt("--target"),
-                "keywords": CmdUsageOpt("--keywords"),
-            },
-        ),
-        "--target-file": CmdUsage(
-            CmdOpt(
-                "Specify CERTFR page references for parsing (comma separated, no space)",
-                arg="TARGETFILE"
-            ),
-            "(--target-file=TARGETFILE) [--keywords=KEYWORDS | --keywords-file=KEYWORDSFILE] [options]",
-            {
-                "search_filter": CmdUsageOpt("--target-file"),
                 "keywords": CmdUsageOpt("--keywords"),
             },
         ),
@@ -71,7 +56,7 @@ class CERTFRConnectorCommand(ConnectorCommand):
             CmdOpt(
                 "Automatically retrieve and parse CERTFR pages from RSS feed",
             ),
-            "--feed [--feed-filter=FEEDFILTER] [--keywords=KEYWORDS | --keywords-file=KEYWORDSFILE] [options]",
+            "--feed [--feed-filter=FEEDFILTER] [--keywords=KEYWORDS] [options]",
             {
                 "date_filter_str": CmdUsageOpt("--feed-filter"),
                 "keywords": CmdUsageOpt("--keywords"),
@@ -97,10 +82,8 @@ class CERTFRConnectorCommand(ConnectorCommand):
         # Options transform based on instance
         self.__cmd_props__.opts_transform(
             {
-                "--target": lambda opt, _: self._unify_str_opt(opt, "--target-file"),
-                "--target-file": lambda opt, _: self._unify_str_opt("--target", opt),
-                "--keywords": lambda opt, _: self._unify_str_opt(opt, "--keywords-file"),
-                "--keywords-file": lambda opt, _: self._unify_str_opt("--keywords", opt),
+                "--target": lambda opt, _: self._unify_str_opt(opt),
+                "--keywords": lambda opt, _: self._unify_str_opt(opt),
             }
         )
 
@@ -108,7 +91,6 @@ class CERTFRConnectorCommand(ConnectorCommand):
         self.__cmd_props__.backends(
             {
                 "--target": self.connector.fetch,
-                "--target-file": self.connector.fetch,
                 "--feed": self.connector.feed,
             }
         )

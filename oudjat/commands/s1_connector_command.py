@@ -4,11 +4,8 @@ A command module to handle interactions to Sentinel One API through the dedicate
 
 from typing import Any
 
-import orjson
-
 from oudjat.connectors.edr.sentinelone import S1Connector
 from oudjat.utils.doc_builder import DocBuilder
-from oudjat.utils.string_utils import StringUtils
 
 from .base import CmdOpt, CmdProps, CmdUsage, CmdUsageOpt
 from .connector_command import ConnectorCommand
@@ -28,6 +25,59 @@ class S1ConnectorCommand(ConnectorCommand):
     )
 
     __cmd_props__.options = {
+        "--auto": CmdOpt(
+            "Trigger auto mode. See the doc for full usage details",
+        ),
+        "--creds-service": CmdOpt(
+            "A credential service name to retrieve username and password from",
+            short="c",
+            arg="SERVICE",
+        ),
+        "--filter": CmdOpt(
+            "Provide a JSON filter to narrow down selection",
+            arg="FILTER",
+        ),
+        "--ids": CmdOpt(
+            "A list of IDs to narrow down selection. See the doc for full usage details",
+            arg="IDS",
+        ),
+        "--malicious-policy": CmdOpt(
+            "Specify the malicious policy for a group or agent",
+            arg="MALPOLICY",
+        ),
+        "--names": CmdOpt(
+            "A list of names to narrow down selection",
+            arg="NAMES",
+        ),
+        "--password": CmdOpt(
+            "The password used for authentication",
+            short="p",
+            arg="PASS",
+        ),
+        "--path": CmdOpt(
+            "A path of a file or process to narrow down selection",
+            arg="PATH",
+        ),
+        "--payload": CmdOpt(
+            "A JSON payload to pass additional query parameters",
+            arg="PAYLOAD",
+        ),
+        "--sites-list": CmdOpt(
+            "A list of site IDs or names",
+            arg="SITES",
+        ),
+        "--status": CmdOpt(
+            "Specify an incident status to an alert or a threat",
+            arg="STATUS",
+        ),
+        "--status-filter": CmdOpt(
+            "A list of incident statuses for alert/threat selection",
+            arg="STATUSFILTER",
+        ),
+        "--suspicious-policy": CmdOpt(
+            "Specify the suspicious policy for a group or agent",
+            arg="SUPOLICY",
+        ),
         "--target": CmdOpt(
             "Specify the SentinelOne URL to query",
             short="t",
@@ -38,81 +88,9 @@ class S1ConnectorCommand(ConnectorCommand):
             short="u",
             arg="USER",
         ),
-        "--password": CmdOpt(
-            "The password used for authentication",
-            short="p",
-            arg="PASS",
-        ),
-        "--creds-service": CmdOpt(
-            "A credential service name to retrieve username and password from",
-            short="c",
-            arg="SERVICE",
-        ),
-        "--auto": CmdOpt(
-            "Trigger auto mode. See the doc for full usage details",
-        ),
-        "--filter": CmdOpt(
-            "Provide a JSON filter to narrow down selection",
-            arg="FILTER",
-            transform=lambda _, v: orjson.loads(StringUtils.jsonify(v)),
-        ),
-        "--ids": CmdOpt(
-            "A list of IDs to narrow down selection. See the doc for full usage details",
-            arg="IDS",
-        ),
-        "--ids-file": CmdOpt(
-            "A list of IDs (as a file) to narrow down selection",
-            arg="IDSFILE",
-        ),
-        "--malicious-policy": CmdOpt(
-            "Specify the malicious policy for a group or agent",
-            arg="MALPOLICY",
-        ),
-        "--names": CmdOpt(
-            "A list of names to narrow down selection",
-            arg="NAMES",
-        ),
-        "--names-file": CmdOpt(
-            "A list of names (as a file) to narrow down selection",
-            arg="NAMESFILE",
-        ),
-        "--path": CmdOpt(
-            "A path of a file or process to narrow down selection",
-            arg="PATH",
-        ),
-        "--payload": CmdOpt(
-            "A JSON payload to pass additional query parameters",
-            arg="PAYLOAD",
-            transform=lambda _, v: orjson.loads(StringUtils.jsonify(v)),
-        ),
-        "--sites-list": CmdOpt(
-            "A list of site IDs or names",
-            arg="SITELIST",
-        ),
-        "--sites-file": CmdOpt(
-            "A list of site IDs or names (as file)",
-            arg="SITESFILE",
-        ),
-        "--status": CmdOpt(
-            "Specify an incident status to an alert or a threat",
-            arg="STATUS",
-        ),
-        "--status-filter": CmdOpt(
-            "A list of incident statuses for alert/threat selection",
-            arg="STATUSFILTER",
-            transform=lambda opt, v: v.split(","),
-        ),
-        "--suspicious-policy": CmdOpt(
-            "Specify the suspicious policy for a group or agent",
-            arg="SUPOLICY",
-        ),
         "--vendors": CmdOpt(
             "A list of application vendor for CVEs/application selection",
-            arg="VENDOR",
-        ),
-        "--vendors-file": CmdOpt(
-            "A list of application vendor (as a file) for CVEs/application selection.",
-            arg="VENDORSFILE",
+            arg="VENDORS",
         ),
         "--verdict": CmdOpt(
             "Specify an incident analyst verdict to an alert or a threat",
@@ -121,7 +99,6 @@ class S1ConnectorCommand(ConnectorCommand):
         "--verdict-filter": CmdOpt(
             "a list of incident statuses for alert/threat selection",
             arg="VERDICTFILTER",
-            transform=lambda opt, v: v.split(","),
         ),
     }
 
@@ -129,7 +106,7 @@ class S1ConnectorCommand(ConnectorCommand):
         # Agents
         "--agents": CmdUsage(
             CmdOpt("Export S1 agents details"),
-            "--agents [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
+            "--agents [--sites-list=SITES] [--payload=PAYLOAD]",
             {
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
@@ -137,7 +114,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--agents-export": CmdUsage(
             CmdOpt("Export flat agent data"),
-            "--agents-export [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
+            "--agents-export [--sites-list=SITES] [--payload=PAYLOAD]",
             {
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
@@ -145,7 +122,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--move-agent-site": CmdUsage(
             CmdOpt("Move one or multiple agents to a site based on its id"),
-            "--move-agent-site [--sites-list=SITELIST | --sites-file=SITEFILE] [--names=NAMES | --names-file=NAMESFILE]",
+            "--move-agent-site [--sites-list=SITES] [--names=NAMES]",
             {
                 "site_id": CmdUsageOpt("--sites-list", lambda lst: next(iter(lst))),
                 "agent_name": CmdUsageOpt("--names"),
@@ -154,7 +131,7 @@ class S1ConnectorCommand(ConnectorCommand):
         # Threats
         "--threats": CmdUsage(
             CmdOpt("Retrieve threats detected by S1"),
-            "--threats [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
+            "--threats [--sites-list=SITES] [--payload=PAYLOAD]",
             {
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
@@ -162,7 +139,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--threats-verdict": CmdUsage(
             CmdOpt("Change the verdict of filtered threats"),
-            "--threats-verdict [--verdict=VERDICT] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER]",
+            "--threats-verdict [--verdict=VERDICT] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER]",
             {
                 "verdict": CmdUsageOpt("--verdict"),
                 "threat_ids": CmdUsageOpt("--ids"),
@@ -175,7 +152,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--threats-incident": CmdUsage(
             CmdOpt("Change the verdict and status of filtered threats"),
-            "--threats-incident (--status=STATUS --verdict=VERDICT) [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER]",
+            "--threats-incident (--status=STATUS --verdict=VERDICT) [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER]",
             {
                 "status": CmdUsageOpt("--status"),
                 "verdict": CmdUsageOpt("--verdict"),
@@ -191,7 +168,7 @@ class S1ConnectorCommand(ConnectorCommand):
         # Alerts
         "--alert-verdict": CmdUsage(
             CmdOpt("Change the verdict of filtered alerts"),
-            "--alert-verdict [--verdict=VERDICT] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER]",
+            "--alert-verdict [--verdict=VERDICT] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER]",
             {
                 "verdict": CmdUsageOpt("--verdict"),
                 "alert_ids": CmdUsageOpt("--ids"),
@@ -204,7 +181,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--alert-incident": CmdUsage(
             CmdOpt("Change the status of filtered alerts (threats:malicious / alerts:suspicious)"),
-            "--alert-incident [--status=STATUS] [--ids=IDS | --ids-file=IDSFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER]",
+            "--alert-incident [--status=STATUS] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER]",
             {
                 "status": CmdUsageOpt("--status"),
                 "alert_ids": CmdUsageOpt("--ids"),
@@ -219,10 +196,10 @@ class S1ConnectorCommand(ConnectorCommand):
         # Applications
         "--applications": CmdUsage(
             CmdOpt("Retrieve an inventory of applications detected by S1"),
-            "--applications [--vendors=VENDOR | --vendors-file=VENDORFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
+            "--applications [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD]",
             {
                 "vendors": CmdUsageOpt("--vendors"),
-                "site_ids": CmdUsageOpt("--sites"),
+                "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
@@ -230,7 +207,7 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt(
                 "Retrieve an inventory of applications detected by S1 that present a security risk"
             ),
-            "--applications-with-risks [--vendors=VENDOR | --vendors-file=VENDORFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
+            "--applications-with-risks [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD]",
             {
                 "vendors": CmdUsageOpt("--vendors"),
                 "site_ids": CmdUsageOpt("--sites-list"),
@@ -239,7 +216,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--applications-cves": CmdUsage(
             CmdOpt("Retrieve CVEs for specific application(s)"),
-            "--applications-cves [--ids=IDS | --ids-file=IDSFILE] [--names=NAMES | --names-file=NAMESFILE] [--vendors=VENDOR | --vendors-file=VENDORFILE] [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
+            "--applications-cves [--ids=IDS] [--names=NAMES] [--vendors=VENDORS] [--sites-list=SITES] [--payload=PAYLOAD]",
             {
                 "appliation_ids": CmdUsageOpt("--ids"),
                 "appliation_name": CmdUsageOpt("--names"),
@@ -250,7 +227,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--cves": CmdUsage(
             CmdOpt("Retrieve CVEs detected by S1"),
-            "--cves [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
+            "--cves [--sites-list=SITES] [--payload=PAYLOAD]",
             {
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
@@ -259,15 +236,16 @@ class S1ConnectorCommand(ConnectorCommand):
         # Groups
         "--groups": CmdUsage(
             CmdOpt("Retrieve groups"),
-            "--groups [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
+            "--groups [--names=NAMES] [--sites-list=SITES] [--payload=PAYLOAD]",
             {
+                "name": CmdUsageOpt("--names", transform=lambda v: next(iter(v))),
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
         "--group-policy": CmdUsage(
             CmdOpt("Update the policy of the specified groups"),
-            "--group-policy [--ids=IDS | --ids-file=IDSFILE] [--malicious-policy=MALPOLICY] [--suspicious-policy=SUPOLICY] [--payload=PAYLOAD]",
+            "--group-policy [--ids=IDS] [--malicious-policy=MALPOLICY] [--suspicious-policy=SUPOLICY] [--payload=PAYLOAD]",
             {
                 "group_id": CmdUsageOpt("--ids"),
                 "malicious_mitigation": CmdUsageOpt("--malicious-policy"),
@@ -277,7 +255,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--group-move-agent": CmdUsage(
             CmdOpt("Move agents into specified group"),
-            "--group-move-agent [--ids=IDS | --ids-file=IDSFILE] [--names=NAMES | --names-file=NAMESFILE] [--payload=PAYLOAD]",
+            "--group-move-agent [--ids=IDS] [--names=NAMES] [--payload=PAYLOAD]",
             {
                 "group_id": CmdUsageOpt("--ids", lambda lst: next(iter(lst))),
                 "agent_name": CmdUsageOpt("--names"),
@@ -294,16 +272,16 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--sites-by-name": CmdUsage(
             CmdOpt("Retrieve sites by names"),
-            "--sites-by-name [--sites-list=SITELIST | --sites-file=SITEFILE] [--payload=PAYLOAD]",
+            "--sites-by-name [--names=NAMES] [--payload=PAYLOAD]",
             {
-                "site_name": CmdUsageOpt("--sites-list"),
+                "site_name": CmdUsageOpt("--names"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
     }
 
     __cmd_props__.prepend_usages(
-        "(-t=TARGET | --target TARGET) (--username=USER --password=PASS | --creds-service=SERVICE)"
+        "(-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE)"
     )
     __cmd_props__.append_usages("[options]")
 
@@ -340,14 +318,14 @@ class S1ConnectorCommand(ConnectorCommand):
         self.__cmd_props__.opts_transform(
             {
                 "--auto": lambda opt, _: self._is_opt_present(opt),
-                "--ids": lambda opt, _: self._unify_str_opt(opt, "--ids-file"),
-                "--ids-file": lambda opt, _: self._unify_str_opt("--ids", opt),
-                "--names": lambda opt, _: self._unify_str_opt(opt, "--names-file"),
-                "--names-file": lambda opt, _: self._unify_str_opt("--names-list", opt),
-                "--sites-list": lambda opt, _: self._unify_str_opt(opt, "--sites-file"),
-                "--sites-file": lambda opt, _: self._unify_str_opt("--sites-list", opt),
-                "--vendors": lambda opt, _: self._unify_str_opt(opt, "--vendor-file"),
-                "--vendors-file": lambda opt, _: self._unify_str_opt("--vendor-list", opt),
+                "--ids": lambda opt, _: self._unify_str_opt(opt),
+                "--filter": lambda _, v: self._parse_payload(v),
+                "--names": lambda opt, _: self._unify_str_opt(opt),
+                "--payload": lambda _, v: self._parse_payload(v),
+                "--sites-list": lambda opt, _: self._unify_str_opt(opt),
+                "--status-filter": lambda _, v: self._unify_str_opt(v),
+                "--vendors": lambda opt, _: self._unify_str_opt(opt),
+                "--verdict-filter": lambda _, v: self._unify_str_opt(v),
             }
         )
 

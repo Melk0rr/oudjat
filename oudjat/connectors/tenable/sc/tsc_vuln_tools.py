@@ -1,6 +1,7 @@
 """A simple module to list Tenable.sc vulnerability tools."""
 
 from enum import Enum
+from typing import override
 
 
 class TSCVulnTool(Enum):
@@ -42,3 +43,14 @@ class TSCVulnTool(Enum):
     SUMWASURL             = "sumwasurl"
     WASVULNDETAIL         = "wasvulndetail"
     WASLISTVULN           = "waslistvuln"
+
+    @override
+    def __str__(self) -> str:
+        """
+        Convert the vulnerability tool into a string.
+
+        Returns:
+            str: A string representation of the vulnerability tool
+        """
+
+        return self._value_

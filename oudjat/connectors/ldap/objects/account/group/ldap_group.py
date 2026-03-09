@@ -240,7 +240,11 @@ class LDAPGroup(LDAPObject):
             dict[str, Any]: The current instance converted into a dictionary
         """
 
+        base = super().to_dict()
+
         return {
-            **super().to_dict(),
-            "members": list(self._members.keys())
+            **base,
+            "type": str(self.group_type),
+            "subgroups": list(self.sub_groups(True)),
+            "members": self.member_refs(),
         }

@@ -146,7 +146,7 @@ class LDAPOrganizationalUnit(LDAPObject):
         return {
             obj_id: obj
             for obj_id, obj in self.objects.items()
-            if set(obj.entry.object_cls) & set(object_cls)
+            if set(obj.classes) & set(object_cls)
         }
 
     def gpo_from_gplink(self) -> dict[str, "LDAPObject"]:
@@ -172,7 +172,7 @@ class LDAPOrganizationalUnit(LDAPObject):
         LDAPGPOCls = gpo_opt.cls
 
         res = {}
-        for entry in gpo_opt.fetch(name=gpo_refs):
+        for entry in gpo_opt.fetch(name=gpo_refs).values():
             res[entry.dn] = LDAPGPOCls(entry, capabilities=self.capabilities)
 
         return res
@@ -186,4 +186,10 @@ class LDAPOrganizationalUnit(LDAPObject):
             dict: A dictionary containing the attributes of the LDAP ou in a structured format
         """
 
-        return {**super().to_dict(), "gpLink": self.gplink, "objects": list(self.objects.keys())}
+        base = super().to_dict()
+
+        return {
+            **base,
+            "gpLink": self.gplink,
+            "objects": list(self.objects.keys()),
+        }

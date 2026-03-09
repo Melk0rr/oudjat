@@ -160,10 +160,10 @@ class LDAPGroupPolicyObject(LDAPObject):
             dict[str, Any]: A dictionary containing the GPO's display name, scope, state, and linked GUIDs.
         """
 
-        base_dict = super().to_dict()
+        base = super().to_dict()
 
         return {
-            **base_dict,
+            **base,
             "displayName": self.display_name,
             "scope": self.scope.name,
             "state": self.state.name,

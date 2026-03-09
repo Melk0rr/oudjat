@@ -5,6 +5,8 @@ A command module to handle interactions to Sentinel One API through the dedicate
 from typing import Any
 
 from oudjat.connectors.tenable.sc import TenableSCConnector
+from oudjat.connectors.tenable.sc.tsc_connector import TSCFilter
+from oudjat.utils import Context
 from oudjat.utils.doc_builder import DocBuilder
 
 from .base import (
@@ -29,24 +31,102 @@ class TenableSCConnectorCommand(ConnectorCommand):
         "A command to interact with Tenable.sc API through the oudjat TenableSCConnector",
     )
     __cmd_props__.options = {
+        "--exploitable": CmdOpt(
+            "Include only exploitable vulnerabilities in the results",
+        ),
+        "--filter": CmdOpt(
+            "Provide 3 values filter to narrow down vulnerability search (attribute,operator,value)",
+            arg="FILTER",
+        ),
+        "--fields": CmdOpt(
+            "A list of attributes to return for each scan / asset lists",
+            arg="FIELDS",
+        ),
+        "--ids": CmdOpt(
+            "A list of IDs of scans or asset list",
+            arg="IDS",
+        ),
+        "--payload": CmdOpt(
+            "Additional parameters to pass",
+            arg="PAYLOAD",
+        ),
+        "--product": CmdOpt(
+            "Specify a product name to retrieve vulnerabilities for",
+            arg="PRODUCT",
+        ),
         "--severities": CmdOpt(
-            "Specify severity numbers (1:MINOR,2:MODERATE,3:HIGH,4:CRITICAL)",
+            "Provide severity numbers, comma separated (1:MINOR,2:MODERATE,3:HIGH,4:CRITICAL)",
             arg="SEVERITIES",
         ),
-
+        "--tool": CmdOpt(
+            "Specify an analysis tool which provides a specific vulnerability view. See the list of available tools",
+            arg="TOOL",
+            default="vulndetails",
+        ),
     }
 
     __cmd_props__.usages = {
         "--vulns": CmdUsage(
             CmdOpt("Retrieve vulnerabilities that match the provided severities and filters"),
-            "--vulns [--severities=SEVERITIES]",
+            "--vulns [--severities=SEVERITIES] [--tool=TOOL] [--product=PRODUCT] [--exploitable] [--filter]... [--payload]",
             {
-                "": CmdUsageOpt("--sites-list"),
+                "*severities": CmdUsageOpt("--severities"),
+                "tool": CmdUsageOpt("--tool"),
+                "product": CmdUsageOpt("--product"),
+                "exploitable": CmdUsageOpt("--exploitable"),
+                "filters": CmdUsageOpt("--filter"),
                 "payload": CmdUsageOpt("--payload"),
+            },
+        ),
+        "--asset-lists": CmdUsage(
+            CmdOpt("Retrieve a list of asset lists with minimal informations like list ids."),
+            "--asset-lists [--filter]... [--fields=FIELDS] [--payload=PAYLOAD]",
+            {
+                "scan_filter": CmdUsageOpt("--filter"),
+                "fields": CmdUsageOpt("--scan-fields"),
+                "payload": CmdUsageOpt("--payload"),
+            },
+        ),
+        "--asset-lists-details": CmdUsage(
+            CmdOpt("Return the details of one or more asset lists."),
+            "--asset-lists-details [--ids=IDS]",
+            {
+                "scan_ids": CmdUsageOpt("--ids"),
+            },
+        ),
+        "--asset-lists-delete": CmdUsage(
+            CmdOpt("Delete an asset list based on given id."),
+            "--asset-lists-delete [--ids=IDS]",
+            {
+                "scan_ids": CmdUsageOpt("--ids"),
+            },
+        ),
+        "--scans": CmdUsage(
+            CmdOpt("Retrieve a list of scans with minimal information like scan ids"),
+            "--scans [--filter]... [--fields=FIELDS] [--payload=PAYLOAD]",
+            {
+                "scan_filter": CmdUsageOpt("--filter"),
+                "fields": CmdUsageOpt("--fields"),
+                "payload": CmdUsageOpt("--payload"),
+            },
+        ),
+        "--scans-details": CmdUsage(
+            CmdOpt("Return the details of one or more scans."),
+            "--scans-details [--ids=IDS]",
+            {
+                "scan_ids": CmdUsageOpt("--ids"),
+            },
+        ),
+        "--scans-delete": CmdUsage(
+            CmdOpt("Delete one or more scans."),
+            "--scans-details [--ids=IDS]",
+            {
+                "scan_ids": CmdUsageOpt("--ids"),
             },
         ),
     }
 
+    __cmd_props__.append_usages("[options]")
     __doc_builder__: "DocBuilder" = ConnectorCommand._gen_doc("oudjat", __cmd_props__, "")
 
     def __init__(self, options: dict[str, Any]) -> None:
@@ -78,6 +158,9 @@ class TenableSCConnectorCommand(ConnectorCommand):
         # Options transform based on instance
         self.__cmd_props__.opts_transform(
             {
+                "--fields": lambda opt, _: self._unify_str_opt(opt),
+                "--filter": lambda _, v: self._parse_filter(v),
+                "--payload": lambda _, v: self._parse_payload(v),
                 "--severities": lambda opt, _: self._unify_str_opt(opt),
             }
         )
@@ -85,5 +168,31 @@ class TenableSCConnectorCommand(ConnectorCommand):
         # Usage backends
         self.__cmd_props__.backends(
             {
+                "--vulns": self.connector.vulns,
+                "--asset-lists": self.connector.asset_lists,
+                "--asset-lists-details": self.connector.asset_lists_details,
+                "--asset-lists-delete": self.connector.asset_lists_delete,
+                "--scans": self.connector.scans,
+                "--scans-details": self.connector.scans_details,
+                "--scans-delete": self.connector.scans_delete,
             }
         )
+
+    def _parse_filter(self, filter_str: list[str]) -> list["TSCFilter"]:
+        """
+        Parse filter values into tuples.
+
+        Returns:
+            list[TSCFilter]: A list of filter tuples
+        """
+
+        filters = []
+        for f in filter_str:
+            f_split = [f.strip().split(",")]
+
+            if len(f_split) != 3:
+                raise ValueError(f"{Context()}::Invalid filter provided {f}.")
+
+            filters.append(tuple(f_split))
+
+        return filters

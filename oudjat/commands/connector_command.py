@@ -8,6 +8,7 @@ from typing import Any, override
 
 from oudjat.connectors.exceptions import ConnectorCredentialError
 from oudjat.core.mapper import Mapper
+from oudjat.utils import UtilsDict
 from oudjat.utils.context import Context
 from oudjat.utils.doc_builder import DocBuilder
 from oudjat.utils.file_utils import FileUtils
@@ -51,7 +52,7 @@ class ConnectorCommand(Base):
             )
 
     # ****************************************************************
-    # Methods
+    # Methods - helpers
 
     def _resolve_arg_value(self, val: str) -> Any:
         """
@@ -105,6 +106,30 @@ class ConnectorCommand(Base):
 
         return next(filter(cmd_in_options, self.__cmd_props__.usages.keys()))
 
+    def _prepare_backend(
+        self, mapped_args: dict[str, Any]
+    ) -> tuple[tuple[Any] | list[Any], dict[str, Any]]:
+
+        args = []
+        kwargs = {}
+
+        for key, value in mapped_args.items():
+            if key.startswith("*"):
+                if isinstance(value, (list, tuple)):
+                    args.extend(value)
+
+                else:
+                    args.append(value)
+
+            else:
+                kwargs[key] = value
+
+        return (args, kwargs)
+
+    # ****************************************************************
+    # Methods - main
+
+    # TODO: Allow multiple command execution
     @override
     def run(self) -> None:
         """
@@ -132,7 +157,11 @@ class ConnectorCommand(Base):
             raise ArgumentError(f"{context}::{cmd_name} command requires {list(req_params)}")
 
         # Run the command
-        data = cmd_usg.backend(**args)
+        args, kwargs = self._prepare_backend(args)
+        data = cmd_usg.backend(*args, **kwargs)
+
+        if self.options["--key-filter"]:
+            data = [UtilsDict.filter_keys(d, self.options["--key-filter"]) for d in data]
 
         # Post operations
         if self.options["--csv"]:
@@ -148,6 +177,8 @@ class ConnectorCommand(Base):
         if self.options["--print"]:
             print(data)
 
+    # ****************************************************************
+    # Static methods
     @staticmethod
     def _gen_doc(program: str, cmd_hub: "CmdProps", description: str = "") -> "DocBuilder":
         """
@@ -164,10 +195,8 @@ class ConnectorCommand(Base):
 
         builder = DocBuilder(program, description)
 
-        builder.add_command(cmd_hub.name, cmd_hub.description)
-
         for opt_k, opt in cmd_hub.options.items():
-            builder.add_option(opt_k, opt.description, opt.arg, opt.short)
+            builder.add_option(opt_k, opt.description, opt.arg, opt.short, default=opt.default)
 
         for usg_k, usg in cmd_hub.usages.items():
             builder.add_option(usg_k, usg.option.description, usg.option.arg, usg.option.short)

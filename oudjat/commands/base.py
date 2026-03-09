@@ -3,8 +3,11 @@
 from dataclasses import dataclass, field
 from typing import Any, Callable, TypeAlias
 
+import orjson
+
 from oudjat.utils import Context
 from oudjat.utils.file_utils import FileUtils
+from oudjat.utils.string_utils import StringUtils
 from oudjat.utils.types import DataType
 
 
@@ -49,15 +52,17 @@ class CmdOpt:
     A dataclass that holds a command option details that will be passed to docopt string.
 
     Attributes:
-        description (str) : A description passed
-        short (str | None): An optional short version of the option name
-        arg (str | None)  : An optional argument name
-        transform         : An optional transform function that will be given the option name and the option value
+        description (str)   : A description passed
+        short (str | None)  : An optional short version of the option name
+        arg (str | None)    : An optional argument name
+        default (Any | None): A default value for the option
+        transform           : An optional transform function that will be given the option name and the option value
     """
 
     description: str
     short: str | None = None
     arg: str | None = None
+    default: Any | None = None
     transform: "CmdMappingCallback | None" = None
 
 
@@ -161,6 +166,7 @@ class CmdProps:
             usg = self.usages[k]
             usg.usage_str = f"{prepend_str} {usg.usage_str}"
 
+
 CmdMappingCallback: TypeAlias = Callable[[str, Any], Any]
 CmdOptRegistry: TypeAlias = dict[str, "CmdOpt"]
 CmdOptUsageRegistry: TypeAlias = dict[str, "CmdUsageOpt"]
@@ -190,7 +196,7 @@ class Base:
         self._kwargs: dict[str, Any] = kwargs
 
     # ****************************************************************
-    # Methods
+    # Methods - getters/setters
 
     @property
     def options(self) -> dict[str, Any]:
@@ -225,6 +231,22 @@ class Base:
 
         return self._kwargs
 
+    # ****************************************************************
+    # Methods - helpers
+
+    def _parse_payload(self, payload_str: str) -> dict[str, Any]:
+        """
+        Parse a payload string into a dictionary.
+
+        Args:
+            payload_str (str): The payload string to parse
+
+        Returns:
+            dict[str, Any]: The dictionary resulting of the parsing
+        """
+
+        return orjson.loads(StringUtils.jsonify(payload_str))
+
     def _is_opt_present(self, opt: str) -> bool:
         """
         Check if the option is present.
@@ -238,7 +260,7 @@ class Base:
 
         return bool(self.options.get(opt) or False)
 
-    def _unify_str_opt(self, str_opt: str, file_opt: str | None = None) -> list[str]:
+    def _unify_str_opt(self, str_opt: str) -> list[str]:
         """
         Unify option case where a list of information can be passed either as a string, a list of strings or a txt file.
 
@@ -250,13 +272,20 @@ class Base:
             list[str]: A cleaned list of strings
         """
 
-        args = (
-            FileUtils.import_txt(filepath=self.options[file_opt])
-            if (file_opt and self.options[file_opt])
-            else self.options[str_opt].split(",")
-        )
+        values = []
 
-        return list(filter(None, args))
+        if self.options[str_opt].startswith("@"):
+            path = self.options[str_opt][1:]
+
+            if not FileUtils.check_path(path):
+                raise FileNotFoundError(f"{Context()}::Could not find {path}")
+
+            values = [v.strip() for v in FileUtils.import_txt(path)]
+
+        else:
+            values = [v.strip() for v in self.options[str_opt].split(",")]
+
+        return list(filter(None, values))
 
     def run(self) -> None:
         """

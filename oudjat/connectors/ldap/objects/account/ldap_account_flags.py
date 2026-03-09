@@ -1,104 +1,34 @@
 """
-A simple module to declare account control values as a bit flag.
-
-See : https://learn.microsoft.com/fr-fr/troubleshoot/windows-server/active-directory/useraccountcontrol-manipulate-account-properties
+A simple module to enumerate some LDAP account flags.
 """
 
-from oudjat.utils.bit_flag import BitFlag
+from typing import TYPE_CHECKING
+
+from ..ldap_object_flags import LDAPObjectFlag
+from .ad_encryption_types import ADEncryptionType
+
+if TYPE_CHECKING:
+    from .ldap_account import LDAPAccount
 
 
-class LDAPAccountFlag(BitFlag):
-    """Bit flag to exploit user account control."""
+def _pwd_age_check(acc: "LDAPAccount", age: int) -> bool:
+    return acc.pwd_last_set_in_days >= age
 
-    SCRIPT = 1
-    ACCOUNT_DISABLE = 2
-    HOMEDIR_REQUIRED = 8
-    LOCKOUT = 16
-    PASSWD_NOTREQD = 32
-    PASSWD_CANT_CHANGE = 64
-    ENCRYPTED_TEXT_PASSWORD_ALLOWED = 128
-    NORMAL_ACCOUNT = 512
-    INTERDOMAIN_TRUST_ACCOUNT = 2048
-    WORKSTATION_TRUST_ACCOUNT = 4096
-    SERVER_TRUST_ACCOUNT = 8192
-    PASSWD_DONT_EXPIRE = 65536
-    MNS_LOGON_ACCOUNT = 131072
-    SMARTCARD_REQUIRED = 262144
-    TRUSTED_FOR_DELEGATION = 524288
-    NOT_DELEGATED = 1048576
-    USE_DES_KEY_ONLY = 2097152
-    DONT_REQUIRE_PREAUTH = 4194304
-    PASSWORD_EXPIRED = 8388608
-    TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION = 16777216
-    NO_AUTH_DATA_REQUIRED = 33554432
-    PARTIAL_SECRETS_ACCOUNT = 67108864
 
-    @staticmethod
-    def is_disabled(account_control: int) -> bool:
-        """
-        Check if an account is disabled based on its account control.
+def _enc_check(acc: "LDAPAccount", enc: int) -> bool:
+    enc_details = acc.supported_encryption
+    return enc_details["value"] is not None and bool(
+        ADEncryptionType.check_flag(enc_details["value"], enc)
+    )
 
-        Args:
-            account_control (int): The integer representation of account control flags.
+def _clr_txt_pwd_check(acc: "LDAPAccount") -> bool:
+    return acc.search_clear_txt_pwd()
 
-        Returns:
-            bool: True if the ACCOUNT_DISABLE flag is set, otherwise False.
-        """
+class LDAPAccountFlag(LDAPObjectFlag):
+    """Specific flags for ldap accounts."""
 
-        return LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.ACCOUNT_DISABLE) != 0
+    OLD_PASSWORD = _pwd_age_check, 180
+    VERY_OLD_PASSWORD = _pwd_age_check, 1095
+    POTENTIAL_CLEARTXT_PWD = _clr_txt_pwd_check,
+    WEAK_ENCRYPTION_SUPPORTED = _enc_check, 7
 
-    @staticmethod
-    def pwd_expires(account_control: int) -> bool:
-        """
-        Check if the account's password expires.
-
-        Args:
-            account_control (int): The integer representation of account control flags.
-
-        Returns:
-            bool: True if the PASSWD_DONT_EXPIRE flag is not set, otherwise False.
-        """
-
-        return not LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.PASSWD_DONT_EXPIRE)
-
-    @staticmethod
-    def pwd_expired(account_control: int) -> bool:
-        """
-        Check if the account's password is expired.
-
-        Args:
-            account_control (int): The integer representation of account control flags.
-
-        Returns:
-            bool: True if the PASSWORD_EXPIRED flag is set, otherwise False.
-        """
-
-        return LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.PASSWORD_EXPIRED) != 0
-
-    @staticmethod
-    def pwd_required(account_control: int) -> bool:
-        """
-        Check if the account requires a password.
-
-        Args:
-            account_control (int): The integer representation of account control flags.
-
-        Returns:
-            bool: True if the PASSWD_NOTREQD flag is not set, otherwise False.
-        """
-
-        return not LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.PASSWD_NOTREQD)
-
-    @staticmethod
-    def is_locked(account_control: int) -> bool:
-        """
-        Check if the account is locked.
-
-        Args:
-            account_control (int): The integer representation of account control flags.
-
-        Returns:
-            bool: True if the LOCKOUT flag is set, otherwise False.
-        """
-
-        return not LDAPAccountFlag.check_flag(account_control, LDAPAccountFlag.LOCKOUT)

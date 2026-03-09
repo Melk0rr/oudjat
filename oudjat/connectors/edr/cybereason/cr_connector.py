@@ -8,6 +8,7 @@ from typing import Any, override
 from urllib.parse import ParseResult, urlparse
 
 import requests
+from yaspin import yaspin
 
 from oudjat.connectors.connector import Connector
 from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoint
@@ -196,42 +197,57 @@ class CybereasonConnector(Connector):
         if attributes is None:
             attributes = endpoint.attributes
 
-        self.logger.debug(f"{context}::Fetching {endpoint} data {payload}")
+
+        action_str = (
+            "Retrieving data for"
+            if endpoint.method.name == "GET"
+            else "Updating elements with"
+        )
+
+        self.logger.info(f"{action_str} {endpoint} Cybereason endpoint")
+        self.logger.debug(f"{context}::{endpoint} > {payload}")
 
         res: list["CybereasonEntry"] = []
-        try:
-            req = self._connection.request(
-                method=endpoint.method.name,
-                url=f"{self._endpoint_url(endpoint)}/{endpoint_arg}",
-                data=json.dumps(payload),
-                headers={"Content-Type": "application/json"},
-            )
+        with yaspin(text=f"{action_str} {endpoint}...") as spinner:
+            try:
+                req = self._connection.request(
+                    method=endpoint.method.name,
+                    url=f"{self._endpoint_url(endpoint)}/{endpoint_arg}",
+                    data=json.dumps(payload),
+                    headers={"Content-Type": "application/json"},
+                )
 
-            if req.status_code != 200:
-                raise CybereasonAPIRequestError(f"API responded with status code {req.status_code}")
+                if req.status_code != 200:
+                    raise CybereasonAPIRequestError(f"API responded with status code {req.status_code}")
 
-            req_json = req.json()
-            if not isinstance(req_json, list):
-                if "data" in req_json:
-                    req_json = req_json.get("data", [])
+                req_json = req.json()
+                if not isinstance(req_json, list):
+                    if "data" in req_json:
+                        req_json = req_json.get("data", [])
 
-                elif req_json.get(endpoint.name.lower(), None) is not None:
-                    req_json = req_json.get(endpoint.name.lower())
+                    elif req_json.get(endpoint.name.lower(), None) is not None:
+                        req_json = req_json.get(endpoint.name.lower())
 
-                else:
-                    req_json = [req_json]
+                    else:
+                        req_json = [req_json]
 
-            # Map to CybereasonEntry instances
-            def map_cr_entry(element: dict[str, Any]) -> "CybereasonEntry":
-                filtered_element = {k: v for k, v in element.items() if k in attributes}
-                return CybereasonEntry(**filtered_element)
+                # Map to CybereasonEntry instances
+                def map_cr_entry(element: dict[str, Any]) -> "CybereasonEntry":
+                    filtered_element = {k: v for k, v in element.items() if k in attributes}
+                    return CybereasonEntry(**filtered_element)
 
-            res.extend(list(map(map_cr_entry, req_json)))
+                res.extend(list(map(map_cr_entry, req_json)))
 
-        except CybereasonAPIRequestError as e:
-            raise CybereasonAPIRequestError(
-                f"{context}::An error occured while retriving data from {self._endpoint_url(endpoint)}\n{e}"
-            )
+            except CybereasonAPIRequestError as e:
+                raise CybereasonAPIRequestError(
+                    f"{context}::An error occured while retriving data from {self._endpoint_url(endpoint)}\n{e}"
+                )
+
+            if len(res) > 0:
+                spinner.ok(f"✅ {len(res)} elements were retrieved or updated")
+
+            else:
+                spinner.fail("❌ No element could be retrieved or updated")
 
         return res
 

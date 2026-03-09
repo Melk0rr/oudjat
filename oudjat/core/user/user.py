@@ -1,6 +1,7 @@
 """A module that defines the user asset type."""
 
 import re
+from dataclasses import dataclass
 from typing import Any, TypedDict, override
 
 from oudjat.utils.mail import EMAIL_REG
@@ -8,6 +9,19 @@ from oudjat.utils.mail import EMAIL_REG
 from ..asset import Asset
 from ..asset_type import AssetType
 from .user_type import UserType
+
+
+# TODO: Implement user classification
+@dataclass
+class UserClassificationScore:
+    """
+    A simple dataclass to associate a user type with a score.
+
+    It is intended to be used in user classification processes.
+    """
+
+    type: "UserType"
+    score: int = 0
 
 
 class UserBaseDict(TypedDict):

@@ -1,19 +1,22 @@
 """A module to describe generic properties shared by more specific account objects like user or computer."""
 
+import re
 from abc import ABC
 from datetime import datetime
 from enum import IntEnum
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, Any, TypeVar, override
 
 from oudjat.utils.time_utils import TimeConverter
 
 from ..ldap_object import LDAPObject
-from .ldap_account_flags import LDAPAccountFlag
+from .ad_encryption_types import ADEncryptionType
+from .ldap_account_ctl_flags import LDAPAccountCtlFlag
 
 if TYPE_CHECKING:
     from ..ldap_entry import LDAPEntry
     from ..ldap_object import LDAPCapabilities
 
+LDAPAccountBoundType = TypeVar("LDAPAccountBoundType", bound="LDAPAccount")
 
 class LDAPAccountStatus(IntEnum):
     """
@@ -66,24 +69,20 @@ class LDAPAccount(LDAPObject, ABC):
         self._pwd_required: bool = True
         self._is_locked: bool = False
 
-        self._account_flags: set[str] = set()
-
         if self.account_ctl is not None:
-            self._status = LDAPAccountStatus(not LDAPAccountFlag.is_disabled(self.account_ctl))
-            self._pwd_expires = LDAPAccountFlag.pwd_expires(self.account_ctl)
-            self._pwd_expired = LDAPAccountFlag.pwd_expired(self.account_ctl)
-            self._pwd_required = LDAPAccountFlag.pwd_required(self.account_ctl)
-            self._is_locked = LDAPAccountFlag.is_locked(self.account_ctl)
+            self._status = LDAPAccountStatus(not LDAPAccountCtlFlag.is_disabled(self.account_ctl))
+            self._pwd_expires = LDAPAccountCtlFlag.pwd_expires(self.account_ctl)
+            self._pwd_expired = LDAPAccountCtlFlag.pwd_expired(self.account_ctl)
+            self._pwd_required = LDAPAccountCtlFlag.pwd_required(self.account_ctl)
+            self._is_locked = LDAPAccountCtlFlag.is_locked(self.account_ctl)
 
-            for flag in list(LDAPAccountFlag):
-                if LDAPAccountFlag.check_flag(self.account_ctl, flag):
-                    self.account_flags.add(flag.name)
+            self._ldap_obj_flags.update(LDAPAccountCtlFlag.flags(self.account_ctl))
 
         else:
             self._ldap_obj_flags.add("MISSING-USR-ACC-CTL")
 
     # ****************************************************************
-    # Methods
+    # Methods - getters/setters
 
     @property
     def san(self) -> str:
@@ -203,17 +202,6 @@ class LDAPAccount(LDAPObject, ABC):
         return TimeConverter.days_diff(self.pwd_last_set) if self.pwd_last_set else -1
 
     @property
-    def account_flags(self) -> set[str]:
-        """
-        Retrieve account flags.
-
-        Returns:
-            set[str]: A list of strings representing the account flags.
-        """
-
-        return self._account_flags
-
-    @property
     def account_expires(self) -> bool:
         """
         Check whether the account expires.
@@ -268,6 +256,71 @@ class LDAPAccount(LDAPObject, ABC):
 
         return self._is_locked
 
+    # ****************************************************************
+    # Methods - getters/setters for AD context
+
+    @property
+    def supported_encryption(self) -> dict[str, Any]:
+        """
+        Return account supported encryption details.
+
+        Available only in Active Directory.
+
+        Returns:
+            dict[str, Any]: Encryption support details
+        """
+
+        details = {}
+
+        details["attr"] = "msDS-SupportedEncryptionTypes"
+        details["value"] = self.entry.get(details["attr"])
+
+        details["protocols"] = set()
+
+        if details["value"] is not None:
+            details["protocols"].update(ADEncryptionType.flags(details["value"]))
+
+        details["protocols"] = list(details["protocols"])
+
+        return details
+
+    @property
+    def key_version(self) -> str:
+        """
+        Return the kerberos version number of the current key for this account.
+
+        Available only in Active Directory.
+
+        Returns:
+            str: Kerberos version number
+        """
+
+        return self.entry.get("msDS-KeyVersionNumber")
+
+    # ****************************************************************
+    # Methods - security checks
+
+    def search_clear_txt_pwd(self) -> bool:
+        """
+        Search for potential clear text password in account description.
+
+        Returns:
+            bool: True if a potential match is found. False otherwise
+        """
+
+        if not self.description or len(self.description) == 0:
+            return False
+
+        PWD_PATTERNS = [
+            r"(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{6,}",
+            r"(pass(word)?|pwd|secret|token|api[_-]?key|cred|mdp)",
+        ]
+
+        return any([re.search(p, self.description) for p in PWD_PATTERNS])
+
+    # ****************************************************************
+    # Methods - converters
+
     @override
     def to_dict(self) -> dict[str, Any]:
         """
@@ -277,16 +330,19 @@ class LDAPAccount(LDAPObject, ABC):
             dict[str, Any]: A dictionary containing various account details including sAMAccountName, status, expiration date, etc.
         """
 
-        base_dict = super().to_dict()
-        return {
-            **base_dict,
+        encryption_details = self.supported_encryption
+        encryption_details.pop("attr")
+        encryption_details["keyVersion"] = self.key_version
+
+        base = super().to_dict()
+
+        formatted = {
             "san": self.san,
             "account": {
                 "status": str(self._status),
                 "expires": self.account_expires,
                 "expirationDate": LDAPObject._format_acc_date_str(self.account_expiration),
                 "ctl": self.account_ctl,
-                "flags": list(self.account_flags),
             },
             "pwd": {
                 "expires": self.pwd_expires,
@@ -299,4 +355,18 @@ class LDAPAccount(LDAPObject, ABC):
                 "lastLogon": LDAPObject._format_acc_date_str(self.last_logon),
                 "lastLogonDays": self.last_logon_in_days,
             },
+            "encryption": encryption_details,
         }
+
+        base.pop("msDS-KeyVersionNumber", None)
+        base.pop("accountExpires", None)
+        base.pop("pwdLastSet", None)
+        base.pop("userAccountControl", None)
+
+        return {
+            **base,
+            **formatted,
+        }
+
+    # ****************************************************************
+    # Static methods

@@ -1,30 +1,13 @@
 """A module to describe a generic class that includes common properties among multiple asset types."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, TypedDict, TypeVar, override
+from typing import Any, Generic, TypeVar, override
 
 from oudjat.utils import Context, UtilsDict
 
 from .exceptions import CustomAttributeError
 
 GenericBoundType = TypeVar("GenericBoundType", bound="GenericIdentifiable")
-
-
-class GenericIdentifiableBaseDict(TypedDict):
-    """
-    A helper class to properly handle base GenericIdentifiable dictionary attributes.
-
-    Attributes:
-        id (int | str)          : The id of the object
-        name (str)              : The name of the object
-        label (str | None)      : The label of the object, if any
-        description (str | None): The description given to the object, if any
-    """
-
-    id: int | str
-    name: str
-    label: str | None
-    description: str | None
 
 
 class GenericIdentifiable(Generic[GenericBoundType], ABC):
@@ -58,10 +41,11 @@ class GenericIdentifiable(Generic[GenericBoundType], ABC):
         self._label: str | None = label
         self._description: str | None = description
 
+        self._flags: set[str] = set()
         self._custom_attributes: dict[str, Any] = {**kwargs}
 
     # ****************************************************************
-    # Methods
+    # Methods - getters/setters
 
     @property
     def id(self) -> int | str:
@@ -170,6 +154,20 @@ class GenericIdentifiable(Generic[GenericBoundType], ABC):
 
         self._custom_attributes = new_custom_attr
 
+    @property
+    def flags(self) -> set[str]:
+        """
+        Return the element flags.
+
+        Returns:
+            set[str]: The flags associated with this element
+        """
+
+        return self._flags
+
+    # ****************************************************************
+    # Methods - custom attributes
+
     def add_custom_attr(self, key: str, value: Any) -> None:
         """
         Add a new custom attribute.
@@ -219,6 +217,9 @@ class GenericIdentifiable(Generic[GenericBoundType], ABC):
 
         self.custom_attributes = {}
 
+    # ****************************************************************
+    # Methods - convertions
+
     def merge(self, other: "GenericBoundType") -> None:
         """
         Merge the provided GenericIdentifiable data into the current one.
@@ -262,15 +263,16 @@ class GenericIdentifiable(Generic[GenericBoundType], ABC):
             dict[str, Any]: A dictionary representation of the object, including id, name, label, description, and custom attributes.
         """
 
-        base_dict: "GenericIdentifiableBaseDict" = {
+        base = {
             "id": self._id,
             "name": self._name,
             "label": self._label,
             "description": self._description,
+            "flags": list(self._flags),
         }
 
         return {
-            **base_dict,
+            **base,
             **self.custom_attributes,
         }
 

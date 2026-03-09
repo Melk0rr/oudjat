@@ -8,18 +8,17 @@ from typing import Any, TypeAlias, override
 from urllib.parse import ParseResult, urlparse
 
 import requests
+from yaspin import yaspin
 
-from oudjat.connectors.edr.sentinelone.s1_incident_types import S1IncidentType
-from oudjat.utils import FileUtils
-from oudjat.utils.context import Context
-from oudjat.utils.credentials import NoCredentialsError
-from oudjat.utils.types import DataType, StrType
+from oudjat.utils import Context, DataType, FileUtils, NoCredentialsError, StrType
+from oudjat.utils.logging import spinner_log
 
 from ... import Connector, ConnectorMethod
 from .exceptions import SentinelOneAPIConnectionError, SentinelOneEndpointFormatError
 from .s1_analyst_verdicts import S1AnalystVerdict
 from .s1_endpoints import S1Endpoint
 from .s1_incident_statuses import S1IncidentStatus
+from .s1_incident_types import S1IncidentType
 from .s1_mitigation_modes import S1MitigationMode
 
 S1IncidentStatusType: TypeAlias = "str | S1IncidentStatus | list[str | S1IncidentStatus]"
@@ -171,7 +170,7 @@ class S1Connector(Connector):
         incident_filter: dict[str, Any],
         statuses: "S1IncidentStatusType | None",
         incident_type: "S1IncidentType",
-        exclude: bool = True,
+        exclude: bool = False,
     ) -> None:
         """
         Unify an incident status value into a valid status string.
@@ -195,12 +194,14 @@ class S1Connector(Connector):
             if not isinstance(statuses, list):
                 statuses = [statuses]
 
-            statuses = list(set(map(self._unify_status, statuses)))
+            unified_statuses = list(set(map(self._unify_status, statuses)))
 
-            if len(statuses) > 0:
+            if len(unified_statuses) > 0:
                 prop = filter_props[incident_type][exclude]
-                incident_filter[prop] = (
-                    statuses if incident_type is S1IncidentType.THREAT else next(iter(statuses))
+                incident_filter[prop] = self._unify_str_list(
+                    unified_statuses
+                    if incident_type is S1IncidentType.THREAT
+                    else next(iter(unified_statuses))
                 )
 
     def _update_filter_verdict(
@@ -208,7 +209,7 @@ class S1Connector(Connector):
         incident_filter: dict[str, Any],
         verdicts: "S1AnalystVerdictType | None",
         incident_type: "S1IncidentType",
-        exclude: bool = True,
+        exclude: bool = False,
     ) -> None:
         """
         Unify an incident status value into a valid status string.
@@ -232,12 +233,14 @@ class S1Connector(Connector):
             if not isinstance(verdicts, list):
                 verdicts = [verdicts]
 
-            verdicts = list(set(map(self._unify_verdict, verdicts)))
+            unified_verdicts: list[str] = list(set(map(self._unify_verdict, verdicts)))
 
-            if len(verdicts) > 0:
+            if len(unified_verdicts) > 0:
                 prop = filter_props[incident_type][exclude]
-                incident_filter[prop] = (
-                    verdicts if incident_type is S1IncidentType.THREAT else next(iter(verdicts))
+                incident_filter[prop] = self._unify_str_list(
+                    unified_verdicts
+                    if incident_type is S1IncidentType.THREAT
+                    else next(iter(unified_verdicts))
                 )
 
     # ****************************************************************
@@ -304,9 +307,7 @@ class S1Connector(Connector):
             self.logger.info(f"Connected to {self._target.netloc}")
 
         else:
-            self.logger.warning(
-                f"Connection to {self._target.netloc} is already initialized."
-            )
+            self.logger.warning(f"Connection to {self._target.netloc} is already initialized.")
 
     # ****************************************************************
     # Methods - main
@@ -332,7 +333,6 @@ class S1Connector(Connector):
 
         context = Context()
 
-        res = []
         next_cursor = None
 
         endpoint_path = endpoint.path
@@ -345,32 +345,47 @@ class S1Connector(Connector):
         if path_fmt:
             endpoint_path = endpoint_path.format(**path_fmt)
 
+        action_str = (
+            "Retrieving data from" if endpoint.method.name == "GET" else "Updating elements with"
+        )
+
+        self.logger.info(f"{action_str} {endpoint} S1 endpoint")
         self.logger.debug(f"{context}::{endpoint} > {payload}")
-        while True:
-            if next_cursor:
-                payload["cursor"] = next_cursor
 
-            r_params = self._request_params(payload, endpoint.method, endpoint_path)
-            req = endpoint.method(**r_params)
-            req_json = req.json()
+        res = []
+        with yaspin(text=f"{action_str} {endpoint}...") as spinner:
+            try:
+                while True:
+                    if next_cursor:
+                        payload["cursor"] = next_cursor
 
-            self.logger.debug(f"{context}::{endpoint} > {req_json}")
+                    r_params = self._request_params(payload, endpoint.method, endpoint_path)
+                    req = endpoint.method(**r_params)
+                    req_json = req.json()
 
-            if "data" in req_json:
-                if isinstance(req_json["data"], list):
-                    res.extend(req_json["data"])
+                    spinner_log(f"{context}::{endpoint} > {req_json}", self.logger.debug, spinner)
 
-                else:
-                    res.append(req_json["data"])
+                    if "data" in req_json:
+                        if isinstance(req_json["data"], list):
+                            res.extend(req_json["data"])
 
-            if req.status_code != 200:
-                raise SentinelOneAPIConnectionError(
-                    f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
-                )
+                        else:
+                            res.append(req_json["data"])
 
-            next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
-            if not next_cursor:
-                break
+                    if req.status_code != 200:
+                        raise SentinelOneAPIConnectionError(
+                            f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
+                        )
+
+                    next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
+                    if not next_cursor:
+                        break
+
+                spinner.ok(f"✅ Done {action_str.lower()} {endpoint}")
+
+            except Exception as e:
+                spinner.fail(f"❌ Error while {action_str.lower()} {endpoint}")
+                raise e
 
         return res
 
@@ -457,12 +472,17 @@ class S1Connector(Connector):
             payload["infected"] = True
 
         endpoint = S1Endpoint.AGENTS_EXPORT
-        req = endpoint.method(**self._request_params(payload, endpoint.method, endpoint.path))
 
-        if req.status_code != 200:
-            raise SentinelOneAPIConnectionError(
-                f"{Context()}::An error occured while fetching data from {endpoint}"
-            )
+        with yaspin(text=f"Exporting agents data using {endpoint}...") as spinner:
+            req = endpoint.method(**self._request_params(payload, endpoint.method, endpoint.path))
+
+            if req.status_code != 200:
+                spinner.fail("❌ Error while exporting agents")
+                raise SentinelOneAPIConnectionError(
+                    f"{Context()}::An error occured while fetching data from {endpoint}"
+                )
+
+            spinner.ok("✅ Done exporting agents")
 
         return FileUtils.parse_csv_str(req.content.decode().replace('"', ""), delimiter=",")
 
@@ -698,6 +718,9 @@ class S1Connector(Connector):
         self._update_filter_status(threat_filter, status_filter, S1IncidentType.THREAT)
         self._update_filter_verdict(threat_filter, verdict_filter, S1IncidentType.THREAT)
 
+        if "limit" not in threat_filter:
+            threat_filter["limit"] = 1000
+
         if file_path is not None:
             threat_filter["filePath__contains"] = self._unify_str_list(file_path)
 
@@ -756,8 +779,15 @@ class S1Connector(Connector):
         if site_ids is not None:
             threat_filter["siteIds"] = self._unify_str_list(site_ids)
 
-        self._update_filter_status(threat_filter, status_filter, S1IncidentType.THREAT)
+        self._update_filter_status(
+            threat_filter,
+            status_filter,
+            S1IncidentType.THREAT,
+        )
         self._update_filter_verdict(threat_filter, verdict_filter, S1IncidentType.THREAT)
+
+        if "limit" not in threat_filter:
+            threat_filter["limit"] = 1000
 
         if file_path is not None:
             threat_filter["filePath__contains"] = self._unify_str_list(file_path)
@@ -776,17 +806,13 @@ class S1Connector(Connector):
             while True:
                 q = self.fetch(S1Endpoint.THREATS_INCIDENT, payload)
 
-                if q[0]["affected"] == 0:
+                if next(iter(q))["affected"] == 0:
                     break
 
                 res.extend(q)
 
         else:
-            res.extend(
-                self.fetch(
-                    S1Endpoint.THREATS_INCIDENT, {"filter": threat_filter, "data": input_data}
-                )
-            )
+            res.extend(self.fetch(S1Endpoint.THREATS_INCIDENT, payload))
 
         return res
 
@@ -943,7 +969,10 @@ class S1Connector(Connector):
     # Methods: Groups
 
     def groups(
-        self, site_ids: "StrType | None", payload: dict[str, Any] | None = None
+        self,
+        name: str | None = None,
+        site_ids: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Get data of groups that match the filter.
@@ -954,8 +983,9 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry
 
         Args:
-            site_ids (str)           : The site to remove groups from
-            payload (dict[str, Any]) : Payload to send to the endpoint
+            name (str | None)       : The name of the groups to retrieve
+            site_ids (str | None)   : List of site IDs to filter
+            payload (dict[str, Any]): Payload to send to the endpoint
 
         Returns:
             DataType: Groups data based on the provided filters
@@ -963,6 +993,9 @@ class S1Connector(Connector):
 
         if payload is None:
             payload = {}
+
+        if name is not None:
+            payload["name"] = name
 
         if site_ids is not None:
             if not isinstance(site_ids, list):

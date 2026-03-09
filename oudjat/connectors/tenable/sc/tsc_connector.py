@@ -6,6 +6,9 @@ from enum import Enum
 from typing import Any, Callable, TypeAlias, override
 from urllib.parse import ParseResult, urlparse
 
+from yaspin import yaspin
+
+from oudjat.utils.logging import spinner_log
 from tenable.sc import TenableSC
 
 from oudjat.connectors.connector import Connector
@@ -20,7 +23,7 @@ from oudjat.utils import (
     UtilsList,
 )
 
-from .exceptions import TenableSCConnectionError
+from .exceptions import TenableSCConnectionError, TenableSCInvalidAnalysisTool
 from .tsc_asset_list_types import TSCAssetListType
 from .tsc_endpoints import TSCEndpoint
 from .tsc_vuln_tools import TSCVulnTool
@@ -98,6 +101,9 @@ class TenableSCConnector(Connector):
         Args:
             severities (list[str]) : severities to include in the filter (see cve.py)
         """
+
+        if len(severities) > 4:
+            raise ValueError(f"{Context()}::Too many severity numbers provided")
 
         if len(severities) == 0:
             severities = (1, 2, 3, 4)
@@ -188,27 +194,34 @@ class TenableSCConnector(Connector):
         if filters is None:
             filters = []
 
-        payload = { **payload, **kwargs }
+        payload = {**payload, **kwargs}
 
         res = []
-        try:
-            endpoint_api_name, endpoint_api_method = endpoint.value.split(".")
-            endpoint_api = getattr(self._connection, endpoint_api_name)
+        with yaspin(text=f"Retrieving / updating {endpoint.name.lower()} elements") as spinner:
+            try:
+                endpoint_api_name, endpoint_api_method = endpoint.value.split(".")
+                endpoint_api = getattr(self._connection, endpoint_api_name)
 
-            self.logger.debug(f"{context}::{endpoint.value} > {payload}")
-            endpoint_func: Callable[..., "DatumDataType"] = getattr(
-                endpoint_api, endpoint_api_method
-            )
+                spinner_log(f"{context}::{endpoint.value} > {payload}", self.logger.debug, spinner)
+                endpoint_func: Callable[..., "DatumDataType"] = getattr(
+                    endpoint_api, endpoint_api_method
+                )
 
-            req = endpoint_func(*filters, **payload)
-            UtilsList.append_flat(res, list(req))
+                req = endpoint_func(*filters, **payload)
+                UtilsList.append_flat(res, list(req))
 
-            self.logger.debug(f"{context}::{endpoint.value} > {req}")
+                spinner_log(f"{context}::{endpoint.value} > {req}", self.logger.debug, spinner)
 
-        except TenableSCConnectionError as e:
-            raise TenableSCConnectionError(
-                f"{context}::Could not retrieve data from {self._target.netloc}/{endpoint.value}\n{e}"
-            )
+            except TenableSCConnectionError as e:
+                raise TenableSCConnectionError(
+                    f"{context}::Could not retrieve data from {self._target.netloc}/{endpoint.value}\n{e}"
+                )
+
+            if len(res) > 0:
+                spinner.ok(f"✅ Retrieved / updated {len(res)} elements")
+
+            else:
+                spinner.fail("❌ No elements could be retrieved / updated")
 
         return res
 
@@ -218,7 +231,7 @@ class TenableSCConnector(Connector):
     def vulns(
         self,
         *severities: int,
-        tool: "TSCVulnTool" = TSCVulnTool.VULNDETAILS,
+        tool: "str | TSCVulnTool" = TSCVulnTool.VULNDETAILS,
         product: str | None = None,
         exploitable: bool = True,
         filters: list["TSCFilter"] | None = None,
@@ -242,8 +255,15 @@ class TenableSCConnector(Connector):
         if payload is None:
             payload = {}
 
-        payload["tool"] = tool.value
+        if not isinstance(tool, TSCVulnTool):
+            if tool.upper() not in TSCVulnTool:
+                raise TenableSCInvalidAnalysisTool(
+                    f"{Context()}::Invalid analysis tool provided {tool}"
+                )
 
+            tool = TSCVulnTool[tool.upper()]
+
+        payload["tool"] = str(tool)
         if filters is None:
             filters = []
 
@@ -258,67 +278,6 @@ class TenableSCConnector(Connector):
 
     # ****************************************************************
     # Methods - asset lists
-
-    def asset_lists_create(
-        self,
-        name: str,
-        list_type: "TSCAssetListType" = TSCAssetListType.COMBINATION,
-        description: str | None = None,
-        ips: list[str] | None = None,
-        dns_names: list[str] | None = None,
-        payload: dict[str, Any] | None = None,
-    ) -> "DataType":
-        """
-        Create a new asset list.
-
-        Args:
-            name (str)                     : Name of the asset list
-            list_type (TSCAssetListType)   : Type of the asset list (see tsc_asset_list_types.py for details)
-            description (str | None)       : Asset list description
-            ips: (list[str] | None)        : A list of ip addresses to associate with the list
-            dns_names: (list[str] | None)  : A list of dns names to associate with the list
-            payload (dict[str, Any] | None): Payload to send to the endpoint
-
-        Returns:
-            DataType: Data containing the details of the created asset lists
-        """
-
-        if payload is None:
-            payload = {}
-
-        payload["name"] = name
-        payload["list_type"] = list_type.value
-
-        if description:
-            payload["description"] = description
-
-        if ips:
-            payload["ips"] = ips
-
-        if dns_names:
-            payload["dns_names"] = dns_names
-
-        return self.fetch(endpoint=TSCEndpoint.ASSETS_CREATE, payload=payload)
-
-    def asset_lists_delete(self, list_id: int | list[int]) -> "DataType":
-        """
-        Delete an asset list based on given id.
-
-        Args:
-            list_id (int | list[int]): List of ids of the asset lists to delete
-
-        Returns:
-            DataType: Data containing the details of the deleted asset lists
-        """
-
-        if not isinstance(list_id, list):
-            list_id = [list_id]
-
-        res = []
-        for lid in list_id:
-            res.extend(self.fetch(endpoint=TSCEndpoint.ASSETS_DELETE, id=lid))
-
-        return res
 
     def asset_lists(
         self,
@@ -387,6 +346,67 @@ class TenableSCConnector(Connector):
 
         return list_details
 
+    def asset_lists_create(
+        self,
+        name: str,
+        list_type: "TSCAssetListType" = TSCAssetListType.COMBINATION,
+        description: str | None = None,
+        ips: list[str] | None = None,
+        dns_names: list[str] | None = None,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Create a new asset list.
+
+        Args:
+            name (str)                     : Name of the asset list
+            list_type (TSCAssetListType)   : Type of the asset list (see tsc_asset_list_types.py for details)
+            description (str | None)       : Asset list description
+            ips: (list[str] | None)        : A list of ip addresses to associate with the list
+            dns_names: (list[str] | None)  : A list of dns names to associate with the list
+            payload (dict[str, Any] | None): Payload to send to the endpoint
+
+        Returns:
+            DataType: Data containing the details of the created asset lists
+        """
+
+        if payload is None:
+            payload = {}
+
+        payload["name"] = name
+        payload["list_type"] = list_type.value
+
+        if description:
+            payload["description"] = description
+
+        if ips:
+            payload["ips"] = ips
+
+        if dns_names:
+            payload["dns_names"] = dns_names
+
+        return self.fetch(endpoint=TSCEndpoint.ASSETS_CREATE, payload=payload)
+
+    def asset_lists_delete(self, list_id: int | list[int]) -> "DataType":
+        """
+        Delete an asset list based on given id.
+
+        Args:
+            list_id (int | list[int]): List of ids of the asset lists to delete
+
+        Returns:
+            DataType: Data containing the details of the deleted asset lists
+        """
+
+        if not isinstance(list_id, list):
+            list_id = [list_id]
+
+        res = []
+        for lid in list_id:
+            res.extend(self.fetch(endpoint=TSCEndpoint.ASSETS_DELETE, id=lid))
+
+        return res
+
     # TODO: Edit asset list
 
     # ****************************************************************
@@ -428,32 +448,32 @@ class TenableSCConnector(Connector):
 
         return scan_list
 
-    def scans_details(self, scan_id: int | list[int]) -> "DataType":
+    def scans_details(self, scan_ids: int | list[int]) -> "DataType":
         """
         Return the details of one or more scans.
 
         Args:
-            scan_id (int | list[int]): One or more scan id to retrieve
+            scan_ids (int | list[int]): Ids of the scan to retrieve
 
         Returns:
             DataType: Data containing the details of the scans matching provided IDs
         """
 
-        if not isinstance(scan_id, list):
-            scan_id = [scan_id]
+        if not isinstance(scan_ids, list):
+            scan_ids = [scan_ids]
 
         scan_details = []
-        for sid in scan_id:
+        for sid in scan_ids:
             scan_details.extend(self.fetch(endpoint=TSCEndpoint.SCANS_DETAILS, id=sid))
 
         return scan_details
 
     def scans_delete(self, scan_id: int | list[int]) -> "DataType":
         """
-        Delete an asset list based on given id.
+        Delete one or more scans.
 
         Args:
-            scan_id (int | list[int]) : one or more scan id to delete
+            scan_id (int | list[int]) : Ids of the scans to delete
 
         Return:
             DataType: Data containing the details of the deleted scans
@@ -486,7 +506,7 @@ class TenableSCConnector(Connector):
             asset_lists (list[int] | None)  : The asset lists ids to run the scan against
             description (str | None)        : Scan description
             schedule (dict[str, str] | None): Schedule dictionary
-            payload (dict[str, Any] | None) : Payload to send to the endpoint
+            payload (dict[str, Any] | None) : Additional parameters
 
         Returns:
             DataType: Data containing the created scan details
