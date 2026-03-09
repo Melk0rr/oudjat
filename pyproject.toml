@@ -21,7 +21,6 @@ license = { file = "LICENSE" }
 
 dependencies = [
   "beautifulsoup4",
-  "commentjson",
   "docopt",
   "keyring",
   "ldap3",
