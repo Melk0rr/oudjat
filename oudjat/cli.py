@@ -16,6 +16,7 @@ from oudjat.commands import (
     LDAPConnectorCommand,
     S1ConnectorCommand,
     TenableSCConnectorCommand,
+    VulnConnectorCommand,
 )
 from oudjat.commands.exceptions import UnknownCommand
 from oudjat.utils import ColorPrint, Context, StdOutHook, TimeConverter
@@ -30,6 +31,7 @@ _COMMAND_OPTIONS = {
     "connectors.cert.certfr": CERTFRConnectorCommand,
     "connectors.ldap": LDAPConnectorCommand,
     "connectors.tenable.sc": TenableSCConnectorCommand,
+    "connectors.vuln": VulnConnectorCommand,
 }
 
 

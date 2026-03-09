@@ -5,6 +5,7 @@ A command module to handle interactions with vulnerability databases.
 from typing import Any
 
 from oudjat.connectors.vuln import CVEConnector, CVEDatabase
+from oudjat.connectors.vuln.cve_load_balancer import CVELoadBalancer
 from oudjat.utils.doc_builder import DocBuilder
 
 from .base import (
@@ -53,7 +54,7 @@ class VulnConnectorCommand(ConnectorCommand):
         ),
         "--auto": CmdUsage(
             CmdOpt(
-                "Use a specific database to retrieve CVE data. Keep in mind APIs are requests/min restricted",
+                "Use load balancing to retrieve data dynamically from available CVE APIs",
             ),
             "--auto (--cves=CVES) [options]",
             {
@@ -86,9 +87,12 @@ class VulnConnectorCommand(ConnectorCommand):
             },
         )
 
+        self._balancer: "CVELoadBalancer" = CVELoadBalancer()
+
         # Usage backends
         self.__cmd_props__.backends(
             {
                 "--db": self.connector.fetch,
+                "--auto": self._balancer.fetch,
             }
         )
