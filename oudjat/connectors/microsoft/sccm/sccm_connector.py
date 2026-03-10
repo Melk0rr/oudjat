@@ -11,7 +11,6 @@ from yaspin import yaspin
 from oudjat.connectors.microsoft.sccm.exceptions import SCCMQueryError, SCCMServerConnectionError
 from oudjat.utils import Context, DataType
 from oudjat.utils.credentials import NoCredentialsError
-from oudjat.utils.types import StrType
 
 from ...connector import Connector
 from .odbc_drivers import ODBCDriver
@@ -31,7 +30,7 @@ class SCCMConnector(Connector):
         db_name: str,
         username: str | None = None,
         password: str | None = None,
-        driver: "ODBCDriver" = ODBCDriver.SQL_SERVER,
+        driver: "str | ODBCDriver" = ODBCDriver.SQL_SERVER,
         port: int = 1433,
         trusted_connection: bool = False,
     ) -> None:
@@ -49,11 +48,18 @@ class SCCMConnector(Connector):
             service_name (str)       : Service name used to register credentials if trusted_connection is false
         """
 
+        context = Context()
         self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         super().__init__(target=server, username=username, password=password)
 
         self._trusted_connection: bool = trusted_connection
+
+        if not isinstance(driver, ODBCDriver):
+            if driver not in ODBCDriver._member_names_:
+                raise ValueError(f"{context}::Invalid ODBC driver provided")
+
+            driver = ODBCDriver[driver]
 
         self._driver: "ODBCDriver" = driver
         self._port: int = port
@@ -132,7 +138,6 @@ class SCCMConnector(Connector):
         self,
         payload: str,
         payload_fmt: dict[str, Any] | None = None,
-        attributes: "StrType | None" = None,
     ) -> "DataType":
         """
         Perform a request to the SQL server.
@@ -140,9 +145,8 @@ class SCCMConnector(Connector):
         Detailed description.
 
         Args:
-            payload (str)                      : A way to narrow search scope or search results. It may be a string, a tuple, or even a callback function
+            payload (str)                      : SQL request to send to the server
             payload_fmt (dict[str, Any] | None): An optional dictionary to format the provided payload
-            attributes (StrType | None)        : A list of attributes to keep in the search results
 
         Returns:
             list[Any]: list of found element based on provided search filter

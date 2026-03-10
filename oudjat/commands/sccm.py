@@ -29,6 +29,23 @@ class SCCMConnectorCommand(ConnectorCommand):
         "A command to interact with an SCCM server through the oudjat SCCMConnector",
     )
     __cmd_props__.options = {
+        "--db": CmdOpt(
+            "The name of the database to query",
+            arg="DBNAME",
+        ),
+        "--driver": CmdOpt(
+            "The ODBC driver to use ",
+            arg="DRIVER",
+        ),
+        "--format": CmdOpt(
+            "A format JSON dictionary",
+            arg="FORMAT",
+        ),
+        "--query": CmdOpt(
+            "Specify the SQL query file",
+            short="q",
+            arg="QUERY",
+        ),
         "--target": CmdOpt(
             "Specify the target server",
             short="t",
@@ -37,15 +54,19 @@ class SCCMConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.usages = {
-        "--": CmdUsage(
+        "--fetch": CmdUsage(
             CmdOpt(
                 "",
             ),
-            "-- (-t=TARGET | --target=TARGET)",
+            "--fetch (-t=TARGET | --target=TARGET) (--db=DBNAME) (-q=QUERY | --query=QUERY) [--driver=DRIVER] [--format=FORMAT]",
             {
+                "payload": CmdUsageOpt("--query"),
+                "payload_fmt": CmdUsageOpt("--format"),
             },
         ),
     }
+
+    __cmd_props__.append_usages("[options]")
 
     __doc_builder__: "DocBuilder" = ConnectorCommand._gen_doc("oudjat", __cmd_props__, "")
 
@@ -68,15 +89,20 @@ class SCCMConnectorCommand(ConnectorCommand):
                 }
             )
 
+        con_args["db_name"] = self.options["--db"]
+
         self.connector: "SCCMConnector" = SCCMConnector(**con_args)
 
         self.__cmd_props__.opts_transform(
             {
+                "--query": lambda opt, _: self._unify_str_opt(opt),
+                "--format": lambda _, v: self._parse_payload(v),
             },
         )
 
         # Usage backends
         self.__cmd_props__.backends(
             {
-            }
+                "--fetch": self.connector.fetch,
+            },
         )
