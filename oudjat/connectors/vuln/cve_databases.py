@@ -29,9 +29,9 @@ class CVEDatabaseProps(NamedTuple):
 class CVEDatabase(Enum):
     """An enumeration of CVE connectors."""
 
-    NIST = CVEDatabaseProps(db_name="Nist", connector=NistConnector, limit_per_minute=10)
-    CIRCL = CVEDatabaseProps(db_name="circl.lu", connector=CirclConnector, limit_per_minute=10)
-    CVEORG = CVEDatabaseProps(db_name="CVE.org", connector=CVEorgConnector, limit_per_minute=10)
+    NIST = CVEDatabaseProps(db_name="Nist", connector=NistConnector, limit_per_minute=20)
+    CIRCL = CVEDatabaseProps(db_name="circl.lu", connector=CirclConnector, limit_per_minute=20)
+    CVEORG = CVEDatabaseProps(db_name="CVE.org", connector=CVEorgConnector, limit_per_minute=20)
 
     @property
     def dbname(self) -> str:
