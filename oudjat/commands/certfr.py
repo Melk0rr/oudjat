@@ -2,9 +2,11 @@
 A command module to handle interactions with the CERTFR website.
 """
 
-from typing import Any
+from typing import Any, override
 
 from oudjat.connectors.cert.certfr import CERTFRConnector
+from oudjat.connectors.vuln.cve_load_balancer import CVELoadBalancer
+from oudjat.control.vulnerability.cve import CVE
 from oudjat.utils.doc_builder import DocBuilder
 
 from .base import (
@@ -33,6 +35,14 @@ class CERTFRConnectorCommand(ConnectorCommand):
             "A filter to retrieve only RSS feed items that were published after a certain date (YYYY-MM-DD format)",
             arg="FEEDFILTER",
         ),
+        "--limit": CmdOpt(
+            "Define a limit to the number of CVEs resolve when using max-cve option",
+            arg="LIMIT",
+            default=50,
+        ),
+        "--max-cve": CmdOpt(
+            "Resolve CVEs data and the highests (most critical) ones",
+        ),
         "--keywords": CmdOpt(
             "A list of keywords (comma separated, no space)",
             arg="KEYWORDS",
@@ -44,9 +54,9 @@ class CERTFRConnectorCommand(ConnectorCommand):
             CmdOpt(
                 "Specify CERTFR page references for parsing (comma separated, no space)",
                 short="t",
-                arg="TARGET"
+                arg="TARGET",
             ),
-            "(-t=TARGET | --target=TARGET) [--keywords=KEYWORDS] [options]",
+            "(-t=TARGET | --target=TARGET) [--keywords=KEYWORDS] [--max-cve [--limit=LIMIT]] [options]",
             {
                 "search_filter": CmdUsageOpt("--target"),
                 "keywords": CmdUsageOpt("--keywords"),
@@ -56,7 +66,7 @@ class CERTFRConnectorCommand(ConnectorCommand):
             CmdOpt(
                 "Automatically retrieve and parse CERTFR pages from RSS feed",
             ),
-            "--feed [--feed-filter=FEEDFILTER] [--keywords=KEYWORDS] [options]",
+            "--feed [--feed-filter=FEEDFILTER] [--keywords=KEYWORDS] [--max-cve [--limit=LIMIT]] [options]",
             {
                 "date_filter_str": CmdUsageOpt("--feed-filter"),
                 "keywords": CmdUsageOpt("--keywords"),
@@ -94,3 +104,40 @@ class CERTFRConnectorCommand(ConnectorCommand):
                 "--feed": self.connector.feed,
             }
         )
+
+        if self.options["--max-cve"]:
+            self._callbacks.append(self._max_cve_cb)
+
+        self.options["--limit"] = int(self.options["--limit"])
+
+    # ****************************************************************
+    # Methods - callbacks
+
+    @override
+    def print(self) -> None:
+        for p in self._data:
+            print(f"{p['ref']} - {p['title']}")
+
+            if self.options["--keywords"]:
+                print(f"    Matched {len(p['matches'])} keywords")
+                for k in p["matches"]:
+                    print(f"        {k}")
+
+            if self.options["--max-cve"]:
+                print("    Highest CVEs")
+                for cve in p["highestCVEs"]:
+                    print(f"        {cve['id']}: {cve['score']}")
+
+    # ****************************************************************
+    # Methods - callbacks
+
+    def _max_cve_cb(self) -> None:
+        balancer = CVELoadBalancer()
+
+        for page in self._data:
+            cves = page["cves"][:self.options["--limit"]]
+            page_cves = balancer.fetch(cves)
+            page_cves = CVE.from_db(page_cves)
+
+            max_cves = CVE.max_cve(page_cves)
+            page["highestCVEs"] = [{"id": cve.ref, "score": cve.cvss_score} for cve in max_cves]
