@@ -27,6 +27,7 @@ dependencies = [
   "lxml",
   "orjson",
   "pycryptodome",
+  "pyodbc",
   "pytenable",
   "requests",
   "tqdm",
