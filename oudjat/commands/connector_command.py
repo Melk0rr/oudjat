@@ -4,7 +4,7 @@ A command module to address some shared behaviors accross connector commands.
 
 import logging
 from ctypes import ArgumentError
-from typing import Any, override
+from typing import Any, Callable, override
 
 from oudjat.connectors.exceptions import ConnectorCredentialError
 from oudjat.core.mapper import Mapper
@@ -12,6 +12,7 @@ from oudjat.utils import UtilsDict
 from oudjat.utils.context import Context
 from oudjat.utils.doc_builder import DocBuilder
 from oudjat.utils.file_utils import FileUtils
+from oudjat.utils.types import DataType
 
 from .base import Base, CmdOptUsageRegistry, CmdProps
 from .exceptions import ConnectorCommandInvalidBackend
@@ -50,6 +51,10 @@ class ConnectorCommand(Base):
             raise ConnectorCredentialError(
                 f"{context}::No credentials were provided for the connector"
             )
+
+        self._data: "DataType" = []
+        self._callbacks: list[Callable[..., None]] = []
+
 
     # ****************************************************************
     # Methods - helpers
@@ -127,7 +132,25 @@ class ConnectorCommand(Base):
         return (args, kwargs)
 
     # ****************************************************************
+    # Methods - callbacks
+
+    def _filter_keys_cb(self) -> None:
+        """
+        Filter the final results keys.
+        """
+
+        self._data = [UtilsDict.filter_keys(d, self.options["--key-filter"]) for d in self._data]
+
+    # ****************************************************************
     # Methods - main
+
+    def print(self) -> None:
+        """
+        Print the results.
+        """
+
+        print(self._data)
+
 
     # TODO: Allow multiple command execution
     @override
@@ -158,10 +181,13 @@ class ConnectorCommand(Base):
 
         # Run the command
         args, kwargs = self._prepare_backend(args)
-        data = cmd_usg.backend(*args, **kwargs)
+        self._data = cmd_usg.backend(*args, **kwargs)
 
         if self.options["--key-filter"]:
-            data = [UtilsDict.filter_keys(d, self.options["--key-filter"]) for d in data]
+            self._callbacks.append(self._filter_keys_cb)
+
+        for cb in self._callbacks:
+            cb()
 
         # Post operations
         if self.options["--csv"]:
@@ -169,13 +195,13 @@ class ConnectorCommand(Base):
                 self.options["--csv"] = [self.options["--csv"]]
 
             for p in self.options["--csv"]:
-                FileUtils.export_csv(data, p, delimiter="|")
+                FileUtils.export_csv(self._data, p, delimiter="|")
 
         if self.options["--json"]:
-            FileUtils.export_json(data, self.options["--json"])
+            FileUtils.export_json(self._data, self.options["--json"])
 
         if self.options["--print"]:
-            print(data)
+            self.print()
 
     # ****************************************************************
     # Static methods
