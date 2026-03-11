@@ -31,9 +31,9 @@ class CERTFRConnectorCommand(ConnectorCommand):
         "A command to parse CERTFR pages through oudjat CERTFRConnector",
     )
     __cmd_props__.options = {
-        "--feed-filter": CmdOpt(
+        "--feed-date": CmdOpt(
             "A filter to retrieve only RSS feed items that were published after a certain date (YYYY-MM-DD format)",
-            arg="FEEDFILTER",
+            arg="FEEDDATE",
         ),
         "--limit": CmdOpt(
             "Define a limit to the number of CVEs resolve when using max-cve option",
@@ -66,9 +66,9 @@ class CERTFRConnectorCommand(ConnectorCommand):
             CmdOpt(
                 "Automatically retrieve and parse CERTFR pages from RSS feed",
             ),
-            "--feed [--feed-filter=FEEDFILTER] [--keywords=KEYWORDS] [--max-cve [--limit=LIMIT]] [options]",
+            "--feed [--feed-date=FEEDDATE] [--keywords=KEYWORDS] [--max-cve [--limit=LIMIT]] [options]",
             {
-                "date_filter_str": CmdUsageOpt("--feed-filter"),
+                "date_filter_str": CmdUsageOpt("--feed-date"),
                 "keywords": CmdUsageOpt("--keywords"),
             },
         ),
