@@ -81,7 +81,7 @@ class CERTFRPage:
         self._matches: set[str] = set()
 
     # ****************************************************************
-    # Methods
+    # Methods - getters/setters
 
     @property
     def ref(self) -> str:
@@ -193,6 +193,20 @@ class CERTFRPage:
 
         return self._content.cves if self._content else []
 
+    @property
+    def matches(self) -> set[str]:
+        """
+        Return the keywords that matched the current page.
+
+        Returns:
+            set[str]: A set of keywords that match the page
+        """
+
+        return self._matches
+
+    # ****************************************************************
+    # Methods - parsing
+
     def connect(self) -> None:
         """
         Connect to a CERTFR page based on the given reference (ref).
@@ -279,8 +293,6 @@ class CERTFRPage:
         if not self._content and not self._title:
             return
 
-        context = Context()
-
         products_str = ("".join(self._content.products) if self._content else "").lower()
         title = (self._title or "").lower()
 
@@ -288,10 +300,6 @@ class CERTFRPage:
             kw for kw in keywords
             if kw.lower() in title or kw.lower() in products_str
         }
-
-        self.logger.info(f"{self._ref} matched {len(matches)} keywords")
-        if len(matches) > 0:
-            self.logger.debug(f"{context}::{'\n'.join(matches)}")
 
         self._matches.update(matches)
 

@@ -121,6 +121,8 @@ class CERTFRConnector(Connector):
                     if keywords is not None:
                         page.match(keywords)
 
+                    spinner_log(f"{ref} matched {len(page.matches)} keywords", self.logger.info, spinner)
+
                     res.append(page.to_dict())
 
                 except Exception as e:
@@ -198,8 +200,4 @@ class CERTFRConnector(Connector):
         except CERTFRParsingError as e:
             logger.error(f"{context}::A parsing error occured for {target}: {e}")
 
-        res = []
-        for ref in filtered_feed:
-            res.extend(self.fetch(ref, keywords))
-
-        return res
+        return self.fetch(filtered_feed, keywords)
