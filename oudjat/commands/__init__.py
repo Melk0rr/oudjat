@@ -4,6 +4,7 @@ from .certfr import CERTFRConnectorCommand
 from .eol import EOLConnectorCommand
 from .ldap import LDAPConnectorCommand
 from .s1 import S1ConnectorCommand
+from .sccm import SCCMConnectorCommand
 from .tenablesc import TenableSCConnectorCommand
 from .vuln import VulnConnectorCommand
 
@@ -12,6 +13,7 @@ __all__ = [
     "EOLConnectorCommand",
     "LDAPConnectorCommand",
     "S1ConnectorCommand",
+    "SCCMConnectorCommand",
     "TenableSCConnectorCommand",
     "VulnConnectorCommand",
 ]
