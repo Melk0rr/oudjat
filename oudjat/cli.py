@@ -15,6 +15,7 @@ from oudjat.commands import (
     EOLConnectorCommand,
     LDAPConnectorCommand,
     S1ConnectorCommand,
+    SCCMConnectorCommand,
     TenableSCConnectorCommand,
     VulnConnectorCommand,
 )
@@ -30,6 +31,7 @@ _COMMAND_OPTIONS = {
     "connectors.endoflife": EOLConnectorCommand,
     "connectors.cert.certfr": CERTFRConnectorCommand,
     "connectors.ldap": LDAPConnectorCommand,
+    "connectors.sccm": SCCMConnectorCommand,
     "connectors.tenable.sc": TenableSCConnectorCommand,
     "connectors.vulns": VulnConnectorCommand,
 }
