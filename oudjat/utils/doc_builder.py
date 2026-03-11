@@ -244,7 +244,7 @@ class DocBuilder:
         if arg is not None:
             arg = arg.upper()
 
-        self._options[long] = DocOption(long, description, short, arg, default)
+        self._options[long] = DocOption(long, description, short, arg=arg, default=default)
 
     def add_command(self, name: str, description: str) -> None:
         """
@@ -285,7 +285,7 @@ class DocBuilder:
             self.add_command(cmd.name, cmd.description)
 
         for opt in other.options.values():
-            self.add_option(opt.long, opt.description, opt.arg, opt.short)
+            self.add_option(opt.long, opt.description, opt.arg, opt.short, opt.default)
 
         for usg in other.usages:
             self.add_usage(usg)
