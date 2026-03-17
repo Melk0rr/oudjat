@@ -970,7 +970,7 @@ class S1Connector(Connector):
 
     def groups(
         self,
-        name: str | None = None,
+        names: "StrType | None" = None,
         site_ids: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
@@ -983,7 +983,7 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry
 
         Args:
-            name (str | None)       : The name of the groups to retrieve
+            names (str | None)      : The name of the groups to retrieve
             site_ids (str | None)   : List of site IDs to filter
             payload (dict[str, Any]): Payload to send to the endpoint
 
@@ -991,11 +991,10 @@ class S1Connector(Connector):
             DataType: Groups data based on the provided filters
         """
 
+
         if payload is None:
             payload = {}
 
-        if name is not None:
-            payload["name"] = name
 
         if site_ids is not None:
             if not isinstance(site_ids, list):
@@ -1003,7 +1002,21 @@ class S1Connector(Connector):
 
             payload["siteIds"] = site_ids
 
-        return self.fetch(S1Endpoint.GROUPS, payload)
+        if names is not None:
+            res = []
+            if not isinstance(names, list):
+                names = [names]
+
+            for name in names:
+                payload["name"] = name
+
+                req = self.fetch(S1Endpoint.GROUPS, payload)
+                res.extend(req)
+
+        else:
+            res = self.fetch(S1Endpoint.GROUPS, payload)
+
+        return res
 
     def group_policy_update(
         self,
