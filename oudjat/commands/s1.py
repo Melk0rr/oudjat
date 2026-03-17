@@ -244,8 +244,15 @@ class S1ConnectorCommand(ConnectorCommand):
             },
         ),
         "--group-policy": CmdUsage(
+            CmdOpt("Retrieve the policy of a specific group"),
+            "--group-policy [--ids=IDS]",
+            {
+                "group_id": CmdUsageOpt("--ids", transform=lambda lst: next(iter(lst))),
+            },
+        ),
+        "--group-policy-update": CmdUsage(
             CmdOpt("Update the policy of the specified groups"),
-            "--group-policy [--ids=IDS] [--malicious-policy=MALPOLICY] [--suspicious-policy=SUPOLICY] [--payload=PAYLOAD]",
+            "--group-policy-update [--ids=IDS] [--malicious-policy=MALPOLICY] [--suspicious-policy=SUPOLICY] [--payload=PAYLOAD]",
             {
                 "group_id": CmdUsageOpt("--ids"),
                 "malicious_mitigation": CmdUsageOpt("--malicious-policy"),
@@ -345,7 +352,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "--applications-cves": self.connector.application_cves,
                 "--cves": self.connector.cves,
                 "--groups": self.connector.groups,
-                "--group-policy": self.connector.group_policy_update,
+                "--group-policy-update": self.connector.group_policy_update,
                 "--group-move-agent": self.connector.group_move_agent,
                 "--sites": self.connector.sites,
                 "--sites-by-name": self.connector.sites_by_name,
