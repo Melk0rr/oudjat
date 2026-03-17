@@ -37,25 +37,6 @@ _COMMAND_OPTIONS = {
 }
 
 
-def _config_logging(options: dict[str, str]) -> "logging.Logger":
-    """
-    Set the logging level.
-
-    Args:
-        options (dict[str, str]): CLI options
-    """
-
-    LOGGING_LEVELS = {
-        "INFO": logging.INFO,
-        "WARNING": logging.WARNING,
-        "ERROR": logging.ERROR,
-        "CRITICAL": logging.CRITICAL,
-        "DEBUG": logging.DEBUG,
-    }
-
-    return oudjatLogger(level=LOGGING_LEVELS.get(options["--log"], LOGGING_LEVELS["INFO"]))
-
-
 def _command_switch(options: dict[str, str]) -> Any:
     """
     Script command switch case.
@@ -99,7 +80,7 @@ It also allows for complex data consolidation and mapping through a config file 
 
     builder.add_option("append", "Append to the output fileappend to the output file", short="a")
     builder.add_option("help", "Print the doc string", short="h")
-    builder.add_option("log", "Specify the logging level", arg="LOGGING", short="l", default="INFO")
+    builder.add_option("verbose", "Show more logs", short="v")
     builder.add_option(
         "output", "Specify a file to save the execution logs to", arg="LOGFILE", short="o"
     )
@@ -162,7 +143,7 @@ def main() -> None:
                 options["--output"], options["--silent"], output=options["--output"]
             )
 
-        logger = _config_logging(options)
+        logger = oudjatLogger(level=logging.DEBUG if options["--verbose"] else logging.INFO)
 
         ColorPrint.blue(banner)
 
