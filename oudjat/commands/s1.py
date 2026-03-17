@@ -352,6 +352,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "--applications-cves": self.connector.application_cves,
                 "--cves": self.connector.cves,
                 "--groups": self.connector.groups,
+                "--group-policy": self.connector.group_policy,
                 "--group-policy-update": self.connector.group_policy_update,
                 "--group-move-agent": self.connector.group_move_agent,
                 "--sites": self.connector.sites,
