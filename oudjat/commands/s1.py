@@ -124,7 +124,7 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt("Move one or multiple agents to a site based on its id"),
             "--move-agent-site [--sites-list=SITES] [--names=NAMES]",
             {
-                "site_id": CmdUsageOpt("--sites-list", lambda lst: next(iter(lst))),
+                "site_id": CmdUsageOpt("--sites-list"),
                 "agent_name": CmdUsageOpt("--names"),
             },
         ),
@@ -238,7 +238,7 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt("Retrieve groups"),
             "--groups [--names=NAMES] [--sites-list=SITES] [--payload=PAYLOAD]",
             {
-                "name": CmdUsageOpt("--names", transform=lambda v: next(iter(v))),
+                "name": CmdUsageOpt("--names"),
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
             },
@@ -257,7 +257,7 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt("Move agents into specified group"),
             "--group-move-agent [--ids=IDS] [--names=NAMES] [--payload=PAYLOAD]",
             {
-                "group_id": CmdUsageOpt("--ids", lambda lst: next(iter(lst))),
+                "group_id": CmdUsageOpt("--ids"),
                 "agent_name": CmdUsageOpt("--names"),
                 "payload": CmdUsageOpt("--payload"),
             },

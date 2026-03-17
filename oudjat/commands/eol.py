@@ -98,7 +98,7 @@ class EOLConnectorCommand(ConnectorCommand):
             CmdOpt("Retrieve all, or a specific tag"),
             "--tags [--tag=TAG] [options]",
             {
-                "tag": CmdUsageOpt("--tag", lambda lst: next(iter(lst))),
+                "tag": CmdUsageOpt("--tag"),
             },
         ),
     }
