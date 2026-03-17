@@ -345,15 +345,11 @@ class S1Connector(Connector):
         if path_fmt:
             endpoint_path = endpoint_path.format(**path_fmt)
 
-        action_str = (
-            "Retrieving data from" if endpoint.method.name == "GET" else "Updating elements with"
-        )
-
-        self.logger.info(f"{action_str} {endpoint} S1 endpoint")
-        self.logger.debug(f"{context}::{endpoint} > {payload}")
+        self.logger.info(f"{endpoint} - {endpoint.description}")
+        self.logger.debug(f"{context}::{payload}")
 
         res = []
-        with yaspin(text=f"{action_str} {endpoint}...") as spinner:
+        with yaspin(text=f"{endpoint.description}...") as spinner:
             try:
                 while True:
                     if next_cursor:
@@ -381,10 +377,10 @@ class S1Connector(Connector):
                     if not next_cursor:
                         break
 
-                spinner.ok(f"✅ Done {action_str.lower()} {endpoint}")
+                spinner.ok(f"✅ Done running {endpoint} action")
 
             except Exception as e:
-                spinner.fail(f"❌ Error while {action_str.lower()} {endpoint}")
+                spinner.fail(f"❌ Error while running {endpoint} action")
                 raise e
 
         return res
