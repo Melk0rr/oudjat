@@ -1080,7 +1080,7 @@ class S1Connector(Connector):
 
         res = []
         for gid in group_id:
-            # Retrieving current group policy
+            # NOTE: Retrieving current group policy > May be unnecessary
             g_payload_data = self.fetch(
                 S1Endpoint.GROUPS_POLICY,
                 {},
