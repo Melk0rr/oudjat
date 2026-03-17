@@ -1068,13 +1068,13 @@ class S1Connector(Connector):
 
         if malicious_mitigation is not None:
             if not isinstance(malicious_mitigation, S1MitigationMode):
-                malicious_mitigation = S1MitigationMode[malicious_mitigation]
+                malicious_mitigation = S1MitigationMode[malicious_mitigation.upper()]
 
             payload["data"]["mitigationMode"] = str(malicious_mitigation)
 
         if suspicious_mitigation is not None:
             if not isinstance(suspicious_mitigation, S1MitigationMode):
-                suspicious_mitigation = S1MitigationMode[suspicious_mitigation]
+                suspicious_mitigation = S1MitigationMode[suspicious_mitigation.upper()]
 
             payload["data"]["mitigationModeSuspicious"] = str(suspicious_mitigation)
 
@@ -1278,13 +1278,13 @@ class S1Connector(Connector):
 
         if malicious_mitigation is not None:
             if not isinstance(malicious_mitigation, S1MitigationMode):
-                malicious_mitigation = S1MitigationMode[malicious_mitigation]
+                malicious_mitigation = S1MitigationMode[malicious_mitigation.upper()]
 
             payload["data"]["mitigationMode"] = str(malicious_mitigation)
 
         if suspicious_mitigation is not None:
             if not isinstance(suspicious_mitigation, S1MitigationMode):
-                suspicious_mitigation = S1MitigationMode[suspicious_mitigation]
+                suspicious_mitigation = S1MitigationMode[suspicious_mitigation.upper()]
 
             payload["data"]["mitigationModeSuspicious"] = str(suspicious_mitigation)
 
