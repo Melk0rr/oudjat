@@ -3,6 +3,7 @@ A simple module that lists Sentinel One mitigations modes.
 """
 
 from enum import Enum
+from typing import override
 
 
 class S1MitigationMode(Enum):
@@ -13,6 +14,7 @@ class S1MitigationMode(Enum):
     DETECT = "detect"
     PROTECT = "protect"
 
+    @override
     def __str__(self) -> str:
         """
         Convert a mitigation mode into a string.

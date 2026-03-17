@@ -991,10 +991,8 @@ class S1Connector(Connector):
             DataType: Groups data based on the provided filters
         """
 
-
         if payload is None:
             payload = {}
-
 
         if site_ids is not None:
             if not isinstance(site_ids, list):
@@ -1021,8 +1019,8 @@ class S1Connector(Connector):
     def group_policy_update(
         self,
         group_id: "StrType",
-        malicious_mitigation: "S1MitigationMode | None" = None,
-        suspicious_mitigation: "S1MitigationMode | None" = None,
+        malicious_mitigation: "str | S1MitigationMode | None" = None,
+        suspicious_mitigation: "str | S1MitigationMode | None" = None,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
@@ -1046,9 +1044,15 @@ class S1Connector(Connector):
             payload["data"] = {}
 
         if malicious_mitigation is not None:
+            if not isinstance(malicious_mitigation, S1MitigationMode):
+                malicious_mitigation = S1MitigationMode[malicious_mitigation]
+
             payload["data"]["mitigationMode"] = str(malicious_mitigation)
 
         if suspicious_mitigation is not None:
+            if not isinstance(suspicious_mitigation, S1MitigationMode):
+                suspicious_mitigation = S1MitigationMode[suspicious_mitigation]
+
             payload["data"]["mitigationModeSuspicious"] = str(suspicious_mitigation)
 
         res = []
