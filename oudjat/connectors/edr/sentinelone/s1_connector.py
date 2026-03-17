@@ -1016,6 +1016,27 @@ class S1Connector(Connector):
 
         return res
 
+    def group_policy(
+        self,
+        group_id: str,
+    ) -> "DataType":
+        """
+        Retrieve the policy for the specified group.
+
+        Possible response messages:
+        200 - Success
+        401 - Unauthorized access - please sign in and retry
+        404 - Group not found
+
+        Args:
+            group_id (str): The id of the group which policy will be retrieved
+
+        Returns:
+            DataType: The policy of the specified group
+        """
+
+        return self.fetch(S1Endpoint.GROUPS_POLICY, {}, path_fmt={"groupId": group_id})
+
     def group_policy_update(
         self,
         group_id: "StrType",
@@ -1025,6 +1046,12 @@ class S1Connector(Connector):
     ) -> "DataType":
         """
         Update the provided groups (by id) policy.
+
+        Possible response messages:
+        200 - Success
+        400 - Invalid user input received. See error details for further information
+        401 - Unauthorized access - please sign in and retry
+        404 - Group not found
 
         Args:
             group_id (str | list[str])                     : Group to update the policy of
