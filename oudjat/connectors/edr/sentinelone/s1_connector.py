@@ -1208,3 +1208,77 @@ class S1Connector(Connector):
             return site["name"] in site_name
 
         return list(filter(_filter_by_name, self.sites(payload)))
+
+    def sites_policy(
+        self,
+        site_id: str,
+    ) -> "DataType":
+        """
+        Retrieve the policy for the specified site.
+
+        Possible response messages:
+        200 - Success
+        401 - Unauthorized access - please sign in and retry
+        404 - Group not found
+
+        Args:
+            site_id (str): The id of the site which policy will be retrieved
+
+        Returns:
+            DataType: The policy of the specified site
+        """
+
+        return self.fetch(S1Endpoint.SITES_POLICY, {}, path_fmt={"siteId": site_id})
+
+    def site_policy_update(
+        self,
+        site_id: "StrType",
+        malicious_mitigation: "str | S1MitigationMode | None" = None,
+        suspicious_mitigation: "str | S1MitigationMode | None" = None,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Update the provided groups (by id) policy.
+
+        Possible response messages:
+        200 - Success
+        400 - Invalid user input received. See error details for further information
+        401 - Unauthorized access - please sign in and retry
+        404 - Group not found
+
+        Args:
+            site_id (str | list[str])                      : Site to update the policy of
+            malicious_mitigation (S1MitigationMode | None) : Malicious policy to set
+            suspicious_mitigation (S1MitigationMode | None): Suspicious policy to set
+            payload (dict[str, Any])                       : Payload to send
+
+        Returns:
+            DataType: Update result
+        """
+
+        if not isinstance(site_id, list):
+            site_id = [site_id]
+
+        if payload is None:
+            payload = {}
+            payload["data"] = {}
+
+        if malicious_mitigation is not None:
+            if not isinstance(malicious_mitigation, S1MitigationMode):
+                malicious_mitigation = S1MitigationMode[malicious_mitigation]
+
+            payload["data"]["mitigationMode"] = str(malicious_mitigation)
+
+        if suspicious_mitigation is not None:
+            if not isinstance(suspicious_mitigation, S1MitigationMode):
+                suspicious_mitigation = S1MitigationMode[suspicious_mitigation]
+
+            payload["data"]["mitigationModeSuspicious"] = str(suspicious_mitigation)
+
+        res = []
+        for sid in site_id:
+            res.extend(
+                self.fetch(S1Endpoint.SITES_POLICY_UPDATE, payload, path_fmt={"siteId": sid})
+            )
+
+        return res
