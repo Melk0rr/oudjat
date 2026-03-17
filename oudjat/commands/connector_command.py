@@ -166,8 +166,6 @@ class ConnectorCommand(Base):
         cmd_usg = self.__cmd_props__.usages[cmd_name]
         args = self._build_cmd_kwargs(cmd_usg.mapping_opts)
 
-        self.logger.info(f"Usage {cmd_name} - {cmd_usg.option.description}")
-
         if cmd_usg.backend is None:
             raise ConnectorCommandInvalidBackend(
                 f"{context}::No backend function defined for {cmd_name} command."
