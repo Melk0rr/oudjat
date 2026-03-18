@@ -6,7 +6,7 @@ For now, Oudjat includes two operating modes.
 1. 🐚Command line
 2. 📜Configuration file
 
-## Connectors
+## 🔌 Connectors
 
 The connector commands allow you to interact and query implemented connectors.
 Every implemented connector return data in the form of a list of dictionaries. Which you can filter, print or export.
