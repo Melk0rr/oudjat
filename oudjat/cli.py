@@ -78,7 +78,7 @@ It also allows for complex data consolidation and mapping through a config file 
     for cmd_name, cmd in _COMMAND_OPTIONS.items():
         builder.add_command(cmd_name, cmd.__cmd_props__.description)
 
-    builder.add_option("append", "Append to the output fileappend to the output file", short="a")
+    builder.add_option("append", "Append to the output file", short="a")
     builder.add_option("help", "Print the doc string", short="h")
     builder.add_option("verbose", "Show more logs", short="v")
     builder.add_option(
