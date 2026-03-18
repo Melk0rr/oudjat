@@ -3,8 +3,8 @@
 Below you can find details about Oudjat command line usage.
 For now, Oudjat includes two operating modes.
 
-1.  Command line
-2.  Configuration file
+1. 🐚Command line
+2. 📜Configuration file
 
 ## Connectors
 
