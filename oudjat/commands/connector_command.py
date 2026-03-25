@@ -114,6 +114,15 @@ class ConnectorCommand(Base):
     def _prepare_backend(
         self, mapped_args: dict[str, Any]
     ) -> tuple[tuple[Any] | list[Any], dict[str, Any]]:
+        """
+        Prepare backend function args and kwargs.
+
+        Args:
+            mapped_args (dict[str, Any]): Mapped arguments to split between positional arguments and kwargs
+
+        Returns:
+            tuple[tuple[Any] | list[Any], dict[str, Any]]: Args and kwargs in a tuple
+        """
 
         args = []
         kwargs = {}
@@ -174,7 +183,7 @@ class ConnectorCommand(Base):
         req_params = Mapper.required_params(Mapper.signature_params(cmd_usg.backend))
 
         # Check if no required parameters were ommited
-        if not bool(set(args.keys()) & req_params) and len(req_params) > 0:
+        if not bool(set([k.strip("*") for k in args.keys()]) & req_params) and len(req_params) > 0:
             raise ArgumentError(f"{context}::{cmd_name} command requires {list(req_params)}")
 
         # Run the command
