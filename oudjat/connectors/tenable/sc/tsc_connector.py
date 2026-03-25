@@ -270,7 +270,7 @@ class TenableSCConnector(Connector):
             filters.append(TSCBuiltinFilter.VULNS_EXPLOITABLE.value)
 
         if product:
-            filters.append(("pluginName", "=", product))
+            filters.append(("pluginName", "~", product))
 
         filters.append(self._severity_filter(*severities))
         return self.fetch(endpoint=TSCEndpoint.VULNS, filters=filters, payload=payload)
