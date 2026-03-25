@@ -68,7 +68,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
     __cmd_props__.usages = {
         "--vulns": CmdUsage(
             CmdOpt("Retrieve vulnerabilities that match the provided severities and filters"),
-            "--vulns [--severities=SEVERITIES] [--tool=TOOL] [--product=PRODUCT] [--exploitable] [--filter=FILTER]... [--payload]",
+            "--vulns [--severities=SEVERITIES] [--tool=TOOL] [--product=PRODUCT] [--exploitable] [--filter=FILTER]... [--payload=PAYLOAD]",
             {
                 "*severities": CmdUsageOpt("--severities"),
                 "tool": CmdUsageOpt("--tool"),
