@@ -6,10 +6,8 @@ from enum import Enum
 from typing import Any, Callable, TypeAlias, override
 from urllib.parse import ParseResult, urlparse
 
-from yaspin import yaspin
-
-from oudjat.utils.logging import spinner_log
 from tenable.sc import TenableSC
+from yaspin import yaspin
 
 from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
@@ -22,6 +20,7 @@ from oudjat.utils import (
     NoCredentialsError,
     UtilsList,
 )
+from oudjat.utils.logging import spinner_log
 
 from .exceptions import TenableSCConnectionError, TenableSCInvalidAnalysisTool
 from .tsc_asset_list_types import TSCAssetListType
@@ -256,7 +255,7 @@ class TenableSCConnector(Connector):
             payload = {}
 
         if not isinstance(tool, TSCVulnTool):
-            if tool.upper() not in TSCVulnTool:
+            if tool.upper() not in TSCVulnTool._member_names_:
                 raise TenableSCInvalidAnalysisTool(
                     f"{Context()}::Invalid analysis tool provided {tool}"
                 )
