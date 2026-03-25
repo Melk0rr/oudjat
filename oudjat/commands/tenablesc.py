@@ -31,6 +31,11 @@ class TenableSCConnectorCommand(ConnectorCommand):
         "A command to interact with Tenable.sc API through the oudjat TenableSCConnector",
     )
     __cmd_props__.options = {
+        "--creds-service": CmdOpt(
+            "A credential service name to retrieve username and password from",
+            short="c",
+            arg="SERVICE",
+        ),
         "--exploitable": CmdOpt(
             "Include only exploitable vulnerabilities in the results",
         ),
@@ -46,6 +51,11 @@ class TenableSCConnectorCommand(ConnectorCommand):
             "A list of IDs of scans or asset list",
             arg="IDS",
         ),
+        "--password": CmdOpt(
+            "The password used for authentication",
+            short="p",
+            arg="PASS",
+        ),
         "--payload": CmdOpt(
             "Additional parameters to pass",
             arg="PAYLOAD",
@@ -58,10 +68,20 @@ class TenableSCConnectorCommand(ConnectorCommand):
             "Provide severity numbers, comma separated (1:MINOR,2:MODERATE,3:HIGH,4:CRITICAL)",
             arg="SEVERITIES",
         ),
+        "--target": CmdOpt(
+            "Specify the SentinelOne URL to query",
+            short="t",
+            arg="TARGET",
+        ),
         "--tool": CmdOpt(
             "Specify an analysis tool which provides a specific vulnerability view. See the list of available tools",
             arg="TOOL",
             default="vulndetails",
+        ),
+        "--username": CmdOpt(
+            "The username used for authentication",
+            short="u",
+            arg="USER",
         ),
     }
 
@@ -126,6 +146,9 @@ class TenableSCConnectorCommand(ConnectorCommand):
         ),
     }
 
+    __cmd_props__.prepend_usages(
+        "(-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE)"
+    )
     __cmd_props__.append_usages("[options]")
     __doc_builder__: "DocBuilder" = ConnectorCommand._gen_doc("oudjat", __cmd_props__, "")
 
