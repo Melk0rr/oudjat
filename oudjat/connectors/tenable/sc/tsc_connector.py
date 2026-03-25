@@ -209,7 +209,7 @@ class TenableSCConnector(Connector):
                 req = endpoint_func(*filters, **payload)
                 UtilsList.append_flat(res, list(req))
 
-                spinner_log(f"{context}::{endpoint.value} > {req}", self.logger.debug, spinner)
+                spinner_log(f"{context}::{endpoint.value} > {list(req)}", self.logger.debug, spinner)
 
             except TenableSCConnectionError as e:
                 raise TenableSCConnectionError(
