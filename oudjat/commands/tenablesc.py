@@ -68,7 +68,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
     __cmd_props__.usages = {
         "--vulns": CmdUsage(
             CmdOpt("Retrieve vulnerabilities that match the provided severities and filters"),
-            "--vulns [--severities=SEVERITIES] [--tool=TOOL] [--product=PRODUCT] [--exploitable] [--filter]... [--payload]",
+            "--vulns [--severities=SEVERITIES] [--tool=TOOL] [--product=PRODUCT] [--exploitable] [--filter=FILTER]... [--payload]",
             {
                 "*severities": CmdUsageOpt("--severities"),
                 "tool": CmdUsageOpt("--tool"),
@@ -80,7 +80,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
         ),
         "--asset-lists": CmdUsage(
             CmdOpt("Retrieve a list of asset lists with minimal informations like list ids."),
-            "--asset-lists [--filter]... [--fields=FIELDS] [--payload=PAYLOAD]",
+            "--asset-lists [--filter=FILTER]... [--fields=FIELDS] [--payload=PAYLOAD]",
             {
                 "scan_filter": CmdUsageOpt("--filter"),
                 "fields": CmdUsageOpt("--scan-fields"),
@@ -103,7 +103,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
         ),
         "--scans": CmdUsage(
             CmdOpt("Retrieve a list of scans with minimal information like scan ids"),
-            "--scans [--filter]... [--fields=FIELDS] [--payload=PAYLOAD]",
+            "--scans [--filter=FILTER]... [--fields=FIELDS] [--payload=PAYLOAD]",
             {
                 "scan_filter": CmdUsageOpt("--filter"),
                 "fields": CmdUsageOpt("--fields"),
@@ -119,7 +119,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
         ),
         "--scans-delete": CmdUsage(
             CmdOpt("Delete one or more scans."),
-            "--scans-details [--ids=IDS]",
+            "--scans-delete [--ids=IDS]",
             {
                 "scan_ids": CmdUsageOpt("--ids"),
             },
