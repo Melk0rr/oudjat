@@ -57,7 +57,7 @@ class AssetMapper(Mapper):
         cls,
         record: dict[str, Any],
         map_cls: type["AssetBoundType"],
-        mapping_registry: "MappingRegistry" | list["MappingRegistry"],
+        mapping_registry: "MappingRegistry | list[MappingRegistry]",
         callback: "AssetMappingCallback | None" = None,
     ) -> "AssetBoundType":
         """
