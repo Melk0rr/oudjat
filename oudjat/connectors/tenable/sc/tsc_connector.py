@@ -107,7 +107,7 @@ class TenableSCConnector(Connector):
         if len(severities) == 0:
             severities = (1, 2, 3, 4)
 
-        severity_str: str = ",".join([f"{Severity.from_score(sev).score}" for sev in severities])
+        severity_str: str = ",".join([f"{Severity.from_score(int(sev)).score}" for sev in severities])
         return (*TSCBuiltinFilter.VULNS_CRITICAL.value[:2], severity_str)
 
     # ****************************************************************
