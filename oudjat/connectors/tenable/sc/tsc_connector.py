@@ -232,7 +232,7 @@ class TenableSCConnector(Connector):
         *severities: int,
         tool: "str | TSCVulnTool" = TSCVulnTool.VULNDETAILS,
         product: str | None = None,
-        exploitable: bool = True,
+        exploitable: bool = False,
         filters: list["TSCFilter"] | None = None,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
