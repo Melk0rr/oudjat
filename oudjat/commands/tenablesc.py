@@ -67,7 +67,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
         "--severities": CmdOpt(
             "Provide severity numbers, comma separated (1:MINOR,2:MODERATE,3:HIGH,4:CRITICAL)",
             arg="SEVERITIES",
-            default=[3,4]
+            default="3,4"
         ),
         "--target": CmdOpt(
             "Specify the SentinelOne URL to query",
