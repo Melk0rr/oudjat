@@ -55,7 +55,6 @@ class ConnectorCommand(Base):
         self._data: "DataType" = []
         self._callbacks: list[Callable[..., None]] = []
 
-
     # ****************************************************************
     # Methods - helpers
 
@@ -159,7 +158,6 @@ class ConnectorCommand(Base):
         """
 
         print(self._data)
-
 
     # TODO: Allow multiple command execution
     @override
