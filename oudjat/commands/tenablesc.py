@@ -212,7 +212,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
 
         filters = []
         for f in filter_str:
-            f_split = [f.strip().split(",")]
+            f_split = f.strip().split(",")
 
             if len(f_split) != 3:
                 raise ValueError(f"{Context()}::Invalid filter provided {f}.")
