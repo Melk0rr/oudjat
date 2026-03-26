@@ -207,7 +207,7 @@ class LDAPUser(LDAPAccount):
             dict[str, Any]: The current user represented as a dictionary
         """
 
-        base = UtilsDict.filter_by_pattern(super().to_dict(), r"^extensionAttribute")
+        base = UtilsDict.filter_by_pattern(super().to_dict(), r"^extensionAttribute", True)
         ms_acc_ctl = self.ms_account_ctl
         base["account"][ms_acc_ctl["attr"]] = ms_acc_ctl["value"]
 
