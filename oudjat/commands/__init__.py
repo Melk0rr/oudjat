@@ -1,12 +1,12 @@
 """A package that gather oudjat command options."""
 
-from .certfr import CERTFRConnectorCommand
-from .eol import EOLConnectorCommand
-from .ldap import LDAPConnectorCommand
-from .s1 import S1ConnectorCommand
-from .sccm import SCCMConnectorCommand
-from .tenablesc import TenableSCConnectorCommand
-from .vuln import VulnConnectorCommand
+from .co_certfr import CERTFRConnectorCommand
+from .co_eol import EOLConnectorCommand
+from .co_ldap import LDAPConnectorCommand
+from .co_s1 import S1ConnectorCommand
+from .co_sccm import SCCMConnectorCommand
+from .co_tenablesc import TenableSCConnectorCommand
+from .co_vuln import VulnConnectorCommand
 
 __all__ = [
     "CERTFRConnectorCommand",

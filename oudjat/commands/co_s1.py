@@ -196,9 +196,20 @@ class S1ConnectorCommand(ConnectorCommand):
         # Applications
         "--applications": CmdUsage(
             CmdOpt("Retrieve an inventory of applications detected by S1"),
-            "--applications [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD]",
+            "--applications [--names=NAMES] [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD]",
             {
+                "names": CmdUsageOpt("--names"),
                 "vendors": CmdUsageOpt("--vendors"),
+                "site_ids": CmdUsageOpt("--sites-list"),
+                "payload": CmdUsageOpt("--payload"),
+            },
+        ),
+        "--applications-endpoints": CmdUsage(
+            CmdOpt("Retrieve an inventory of endpoints for a specific application"),
+            "--applications [--names=NAMES] [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD]",
+            {
+                "names": CmdUsageOpt("--names", transform=lambda lst: next(iter(lst))),
+                "vendors": CmdUsageOpt("--vendors", transform=lambda lst: next(iter(lst))),
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
             },
@@ -218,9 +229,9 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt("Retrieve CVEs for specific application(s)"),
             "--applications-cves [--ids=IDS] [--names=NAMES] [--vendors=VENDORS] [--sites-list=SITES] [--payload=PAYLOAD]",
             {
-                "appliation_ids": CmdUsageOpt("--ids"),
-                "appliation_name": CmdUsageOpt("--names"),
-                "application_vendor": CmdUsageOpt("--vendors"),
+                "ids": CmdUsageOpt("--ids"),
+                "name": CmdUsageOpt("--names"),
+                "vendor": CmdUsageOpt("--vendors"),
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
             },

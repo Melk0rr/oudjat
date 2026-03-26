@@ -817,7 +817,7 @@ class S1Connector(Connector):
 
     def applications(
         self,
-        name: "StrType | None" = None,
+        names: "StrType | None" = None,
         vendors: "StrType | None" = None,
         site_ids: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
@@ -832,7 +832,7 @@ class S1Connector(Connector):
         403 - Insufficient permissions
 
         Args:
-            name (str | list[str] | None)    : A list of application names
+            names (str | list[str] | None)   : A list of application names
             vendors (str | list[str] | None) : List of vendors to include. If None, all are included
             site_ids (str | list[str] | None): List of site ids to filter
             payload (dict[str, Any] | None)  : Payload to send to the endpoint
@@ -844,8 +844,8 @@ class S1Connector(Connector):
         if payload is None:
             payload = {}
 
-        if name is not None:
-            payload["name__contains"] = self._unify_str_list(name)
+        if names is not None:
+            payload["name__contains"] = self._unify_str_list(names)
 
         if vendors is not None:
             payload["vendors"] = self._unify_str_list(vendors)
@@ -859,15 +859,17 @@ class S1Connector(Connector):
         self,
         name: str,
         vendor: str,
+        site_ids: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Retrieve endpoint data for a specific application.
 
         Args:
-            name (str)                     : The name of the application
-            vendor (str)                   : The vendor of the application
-            payload (dict[str, Any] | None): Payload to send to the endpoint
+            name (str)                       : The name of the application
+            vendor (str)                     : The vendor of the application
+            site_ids (str | list[str] | None): List of site ids to filter
+            payload (dict[str, Any] | None)  : Payload to send to the endpoint
 
         Returns:
             DataType: Endpoint data based on the provided filters
@@ -878,6 +880,9 @@ class S1Connector(Connector):
 
         payload["applicationName"] = name
         payload["applicationVendor"] = vendor
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
 
         return self.fetch(S1Endpoint.APPLICATIONS_INVENTORY_ENDPOINTS, payload)
 
