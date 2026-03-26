@@ -6,10 +6,8 @@ from enum import Enum
 from typing import Any, Callable, TypeAlias, override
 from urllib.parse import ParseResult, urlparse
 
-from yaspin import yaspin
-
-from oudjat.utils.logging import spinner_log
 from tenable.sc import TenableSC
+from yaspin import yaspin
 
 from oudjat.connectors.connector import Connector
 from oudjat.control.data.data_filter import DataFilter
@@ -22,6 +20,7 @@ from oudjat.utils import (
     NoCredentialsError,
     UtilsList,
 )
+from oudjat.utils.logging import spinner_log
 
 from .exceptions import TenableSCConnectionError, TenableSCInvalidAnalysisTool
 from .tsc_asset_list_types import TSCAssetListType
@@ -108,7 +107,7 @@ class TenableSCConnector(Connector):
         if len(severities) == 0:
             severities = (1, 2, 3, 4)
 
-        severity_str: str = ",".join([f"{Severity.from_score(sev).score}" for sev in severities])
+        severity_str: str = ",".join([f"{Severity.from_score(int(sev)).score}" for sev in severities])
         return (*TSCBuiltinFilter.VULNS_CRITICAL.value[:2], severity_str)
 
     # ****************************************************************
@@ -210,7 +209,7 @@ class TenableSCConnector(Connector):
                 req = endpoint_func(*filters, **payload)
                 UtilsList.append_flat(res, list(req))
 
-                spinner_log(f"{context}::{endpoint.value} > {req}", self.logger.debug, spinner)
+                spinner_log(f"{context}::{endpoint.value} > {list(req)}", self.logger.debug, spinner)
 
             except TenableSCConnectionError as e:
                 raise TenableSCConnectionError(
@@ -233,7 +232,7 @@ class TenableSCConnector(Connector):
         *severities: int,
         tool: "str | TSCVulnTool" = TSCVulnTool.VULNDETAILS,
         product: str | None = None,
-        exploitable: bool = True,
+        exploitable: bool = False,
         filters: list["TSCFilter"] | None = None,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
@@ -256,7 +255,7 @@ class TenableSCConnector(Connector):
             payload = {}
 
         if not isinstance(tool, TSCVulnTool):
-            if tool.upper() not in TSCVulnTool:
+            if tool.upper() not in TSCVulnTool._member_names_:
                 raise TenableSCInvalidAnalysisTool(
                     f"{Context()}::Invalid analysis tool provided {tool}"
                 )
@@ -271,7 +270,7 @@ class TenableSCConnector(Connector):
             filters.append(TSCBuiltinFilter.VULNS_EXPLOITABLE.value)
 
         if product:
-            filters.append(("pluginName", "=", product))
+            filters.append(("pluginName", "~", product))
 
         filters.append(self._severity_filter(*severities))
         return self.fetch(endpoint=TSCEndpoint.VULNS, filters=filters, payload=payload)

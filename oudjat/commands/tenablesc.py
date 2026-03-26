@@ -31,6 +31,11 @@ class TenableSCConnectorCommand(ConnectorCommand):
         "A command to interact with Tenable.sc API through the oudjat TenableSCConnector",
     )
     __cmd_props__.options = {
+        "--creds-service": CmdOpt(
+            "A credential service name to retrieve username and password from",
+            short="c",
+            arg="SERVICE",
+        ),
         "--exploitable": CmdOpt(
             "Include only exploitable vulnerabilities in the results",
         ),
@@ -46,6 +51,11 @@ class TenableSCConnectorCommand(ConnectorCommand):
             "A list of IDs of scans or asset list",
             arg="IDS",
         ),
+        "--password": CmdOpt(
+            "The password used for authentication",
+            short="p",
+            arg="PASS",
+        ),
         "--payload": CmdOpt(
             "Additional parameters to pass",
             arg="PAYLOAD",
@@ -57,18 +67,29 @@ class TenableSCConnectorCommand(ConnectorCommand):
         "--severities": CmdOpt(
             "Provide severity numbers, comma separated (1:MINOR,2:MODERATE,3:HIGH,4:CRITICAL)",
             arg="SEVERITIES",
+            default="3,4"
+        ),
+        "--target": CmdOpt(
+            "Specify the SentinelOne URL to query",
+            short="t",
+            arg="TARGET",
         ),
         "--tool": CmdOpt(
             "Specify an analysis tool which provides a specific vulnerability view. See the list of available tools",
             arg="TOOL",
             default="vulndetails",
         ),
+        "--username": CmdOpt(
+            "The username used for authentication",
+            short="u",
+            arg="USER",
+        ),
     }
 
     __cmd_props__.usages = {
         "--vulns": CmdUsage(
             CmdOpt("Retrieve vulnerabilities that match the provided severities and filters"),
-            "--vulns [--severities=SEVERITIES] [--tool=TOOL] [--product=PRODUCT] [--exploitable] [--filter]... [--payload]",
+            "--vulns [--severities=SEVERITIES] [--tool=TOOL] [--product=PRODUCT] [--exploitable] [--filter=FILTER]... [--payload=PAYLOAD]",
             {
                 "*severities": CmdUsageOpt("--severities"),
                 "tool": CmdUsageOpt("--tool"),
@@ -80,7 +101,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
         ),
         "--asset-lists": CmdUsage(
             CmdOpt("Retrieve a list of asset lists with minimal informations like list ids."),
-            "--asset-lists [--filter]... [--fields=FIELDS] [--payload=PAYLOAD]",
+            "--asset-lists [--filter=FILTER]... [--fields=FIELDS] [--payload=PAYLOAD]",
             {
                 "scan_filter": CmdUsageOpt("--filter"),
                 "fields": CmdUsageOpt("--scan-fields"),
@@ -103,7 +124,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
         ),
         "--scans": CmdUsage(
             CmdOpt("Retrieve a list of scans with minimal information like scan ids"),
-            "--scans [--filter]... [--fields=FIELDS] [--payload=PAYLOAD]",
+            "--scans [--filter=FILTER]... [--fields=FIELDS] [--payload=PAYLOAD]",
             {
                 "scan_filter": CmdUsageOpt("--filter"),
                 "fields": CmdUsageOpt("--fields"),
@@ -119,13 +140,16 @@ class TenableSCConnectorCommand(ConnectorCommand):
         ),
         "--scans-delete": CmdUsage(
             CmdOpt("Delete one or more scans."),
-            "--scans-details [--ids=IDS]",
+            "--scans-delete [--ids=IDS]",
             {
                 "scan_ids": CmdUsageOpt("--ids"),
             },
         ),
     }
 
+    __cmd_props__.prepend_usages(
+        "(-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE)"
+    )
     __cmd_props__.append_usages("[options]")
     __doc_builder__: "DocBuilder" = ConnectorCommand._gen_doc("oudjat", __cmd_props__, "")
 
@@ -188,7 +212,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
 
         filters = []
         for f in filter_str:
-            f_split = [f.strip().split(",")]
+            f_split = f.strip().split(",")
 
             if len(f_split) != 3:
                 raise ValueError(f"{Context()}::Invalid filter provided {f}.")

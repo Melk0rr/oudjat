@@ -148,7 +148,7 @@ class Mapper:
         cls,
         records: Sequence[dict[str, Any]],
         map_cls: type[Any],
-        mapping_registry: "MappingRegistry" | list["MappingRegistry"],
+        mapping_registry: "MappingRegistry | list[MappingRegistry]",
         key_cb: Callable[[dict[str, Any]], str],
         record_cb: Callable[..., dict[str, Any]] | None = None,
         asset_cb: "MappingCallback | None" = None,

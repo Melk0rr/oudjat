@@ -2,7 +2,7 @@
 A command module to handle interactions with vulnerability databases.
 """
 
-from typing import Any
+from typing import Any, override
 
 from oudjat.connectors.vuln import CVEConnector, CVEDatabase
 from oudjat.connectors.vuln.cve_load_balancer import CVELoadBalancer
@@ -103,3 +103,11 @@ class VulnConnectorCommand(ConnectorCommand):
                 "--auto": self._balancer.fetch,
             }
         )
+
+    # ****************************************************************
+    # Methods - callbacks
+
+    @override
+    def print(self) -> None:
+        for cve in self._data:
+            print(f"{cve['id']}: {cve['metrics']['score']}")
