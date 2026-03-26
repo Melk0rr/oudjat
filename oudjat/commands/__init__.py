@@ -7,6 +7,7 @@ from .co_s1 import S1ConnectorCommand
 from .co_sccm import SCCMConnectorCommand
 from .co_tenablesc import TenableSCConnectorCommand
 from .co_vuln import VulnConnectorCommand
+from .u_creds import CredentialUtilCmd
 
 __all__ = [
     "CERTFRConnectorCommand",
@@ -16,4 +17,5 @@ __all__ = [
     "SCCMConnectorCommand",
     "TenableSCConnectorCommand",
     "VulnConnectorCommand",
+    "CredentialUtilCmd",
 ]

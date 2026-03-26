@@ -4,9 +4,9 @@ A command module to handle credential utility.
 
 from typing import Any
 
-from oudjat.connectors.vuln import CVEConnector, CVEDatabase
 from oudjat.utils.credentials import CredentialUtils
 from oudjat.utils.doc_builder import DocBuilder
+from oudjat.utils.types import DataType
 
 from .base import (
     CmdOpt,
@@ -17,7 +17,7 @@ from .base import (
 from .connector_command import ConnectorCommand
 
 
-class VulnConnectorCommand(ConnectorCommand):
+class CredentialUtilCmd(ConnectorCommand):
     """
     A class to provide an access to various CVE databases.
     """
@@ -43,24 +43,34 @@ class VulnConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.usages = {
-        "--db": CmdUsage(
+        "--new": CmdUsage(
             CmdOpt(
-                "Use a specific database to retrieve CVE data. Keep in mind APIs are requests/min restricted",
+                "Register a new set of credentials for a specified service and user",
             ),
-            "--db (-t=TARGET | --target=TARGET) (--cves=CVES) [--payload=PAYLOAD] [options]",
+            "--new (-s=SERVICE | --service=SERVICE) [-u=USERNAME | --username=USERNAME]",
             {
-                "cves": CmdUsageOpt("--cves"),
-                "payload": CmdUsageOpt("--payload"),
+                "service": CmdUsageOpt("--service"),
+                "username": CmdUsageOpt("--username"),
             },
         ),
-        "--auto": CmdUsage(
+        "--edit": CmdUsage(
             CmdOpt(
-                "Use load balancing to retrieve data dynamically from available CVE APIs",
+                "Edit the password for the specified service and user",
             ),
-            "--auto (--cves=CVES) [--payload=PAYLOAD] [options]",
+            "--edit (-s=SERVICE | --service=SERVICE) (-u=USERNAME | --username=USERNAME)",
             {
-                "cves": CmdUsageOpt("--cves"),
-                "payload": CmdUsageOpt("--payload"),
+                "service": CmdUsageOpt("--service"),
+                "username": CmdUsageOpt("--username"),
+            },
+        ),
+        "--delete": CmdUsage(
+            CmdOpt(
+                "Delete the password for the specified service and user",
+            ),
+            "--delete (-s=SERVICE | --service=SERVICE) [-u=USERNAME | --username=USERNAME]",
+            {
+                "service": CmdUsageOpt("--service"),
+                "username": CmdUsageOpt("--username"),
             },
         ),
     }
@@ -77,22 +87,26 @@ class VulnConnectorCommand(ConnectorCommand):
 
         super().__init__(options, False)
 
-        connector_cls = CVEDatabase.CVEORG.connector
-        if self.options["--db"]:
-            CVEDatabase[self.options["--db"].upper()].connector
-
-        self.connector: "CVEConnector" = connector_cls()
-
-        self.__cmd_props__.opts_transform(
-            {
-                "--cves": lambda opt, _: self._unify_str_opt(opt),
-                "--payload": lambda _, v: self._parse_payload(v),
-            },
-        )
-
         # Usage backends
         self.__cmd_props__.backends(
             {
-                "--db": self.connector.fetch,
+                "--new": self._new_creds,
+                "--edit": self._edit_creds,
+                "--delete": self._delete_creds,
             }
         )
+
+    def _new_creds(self, service: str, username: str) -> "DataType":
+        _ = CredentialUtils.save_credentials(service, username)
+
+        return [{"action": "new", "service": service, "username": username}]
+
+    def _edit_creds(self, service: str, username: str) -> "DataType":
+        _ = CredentialUtils.edit_credentials(service, username)
+
+        return [{"action": "edit", "service": service, "username": username}]
+
+    def _delete_creds(self, service: str, username: str) -> "DataType":
+        _ = CredentialUtils.del_credentials(service, username)
+
+        return [{"action": "delete", "service": service, "username": username}]

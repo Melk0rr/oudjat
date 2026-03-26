@@ -50,7 +50,7 @@ class CredentialUtils:
     logger: "logging.Logger" = logging.getLogger(__name__)
 
     @classmethod
-    def save_credentials(cls, service: str, username: str, password: str) -> None:
+    def save_credentials(cls, service: str, username: str | None = None) -> "SimpleCredential":
         """
         Use the `keyring` library to securely store the provided credentials (username and password) for a specified service in an encrypted vault.
 
@@ -59,7 +59,6 @@ class CredentialUtils:
         Args:
             service (str) : The identifier for the service or application where the credentials are being stored.
             username (str): The username to be associated with these credentials.
-            password (str): The password that corresponds to the given username.
 
         Raises:
             keyring.errors.PasswordSetError: If there is an error while attempting to save the password.
@@ -68,16 +67,24 @@ class CredentialUtils:
         context = Context()
 
         try:
+            # Ask user's credentials
+            if username is None:
+                username = input(f"Username for {service}: ")
+
+            password = getpass.getpass(f"Password for {service}: ")
+
             keyring.set_password(service, username, password)
             cls.logger.info(f"Successfully saved credentials for {service}")
 
         except PasswordSetError as e:
             raise PasswordSetError(
-                f"{context}::Error while saving credentials for {service}:{username}\n{e}"
+                f"{context}::Error while saving credentials for {service}\n{e}"
             )
 
+        return SimpleCredential(username, password)
+
     @classmethod
-    def get_credentials(cls, service: str) -> "SimpleCredential":
+    def get_credentials(cls, service: str, username: str = "") -> "SimpleCredential":
         """
         Attempt to retrieve stored credentials from the `keyring` using the provided service name.
 
@@ -85,7 +92,8 @@ class CredentialUtils:
         retrieval or if there's an issue with the keyring itself by raising a `keyring.errors.KeyringError`.
 
         Args:
-            service (str): The identifier for the service from which to retrieve credentials.
+            service (str) : The identifier for the service from which to retrieve credentials.
+            username (str): The username to be associated with these credentials.
 
         Returns:
             keyring.credentials.SimpleCredential: An object containing the retrieved username and password.
@@ -97,18 +105,11 @@ class CredentialUtils:
         context = Context()
 
         try:
-            cred = keyring.get_credential(service, "")
+            cred = keyring.get_credential(service, username)
 
             if cred is None:
-                print(f"No stored credentials for {service}. Please enter your credentials:")
-
-                # Ask user's credentials
-                username = input("Username: ")
-                password = getpass.getpass("Password: ")
-
-                # Saving credentials
-                CredentialUtils.save_credentials(service, username, password)
-                cred = SimpleCredential(username, password)
+                cls.logger.warning(f"No stored secret for {service}")
+                cred = CredentialUtils.save_credentials(service)
 
             else:
                 cred = SimpleCredential(cred.username, cred.password)
@@ -120,7 +121,7 @@ class CredentialUtils:
         return cred
 
     @classmethod
-    def edit_credentials(cls, service: str, username: str) -> None:
+    def edit_credentials(cls, service: str, username: str) -> "SimpleCredential":
         """
         Edit password for the provided service/username.
 
@@ -132,17 +133,15 @@ class CredentialUtils:
         context = Context()
 
         try:
-            if keyring.get_credential(service, username) is None:
-                raise KeyringError(f"Could not find the provided service/username provided: {service}/{username}")
-
-            password = getpass.getpass("Password: ")
-            CredentialUtils.save_credentials(service, username, password)
+            cred = CredentialUtils.save_credentials(service, username)
 
         except KeyringError as e:
-            raise KeyringError(f"{context}::Could not retrieve credentials for {service}\n{e}")
+            raise KeyringError(f"{context}::Could not edit credentials for {service}\n{e}")
+
+        return cred
 
     @classmethod
-    def del_credentials(cls, service: str, username: str) -> None:
+    def del_credentials(cls, service: str, username: str = "") -> None:
         """
         Remove stored credentials from the `keyring` using both the service identifier and the specified username.
 

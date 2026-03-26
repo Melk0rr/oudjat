@@ -12,6 +12,7 @@ from docopt import docopt
 from oudjat.banner import banner
 from oudjat.commands import (
     CERTFRConnectorCommand,
+    CredentialUtilCmd,
     EOLConnectorCommand,
     LDAPConnectorCommand,
     S1ConnectorCommand,
@@ -34,6 +35,7 @@ _COMMAND_OPTIONS = {
     "connectors.sccm": SCCMConnectorCommand,
     "connectors.tenable.sc": TenableSCConnectorCommand,
     "connectors.vulns": VulnConnectorCommand,
+    "utils.credentials": CredentialUtilCmd,
 }
 
 
