@@ -817,6 +817,7 @@ class S1Connector(Connector):
 
     def applications(
         self,
+        name: "StrType | None" = None,
         vendors: "StrType | None" = None,
         site_ids: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
@@ -831,6 +832,7 @@ class S1Connector(Connector):
         403 - Insufficient permissions
 
         Args:
+            name (str | list[str] | None)    : A list of application names
             vendors (str | list[str] | None) : List of vendors to include. If None, all are included
             site_ids (str | list[str] | None): List of site ids to filter
             payload (dict[str, Any] | None)  : Payload to send to the endpoint
@@ -842,6 +844,9 @@ class S1Connector(Connector):
         if payload is None:
             payload = {}
 
+        if name is not None:
+            payload["name__contains"] = self._unify_str_list(name)
+
         if vendors is not None:
             payload["vendors"] = self._unify_str_list(vendors)
 
@@ -849,6 +854,32 @@ class S1Connector(Connector):
             payload["siteIds"] = self._unify_str_list(site_ids)
 
         return self.fetch(S1Endpoint.APPLICATIONS_INVENTORY, payload)
+
+    def applications_endpoints(
+        self,
+        name: str,
+        vendor: str,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Retrieve endpoint data for a specific application.
+
+        Args:
+            name (str)                     : The name of the application
+            vendor (str)                   : The vendor of the application
+            payload (dict[str, Any] | None): Payload to send to the endpoint
+
+        Returns:
+            DataType: Endpoint data based on the provided filters
+        """
+
+        if payload is None:
+            payload = {}
+
+        payload["applicationName"] = name
+        payload["applicationVendor"] = vendor
+
+        return self.fetch(S1Endpoint.APPLICATIONS_INVENTORY_ENDPOINTS, payload)
 
     def applications_with_risks(
         self,
@@ -915,9 +946,9 @@ class S1Connector(Connector):
 
     def application_cves(
         self,
-        application_ids: "StrType | None" = None,
-        application_name: str | None = None,
-        application_vendor: str | None = None,
+        ids: "StrType | None" = None,
+        name: str | None = None,
+        vendor: str | None = None,
         site_ids: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
@@ -931,11 +962,11 @@ class S1Connector(Connector):
         403 - Insufficient permissions
 
         Args:
-            application_ids (str | list[str] | None): List of applications to include
-            application_name (str | None)           : Application name, if application ids are not specified
-            application_vendor (str | None)         : Application vendor, if application ids are not specified
-            site_ids (str | list[str] | None)       : List of site ids to filter
-            payload (dict[str, Any])                : Payload to send to the endpoint
+            ids (str | list[str] | None)     : List of applications to include
+            name (str | None)                : Application name, if application ids are not specified
+            vendor (str | None)              : Application vendor, if application ids are not specified
+            site_ids (str | list[str] | None): List of site ids to filter
+            payload (dict[str, Any])         : Payload to send to the endpoint
 
         Returns:
             DataType: CVEs data based on the provided filters
@@ -944,12 +975,12 @@ class S1Connector(Connector):
         if payload is None:
             payload = {}
 
-        if application_ids is not None:
-            payload["applicationIds"] = self._unify_str_list(application_ids)
+        if ids is not None:
+            payload["applicationIds"] = self._unify_str_list(ids)
 
-        elif application_name is not None and application_vendor is not None:
-            payload["applicationName"] = application_name
-            payload["applicationVendor"] = application_vendor
+        elif name is not None and vendor is not None:
+            payload["applicationName"] = name
+            payload["applicationVendor"] = vendor
 
         else:
             raise ValueError(
