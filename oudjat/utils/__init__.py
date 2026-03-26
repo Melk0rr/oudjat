@@ -4,15 +4,15 @@ from .bit_flag import BitFlag
 from .color_print import ColorPrint
 from .context import Context
 from .credentials import CredentialUtils, InvalidCredentialsError, NoCredentialsError
-from .dictionary_utils import UtilsDict
+from .dictionary import UtilsDict
 from .doc_builder import DocBuilder, DocCommand, DocOption
-from .file_utils import FileType, FileUtils
-from .list_utils import UtilsList
+from .file import FileType, FileUtils
+from .list import UtilsList
 from .logging import OudjatFormatter
 from .mail import EMAIL_REG, Mail
 from .operators import CompareOperator, LogicalOperator
 from .stdouthook import StdOutHook
-from .time_utils import DateFlag, DateFormat, TimeConverter
+from .time import DateFlag, DateFormat, TimeConverter
 from .types import (
     DataType,
     DatumDataType,
