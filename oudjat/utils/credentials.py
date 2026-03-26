@@ -69,7 +69,7 @@ class CredentialUtils:
 
         try:
             keyring.set_password(service, username, password)
-            cls.logger.info(f"Saved credentials for {service}")
+            cls.logger.info(f"Successfully saved credentials for {service}")
 
         except PasswordSetError as e:
             raise PasswordSetError(
@@ -118,6 +118,28 @@ class CredentialUtils:
 
         cls.logger.info(f"Retrieved credentials for {service}")
         return cred
+
+    @classmethod
+    def edit_credentials(cls, service: str, username: str) -> None:
+        """
+        Edit password for the provided service/username.
+
+        Args:
+            service (str) : The service for which the password will be edited
+            username (str): The username for which the password will be edited
+        """
+
+        context = Context()
+
+        try:
+            if keyring.get_credential(service, username) is None:
+                raise KeyringError(f"Could not find the provided service/username provided: {service}/{username}")
+
+            password = getpass.getpass("Password: ")
+            CredentialUtils.save_credentials(service, username, password)
+
+        except KeyringError as e:
+            raise KeyringError(f"{context}::Could not retrieve credentials for {service}\n{e}")
 
     @classmethod
     def del_credentials(cls, service: str, username: str) -> None:
