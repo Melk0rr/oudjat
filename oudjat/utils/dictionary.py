@@ -1,5 +1,6 @@
 """A module that gather dictionary utilities."""
 
+import re
 from typing import Any, Callable
 
 
@@ -49,6 +50,21 @@ class UtilsDict(dict):
     # Static methods
 
     @staticmethod
+    def _check_exclude(check: bool, exclude: bool) -> bool:
+        """
+        Return a check value based on a boolean exclusion.
+
+        Args:
+            check (bool)  : The check boolean base value
+            exclude (bool): The exclusion pivot
+
+        Returns:
+            bool: Final check value based on exclusion
+        """
+
+        return (not exclude and check) or (exclude and not check)
+
+    @staticmethod
     def keys_list(dictionary: dict[str, Any]) -> list[str]:
         """
         Convert the provided dictionary keys into a regular list.
@@ -63,7 +79,7 @@ class UtilsDict(dict):
         return list(dictionary.keys())
 
     @staticmethod
-    def join_dictionary_items(dictionary: dict[str, Any], char: str) -> str:
+    def join_dict_items(dictionary: dict[str, Any], char: str) -> str:
         """
         Join dictionary items with the provided character.
 
@@ -75,14 +91,14 @@ class UtilsDict(dict):
             str: A string where each item in the dictionary is joined by the specified character, formatted as "key: value".
 
         Example:
-            >>> join_dictionary_items({'a': 1, 'b': 2}, ':')
-            'a: 1: b: 2'
+            >>> join_dictionary_items({'a': 1, 'b': 2}, ',')
+            'a: 1,b: 2'
         """
 
         return char.join(f"{k}: {v}" for k, v in dictionary.items())
 
     @staticmethod
-    def join_dictionary_values(dictionary: dict[str, Any], char: str) -> str:
+    def join_dict_values(dictionary: dict[str, Any], char: str) -> str:
         """
         Join dictionary values with the provided character.
 
@@ -170,7 +186,7 @@ class UtilsDict(dict):
         return res
 
     @staticmethod
-    def merge_dictionaries(d1: dict[str, Any], d2: dict[str, Any]) -> dict[str, Any]:
+    def merge(d1: dict[str, Any], d2: dict[str, Any]) -> dict[str, Any]:
         """
         Merge two dictionaries.
 
@@ -184,7 +200,7 @@ class UtilsDict(dict):
 
         for k, v in d2:
             if k in d1 and isinstance(d1[k], dict) and isinstance(v, dict):
-                return UtilsDict.merge_dictionaries(d1[k], v)
+                return UtilsDict.merge(d1[k], v)
 
             else:
                 d1[k] = v
@@ -192,7 +208,7 @@ class UtilsDict(dict):
         return d1
 
     @staticmethod
-    def filter_keys(d: dict[str, Any], keys: list[str], exclude: bool = False) -> dict[str, Any]:
+    def filter(d: dict[str, Any], keys: list[str], exclude: bool = False) -> dict[str, Any]:
         """
         Filter the keys of a dictionary.
 
@@ -205,13 +221,30 @@ class UtilsDict(dict):
             dict[str, Any]: Filtered dictionary
         """
 
-        if exclude:
-            return {k: v for k, v in d.items() if k not in keys}
-
-        return {k: v for k, v in d.items() if k in keys}
+        return {k: v for k, v in d.items() if UtilsDict._check_exclude(k in keys, exclude)}
 
     @staticmethod
-    def flatten_dict(d: dict[str, Any], parent_key: str = "", sep: str = ".") -> dict[str, Any]:
+    def filter_by_pattern(d: dict[str, Any], pattern: str, exclude: bool = False) -> dict[str, Any]:
+        """
+        Filter the keys of a dictionary based on a provided pattern.
+
+        Args:
+            d (dict[str, Any]): The dictionary, which keys will be filtered
+            pattern (str)     : The pattern to filter dictionary keys
+            exclude (bool)    : If true, matching keys will be excluded from the final dictionary instead of included
+
+        Returns:
+            dict[str, Any]: Filtered dictionary
+        """
+
+        return {
+            k: v
+            for k, v in d.items()
+            if UtilsDict._check_exclude(re.match(pattern, k) is not None, exclude)
+        }
+
+    @staticmethod
+    def flatten(d: dict[str, Any], parent_key: str = "", sep: str = ".") -> dict[str, Any]:
         """
         Flatten a given dictionary based on the provided separator.
 
@@ -234,13 +267,13 @@ class UtilsDict(dict):
         for k, v in d.items():
             new_key = f"{parent_key}{sep}{k}" if parent_key else k
             if isinstance(v, dict):
-                items.extend(UtilsDict.flatten_dict(v, new_key, sep).items())
+                items.extend(UtilsDict.flatten(v, new_key, sep).items())
 
             elif isinstance(v, list):
                 for i, el in enumerate(v):
                     list_key = f"{new_key}{sep}{i}"
                     if isinstance(el, dict):
-                        items.extend(UtilsDict.flatten_dict(el, list_key, sep).items())
+                        items.extend(UtilsDict.flatten(el, list_key, sep).items())
 
                     else:
                         items.append((list_key, el))
