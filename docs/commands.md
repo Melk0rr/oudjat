@@ -20,9 +20,9 @@ To use one of oudjat connectors, you can reference it like this:
 oudjat connectors.<connector_path> [options]
 ```
 
-You will find every connector reference in their dedicated command section.
+You will find every connector reference in their **dedicated command section** .
 
-The connectors commands share some operations you can pass as options:
+The connectors commands **share some common operations** you can pass as options:
 
 | Option                 | Description                                                                   |
 | ---------------------- | ----------------------------------------------------------------------------- |
@@ -37,7 +37,7 @@ The connectors commands share some operations you can pass as options:
 | --print                | Print the results in the terminal                                             |
 | --key-filter=KEYFILTER | Filter the final result keys                                                  |
 
-In a lot of cases, the connector will also require that you provide 🔑credentials to perform some form of authentication in order to retrieve data.
+In a lot of cases, the connector will also require that you provide 🔑**credentials** to perform some form of 👤**authentication**.
 You can provide 🔑credentials with these options
 
 | Option          | Description                                                                                                         |
@@ -61,7 +61,7 @@ oudjat connectors.edr.sentinelone --help
 
 ### CERT - CERTFR
 
-A connector used to parse CERTFR pages.
+A connector used to parse [CERTFR pages](https://www.cert.ssi.gouv.fr/) .
 It returns CERTFR pages content:
 
 - Title
@@ -102,7 +102,7 @@ oudjat connectors.cert.certfr --feed [--feed-date=FEEDDATE] [--keywords=KEYWORDS
 #### Exemples
 
 ```bash
-oudjat connectors.cert.certfr -t "https://www.cert.ssi.gouv.fr/alerte/CERTFR-2021-ALE-022/"
+oudjat connectors.cert.certfr -t "https://www.cert.ssi.gouv.fr/alerte/CERTFR-2021-ALE-022/" --max-cve --limit 20
 oudjat connectors.cert.certfr -t "https://www.cert.ssi.gouv.fr/avis/feed/" --feed --date-filter "2025-12-01"
 ```
 
