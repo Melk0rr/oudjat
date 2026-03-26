@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any, TypeVar, override
 
-from oudjat.utils.time_utils import TimeConverter
+from oudjat.utils.time import TimeConverter
 
 from ..ldap_object import LDAPObject
 from .ad_encryption_types import ADEncryptionType

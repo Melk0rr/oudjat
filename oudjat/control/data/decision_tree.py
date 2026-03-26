@@ -4,7 +4,7 @@ import logging
 from typing import Any, TypeAlias, TypedDict, override
 
 from oudjat.utils import Context, DataType, LogicalOperator
-from oudjat.utils.list_utils import UtilsList
+from oudjat.utils.list import UtilsList
 from oudjat.utils.types import NumberType
 
 from .data_filter import DataFilter, DataFilterDictionaryProps

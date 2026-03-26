@@ -4,8 +4,8 @@ import logging
 from typing import Any, Callable, override
 
 from oudjat.connectors.connector import Connector
-from oudjat.utils import Context
-from oudjat.utils.file_utils import FileType, FileUtils
+from oudjat.utils.context import Context
+from oudjat.utils.file import FileType, FileUtils
 
 from .exceptions import FileTypeError
 

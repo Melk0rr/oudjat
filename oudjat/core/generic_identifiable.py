@@ -234,7 +234,7 @@ class GenericIdentifiable(Generic[GenericBoundType], ABC):
         if self._description is None and other.description is not None:
             self._description = other.description
 
-        self._custom_attributes = UtilsDict.merge_dictionaries(
+        self._custom_attributes = UtilsDict.merge(
             self._custom_attributes, other.custom_attributes
         )
 

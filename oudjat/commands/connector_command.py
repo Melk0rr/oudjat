@@ -11,7 +11,7 @@ from oudjat.core.mapper import Mapper
 from oudjat.utils import UtilsDict
 from oudjat.utils.context import Context
 from oudjat.utils.doc_builder import DocBuilder
-from oudjat.utils.file_utils import FileUtils
+from oudjat.utils.file import FileUtils
 from oudjat.utils.types import DataType
 
 from .base import Base, CmdOptUsageRegistry, CmdProps
@@ -147,7 +147,7 @@ class ConnectorCommand(Base):
         Filter the final results keys.
         """
 
-        self._data = [UtilsDict.filter_keys(d, self.options["--key-filter"]) for d in self._data]
+        self._data = [UtilsDict.filter(d, self.options["--key-filter"]) for d in self._data]
 
     # ****************************************************************
     # Methods - main

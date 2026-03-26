@@ -3,7 +3,7 @@
 import os
 
 from oudjat.core.software.software_release import SoftwareReleaseImportDict
-from oudjat.utils.file_utils import FileUtils
+from oudjat.utils.file import FileUtils
 
 dirname = os.path.dirname(os.path.abspath(__file__))
 

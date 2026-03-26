@@ -13,7 +13,7 @@ from yaspin import yaspin
 from oudjat.connectors.connector import Connector
 from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoint
 from oudjat.utils.context import Context
-from oudjat.utils.time_utils import TimeConverter
+from oudjat.utils.time import TimeConverter
 from oudjat.utils.types import StrType
 
 from .cr_sensor_actions import CybereasonSensorAction

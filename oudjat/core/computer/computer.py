@@ -423,7 +423,7 @@ class Computer(Asset):
         if self._status is ComputerStatus.UNKNOWN and other.status is not ComputerStatus.UNKNOWN:
             self._status = other.status
 
-        self._softwares = UtilsDict.merge_dictionaries(self._softwares, other.softwares)
+        self._softwares = UtilsDict.merge(self._softwares, other.softwares)
         if self._os.release is None and other.os.release is not None:
             self._os.release = other.os.release
 

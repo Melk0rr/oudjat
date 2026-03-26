@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import IntEnum
 from typing import TypedDict, override
 
-from oudjat.utils.time_utils import TimeConverter
+from oudjat.utils.time import TimeConverter
 
 
 class SoftwareReleaseSupportDetailsDict(TypedDict):

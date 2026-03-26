@@ -144,7 +144,7 @@ class Asset(GenericIdentifiable[AssetBoundType], ABC):
 
         super().merge(other)
 
-        self._location = UtilsDict.merge_dictionaries(self._location, other.location)
+        self._location = UtilsDict.merge(self._location, other.location)
 
     @override
     def to_dict(self) -> dict[str, Any]:

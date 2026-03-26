@@ -10,7 +10,7 @@ from oudjat.core import Asset
 from oudjat.core.asset_type import AssetType
 from oudjat.core.software.software_edition import SoftwareEdition
 from oudjat.utils import Context
-from oudjat.utils.time_utils import TimeConverter
+from oudjat.utils.time import TimeConverter
 
 from .software_release_version import SoftwareReleaseVersion
 from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportDict

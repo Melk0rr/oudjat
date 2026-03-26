@@ -6,8 +6,8 @@ from typing import Any, Callable, TypeAlias
 import orjson
 
 from oudjat.utils import Context
-from oudjat.utils.file_utils import FileUtils
-from oudjat.utils.string_utils import StringUtils
+from oudjat.utils.file import FileUtils
+from oudjat.utils.string import StringUtils
 from oudjat.utils.types import DataType
 
 
