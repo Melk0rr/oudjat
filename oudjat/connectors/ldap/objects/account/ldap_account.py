@@ -363,6 +363,7 @@ class LDAPAccount(LDAPObject, ABC):
         base.pop("accountExpires", None)
         base.pop("pwdLastSet", None)
         base.pop("userAccountControl", None)
+        base.pop("lastLogonTimestamp", None)
 
         return {
             **base,

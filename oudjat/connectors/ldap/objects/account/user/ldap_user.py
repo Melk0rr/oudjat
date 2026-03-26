@@ -217,6 +217,8 @@ class LDAPUser(LDAPAccount):
         base.pop(exch_details.pop("attr"), None)
         base.pop("adminCount", None)
 
+        base["pwd"]["pso"] = base.pop("msDS-ResultantPSO", None)
+
         formatted = {
             "givenname": self.givenname,
             "surname": self.surname,
