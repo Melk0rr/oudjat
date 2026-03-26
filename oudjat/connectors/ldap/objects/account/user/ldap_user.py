@@ -2,6 +2,8 @@
 
 from typing import TYPE_CHECKING, Any, override
 
+from oudjat.utils.dictionary import UtilsDict
+
 from ..ldap_account import LDAPAccount
 from ..ldap_account_ctl_flags import LDAPAccountCtlFlag
 from .ms_exch_flags import MSExchFlag
@@ -205,12 +207,14 @@ class LDAPUser(LDAPAccount):
             dict[str, Any]: The current user represented as a dictionary
         """
 
-        base = super().to_dict()
+        base = UtilsDict.filter_by_pattern(super().to_dict(), r"^extensionAttribute")
         ms_acc_ctl = self.ms_account_ctl
         base["account"][ms_acc_ctl["attr"]] = ms_acc_ctl["value"]
 
         exch_details = self.ms_exchange_recipient_details
         exch_details.pop("attr")
+
+        base.pop("adminCount")
 
         formatted = {
             "givenname": self.givenname,
