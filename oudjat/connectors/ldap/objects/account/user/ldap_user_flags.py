@@ -13,8 +13,8 @@ if TYPE_CHECKING:
     from .ldap_user import LDAPUser
 
 
-def _is_adm_check(acc: "LDAPUser", age: int) -> bool:
-    return acc.pwd_last_set_in_days >= age
+def _is_adm_check(acc: "LDAPUser") -> bool:
+    return acc.is_admin
 
 @extend_enum(LDAPAccountFlag, LDAPObjectFlag)
 class LDAPUserFlag(LDAPObjectFlag):
