@@ -212,9 +212,10 @@ class LDAPUser(LDAPAccount):
         base["account"][ms_acc_ctl["attr"]] = ms_acc_ctl["value"]
 
         exch_details = self.ms_exchange_recipient_details
-        exch_details.pop("attr")
 
-        base.pop("adminCount")
+        base.pop(ms_acc_ctl.pop("attr"), None)
+        base.pop(exch_details.pop("attr"), None)
+        base.pop("adminCount", None)
 
         formatted = {
             "givenname": self.givenname,

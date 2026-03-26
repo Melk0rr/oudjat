@@ -331,10 +331,11 @@ class LDAPAccount(LDAPObject, ABC):
         """
 
         encryption_details = self.supported_encryption
-        encryption_details.pop("attr")
         encryption_details["keyVersion"] = self.key_version
 
         base = super().to_dict()
+
+        base.pop(encryption_details.pop("attr"), None)
 
         formatted = {
             "san": self.san,
