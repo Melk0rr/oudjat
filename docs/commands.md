@@ -9,7 +9,10 @@ For now, Oudjat includes two operating modes.
 ## 🔌 Connectors
 
 The connector commands allow you to interact and query implemented connectors.
-Every implemented connector return data in the form of a list of dictionaries. Which you can filter, print or export.
+Every implemented connector return data in the form of a list of dictionaries. Which you can 
+- filter
+- print
+- export.
 
 To use one of oudjat connectors, you can reference it like this:
 
