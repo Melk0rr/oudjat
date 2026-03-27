@@ -206,7 +206,7 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--applications-endpoints": CmdUsage(
             CmdOpt("Retrieve an inventory of endpoints for a specific application"),
-            "--applications [--names=NAMES] [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD]",
+            "--applications-endpoints [--names=NAMES] [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD]",
             {
                 "names": CmdUsageOpt("--names", transform=lambda lst: next(iter(lst))),
                 "vendors": CmdUsageOpt("--vendors", transform=lambda lst: next(iter(lst))),
