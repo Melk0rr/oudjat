@@ -853,6 +853,9 @@ class S1Connector(Connector):
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
 
+        if "limit" not in payload:
+            payload["limit"] = 1000
+
         return self.fetch(S1Endpoint.APPLICATIONS_INVENTORY, payload)
 
     def applications_endpoints(
