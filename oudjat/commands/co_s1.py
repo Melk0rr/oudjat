@@ -348,7 +348,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "--filter": lambda _, v: self._parse_payload(v),
                 "--names": lambda opt, _: self._unify_str_opt(opt),
                 "--payload": lambda _, v: self._parse_payload(v),
-                "--severities": lambda opt, _: self._unify_str_opt(opt),
+                "--severities": lambda opt, _: list(map(int, self._unify_str_opt(opt))),
                 "--sites-list": lambda opt, _: self._unify_str_opt(opt),
                 "--status-filter": lambda _, v: self._unify_str_opt(v),
                 "--vendors": lambda opt, _: self._unify_str_opt(opt),
