@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 LDAPAccountBoundType = TypeVar("LDAPAccountBoundType", bound="LDAPAccount")
 
+
 class LDAPAccountStatus(IntEnum):
     """
     A helper class to handle LDAPAccount status.
@@ -130,14 +131,9 @@ class LDAPAccount(LDAPObject, ABC):
         """
 
         default_acc_exp = self.entry.get("accountExpires")
+        unified_acc_exp = default_acc_exp or datetime.max
 
-        unified_acc_exp = (
-            default_acc_exp if default_acc_exp is not None else datetime(9999, 12, 31, 23, 59, 59)
-        )
-        if isinstance(default_acc_exp, datetime):
-            unified_acc_exp = default_acc_exp
-
-        elif isinstance(default_acc_exp, list):
+        if isinstance(default_acc_exp, list):
             if len(default_acc_exp) > 0:
                 unified_acc_exp = TimeConverter.str_to_date(default_acc_exp[0])
 
@@ -210,7 +206,9 @@ class LDAPAccount(LDAPObject, ABC):
             bool: True if the account does not expire (not year 9999), False otherwise.
         """
 
-        return not self.account_expiration.year == 9999
+        return (not self.account_expiration == datetime.max) and (
+            not self.account_expiration == datetime(1601, 1, 1)
+        )
 
     @property
     def pwd_required(self) -> bool:
