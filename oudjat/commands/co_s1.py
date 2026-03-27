@@ -361,6 +361,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "--alert-verdict": self.connector.alert_verdict,
                 "--alert-incident": self.connector.alert_incident,
                 "--applications": self.connector.applications,
+                "--applications-endpoints": self.connector.applications_endpoints,
                 "--applications-with-risks": self.connector.applications_with_risks,
                 "--applications-cves": self.connector.application_cves,
                 "--cves": self.connector.cves,
