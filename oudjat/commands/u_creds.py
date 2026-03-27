@@ -106,7 +106,7 @@ class CredentialUtilCmd(ConnectorCommand):
                 "--new": self._new_creds,
                 "--edit": self._edit_creds,
                 "--delete": self._delete_creds,
-                "--check": self._delete_creds,
+                "--check": self._check_creds,
             }
         )
 
