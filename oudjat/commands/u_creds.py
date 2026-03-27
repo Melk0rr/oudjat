@@ -2,6 +2,7 @@
 A command module to handle credential utility.
 """
 
+from datetime import datetime
 from typing import Any
 
 from oudjat.utils.credentials import CredentialUtils
@@ -97,16 +98,73 @@ class CredentialUtilCmd(ConnectorCommand):
         )
 
     def _new_creds(self, service: str, username: str) -> "DataType":
+        """
+        Wrap CredentialUtils save_credentials method to match backend signature.
+
+        Args:
+            service (str) : The service the credentials are for
+            username (str): The credentials username
+
+        Returns:
+            DataType: A simple output to match backend signature
+        """
+
         _ = CredentialUtils.save_credentials(service, username)
 
-        return [{"action": "new", "service": service, "username": username}]
+        return [
+            {
+                "utils": self.__cmd_props__.name,
+                "action": "new",
+                "service": service,
+                "username": username,
+                "time": datetime.now()
+            }
+        ]
 
     def _edit_creds(self, service: str, username: str) -> "DataType":
+        """
+        Wrap CredentialUtils edit_credentials method to match backend signature.
+
+        Args:
+            service (str) : The service the credentials are for
+            username (str): The credentials username
+
+        Returns:
+            DataType: A simple output to match backend signature
+        """
+
         _ = CredentialUtils.edit_credentials(service, username)
 
-        return [{"action": "edit", "service": service, "username": username}]
+        return [
+            {
+                "utils": self.__cmd_props__.name,
+                "action": "edit",
+                "service": service,
+                "username": username,
+                "time": datetime.now()
+            }
+        ]
 
     def _delete_creds(self, service: str, username: str) -> "DataType":
+        """
+        Wrap CredentialUtils del_credentials method to match backend signature.
+
+        Args:
+            service (str) : The service the credentials are for
+            username (str): The credentials username
+
+        Returns:
+            DataType: A simple output to match backend signature
+        """
+
         _ = CredentialUtils.del_credentials(service, username)
 
-        return [{"action": "delete", "service": service, "username": username}]
+        return [
+            {
+                "utils": self.__cmd_props__.name,
+                "action": "delete",
+                "service": service,
+                "username": username,
+                "time": datetime.now()
+            }
+        ]
