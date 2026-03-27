@@ -99,7 +99,7 @@ class CredentialUtilCmd(ConnectorCommand):
             }
         )
 
-    def _new_creds(self, service: str, username: str) -> "DataType":
+    def _new_creds(self, service: str, username: str | None = None) -> "DataType":
         """
         Wrap CredentialUtils save_credentials method to match backend signature.
 
@@ -147,7 +147,7 @@ class CredentialUtilCmd(ConnectorCommand):
             }
         ]
 
-    def _delete_creds(self, service: str, username: str) -> "DataType":
+    def _delete_creds(self, service: str, username: str = "") -> "DataType":
         """
         Wrap CredentialUtils del_credentials method to match backend signature.
 
