@@ -74,7 +74,7 @@ class CredentialUtils:
             password = getpass.getpass(f"Password for {service}: ")
 
             keyring.set_password(service, username, password)
-            cls.logger.info(f"Successfully saved credentials for {service}")
+            cls.logger.info(f"Successfully saved credentials for {service}@{username}")
 
         except PasswordSetError as e:
             raise PasswordSetError(f"{context}::Error while saving credentials for {service}\n{e}")
