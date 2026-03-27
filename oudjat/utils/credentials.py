@@ -82,18 +82,19 @@ class CredentialUtils:
         return SimpleCredential(username, password)
 
     @classmethod
-    def check_credentials(cls, service: str) -> "SimpleCredential | None":
+    def check_credentials(cls, service: str, username: str | None = None) -> "SimpleCredential | None":
         """
         Return a set of credentials for the specified service, if any.
 
         Args:
-            service (str): The service to search credentials for
+            service (str) : The service to search credentials for
+            username (str): The specific username to check credentials for
 
         Returns:
             SimpleCredential | None: A set of credentials available for the specified service if any
         """
 
-        creds = keyring.get_credential(service, None)
+        creds = keyring.get_credential(service, username)
         if not creds:
             return creds
 
@@ -121,14 +122,11 @@ class CredentialUtils:
         context = Context()
 
         try:
-            cred = keyring.get_credential(service, username)
+            cred = cls.check_credentials(service, username)
 
             if cred is None:
                 cls.logger.warning(f"No stored secret for {service}")
                 cred = CredentialUtils.save_credentials(service)
-
-            else:
-                cred = SimpleCredential(cred.username, cred.password)
 
         except KeyringError as e:
             raise KeyringError(f"{context}::Could not retrieve credentials for {service}\n{e}")

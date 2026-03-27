@@ -79,9 +79,10 @@ class CredentialUtilCmd(ConnectorCommand):
             CmdOpt(
                 "Check the existence of credentials for the specified service",
             ),
-            "--check (-s=SERVICE | --service=SERVICE)",
+            "--check (-s=SERVICE | --service=SERVICE) [-u=USERNAME | --username=USERNAME]",
             {
                 "service": CmdUsageOpt("--service"),
+                "username": CmdUsageOpt("--username"),
             },
         ),
     }
@@ -182,7 +183,7 @@ class CredentialUtilCmd(ConnectorCommand):
             }
         ]
 
-    def _check_creds(self, service: str) -> "DataType":
+    def _check_creds(self, service: str, username: str | None = None) -> "DataType":
         """
         Wrap CredentialUtils del_credentials method to match backend signature.
 
@@ -194,10 +195,17 @@ class CredentialUtilCmd(ConnectorCommand):
             DataType: A simple output to match backend signature
         """
 
-        check = CredentialUtils.check_credentials(service)
+        check = CredentialUtils.check_credentials(service, username)
 
         if check:
             ColorPrint.green(f"Found existing credentials for {service}@{check.username}")
+
+        else:
+            msg = f"No credentials were found for {service}"
+            if username:
+                msg += f"@{username}"
+
+            ColorPrint.red(msg)
 
         return [
             {
