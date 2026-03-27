@@ -148,7 +148,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.prepend_usages(
-        "(-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE)"
+        "(-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])"
     )
     __cmd_props__.append_usages("[options]")
     __doc_builder__: "DocBuilder" = ConnectorCommand._gen_doc("oudjat", __cmd_props__, "")
@@ -175,7 +175,9 @@ class TenableSCConnectorCommand(ConnectorCommand):
 
         # Retrieve credentials from credential service if provided
         if self._is_opt_present("--creds-service"):
-            self.connector.set_creds_from_svc_name(self.options["--creds-service"])
+            self.connector.set_creds_from_service(
+                self.options["--creds-service"], self.options["--username"]
+            )
 
         self.connector.connect()
 
