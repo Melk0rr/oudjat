@@ -93,6 +93,7 @@ It also allows for complex data consolidation and mapping through a config file 
     builder.add_option("print", "Print the results in the terminal")
     builder.add_option("key-filter", "Filter the final result keys", arg="KEYFILTER")
     builder.add_option("sort", "Sort the final result based on the provided key", short="s", arg="SORTKEY")
+    builder.add_option("sort-reverse", "Reverse the sorting order")
 
     builder.help_content = [
         "For help using this tool, please open an issue on the Codeberg repository:",

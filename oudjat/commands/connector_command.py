@@ -150,7 +150,7 @@ class ConnectorCommand(Base):
         self.logger.info("Callback - Sorting final result")
         self.logger.debug(f"{Context()}::{self.options['--sort']}")
 
-        self._data.sort(key=lambda e: e[self.options["--sort"]])
+        self._data.sort(key=lambda e: e[self.options["--sort"]], reverse=self.options["--sort-reverse"])
 
     def _filter_keys_cb(self) -> None:
         """
