@@ -117,7 +117,7 @@ class CredentialUtils:
         except KeyringError as e:
             raise KeyringError(f"{context}::Could not retrieve credentials for {service}\n{e}")
 
-        cls.logger.info(f"Retrieved credentials for {service}")
+        cls.logger.info(f"Retrieved credentials for {service}@{cred.username}")
         return cred
 
     @classmethod
