@@ -884,6 +884,9 @@ class S1Connector(Connector):
         payload["applicationName"] = name
         payload["applicationVendor"] = vendor
 
+        if "limit" not in payload:
+            payload["limit"] = 1000
+
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
 
@@ -922,6 +925,9 @@ class S1Connector(Connector):
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
 
+        if "limit" not in payload:
+            payload["limit"] = 1000
+
         return self.fetch(S1Endpoint.APPLICATIONS_WITH_RISKS, payload)
 
     def cves(
@@ -949,6 +955,9 @@ class S1Connector(Connector):
 
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
+
+        if "limit" not in payload:
+            payload["limit"] = 1000
 
         return self.fetch(S1Endpoint.APPLICATIONS_CVES, payload)
 
