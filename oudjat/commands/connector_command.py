@@ -142,6 +142,13 @@ class ConnectorCommand(Base):
     # ****************************************************************
     # Methods - callbacks
 
+    def _sort_cb(self) -> None:
+        """
+        Sort the final result.
+        """
+
+        self._data.sort(key=lambda e: e[self.options["--sort"]])
+
     def _filter_keys_cb(self) -> None:
         """
         Filter the final results keys.
@@ -190,6 +197,9 @@ class ConnectorCommand(Base):
 
         if self.options["--key-filter"]:
             self._callbacks.append(self._filter_keys_cb)
+
+        if self.options["--sort"]:
+            self._callbacks.append(self._sort_cb)
 
         for cb in self._callbacks:
             cb()
