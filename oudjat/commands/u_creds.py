@@ -68,7 +68,7 @@ class CredentialUtilCmd(ConnectorCommand):
             CmdOpt(
                 "Delete the password for the specified service and user",
             ),
-            "--delete (-s=SERVICE | --service=SERVICE) [-u=USERNAME | --username=USERNAME]",
+            "--delete (-s=SERVICE | --service=SERVICE) (-u=USERNAME | --username=USERNAME)",
             {
                 "service": CmdUsageOpt("--service"),
                 "username": CmdUsageOpt("--username"),
@@ -147,7 +147,7 @@ class CredentialUtilCmd(ConnectorCommand):
             }
         ]
 
-    def _delete_creds(self, service: str, username: str = "") -> "DataType":
+    def _delete_creds(self, service: str, username: str) -> "DataType":
         """
         Wrap CredentialUtils del_credentials method to match backend signature.
 

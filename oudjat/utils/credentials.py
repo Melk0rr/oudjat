@@ -141,7 +141,7 @@ class CredentialUtils:
         return cred
 
     @classmethod
-    def del_credentials(cls, service: str, username: str = "") -> None:
+    def del_credentials(cls, service: str, username: str) -> None:
         """
         Remove stored credentials from the `keyring` using both the service identifier and the specified username.
 
