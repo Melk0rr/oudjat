@@ -147,12 +147,18 @@ class ConnectorCommand(Base):
         Sort the final result.
         """
 
+        self.logger.info("Callback - Sorting final result")
+        self.logger.debug(f"{Context()}::{self.options['--sort']}")
+
         self._data.sort(key=lambda e: e[self.options["--sort"]])
 
     def _filter_keys_cb(self) -> None:
         """
         Filter the final results keys.
         """
+
+        self.logger.info("Callback - Filtering final result keys")
+        self.logger.debug(f"{Context()}::{self.options['--key-filter']}")
 
         self._data = [UtilsDict.filter(d, self.options["--key-filter"]) for d in self._data]
 
