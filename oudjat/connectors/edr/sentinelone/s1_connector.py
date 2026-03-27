@@ -10,6 +10,7 @@ from urllib.parse import ParseResult, urlparse
 import requests
 from yaspin import yaspin
 
+from oudjat.control.vulnerability.severity import Severity
 from oudjat.utils import Context, DataType, FileUtils, NoCredentialsError, StrType
 from oudjat.utils.logging import spinner_log
 
@@ -931,7 +932,11 @@ class S1Connector(Connector):
         return self.fetch(S1Endpoint.APPLICATIONS_WITH_RISKS, payload)
 
     def cves(
-        self, site_ids: "StrType | None" = None, payload: dict[str, Any] | None = None
+        self,
+        ids: "StrType | None" = None,
+        severities: list[int] | None = None,
+        site_ids: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Get known CVEs for applications installed on endpoints with 'Application Risk-enabled Agents'.
@@ -943,6 +948,8 @@ class S1Connector(Connector):
         403 - Insufficient permissions
 
         Args:
+            ids (str | list[str] | None)     : A list of CVE ids or partial ids to filter
+            severities (list[int] | None)    : A list of severity numbers
             site_ids (str | list[str] | None): List of site ids to filter
             payload (dict[str, Any])         : Payload to send to the endpoint
 
@@ -952,6 +959,14 @@ class S1Connector(Connector):
 
         if payload is None:
             payload = {}
+
+        if ids is not None:
+            payload["cveId__contains"] = self._unify_str_list(ids)
+
+        if severities is not None:
+            payload["severities"] = self._unify_str_list(
+                [str(Severity.from_score(s)) for s in severities]
+            )
 
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)

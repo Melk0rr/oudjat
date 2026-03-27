@@ -62,6 +62,10 @@ class S1ConnectorCommand(ConnectorCommand):
             "A JSON payload to pass additional query parameters",
             arg="PAYLOAD",
         ),
+        "--severities": CmdOpt(
+            "A list severity numbers",
+            arg="SEVERITIES",
+        ),
         "--sites-list": CmdOpt(
             "A list of site IDs or names",
             arg="SITES",
@@ -238,8 +242,10 @@ class S1ConnectorCommand(ConnectorCommand):
         ),
         "--cves": CmdUsage(
             CmdOpt("Retrieve CVEs detected by S1"),
-            "--cves [--sites-list=SITES] [--payload=PAYLOAD]",
+            "--cves [--ids=IDS] [--severities=SEVERITIES] [--sites-list=SITES] [--payload=PAYLOAD]",
             {
+                "ids": CmdUsageOpt("--ids"),
+                "severities": CmdUsageOpt("--severities"),
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
             },
@@ -342,6 +348,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "--filter": lambda _, v: self._parse_payload(v),
                 "--names": lambda opt, _: self._unify_str_opt(opt),
                 "--payload": lambda _, v: self._parse_payload(v),
+                "--severities": lambda opt, _: self._unify_str_opt(opt),
                 "--sites-list": lambda opt, _: self._unify_str_opt(opt),
                 "--status-filter": lambda _, v: self._unify_str_opt(v),
                 "--vendors": lambda opt, _: self._unify_str_opt(opt),
