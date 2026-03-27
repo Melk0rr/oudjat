@@ -2,7 +2,7 @@
 
 import re
 from abc import ABC
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any, TypeVar, override
 
@@ -207,7 +207,7 @@ class LDAPAccount(LDAPObject, ABC):
         """
 
         return (not self.account_expiration == datetime.max) and (
-            not self.account_expiration == datetime(1601, 1, 1)
+            not self.account_expiration == datetime(1601, 1, 1, tzinfo=timezone.utc)
         )
 
     @property
