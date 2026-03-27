@@ -77,14 +77,30 @@ class CredentialUtils:
             cls.logger.info(f"Successfully saved credentials for {service}")
 
         except PasswordSetError as e:
-            raise PasswordSetError(
-                f"{context}::Error while saving credentials for {service}\n{e}"
-            )
+            raise PasswordSetError(f"{context}::Error while saving credentials for {service}\n{e}")
 
         return SimpleCredential(username, password)
 
     @classmethod
-    def get_credentials(cls, service: str, username: str = "") -> "SimpleCredential":
+    def check_credentials(cls, service: str) -> "SimpleCredential | None":
+        """
+        Return a set of credentials for the specified service, if any.
+
+        Args:
+            service (str): The service to search credentials for
+
+        Returns:
+            SimpleCredential | None: A set of credentials available for the specified service if any
+        """
+
+        creds = keyring.get_credential(service, None)
+        if not creds:
+            return creds
+
+        return SimpleCredential(creds.username, creds.password)
+
+    @classmethod
+    def get_credentials(cls, service: str, username: str | None = None) -> "SimpleCredential":
         """
         Attempt to retrieve stored credentials from the `keyring` using the provided service name.
 

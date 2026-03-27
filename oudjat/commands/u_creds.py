@@ -5,6 +5,7 @@ A command module to handle credential utility.
 from datetime import datetime
 from typing import Any
 
+from oudjat.utils.color_print import ColorPrint
 from oudjat.utils.credentials import CredentialUtils
 from oudjat.utils.doc_builder import DocBuilder
 from oudjat.utils.types import DataType
@@ -74,6 +75,15 @@ class CredentialUtilCmd(ConnectorCommand):
                 "username": CmdUsageOpt("--username"),
             },
         ),
+        "--check": CmdUsage(
+            CmdOpt(
+                "Check the existence of credentials for the specified service",
+            ),
+            "--check (-s=SERVICE | --service=SERVICE)",
+            {
+                "service": CmdUsageOpt("--service"),
+            },
+        ),
     }
 
     __cmd_props__.append_usages("[options]")
@@ -96,6 +106,7 @@ class CredentialUtilCmd(ConnectorCommand):
                 "--new": self._new_creds,
                 "--edit": self._edit_creds,
                 "--delete": self._delete_creds,
+                "--check": self._delete_creds,
             }
         )
 
@@ -167,6 +178,33 @@ class CredentialUtilCmd(ConnectorCommand):
                 "action": "delete",
                 "service": service,
                 "username": username,
+                "time": datetime.now()
+            }
+        ]
+
+    def _check_creds(self, service: str) -> "DataType":
+        """
+        Wrap CredentialUtils del_credentials method to match backend signature.
+
+        Args:
+            service (str) : The service the credentials are for
+            username (str): The credentials username
+
+        Returns:
+            DataType: A simple output to match backend signature
+        """
+
+        check = CredentialUtils.check_credentials(service)
+
+        if check:
+            ColorPrint.green(f"Found existing credentials for {service}@{check.username}")
+
+        return [
+            {
+                "utils": self.__cmd_props__.name,
+                "action": "check",
+                "service": service,
+                "username": None,
                 "time": datetime.now()
             }
         ]
