@@ -849,7 +849,7 @@ class S1Connector(Connector):
             payload["name__contains"] = self._unify_str_list(names)
 
         if vendors is not None:
-            payload["vendors"] = self._unify_str_list(vendors)
+            payload["vendor__contains"] = self._unify_str_list(vendors)
 
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
