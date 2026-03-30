@@ -29,6 +29,13 @@ class S1Endpoint(Enum):
     An enumeration of the possible SentinelOne connection endpoints.
     """
 
+    # ======== Accounts ========
+    ACCOUNTS = S1EndpointsProps(
+        "/web/api/v2.1/accounts",
+        ConnectorMethod.GET,
+        "Retrieve accounts data",
+    )
+
     # ======== Agents ========
     AGENTS_ACTIONS_DECOMMISSION = S1EndpointsProps(
         "/web/api/v2.1/agents/actions/decommission",
