@@ -263,6 +263,22 @@ class S1Connector(Connector):
         payload = {"data": {"apiToken": self._api_token}}
         return self.fetch(endpoint=S1Endpoint.USERS_LOGIN_BY_API_TOKEN, payload=payload)
 
+    def login_by_token(self) -> "DataType":
+        """
+        Log in to the API with a token.
+
+        Possible response messages
+        200 - user logged in
+        400 - Invalid user input received. See error details for further information.
+        401 - User authentication failed
+
+        Returns:
+            DataType: data with user token and user name
+        """
+
+        payload = {"data": {"token": self._api_token}}
+        return self.fetch(endpoint=S1Endpoint.USERS_LOGIN_BY_TOKEN, payload=payload)
+
     def logout(self, payload: dict[str, Any] | None = None) -> "DataType":
         """
         Log out the authenticated user.
