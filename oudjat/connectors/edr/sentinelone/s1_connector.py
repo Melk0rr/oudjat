@@ -260,12 +260,17 @@ class S1Connector(Connector):
             DataType: data with user token and user name
         """
 
-        payload = {"data": {"apiToken": self._api_token}}
+        if self._credentials is None:
+            raise NoCredentialsError(f"{Context()}::No credentials provided")
+
+        payload = {
+            "data": {"apiToken": self._api_token},
+        }
         return self.fetch(endpoint=S1Endpoint.USERS_LOGIN_BY_API_TOKEN, payload=payload)
 
     def login_by_token(self) -> "DataType":
         """
-        Log in to the API with a token.
+        Log in a user with an authentication token.
 
         Possible response messages
         200 - user logged in
@@ -276,8 +281,39 @@ class S1Connector(Connector):
             DataType: data with user token and user name
         """
 
-        payload = {"data": {"token": self._api_token}}
+        if self._credentials is None:
+            raise NoCredentialsError(f"{Context()}::No credentials provided")
+
+        payload = {
+            "data": {"token": self._api_token},
+        }
+
         return self.fetch(endpoint=S1Endpoint.USERS_LOGIN_BY_TOKEN, payload=payload)
+
+    def login(self) -> "DataType":
+        """
+        Log in a user by username/password.
+
+        Possible response messages
+        200 - user logged in
+        400 - Invalid user input received. See error details for further information.
+        401 - User authentication failed
+
+        Returns:
+            DataType: data with user token and user name
+        """
+
+        if self._credentials is None:
+            raise NoCredentialsError(f"{Context()}::No credentials provided")
+
+        payload = {
+            "data": {
+                "username": self._credentials.username,
+                "password": self._credentials.password,
+            },
+        }
+
+        return self.fetch(endpoint=S1Endpoint.USERS_LOGIN, payload=payload)
 
     def logout(self, payload: dict[str, Any] | None = None) -> "DataType":
         """
@@ -305,7 +341,7 @@ class S1Connector(Connector):
         context = Context()
 
         if self._credentials is None:
-            raise NoCredentialsError(f"{context}::No password provided")
+            raise NoCredentialsError(f"{context}::No credentials provided")
 
         if not self._connection:
             self.logger.info(f"Connecting to {self._target.netloc} with user API token")
