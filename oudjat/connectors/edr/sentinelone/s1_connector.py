@@ -307,10 +307,8 @@ class S1Connector(Connector):
             raise NoCredentialsError(f"{Context()}::No credentials provided")
 
         payload = {
-            "data": {
-                "username": self._credentials.username,
-                "password": self._credentials.password,
-            },
+            "username": self._credentials.username,
+            "password": self._credentials.password,
         }
 
         return self.fetch(endpoint=S1Endpoint.USERS_LOGIN, payload=payload)
