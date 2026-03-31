@@ -349,6 +349,7 @@ class S1Connector(Connector):
 
             except SentinelOneAPIConnectionError as e:
                 if "Invalid operation" in str(e):
+                    self.logger.warning("Failed to log in with API token. Passing user's password as header authorization...")
                     self._connection = self._credentials.password
 
                 else:
@@ -902,6 +903,9 @@ class S1Connector(Connector):
 
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
+
+        if "skipCount" not in payload:
+            payload["skipCount"] = True
 
         if "limit" not in payload:
             payload["limit"] = 1000
