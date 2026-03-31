@@ -7,7 +7,7 @@ from oudjat.utils import Context, DataType, LogicalOperator
 from oudjat.utils.list import UtilsList
 from oudjat.utils.types import NumberType
 
-from .data_filter import DataFilter, DataFilterDictionaryProps
+from .datafilter import DataFilter, DataFilterDictionaryProps
 from .exceptions import DecisionTreeBuildError, DecisionTreeInvalidNodeError
 
 DecisionNodeFlagType: TypeAlias = "NumberType | str | None"

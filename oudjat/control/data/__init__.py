@@ -1,9 +1,9 @@
 """A package providing data manipulation utilities."""
 
-from .data_filter import DataFilter
-from .data_set import DataSet, DataSetType
-from .data_source import DataSource
-from .decision_tree import DecisionTree, DecisionTreeNode
+from .datafilter import DataFilter
+from .dataset import DataSet, DataSetType
+from .datasource import DataSource
+from .decisiontree import DecisionTree, DecisionTreeDictionaryProps, DecisionTreeNode
 
 __all__ = [
     "DataFilter",
@@ -11,5 +11,6 @@ __all__ = [
     "DataSetType",
     "DataSource",
     "DecisionTree",
+    "DecisionTreeDictionaryProps",
     "DecisionTreeNode",
 ]
