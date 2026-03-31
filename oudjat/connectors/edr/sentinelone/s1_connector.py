@@ -7,7 +7,6 @@ import re
 from typing import Any, TypeAlias, override
 from urllib.parse import ParseResult, urlparse
 
-import requests
 from yaspin import yaspin
 
 from oudjat.control.vulnerability.severity import Severity
@@ -64,7 +63,7 @@ class S1Connector(Connector):
         self._target: "ParseResult"
         super().__init__(target=urlparse(target), username=username, password=api_token)
 
-        self._connection: "requests.Session | None" = None
+        self._connection: "str | None" = None
         self._DEFAULT_HEADERS: dict[str, str] = {"Content-Type": "application/json"}
 
     # ****************************************************************
@@ -344,16 +343,16 @@ class S1Connector(Connector):
         if not self._connection:
             self.logger.info(f"Connecting to {self._target.netloc} with user API token")
 
-            if self._api_token:
-                try:
-                    data = self.login_by_api_token()
-                    self._connection = data[0]["token"]
+            try:
+                data = self.login_by_api_token()
+                self._connection = data[0]["token"]
 
-                except SentinelOneAPIConnectionError as e:
+            except SentinelOneAPIConnectionError as e:
+                if "Invalid operation" in str(e):
+                    self._connection = self._credentials.password
+
+                else:
                     raise SentinelOneAPIConnectionError(f"{context}::{e}")
-
-            else:
-                raise NoCredentialsError(f"{context}::No API token provided")
 
             self.logger.info(f"Connected to {self._target.netloc}")
 
