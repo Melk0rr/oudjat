@@ -15,6 +15,7 @@ from .stdouthook import StdOutHook
 from .time import DateFlag, DateFormat, TimeConverter
 from .types import (
     DataType,
+    DateInputType,
     DatumDataType,
     DatumType,
     FilterTupleExtType,
@@ -47,6 +48,7 @@ __all__ = [
     "DateFormat",
     "TimeConverter",
     "DataType",
+    "DateInputType",
     "DatumType",
     "DatumDataType",
     "FilterTupleExtType",
