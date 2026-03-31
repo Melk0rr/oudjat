@@ -12,7 +12,6 @@ from oudjat.core.user.user import User
 from oudjat.utils.types import DataType
 
 from ..asset_mapper import AssetMapper, MappingOSTuple
-from .ldap_connector import LDAPConnector
 
 if TYPE_CHECKING:
     from oudjat.core.mapper import MappingRegistry
@@ -26,7 +25,7 @@ class LDAPAssetMapper(AssetMapper):
     # ****************************************************************
     # Attributes & Constructor
 
-    def __init__(self, ldapco: "LDAPConnector") -> None:
+    def __init__(self) -> None:
         """
         Create a new LDAPAssetMapper.
 
@@ -36,8 +35,6 @@ class LDAPAssetMapper(AssetMapper):
 
         super().__init__()
         self.logger: "logging.Logger" = logging.getLogger(__name__)
-
-        self._connector: "LDAPConnector" = ldapco
 
     # ****************************************************************
     # Methods - Asset mapping
