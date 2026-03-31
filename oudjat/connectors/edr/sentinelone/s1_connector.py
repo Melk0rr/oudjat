@@ -94,7 +94,7 @@ class S1Connector(Connector):
 
         headers = self._DEFAULT_HEADERS
         if self._connection:
-            headers["Authorization"] = f"Token {self._connection}"
+            headers["Authorization"] = f"Bearer {self._connection}"
 
         return headers
 
