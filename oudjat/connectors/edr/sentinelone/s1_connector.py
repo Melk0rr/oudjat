@@ -1211,19 +1211,10 @@ class S1Connector(Connector):
 
         res = []
         for gid in group_id:
-            # NOTE: Retrieving current group policy > May be unnecessary
-            g_payload_data = self.fetch(
-                S1Endpoint.GROUPS_POLICY,
-                {},
-                path_fmt={"groupId": gid},
-            )[0]
-
-            g_payload_data.update(payload["data"])
-
             res.extend(
                 self.fetch(
                     S1Endpoint.GROUPS_POLICY_UPDATE,
-                    payload={"data": g_payload_data},
+                    payload=payload,
                     path_fmt={"groupId": gid},
                 )
             )
