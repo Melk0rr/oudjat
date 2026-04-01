@@ -349,7 +349,9 @@ class S1Connector(Connector):
 
             except SentinelOneAPIConnectionError as e:
                 if "Invalid operation" in str(e):
-                    self.logger.warning("Failed to log in with API token. Passing user's password as header authorization...")
+                    self.logger.warning(
+                        "Failed to log in with API token. Passing user's password as header authorization..."
+                    )
                     self._connection = self._credentials.password
 
                 else:
@@ -1156,6 +1158,7 @@ class S1Connector(Connector):
         group_id: "StrType",
         malicious_mitigation: "str | S1MitigationMode | None" = None,
         suspicious_mitigation: "str | S1MitigationMode | None" = None,
+        auto_mitigation_action: str | None = None,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
@@ -1171,6 +1174,7 @@ class S1Connector(Connector):
             group_id (str | list[str])                     : Group to update the policy of
             malicious_mitigation (S1MitigationMode | None) : Malicious policy to set
             suspicious_mitigation (S1MitigationMode | None): Suspicious policy to set
+            auto_mitigation_action (str | None)            : The auto mitigation action to use
             payload (dict[str, Any])                       : Payload to send
 
         Returns:
@@ -1191,6 +1195,13 @@ class S1Connector(Connector):
                 malicious_mitigation = S1MitigationMode[malicious_mitigation.upper()]
 
             payload["data"]["mitigationMode"] = str(malicious_mitigation)
+
+            # Need to set an autoMitigationAction value or policy change fails
+            payload["data"]["autoMitigationAction"] = auto_mitigation_action or (
+                "mitigation.none"
+                if malicious_mitigation is S1MitigationMode.DETECT
+                else "mitigation.quarantineThreat"
+            )
 
         if suspicious_mitigation is not None:
             if not isinstance(suspicious_mitigation, S1MitigationMode):
