@@ -10,7 +10,7 @@ from tenable.sc import TenableSC
 from yaspin import yaspin
 
 from oudjat.connectors.connector import Connector
-from oudjat.control.data.data_filter import DataFilter
+from oudjat.control.data.datafilter import DataFilter
 from oudjat.control.vulnerability.severity import Severity
 from oudjat.utils import (
     Context,
