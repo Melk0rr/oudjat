@@ -43,5 +43,6 @@ class StringUtils:
             str: Valid JSON string
         """
 
-        return re.sub(r'(\w+)(?=\s*:)', r'"\1"', s)
+        jsonified_keys = re.sub(r'([A-Za-z\._-]+)(?=\s*:)', r'"\1"', s)
+        return re.sub(r'(?:\:\s*)([A-Za-z\._-]+)', r': "\1"', jsonified_keys)
 
