@@ -397,7 +397,9 @@ class S1Connector(Connector):
             endpoint_path = endpoint_path.format(**path_fmt)
 
         self.logger.info(f"{endpoint} - {endpoint.description}")
-        self.logger.debug(f"{context}::{payload}")
+
+        if "LOGIN" not in endpoint.name:
+            self.logger.debug(f"{context}::{payload}")
 
         res = []
         with yaspin(text=f"{endpoint.description}...") as spinner:
