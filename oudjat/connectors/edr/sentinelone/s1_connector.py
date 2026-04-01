@@ -1180,6 +1180,8 @@ class S1Connector(Connector):
 
         if payload is None:
             payload = {}
+
+        if "data" not in payload:
             payload["data"] = {}
 
         if malicious_mitigation is not None:
