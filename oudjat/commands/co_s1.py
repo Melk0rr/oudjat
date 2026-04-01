@@ -213,7 +213,7 @@ class S1ConnectorCommand(ConnectorCommand):
             "--applications-endpoints [--names=NAMES] [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD]",
             {
                 "name": CmdUsageOpt("--names", transform=lambda lst: next(iter(lst))),
-                "vendor": CmdUsageOpt("--vendors", transform=lambda lst: next(iter(lst))),
+                "vendor": CmdUsageOpt("--vendors", transform=",".join),
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
             },
