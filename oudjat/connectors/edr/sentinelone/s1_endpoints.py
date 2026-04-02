@@ -108,6 +108,11 @@ class S1Endpoint(Enum):
         ConnectorMethod.GET,
         "Retrieve groups data",
     )
+    GROUPS_UPDATE = S1EndpointsProps(
+        "/web/api/v2.1/groups/{groupId}",
+        ConnectorMethod.PUT,
+        "Update properties of a group",
+    )
     GROUPS_MOVE_AGENTS = S1EndpointsProps(
         "/web/api/v2.1/groups/{groupId}/move-agents",
         ConnectorMethod.PUT,
