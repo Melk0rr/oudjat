@@ -8,12 +8,16 @@ For now, Oudjat includes two operating modes.
 
 ## 🔌 Connectors
 
+### Descriptions
+
 The connector commands allow you to interact and query implemented connectors.
 Every implemented connector return data in the form of a list of dictionaries. Which you can
 
 - filter
 - print
 - export.
+
+### Basic usage
 
 To use one of oudjat connectors, you can reference it like this:
 
@@ -22,6 +26,8 @@ oudjat connectors.<connector_path> [options]
 ```
 
 You will find every connector reference in their **dedicated command section** .
+
+### Options
 
 The connectors commands **share some common operations** you can pass as options:
 
@@ -37,6 +43,10 @@ The connectors commands **share some common operations** you can pass as options
 | --json=JSON            | Save results as a JSON file                                                   |
 | --print                | Print the results in the terminal                                             |
 | --key-filter=KEYFILTER | Filter the final result keys                                                  |
+| --sort=SORTKEY         | Sort the final results using the provided key                                 |
+| --sort-reverse         | Reverse the sorting order                                                     |
+
+### Credentials
 
 In a lot of cases, the connector will also require that you provide 🔑**credentials** to perform some form of 👤**authentication**.
 You can provide 🔑credentials with these options
@@ -50,11 +60,29 @@ You can provide 🔑credentials with these options
 While using the _--creds-service_ option, you can either:
 
 - Provide a username to specifically connect with a certain user
-- Provide no extra information. Oudjat will automatically retrieve ailable 🔑**credentials**  for the specified service
+- Provide no extra information. Oudjat will automatically retrieve ailable 🔑**credentials** for the specified service
 
-When you specify a credential service name, Oudjat will store the prompted 🔑**credentials** in the available credential store on your system:
-- 🐧Linux: KWallet, Gnome keyring, etc.
-- 🪟Windows: Windows Credential Store
+When you specify a credential service name:
+
+1. Oudjat will ask you for a username and password.
+
+```bash
+> oudjat connectors.ldap -t "server.domain.local" --creds-service "MyLDAPSrvConnection" ...
+> Username for MyLDAPSrvConnection: <my_user>
+> Password for MyLDAPSrvConnection: ************
+```
+
+2. It will then store the prompted 🔑**credentials** in the available credential store on your system:
+   - 🐧**Linux**: KWallet, Gnome keyring, etc.
+   - 🪟**Windows**: Windows Credential Store
+
+The next time you use the same service, Oudjat will automatically retrieve the registered 🔑**credentials** for that service.
+
+> [!Important]
+> If multiple username/password pairs are registered for the same service. Oudjat will retrieve the last registered one.
+> You can specify the username you want to retrieve credentials for.
+
+### Help
 
 Each connector command options can be retrieved by combining the connector ref with the help option like this:
 
