@@ -28,6 +28,10 @@ class S1ConnectorCommand(ConnectorCommand):
         "--auto": CmdOpt(
             "Trigger auto mode. See the doc for full usage details",
         ),
+        "--auto-mitigation-action": CmdOpt(
+            "Specify the automatic mitigation action",
+            arg="AUTOMITIGATION",
+        ),
         "--creds-service": CmdOpt(
             "A credential service name to retrieve username and password from",
             short="c",
@@ -274,6 +278,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "group_id": CmdUsageOpt("--ids"),
                 "malicious_mitigation": CmdUsageOpt("--malicious-policy"),
                 "suspicious_mitigation": CmdUsageOpt("--suspicious-policy"),
+                "auto_mitigation_action": CmdUsageOpt("--auto-mitigation-action"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
