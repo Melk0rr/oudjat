@@ -245,7 +245,11 @@ class Base:
             dict[str, Any]: The dictionary resulting of the parsing
         """
 
-        return orjson.loads(StringUtils.jsonify(payload_str))
+        try:
+            return orjson.loads(StringUtils.jsonify(payload_str))
+
+        except orjson.JSONDecodeError as e:
+            raise ValueError(f"{Context()}::Failed to parse payload {payload_str} - {e}")
 
     def _is_opt_present(self, opt: str) -> bool:
         """

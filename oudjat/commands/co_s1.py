@@ -28,6 +28,10 @@ class S1ConnectorCommand(ConnectorCommand):
         "--auto": CmdOpt(
             "Trigger auto mode. See the doc for full usage details",
         ),
+        "--auto-mitigation-action": CmdOpt(
+            "Specify the automatic mitigation action",
+            arg="AUTOMITIGATION",
+        ),
         "--creds-service": CmdOpt(
             "A credential service name to retrieve username and password from",
             short="c",
@@ -212,8 +216,8 @@ class S1ConnectorCommand(ConnectorCommand):
             CmdOpt("Retrieve an inventory of endpoints for a specific application"),
             "--applications-endpoints [--names=NAMES] [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD]",
             {
-                "names": CmdUsageOpt("--names", transform=lambda lst: next(iter(lst))),
-                "vendors": CmdUsageOpt("--vendors", transform=lambda lst: next(iter(lst))),
+                "name": CmdUsageOpt("--names", transform=lambda lst: next(iter(lst))),
+                "vendor": CmdUsageOpt("--vendors", transform=",".join),
                 "site_ids": CmdUsageOpt("--sites-list"),
                 "payload": CmdUsageOpt("--payload"),
             },
@@ -274,6 +278,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "group_id": CmdUsageOpt("--ids"),
                 "malicious_mitigation": CmdUsageOpt("--malicious-policy"),
                 "suspicious_mitigation": CmdUsageOpt("--suspicious-policy"),
+                "auto_mitigation_action": CmdUsageOpt("--auto-mitigation-action"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),

@@ -349,7 +349,9 @@ class S1Connector(Connector):
 
             except SentinelOneAPIConnectionError as e:
                 if "Invalid operation" in str(e):
-                    self.logger.warning("Failed to log in with API token. Passing user's password as header authorization...")
+                    self.logger.warning(
+                        "Failed to log in with API token. Passing user's password as header authorization..."
+                    )
                     self._connection = self._credentials.password
 
                 else:
@@ -397,7 +399,9 @@ class S1Connector(Connector):
             endpoint_path = endpoint_path.format(**path_fmt)
 
         self.logger.info(f"{endpoint} - {endpoint.description}")
-        self.logger.debug(f"{context}::{payload}")
+
+        if "LOGIN" not in endpoint.name:
+            self.logger.debug(f"{context}::{payload}")
 
         res = []
         with yaspin(text=f"{endpoint.description}...") as spinner:
@@ -1154,6 +1158,7 @@ class S1Connector(Connector):
         group_id: "StrType",
         malicious_mitigation: "str | S1MitigationMode | None" = None,
         suspicious_mitigation: "str | S1MitigationMode | None" = None,
+        auto_mitigation_action: str | None = None,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
@@ -1169,6 +1174,7 @@ class S1Connector(Connector):
             group_id (str | list[str])                     : Group to update the policy of
             malicious_mitigation (S1MitigationMode | None) : Malicious policy to set
             suspicious_mitigation (S1MitigationMode | None): Suspicious policy to set
+            auto_mitigation_action (str | None)            : The auto mitigation action to use
             payload (dict[str, Any])                       : Payload to send
 
         Returns:
@@ -1180,6 +1186,8 @@ class S1Connector(Connector):
 
         if payload is None:
             payload = {}
+
+        if "data" not in payload:
             payload["data"] = {}
 
         if malicious_mitigation is not None:
@@ -1187,6 +1195,13 @@ class S1Connector(Connector):
                 malicious_mitigation = S1MitigationMode[malicious_mitigation.upper()]
 
             payload["data"]["mitigationMode"] = str(malicious_mitigation)
+
+            # Need to set an autoMitigationAction value or policy change fails
+            payload["data"]["autoMitigationAction"] = auto_mitigation_action or (
+                "mitigation.none"
+                if malicious_mitigation is S1MitigationMode.DETECT
+                else "mitigation.quarantineThreat"
+            )
 
         if suspicious_mitigation is not None:
             if not isinstance(suspicious_mitigation, S1MitigationMode):
@@ -1196,19 +1211,10 @@ class S1Connector(Connector):
 
         res = []
         for gid in group_id:
-            # NOTE: Retrieving current group policy > May be unnecessary
-            g_payload_data = self.fetch(
-                S1Endpoint.GROUPS_POLICY,
-                {},
-                path_fmt={"groupId": gid},
-            )[0]
-
-            g_payload_data.update(payload["data"])
-
             res.extend(
                 self.fetch(
                     S1Endpoint.GROUPS_POLICY_UPDATE,
-                    payload={"data": g_payload_data},
+                    payload=payload,
                     path_fmt={"groupId": gid},
                 )
             )
