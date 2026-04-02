@@ -9,7 +9,8 @@ For now, Oudjat includes two operating modes.
 ## 🔌 Connectors
 
 The connector commands allow you to interact and query implemented connectors.
-Every implemented connector return data in the form of a list of dictionaries. Which you can 
+Every implemented connector return data in the form of a list of dictionaries. Which you can
+
 - filter
 - print
 - export.
@@ -45,6 +46,15 @@ You can provide 🔑credentials with these options
 | -u --username   | The username / login to use for the connection                                                                      |
 | -p --password   | The password to use for the connection                                                                              |
 | --creds-service | Alternatively, you can provide a service name that will be used to store credentials for that particular connector. |
+
+While using the _--creds-service_ option, you can either:
+
+- Provide a username to specifically connect with a certain user
+- Provide no extra information. Oudjat will automatically retrieve ailable 🔑**credentials**  for the specified service
+
+When you specify a credential service name, Oudjat will store the prompted 🔑**credentials** in the available credential store on your system:
+- 🐧Linux: KWallet, Gnome keyring, etc.
+- 🪟Windows: Windows Credential Store
 
 Each connector command options can be retrieved by combining the connector ref with the help option like this:
 
