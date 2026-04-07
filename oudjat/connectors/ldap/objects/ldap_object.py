@@ -80,7 +80,7 @@ class LDAPObject:
             str: The distinguished name (DN) of the LDAP object.
         """
 
-        return self._entry.get("distinguishedName")
+        return self._entry.get("distinguishedName", self._entry["dn"])
 
     @property
     def id(self) -> str:
@@ -119,7 +119,6 @@ class LDAPObject:
             desc = " - ".join(desc)
 
         return desc
-
 
     @property
     def sid(self) -> str:
