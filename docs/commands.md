@@ -8,7 +8,7 @@ For now, Oudjat includes two operating modes.
 
 ## 🔌 Connectors
 
-### Descriptions
+### Description
 
 The connector commands allow you to interact and query implemented connectors.
 Every implemented connector return data in the form of a list of dictionaries. Which you can
@@ -25,9 +25,16 @@ To use one of oudjat connectors, you can reference it like this:
 oudjat connectors.<connector_path> [options]
 ```
 
-You will find every connector reference in their **dedicated command section** .
+You will find every connector reference in their **dedicated command section**.
 
 ### Options
+
+Oudjat uses [docotp](http://docopt.org/) to handle its usages and command options.
+
+> [!IMPORTANT]
+> The most important rule of docopt you need to know is:
+> options wrapped with **parenthesis** () or not wrapped at all, are required.
+> options wrappped with **brackets** [] are optional.
 
 The connectors commands **share some common operations** you can pass as options:
 
@@ -49,7 +56,7 @@ The connectors commands **share some common operations** you can pass as options
 ### Credentials
 
 In a lot of cases, the connector will also require that you provide 🔑**credentials** to perform some form of 👤**authentication**.
-You can provide 🔑credentials with these options
+You can provide 🔑 with these options
 
 | Option          | Description                                                                                                         |
 | --------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -60,7 +67,7 @@ You can provide 🔑credentials with these options
 While using the _--creds-service_ option, you can either:
 
 - Provide a username to specifically connect with a certain user
-- Provide no extra information. Oudjat will automatically retrieve ailable 🔑**credentials** for the specified service
+- Provide no extra information. Oudjat will automatically retrieve ailable 🔑 for the specified service
 
 When you specify a credential service name:
 
@@ -72,15 +79,18 @@ When you specify a credential service name:
 > Password for MyLDAPSrvConnection: ************
 ```
 
-2. It will then store the prompted 🔑**credentials** in the available credential store on your system:
+2. It will then store the prompted 🔑 in the available credential store on your system:
    - 🐧**Linux**: KWallet, Gnome keyring, etc.
    - 🪟**Windows**: Windows Credential Store
 
-The next time you use the same service, Oudjat will automatically retrieve the registered 🔑**credentials** for that service.
+The next time you use the same service, Oudjat will automatically retrieve the registered 🔑 for that service.
 
 > [!Important]
 > If multiple username/password pairs are registered for the same service. Oudjat will retrieve the last registered one.
 > You can specify the username you want to retrieve credentials for.
+
+In most cases, you would use those options like this:
+`(--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])`
 
 ### Help
 
@@ -97,7 +107,9 @@ oudjat connectors.<ref> --help
 oudjat connectors.edr.sentinelone --help
 ```
 
-### CERT - CERTFR
+## 🔌 Connectors - CERT.CERTFR
+
+### Description
 
 A connector used to parse [CERTFR pages](https://www.cert.ssi.gouv.fr/) .
 It returns CERTFR pages content:
@@ -112,11 +124,11 @@ It returns CERTFR pages content:
 You can optionally fetch data for the CVEs referenced in parsed pages.
 This will use CVE connectors for various CVE databases like Nist, CVE.org, and more to retrieve CVSS score and other CVE details.
 
-#### Reference
+### Reference
 
 `connectors.cert.certfr`
 
-#### Usage
+### Usage
 
 | Usage    | Description                                                 |
 | -------- | ----------------------------------------------------------- |
@@ -128,7 +140,7 @@ oudjat connectors.cert.certfr (-t=TARGET | --target=TARGET) [--keywords=KEYWORDS
 oudjat connectors.cert.certfr --feed [--feed-date=FEEDDATE] [--keywords=KEYWORDS] [--max-cve [--limit=LIMIT]] [options]
 ```
 
-#### Options
+### Options
 
 | Option               | Description                                                                                           |
 | -------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -137,267 +149,249 @@ oudjat connectors.cert.certfr --feed [--feed-date=FEEDDATE] [--keywords=KEYWORDS
 | --max-cve            | Resolve CVEs data and the highests (most critical) ones                                               |
 | --keywords=KEYWORDS  | A list of keywords (comma separated, no space)                                                        |
 
-#### Exemples
+### Exemples
 
 ```bash
-oudjat connectors.cert.certfr -t "https://www.cert.ssi.gouv.fr/alerte/CERTFR-2021-ALE-022/" --max-cve --limit 20
-oudjat connectors.cert.certfr -t "https://www.cert.ssi.gouv.fr/avis/feed/" --feed --date-filter "2025-12-01"
+oudjat connectors.cert.certfr -t CERTFR-2021-ALE-022" --max-cve --limit 20
+oudjat connectors.cert.certfr --feed --date-filter "2025-12-01"
 ```
 
-### EDR - Cybereason
+## 🔌 Connectors - EDR.Cybereason
+> [!IMPORTANT]
+> Cybereason connector is no longer maintained
 
-A connector to interact with Cybereason API.
+## 🔌 Connectors - EDR.Sentinelone
 
-#### Reference
-
-`connectors.edr.cybereason`
-
-#### Usage
-
-```bash
-oudjat connectors.edr.cybereason [options]
-```
-
-#### Options
-
-| Option                | Description                                                   |
-| --------------------- | ------------------------------------------------------------- |
-| --sensors             | Retrieve sensors from the API                                 |
-| --sensors-ids=SENSORS | Ids of sensors an action will be performed on                 |
-| --edit_policy         | Edit the policy of specified sensors (by ids)                 |
-| --file=FILENAME       | Search for a specific file                                    |
-| --sensor-restart      | Restart the specified sensors                                 |
-| --sensor-remove-group | Remove specified sensors from the given group                 |
-| --sensor-assign-group | Assign a new group to the specified sensors                   |
-| --fetch=ENDPOINT      | Run a custom query based on the provided endpoint and payload |
-| --payload=PAYLOAD     | Assign a new group to the specified sensors                   |
-
-#### Exemple
-
-```bash
-# Search for a test.exe file
-oudjat connectors.edr.cybereason --file "test.exe"
-
-# Export sensors into a csv file
-oudjat connectors.edr.cybereason --sensors --limit 40000 --csv ./sensors.csv
-oudjat connectors.edr.cybereason --sensor-assign-group --sensors-list sensors.txt --payload {"argument": groupId}
-```
-
-### EDR - Sentinelone
-
-#### Reference
+### Reference
 
 `connectors.edr.sentinelone`
 
-#### Usage
+### Usage
+
+| Usage                     | Description                                                                       |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| --agents                  | Export S1 agents details                                                          |
+| --agents-export           | Export flat agent data                                                            |
+| --move-agent-site         | Move one or multiple agents to a site based on its id                             |
+| --threats                 | Retrieve threats detected by S1                                                   |
+| --threats-verdict         | Change the verdict of filtered threats                                            |
+| --threats-incident        | Change the verdict and status of filtered threats                                 |
+| --alert-verdict           | Change the verdict of filtered alerts                                             |
+| --alert-incident          | Change the status of filtered alerts (threats:malicious / alerts:suspicious)      |
+| --applications            | Retrieve an inventory of applications detected by S1                              |
+| --applications-endpoints  | Retrieve an inventory of endpoints for a specific application                     |
+| --applications-with-risks | Retrieve an inventory of applications detected by S1 that present a security risk |
+| --applications-cves       | Retrieve CVEs for specific application(s)                                         |
+| --cves                    | Retrieve CVEs detected by S1                                                      |
+| --groups                  | Retrieve groups                                                                   |
+| --group-policy            | Retrieve the policy of a specific group                                           |
+| --group-policy-update     | Update the policy of the specified groups                                         |
+| --group-move-agent        | Move agents into specified group                                                  |
+| --sites                   | Retrieve sites                                                                    |
+| --sites-by-name           | Retrieve sites by names                                                           |
 
 ```bash
-oudjat connectors.edr.sentinelone [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --agents
+                                                                                                                                              [--sites-list=SITES]
+                                                                                                                                              [--payload=PAYLOAD]
+                                                                                                                                              [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --agents-export
+                                                                                                                                              [--sites-list=SITES]
+                                                                                                                                              [--payload=PAYLOAD]
+                                                                                                                                              [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --move-agent-site 
+                                                                                                                                              [--sites-list=SITES]
+                                                                                                                                              [--names=NAMES]
+                                                                                                                                              [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --threats [--sites-list=SITES] [--payload=PAYLOAD] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --threats-verdict [--verdict=VERDICT] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --threats-incident (--status=STATUS --verdict=VERDICT) [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --alert-verdict [--verdict=VERDICT] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --alert-incident [--status=STATUS] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --applications [--names=NAMES] [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --applications-endpoints [--names=NAMES] [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --applications-with-risks [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --applications-cves [--ids=IDS] [--names=NAMES] [--vendors=VENDORS] [--sites-list=SITES] [--payload=PAYLOAD] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --cves [--ids=IDS] [--severities=SEVERITIES] [--sites-list=SITES] [--payload=PAYLOAD] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --groups [--names=NAMES] [--sites-list=SITES] [--payload=PAYLOAD] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --group-policy [--ids=IDS] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --group-policy-update [--ids=IDS] [--malicious-policy=MALPOLICY] [--suspicious-policy=SUPOLICY] [--payload=PAYLOAD] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --group-move-agent [--ids=IDS] [--names=NAMES] [--payload=PAYLOAD] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --sites [--payload=PAYLOAD] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --sites-by-name [--names=NAMES] [--payload=PAYLOAD] [options]
 ```
 
-#### Options
+### Options
 
-| Option                       | Description                                              |
-| ---------------------------- | -------------------------------------------------------- |
-| --agents                     | Retrieve agents details from the API                     |
-| --agents-export              | Export agent details as a CSV built natively on API side |
-| --move-agent-site=AGENT_NAME | Change the site of the agent                             |
-| --sites                      | Retrieve sites informations                              |
+| Option                                  | Description                                                                |
+| --------------------------------------- | -------------------------------------------------------------------------- |
+| --auto                                  | Trigger auto mode. See the doc for full usage details                      |
+| --auto-mitigation-action=AUTOMITIGATION | Specify the automatic mitigation action                                    |
+| --filter=FILTER                         | Provide a JSON filter to narrow down selection                             |
+| --ids=IDS                               | A list of IDs to narrow down selection. See the doc for full usage details |
+| --malicious-policy=MALPOLICY            | Specify the malicious policy for a group or agent                          |
+| --names=NAMES                           | A list of names to narrow down selection                                   |
+| --path=PATH                             | A path of a file or process to narrow down selection                       |
+| --payload=PAYLOAD                       | A JSON payload to pass additional query parameters                         |
+| --severities=SEVERITIES                 | A list severity numbers                                                    |
+| --sites-list=SITES                      | A list of site IDs or names                                                |
+| --status=STATUS                         | Specify an incident status to an alert or a threat                         |
+| --status-filter=STATUSFILTER            | A list of incident statuses for alert/threat selection                     |
+| --suspicious-policy=SUPOLICY            | Specify the suspicious policy for a group or agent                         |
+| --vendors=VENDORS                       | A list of application vendor for CVEs/application selection                |
+| --verdict=VERDICT                       | Specify an incident analyst verdict to an alert or a threat                |
+| --verdict-filter=VERDICTFILTER          | a list of incident statuses for alert/threat selection                     |
 
-#### Exemple
+### Exemple
 
 ```bash
 # Export agents details into a json file
 oudjat connectors.edr.sentinelone --agents --json ./agents.json
 ```
 
-### Endoflife
+## 🔌 Connectors - Endoflife
 
-#### Reference
+### Reference
 
 ``
 
-#### Usage
+### Usage
 
 ```bash
 ```
 
-#### Options
+### Options
 
 | Option | Description |
 | ------ | ----------- |
 
-#### Exemple
+### Exemple
 
 ```bash
 ```
 
-### File
+## 🔌 Connectors - File
 
-#### Reference
+### Reference
 
 ``
 
-#### Usage
+### Usage
 
 ```bash
 ```
 
-#### Options
+### Options
 
 | Option | Description |
 | ------ | ----------- |
 
-#### Exemple
+### Exemple
 
 ```bash
 ```
 
-### LDAP
+## 🔌 Connectors - LDAP
 
-#### Reference
+### Reference
 
 ``
 
-#### Usage
+### Usage
 
 ```bash
 ```
 
-#### Options
+### Options
 
 | Option | Description |
 | ------ | ----------- |
 
-#### Exemple
+### Exemple
 
 ```bash
 ```
 
-### MS - CVRF
+## 🔌 Connectors - MS.CVRF
 
-#### Reference
+### Reference
 
 ``
 
-#### Usage
+### Usage
 
 ```bash
 ```
 
-#### Options
+### Options
 
 | Option | Description |
 | ------ | ----------- |
 
-#### Exemple
+### Exemple
 
 ```bash
 ```
 
-### MS - SCCM
+## 🔌 Connectors - MS.SCCM
 
-#### Reference
+### Reference
 
 ``
 
-#### Usage
+### Usage
 
 ```bash
 ```
 
-#### Options
+### Options
 
 | Option | Description |
 | ------ | ----------- |
 
-#### Exemple
+### Exemple
 
 ```bash
 ```
 
-### Tenable - Security Center
+## 🔌 Connectors - Tenable.SC
 
-#### Reference
+### Reference
 
 ``
 
-#### Usage
+### Usage
 
 ```bash
 ```
 
-#### Options
+### Options
 
 | Option | Description |
 | ------ | ----------- |
 
-#### Exemple
+### Exemple
 
 ```bash
 ```
 
-### Vuln - CVE.org
+## 🔌 Connectors - Vulns
 
-#### Reference
+### Reference
 
 ``
 
-#### Usage
+### Usage
 
 ```bash
 ```
 
-#### Options
+### Options
 
 | Option | Description |
 | ------ | ----------- |
 
-#### Exemple
+### Exemple
 
 ```bash
 ```
-
-### Vuln - Nist
-
-#### Reference
-
-``
-
-#### Usage
-
-```bash
-```
-
-#### Options
-
-| Option | Description |
-| ------ | ----------- |
-
-#### Exemple
-
-```bash
-```
-
-### Vuln - Circl
-
-#### Reference
-
-``
-
-#### Usage
-
-```bash
-```
-
-#### Options
-
-| Option | Description |
-| ------ | ----------- |
-
-#### Exemple
-
-```bash
-```
-
-## Data collection / ETL
