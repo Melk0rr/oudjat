@@ -471,7 +471,7 @@ class LDAPConnector(Connector):
 
             return LDAPObject(entry, capabilities=self._CAPABILITIES)
 
-        objects = {obj.dn: obj for obj in [_map_obj(e) for e in tqdm(entries, ncols=100)]}
+        objects = {obj.dn: obj for obj in [_map_obj(e) for e in entries]}
 
         return objects
 
@@ -492,7 +492,7 @@ class LDAPConnector(Connector):
 
             return cpt
 
-        computers = {cpt.dn: cpt for cpt in [_map_cpt(e) for e in tqdm(entries, ncols=100)]}
+        computers = {cpt.dn: cpt for cpt in [_map_cpt(e) for e in entries]}
 
         return computers
 
@@ -513,7 +513,7 @@ class LDAPConnector(Connector):
 
             return usr
 
-        users = {usr.dn: usr for usr in [_map_usr(e) for e in tqdm(entries, ncols=100)]}
+        users = {usr.dn: usr for usr in [_map_usr(e) for e in entries]}
 
         return users
 
@@ -540,7 +540,7 @@ class LDAPConnector(Connector):
 
             return grp_instance
 
-        groups = {grp.dn: grp for grp in [_map_grp(e) for e in tqdm(entries, ncols=100)]}
+        groups = {grp.dn: grp for grp in [_map_grp(e) for e in entries]}
 
         return groups
 
@@ -558,7 +558,7 @@ class LDAPConnector(Connector):
         def _map_gpo(entry: "LDAPEntry") -> "LDAPGroupPolicyObject":
             return LDAPGroupPolicyObject(entry, self._CAPABILITIES)
 
-        gpos = {gpo.dn: gpo for gpo in [_map_gpo(e) for e in tqdm(entries, ncols=100)]}
+        gpos = {gpo.dn: gpo for gpo in [_map_gpo(e) for e in entries]}
 
         return gpos
 
@@ -585,7 +585,7 @@ class LDAPConnector(Connector):
 
             return ou_instance
 
-        ous = {ou.dn: ou for ou in [_map_ou(e) for e in tqdm(entries, ncols=100)]}
+        ous = {ou.dn: ou for ou in [_map_ou(e) for e in entries]}
 
         return ous
 
@@ -605,7 +605,7 @@ class LDAPConnector(Connector):
         def _map_net(entry: "LDAPEntry") -> "LDAPSubnet":
             return LDAPSubnet(entry, self._CAPABILITIES)
 
-        subnets = {net.dn: net for net in [_map_net(e) for e in tqdm(entries, ncols=100)]}
+        subnets = {net.dn: net for net in [_map_net(e) for e in entries]}
 
         return subnets
 
