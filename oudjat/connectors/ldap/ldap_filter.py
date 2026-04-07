@@ -487,7 +487,12 @@ class LDAPFilter:
         def fmt_filter(value_to_fmt: str) -> str:
             return filter_fmt(value_to_fmt)
 
-        return cls(f"({operator.value}{''.join(list(map(fmt_filter, filter_values)))})")
+        formated_values = list(map(fmt_filter, filter_values))
+        return (
+            cls(f"({operator.value}{''.join(formated_values)})")
+            if len(formated_values) > 1
+            else cls("".join(formated_values))
+        )
 
     @classmethod
     def dn(
