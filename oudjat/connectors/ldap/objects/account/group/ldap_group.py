@@ -3,8 +3,6 @@
 import logging
 from typing import TYPE_CHECKING, Any, override
 
-from ldap3.utils.conv import escape_filter_chars
-
 from oudjat.connectors.ldap.ldap_filter import LDAPFilter
 from oudjat.connectors.ldap.objects.ldap_object_types import LDAPObjectType
 from oudjat.utils.context import Context
@@ -99,21 +97,29 @@ class LDAPGroup(LDAPObject):
 
     def fetch_members(
         self,
+        member_filter: "str | LDAPFilter | None" = None,
         recursive: bool = False,
     ) -> None:
         """
         Retrieve the group members.
 
         Args:
-            recursive (bool): Either to retrieve the members recursively or not
+            member_filter (str | LDAPFilter | None): Additional filter to narrow down group member search
+            recursive (bool)                       : Either to retrieve the members recursively or not
         """
 
         context = Context()
-        self.logger.info(f"Fetching members of {self.dn}{recursive and ' recursively'}")
 
-        members_search: list["LDAPEntry"] = self.capabilities.ldap_search(
-            search_filter=LDAPFilter(f"(memberOf={self.dn})")
-        )
+        if member_filter is not None and not isinstance(member_filter, LDAPFilter):
+            member_filter = LDAPFilter(member_filter)
+
+        gpmember_filter = LDAPFilter(f"(memberOf={self.dn})")
+
+        if member_filter is not None:
+            gpmember_filter = gpmember_filter & member_filter
+
+        self.logger.info(f"Fetching members of {self.dn}{recursive and ' recursively'}")
+        members_search = self.capabilities.ldap_search(search_filter=gpmember_filter)
 
         for member in members_search:
             entry_obj_type = LDAPObjectType.from_object_cls(member)
