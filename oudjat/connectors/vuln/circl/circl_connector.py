@@ -113,10 +113,11 @@ class CirclConnector(CVEConnector):
                     break
 
             if len(res) > 0:
-                spinner.ok(f"✅ Retrieved data for {len(res)} CVEs")
+                spinner.text = f"Retrieved data for {len(res)} CVEs"
+                spinner.ok("✅ ")
 
             else:
-                spinner.fail("❌ Could not retrieve any CVE data")
+                spinner.fail("❌ ")
 
         return res
 

@@ -174,10 +174,11 @@ class SCCMConnector(Connector):
             res = [dict(zip(res_columns, row)) for row in self._cursor.fetchall()]
 
             if len(res) > 0:
-                spinner.ok(f"✅ Fetched {len(res)} elements")
+                spinner.text = f"Fetched {len(res)} elements"
+                spinner.ok("✅ ")
 
             else:
-                spinner.fail("❌ Could not retrieve any data")
+                spinner.fail("❌ ")
 
         self.logger.debug(f"{context}::Retrieved {len(res)} elements")
 

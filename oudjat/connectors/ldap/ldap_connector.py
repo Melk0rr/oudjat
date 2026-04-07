@@ -398,10 +398,11 @@ class LDAPConnector(Connector):
             )
 
             if len(res) > 0:
-                spinner.ok(f"✅ Retrieved {len(res)} {search_type} entries")
+                spinner.text = f"Retrieved {len(res)} {search_type} entries"
+                spinner.ok("✅ ")
 
             else:
-                spinner.fail(f"❌ No {search_type} entries could be retrieved")
+                spinner.fail("❌ ")
 
         self.logger.debug(f"{context}::{search_type} > {[el.dn for el in res]}")
 
@@ -650,7 +651,9 @@ class LDAPConnector(Connector):
         def _obj_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPObject(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = [_obj_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_obj_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     def computers(
@@ -692,7 +695,9 @@ class LDAPConnector(Connector):
 
             return cpt.to_dict()
 
-        processed = [_cpt_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_cpt_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     def users(
@@ -746,7 +751,9 @@ class LDAPConnector(Connector):
 
             return usr.to_dict()
 
-        processed = [_usr_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_usr_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     # TODO: Add more options to retrieve different levels of members.
@@ -786,7 +793,9 @@ class LDAPConnector(Connector):
         def _grp_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPGroup(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = [_grp_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_grp_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     def gpos(
@@ -847,7 +856,6 @@ class LDAPConnector(Connector):
         def _gpo_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPGroupPolicyObject(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = []
         with logging_redirect_tqdm():
             processed = [_gpo_dict(e) for e in tqdm(entries, ncols=100)]
 
@@ -890,7 +898,9 @@ class LDAPConnector(Connector):
         def _ou_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPOrganizationalUnit(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = [_ou_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_ou_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     def subnets(
@@ -929,7 +939,9 @@ class LDAPConnector(Connector):
         def _net_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPSubnet(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = [_net_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_net_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     def complete_partial_entry(self, ldap_entry: "LDAPEntry") -> "LDAPEntry":
