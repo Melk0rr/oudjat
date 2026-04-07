@@ -849,7 +849,7 @@ class LDAPConnector(Connector):
 
         processed = []
         with logging_redirect_tqdm():
-            processed = [_gpo_dict(e) for e in entries]
+            processed = [_gpo_dict(e) for e in tqdm(entries, ncols=100)]
 
         return processed
 
