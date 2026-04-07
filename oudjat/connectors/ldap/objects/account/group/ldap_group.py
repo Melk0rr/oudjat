@@ -75,6 +75,7 @@ class LDAPGroup(LDAPObject):
 
         return LDAPGroupType(self._group_type_raw())
 
+    @property
     def member_refs(self) -> list[str]:
         """
         Return member refs.
@@ -238,10 +239,11 @@ class LDAPGroup(LDAPObject):
         """
 
         base = super().to_dict()
+        _ = base.pop("member", None)
 
         return {
             **base,
             "type": str(self.group_type),
             "subgroups": list(self.sub_groups()),
-            "members": base.pop("member"),
+            "members": self.member_refs,
         }
