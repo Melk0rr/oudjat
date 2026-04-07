@@ -9,6 +9,7 @@ from typing import Any, TypedDict, override
 import ldap3
 from ldap3.core.exceptions import LDAPSocketOpenError
 from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
 from yaspin import yaspin
 
 from oudjat.utils import Context
@@ -29,7 +30,7 @@ from .objects import (
     LDAPGroup,
     LDAPGroupPolicyObject,
     LDAPObject,
-    LDAPObjectOptions,
+    LDAPObjectOption,
     LDAPOrganizationalUnit,
     LDAPSubnet,
     LDAPUser,
@@ -397,10 +398,11 @@ class LDAPConnector(Connector):
             )
 
             if len(res) > 0:
-                spinner.ok(f"✅ Retrieved {len(res)} {search_type} entries")
+                spinner.text = f"Retrieved {len(res)} {search_type} entries"
+                spinner.ok("✅ ")
 
             else:
-                spinner.fail(f"❌ No {search_type} entries could be retrieved")
+                spinner.fail("❌ ")
 
         self.logger.debug(f"{context}::{search_type} > {[el.dn for el in res]}")
 
@@ -409,7 +411,7 @@ class LDAPConnector(Connector):
     # ****************************************************************
     # Methods - ldap objects
 
-    def _object_opt(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOptions[LDAPObject]":
+    def _object_opt(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOption[LDAPObject]":
         """
         Return an LDAP object based on a given type.
 
@@ -420,26 +422,26 @@ class LDAPConnector(Connector):
             LDAPObjTypeAlias: The python class matching the provided entry
         """
 
-        obj_map: dict[str, "LDAPObjectOptions"] = {
-            f"{LDAPObjectType.DEFAULT}": LDAPObjectOptions["LDAPObject"](
+        obj_map: dict[str, "LDAPObjectOption"] = {
+            f"{LDAPObjectType.DEFAULT}": LDAPObjectOption["LDAPObject"](
                 cls=LDAPObject, fetch=self.ldap_objects
             ),
-            f"{LDAPObjectType.COMPUTER}": LDAPObjectOptions["LDAPComputer"](
+            f"{LDAPObjectType.COMPUTER}": LDAPObjectOption["LDAPComputer"](
                 cls=LDAPComputer, fetch=self.ldap_computers
             ),
-            f"{LDAPObjectType.GPO}": LDAPObjectOptions["LDAPGroupPolicyObject"](
+            f"{LDAPObjectType.GPO}": LDAPObjectOption["LDAPGroupPolicyObject"](
                 cls=LDAPGroupPolicyObject, fetch=self.ldap_gpos
             ),
-            f"{LDAPObjectType.GROUP}": LDAPObjectOptions["LDAPGroup"](
+            f"{LDAPObjectType.GROUP}": LDAPObjectOption["LDAPGroup"](
                 cls=LDAPGroup, fetch=self.ldap_groups
             ),
-            f"{LDAPObjectType.OU}": LDAPObjectOptions["LDAPOrganizationalUnit"](
+            f"{LDAPObjectType.OU}": LDAPObjectOption["LDAPOrganizationalUnit"](
                 cls=LDAPOrganizationalUnit, fetch=self.ldap_ous
             ),
-            f"{LDAPObjectType.SUBNET}": LDAPObjectOptions["LDAPSubnet"](
+            f"{LDAPObjectType.SUBNET}": LDAPObjectOption["LDAPSubnet"](
                 cls=LDAPSubnet, fetch=self.ldap_subnets
             ),
-            f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](
+            f"{LDAPObjectType.USER}": LDAPObjectOption["LDAPUser"](
                 cls=LDAPUser, fetch=self.ldap_users
             ),
         }
@@ -471,7 +473,7 @@ class LDAPConnector(Connector):
 
             return LDAPObject(entry, capabilities=self._CAPABILITIES)
 
-        objects = {obj.dn: obj for obj in [_map_obj(e) for e in tqdm(entries, ncols=100)]}
+        objects = {obj.dn: obj for obj in [_map_obj(e) for e in entries]}
 
         return objects
 
@@ -492,7 +494,7 @@ class LDAPConnector(Connector):
 
             return cpt
 
-        computers = {cpt.dn: cpt for cpt in [_map_cpt(e) for e in tqdm(entries, ncols=100)]}
+        computers = {cpt.dn: cpt for cpt in [_map_cpt(e) for e in entries]}
 
         return computers
 
@@ -513,7 +515,7 @@ class LDAPConnector(Connector):
 
             return usr
 
-        users = {usr.dn: usr for usr in [_map_usr(e) for e in tqdm(entries, ncols=100)]}
+        users = {usr.dn: usr for usr in [_map_usr(e) for e in entries]}
 
         return users
 
@@ -540,7 +542,7 @@ class LDAPConnector(Connector):
 
             return grp_instance
 
-        groups = {grp.dn: grp for grp in [_map_grp(e) for e in tqdm(entries, ncols=100)]}
+        groups = {grp.dn: grp for grp in [_map_grp(e) for e in entries]}
 
         return groups
 
@@ -558,7 +560,7 @@ class LDAPConnector(Connector):
         def _map_gpo(entry: "LDAPEntry") -> "LDAPGroupPolicyObject":
             return LDAPGroupPolicyObject(entry, self._CAPABILITIES)
 
-        gpos = {gpo.dn: gpo for gpo in [_map_gpo(e) for e in tqdm(entries, ncols=100)]}
+        gpos = {gpo.dn: gpo for gpo in [_map_gpo(e) for e in entries]}
 
         return gpos
 
@@ -585,7 +587,7 @@ class LDAPConnector(Connector):
 
             return ou_instance
 
-        ous = {ou.dn: ou for ou in [_map_ou(e) for e in tqdm(entries, ncols=100)]}
+        ous = {ou.dn: ou for ou in [_map_ou(e) for e in entries]}
 
         return ous
 
@@ -605,7 +607,7 @@ class LDAPConnector(Connector):
         def _map_net(entry: "LDAPEntry") -> "LDAPSubnet":
             return LDAPSubnet(entry, self._CAPABILITIES)
 
-        subnets = {net.dn: net for net in [_map_net(e) for e in tqdm(entries, ncols=100)]}
+        subnets = {net.dn: net for net in [_map_net(e) for e in entries]}
 
         return subnets
 
@@ -649,7 +651,9 @@ class LDAPConnector(Connector):
         def _obj_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPObject(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = [_obj_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_obj_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     def computers(
@@ -691,7 +695,9 @@ class LDAPConnector(Connector):
 
             return cpt.to_dict()
 
-        processed = [_cpt_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_cpt_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     def users(
@@ -745,7 +751,9 @@ class LDAPConnector(Connector):
 
             return usr.to_dict()
 
-        processed = [_usr_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_usr_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     # TODO: Add more options to retrieve different levels of members.
@@ -785,7 +793,9 @@ class LDAPConnector(Connector):
         def _grp_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPGroup(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = [_grp_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_grp_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     def gpos(
@@ -846,7 +856,9 @@ class LDAPConnector(Connector):
         def _gpo_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPGroupPolicyObject(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = [_gpo_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_gpo_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     def ous(
@@ -886,7 +898,9 @@ class LDAPConnector(Connector):
         def _ou_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPOrganizationalUnit(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = [_ou_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_ou_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     def subnets(
@@ -925,7 +939,9 @@ class LDAPConnector(Connector):
         def _net_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPSubnet(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = [_net_dict(e) for e in tqdm(entries, ncols=100)]
+        with logging_redirect_tqdm():
+            processed = [_net_dict(e) for e in tqdm(entries, ncols=100)]
+
         return processed
 
     def complete_partial_entry(self, ldap_entry: "LDAPEntry") -> "LDAPEntry":

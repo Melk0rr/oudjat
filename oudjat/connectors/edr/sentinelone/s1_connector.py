@@ -432,10 +432,10 @@ class S1Connector(Connector):
                     if not next_cursor:
                         break
 
-                spinner.ok(f"✅ Done running {endpoint} action")
+                spinner.ok("✅ ")
 
             except Exception as e:
-                spinner.fail(f"❌ Error while running {endpoint} action")
+                spinner.fail("❌ ")
                 raise e
 
         return res
@@ -528,12 +528,12 @@ class S1Connector(Connector):
             req = endpoint.method(**self._request_params(payload, endpoint.method, endpoint.path))
 
             if req.status_code != 200:
-                spinner.fail("❌ Error while exporting agents")
+                spinner.fail("❌ ")
                 raise SentinelOneAPIConnectionError(
                     f"{Context()}::An error occured while fetching data from {endpoint}"
                 )
 
-            spinner.ok("✅ Done exporting agents")
+            spinner.ok("✅ ")
 
         return FileUtils.parse_csv_str(req.content.decode().replace('"', ""), delimiter=",")
 

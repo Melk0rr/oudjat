@@ -141,13 +141,15 @@ class LDAPGroupPolicyObject(LDAPObject):
         self.logger.info(f"Retrieving linked object of {self.display_name}")
 
         obj_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.OU)
-        obj_filter = LDAPFilter(f"(gPLink={f'*{self._name}*'})") & LDAPFilter.name(ou)
+        obj_filter = LDAPFilter(f"(gPLink={f'*{self.name}*'})") & LDAPFilter.name(ou)
 
-        res = {}
-        for entry in obj_opt.fetch(search_filter=obj_filter, attributes=attributes):
-            res[entry.dn] = obj_opt.cls(entry, capabilities=self.capabilities)
+        obj_entries = self.capabilities.ldap_search(
+            search_type=LDAPObjectType.OU,
+            search_filter=obj_filter,
+            attributes=attributes,
+        )
 
-        return res
+        return obj_opt.fetch(entries=obj_entries)
 
     @override
     def to_dict(self) -> dict[str, Any]:

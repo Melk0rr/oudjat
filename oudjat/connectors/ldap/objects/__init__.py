@@ -2,7 +2,7 @@
 
 from .account import LDAPComputer, LDAPGroup, LDAPUser
 from .gpo import LDAPGroupPolicyObject
-from .ldap_object import LDAPCapabilities, LDAPObject, LDAPObjectOptions
+from .ldap_object import LDAPCapabilities, LDAPObject, LDAPObjectOption
 from .ou import LDAPOrganizationalUnit
 from .subnet import LDAPSubnet
 
@@ -13,7 +13,7 @@ __all__ = [
     "LDAPGroupPolicyObject",
     "LDAPCapabilities",
     "LDAPObject",
-    "LDAPObjectOptions",
+    "LDAPObjectOption",
     "LDAPOrganizationalUnit",
     "LDAPSubnet"
 ]

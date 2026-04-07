@@ -3,8 +3,6 @@
 import logging
 from typing import TYPE_CHECKING, Any, override
 
-from ldap3.utils.conv import escape_filter_chars
-
 from oudjat.connectors.ldap.ldap_filter import LDAPFilter
 from oudjat.connectors.ldap.objects.ldap_object_types import LDAPObjectType
 from oudjat.utils.context import Context
@@ -77,6 +75,7 @@ class LDAPGroup(LDAPObject):
 
         return LDAPGroupType(self._group_type_raw())
 
+    @property
     def member_refs(self) -> list[str]:
         """
         Return member refs.
@@ -99,42 +98,41 @@ class LDAPGroup(LDAPObject):
 
     def fetch_members(
         self,
+        member_filter: "str | LDAPFilter | None" = None,
         recursive: bool = False,
     ) -> None:
         """
         Retrieve the group members.
 
         Args:
-            recursive (bool): Either to retrieve the members recursively or not
+            member_filter (str | LDAPFilter | None): Additional filter to narrow down group member search
+            recursive (bool)                       : Either to retrieve the members recursively or not
         """
 
         context = Context()
+
+        if member_filter is not None and not isinstance(member_filter, LDAPFilter):
+            member_filter = LDAPFilter(member_filter)
+
+        gpmember_filter = LDAPFilter(f"(memberOf={self.dn})")
+
+        if member_filter is not None:
+            gpmember_filter = gpmember_filter & member_filter
+
         self.logger.info(f"Fetching members of {self.dn}{recursive and ' recursively'}")
+        members_search = self.capabilities.ldap_search(search_filter=gpmember_filter)
 
-        for ref in self.member_refs():
-            self.logger.info(f"Fetching member data for {ref}")
+        for member in members_search:
+            entry_obj_type = LDAPObjectType.from_object_cls(member)
+            LDAPObjectCls = self.capabilities.ldap_obj_opt(entry_obj_type).cls
 
-            # INFO: Search for the ref in LDAP server
-            escaped_ref = escape_filter_chars(ref)
-            ref_search: list["LDAPEntry"] = self.capabilities.ldap_search(
-                search_filter=LDAPFilter.dn(escaped_ref)
-            )
+            new_member = LDAPObjectCls(member, capabilities=self.capabilities)
+            if isinstance(new_member, LDAPGroup) and recursive:
+                self.logger.debug(f"{context}::Fetching members of sub group {member}")
+                new_member.fetch_members(recursive=recursive)
 
-            if len(ref_search) > 0:
-                search_entry = ref_search[0]
-                entry_obj_type = LDAPObjectType.from_object_cls(search_entry)
-                LDAPObjectCls = self.capabilities.ldap_obj_opt(entry_obj_type).cls
-
-                new_member = LDAPObjectCls(search_entry, capabilities=self.capabilities)
-                if isinstance(new_member, LDAPGroup) and recursive:
-                    self.logger.debug(f"{context}::Fetching members of sub group {ref}")
-                    new_member.fetch_members(recursive=recursive)
-
-                self.logger.debug(f"{context}::Adding new member {ref}")
-                self.add_member(new_member)
-
-            else:
-                self.logger.warning(f"Could not find data for {ref}")
+            self.logger.debug(f"{context}::Adding {member} to {self.dn} members")
+            self.add_member(new_member)
 
     def sub_groups(self, recursive: bool = False) -> dict[str, "LDAPGroup"]:
         """
@@ -241,10 +239,11 @@ class LDAPGroup(LDAPObject):
         """
 
         base = super().to_dict()
+        _ = base.pop("member", None)
 
         return {
             **base,
             "type": str(self.group_type),
-            "subgroups": list(self.sub_groups(True)),
-            "members": self.member_refs(),
+            "subgroups": list(self.sub_groups()),
+            "members": self.member_refs,
         }

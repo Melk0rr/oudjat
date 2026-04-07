@@ -93,10 +93,11 @@ class LDAPFilterStrFormat(Enum):
     CN = "(cn{cmp_operator}{value})"
     CTG = "(objectCategory{cmp_operator}{value})"
     DNAME = "(displayName{cmp_operator}{value})"
-    DPT = "(department{cmp_operator}{value})"
+    DEPARTMENT = "(department{cmp_operator}{value})"
     DN = "(distinguishedName{cmp_operator}{value})"
-    GPL = "(gPLink{cmp_operator}{value})"
+    GPLINK = "(gPLink{cmp_operator}{value})"
     MAIL = "(mail{cmp_operator}{value})"
+    MEMBEROF = "(memberOf{cmp_operator}{value})"
     NAME = "(name{cmp_operator}{value})"
     SAN = "(sAMAccountName{cmp_operator}{value})"
     SAT = "(sAMAccountType{cmp_operator}{value})"
@@ -487,7 +488,12 @@ class LDAPFilter:
         def fmt_filter(value_to_fmt: str) -> str:
             return filter_fmt(value_to_fmt)
 
-        return cls(f"({operator.value}{''.join(list(map(fmt_filter, filter_values)))})")
+        formated_values = list(map(fmt_filter, filter_values))
+        return (
+            cls(f"({operator.value}{''.join(formated_values)})")
+            if len(formated_values) > 1
+            else cls("".join(formated_values))
+        )
 
     @classmethod
     def dn(

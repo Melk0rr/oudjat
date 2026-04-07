@@ -122,10 +122,11 @@ class EndOfLifeConnector(Connector):
                 )
 
             if len(res) > 0:
-                spinner.ok(f"✅ Retrieved {len(res)} {endpoint}")
+                spinner.text = f"Retrieved {len(res)} {endpoint}"
+                spinner.ok("✅ ")
 
             else:
-                spinner.fail(f"❌ Coulnd not retrieve {endpoint}")
+                spinner.fail("❌ ")
 
         return res
 

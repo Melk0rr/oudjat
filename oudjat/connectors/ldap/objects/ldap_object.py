@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 LDAPObjectBoundType = TypeVar("LDAPObjectBoundType", bound="LDAPObject")
 
 
-class LDAPObjectOptions(NamedTuple, Generic[LDAPObjectBoundType]):
+class LDAPObjectOption(NamedTuple, Generic[LDAPObjectBoundType]):
     """
     Helper class to handle passing of LDAPObject derivated and dedicated method to retrive this specific type of LDAPObject.
 
@@ -38,7 +38,7 @@ class LDAPCapabilities(NamedTuple):
     """
 
     ldap_search: Callable[..., list["LDAPEntry"]]
-    ldap_obj_opt: Callable[["LDAPObjectType"], "LDAPObjectOptions"]
+    ldap_obj_opt: Callable[["LDAPObjectType"], "LDAPObjectOption"]
 
 
 class LDAPObject:
@@ -80,7 +80,7 @@ class LDAPObject:
             str: The distinguished name (DN) of the LDAP object.
         """
 
-        return self._entry.get("distinguishedName")
+        return self._entry.get("distinguishedName", self._entry["dn"])
 
     @property
     def id(self) -> str:
@@ -119,7 +119,6 @@ class LDAPObject:
             desc = " - ".join(desc)
 
         return desc
-
 
     @property
     def sid(self) -> str:
@@ -286,7 +285,7 @@ class LDAPObject:
             dict: A dictionary containing the attributes of the LDAP object in a structured format
         """
 
-        base = self._entry.attr
+        base = self._entry.attr.copy()
 
         formatted = {
             "id": self.id,

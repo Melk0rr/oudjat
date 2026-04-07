@@ -244,10 +244,11 @@ class CybereasonConnector(Connector):
                 )
 
             if len(res) > 0:
-                spinner.ok(f"✅ {len(res)} elements were retrieved or updated")
+                spinner.text = f"{len(res)} elements were retrieved or updated"
+                spinner.ok("✅ ")
 
             else:
-                spinner.fail("❌ No element could be retrieved or updated")
+                spinner.fail("❌ ")
 
         return res
 

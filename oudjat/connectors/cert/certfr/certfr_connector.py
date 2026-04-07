@@ -130,10 +130,12 @@ class CERTFRConnector(Connector):
                     continue
 
             if len(res) == len(search_filter):
-                spinner.ok(f"✅ Parsed of {len(res)} CERTFR pages")
+                spinner.text = f"Parsed of {len(res)} CERTFR pages"
+                spinner.ok("✅ ")
 
             else:
-                spinner.fail(f"❌ Parsing failed for {len(search_filter) - len(res)} CERTFR pages")
+                spinner.text = f"Parsing failed for {len(search_filter) - len(res)} CERTFR pages"
+                spinner.fail("❌ ")
 
         return res
 

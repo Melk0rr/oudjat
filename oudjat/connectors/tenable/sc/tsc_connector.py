@@ -73,7 +73,7 @@ class TenableSCConnector(Connector):
         self._target: "ParseResult"
         super().__init__(target=urlparse(target), username=username, password=password)
 
-        self._connection: "TenableSC"
+        self._connection: "TenableSC | None" = None
         self._repos: list[str] | None = None
 
     # ****************************************************************
@@ -217,10 +217,11 @@ class TenableSCConnector(Connector):
                 )
 
             if len(res) > 0:
-                spinner.ok(f"✅ Retrieved / updated {len(res)} elements")
+                spinner.text = f"Retrieved / updated {len(res)} elements"
+                spinner.ok("✅ ")
 
             else:
-                spinner.fail("❌ No elements could be retrieved / updated")
+                spinner.fail("❌ ")
 
         return res
 
