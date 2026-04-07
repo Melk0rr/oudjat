@@ -118,7 +118,7 @@ class LDAPGroup(LDAPObject):
         if member_filter is not None:
             gpmember_filter = gpmember_filter & member_filter
 
-        self.logger.info(f"Fetching members of {self.name}{recursive and ' recursively'}")
+        self.logger.info(f"Fetching members of {self.dn}{recursive and ' recursively'}")
         members_search = self.capabilities.ldap_search(search_filter=gpmember_filter)
 
         for member in members_search:
@@ -130,7 +130,7 @@ class LDAPGroup(LDAPObject):
                 self.logger.debug(f"{context}::Fetching members of sub group {member}")
                 new_member.fetch_members(recursive=recursive)
 
-            self.logger.debug(f"{context}::Adding {member} to {self.name} members")
+            self.logger.debug(f"{context}::Adding {member} to {self.dn} members")
             self.add_member(new_member)
 
     def sub_groups(self, recursive: bool = False) -> dict[str, "LDAPGroup"]:
