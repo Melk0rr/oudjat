@@ -111,30 +111,21 @@ class LDAPGroup(LDAPObject):
         context = Context()
         self.logger.info(f"Fetching members of {self.dn}{recursive and ' recursively'}")
 
-        for ref in self.member_refs():
-            self.logger.info(f"Fetching member data for {ref}")
+        members_search: list["LDAPEntry"] = self.capabilities.ldap_search(
+            search_filter=LDAPFilter(f"(memberOf={self.dn})")
+        )
 
-            # INFO: Search for the ref in LDAP server
-            escaped_ref = escape_filter_chars(ref)
-            ref_search: list["LDAPEntry"] = self.capabilities.ldap_search(
-                search_filter=LDAPFilter.dn(escaped_ref)
-            )
+        for member in members_search:
+            entry_obj_type = LDAPObjectType.from_object_cls(member)
+            LDAPObjectCls = self.capabilities.ldap_obj_opt(entry_obj_type).cls
 
-            if len(ref_search) > 0:
-                search_entry = ref_search[0]
-                entry_obj_type = LDAPObjectType.from_object_cls(search_entry)
-                LDAPObjectCls = self.capabilities.ldap_obj_opt(entry_obj_type).cls
+            new_member = LDAPObjectCls(member, capabilities=self.capabilities)
+            if isinstance(new_member, LDAPGroup) and recursive:
+                self.logger.debug(f"{context}::Fetching members of sub group {member}")
+                new_member.fetch_members(recursive=recursive)
 
-                new_member = LDAPObjectCls(search_entry, capabilities=self.capabilities)
-                if isinstance(new_member, LDAPGroup) and recursive:
-                    self.logger.debug(f"{context}::Fetching members of sub group {ref}")
-                    new_member.fetch_members(recursive=recursive)
-
-                self.logger.debug(f"{context}::Adding new member {ref}")
-                self.add_member(new_member)
-
-            else:
-                self.logger.warning(f"Could not find data for {ref}")
+            self.logger.debug(f"{context}::Adding {member} to {self.name} members")
+            self.add_member(new_member)
 
     def sub_groups(self, recursive: bool = False) -> dict[str, "LDAPGroup"]:
         """
