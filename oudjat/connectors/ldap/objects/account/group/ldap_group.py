@@ -243,5 +243,5 @@ class LDAPGroup(LDAPObject):
             **base,
             "type": str(self.group_type),
             "subgroups": list(self.sub_groups()),
-            "members": self.member_refs(),
+            "members": base.pop("member"),
         }
