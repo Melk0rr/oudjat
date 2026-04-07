@@ -102,7 +102,7 @@ class LDAPObject:
             str: Object name
         """
 
-        return self._entry.get("name", self._entry["name"])
+        return self._entry.get("name")
 
     @property
     def description(self) -> str:
@@ -285,7 +285,7 @@ class LDAPObject:
             dict: A dictionary containing the attributes of the LDAP object in a structured format
         """
 
-        base = self._entry.attr
+        base = self._entry.attr.copy()
 
         formatted = {
             "id": self.id,
