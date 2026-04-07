@@ -9,6 +9,7 @@ from typing import Any, TypedDict, override
 import ldap3
 from ldap3.core.exceptions import LDAPSocketOpenError
 from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
 from yaspin import yaspin
 
 from oudjat.utils import Context
@@ -846,7 +847,10 @@ class LDAPConnector(Connector):
         def _gpo_dict(e: "LDAPEntry") -> dict[str, Any]:
             return LDAPGroupPolicyObject(e, capabilities=self._CAPABILITIES).to_dict()
 
-        processed = [_gpo_dict(e) for e in tqdm(entries, ncols=100)]
+        processed = []
+        with logging_redirect_tqdm():
+            processed = [_gpo_dict(e) for e in entries]
+
         return processed
 
     def ous(
