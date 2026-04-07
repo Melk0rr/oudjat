@@ -118,7 +118,7 @@ class LDAPGroup(LDAPObject):
         if member_filter is not None:
             gpmember_filter = gpmember_filter & member_filter
 
-        self.logger.info(f"Fetching members of {self.dn}{recursive and ' recursively'}")
+        self.logger.info(f"Fetching members of {self.name}{recursive and ' recursively'}")
         members_search = self.capabilities.ldap_search(search_filter=gpmember_filter)
 
         for member in members_search:
@@ -242,6 +242,6 @@ class LDAPGroup(LDAPObject):
         return {
             **base,
             "type": str(self.group_type),
-            "subgroups": list(self.sub_groups(True)),
+            "subgroups": list(self.sub_groups()),
             "members": self.member_refs(),
         }
