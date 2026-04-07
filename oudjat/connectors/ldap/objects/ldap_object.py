@@ -102,7 +102,7 @@ class LDAPObject:
             str: Object name
         """
 
-        return self._entry.get("name")
+        return self._entry.get("name", self._entry["name"])
 
     @property
     def description(self) -> str:
