@@ -4,10 +4,11 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, override
 
+from oudjat.connectors.ldap.ldap_filter import LDAPFilter
 from oudjat.utils.types import StrType
 
 from ..definitions import UUID_REG
-from ..ldap_object import LDAPObject
+from ..ldap_object import LDAPObject, LDAPObjectOption
 from ..ldap_object_types import LDAPObjectType
 
 if TYPE_CHECKING:
@@ -88,15 +89,15 @@ class LDAPOrganizationalUnit(LDAPObject):
         search_args: dict[str, Any] = {"search_base": self.dn}
         entries = self.capabilities.ldap_search(attributes="*", **search_args)
 
-        for entry in entries:
-            obj_type = LDAPObjectType.from_object_cls(entry)
-            LDAPObjectCls = self.capabilities.ldap_obj_opt(obj_type).cls
-            new_object = LDAPObjectCls(entry, capabilities=self.capabilities)
+        default_opt: "LDAPObjectOption[LDAPObject]" = self.capabilities.ldap_obj_opt(
+            LDAPObjectType.DEFAULT
+        )
+        self._objects = default_opt.fetch(entries, auto=True)
 
-            if isinstance(new_object, LDAPOrganizationalUnit) and recursive:
-                new_object.fetch_objects(recursive)
-
-            self.objects[entry.dn] = new_object
+        if recursive:
+            for obj in self._objects:
+                if isinstance(obj, LDAPOrganizationalUnit):
+                    obj.fetch_objects(recursive)
 
     def sub_ous(self, recursive: bool = False) -> dict[str, "LDAPOrganizationalUnit"]:
         """
@@ -168,14 +169,17 @@ class LDAPOrganizationalUnit(LDAPObject):
         if len(gpo_refs) == 0:
             return {}
 
+        name_filter = LDAPFilter(operator="|")
+        for ref in gpo_refs:
+            name_filter.add_node(LDAPFilter(f"(name={ref})"))
+
         gpo_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.GPO)
-        LDAPGPOCls = gpo_opt.cls
+        gpo_entries = self.capabilities.ldap_search(
+            search_type=LDAPObjectType.GPO,
+            search_filter=name_filter,
+        )
 
-        res = {}
-        for entry in gpo_opt.fetch(name=gpo_refs).values():
-            res[entry.dn] = LDAPGPOCls(entry, capabilities=self.capabilities)
-
-        return res
+        return gpo_opt.fetch(gpo_entries)
 
     @override
     def to_dict(self) -> dict[str, Any]:

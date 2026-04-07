@@ -29,7 +29,7 @@ from .objects import (
     LDAPGroup,
     LDAPGroupPolicyObject,
     LDAPObject,
-    LDAPObjectOptions,
+    LDAPObjectOption,
     LDAPOrganizationalUnit,
     LDAPSubnet,
     LDAPUser,
@@ -409,7 +409,7 @@ class LDAPConnector(Connector):
     # ****************************************************************
     # Methods - ldap objects
 
-    def _object_opt(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOptions[LDAPObject]":
+    def _object_opt(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOption[LDAPObject]":
         """
         Return an LDAP object based on a given type.
 
@@ -420,26 +420,26 @@ class LDAPConnector(Connector):
             LDAPObjTypeAlias: The python class matching the provided entry
         """
 
-        obj_map: dict[str, "LDAPObjectOptions"] = {
-            f"{LDAPObjectType.DEFAULT}": LDAPObjectOptions["LDAPObject"](
+        obj_map: dict[str, "LDAPObjectOption"] = {
+            f"{LDAPObjectType.DEFAULT}": LDAPObjectOption["LDAPObject"](
                 cls=LDAPObject, fetch=self.ldap_objects
             ),
-            f"{LDAPObjectType.COMPUTER}": LDAPObjectOptions["LDAPComputer"](
+            f"{LDAPObjectType.COMPUTER}": LDAPObjectOption["LDAPComputer"](
                 cls=LDAPComputer, fetch=self.ldap_computers
             ),
-            f"{LDAPObjectType.GPO}": LDAPObjectOptions["LDAPGroupPolicyObject"](
+            f"{LDAPObjectType.GPO}": LDAPObjectOption["LDAPGroupPolicyObject"](
                 cls=LDAPGroupPolicyObject, fetch=self.ldap_gpos
             ),
-            f"{LDAPObjectType.GROUP}": LDAPObjectOptions["LDAPGroup"](
+            f"{LDAPObjectType.GROUP}": LDAPObjectOption["LDAPGroup"](
                 cls=LDAPGroup, fetch=self.ldap_groups
             ),
-            f"{LDAPObjectType.OU}": LDAPObjectOptions["LDAPOrganizationalUnit"](
+            f"{LDAPObjectType.OU}": LDAPObjectOption["LDAPOrganizationalUnit"](
                 cls=LDAPOrganizationalUnit, fetch=self.ldap_ous
             ),
-            f"{LDAPObjectType.SUBNET}": LDAPObjectOptions["LDAPSubnet"](
+            f"{LDAPObjectType.SUBNET}": LDAPObjectOption["LDAPSubnet"](
                 cls=LDAPSubnet, fetch=self.ldap_subnets
             ),
-            f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](
+            f"{LDAPObjectType.USER}": LDAPObjectOption["LDAPUser"](
                 cls=LDAPUser, fetch=self.ldap_users
             ),
         }
