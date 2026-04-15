@@ -54,7 +54,8 @@ class CredentialUtils:
         """
         Use the `keyring` library to securely store the provided credentials (username and password) for a specified service in an encrypted vault.
 
-        If the operation is successful, no value is returned. Otherwise, it will raise a `keyring.errors.PasswordSetError` if there's an issue setting the password.
+        If the operation is successful, no value is returned.
+        Otherwise, it will raise a `keyring.errors.PasswordSetError` if there's an issue setting the password.
 
         Args:
             service (str) : The identifier for the service or application where the credentials are being stored.
@@ -105,8 +106,8 @@ class CredentialUtils:
         """
         Attempt to retrieve stored credentials from the `keyring` using the provided service name.
 
-        If no credentials are found, it prompts the user to enter their username and password manually, which are then saved in the keyring before being returned. It also handles errors that may occur during
-        retrieval or if there's an issue with the keyring itself by raising a `keyring.errors.KeyringError`.
+        If no credentials are found, it prompts the user to enter their username and password manually.
+        Which are then saved in the keyring before being returned.
 
         Args:
             service (str) : The identifier for the service from which to retrieve credentials.
