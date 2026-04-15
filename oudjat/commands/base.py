@@ -40,8 +40,8 @@ class CmdUsage:
 
     """
 
-    option: "CmdOpt"
-    usage_str: str
+    description: str
+    usage_str: tuple[str, str]
     mapping_opts: "CmdOptUsageRegistry" = field(default_factory=lambda: {})
     backend: Callable[..., "DataType"] | None = None
 
@@ -137,7 +137,8 @@ class CmdProps:
 
         for k in target_keys:
             usg = self.usages[k]
-            usg.usage_str = f"{usg.usage_str} {append_str}"
+            main, opts = usg.usage_str
+            usg.usage_str = (main, f"{opts} {append_str}")
 
     def prepend_usages(
         self, prepend_str: str, inc: set[str] | None = None, exc: set[str] | None = None
@@ -164,7 +165,8 @@ class CmdProps:
 
         for k in target_keys:
             usg = self.usages[k]
-            usg.usage_str = f"{prepend_str} {usg.usage_str}"
+            main, opts = usg.usage_str
+            usg.usage_str = (main, f"{prepend_str} {opts}")
 
 
 CmdMappingCallback: TypeAlias = Callable[[str, Any], Any]

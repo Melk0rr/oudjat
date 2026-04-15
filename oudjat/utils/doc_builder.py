@@ -2,6 +2,8 @@
 A helper module to handle __doc__ and docopt strings.
 """
 
+import re
+
 from dataclasses import dataclass
 from typing import Any, override
 
@@ -43,6 +45,28 @@ class DocCommand:
     description: str
 
 
+@dataclass
+class DocUsage:
+    """
+    A dataclass to describe a doc command.
+    """
+
+    name: str
+    usage_str: str
+    description: str
+
+    @override
+    def __str__(self) -> str:
+        """
+        Convert the current usage into a simple string.
+
+        Returns:
+            str: The usage string representation
+        """
+
+        return self.usage_str
+
+
 class DocBuilder:
     """
     A helper class to build a docopt string.
@@ -65,7 +89,7 @@ class DocBuilder:
 
         self._commands: dict[str, "DocCommand"] = {}
         self._options: dict[str, "DocOption"] = {}
-        self._usages: list[str] = []
+        self._usages: list["DocUsage"] = []
         self._help: list[str] = []
 
     # ****************************************************************
@@ -116,7 +140,7 @@ class DocBuilder:
         self._options = new_options
 
     @property
-    def usages(self) -> list[str]:
+    def usages(self) -> list["DocUsage"]:
         """
         Return the usage lines of the current builder.
 
@@ -127,7 +151,7 @@ class DocBuilder:
         return self._usages
 
     @usages.setter
-    def usages(self, new_usages: list[str]) -> None:
+    def usages(self, new_usages: list["DocUsage"]) -> None:
         """
         Specify usage lines to be referenced by this doc builder.
 
@@ -202,7 +226,9 @@ class DocBuilder:
         """
 
         default = f"[default: {option.default}]" if option.default else ""
-        return f"    {option}{self._pad_opt(str(option), pad_len)}    {option.description} {default}"
+        return (
+            f"    {option}{self._pad_opt(str(option), pad_len)}    {option.description} {default}"
+        )
 
     # ****************************************************************
     # Methods - content appenders
@@ -258,15 +284,17 @@ class DocBuilder:
         name = name.lower()
         self._commands[name] = DocCommand(name, description)
 
-    def add_usage(self, usage: str) -> None:
+    def add_usage(self, name: str, usage: str, description: str) -> None:
         """
         Add a usage string.
 
         Args:
-            usage (str): The usage string
+            name (str)       : A short name that match the usage
+            usage (str)      : The usage string
+            description (str): A description of the usage
         """
 
-        self._usages.append(usage)
+        self._usages.append(DocUsage(name, usage, description))
 
     # ****************************************************************
     # Methods - merger
@@ -288,7 +316,7 @@ class DocBuilder:
             self.add_option(opt.long, opt.description, opt.arg, opt.short, opt.default)
 
         for usg in other.usages:
-            self.add_usage(usg)
+            self.add_usage(usg.name, usg.usage_str, usg.description)
 
         self._help.extend(other.help_content)
 
@@ -317,7 +345,36 @@ class DocBuilder:
             str: Option descriptions
         """
 
-        return [f"    {self._program} {usg}" for usg in self._usages]
+        lines = []
+        for usg in self._usages:
+            if len(usg.usage_str) > 100:
+                usg_str_complete = f"{self._program} {usg.usage_str}"
+                usg_split = re.findall(r"\([^\)]*\)|\[[^\]]*\]|[^\s]+", usg_str_complete)
+                baseline = f"    {' '.join(usg_split[:3])}"
+                pad = len(baseline) - len(usg_split[2])
+
+                lines.append(baseline)
+                for usg_piece in usg_split[3:]:
+                    lines.append(f"{' ' * pad}{usg_piece}")
+
+            else:
+                lines.append(f"    {self._program} {usg}")
+
+        return lines
+
+    def usage_description_lines(self) -> list[str]:
+        """
+        Return the usage descriptions lines.
+
+        Returns:
+            list[str]: Lines that describe usages
+        """
+
+        pad_len = self._longest_key_len([usg.name for usg in self._usages])
+        return [
+            f"    {usg.name}{self._pad_opt(usg.name, pad_len)}    {usg.description}"
+            for usg in self._usages
+        ]
 
     def options_lines(self) -> list[str]:
         """
@@ -332,7 +389,6 @@ class DocBuilder:
 
     @override
     def __str__(self) -> str:
-
         lines = []
 
         # Header
@@ -348,6 +404,10 @@ class DocBuilder:
         # Usage section
         lines.append("\nUsage:")
         lines.extend(self.usage_lines())
+
+        # Usage descriptions
+        lines.append("\nUsage-description:")
+        lines.extend(self.usage_description_lines())
 
         # Option section
         lines.append("\nOptions:")

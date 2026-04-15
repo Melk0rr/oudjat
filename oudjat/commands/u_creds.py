@@ -45,41 +45,45 @@ class CredentialUtilCmd(ConnectorCommand):
     }
 
     __cmd_props__.usages = {
-        "--new": CmdUsage(
-            CmdOpt(
-                "Register a new set of credentials for a specified service and user",
+        "new": CmdUsage(
+            "Register a new set of credentials for a specified service and user",
+            (
+                "--new",
+                "(-s=SERVICE | --service=SERVICE) [-u=USERNAME | --username=USERNAME]",
             ),
-            "--new (-s=SERVICE | --service=SERVICE) [-u=USERNAME | --username=USERNAME]",
             {
                 "service": CmdUsageOpt("--service"),
                 "username": CmdUsageOpt("--username"),
             },
         ),
         "--edit": CmdUsage(
-            CmdOpt(
-                "Edit the password for the specified service and user",
+            "Edit the password for the specified service and user",
+            (
+                "--edit",
+                "(-s=SERVICE | --service=SERVICE) (-u=USERNAME | --username=USERNAME)",
             ),
-            "--edit (-s=SERVICE | --service=SERVICE) (-u=USERNAME | --username=USERNAME)",
             {
                 "service": CmdUsageOpt("--service"),
                 "username": CmdUsageOpt("--username"),
             },
         ),
         "--delete": CmdUsage(
-            CmdOpt(
-                "Delete the password for the specified service and user",
+            "Delete the password for the specified service and user",
+            (
+                "--delete",
+                "(-s=SERVICE | --service=SERVICE) (-u=USERNAME | --username=USERNAME)",
             ),
-            "--delete (-s=SERVICE | --service=SERVICE) (-u=USERNAME | --username=USERNAME)",
             {
                 "service": CmdUsageOpt("--service"),
                 "username": CmdUsageOpt("--username"),
             },
         ),
         "--check": CmdUsage(
-            CmdOpt(
-                "Check the existence of credentials for the specified service",
+            "Check the existence of credentials for the specified service",
+            (
+                "--check",
+                "(-s=SERVICE | --service=SERVICE) [-u=USERNAME | --username=USERNAME]",
             ),
-            "--check (-s=SERVICE | --service=SERVICE) [-u=USERNAME | --username=USERNAME]",
             {
                 "service": CmdUsageOpt("--service"),
                 "username": CmdUsageOpt("--username"),
@@ -131,7 +135,7 @@ class CredentialUtilCmd(ConnectorCommand):
                 "action": "new",
                 "service": service,
                 "username": username,
-                "time": datetime.now()
+                "time": datetime.now(),
             }
         ]
 
@@ -155,7 +159,7 @@ class CredentialUtilCmd(ConnectorCommand):
                 "action": "edit",
                 "service": service,
                 "username": username,
-                "time": datetime.now()
+                "time": datetime.now(),
             }
         ]
 
@@ -179,7 +183,7 @@ class CredentialUtilCmd(ConnectorCommand):
                 "action": "delete",
                 "service": service,
                 "username": username,
-                "time": datetime.now()
+                "time": datetime.now(),
             }
         ]
 
@@ -213,6 +217,6 @@ class CredentialUtilCmd(ConnectorCommand):
                 "action": "check",
                 "service": service,
                 "username": None,
-                "time": datetime.now()
+                "time": datetime.now(),
             }
         ]

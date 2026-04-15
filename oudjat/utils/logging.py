@@ -65,7 +65,6 @@ class OudjatFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-@staticmethod
 def oudjatLogger(
     level: int = logging.INFO,
     stdout: bool = True,

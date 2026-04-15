@@ -72,10 +72,8 @@ It also allows for complex data consolidation and mapping through a config file 
     #     for cmd in _COMMAND_OPTIONS.values()
     # }
 
-    builder.usages = [
-        "-h | --help",
-        "-V | --version",
-    ]
+    builder.add_usage("help", "-h | --help", "Prints a help message, then exit")
+    builder.add_usage("version", "-V | --version", "Prints the program version, then exit")
 
     for cmd_name, cmd in _COMMAND_OPTIONS.items():
         builder.add_command(cmd_name, cmd.__cmd_props__.description)
@@ -92,7 +90,9 @@ It also allows for complex data consolidation and mapping through a config file 
     builder.add_option("json", "Save results as a JSON file", arg="JSON")
     builder.add_option("print", "Print the results in the terminal")
     builder.add_option("key-filter", "Filter the final result keys", arg="KEYFILTER")
-    builder.add_option("sort", "Sort the final result based on the provided key", short="s", arg="SORTKEY")
+    builder.add_option(
+        "sort", "Sort the final result based on the provided key", short="s", arg="SORTKEY"
+    )
     builder.add_option("sort-reverse", "Reverse the sorting order")
 
     builder.help_content = [

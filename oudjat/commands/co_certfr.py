@@ -35,6 +35,10 @@ class CERTFRConnectorCommand(ConnectorCommand):
             "A filter to retrieve only RSS feed items that were published after a certain date (YYYY-MM-DD format)",
             arg="FEEDDATE",
         ),
+        "--keywords": CmdOpt(
+            "A list of keywords (comma separated, no space)",
+            arg="KEYWORDS",
+        ),
         "--limit": CmdOpt(
             "Define a limit to the number of CVEs resolve when using max-cve option",
             arg="LIMIT",
@@ -43,30 +47,27 @@ class CERTFRConnectorCommand(ConnectorCommand):
         "--max-cve": CmdOpt(
             "Resolve CVEs data and the highests (most critical) ones",
         ),
-        "--keywords": CmdOpt(
-            "A list of keywords (comma separated, no space)",
-            arg="KEYWORDS",
-        ),
+        "--target": CmdOpt("Specify one or multiple CERTFR page refs", short="t", arg="TARGET"),
     }
 
     __cmd_props__.usages = {
-        "--target": CmdUsage(
-            CmdOpt(
-                "Specify CERTFR page references for parsing (comma separated, no space)",
-                short="t",
-                arg="TARGET",
+        "default": CmdUsage(
+            "Specify CERTFR page references for parsing (comma separated, no space)",
+            (
+                "(-t=TARGET | --target=TARGET)",
+                "[--keywords=KEYWORDS] [--max-cve [--limit=LIMIT]] [options]",
             ),
-            "(-t=TARGET | --target=TARGET) [--keywords=KEYWORDS] [--max-cve [--limit=LIMIT]] [options]",
             {
                 "search_filter": CmdUsageOpt("--target"),
                 "keywords": CmdUsageOpt("--keywords"),
             },
         ),
-        "--feed": CmdUsage(
-            CmdOpt(
-                "Automatically retrieve and parse CERTFR pages from RSS feed",
+        "feed": CmdUsage(
+            "Automatically retrieve and parse CERTFR pages from RSS feed",
+            (
+                "--feed",
+                "[--feed-date=FEEDDATE] [--keywords=KEYWORDS] [--max-cve [--limit=LIMIT]] [options]",
             ),
-            "--feed [--feed-date=FEEDDATE] [--keywords=KEYWORDS] [--max-cve [--limit=LIMIT]] [options]",
             {
                 "date_filter_str": CmdUsageOpt("--feed-date"),
                 "keywords": CmdUsageOpt("--keywords"),
@@ -100,8 +101,8 @@ class CERTFRConnectorCommand(ConnectorCommand):
         # Usage backends
         self.__cmd_props__.backends(
             {
-                "--target": self.connector.fetch,
-                "--feed": self.connector.feed,
+                "default": self.connector.fetch,
+                "feed": self.connector.feed,
             }
         )
 
@@ -120,11 +121,13 @@ class CERTFRConnectorCommand(ConnectorCommand):
 
             if self.options["--keywords"]:
                 print(f"    Matched {len(p['matches'])} keywords")
+
                 for k in p["matches"]:
                     print(f"        {k}")
 
             if self.options["--max-cve"]:
                 print("    Highest CVEs")
+
                 for cve in p["highestCVEs"]:
                     print(f"        {cve['id']}: {cve['score']}")
 
@@ -135,7 +138,7 @@ class CERTFRConnectorCommand(ConnectorCommand):
         balancer = CVELoadBalancer()
 
         for page in self._data:
-            cves = page["cves"][:self.options["--limit"]]
+            cves = page["cves"][: self.options["--limit"]]
             page_cves = balancer.fetch(cves)
             page_cves = CVE.from_db(page_cves)
 
