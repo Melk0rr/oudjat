@@ -203,7 +203,7 @@ You will need several elements to use this connector:
 2. An API token
 3. The required permissions to query the endpoints you want to reach
 
-🔑Credentials are needed for this connector. See [[#Credentials]] section.
+🔑Credentials are needed for this connector. See [[commands#Credentials]] section
 
 > [!IMPORTANT]
 > For this connector, the password is the API token
@@ -440,6 +440,11 @@ Endoflife.date is a website that documents end of life and support lifecycles fo
 ### Reference
 
 `connectors.endoflife`
+
+### Prerequisites
+
+- No API key, nor special access is required.
+- You just need an internet access.
 
 ### Usage
 
