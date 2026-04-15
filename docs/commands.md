@@ -107,6 +107,8 @@ oudjat connectors.<ref> --help
 oudjat connectors.edr.sentinelone --help
 ```
 
+---
+
 ## 🔌Connectors - 🌐CERT.CERTFR
 
 ### Description
@@ -121,12 +123,14 @@ It returns CERTFR pages content:
 - Risks
 - CVEs
 
-You can optionally fetch data for the CVEs referenced in parsed pages.
-This will use CVE connectors for various CVE databases like Nist, CVE.org, and more to retrieve CVSS score and other CVE details.
-
 ### Reference
 
 `connectors.cert.certfr`
+
+### Prerequisites
+
+- No API key, nor special access is required.
+- You just need an internet access.
 
 ### Usage
 
@@ -156,6 +160,13 @@ oudjat connectors.cert.certfr --feed
 | --max-cve            | Resolve CVEs data and the highests (most critical) ones                                               |
 | --keywords=KEYWORDS  | A list of keywords (comma separated, no space)                                                        |
 
+> [!NOTE]
+> You can optionally fetch data for the CVEs referenced in parsed pages using the _--max-cve_ option.
+> This will use CVE connectors for various CVE databases like Nist, CVE.org, and more to retrieve CVSS score and other CVE details.
+
+> [!WARNING]
+> Since CERTFR pages tend to have a lot of CVE references, you can limit how many are resolved with the _--limit_ option.
+
 ### Exemples
 
 ```bash
@@ -165,7 +176,7 @@ oudjat connectors.cert.certfr --feed --date-filter "2025-12-01"
 
 ## 🔌 Connectors - EDR.Cybereason
 
-> [!IMPORTANT]
+> [!WARNING]
 > Cybereason connector is no longer maintained
 
 ## 🔌 Connectors - EDR.Sentinelone
@@ -184,7 +195,25 @@ It provides ability to do various actions:
 
 `connectors.edr.sentinelone`
 
+### Prerequisites
+
+You will need several elements to use this connector:
+
+1. An account on SentinelOne console at least.
+2. An API token
+3. The required permissions to query the endpoints you want to reach
+
+🔑Credentials are needed for this connector. See [[commands#Credentials]] section.
+
+> [!IMPORTANT]
+> For this connector, the password is the API token
+
 ### Usage
+
+> [!WARNING]
+> Some commands (usages) bellow can have a significant impact on your asssets
+> Whether, you want to change a policy, move an asset, change a threat status, etc. It can have direct or indirect consequences
+> Trade with the usages marked with ❗ carefully !
 
 | Usage                     | Description                                                                       |
 | ------------------------- | --------------------------------------------------------------------------------- |
