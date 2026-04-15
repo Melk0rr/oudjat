@@ -3,7 +3,6 @@ A helper module to handle __doc__ and docopt strings.
 """
 
 import re
-
 from dataclasses import dataclass
 from typing import Any, override
 
@@ -347,9 +346,9 @@ class DocBuilder:
 
         lines = []
         for usg in self._usages:
+            full_usg = f"{self._program} {usg}"
             if len(usg.usage_str) > 100:
-                usg_str_complete = f"{self._program} {usg.usage_str}"
-                usg_split = re.findall(r"\([^\)]*\)|\[[^\]]*\]|[^\s]+", usg_str_complete)
+                usg_split = re.findall(r"\(+[^\)]*\)+|\[+[^\]]*\]+|[^\s]+", full_usg)
                 baseline = f"    {' '.join(usg_split[:3])}"
                 pad = len(baseline) - len(usg_split[2])
 
@@ -358,7 +357,7 @@ class DocBuilder:
                     lines.append(f"{' ' * pad}{usg_piece}")
 
             else:
-                lines.append(f"    {self._program} {usg}")
+                lines.append(f"    {full_usg}")
 
         return lines
 
@@ -372,7 +371,7 @@ class DocBuilder:
 
         pad_len = self._longest_key_len([usg.name for usg in self._usages])
         return [
-            f"    {usg.name}{self._pad_opt(usg.name, pad_len)}    {usg.description}"
+            f"    {usg.name.replace('--', '')}{self._pad_opt(usg.name, pad_len)}    {usg.description}"
             for usg in self._usages
         ]
 

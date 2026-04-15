@@ -72,8 +72,8 @@ It also allows for complex data consolidation and mapping through a config file 
     #     for cmd in _COMMAND_OPTIONS.values()
     # }
 
-    builder.add_usage("help", "-h | --help", "Prints a help message, then exit")
-    builder.add_usage("version", "-V | --version", "Prints the program version, then exit")
+    builder.add_usage("--help", "-h | --help", "Prints a help message, then exit")
+    builder.add_usage("--version", "-V | --version", "Prints the program version, then exit")
 
     for cmd_name, cmd in _COMMAND_OPTIONS.items():
         builder.add_command(cmd_name, cmd.__cmd_props__.description)
