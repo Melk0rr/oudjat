@@ -73,6 +73,9 @@ class DataFilter:
 
             operator = CompareOperator.find_by_key(operator)
 
+            if operator is None:
+                raise ValueError(f"{Context()}::Invalid operator key provided")
+
         self._fieldname: str = fieldname
         self._operator: "CompareOperator" = operator
         self._value: Any = value

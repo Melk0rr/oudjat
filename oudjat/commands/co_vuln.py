@@ -47,21 +47,23 @@ class VulnConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.usages = {
-        "--db": CmdUsage(
-            CmdOpt(
-                "Use a specific database to retrieve CVE data. Keep in mind APIs are requests/min restricted",
+        "db": CmdUsage(
+            "Use a specific database to retrieve CVE data. Keep in mind APIs are requests/min restricted",
+            (
+                "--db",
+                "(-t=TARGET | --target=TARGET) (--cves=CVES) [--payload=PAYLOAD] [options]",
             ),
-            "--db (-t=TARGET | --target=TARGET) (--cves=CVES) [--payload=PAYLOAD] [options]",
             {
                 "cves": CmdUsageOpt("--cves"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "--auto": CmdUsage(
-            CmdOpt(
-                "Use load balancing to retrieve data dynamically from available CVE APIs",
+        "auto": CmdUsage(
+            "Use load balancing to retrieve data dynamically from available CVE APIs",
+            (
+                "--auto",
+                "(--cves=CVES) [--payload=PAYLOAD] [options]",
             ),
-            "--auto (--cves=CVES) [--payload=PAYLOAD] [options]",
             {
                 "cves": CmdUsageOpt("--cves"),
                 "payload": CmdUsageOpt("--payload"),

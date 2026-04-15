@@ -51,52 +51,83 @@ class EOLConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.usages = {
-        "--products": CmdUsage(
-            CmdOpt(
-                "Retrieve all or a specific product from EOL",
+        "products": CmdUsage(
+            "Retrieve all or a specific product from EOL",
+            (
+                "--products",
+                "[--product-name=PRODUCTNAME] [--tag=TAG]... [--full] [options]",
             ),
-            "--products [--product-name=PRODUCTNAME] [--tag=TAG]... [--full] [options]",
             {
                 "product": CmdUsageOpt("--product-name"),
                 "tags": CmdUsageOpt("--tag"),
                 "full": CmdUsageOpt("--full"),
             },
         ),
-        "--product-releases": CmdUsage(
-            CmdOpt("Retrieve a product release from EOL"),
-            "--product-releases [--product-name=PRODUCTNAME] [--release-name=RELNAME] [options]",
+        "product-releases": CmdUsage(
+            "Retrieve a product release from EOL",
+            (
+                "--product-releases",
+                "[--product-name=PRODUCTNAME] [--release-name=RELNAME] [options]",
+            ),
             {
                 "product": CmdUsageOpt("--product-name"),
                 "release": CmdUsageOpt("--release-name"),
             },
         ),
-        "--linux": CmdUsage(
-            CmdOpt("Retrieve linux related products"),
-            "--linux [--full] [options]",
+        "linux": CmdUsage(
+            "Retrieve linux related products",
+            (
+                "--linux",
+                "[--full] [options]",
+            ),
             {
                 "full": CmdUsageOpt("--full"),
             },
         ),
-        "--windows": CmdUsage(
-            CmdOpt("Retrieve windows related products"),
-            "--windows [options]",
+        "windows": CmdUsage(
+            "Retrieve windows related products",
+            (
+                "--windows",
+                "[options]",
+            ),
         ),
-        "--windows-server": CmdUsage(
-            CmdOpt("Retrieve windows server related products"),
-            "--windows-server [options]",
+        "windows-server": CmdUsage(
+            "Retrieve windows server related products",
+            (
+                "--windows-server",
+                "[options]",
+            ),
         ),
-        "--categories": CmdUsage(
-            CmdOpt("Retrieve product categories"),
-            "--categories [--category-name=CTGNAME] [options]",
+        "categories": CmdUsage(
+            "Retrieve product categories",
+            (
+                "--categories",
+                "[--category-name=CTGNAME] [options]",
+            ),
             {
                 "category": CmdUsageOpt("--category-name"),
             },
         ),
-        "--apps": CmdUsage(CmdOpt("Retrieve app category products"), "--apps [options]"),
-        "--oses": CmdUsage(CmdOpt("Retrieve os category products"), "--oses [options]"),
-        "--tags": CmdUsage(
-            CmdOpt("Retrieve all, or a specific tag"),
-            "--tags [--tag=TAG] [options]",
+        "apps": CmdUsage(
+            "Retrieve app category products",
+            (
+                "--apps",
+                "[options]",
+            ),
+        ),
+        "oses": CmdUsage(
+            "Retrieve os category products",
+            (
+                "--oses",
+                "[options]",
+            ),
+        ),
+        "tags": CmdUsage(
+            "Retrieve all, or a specific tag",
+            (
+                "--tags",
+                "[--tag=TAG] [options]",
+            ),
             {
                 "tag": CmdUsageOpt("--tag"),
             },
@@ -121,14 +152,14 @@ class EOLConnectorCommand(ConnectorCommand):
         # Usage backends
         self.__cmd_props__.backends(
             {
-                "--products": self.connector.products,
-                "--product-releases": self.connector.product_releases,
-                "--linux": self.connector.linux,
-                "--windows": self.connector.windows,
-                "--windows-server": self.connector.windows_server,
-                "--categories": self.connector.categories,
-                "--apps": self.connector.apps,
-                "--oses": self.connector.oses,
-                "--tags": self.connector.tags,
+                "products": self.connector.products,
+                "product-releases": self.connector.product_releases,
+                "linux": self.connector.linux,
+                "windows": self.connector.windows,
+                "windows-server": self.connector.windows_server,
+                "categories": self.connector.categories,
+                "apps": self.connector.apps,
+                "oses": self.connector.oses,
+                "tags": self.connector.tags,
             }
         )

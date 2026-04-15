@@ -54,11 +54,12 @@ class SCCMConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.usages = {
-        "--fetch": CmdUsage(
-            CmdOpt(
-                "",
+        "fetch": CmdUsage(
+            "",
+            (
+                "(-t=TARGET | --target=TARGET)",
+                "(--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) (--db=DBNAME) (-q=QUERY | --query=QUERY) [--driver=DRIVER] [--format=FORMAT]",
             ),
-            "--fetch (-t=TARGET | --target=TARGET) (--db=DBNAME) (-q=QUERY | --query=QUERY) [--driver=DRIVER] [--format=FORMAT]",
             {
                 "payload": CmdUsageOpt("--query"),
                 "payload_fmt": CmdUsageOpt("--format"),
@@ -103,6 +104,6 @@ class SCCMConnectorCommand(ConnectorCommand):
         # Usage backends
         self.__cmd_props__.backends(
             {
-                "--fetch": self.connector.fetch,
+                "fetch": self.connector.fetch,
             },
         )

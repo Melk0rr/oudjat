@@ -150,7 +150,9 @@ class ConnectorCommand(Base):
         self.logger.info("Callback - Sorting final result")
         self.logger.debug(f"{Context()}::{self.options['--sort']}")
 
-        self._data.sort(key=lambda e: e[self.options["--sort"]], reverse=self.options["--sort-reverse"])
+        self._data.sort(
+            key=lambda e: e[self.options["--sort"]], reverse=self.options["--sort-reverse"]
+        )
 
     def _filter_keys_cb(self) -> None:
         """
@@ -246,7 +248,7 @@ class ConnectorCommand(Base):
             builder.add_option(opt_k, opt.description, opt.arg, opt.short, default=opt.default)
 
         for usg_k, usg in cmd_hub.usages.items():
-            builder.add_option(usg_k, usg.option.description, usg.option.arg, usg.option.short)
-            builder.add_usage(f"{cmd_hub.name} {usg.usage_str}")
+            usg_main, usg_opts = usg.usage_str
+            builder.add_usage(usg_k, f"{cmd_hub.name} {usg_main} {usg_opts}", usg.description)
 
         return builder
