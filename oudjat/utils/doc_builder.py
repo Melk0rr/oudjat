@@ -347,7 +347,7 @@ class DocBuilder:
         lines = []
         for usg in self._usages:
             full_usg = f"{self._program} {usg}"
-            if len(usg.usage_str) > 100:
+            if len(usg.usage_str) > 110:
                 usg_split = re.findall(r"\(+[^\)]*\)+|\[+[^\]]*\]+|[^\s]+", full_usg)
                 baseline = f"    {' '.join(usg_split[:3])}"
                 pad = len(baseline) - len(usg_split[2])
