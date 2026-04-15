@@ -136,8 +136,15 @@ This will use CVE connectors for various CVE databases like Nist, CVE.org, and m
 | --feed   | Automatically retrieve and parse CERTFR pages from RSS feed |
 
 ```bash
-oudjat connectors.cert.certfr (-t=TARGET | --target=TARGET) [--keywords=KEYWORDS] [--max-cve [--limit=LIMIT]] [options]
-oudjat connectors.cert.certfr --feed [--feed-date=FEEDDATE] [--keywords=KEYWORDS] [--max-cve [--limit=LIMIT]] [options]
+oudjat connectors.cert.certfr (-t=TARGET | --target=TARGET)
+                              [--keywords=KEYWORDS]
+                              [--max-cve [--limit=LIMIT]]
+                              [options]
+oudjat connectors.cert.certfr --feed
+                              [--feed-date=FEEDDATE]
+                              [--keywords=KEYWORDS]
+                              [--max-cve [--limit=LIMIT]]
+                              [options]
 ```
 
 ### Options
@@ -204,54 +211,154 @@ It provides ability to do various actions:
 ❗: Usage that can impact your environment. Use carefully
 
 ```bash
-oudjat connectors.edr.sentinelone --agents 
+oudjat connectors.edr.sentinelone --agents
                                   (-t=TARGET | --target=TARGET)
                                   (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
                                   [--sites-list=SITES]
                                   [--payload=PAYLOAD]
                                   [options]
-
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --agents-export [--sites-list=SITES] [--payload=PAYLOAD] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --move-agent-site 
-                                                                                                                                              [--sites-list=SITES]
-                                                                                                                                              [--names=NAMES]
-                                                                                                                                              [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --threats 
-                                                                                                                                              [--sites-list=SITES]
-                                                                                                                                              [--payload=PAYLOAD]
-                                                                                                                                              [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --threats-verdict
-                                                                                                                                              [--verdict=VERDICT]
-                                                                                                                                              [--ids=IDS]
-                                                                                                                                              [--sites-list=SITES]
-                                                                                                                                              [--status-filter=STATUSFILTER]
-                                                                                                                                              [--verdict-filter=VERDICTFILTER]
-                                                                                                                                              [--path=PATH]
-                                                                                                                                              [--filter=FILTER]
-                                                                                                                                              [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --threats-incident
-                                                                                                                                              (--status=STATUS --verdict=VERDICT)
-                                                                                                                                              [--ids=IDS]
-                                                                                                                                              [--sites-list=SITES]
-                                                                                                                                              [--status-filter=STATUSFILTER]
-                                                                                                                                              [--verdict-filter=VERDICTFILTER]
-                                                                                                                                              [--path=PATH]
-                                                                                                                                              [--auto]
-                                                                                                                                              [--filter=FILTER]
-                                                                                                                                              [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --alert-verdict [--verdict=VERDICT] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --alert-incident [--status=STATUS] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --applications [--names=NAMES] [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --applications-endpoints [--names=NAMES] [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --applications-with-risks [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --applications-cves [--ids=IDS] [--names=NAMES] [--vendors=VENDORS] [--sites-list=SITES] [--payload=PAYLOAD] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --cves [--ids=IDS] [--severities=SEVERITIES] [--sites-list=SITES] [--payload=PAYLOAD] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --groups [--names=NAMES] [--sites-list=SITES] [--payload=PAYLOAD] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --group-policy [--ids=IDS] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --group-policy-update [--ids=IDS] [--malicious-policy=MALPOLICY] [--suspicious-policy=SUPOLICY] [--payload=PAYLOAD] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --group-move-agent [--ids=IDS] [--names=NAMES] [--payload=PAYLOAD] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --sites [--payload=PAYLOAD] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --sites-by-name [--names=NAMES] [--payload=PAYLOAD] [options]
+oudjat connectors.edr.sentinelone --agents-export
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--sites-list=SITES]
+                                  [--payload=PAYLOAD]
+                                  [options]
+oudjat connectors.edr.sentinelone --move-agent-site
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--sites-list=SITES]
+                                  [--names=NAMES]
+                                  [options]
+oudjat connectors.edr.sentinelone --threats
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--sites-list=SITES]
+                                  [--payload=PAYLOAD]
+                                  [options]
+oudjat connectors.edr.sentinelone --threats-verdict
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--verdict=VERDICT]
+                                  [--ids=IDS]
+                                  [--sites-list=SITES]
+                                  [--status-filter=STATUSFILTER]
+                                  [--verdict-filter=VERDICTFILTER]
+                                  [--path=PATH]
+                                  [--filter=FILTER]
+                                  [options]
+oudjat connectors.edr.sentinelone --threats-incident
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  (--status=STATUS --verdict=VERDICT)
+                                  [--ids=IDS]
+                                  [--sites-list=SITES]
+                                  [--status-filter=STATUSFILTER]
+                                  [--verdict-filter=VERDICTFILTER]
+                                  [--path=PATH]
+                                  [--auto]
+                                  [--filter=FILTER]
+                                  [options]
+oudjat connectors.edr.sentinelone --alert-verdict
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--verdict=VERDICT]
+                                  [--ids=IDS]
+                                  [--sites-list=SITES]
+                                  [--status-filter=STATUSFILTER]
+                                  [--verdict-filter=VERDICTFILTER]
+                                  [--path=PATH]
+                                  [--filter=FILTER]
+                                  [options]
+oudjat connectors.edr.sentinelone --alert-incident
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--status=STATUS]
+                                  [--ids=IDS]
+                                  [--sites-list=SITES]
+                                  [--status-filter=STATUSFILTER]
+                                  [--verdict-filter=VERDICTFILTER]
+                                  [--path=PATH]
+                                  [--auto]
+                                  [--filter=FILTER]
+                                  [options]
+oudjat connectors.edr.sentinelone --applications
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--names=NAMES]
+                                  [--vendors=VENDOR]
+                                  [--sites-list=SITES]
+                                  [--payload=PAYLOAD]
+                                  [options]
+oudjat connectors.edr.sentinelone --applications-endpoints
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--names=NAMES]
+                                  [--vendors=VENDOR]
+                                  [--sites-list=SITES]
+                                  [--payload=PAYLOAD]
+                                  [options]
+oudjat connectors.edr.sentinelone --applications-with-risks
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--vendors=VENDOR]
+                                  [--sites-list=SITES]
+                                  [--payload=PAYLOAD]
+                                  [options]
+oudjat connectors.edr.sentinelone --applications-cves
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--ids=IDS]
+                                  [--names=NAMES]
+                                  [--vendors=VENDORS]
+                                  [--sites-list=SITES]
+                                  [--payload=PAYLOAD]
+                                  [options]
+oudjat connectors.edr.sentinelone --cves
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--ids=IDS]
+                                  [--severities=SEVERITIES]
+                                  [--sites-list=SITES]
+                                  [--payload=PAYLOAD]
+                                  [options]
+oudjat connectors.edr.sentinelone --groups
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--names=NAMES]
+                                  [--sites-list=SITES]
+                                  [--payload=PAYLOAD]
+                                  [options]
+oudjat connectors.edr.sentinelone --group-policy
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--ids=IDS]
+                                  [options]
+oudjat connectors.edr.sentinelone --group-policy-update
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--ids=IDS]
+                                  [--malicious-policy=MALPOLICY]
+                                  [--suspicious-policy=SUPOLICY]
+                                  [--payload=PAYLOAD]
+                                  [options]
+oudjat connectors.edr.sentinelone --group-move-agent
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--ids=IDS]
+                                  [--names=NAMES]
+                                  [--payload=PAYLOAD]
+                                  [options]
+oudjat connectors.edr.sentinelone --sites
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--payload=PAYLOAD]
+                                  [options]
+oudjat connectors.edr.sentinelone --sites-by-name
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--names=NAMES]
+                                  [--payload=PAYLOAD]
+                                  [options]
 ```
 
 ### Options
@@ -283,7 +390,6 @@ oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1
 
 # Change the policy of one or multiple groups
 oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1API" --group-policy-update --ids "@./group_ids.txt" --malicious-policy protect
-
 ```
 
 ## 🔌 Connectors - 🌐Endoflife
@@ -350,6 +456,8 @@ oudjat connectors.endoflife --windows --csv ./windows.csv
 ```
 
 ## 🔌 Connectors - LDAP
+
+### Description
 
 ### Reference
 
