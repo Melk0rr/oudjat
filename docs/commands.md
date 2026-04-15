@@ -162,6 +162,9 @@ oudjat connectors.cert.certfr --feed --date-filter "2025-12-01"
 
 ## 🔌 Connectors - EDR.Sentinelone
 
+### Description
+A connector
+
 ### Reference
 
 `connectors.edr.sentinelone`
@@ -246,14 +249,18 @@ oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER
 
 ```bash
 # Export agents details into a json file
-oudjat connectors.edr.sentinelone --agents --json ./agents.json
+oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1API" --agents --json ./agents.json
+
+# Change the policy of one or multiple groups
+oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1API" --group-policy-update --ids "@./group_ids.txt" --malicious-policy protect
+
 ```
 
 ## 🔌 Connectors - Endoflife
 
 ### Reference
 
-``
+`connectors.edr.endoflife`
 
 ### Usage
 
