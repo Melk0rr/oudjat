@@ -89,7 +89,7 @@ The next time you use the same service, Oudjat will automatically retrieve the r
 > If multiple username/password pairs are registered for the same service. Oudjat will retrieve the last registered one.
 > You can specify the username you want to retrieve credentials for.
 
-In most cases, you would use those options like this:
+So the credentials options are usually handled with the following docopt logic:
 `(--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])`
 
 ### Help
@@ -107,7 +107,7 @@ oudjat connectors.<ref> --help
 oudjat connectors.edr.sentinelone --help
 ```
 
-## 🔌 Connectors - CERT.CERTFR
+## 🔌Connectors - 🌐CERT.CERTFR
 
 ### Description
 
@@ -157,10 +157,21 @@ oudjat connectors.cert.certfr --feed --date-filter "2025-12-01"
 ```
 
 ## 🔌 Connectors - EDR.Cybereason
+
 > [!IMPORTANT]
 > Cybereason connector is no longer maintained
 
 ## 🔌 Connectors - EDR.Sentinelone
+
+### Description
+
+A connector to interact with [SentinelOne](https://www.sentinelone.com/fr/) EDR API.
+It provides ability to do various actions:
+
+- Retrieve data (agents, appliations, policies, groups, sites, threats, etc.)
+- Move objects (agent to group, group to site)
+- Update policies (group, site)
+- Update threats status and verdict
 
 ### Reference
 
@@ -172,12 +183,12 @@ oudjat connectors.cert.certfr --feed --date-filter "2025-12-01"
 | ------------------------- | --------------------------------------------------------------------------------- |
 | --agents                  | Export S1 agents details                                                          |
 | --agents-export           | Export flat agent data                                                            |
-| --move-agent-site         | Move one or multiple agents to a site based on its id                             |
+| --move-agent-site         | ❗Move one or multiple agents to a site based on its id                           |
 | --threats                 | Retrieve threats detected by S1                                                   |
-| --threats-verdict         | Change the verdict of filtered threats                                            |
-| --threats-incident        | Change the verdict and status of filtered threats                                 |
-| --alert-verdict           | Change the verdict of filtered alerts                                             |
-| --alert-incident          | Change the status of filtered alerts (threats:malicious / alerts:suspicious)      |
+| --threats-verdict         | ❗Change the verdict of filtered threats                                          |
+| --threats-incident        | ❗Change the verdict and status of filtered threats                               |
+| --alert-verdict           | ❗Change the verdict of filtered alerts                                           |
+| --alert-incident          | ❗Change the status of filtered alerts                                            |
 | --applications            | Retrieve an inventory of applications detected by S1                              |
 | --applications-endpoints  | Retrieve an inventory of endpoints for a specific application                     |
 | --applications-with-risks | Retrieve an inventory of applications detected by S1 that present a security risk |
@@ -185,27 +196,49 @@ oudjat connectors.cert.certfr --feed --date-filter "2025-12-01"
 | --cves                    | Retrieve CVEs detected by S1                                                      |
 | --groups                  | Retrieve groups                                                                   |
 | --group-policy            | Retrieve the policy of a specific group                                           |
-| --group-policy-update     | Update the policy of the specified groups                                         |
-| --group-move-agent        | Move agents into specified group                                                  |
+| --group-policy-update     | ❗Update the policy of the specified groups                                       |
+| --group-move-agent        | ❗Move agents into specified group                                                |
 | --sites                   | Retrieve sites                                                                    |
 | --sites-by-name           | Retrieve sites by names                                                           |
 
+❗: Usage that can impact your environment. Use carefully
+
 ```bash
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --agents
-                                                                                                                                              [--sites-list=SITES]
-                                                                                                                                              [--payload=PAYLOAD]
-                                                                                                                                              [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --agents-export
-                                                                                                                                              [--sites-list=SITES]
-                                                                                                                                              [--payload=PAYLOAD]
-                                                                                                                                              [options]
+oudjat connectors.edr.sentinelone --agents 
+                                  (-t=TARGET | --target=TARGET)
+                                  (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                                  [--sites-list=SITES]
+                                  [--payload=PAYLOAD]
+                                  [options]
+
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --agents-export [--sites-list=SITES] [--payload=PAYLOAD] [options]
 oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --move-agent-site 
                                                                                                                                               [--sites-list=SITES]
                                                                                                                                               [--names=NAMES]
                                                                                                                                               [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --threats [--sites-list=SITES] [--payload=PAYLOAD] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --threats-verdict [--verdict=VERDICT] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER] [options]
-oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --threats-incident (--status=STATUS --verdict=VERDICT) [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER] [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --threats 
+                                                                                                                                              [--sites-list=SITES]
+                                                                                                                                              [--payload=PAYLOAD]
+                                                                                                                                              [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --threats-verdict
+                                                                                                                                              [--verdict=VERDICT]
+                                                                                                                                              [--ids=IDS]
+                                                                                                                                              [--sites-list=SITES]
+                                                                                                                                              [--status-filter=STATUSFILTER]
+                                                                                                                                              [--verdict-filter=VERDICTFILTER]
+                                                                                                                                              [--path=PATH]
+                                                                                                                                              [--filter=FILTER]
+                                                                                                                                              [options]
+oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --threats-incident
+                                                                                                                                              (--status=STATUS --verdict=VERDICT)
+                                                                                                                                              [--ids=IDS]
+                                                                                                                                              [--sites-list=SITES]
+                                                                                                                                              [--status-filter=STATUSFILTER]
+                                                                                                                                              [--verdict-filter=VERDICTFILTER]
+                                                                                                                                              [--path=PATH]
+                                                                                                                                              [--auto]
+                                                                                                                                              [--filter=FILTER]
+                                                                                                                                              [options]
 oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --alert-verdict [--verdict=VERDICT] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER] [options]
 oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --alert-incident [--status=STATUS] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER] [options]
 oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) --applications [--names=NAMES] [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD] [options]
@@ -249,53 +282,74 @@ oudjat connectors.edr.sentinelone (-t=TARGET | --target=TARGET) (--username=USER
 oudjat connectors.edr.sentinelone --agents --json ./agents.json
 ```
 
-## 🔌 Connectors - Endoflife
+## 🔌 Connectors - 🌐Endoflife
+
+### Description
+
+A connector to retrieve data from [endoflife](https://endoflife.date/) API.
+Endoflife.date is a website that documents end of life and support lifecycles for various products.
+
+- Applications
+- Databases
+- Devices
+- Frameworks
+- Operating Systems
+- Server Applications
+- Services
+- Standards
 
 ### Reference
 
-``
+`connectors.endoflife`
 
 ### Usage
 
+| Usage              | Description                                 |
+| ------------------ | ------------------------------------------- |
+| --products         | Retrieve all or a specific product from EOL |
+| --product-releases | Retrieve a product release from EOL         |
+| --linux            | Retrieve linux related products             |
+| --windows          | Retrieve windows related products           |
+| --windows-server   | Retrieve windows server related products    |
+| --categories       | Retrieve product categories                 |
+| --apps             | Retrieve app category products              |
+| --oses             | Retrieve os category products               |
+| --tags             | Retrieve all, or a specific tag             |
+
 ```bash
+oudjat connectors.endoflife --products [--product-name=PRODUCTNAME] [--tag=TAG]... [--full] [options]
+oudjat connectors.endoflife --product-releases [--product-name=PRODUCTNAME] [--release-name=RELNAME] [options]
+oudjat connectors.endoflife --linux [--full] [options]
+oudjat connectors.endoflife --windows [options]
+oudjat connectors.endoflife --windows-server [options]
+oudjat connectors.endoflife --categories [--category-name=CTGNAME] [options]
+oudjat connectors.endoflife --apps [options]
+oudjat connectors.endoflife --oses [options]
+oudjat connectors.endoflife --tags [--tag=TAG] [options]
 ```
 
 ### Options
 
-| Option | Description |
-| ------ | ----------- |
+| Option                     | Description                              |
+| -------------------------- | ---------------------------------------- |
+| --category-name=CTGNAME    | Specify a product category name          |
+| --full                     | If specified, retrieve full product data |
+| --product-name=PRODUCTNAME | Specify a product name                   |
+| --release-name=RELNAME     | Specify a release name (its version)     |
+| --tag=TAG                  | Specify one or several tag (repeatable)  |
 
 ### Exemple
 
 ```bash
-```
-
-## 🔌 Connectors - File
-
-### Reference
-
-``
-
-### Usage
-
-```bash
-```
-
-### Options
-
-| Option | Description |
-| ------ | ----------- |
-
-### Exemple
-
-```bash
+oudjat connectors.endoflife --products --product-name LibreOffice --json ./libreoffice.json
+oudjat connectors.endoflife --windows --csv ./windows.csv
 ```
 
 ## 🔌 Connectors - LDAP
 
 ### Reference
 
-``
+`connectors.ldap`
 
 ### Usage
 
@@ -312,11 +366,11 @@ oudjat connectors.edr.sentinelone --agents --json ./agents.json
 ```bash
 ```
 
-## 🔌 Connectors - MS.CVRF
+## 🔌 Connectors - 🌐MS.CVRF
 
 ### Reference
 
-``
+`connectors.ms.cvrf`
 
 ### Usage
 
@@ -337,7 +391,7 @@ oudjat connectors.edr.sentinelone --agents --json ./agents.json
 
 ### Reference
 
-``
+`connectors.ms.sccm`
 
 ### Usage
 
@@ -375,7 +429,7 @@ oudjat connectors.edr.sentinelone --agents --json ./agents.json
 ```bash
 ```
 
-## 🔌 Connectors - Vulns
+## 🔌 Connectors - 🌐Vulns
 
 ### Reference
 
