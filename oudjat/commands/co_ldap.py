@@ -67,7 +67,7 @@ class LDAPConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.usages = {
-        "computers": CmdUsage(
+        "--computers": CmdUsage(
             "Retrieve computer accounts",
             (
                 "--computers",
@@ -79,7 +79,7 @@ class LDAPConnectorCommand(ConnectorCommand):
                 "search_base": CmdUsageOpt("--search-base"),
             },
         ),
-        "gpos": CmdUsage(
+        "--gpos": CmdUsage(
             "Retrieve Group Policy Objects",
             (
                 "--gpos",
@@ -93,7 +93,7 @@ class LDAPConnectorCommand(ConnectorCommand):
                 "search_base": CmdUsageOpt("--search-base"),
             },
         ),
-        "groups": CmdUsage(
+        "--groups": CmdUsage(
             "Retrieve group objects",
             (
                 "--groups",
@@ -105,7 +105,7 @@ class LDAPConnectorCommand(ConnectorCommand):
                 "search_base": CmdUsageOpt("--search-base"),
             },
         ),
-        "objects": CmdUsage(
+        "--objects": CmdUsage(
             "Retrieve any LDAP objects",
             (
                 "--objects",
@@ -117,7 +117,7 @@ class LDAPConnectorCommand(ConnectorCommand):
                 "search_base": CmdUsageOpt("--search-base"),
             },
         ),
-        "ous": CmdUsage(
+        "--ous": CmdUsage(
             "Retrieve Organizational Unit objects",
             (
                 "--ous",
@@ -129,7 +129,7 @@ class LDAPConnectorCommand(ConnectorCommand):
                 "search_base": CmdUsageOpt("--search-base"),
             },
         ),
-        "subnets": CmdUsage(
+        "--subnets": CmdUsage(
             "Retrieve subnet objects",
             (
                 "--subnets",
@@ -141,7 +141,7 @@ class LDAPConnectorCommand(ConnectorCommand):
                 "search_base": CmdUsageOpt("--search-base"),
             },
         ),
-        "users": CmdUsage(
+        "--users": CmdUsage(
             "Retrieve user accounts",
             (
                 "--users",

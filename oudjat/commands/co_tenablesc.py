@@ -87,7 +87,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.usages = {
-        "vulns": CmdUsage(
+        "--vulns": CmdUsage(
             "Retrieve vulnerabilities that match the provided severities and filters",
             (
                 "--vulns",
@@ -102,7 +102,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "asset-lists": CmdUsage(
+        "--asset-lists": CmdUsage(
             "Retrieve a list of asset lists with minimal informations like list ids",
             (
                 "--asset-lists",
@@ -114,7 +114,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "asset-lists-details": CmdUsage(
+        "--asset-lists-details": CmdUsage(
             "Return the details of one or more asset lists",
             (
                 "--asset-lists-details",
@@ -124,7 +124,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
                 "scan_ids": CmdUsageOpt("--ids"),
             },
         ),
-        "asset-lists-delete": CmdUsage(
+        "--asset-lists-delete": CmdUsage(
             "Delete an asset list based on given id",
             (
                 "--asset-lists-delete",
@@ -134,7 +134,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
                 "scan_ids": CmdUsageOpt("--ids"),
             },
         ),
-        "scans": CmdUsage(
+        "--scans": CmdUsage(
             "Retrieve a list of scans with minimal information like scan ids",
             (
                 "--scans",
@@ -146,7 +146,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "scans-details": CmdUsage(
+        "--scans-details": CmdUsage(
             "Return the details of one or more scans",
             (
                 "--scans-details",
@@ -156,7 +156,7 @@ class TenableSCConnectorCommand(ConnectorCommand):
                 "scan_ids": CmdUsageOpt("--ids"),
             },
         ),
-        "scans-delete": CmdUsage(
+        "--scans-delete": CmdUsage(
             "Delete one or multiple scans",
             (
                 "--scans-delete",
@@ -215,13 +215,13 @@ class TenableSCConnectorCommand(ConnectorCommand):
         # Usage backends
         self.__cmd_props__.backends(
             {
-                "vulns": self.connector.vulns,
-                "asset-lists": self.connector.asset_lists,
-                "asset-lists-details": self.connector.asset_lists_details,
-                "asset-lists-delete": self.connector.asset_lists_delete,
-                "scans": self.connector.scans,
-                "scans-details": self.connector.scans_details,
-                "scans-delete": self.connector.scans_delete,
+                "--vulns": self.connector.vulns,
+                "--asset-lists": self.connector.asset_lists,
+                "--asset-lists-details": self.connector.asset_lists_details,
+                "--asset-lists-delete": self.connector.asset_lists_delete,
+                "--scans": self.connector.scans,
+                "--scans-details": self.connector.scans_details,
+                "--scans-delete": self.connector.scans_delete,
             }
         )
 

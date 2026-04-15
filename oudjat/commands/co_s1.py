@@ -112,7 +112,7 @@ class S1ConnectorCommand(ConnectorCommand):
 
     __cmd_props__.usages = {
         # Agents
-        "agents": CmdUsage(
+        "--agents": CmdUsage(
             "Export S1 agents details",
             (
                 "--agents",
@@ -123,7 +123,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "agents-export": CmdUsage(
+        "--agents-export": CmdUsage(
             "Export flat agent data",
             (
                 "--agents-export",
@@ -134,7 +134,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "move-agent-site": CmdUsage(
+        "--move-agent-site": CmdUsage(
             "Move one or multiple agents to a site based on its id",
             (
                 "--move-agent-site",
@@ -146,7 +146,7 @@ class S1ConnectorCommand(ConnectorCommand):
             },
         ),
         # Threats
-        "threats": CmdUsage(
+        "--threats": CmdUsage(
             "Retrieve threats detected by S1",
             (
                 "--threats",
@@ -157,7 +157,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "threats-verdict": CmdUsage(
+        "--threats-verdict": CmdUsage(
             "Change the verdict of filtered threats",
             (
                 "--threats-verdict",
@@ -173,7 +173,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "threat_filter": CmdUsageOpt("--filter"),
             },
         ),
-        "threats-incident": CmdUsage(
+        "--threats-incident": CmdUsage(
             "Change the verdict and status of filtered threats",
             (
                 "--threats-incident",
@@ -192,7 +192,7 @@ class S1ConnectorCommand(ConnectorCommand):
             },
         ),
         # Alerts
-        "alert-verdict": CmdUsage(
+        "--alert-verdict": CmdUsage(
             "Change the verdict of filtered alerts",
             (
                 "--alert-verdict",
@@ -208,7 +208,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "alert_filter": CmdUsageOpt("--filter"),
             },
         ),
-        "alert-incident": CmdUsage(
+        "--alert-incident": CmdUsage(
             "Change the status of filtered alerts",
             (
                 "--alert-incident",
@@ -226,7 +226,7 @@ class S1ConnectorCommand(ConnectorCommand):
             },
         ),
         # Applications
-        "applications": CmdUsage(
+        "--applications": CmdUsage(
             "Retrieve an inventory of applications detected by S1",
             (
                 "--applications",
@@ -239,7 +239,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "applications-endpoints": CmdUsage(
+        "--applications-endpoints": CmdUsage(
             "Retrieve an inventory of endpoints for a specific application",
             (
                 "--applications-endpoints",
@@ -252,7 +252,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "applications-with-risks": CmdUsage(
+        "--applications-with-risks": CmdUsage(
             "Retrieve an inventory of applications detected by S1 that present a security risk",
             (
                 "--applications-with-risks",
@@ -264,7 +264,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "applications-cves": CmdUsage(
+        "--applications-cves": CmdUsage(
             "Retrieve CVEs for specific application(s)",
             (
                 "--applications-cves",
@@ -278,7 +278,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "cves": CmdUsage(
+        "--cves": CmdUsage(
             "Retrieve CVEs detected by S1",
             (
                 "--cves",
@@ -292,7 +292,7 @@ class S1ConnectorCommand(ConnectorCommand):
             },
         ),
         # Groups
-        "groups": CmdUsage(
+        "--groups": CmdUsage(
             "Retrieve groups",
             (
                 "--groups",
@@ -304,7 +304,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "group-policy": CmdUsage(
+        "--group-policy": CmdUsage(
             "Retrieve the policy of a specific group",
             (
                 "--group-policy",
@@ -314,7 +314,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "group_id": CmdUsageOpt("--ids", transform=lambda lst: next(iter(lst))),
             },
         ),
-        "group-policy-update": CmdUsage(
+        "--group-policy-update": CmdUsage(
             "Update the policy of the specified groups",
             (
                 "--group-policy-update",
@@ -328,7 +328,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "group-move-agent": CmdUsage(
+        "--group-move-agent": CmdUsage(
             "Move agents into specified group",
             (
                 "--group-move-agent",
@@ -341,7 +341,7 @@ class S1ConnectorCommand(ConnectorCommand):
             },
         ),
         # Sites
-        "sites": CmdUsage(
+        "--sites": CmdUsage(
             "Retrieve sites data",
             (
                 "--sites",
@@ -351,7 +351,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "sites-by-name": CmdUsage(
+        "--sites-by-name": CmdUsage(
             "Retrieve sites by names",
             (
                 "--sites-by-name",
@@ -419,24 +419,24 @@ class S1ConnectorCommand(ConnectorCommand):
         # Usage backends
         self.__cmd_props__.backends(
             {
-                "agents": self.connector.agents,
-                "agents-export": self.connector.agents_export,
-                "move-agent-site": self.connector.move_agent_to_site,
-                "threats": self.connector.threats,
-                "threats-verdict": self.connector.threat_verdict,
-                "threats-incident": self.connector.threat_incident,
-                "alert-verdict": self.connector.alert_verdict,
-                "alert-incident": self.connector.alert_incident,
-                "applications": self.connector.applications,
-                "applications-endpoints": self.connector.applications_endpoints,
-                "applications-with-risks": self.connector.applications_with_risks,
-                "applications-cves": self.connector.application_cves,
-                "cves": self.connector.cves,
-                "groups": self.connector.groups,
-                "group-policy": self.connector.group_policy,
-                "group-policy-update": self.connector.group_policy_update,
-                "group-move-agent": self.connector.group_move_agent,
-                "sites": self.connector.sites,
-                "sites-by-name": self.connector.sites_by_name,
+                "--agents": self.connector.agents,
+                "--agents-export": self.connector.agents_export,
+                "--move-agent-site": self.connector.move_agent_to_site,
+                "--threats": self.connector.threats,
+                "--threats-verdict": self.connector.threat_verdict,
+                "--threats-incident": self.connector.threat_incident,
+                "--alert-verdict": self.connector.alert_verdict,
+                "--alert-incident": self.connector.alert_incident,
+                "--applications": self.connector.applications,
+                "--applications-endpoints": self.connector.applications_endpoints,
+                "--applications-with-risks": self.connector.applications_with_risks,
+                "--applications-cves": self.connector.application_cves,
+                "--cves": self.connector.cves,
+                "--groups": self.connector.groups,
+                "--group-policy": self.connector.group_policy,
+                "--group-policy-update": self.connector.group_policy_update,
+                "--group-move-agent": self.connector.group_move_agent,
+                "--sites": self.connector.sites,
+                "--sites-by-name": self.connector.sites_by_name,
             }
         )

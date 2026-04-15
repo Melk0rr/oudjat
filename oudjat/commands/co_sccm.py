@@ -54,7 +54,7 @@ class SCCMConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.usages = {
-        "fetch": CmdUsage(
+        "--target": CmdUsage(
             "",
             (
                 "(-t=TARGET | --target=TARGET)",
@@ -104,6 +104,6 @@ class SCCMConnectorCommand(ConnectorCommand):
         # Usage backends
         self.__cmd_props__.backends(
             {
-                "fetch": self.connector.fetch,
+                "--target": self.connector.fetch,
             },
         )

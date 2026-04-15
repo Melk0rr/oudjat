@@ -47,7 +47,7 @@ class VulnConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.usages = {
-        "db": CmdUsage(
+        "--db": CmdUsage(
             "Use a specific database to retrieve CVE data. Keep in mind APIs are requests/min restricted",
             (
                 "--db",
@@ -58,7 +58,7 @@ class VulnConnectorCommand(ConnectorCommand):
                 "payload": CmdUsageOpt("--payload"),
             },
         ),
-        "auto": CmdUsage(
+        "--auto": CmdUsage(
             "Use load balancing to retrieve data dynamically from available CVE APIs",
             (
                 "--auto",

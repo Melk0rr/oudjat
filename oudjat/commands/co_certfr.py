@@ -51,7 +51,7 @@ class CERTFRConnectorCommand(ConnectorCommand):
     }
 
     __cmd_props__.usages = {
-        "default": CmdUsage(
+        "--target": CmdUsage(
             "Specify CERTFR page references for parsing (comma separated, no space)",
             (
                 "(-t=TARGET | --target=TARGET)",
@@ -62,7 +62,7 @@ class CERTFRConnectorCommand(ConnectorCommand):
                 "keywords": CmdUsageOpt("--keywords"),
             },
         ),
-        "feed": CmdUsage(
+        "--feed": CmdUsage(
             "Automatically retrieve and parse CERTFR pages from RSS feed",
             (
                 "--feed",
@@ -101,8 +101,8 @@ class CERTFRConnectorCommand(ConnectorCommand):
         # Usage backends
         self.__cmd_props__.backends(
             {
-                "default": self.connector.fetch,
-                "feed": self.connector.feed,
+                "--default": self.connector.fetch,
+                "--feed": self.connector.feed,
             }
         )
 
