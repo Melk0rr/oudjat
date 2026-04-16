@@ -69,7 +69,8 @@ The JSON string must also be wrapped between **single quotes**:
 oudjat connectors.<connector_ref> --usage --payload '{"attribute1": 2, "attribute2": "whatever"}'
 ```
 
-Any invalid JSON will result with an error.
+> [!WARNING]
+> Any invalid JSON will result with an error.
 
 #### 📋Lists
 
