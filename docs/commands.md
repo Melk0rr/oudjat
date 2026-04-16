@@ -79,7 +79,7 @@ You may also come across several options that need a **list of elements**.
 - Names
 
 > [!TIP]
-> Any list can contain a single element as well as multiple ones. Because... it's a list right...
+> Any list can contain a single element as well as multiple ones. Because... It's a list alright...
 
 > [!TIP]
 > You can provide the list in two different ways
