@@ -3,12 +3,12 @@
 Below you can find details about Oudjat command line usage.
 For now, Oudjat includes two operating modes.
 
-1. 🐚Command line
-2. 📜Configuration file
+1. 🐚Command Line
+2. ⚙️Configuration File
 
 ## 🔌 Connectors
 
-### Description
+### 💡Description
 
 The connector commands allow you to interact and query implemented connectors.
 Every implemented connector return data in the form of a list of dictionaries. Which you can
@@ -17,7 +17,7 @@ Every implemented connector return data in the form of a list of dictionaries. W
 - print
 - export.
 
-### Basic usage
+### 🚀Basic usage
 
 To use one of oudjat connectors, you can reference it like this:
 
@@ -27,7 +27,7 @@ oudjat connectors.<connector_path> [options]
 
 You will find every connector reference in their **dedicated command section**.
 
-### Options
+### 🎛️Options
 
 Oudjat uses [docotp](http://docopt.org/) to handle its usages and command options.
 
@@ -53,7 +53,26 @@ The connectors commands **share some common operations** you can pass as options
 | --sort=SORTKEY         | Sort the final results using the provided key                                 |
 | --sort-reverse         | Reverse the sorting order                                                     |
 
-### Credentials
+#### JSON String
+
+> [!IMPORTANT]
+> You will often see connectors with at least one option that expects a JSON string argument (e.g. `--payload`)
+
+Provided JSON string must follow... Well, JSON syntax:
+
+```json
+{ "intAttribute": 10, "boolAttribute": true, "stringAttribute": "value" }
+```
+
+The JSON string must also be wrapped between **single quotes**:
+
+```bash
+oudjat connectors.<connector_ref> --usage --payload '{"attribute1": 2, "attribute2": "whatever"}'
+```
+
+Any invalid JSON will result with an error.
+
+#### 🔑Credentials
 
 In a lot of cases, the connector will also require that you provide 🔑**credentials** to perform some form of 👤**authentication**.
 You can provide 🔑 with these options
@@ -92,26 +111,34 @@ The next time you use the same service, Oudjat will automatically retrieve the r
 So the credentials options are usually handled with the following docopt logic:
 `(--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])`
 
-### Help
+### 🆘Help
 
-Each connector command options can be retrieved by combining the connector ref with the help option like this:
+Each connector command options can be retrieved by combining the connector ref with the `--help` option like this:
 
 ```bash
 oudjat connectors.<ref> -h
 oudjat connectors.<ref> --help
 ```
 
-<u>Exemple:</u>
+Using the `--help` option without any connector reference, will just print the general help message
+
+#### 📝Exemples
 
 ```bash
+# Print general help
+oudjat -h
+oudjat --help
+
+# Print help message for specific connectors
 oudjat connectors.edr.sentinelone --help
+oudjat connectors.endoflife --help
 ```
 
 ---
 
 ## 🔌Connectors - 🌐CERT.CERTFR
 
-### Description
+### 💡Description
 
 A connector used to parse [CERTFR pages](https://www.cert.ssi.gouv.fr/) .
 It returns CERTFR pages content:
@@ -123,16 +150,17 @@ It returns CERTFR pages content:
 - Risks
 - CVEs
 
-### Reference
+### 📚Reference
 
 `connectors.cert.certfr`
 
-### Prerequisites
+### ☑️Prerequisites
 
 - No API key, nor special access is required.
+- No credential are required either.
 - You just need an internet access.
 
-### Usage
+### 🚀Usage
 
 | Usage    | Description                                                 |
 | -------- | ----------------------------------------------------------- |
@@ -151,7 +179,7 @@ oudjat connectors.cert.certfr --feed
                               [options]
 ```
 
-### Options
+### ⚙️Options
 
 | Option               | Description                                                                                           |
 | -------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -167,7 +195,7 @@ oudjat connectors.cert.certfr --feed
 > [!WARNING]
 > Since CERTFR pages tend to have a lot of CVE references, you can limit how many are resolved with the _--limit_ option.
 
-### Exemples
+### 📝Exemples
 
 ```bash
 oudjat connectors.cert.certfr -t CERTFR-2021-ALE-022" --max-cve --limit 20
@@ -181,7 +209,7 @@ oudjat connectors.cert.certfr --feed --date-filter "2025-12-01"
 
 ## 🔌 Connectors - EDR.Sentinelone
 
-### Description
+### 💡Description
 
 A connector to interact with [SentinelOne](https://www.sentinelone.com/fr/) EDR API.
 It provides ability to do various actions:
@@ -191,11 +219,11 @@ It provides ability to do various actions:
 - Update policies (group, site)
 - Update threats status and verdict
 
-### Reference
+### 📚Reference
 
 `connectors.edr.sentinelone`
 
-### Prerequisites
+### ☑️Prerequisites
 
 You will need several elements to use this connector:
 
@@ -203,12 +231,12 @@ You will need several elements to use this connector:
 2. An API token
 3. The required permissions to query the endpoints you want to reach
 
-🔑Credentials are needed for this connector. See [[commands#Credentials]] section
+🔑Credentials are needed for this connector. See [[commands#🔑Credentials]] section
 
 > [!IMPORTANT]
 > For this connector, the password is the API token
 
-### Usage
+### 🚀Usage
 
 > [!WARNING]
 > Some commands (usages) bellow can have a significant impact on your asssets
@@ -390,13 +418,15 @@ oudjat connectors.edr.sentinelone --sites-by-name
                                   [options]
 ```
 
-### Options
+> [!IMPORTANT]
+> Each usage matches a specific SentinelOne endpoint.
+
+### 🎛️Options
 
 | Option                                  | Description                                                                |
 | --------------------------------------- | -------------------------------------------------------------------------- |
 | --auto                                  | Trigger auto mode. See the doc for full usage details                      |
 | --auto-mitigation-action=AUTOMITIGATION | Specify the automatic mitigation action                                    |
-| --filter=FILTER                         | Provide a JSON filter to narrow down selection                             |
 | --ids=IDS                               | A list of IDs to narrow down selection. See the doc for full usage details |
 | --malicious-policy=MALPOLICY            | Specify the malicious policy for a group or agent                          |
 | --names=NAMES                           | A list of names to narrow down selection                                   |
@@ -411,7 +441,41 @@ oudjat connectors.edr.sentinelone --sites-by-name
 | --verdict=VERDICT                       | Specify an incident analyst verdict to an alert or a threat                |
 | --verdict-filter=VERDICTFILTER          | a list of incident statuses for alert/threat selection                     |
 
-### Exemple
+> [!IMPORTANT]
+> Some of the options listed above expect a [[commands#JSON String]] argument:
+
+- `--payload`
+    - The payload is basically what is sent in the request. 
+    - So it can contain any attribute accepted by the SentinelOne endpoint.
+    - In theory, you only need the payload option to do whatever you want with every usage.
+    - For ease of use, some parameters have their dedicated option
+
+So...
+
+```bash
+oudjat connectors.edr.sentinelone --group-policy-update --ids 01234567890 --payload '{"data": {"maliciousPolicy": "protect"}}'
+```
+
+Is equivalent to this...
+
+```bash
+oudjat connectors.edr.sentinelone --group-policy-update --ids 01234567890 --malicious-policy protect
+```
+
+> [!TIP]
+> The value passed with the dedicated argument will always override what you pass inside the payload
+
+So let's say you run this command:
+```bash
+oudjat connectors.edr.sentinelone --group-policy-update --ids 01234567890 --malicious-policy protect --payload '{"data": {"maliciousPolicy": "detect"}}'
+```
+- The policy is set to **detect** in the payload
+- But the dedicated option set it to **protect**
+
+> [!WARNING]
+> Please check the SentinelOne API documentation to know which parameters you can pass and how they must be formatted.
+
+### 📝Exemples
 
 ```bash
 # Export agents details into a json file
@@ -423,7 +487,7 @@ oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1
 
 ## 🔌 Connectors - 🌐Endoflife
 
-### Description
+### 💡Description
 
 A connector to retrieve data from [endoflife](https://endoflife.date/) API.
 Endoflife.date is a website that documents end of life and support lifecycles for various products.
@@ -437,16 +501,17 @@ Endoflife.date is a website that documents end of life and support lifecycles fo
 - Services
 - Standards
 
-### Reference
+### 📚Reference
 
 `connectors.endoflife`
 
-### Prerequisites
+### ☑️Prerequisites
 
 - No API key, nor special access is required.
+- No credential are required either.
 - You just need an internet access.
 
-### Usage
+### 🚀Usage
 
 | Usage              | Description                                 |
 | ------------------ | ------------------------------------------- |
@@ -472,7 +537,7 @@ oudjat connectors.endoflife --oses [options]
 oudjat connectors.endoflife --tags [--tag=TAG] [options]
 ```
 
-### Options
+### 🎛️Options
 
 | Option                     | Description                              |
 | -------------------------- | ---------------------------------------- |
@@ -482,7 +547,7 @@ oudjat connectors.endoflife --tags [--tag=TAG] [options]
 | --release-name=RELNAME     | Specify a release name (its version)     |
 | --tag=TAG                  | Specify one or several tag (repeatable)  |
 
-### Exemple
+### 📝Exemples
 
 ```bash
 oudjat connectors.endoflife --products --product-name LibreOffice --json ./libreoffice.json
@@ -491,107 +556,125 @@ oudjat connectors.endoflife --windows --csv ./windows.csv
 
 ## 🔌 Connectors - LDAP
 
-### Description
+### 💡Description
 
-### Reference
+### 📚Reference
 
 `connectors.ldap`
 
-### Usage
+### ☑️Prerequisites
+
+### 🚀Usage
 
 ```bash
 ```
 
-### Options
+### 🎛️Options
 
 | Option | Description |
 | ------ | ----------- |
 
-### Exemple
+### 📝Exemples
 
 ```bash
 ```
 
 ## 🔌 Connectors - 🌐MS.CVRF
 
-### Reference
+### 💡Description
+
+### 📚Reference
 
 `connectors.ms.cvrf`
 
-### Usage
+### ☑️Prerequisites
+
+### 🚀Usage
 
 ```bash
 ```
 
-### Options
+### 🎛️Options
 
 | Option | Description |
 | ------ | ----------- |
 
-### Exemple
+### 📝Exemples
 
 ```bash
 ```
 
 ## 🔌 Connectors - MS.SCCM
 
-### Reference
+### 💡Description
+
+### 📚Reference
 
 `connectors.ms.sccm`
 
-### Usage
+### ☑️Prerequisites
+
+### 🚀Usage
 
 ```bash
 ```
 
-### Options
+### 🎛️Options
 
 | Option | Description |
 | ------ | ----------- |
 
-### Exemple
+### 📝Exemples
 
 ```bash
 ```
 
 ## 🔌 Connectors - Tenable.SC
 
-### Reference
+### 💡Description
+
+### 📚Reference
 
 ``
 
-### Usage
+### ☑️Prerequisites
+
+### 🚀Usage
 
 ```bash
 ```
 
-### Options
+### 🎛️Options
 
 | Option | Description |
 | ------ | ----------- |
 
-### Exemple
+### 📝Exemples
 
 ```bash
 ```
 
 ## 🔌 Connectors - 🌐Vulns
 
-### Reference
+### 💡Description
+
+### 📚Reference
 
 ``
 
-### Usage
+### ☑️Prerequisites
+
+### 🚀Usage
 
 ```bash
 ```
 
-### Options
+### 🎛️Options
 
 | Option | Description |
 | ------ | ----------- |
 
-### Exemple
+### 📝Exemples
 
 ```bash
 ```
