@@ -1,10 +1,10 @@
-# Command usage
+# Oudjat Command line usage
 
 Below you can find details about Oudjat command line usage.
 For now, Oudjat includes two operating modes.
 
-1. 🐚Command Line
-2. ⚙️Configuration File
+1. 🐚Command Line (covered bellow)
+2. ⚙️Configuration File (covered in its [dedicated doc file](config_file))
 
 ## 🔌 Connectors
 
@@ -46,17 +46,16 @@ The connectors commands **share some common operations** you can pass as options
 | -o --output=LOGFILE    | Specify a file to save the execution logs                                     |
 | -S --silent            | Simple output                                                                 |
 | -V --version           | Show the program version and exit                                             |
-| --csv=CSV              | Save results as a CSV file                                                    |
-| --json=JSON            | Save results as a JSON file                                                   |
+| --csv=CSV              | Save results as CSV to the specified list of location                         |
+| --json=JSON            | Save results as JSON to the specified list of location                        |
 | --print                | Print the results in the terminal                                             |
-| --key-filter=KEYFILTER | Filter the final result keys                                                  |
-| --sort=SORTKEY         | Sort the final results using the provided key                                 |
+| --key-filter=KEYFILTER | A list of keys to filter the final results with                               |
+| --sort=SORTKEY         | A key to sort the result with                                                 |
 | --sort-reverse         | Reverse the sorting order                                                     |
 
 #### 📦JSON String
 
-> [!IMPORTANT]
-> You will often see connectors with at least one option that expects a JSON string argument (e.g. `--payload`)
+You will often see connectors with at least one option that expects a JSON string argument (e.g. `--payload`)
 
 Provided JSON string must follow... Well, JSON syntax:
 
@@ -72,9 +71,45 @@ oudjat connectors.<connector_ref> --usage --payload '{"attribute1": 2, "attribut
 
 Any invalid JSON will result with an error.
 
+#### 📋Lists
+
+You may also come across several options that need a **list of elements**.
+
+- IDs
+- Names
+
+> [!TIP]
+> Any list can contain a single element as well as multiple ones. Because... it's a list right...
+
+> [!TIP]
+> You can provide the list in two different ways
+
+1. Provide the list directly
+
+```bash
+oudjat connectors.<connector_ref> --usage --names Rick,Roy,Pris
+```
+
+> [!TIP]
+> Each element in the list must be separated by a comma, no space
+
+2. Provide the list as a file
+
+```bash
+oudjat connectors.<connector_ref> --usage --names @./path/to/file.txt
+```
+
+> [!TIP]
+> To specify that the list is a file, you must include an at sign **@** at the beginning of the argument value.
+> Each line of the file will be considered a value. So one element (name, id, whatever) per line.
+> The provided file can have any extension, as long as its content is clear text
+
+> [!IMPORTANT]
+> Check option description to know if the option expects a list
+
 #### 🔑Credentials
 
-In a lot of cases, the connector will also require that you provide 🔑**credentials** to perform some form of 👤**authentication**.
+In a lot of cases, the connector will require that you provide 🔑**credentials** to perform some form of 👤**authentication**.
 You can provide 🔑 with these options
 
 | Option          | Description                                                                                                         |
@@ -186,7 +221,7 @@ oudjat connectors.cert.certfr --feed
 | --feed-date=FEEDDATE | A filter to retrieve only RSS feed items that were published after a certain date (YYYY-MM-DD format) |
 | --limit=LIMIT        | Define a limit to the number of CVEs resolve when using max-cve option [default: 50]                  |
 | --max-cve            | Resolve CVEs data and the highests (most critical) ones                                               |
-| --keywords=KEYWORDS  | A list of keywords (comma separated, no space)                                                        |
+| --keywords=KEYWORDS  | A list of keywords to match pages                                                                     |
 
 > [!NOTE]
 > You can optionally fetch data for the CVEs referenced in parsed pages using the `--max-cve` option.
@@ -231,9 +266,8 @@ You will need several elements to use this connector:
 2. An API token
 3. The required permissions to query the endpoints you want to reach
 
-🔑Credentials are needed for this connector. See [[commands#🔑Credentials]] section
-
 > [!IMPORTANT]
+> 🔑Credentials are needed for this connector. See [[commands#🔑Credentials]] section
 > For this connector, the password is the API token
 
 ### 🚀Usage
@@ -442,13 +476,13 @@ oudjat connectors.edr.sentinelone --sites-by-name
 | --verdict-filter=VERDICTFILTER          | a list of incident statuses for alert/threat selection                     |
 
 > [!IMPORTANT]
-> Some of the options listed above expect a [[commands#JSON String]] argument:
+> Some of the options listed above expect a [[commands#📦JSON String]] argument:
 
 - `--payload`
-    - The payload is basically what is sent in the request. 
-    - So it can contain any attribute accepted by the SentinelOne endpoint.
-    - In theory, you only need the payload option to do whatever you want with every usage.
-    - For ease of use, some parameters have their dedicated option
+  - The payload is basically what is sent in the request.
+  - So it can contain any attribute accepted by the SentinelOne endpoint.
+  - In theory, you only need the payload option to do whatever you want with every usage.
+  - For ease of use, some parameters have their dedicated option
 
 So...
 
@@ -466,9 +500,11 @@ oudjat connectors.edr.sentinelone --group-policy-update --ids 01234567890 --mali
 > The value passed with the dedicated argument will always override what you pass inside the payload
 
 So let's say you run this command:
+
 ```bash
-oudjat connectors.edr.sentinelone --group-policy-update --ids 01234567890 --malicious-policy protect --payload '{"data": {"maliciousPolicy": "detect"}}'
+oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1API" --group-policy-update --ids 01234567890 --malicious-policy protect --payload '{"data": {"maliciousPolicy": "detect"}}'
 ```
+
 - The policy is set to **detect** in the payload
 - But the dedicated option set it to **protect**
 
