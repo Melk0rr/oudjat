@@ -53,7 +53,7 @@ The connectors commands **share some common operations** you can pass as options
 | --sort=SORTKEY         | Sort the final results using the provided key                                 |
 | --sort-reverse         | Reverse the sorting order                                                     |
 
-#### JSON String
+#### 📦JSON String
 
 > [!IMPORTANT]
 > You will often see connectors with at least one option that expects a JSON string argument (e.g. `--payload`)
