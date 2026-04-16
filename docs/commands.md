@@ -6,15 +6,11 @@ For now, Oudjat includes two operating modes.
 1. 🐚Command Line (covered bellow)
 2. ⚙️Configuration File (covered in its [dedicated doc file](config_file))
 
-## TOC
+<!-- TOC -->
 
-1. [Connectors](<#🔌 Connectors>)
-2. [Connectors - CERT.CERTFR](<#🔌Connectors - 🌐CERT.CERTFR>)
-3. [Connectors - EDR.Cybereason](<#🔌 Connectors - EDR.Cybereason>)
-4. [Connectors - EDR.SentinelOne](<#🔌 Connectors - EDR.Sentinelone>)
-5. [Connectors - Endoflife](<#🔌 Connectors - 🌐Endoflife>)
-6. [Connectors - LDAP](<#🔌 Connectors - LDAP>)
-7. [Connectors - MS.SCCM](<#🔌 Connectors - MS.SCCM>)
+# Table of Contents
+
+<!-- /TOC -->
 
 ## 🔌 Connectors
 
