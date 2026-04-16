@@ -37,10 +37,6 @@ class S1ConnectorCommand(ConnectorCommand):
             short="c",
             arg="SERVICE",
         ),
-        "--filter": CmdOpt(
-            "Provide a JSON filter to narrow down selection",
-            arg="FILTER",
-        ),
         "--ids": CmdOpt(
             "A list of IDs to narrow down selection. See the doc for full usage details",
             arg="IDS",
@@ -161,7 +157,7 @@ class S1ConnectorCommand(ConnectorCommand):
             "Change the verdict of filtered threats",
             (
                 "--threats-verdict",
-                "[--verdict=VERDICT] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER]",
+                "[--verdict=VERDICT] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--payload=PAYLOAD]",
             ),
             {
                 "verdict": CmdUsageOpt("--verdict"),
@@ -170,14 +166,14 @@ class S1ConnectorCommand(ConnectorCommand):
                 "status_filter": CmdUsageOpt("--status-filter"),
                 "verdict_filter": CmdUsageOpt("--verdict-filter"),
                 "file_path": CmdUsageOpt("--path"),
-                "threat_filter": CmdUsageOpt("--filter"),
+                "payload": CmdUsageOpt("--payload"),
             },
         ),
         "--threats-incident": CmdUsage(
             "Change the verdict and status of filtered threats",
             (
                 "--threats-incident",
-                "(--status=STATUS --verdict=VERDICT) [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER]",
+                "(--status=STATUS --verdict=VERDICT) [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--payload=PAYLOAD]",
             ),
             {
                 "status": CmdUsageOpt("--status"),
@@ -188,7 +184,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "verdict_filter": CmdUsageOpt("--verdict-filter"),
                 "file_path": CmdUsageOpt("--path"),
                 "auto": CmdUsageOpt("--auto"),
-                "threat_filter": CmdUsageOpt("--filter"),
+                "payload": CmdUsageOpt("--payload"),
             },
         ),
         # Alerts
@@ -196,7 +192,7 @@ class S1ConnectorCommand(ConnectorCommand):
             "Change the verdict of filtered alerts",
             (
                 "--alert-verdict",
-                "[--verdict=VERDICT] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--filter=FILTER]",
+                "[--verdict=VERDICT] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--payload=PAYLOAD]",
             ),
             {
                 "verdict": CmdUsageOpt("--verdict"),
@@ -205,14 +201,14 @@ class S1ConnectorCommand(ConnectorCommand):
                 "status_filter": CmdUsageOpt("--status-filter"),
                 "verdict_filter": CmdUsageOpt("--verdict-filter"),
                 "file_path": CmdUsageOpt("--path"),
-                "alert_filter": CmdUsageOpt("--filter"),
+                "payload": CmdUsageOpt("--payload"),
             },
         ),
         "--alert-incident": CmdUsage(
             "Change the status of filtered alerts",
             (
                 "--alert-incident",
-                "[--status=STATUS] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--filter=FILTER]",
+                "[--status=STATUS] [--ids=IDS] [--sites-list=SITES] [--status-filter=STATUSFILTER] [--verdict-filter=VERDICTFILTER] [--path=PATH] [--auto] [--payload=PAYLOAD]",
             ),
             {
                 "status": CmdUsageOpt("--status"),
@@ -222,7 +218,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "verdict_filter": CmdUsageOpt("--verdict-filter"),
                 "file_path": CmdUsageOpt("--path"),
                 "auto": CmdUsageOpt("--auto"),
-                "alert_filter": CmdUsageOpt("--filter"),
+                "payload": CmdUsageOpt("--payload"),
             },
         ),
         # Applications
@@ -405,7 +401,6 @@ class S1ConnectorCommand(ConnectorCommand):
             {
                 "--auto": lambda opt, _: self._is_opt_present(opt),
                 "--ids": lambda opt, _: self._unify_str_opt(opt),
-                "--filter": lambda _, v: self._parse_payload(v),
                 "--names": lambda opt, _: self._unify_str_opt(opt),
                 "--payload": lambda _, v: self._parse_payload(v),
                 "--severities": lambda opt, _: list(map(int, self._unify_str_opt(opt))),
