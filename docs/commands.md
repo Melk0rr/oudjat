@@ -83,7 +83,7 @@ You can provide 🔑 with these options
 | -p --password   | The password to use for the connection                                                                              |
 | --creds-service | Alternatively, you can provide a service name that will be used to store credentials for that particular connector. |
 
-While using the _--creds-service_ option, you can either:
+While using the `--creds-service` option, you can either:
 
 - Provide a username to specifically connect with a certain user
 - Provide no extra information. Oudjat will automatically retrieve ailable 🔑 for the specified service
@@ -189,11 +189,11 @@ oudjat connectors.cert.certfr --feed
 | --keywords=KEYWORDS  | A list of keywords (comma separated, no space)                                                        |
 
 > [!NOTE]
-> You can optionally fetch data for the CVEs referenced in parsed pages using the _--max-cve_ option.
+> You can optionally fetch data for the CVEs referenced in parsed pages using the `--max-cve` option.
 > This will use CVE connectors for various CVE databases like Nist, CVE.org, and more to retrieve CVSS score and other CVE details.
 
 > [!WARNING]
-> Since CERTFR pages tend to have a lot of CVE references, you can limit how many are resolved with the _--limit_ option.
+> Since CERTFR pages tend to have a lot of CVE references, you can limit how many are resolved with the `--limit` option.
 
 ### 📝Exemples
 
