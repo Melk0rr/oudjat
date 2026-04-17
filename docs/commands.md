@@ -15,6 +15,8 @@ For now, Oudjat includes two operating modes.
 5. [Connectors - Endoflife](#connectors-endoflife)
 6. [Connectors - LDAP](#connectors-ldap)
 7. [Connectors - MS.SCCM](#connectors-ms-sccm)
+8. [Connectors - Tenable.SC](#connectors-tenable-sc)
+9. [Connectors - Vulns](#connectors-vulns)
 
 ## 🔌 Connectors
 
@@ -273,7 +275,7 @@ It provides ability to do various actions:
 
 You will need several elements to use this connector:
 
-1. An account on SentinelOne console at least.
+1. An account on SentinelOne console
 2. An API token
 3. The required permissions to query the endpoints you want to reach
 
@@ -605,21 +607,109 @@ oudjat connectors.endoflife --windows --csv ./windows.csv
 
 ### 💡Description
 
+A connector to extract data from an [LDAP](https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol) directory.
+
+The connector provides ways to extract various objects:
+
+- Users
+- Computers
+- Groups
+- Organizational Units (OU)
+- Group Policy Objects (GPO)
+
+> [!IMPORTANT]
+> This connector currently does not provide any way to write or edit objects in the directory.
+
 ### 📚Reference
 
 `connectors.ldap`
 
 ### ☑️Prerequisites
 
+You will need the following elements to use this connector:
+
+- A valid and active account in the directory you want to extract data from
+- Permission given to this account to read directory data
+
 ### 🚀Usage
 
+| Usage     | Description                                                                      |
+| --------- | -------------------------------------------------------------------------------- |
+| computers | Retrieve computer accounts                                                       |
+| gpos      | Retrieve Group Policy Objects                                                    |
+| groups    | Retrieve group objects                                                           |
+| objects   | Retrieve any type of LDAP objects. Result depends heavily on the provided filter |
+| ous       | Retrieve Organizational Unit objects                                             |
+| subnets   | Retrieve subnet objects                                                          |
+| users     | Retrieve user accounts                                                           |
+
 ```bash
+oudjat connectors.ldap --computers
+                       (-t=TARGET | --target=TARGET)
+                       (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                       [--attributes=ATTRIBUTES]
+                       [--search-base=SEARCHBASE]
+                       [--filter=FILTER]
+                       [options]
+oudjat connectors.ldap --gpos
+                       (-t=TARGET | --target=TARGET)
+                       (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                       [--displayname=DISPLAYNAME]
+                       [--name=NAME]
+                       [--search-base=SEARCHBASE]
+                       [--filter=FILTER]
+                       [--attributes=ATTRIBUTES]
+                       [options]
+oudjat connectors.ldap --groups
+                       (-t=TARGET | --target=TARGET)
+                       (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                       [--attributes=ATTRIBUTES]
+                       [--search-base=SEARCHBASE]
+                       [--filter=FILTER]
+                       [options]
+oudjat connectors.ldap --objects
+                       (-t=TARGET | --target=TARGET)
+                       (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                       [--attributes=ATTRIBUTES]
+                       [--search-base=SEARCHBASE]
+                       [--filter=FILTER]
+                       [options]
+oudjat connectors.ldap --ous
+                       (-t=TARGET | --target=TARGET)
+                       (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                       [--attributes=ATTRIBUTES]
+                       [--search-base=SEARCHBASE]
+                       [--filter=FILTER]
+                       [options]
+oudjat connectors.ldap --subnets
+                       (-t=TARGET | --target=TARGET)
+                       (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                       [--attributes=ATTRIBUTES]
+                       [--search-base=SEARCHBASE]
+                       [--filter=FILTER]
+                       [options]
+oudjat connectors.ldap --users
+                       (-t=TARGET | --target=TARGET)
+                       (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                       [--attributes=ATTRIBUTES]
+                       [--search-base=SEARCHBASE]
+                       [--filter=FILTER]
+                       [options]
 ```
 
 ### 🎛️Options
 
-| Option | Description |
-| ------ | ----------- |
+| Option                     | Description                                                      |
+| -------------------------- | ---------------------------------------------------------------- |
+| -c --creds-service=SERVICE | A credential service name to retrieve username and password from |
+| -u --username=USER         | The username used for authentication                             |
+| -p --password=PASS         | The password used for authentication                             |
+| -t --target=TARGET         | Specify the SentinelOne URL to query                             |
+| --attributes=ATTRIBUTES    | Provide additional attributes to retrieve from server            |
+| --displayname=DISPLAYNAME  | The GPO display name                                             |
+| --filter=FILTER            | Provide an LDAP filter string to narrow down results             |
+| --name=NAME                | The GPO name (link)                                              |
+| --search-base=SEARCHBASE   | Where to base the search on in terms of directory location       |
 
 ### 📝Exemples
 
@@ -628,7 +718,13 @@ oudjat connectors.endoflife --windows --csv ./windows.csv
 
 ## 🔌 Connectors - 🌐MS.CVRF
 
+> [!WARNING]
+> Backend implemented. Command line to be implemented
+
 ### 💡Description
+
+A connector that can retrieve Microsoft KB data from [Microsoft CVRF API](https://api.msrc.microsoft.com/).
+Based on given CVEs, it can retrieve KB numbers that you can then check are deployed in your environment.
 
 ### 📚Reference
 
@@ -637,6 +733,9 @@ oudjat connectors.endoflife --windows --csv ./windows.csv
 ### ☑️Prerequisites
 
 ### 🚀Usage
+
+| Usage | Description |
+| ----- | ----------- |
 
 ```bash
 ```
@@ -663,6 +762,9 @@ oudjat connectors.endoflife --windows --csv ./windows.csv
 
 ### 🚀Usage
 
+| Usage | Description |
+| ----- | ----------- |
+
 ```bash
 ```
 
@@ -687,6 +789,9 @@ oudjat connectors.endoflife --windows --csv ./windows.csv
 ### ☑️Prerequisites
 
 ### 🚀Usage
+
+| Usage | Description |
+| ----- | ----------- |
 
 ```bash
 ```
@@ -713,6 +818,9 @@ oudjat connectors.endoflife --windows --csv ./windows.csv
 
 ### 🚀Usage
 
+| Usage | Description |
+| ----- | ----------- |
+
 ```bash
 ```
 
@@ -729,3 +837,5 @@ oudjat connectors.endoflife --windows --csv ./windows.csv
 ---
 
 ## 🛠️ Utils
+
+## 🛠️ Utils - Credentials
