@@ -29,6 +29,26 @@ class LDAPConnectorCommand(ConnectorCommand):
         "A command to interact with an LDAP server through the oudjat LDAPConnector",
     )
     __cmd_props__.options = {
+        "--creds-service": CmdOpt(
+            "A credential service name to retrieve username and password from",
+            short="c",
+            arg="SERVICE",
+        ),
+        "--username": CmdOpt(
+            "The username used for authentication",
+            short="u",
+            arg="USER",
+        ),
+        "--password": CmdOpt(
+            "The password used for authentication",
+            short="p",
+            arg="PASS",
+        ),
+        "--target": CmdOpt(
+            "Specify the SentinelOne URL to query",
+            short="t",
+            arg="TARGET",
+        ),
         "--attributes": CmdOpt(
             "Provide additional attributes to retrieve from server",
             arg="ATTRIBUTES",
@@ -45,24 +65,9 @@ class LDAPConnectorCommand(ConnectorCommand):
             "The GPO name (link)",
             arg="NAME",
         ),
-        "--password": CmdOpt(
-            "The password used for authentication",
-            short="p",
-            arg="PASS",
-        ),
         "--search-base": CmdOpt(
             "Where to base the search on in terms of directory location",
             arg="SEARCHBASE",
-        ),
-        "--target": CmdOpt(
-            "Specify the SentinelOne URL to query",
-            short="t",
-            arg="TARGET",
-        ),
-        "--username": CmdOpt(
-            "The username used for authentication",
-            short="u",
-            arg="USER",
         ),
     }
 
@@ -106,7 +111,7 @@ class LDAPConnectorCommand(ConnectorCommand):
             },
         ),
         "--objects": CmdUsage(
-            "Retrieve any LDAP objects",
+            "Retrieve any type of LDAP objects. Result depends heavily on the provided filter",
             (
                 "--objects",
                 "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
