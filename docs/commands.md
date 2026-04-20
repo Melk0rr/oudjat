@@ -6,19 +6,19 @@ For now, Oudjat includes two operating modes.
 1. 🐚Command Line (covered bellow)
 2. ⚙️Configuration File (covered in its [dedicated doc file](config_file)
 
-## 📖 Table of Contents
+## 📖Table of Contents
 
 1. [Connectors](#connectors)
-2. [Connectors - CERT.CERTFR](#connectors-cert-certfr)
-3. [Connectors - EDR.Cybereason](#connectors-edr-cybereason)
-4. [Connectors - EDR.SentinelOne](#connectors-edr-sentinelone)
-5. [Connectors - Endoflife](#connectors-endoflife)
-6. [Connectors - LDAP](#connectors-ldap)
-7. [Connectors - MS.SCCM](#connectors-ms-sccm)
-8. [Connectors - Tenable.SC](#connectors-tenable-sc)
-9. [Connectors - Vulns](#connectors-vulns)
+2. [Connectors.CERT.CERTFR](#connectors-cert-certfr)
+3. [Connectors.EDR.Cybereason](#connectors-edr-cybereason)
+4. [Connectors.EDR.SentinelOne](#connectors-edr-sentinelone)
+5. [Connectors.Endoflife](#connectors-endoflife)
+6. [Connectors.LDAP](#connectors-ldap)
+7. [Connectors.MS.SCCM](#connectors-ms-sccm)
+8. [Connectors.Tenable.SC](#connectors-tenable-sc)
+9. [Connectors.Vulns](#connectors-vulns)
 
-## 🔌 Connectors
+## 🔌Connectors
 
 ### 💡Description
 
@@ -41,12 +41,23 @@ You will find every connector reference in their **dedicated command section**.
 
 ### 🎛️Options
 
-Oudjat uses [docotp](http://docopt.org/) to handle its usages and command options.
+Oudjat uses [docotp](http://docopt.org/) to handle its usages and command options. As well as printing help messages.
 
 > [!IMPORTANT]
 > The most important rule of docopt you need to know is:
 > options wrapped with **parenthesis** () or not wrapped at all, are required.
 > options wrappped with **brackets** [] are optional.
+
+Each option is described under its **Options** section in help messages.
+While the usages under the **Usage** section each describe a way you can use the script.
+
+> [!HINT]
+> You may often see the `[options]` string in usage lines.
+> This is a shortcut to specify that you **can** use other options than the ones specified in the usage line.
+
+> [!WARNING]
+> If `[options]` is not present in the usage line, it means you have to strictly stick with the options mentioned in that line.
+> If you use an options that is not mentioned in the line, it will either have no effect, or throw an error
 
 The connectors commands **share some common operations** you can pass as options:
 
@@ -250,12 +261,12 @@ oudjat connectors.cert.certfr -t CERTFR-2021-ALE-022" --max-cve --limit 20
 oudjat connectors.cert.certfr --feed --date-filter "2025-12-01"
 ```
 
-## 🔌 Connectors - EDR.Cybereason
+## 🔌Connectors - EDR.Cybereason
 
 > [!WARNING]
 > Cybereason connector is no longer maintained
 
-## 🔌 Connectors - EDR.Sentinelone
+## 🔌Connectors - EDR.Sentinelone
 
 ### 💡Description
 
@@ -285,7 +296,7 @@ You will need several elements to use this connector:
 
 ### 🚀Usage
 
-> [!WARNING]
+> [!CAUTION]
 > Some commands (usages) bellow can have a significant impact on your asssets
 > Whether, you want to change a policy, move an asset, change a threat status, etc. It can have direct or indirect consequences
 > Trade with the usages marked with ❗ carefully !
@@ -534,7 +545,7 @@ oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1
 oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1API" --group-policy-update --ids "@./group_ids.txt" --malicious-policy protect
 ```
 
-## 🔌 Connectors - Endoflife
+## 🔌Connectors - Endoflife
 
 ### 💡Description
 
@@ -603,7 +614,7 @@ oudjat connectors.endoflife --products --product-name LibreOffice --json ./libre
 oudjat connectors.endoflife --windows --csv ./windows.csv
 ```
 
-## 🔌 Connectors - LDAP
+## 🔌Connectors - LDAP
 
 ### 💡Description
 
@@ -616,6 +627,7 @@ The connector provides ways to extract various objects:
 - Groups
 - Organizational Units (OU)
 - Group Policy Objects (GPO)
+- Subnets
 
 > [!IMPORTANT]
 > This connector currently does not provide any way to write or edit objects in the directory.
@@ -649,6 +661,8 @@ oudjat connectors.ldap --computers
                        (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
                        [--attributes=ATTRIBUTES]
                        [--search-base=SEARCHBASE]
+                       [--dn=DN]
+                       [--name=NAME]
                        [--filter=FILTER]
                        [options]
 oudjat connectors.ldap --gpos
@@ -665,6 +679,8 @@ oudjat connectors.ldap --groups
                        (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
                        [--attributes=ATTRIBUTES]
                        [--search-base=SEARCHBASE]
+                       [--dn=DN]
+                       [--name=NAME]
                        [--filter=FILTER]
                        [options]
 oudjat connectors.ldap --objects
@@ -672,6 +688,8 @@ oudjat connectors.ldap --objects
                        (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
                        [--attributes=ATTRIBUTES]
                        [--search-base=SEARCHBASE]
+                       [--dn=DN]
+                       [--name=NAME]
                        [--filter=FILTER]
                        [options]
 oudjat connectors.ldap --ous
@@ -679,6 +697,7 @@ oudjat connectors.ldap --ous
                        (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
                        [--attributes=ATTRIBUTES]
                        [--search-base=SEARCHBASE]
+                       [--name=NAME]
                        [--filter=FILTER]
                        [options]
 oudjat connectors.ldap --subnets
@@ -693,6 +712,8 @@ oudjat connectors.ldap --users
                        (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
                        [--attributes=ATTRIBUTES]
                        [--search-base=SEARCHBASE]
+                       [--dn=DN]
+                       [--name=NAME]
                        [--filter=FILTER]
                        [options]
 ```
@@ -707,19 +728,44 @@ oudjat connectors.ldap --users
 | -t --target=TARGET         | Specify the SentinelOne URL to query                             |
 | --attributes=ATTRIBUTES    | Provide additional attributes to retrieve from server            |
 | --displayname=DISPLAYNAME  | The GPO display name                                             |
+| --dn=DN                    | DistinguishedName(s) to narrow down elements research            |
 | --filter=FILTER            | Provide an LDAP filter string to narrow down results             |
-| --name=NAME                | The GPO name (link)                                              |
+| --name=NAME                | Name(s) to narrow down elements research                         |
+| --san=SAN                  | SAMAccountName(s) to narrow down elements research               |
 | --search-base=SEARCHBASE   | Where to base the search on in terms of directory location       |
+
+> [!TIP]
+> Options for this connector are mostly trivial (No JSON string or complex object).
+> Except for the `--filter` option, which allows you to pass a custom **LDAP filter** to narrow down query results.
+
+You can check this [cheatsheet](https://gist.github.com/jonlabelle/0f8ec20c2474084325a89bc5362008a7) to learn everything you need about LDAP filters
+
+> [!IMPORTANT]
+> Basically, an LDAP filter is formatted like this : `(<attribute><operator><value>)`.
+> And you can combine them using either the **AND** operator `&` or the **OR** operator `|`
+
+> [!EXAMPLE]
+> Retrieve users:
+> (objectClass=user)
+>
+> Retrieve user with **sAMAccountName** attribute equal to r.deckard:
+> (&(objectClass=user)(sAMAccountName=r.deckard))
 
 ### 📝Exemples
 
 ```bash
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --users --filter (sAMAccountName=r.batty)
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --users --name "@./names.txt"
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --gpos --displayname MY-GPO
 ```
 
-## 🔌 Connectors - 🌐MS.CVRF
+## 🔌Connectors - MS.CVRF
 
-> [!WARNING]
-> Backend implemented. Command line to be implemented
+> [!DONE]
+> Backend implementation
+
+> [!TODO]
+> Command line implemented
 
 ### 💡Description
 
@@ -750,7 +796,7 @@ Based on given CVEs, it can retrieve KB numbers that you can then check are depl
 ```bash
 ```
 
-## 🔌 Connectors - MS.SCCM
+## 🔌Connectors - MS.SCCM
 
 ### 💡Description
 
@@ -778,7 +824,7 @@ Based on given CVEs, it can retrieve KB numbers that you can then check are depl
 ```bash
 ```
 
-## 🔌 Connectors - Tenable.SC
+## 🔌Connectors - Tenable.SC
 
 ### 💡Description
 
@@ -806,7 +852,7 @@ Based on given CVEs, it can retrieve KB numbers that you can then check are depl
 ```bash
 ```
 
-## 🔌 Connectors - 🌐Vulns
+## 🔌Connectors - 🌐Vulns
 
 ### 💡Description
 
@@ -836,6 +882,6 @@ Based on given CVEs, it can retrieve KB numbers that you can then check are depl
 
 ---
 
-## 🛠️ Utils
+## 🛠️Utils
 
-## 🛠️ Utils - Credentials
+## 🛠️Utils - Credentials
