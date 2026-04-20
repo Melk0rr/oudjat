@@ -4,13 +4,12 @@ Below you can find details about Oudjat command line usage.
 For now, Oudjat includes two operating modes.
 
 1. 🐚Command Line (covered bellow)
-2. ⚙️Configuration File (covered in its [dedicated doc file](config_file))
+2. ⚙️Configuration File (covered in its [dedicated doc file](config_file)
 
-## Table of Contents
+## 📖 Table of Contents
 
-[TOC]
 1. [Connectors](#connectors)
-2. [Connectors - CERT.CERTFR](#connectors-cert-certfr) [Test](<commands#🔌Connectors - 🌐CERT.CERTFR>) 
+2. [Connectors - CERT.CERTFR](#connectors-cert-certfr)
 3. [Connectors - EDR.Cybereason](#connectors-edr-cybereason)
 4. [Connectors - EDR.SentinelOne](#connectors-edr-sentinelone)
 5. [Connectors - Endoflife](#connectors-endoflife)
@@ -185,7 +184,7 @@ oudjat connectors.endoflife --help
 
 ---
 
-## 🔌Connectors - 🌐CERT.CERTFR
+## 🔌Connectors - CERT.CERTFR
 
 ### 💡Description
 
@@ -535,7 +534,7 @@ oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1
 oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1API" --group-policy-update --ids "@./group_ids.txt" --malicious-policy protect
 ```
 
-## 🔌 Connectors - 🌐Endoflife
+## 🔌 Connectors - Endoflife
 
 ### 💡Description
 
