@@ -57,13 +57,21 @@ class LDAPConnectorCommand(ConnectorCommand):
             "The GPO display name",
             arg="DISPLAYNAME",
         ),
+        "--dn": CmdOpt(
+            "DistinguishedName(s) to narrow down elements research",
+            arg="DN",
+        ),
         "--filter": CmdOpt(
             "Provide an LDAP filter string to narrow down results",
             arg="FILTER",
         ),
         "--name": CmdOpt(
-            "The GPO name (link)",
+            "Name(s) to narrow down elements research",
             arg="NAME",
+        ),
+        "--san": CmdOpt(
+            "SAMAccountName(s) to narrow down elements research",
+            arg="SAN",
         ),
         "--search-base": CmdOpt(
             "Where to base the search on in terms of directory location",
@@ -76,10 +84,12 @@ class LDAPConnectorCommand(ConnectorCommand):
             "Retrieve computer accounts",
             (
                 "--computers",
-                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
+                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--dn=DN] [--name=NAME] [--filter=FILTER]",
             ),
             {
                 "search_filter": CmdUsageOpt("--filter"),
+                "dn": CmdUsageOpt("--dn"),
+                "name": CmdUsageOpt("--name"),
                 "attributes": CmdUsageOpt("--atributes"),
                 "search_base": CmdUsageOpt("--search-base"),
             },
@@ -102,10 +112,12 @@ class LDAPConnectorCommand(ConnectorCommand):
             "Retrieve group objects",
             (
                 "--groups",
-                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
+                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--dn=DN] [--name=NAME] [--filter=FILTER]",
             ),
             {
                 "search_filter": CmdUsageOpt("--filter"),
+                "dn": CmdUsageOpt("--dn"),
+                "name": CmdUsageOpt("--name"),
                 "attributes": CmdUsageOpt("--atributes"),
                 "search_base": CmdUsageOpt("--search-base"),
             },
@@ -114,10 +126,12 @@ class LDAPConnectorCommand(ConnectorCommand):
             "Retrieve any type of LDAP objects. Result depends heavily on the provided filter",
             (
                 "--objects",
-                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
+                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--dn=DN] [--name=NAME] [--filter=FILTER]",
             ),
             {
                 "search_filter": CmdUsageOpt("--filter"),
+                "dn": CmdUsageOpt("--dn"),
+                "name": CmdUsageOpt("--name"),
                 "attributes": CmdUsageOpt("--atributes"),
                 "search_base": CmdUsageOpt("--search-base"),
             },
@@ -126,10 +140,11 @@ class LDAPConnectorCommand(ConnectorCommand):
             "Retrieve Organizational Unit objects",
             (
                 "--ous",
-                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
+                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--name=NAME] [--filter=FILTER]",
             ),
             {
                 "search_filter": CmdUsageOpt("--filter"),
+                "name": CmdUsageOpt("--name"),
                 "attributes": CmdUsageOpt("--atributes"),
                 "search_base": CmdUsageOpt("--search-base"),
             },
@@ -150,12 +165,14 @@ class LDAPConnectorCommand(ConnectorCommand):
             "Retrieve user accounts",
             (
                 "--users",
-                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
+                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--dn=DN] [--name=NAME] [--filter=FILTER]",
             ),
             {
+                "search_filter": CmdUsageOpt("--filter"),
+                "dn": CmdUsageOpt("--dn"),
+                "name": CmdUsageOpt("--name"),
                 "attributes": CmdUsageOpt("--atributes"),
                 "search_base": CmdUsageOpt("--search-base"),
-                "search_filter": CmdUsageOpt("--filter"),
             },
         ),
     }
@@ -163,6 +180,7 @@ class LDAPConnectorCommand(ConnectorCommand):
     __cmd_props__.prepend_usages(
         "(-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])"
     )
+
     __cmd_props__.append_usages("[options]")
 
     __doc_builder__: "DocBuilder" = ConnectorCommand._gen_doc("oudjat", __cmd_props__, "")
@@ -195,6 +213,13 @@ class LDAPConnectorCommand(ConnectorCommand):
             )
 
         self.connector.connect()
+
+        # Options transform based on instance
+        self.__cmd_props__.opts_transform(
+            {
+                "--name": lambda opt, _: self._unify_str_opt(opt),
+            }
+        )
 
         # Usage backends
         self.__cmd_props__.backends(

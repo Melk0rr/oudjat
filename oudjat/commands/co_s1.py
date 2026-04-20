@@ -239,7 +239,7 @@ class S1ConnectorCommand(ConnectorCommand):
             "Retrieve an inventory of endpoints for a specific application",
             (
                 "--applications-endpoints",
-                "[--names=NAMES] [--vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD]",
+                "[--names=NAMES --vendors=VENDOR] [--sites-list=SITES] [--payload=PAYLOAD]",
             ),
             {
                 "name": CmdUsageOpt("--names", transform=lambda lst: next(iter(lst))),
