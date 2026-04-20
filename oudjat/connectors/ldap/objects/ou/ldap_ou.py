@@ -171,7 +171,7 @@ class LDAPOrganizationalUnit(LDAPObject):
 
         name_filter = LDAPFilter(operator="|")
         for ref in gpo_refs:
-            name_filter.add_node(LDAPFilter(f"(name={ref})"))
+            name_filter += LDAPFilter(f"(name={ref})")
 
         gpo_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.GPO)
         gpo_entries = self.capabilities.ldap_search(

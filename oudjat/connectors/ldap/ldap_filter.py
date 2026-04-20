@@ -364,6 +364,13 @@ class LDAPFilter:
 
         return self._nodes
 
+    def clr_operator(self) -> None:
+        """
+        Clear the current filter operator.
+        """
+
+        self._operator = None
+
     def set_operator_from_str(self, new_operator: str) -> None:
         """
         Set a new operator for the current filter based on a string.
@@ -400,17 +407,19 @@ class LDAPFilter:
             self._operator = LDAPFilterOperator(tuple_filter[0])
             self._nodes = [LDAPFilter(filter_input=sub) for sub in tuple_filter[1]]
 
-    def add_node(self, node: "LDAPFilter") -> None:
+    def __iadd__(self, other: "LDAPFilter") -> "LDAPFilter":
         """
         Add a new node to the current filter if its operator is not None.
 
         Args:
-            node (LDAPFilter): New node / sub-filter to add to the current filter
+            other (LDAPFilter): New node / sub-filter to add to the current filter
         """
         # TODO: Maybe add node under different condition (always set a value tuple and check if the tuple contains 2 or 3 values ?)
 
         if self._operator is not None:
-            self._nodes.append(node)
+            self._nodes.append(other)
+
+        return self
 
     def __and__(self, other: "LDAPFilter") -> "LDAPFilter":
         """
@@ -455,7 +464,7 @@ class LDAPFilter:
             nodes_str = "".join(map(str, self._nodes))
             filter_str = f"{self._operator.value}{nodes_str}"
 
-        return f"({filter_str})"
+        return f"({filter_str})" if len(filter_str) > 0 else ""
 
     # ****************************************************************
     # Class methods
@@ -465,7 +474,7 @@ class LDAPFilter:
         cls,
         filter_fmt: "LDAPFilterStrFormat | str",
         filter_values: "StrType",
-        operator: "LDAPFilterOperator" = LDAPFilterOperator.OR,
+        operator: "LDAPFilterOperator | str" = LDAPFilterOperator.OR,
     ) -> "LDAPFilter":
         """
         Return an LDAPFilter based on the provided format and values.
@@ -479,7 +488,13 @@ class LDAPFilter:
             LDAPFilter: New filter based on provided arguments
         """
 
+        if not isinstance(operator, LDAPFilterOperator):
+            operator = LDAPFilterOperator(operator)
+
         if not isinstance(filter_fmt, LDAPFilterStrFormat):
+            if filter_fmt.upper() not in LDAPFilterStrFormat:
+                raise KeyError(f"{Context()}::Invalid LDAP filter format provided {filter_fmt}")
+
             filter_fmt = LDAPFilterStrFormat[filter_fmt.upper()]
 
         if not isinstance(filter_values, list):
