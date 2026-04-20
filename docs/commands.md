@@ -9,7 +9,7 @@ For now, Oudjat includes two operating modes.
 ## Table of Contents
 
 1. [Connectors](#connectors)
-2. [Connectors - CERT.CERTFR](docs/commands#^22966)
+2. [Connectors - CERT.CERTFR](#connectors-cert-certfr) [Test](<commands#🔌Connectors - 🌐CERT.CERTFR>) 
 3. [Connectors - EDR.Cybereason](#connectors-edr-cybereason)
 4. [Connectors - EDR.SentinelOne](#connectors-edr-sentinelone)
 5. [Connectors - Endoflife](#connectors-endoflife)
@@ -184,7 +184,7 @@ oudjat connectors.endoflife --help
 
 ---
 
-## 🔌Connectors - 🌐CERT.CERTFR   ^22966
+## 🔌Connectors - 🌐CERT.CERTFR
 
 ### 💡Description
 
