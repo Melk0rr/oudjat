@@ -643,7 +643,7 @@ You will need the following elements to use this connector:
 - A valid and active account in the directory you want to extract data from
 - Permission given to this account to read directory data
 
-### 🚀Usage
+### 🚀Usage {#ldap-usage}
 
 | Usage     | Description                                                                      |
 | --------- | -------------------------------------------------------------------------------- |
@@ -734,6 +734,8 @@ oudjat connectors.ldap --users
 | --san=SAN                  | SAMAccountName(s) to narrow down elements research               |
 | --search-base=SEARCHBASE   | Where to base the search on in terms of directory location       |
 
+#### Filter
+
 > [!TIP]
 > Options for this connector are mostly trivial (No JSON string or complex object).
 > Except for the `--filter` option, which allows you to pass a custom **LDAP filter** to narrow down query results.
@@ -742,30 +744,74 @@ You can check this [cheatsheet](https://gist.github.com/jonlabelle/0f8ec20c24740
 
 > [!IMPORTANT]
 > Basically, an LDAP filter is formatted like this : `(<attribute><operator><value>)`.
-> And you can combine them using either the **AND** operator `&` or the **OR** operator `|`
 
-> [!EXAMPLE]
-> Retrieve users:
-> (objectClass=user)
->
-> Retrieve user with **sAMAccountName** attribute equal to r.deckard:
-> (&(objectClass=user)(sAMAccountName=r.deckard))
+| Operator | Meaning                  |
+| :------: | ------------------------ |
+|   `=`    | Equality                 |
+|   `>=`   | Greater than or equal to |
+|   `<=`   | Less than or equal to    |
+|   `~=`   | Approximately equal to   |
+
+You can combine filters using either:
+
+- **AND** operator `&`
+- **OR** operator `|`
+
+You will find more details and exemples in the **cheatsheet** above
+
+#### Usage filter
+
+The [usages](commands#🚀Usage {#ldap-usage}) mentioned earlier have implicit filters.
+
+| Usage     | Description                                  |
+| --------- | -------------------------------------------- |
+| computers | (objectCategory=computer)                    |
+| gpos      | (objectClass=groupPolicyContainer)           |
+| groups    | (objectCategory=group)                       |
+| objects   | (objectClass=*)                              |
+| ous       | (objectClass=organizationalUnit)             |
+| subnets   | (objectClass=subnet)                         |
+| users     | (&(objectCategory=person)(objectClass=user)) |
+
+Which means that the filter you provide with `--filter` or other options will be **combined** with the one bound to the usage you call.
+
+So...
+
+```bash
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --computers --name Skynet
+```
+
+Or...
+
+```bash
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --computers --filter (name=Skynet)
+```
+
+Will end up with this combined filter:
+
+```text
+(&(objectCategory=computer)(name=Skynet))
+```
+
+> [!TIP]
+> If you want to do a generic search, use `--objects` which will basically retrieve any type of object.
+> You can then use other options to narrow down the results.
 
 ### 📝Exemples
 
 ```bash
 oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --users --filter (sAMAccountName=r.batty)
-oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --users --name "@./names.txt"
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --users --dn "@./users.txt"
 oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --gpos --displayname MY-GPO
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --computers --name Skynet,Wintermute,R2D2
 ```
 
 ## 🔌Connectors - MS.CVRF
 
-> [!DONE]
-> Backend implementation
+> [!IMPORTANT]
 
-> [!TODO]
-> Command line implemented
+- [x] Backend implementation
+- [ ] Command line implementation
 
 ### 💡Description
 
