@@ -5,7 +5,7 @@ from typing import Any, NamedTuple, override
 
 from oudjat.utils.types import StrType
 
-from ..ldap_filter import LDAPFilter, LDAPFilterObjectCls, LDAPFilterObjectCtg, LDAPFilterStrFormat
+from ..ldap_filter import LDAPBuiltinFilter, LDAPFilter, LDAPFilterObjectCls, LDAPFilterObjectCtg
 
 
 class LDAPObjectTypeProps(NamedTuple):
@@ -29,14 +29,14 @@ class LDAPObjectType(Enum):
 
     DEFAULT = LDAPObjectTypeProps(
         object_cls="*",
-        filter=LDAPFilter(LDAPFilterStrFormat.CLS("*")),
+        filter=LDAPBuiltinFilter.CLS("*"),
         attributes="*",
         ad_attributes=None,
     )
 
     COMPUTER = LDAPObjectTypeProps(
         object_cls="computer",
-        filter=LDAPFilter(LDAPFilterStrFormat.CTG(LDAPFilterObjectCtg.COMPUTER.value)),
+        filter=LDAPBuiltinFilter.CTG(LDAPFilterObjectCtg.COMPUTER),
         attributes=[
             "accountExpires",
             "cn",
@@ -67,7 +67,7 @@ class LDAPObjectType(Enum):
 
     GPO = LDAPObjectTypeProps(
         object_cls="groupPolicyContainer",
-        filter=LDAPFilter(LDAPFilterStrFormat.CLS(LDAPFilterObjectCls.GPO.value)),
+        filter=LDAPBuiltinFilter.CLS(LDAPFilterObjectCls.GPO),
         attributes=[
             "displayName",
             "gPCFileSysPath",
@@ -86,7 +86,7 @@ class LDAPObjectType(Enum):
 
     GROUP = LDAPObjectTypeProps(
         object_cls="group",
-        filter=LDAPFilter(LDAPFilterStrFormat.CTG(LDAPFilterObjectCtg.GROUP.value)),
+        filter=LDAPBuiltinFilter.CTG(LDAPFilterObjectCtg.GROUP),
         attributes=[
             "cn",
             "description",
@@ -105,7 +105,7 @@ class LDAPObjectType(Enum):
 
     OU = LDAPObjectTypeProps(
         object_cls="organizationalUnit",
-        filter=LDAPFilter(LDAPFilterStrFormat.CLS(LDAPFilterObjectCls.OU.value)),
+        filter=LDAPBuiltinFilter.CLS(LDAPFilterObjectCls.OU),
         attributes=[
             "description",
             "gpLink",
@@ -121,7 +121,7 @@ class LDAPObjectType(Enum):
 
     SUBNET = LDAPObjectTypeProps(
         object_cls="subnet",
-        filter=LDAPFilter(LDAPFilterStrFormat.CLS(LDAPFilterObjectCls.SUBNET.value)),
+        filter=LDAPBuiltinFilter.CLS(LDAPFilterObjectCls.SUBNET),
         attributes=[
             "cn",
             "description",
@@ -138,8 +138,8 @@ class LDAPObjectType(Enum):
     USER = LDAPObjectTypeProps(
         object_cls="user",
         filter=(
-            LDAPFilter(LDAPFilterStrFormat.CTG(LDAPFilterObjectCtg.PERSON.value))
-            & LDAPFilter(LDAPFilterStrFormat.CLS(LDAPFilterObjectCls.USER.value))
+            LDAPBuiltinFilter.CTG(LDAPFilterObjectCtg.PERSON)
+            & LDAPBuiltinFilter.CLS(LDAPFilterObjectCls.USER)
         ),
         attributes=[
             "accountExpires",

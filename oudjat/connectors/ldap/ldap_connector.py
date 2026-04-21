@@ -23,7 +23,7 @@ from .exceptions import (
     LDAPSchemaError,
     LDAPUnreachableServerError,
 )
-from .ldap_filter import LDAPFilter, LDAPFilterStrFormat
+from .ldap_filter import LDAPFilter
 from .objects import (
     LDAPCapabilities,
     LDAPComputer,
@@ -620,6 +620,17 @@ class LDAPConnector(Connector):
     def _merge_filters(
         self, base_filter: "LDAPFilter | str | None", **kwargs: "StrType | None"
     ) -> "LDAPFilter":
+        """
+        Merge filter elements provided as kwargs in a single LDAP filter.
+
+        Args:
+            base_filter (LDAPFilter | str | None): The base filter that may be provided as argument
+            **kwargs (StrType | None)            : Filtering elements (dn, name, san, etc.) to merge
+
+        Returns:
+            LDAPFilter: Merged filter
+        """
+
         if base_filter is None:
             base_filter = LDAPFilter()
 
