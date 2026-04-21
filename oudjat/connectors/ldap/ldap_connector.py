@@ -615,7 +615,7 @@ class LDAPConnector(Connector):
     # Methods - core
 
     # TODO: Methods to retrieve GPOs from OU and OUs from GPO
-    # TODO: Method to retrieve group members with filter on member type
+    # TODO: Method to retrieve group members with filters on members (type, name, etc.)
 
     def _merge_filters(
         self, base_filter: "LDAPFilter | str | None", **kwargs: "StrType | None"
