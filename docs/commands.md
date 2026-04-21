@@ -756,12 +756,13 @@ You can combine filters using either:
 
 - **AND** operator `&`
 - **OR** operator `|`
+- **NOT** operator `!`
 
 You will find more details and exemples in the **cheatsheet** above
 
 #### Usage filter
 
-The [usages](commands#🚀Usage {#ldap-usage}) mentioned earlier have implicit filters.
+The [usages](<commands#🚀Usage {#ldap-usage}>) mentioned earlier have implicit filters.
 
 | Usage     | Description                                  |
 | --------- | -------------------------------------------- |
@@ -784,7 +785,7 @@ oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --computer
 Or...
 
 ```bash
-oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --computers --filter (name=Skynet)
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --computers --filter "(name=Skynet)"
 ```
 
 Will end up with this combined filter:
