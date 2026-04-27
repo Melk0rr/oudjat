@@ -446,7 +446,6 @@ class S1Connector(Connector):
     def agents(
         self,
         site_ids: "StrType | None" = None,
-        limit: int = 1000,
         payload: dict[str, Any] | None = None,
         infected: bool = False,
     ) -> "DataType":
@@ -462,7 +461,6 @@ class S1Connector(Connector):
 
         Args:
             site_ids (str | list[str] | None): List of site ids to filter
-            limit (int)                      : The number of agents per cursor call
             payload (dict[str, Any])         : Payload to send to the endpoint
             infected (bool)                  : Whether to only include agents with at least one active threat
 
@@ -473,7 +471,7 @@ class S1Connector(Connector):
         if payload is None:
             payload = {}
 
-        payload["limit"] = limit
+        payload.setdefault("limit", 1000)
 
         if "skipCount" not in payload:
             payload["skipCount"] = True
@@ -504,7 +502,6 @@ class S1Connector(Connector):
 
         Args:
             site_ids (str | list[str] | None)    : List of site ids to filter
-            limit (int)                          : The number of agents per cursor call
             payload (dict[str, Any])             : Payload to send to the endpoint
             infected (bool)                      : Whether to only include agents with at least one active threat
             net_statuses (str | list[str] | None): Network statuses to filter
@@ -781,8 +778,7 @@ class S1Connector(Connector):
         self._update_filter_status(payload, status_filter, S1IncidentType.THREAT)
         self._update_filter_verdict(payload, verdict_filter, S1IncidentType.THREAT)
 
-        if "limit" not in payload:
-            payload["limit"] = 1000
+        payload.setdefault("limit", 1000)
 
         if file_path is not None:
             payload["filePath__contains"] = self._unify_str_list(file_path)
@@ -853,8 +849,7 @@ class S1Connector(Connector):
         )
         self._update_filter_verdict(payload, verdict_filter, S1IncidentType.THREAT)
 
-        if "limit" not in payload:
-            payload["limit"] = 1000
+        payload.setdefault("limit", 1000)
 
         if file_path is not None:
             payload["filePath__contains"] = self._unify_str_list(file_path)
@@ -927,16 +922,16 @@ class S1Connector(Connector):
         if "skipCount" not in payload:
             payload["skipCount"] = True
 
-        if "limit" not in payload:
-            payload["limit"] = 1000
+        payload.setdefault("limit", 1000)
 
         return self.fetch(S1Endpoint.APPLICATIONS_INVENTORY, payload)
 
     def applications_endpoints(
         self,
-        name: str,
-        vendor: str,
+        name: "StrType | None" = None,
+        vendor: "StrType | None" = None,
         site_ids: "StrType | None" = None,
+        auto: bool = False,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
@@ -946,25 +941,53 @@ class S1Connector(Connector):
             name (str)                       : The name of the application
             vendor (str)                     : The vendor of the application
             site_ids (str | list[str] | None): List of site ids to filter
+            auto (bool)                      : Whether to automatically retrieve applications that match the provided name or vendor
             payload (dict[str, Any] | None)  : Payload to send to the endpoint
 
         Returns:
             DataType: Endpoint data based on the provided filters
         """
 
+        context = Context()
+
         if payload is None:
             payload = {}
 
-        payload["applicationName"] = name
-        payload["applicationVendor"] = vendor
+        if name is None and vendor is None:
+            raise ValueError(f"{context}::Please provide at least an application name or vendor")
 
-        if "limit" not in payload:
-            payload["limit"] = 1000
+        if not auto and (not isinstance(name, str) or not isinstance(vendor, str)):
+            raise ValueError(
+                f"{context}::Invalid application name or vendor. Please use auto mode if you want to do a more dynamic search"
+            )
+
+        payload.setdefault("limit", 1000)
 
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
 
-        return self.fetch(S1Endpoint.APPLICATIONS_INVENTORY_ENDPOINTS, payload)
+        if not auto:
+            payload["applicationName"] = name
+            payload["applicationVendor"] = vendor
+
+            return self.fetch(S1Endpoint.APPLICATIONS_INVENTORY_ENDPOINTS, payload)
+
+        res = []
+        self.logger.info("Automatically retrieving applications that match provided parameters")
+
+        app_search = self.applications(
+            names=name,
+            vendors=vendor,
+            site_ids=site_ids,
+        )
+
+        for app in app_search:
+            payload["applicationName"] = app["applicationName"]
+            payload["applicationVendor"] = app["applicationVendor"]
+
+            res.extend(self.fetch(S1Endpoint.APPLICATIONS_INVENTORY_ENDPOINTS, payload))
+
+        return res
 
     def applications_with_risks(
         self,
@@ -999,8 +1022,7 @@ class S1Connector(Connector):
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
 
-        if "limit" not in payload:
-            payload["limit"] = 1000
+        payload.setdefault("limit", 1000)
 
         return self.fetch(S1Endpoint.APPLICATIONS_WITH_RISKS, payload)
 
@@ -1044,8 +1066,7 @@ class S1Connector(Connector):
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
 
-        if "limit" not in payload:
-            payload["limit"] = 1000
+        payload.setdefault("limit", 1000)
 
         return self.fetch(S1Endpoint.APPLICATIONS_CVES, payload)
 
