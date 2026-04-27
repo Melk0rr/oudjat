@@ -4,23 +4,23 @@ Below you can find details about Oudjat command line usage.
 For now, Oudjat includes two operating modes.
 
 1. 🐚Command Line (covered bellow)
-2. ⚙️Configuration File (covered in its [dedicated doc file](config_file))
+2. ⚙️Configuration File (covered in its [dedicated doc file](config_file)
 
-## Table of Contents
+## 📖Table of Contents
 
 1. [Connectors](#connectors)
-2. [Connectors - CERT.CERTFR](#connectors-cert-certfr)
-3. [Connectors - EDR.Cybereason](#connectors-edr-cybereason)
-4. [Connectors - EDR.SentinelOne](#connectors-edr-sentinelone)
-5. [Connectors - Endoflife](#connectors-endoflife)
-6. [Connectors - LDAP](#connectors-ldap)
-7. [Connectors - MS.SCCM](#connectors-ms-sccm)
-8. [Connectors - Tenable.SC](#connectors-tenable-sc)
-9. [Connectors - Vulns](#connectors-vulns)
+2. [Connectors.CERT.CERTFR](#connectors-cert-certfr)
+3. [Connectors.EDR.Cybereason](#connectors-edr-cybereason)
+4. [Connectors.EDR.SentinelOne](#connectors-edr-sentinelone)
+5. [Connectors.Endoflife](#connectors-endoflife)
+6. [Connectors.LDAP](#connectors-ldap)
+7. [Connectors.MS.SCCM](#connectors-ms-sccm)
+8. [Connectors.Tenable.SC](#connectors-tenable-sc)
+9. [Connectors.Vulns](#connectors-vulns)
 
-## 🔌 Connectors
+## 🔌Connectors
 
-### 💡Description
+### 💡Description {#general-description}
 
 The connector commands allow you to interact and query implemented connectors.
 Every implemented connector return data in the form of a list of dictionaries. Which you can
@@ -29,7 +29,7 @@ Every implemented connector return data in the form of a list of dictionaries. W
 - print
 - export.
 
-### 🚀Basic usage
+### 🚀General usage {#general-usage}
 
 To use one of oudjat connectors, you can reference it like this:
 
@@ -39,14 +39,25 @@ oudjat connectors.<connector_path> [options]
 
 You will find every connector reference in their **dedicated command section**.
 
-### 🎛️Options
+### 🎛️Options {#general-options}
 
-Oudjat uses [docotp](http://docopt.org/) to handle its usages and command options.
+Oudjat uses [docotp](http://docopt.org/) to handle its usages and command options. As well as printing help messages.
 
 > [!IMPORTANT]
 > The most important rule of docopt you need to know is:
 > options wrapped with **parenthesis** () or not wrapped at all, are required.
 > options wrappped with **brackets** [] are optional.
+
+Each option is described under its **Options** section in help messages.
+While the usages under the **Usage** section each describe a way you can use the script.
+
+> [!HINT]
+> You may often see the `[options]` string in usage lines.
+> This is a shortcut to specify that you **can** use other options than the ones specified in the usage line.
+
+> [!WARNING]
+> If `[options]` is not present in the usage line, it means you have to strictly stick with the options mentioned in that line.
+> If you use an options that is not mentioned in the line, it will either have no effect, or throw an error
 
 The connectors commands **share some common operations** you can pass as options:
 
@@ -84,7 +95,7 @@ oudjat connectors.<connector_ref> --usage --payload '{"attribute1": 2, "attribut
 > [!WARNING]
 > Any invalid JSON will result with an error.
 
-#### 📋Lists
+#### 📋Lists {#general-options-lists}
 
 You may also come across several options that need a **list of elements**.
 
@@ -120,16 +131,16 @@ oudjat connectors.<connector_ref> --usage --names @./path/to/file.txt
 > [!IMPORTANT]
 > Check option description to know if the option expects a list
 
-#### 🔑Credentials
+#### 🔑Credentials {#general-options-creds}
 
 In a lot of cases, the connector will require that you provide 🔑**credentials** to perform some form of 👤**authentication**.
 You can provide 🔑 with these options
 
-| Option          | Description                                                                                                         |
-| --------------- | ------------------------------------------------------------------------------------------------------------------- |
-| -u --username   | The username / login to use for the connection                                                                      |
-| -p --password   | The password to use for the connection                                                                              |
-| --creds-service | Alternatively, you can provide a service name that will be used to store credentials for that particular connector. |
+| Option                  | Description                                                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| -u --username=USERNAME  | The username / login to use for the connection                                                                      |
+| -p --password=PASSWORD  | The password to use for the connection                                                                              |
+| --creds-service=SERVICE | Alternatively, you can provide a service name that will be used to store credentials for that particular connector. |
 
 While using the `--creds-service` option, you can either:
 
@@ -159,7 +170,7 @@ The next time you use the same service, Oudjat will automatically retrieve the r
 So the credentials options are usually handled with the following docopt logic:
 `(--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])`
 
-### 🆘Help
+### 🆘Help {#general-help}
 
 Each connector command options can be retrieved by combining the connector ref with the `--help` option like this:
 
@@ -170,23 +181,27 @@ oudjat connectors.<ref> --help
 
 Using the `--help` option without any connector reference, will just print the general help message
 
-#### 📝Exemples
+#### 📝Examples
+
+Print general help:
 
 ```bash
-# Print general help
 oudjat -h
 oudjat --help
+```
 
-# Print help message for specific connectors
+Print help message for specific connectors:
+
+```bash
 oudjat connectors.edr.sentinelone --help
 oudjat connectors.endoflife --help
 ```
 
 ---
 
-## 🔌Connectors - 🌐CERT.CERTFR
+## 🔌Connectors - CERT.CERTFR
 
-### 💡Description
+### 💡Description {#certfr-description}
 
 A connector used to parse [CERTFR pages](https://www.cert.ssi.gouv.fr/) .
 It returns CERTFR pages content:
@@ -198,17 +213,17 @@ It returns CERTFR pages content:
 - Risks
 - CVEs
 
-### 📚Reference
+### 📚Reference {#certfr-ref}
 
 `connectors.cert.certfr`
 
-### ☑️Prerequisites
+### ☑️Prerequisites {#certfr-prereq}
 
 - No API key, nor special access is required.
 - No credential are required either.
 - You just need an internet access.
 
-### 🚀Usage
+### 🚀Usage {#certfr-usage}
 
 | Usage    | Description                                                 |
 | -------- | ----------------------------------------------------------- |
@@ -227,7 +242,7 @@ oudjat connectors.cert.certfr --feed
                               [options]
 ```
 
-### 🎛️Options
+### 🎛️Options {#certfr-options}
 
 | Option               | Description                                                                                           |
 | -------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -243,21 +258,21 @@ oudjat connectors.cert.certfr --feed
 > [!WARNING]
 > Since CERTFR pages tend to have a lot of CVE references, you can limit how many are resolved with the `--limit` option.
 
-### 📝Exemples
+### 📝Examples {#certfr-examples}
 
 ```bash
 oudjat connectors.cert.certfr -t CERTFR-2021-ALE-022" --max-cve --limit 20
 oudjat connectors.cert.certfr --feed --date-filter "2025-12-01"
 ```
 
-## 🔌 Connectors - EDR.Cybereason
+## 🔌Connectors - EDR.Cybereason
 
 > [!WARNING]
 > Cybereason connector is no longer maintained
 
-## 🔌 Connectors - EDR.Sentinelone
+## 🔌Connectors - EDR.Sentinelone
 
-### 💡Description
+### 💡Description {#s1-description}
 
 A connector to interact with [SentinelOne](https://www.sentinelone.com/fr/) EDR API.
 It provides ability to do various actions:
@@ -267,11 +282,11 @@ It provides ability to do various actions:
 - Update policies (group, site)
 - Update threats status and verdict
 
-### 📚Reference
+### 📚Reference {#s1-ref}
 
 `connectors.edr.sentinelone`
 
-### ☑️Prerequisites
+### ☑️Prerequisites {#s1-prereq}
 
 You will need several elements to use this connector:
 
@@ -280,12 +295,12 @@ You will need several elements to use this connector:
 3. The required permissions to query the endpoints you want to reach
 
 > [!IMPORTANT]
-> 🔑Credentials are needed for this connector. See [[commands#🔑Credentials]] section
+> 🔑Credentials are needed for this connector. See [general credentials](#general-options-creds) section.
 > For this connector, the password is the API token
 
-### 🚀Usage
+### 🚀Usage {#s1-usage}
 
-> [!WARNING]
+> [!CAUTION]
 > Some commands (usages) bellow can have a significant impact on your asssets
 > Whether, you want to change a policy, move an asset, change a threat status, etc. It can have direct or indirect consequences
 > Trade with the usages marked with ❗ carefully !
@@ -468,10 +483,11 @@ oudjat connectors.edr.sentinelone --sites-by-name
 > [!IMPORTANT]
 > Each usage matches a specific SentinelOne endpoint.
 
-### 🎛️Options
+### 🎛️Options {#s1-options}
 
 | Option                                  | Description                                                                |
 | --------------------------------------- | -------------------------------------------------------------------------- |
+| -t --target=TARGET                      | Specify the SentinelOne URL to query                                       |
 | --auto                                  | Trigger auto mode. See the doc for full usage details                      |
 | --auto-mitigation-action=AUTOMITIGATION | Specify the automatic mitigation action                                    |
 | --ids=IDS                               | A list of IDs to narrow down selection. See the doc for full usage details |
@@ -524,7 +540,7 @@ oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1
 > [!WARNING]
 > Please check the SentinelOne API documentation to know which parameters you can pass and how they must be formatted.
 
-### 📝Exemples
+### 📝Examples {#s1-examples}
 
 ```bash
 # Export agents details into a json file
@@ -534,9 +550,9 @@ oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1
 oudjat connectors.edr.sentinelone -t "myurl.sentinelone.net" --creds-service "S1API" --group-policy-update --ids "@./group_ids.txt" --malicious-policy protect
 ```
 
-## 🔌 Connectors - 🌐Endoflife
+## 🔌Connectors - Endoflife
 
-### 💡Description
+### 💡Description {#eol-description}
 
 A connector to retrieve data from [endoflife](https://endoflife.date/) API.
 Endoflife.date is a website that documents end of life and support lifecycles for various products.
@@ -550,17 +566,17 @@ Endoflife.date is a website that documents end of life and support lifecycles fo
 - Services
 - Standards
 
-### 📚Reference
+### 📚Reference {#eol-ref}
 
 `connectors.endoflife`
 
-### ☑️Prerequisites
+### ☑️Prerequisites {#eol-prereq}
 
 - No API key, nor special access is required.
 - No credential are required either.
 - You just need an internet access.
 
-### 🚀Usage
+### 🚀Usage {#eol-usage}
 
 | Usage              | Description                                 |
 | ------------------ | ------------------------------------------- |
@@ -586,7 +602,7 @@ oudjat connectors.endoflife --oses [options]
 oudjat connectors.endoflife --tags [--tag=TAG] [options]
 ```
 
-### 🎛️Options
+### 🎛️Options {#eol-options}
 
 | Option                     | Description                              |
 | -------------------------- | ---------------------------------------- |
@@ -596,16 +612,16 @@ oudjat connectors.endoflife --tags [--tag=TAG] [options]
 | --release-name=RELNAME     | Specify a release name (its version)     |
 | --tag=TAG                  | Specify one or several tag (repeatable)  |
 
-### 📝Exemples
+### 📝Examples {#eol-examples}
 
 ```bash
 oudjat connectors.endoflife --products --product-name LibreOffice --json ./libreoffice.json
 oudjat connectors.endoflife --windows --csv ./windows.csv
 ```
 
-## 🔌 Connectors - LDAP
+## 🔌Connectors - LDAP
 
-### 💡Description
+### 💡Description {#ldap-description}
 
 A connector to extract data from an [LDAP](https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol) directory.
 
@@ -616,22 +632,26 @@ The connector provides ways to extract various objects:
 - Groups
 - Organizational Units (OU)
 - Group Policy Objects (GPO)
+- Subnets
 
 > [!IMPORTANT]
 > This connector currently does not provide any way to write or edit objects in the directory.
 
-### 📚Reference
+### 📚Reference {#ldap-ref}
 
 `connectors.ldap`
 
-### ☑️Prerequisites
+### ☑️Prerequisites {#ldap-prereq}
 
 You will need the following elements to use this connector:
 
 - A valid and active account in the directory you want to extract data from
 - Permission given to this account to read directory data
 
-### 🚀Usage
+> [!IMPORTANT]
+> 🔑Credentials are needed for this connector. See [general credentials](#general-options-creds) section.
+
+### 🚀Usage {#ldap-usage}
 
 | Usage     | Description                                                                      |
 | --------- | -------------------------------------------------------------------------------- |
@@ -649,6 +669,8 @@ oudjat connectors.ldap --computers
                        (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
                        [--attributes=ATTRIBUTES]
                        [--search-base=SEARCHBASE]
+                       [--dn=DN]
+                       [--name=NAME]
                        [--filter=FILTER]
                        [options]
 oudjat connectors.ldap --gpos
@@ -665,6 +687,8 @@ oudjat connectors.ldap --groups
                        (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
                        [--attributes=ATTRIBUTES]
                        [--search-base=SEARCHBASE]
+                       [--dn=DN]
+                       [--name=NAME]
                        [--filter=FILTER]
                        [options]
 oudjat connectors.ldap --objects
@@ -672,6 +696,8 @@ oudjat connectors.ldap --objects
                        (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
                        [--attributes=ATTRIBUTES]
                        [--search-base=SEARCHBASE]
+                       [--dn=DN]
+                       [--name=NAME]
                        [--filter=FILTER]
                        [options]
 oudjat connectors.ldap --ous
@@ -679,6 +705,7 @@ oudjat connectors.ldap --ous
                        (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
                        [--attributes=ATTRIBUTES]
                        [--search-base=SEARCHBASE]
+                       [--name=NAME]
                        [--filter=FILTER]
                        [options]
 oudjat connectors.ldap --subnets
@@ -693,46 +720,117 @@ oudjat connectors.ldap --users
                        (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
                        [--attributes=ATTRIBUTES]
                        [--search-base=SEARCHBASE]
+                       [--dn=DN]
+                       [--name=NAME]
                        [--filter=FILTER]
                        [options]
 ```
 
-### 🎛️Options
+### 🎛️Options {#ldap-options}
 
-| Option                     | Description                                                      |
-| -------------------------- | ---------------------------------------------------------------- |
-| -c --creds-service=SERVICE | A credential service name to retrieve username and password from |
-| -u --username=USER         | The username used for authentication                             |
-| -p --password=PASS         | The password used for authentication                             |
-| -t --target=TARGET         | Specify the SentinelOne URL to query                             |
-| --attributes=ATTRIBUTES    | Provide additional attributes to retrieve from server            |
-| --displayname=DISPLAYNAME  | The GPO display name                                             |
-| --filter=FILTER            | Provide an LDAP filter string to narrow down results             |
-| --name=NAME                | The GPO name (link)                                              |
-| --search-base=SEARCHBASE   | Where to base the search on in terms of directory location       |
+| Option                    | Description                                                |
+| ------------------------- | ---------------------------------------------------------- |
+| -t --target=TARGET        | Specify the LDAP server to query                           |
+| --attributes=ATTRIBUTES   | Provide additional attributes to retrieve from server      |
+| --displayname=DISPLAYNAME | The GPO display name                                       |
+| --dn=DN                   | DistinguishedName(s) to narrow down elements research      |
+| --filter=FILTER           | Provide an LDAP filter string to narrow down results       |
+| --name=NAME               | Name(s) to narrow down elements research                   |
+| --san=SAN                 | SAMAccountName(s) to narrow down elements research         |
+| --search-base=SEARCHBASE  | Where to base the search on in terms of directory location |
 
-### 📝Exemples
+#### Filter
+
+> [!TIP]
+> Options for this connector are mostly trivial (No JSON string or complex object).
+> Except for the `--filter` option, which allows you to pass a custom **LDAP filter** to narrow down query results.
+
+You can check this [cheatsheet](https://gist.github.com/jonlabelle/0f8ec20c2474084325a89bc5362008a7) to learn everything you need about LDAP filters
+
+> [!IMPORTANT]
+> Basically, an LDAP filter is formatted like this : `(<attribute><operator><value>)`.
+
+| Operator | Meaning                  |
+| :------: | ------------------------ |
+|   `=`    | Equality                 |
+|   `>=`   | Greater than or equal to |
+|   `<=`   | Less than or equal to    |
+|   `~=`   | Approximately equal to   |
+
+You can combine filters using either:
+
+- **AND** operator `&`
+- **OR** operator `|`
+- **NOT** operator `!`
+
+You will find more details and examples in the **cheatsheet** above
+
+#### Usage filter
+
+The [[commands#🚀Usage {#ldap-usage}]] mentioned earlier have implicit filters.
+
+| Usage     | Description                                  |
+| --------- | -------------------------------------------- |
+| computers | (objectCategory=computer)                    |
+| gpos      | (objectClass=groupPolicyContainer)           |
+| groups    | (objectCategory=group)                       |
+| objects   | (objectClass=*)                              |
+| ous       | (objectClass=organizationalUnit)             |
+| subnets   | (objectClass=subnet)                         |
+| users     | (&(objectCategory=person)(objectClass=user)) |
+
+Which means that the filter you provide with `--filter` or other options will be **combined** with the one bound to the usage you call.
+
+So...
 
 ```bash
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --computers --name Skynet
 ```
 
-## 🔌 Connectors - 🌐MS.CVRF
+Or...
 
-> [!WARNING]
-> Backend implemented. Command line to be implemented
+```bash
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --computers --filter "(name=Skynet)"
+```
 
-### 💡Description
+Will end up with this combined filter:
+
+```text
+(&(objectCategory=computer)(name=Skynet))
+```
+
+> [!TIP]
+> If you want to do a generic search, use `--objects` which will basically retrieve any type of object.
+> You can then use other options to narrow down the results.
+
+### 📝Examples {#ldap-examples}
+
+```bash
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --users --filter (sAMAccountName=r.batty)
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --users --dn "@./users.txt"
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --gpos --displayname MY-GPO
+oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --computers --name Skynet,Wintermute,R2D2
+```
+
+## 🔌Connectors - MS.CVRF
+
+> [!IMPORTANT]
+
+- [x] Backend implementation
+- [ ] Command line implementation
+
+### 💡Description {#cvrf-description}
 
 A connector that can retrieve Microsoft KB data from [Microsoft CVRF API](https://api.msrc.microsoft.com/).
 Based on given CVEs, it can retrieve KB numbers that you can then check are deployed in your environment.
 
-### 📚Reference
+### 📚Reference {#cvrf-ref}
 
 `connectors.ms.cvrf`
 
-### ☑️Prerequisites
+### ☑️Prerequisites {#cvrf-prereq}
 
-### 🚀Usage
+### 🚀Usage {#cvrf-usage}
 
 | Usage | Description |
 | ----- | ----------- |
@@ -740,27 +838,27 @@ Based on given CVEs, it can retrieve KB numbers that you can then check are depl
 ```bash
 ```
 
-### 🎛️Options
+### 🎛️Options {#cvrf-options}
 
 | Option | Description |
 | ------ | ----------- |
 
-### 📝Exemples
+### 📝Examples {#cvrf-examples}
 
 ```bash
 ```
 
-## 🔌 Connectors - MS.SCCM
+## 🔌Connectors - MS.SCCM
 
-### 💡Description
+### 💡Description {#sccm-description}
 
-### 📚Reference
+### 📚Reference {#sccm-ref}
 
 `connectors.ms.sccm`
 
-### ☑️Prerequisites
+### ☑️Prerequisites {#sccm-prereq}
 
-### 🚀Usage
+### 🚀Usage {#sccm-usage}
 
 | Usage | Description |
 | ----- | ----------- |
@@ -768,55 +866,55 @@ Based on given CVEs, it can retrieve KB numbers that you can then check are depl
 ```bash
 ```
 
-### 🎛️Options
+### 🎛️Options {#sccm-options}
 
 | Option | Description |
 | ------ | ----------- |
 
-### 📝Exemples
+### 📝Examples {#sccm-examples}
 
 ```bash
 ```
 
-## 🔌 Connectors - Tenable.SC
+## 🔌Connectors - Tenable.SC
 
-### 💡Description
+### 💡Description {#tsc-description}
 
-### 📚Reference
+### 📚Reference {#tsc-ref}
+
+`connectors.tenable.sc`
+
+### ☑️Prerequisites {#tsc-prereq}
+
+### 🚀Usage {#tsc-usage}
+
+| Usage | Description |
+| ----- | ----------- |
+
+```bash
+```
+
+### 🎛️Options {#tsc-options}
+
+| Option | Description |
+| ------ | ----------- |
+
+### 📝Examples {#tsc-examples}
+
+```bash
+```
+
+## 🔌Connectors - 🌐Vulns
+
+### 💡Description {#vuln-description}
+
+### 📚Reference {#vuln-ref}
 
 ``
 
-### ☑️Prerequisites
+### ☑️Prerequisites {#vuln-prereq}
 
-### 🚀Usage
-
-| Usage | Description |
-| ----- | ----------- |
-
-```bash
-```
-
-### 🎛️Options
-
-| Option | Description |
-| ------ | ----------- |
-
-### 📝Exemples
-
-```bash
-```
-
-## 🔌 Connectors - 🌐Vulns
-
-### 💡Description
-
-### 📚Reference
-
-``
-
-### ☑️Prerequisites
-
-### 🚀Usage
+### 🚀Usage {#vuln-usage}
 
 | Usage | Description |
 | ----- | ----------- |
@@ -824,18 +922,18 @@ Based on given CVEs, it can retrieve KB numbers that you can then check are depl
 ```bash
 ```
 
-### 🎛️Options
+### 🎛️Options {#vuln-options}
 
 | Option | Description |
 | ------ | ----------- |
 
-### 📝Exemples
+### 📝Examples {#vuln-examples}
 
 ```bash
 ```
 
 ---
 
-## 🛠️ Utils
+## 🛠️Utils
 
-## 🛠️ Utils - Credentials
+## 🛠️Utils - Credentials

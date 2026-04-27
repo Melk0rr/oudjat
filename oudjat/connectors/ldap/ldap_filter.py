@@ -2,7 +2,7 @@
 A module that facilitates the handling of LDAP filters.
 """
 
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import TypeAlias, override
 
 from oudjat.utils import Context
@@ -11,7 +11,7 @@ from oudjat.utils.types import StrType
 from .exceptions import InvalidLDAPFilterCmpOperator, InvalidLDAPFilterString
 
 
-class LDAPFilterOperator(Enum):
+class LDAPFilterOperator(StrEnum):
     """
     A helper enumeration to list possible LDAP filter join operators.
     """
@@ -32,7 +32,7 @@ class LDAPFilterOperator(Enum):
         return [o.value for o in LDAPFilterOperator]
 
 
-class LDAPFilterComparisonOperator(Enum):
+class LDAPFilterComparisonOperator(StrEnum):
     """
     A helper enumeration to list possible LDAP filter comparison operators.
     """
@@ -57,7 +57,7 @@ class LDAPFilterComparisonOperator(Enum):
 LDAPFilterParsedTupleType: TypeAlias = tuple[str, str, str] | tuple[str, list[tuple[str, str, str]]]
 
 
-class LDAPFilterObjectCtg(Enum):
+class LDAPFilterObjectCtg(StrEnum):
     """
     A helper class to list valid LDAP filter 'objectCategory' values.
     """
@@ -69,8 +69,7 @@ class LDAPFilterObjectCtg(Enum):
     PERSON = "person"
     USER = "user"
 
-
-class LDAPFilterObjectCls(Enum):
+class LDAPFilterObjectCls(StrEnum):
     """
     A helper class to list valid LDAP filter 'objectClass' values.
     """
@@ -83,7 +82,7 @@ class LDAPFilterObjectCls(Enum):
     USER = "user"
 
 
-class LDAPFilterStrFormat(Enum):
+class LDAPBuiltinFilter(Enum):
     """
     A helper enumeration of built-in LDAP filters.
     """
@@ -109,7 +108,7 @@ class LDAPFilterStrFormat(Enum):
         self,
         value: str,
         cmp_operator: "LDAPFilterComparisonOperator" = LDAPFilterComparisonOperator.EQ,
-    ) -> str:
+    ) -> "LDAPFilter":
         """
         Format the LDAPFilter string with the provided operator and value.
 
@@ -121,7 +120,8 @@ class LDAPFilterStrFormat(Enum):
             str: Formated filter string
         """
 
-        return self._value_.format(**{"cmp_operator": cmp_operator.value, "value": value})
+        formated_filter = self._value_.format(**{"cmp_operator": cmp_operator.value, "value": value})
+        return LDAPFilter(formated_filter)
 
 
 class LDAPFilterParser:
@@ -364,6 +364,13 @@ class LDAPFilter:
 
         return self._nodes
 
+    def clr_operator(self) -> None:
+        """
+        Clear the current filter operator.
+        """
+
+        self._operator = None
+
     def set_operator_from_str(self, new_operator: str) -> None:
         """
         Set a new operator for the current filter based on a string.
@@ -400,17 +407,19 @@ class LDAPFilter:
             self._operator = LDAPFilterOperator(tuple_filter[0])
             self._nodes = [LDAPFilter(filter_input=sub) for sub in tuple_filter[1]]
 
-    def add_node(self, node: "LDAPFilter") -> None:
+    def __iadd__(self, other: "LDAPFilter") -> "LDAPFilter":
         """
         Add a new node to the current filter if its operator is not None.
 
         Args:
-            node (LDAPFilter): New node / sub-filter to add to the current filter
+            other (LDAPFilter): New node / sub-filter to add to the current filter
         """
         # TODO: Maybe add node under different condition (always set a value tuple and check if the tuple contains 2 or 3 values ?)
 
         if self._operator is not None:
-            self._nodes.append(node)
+            self._nodes.append(other)
+
+        return self
 
     def __and__(self, other: "LDAPFilter") -> "LDAPFilter":
         """
@@ -455,7 +464,7 @@ class LDAPFilter:
             nodes_str = "".join(map(str, self._nodes))
             filter_str = f"{self._operator.value}{nodes_str}"
 
-        return f"({filter_str})"
+        return f"({filter_str})" if len(filter_str) > 0 else ""
 
     # ****************************************************************
     # Class methods
@@ -463,9 +472,9 @@ class LDAPFilter:
     @classmethod
     def format(
         cls,
-        filter_fmt: "LDAPFilterStrFormat | str",
+        filter_fmt: "LDAPBuiltinFilter | str",
         filter_values: "StrType",
-        operator: "LDAPFilterOperator" = LDAPFilterOperator.OR,
+        operator: "LDAPFilterOperator | str" = LDAPFilterOperator.OR,
     ) -> "LDAPFilter":
         """
         Return an LDAPFilter based on the provided format and values.
@@ -479,21 +488,27 @@ class LDAPFilter:
             LDAPFilter: New filter based on provided arguments
         """
 
-        if not isinstance(filter_fmt, LDAPFilterStrFormat):
-            filter_fmt = LDAPFilterStrFormat[filter_fmt.upper()]
+        if not isinstance(operator, LDAPFilterOperator):
+            operator = LDAPFilterOperator(operator)
+
+        if not isinstance(filter_fmt, LDAPBuiltinFilter):
+            if filter_fmt.upper() not in LDAPBuiltinFilter._member_names_:
+                raise KeyError(f"{Context()}::Invalid LDAP filter format provided '{filter_fmt}'")
+
+            filter_fmt = LDAPBuiltinFilter[filter_fmt.upper()]
 
         if not isinstance(filter_values, list):
             filter_values = [filter_values]
 
-        def fmt_filter(value_to_fmt: str) -> str:
-            return filter_fmt(value_to_fmt)
+        res_filter = cls(operator=operator)
 
-        formated_values = list(map(fmt_filter, filter_values))
-        return (
-            cls(f"({operator.value}{''.join(formated_values)})")
-            if len(formated_values) > 1
-            else cls("".join(formated_values))
-        )
+        for v in filter_values:
+            res_filter += filter_fmt(v)
+
+        if len(res_filter.nodes) < 2:
+            res_filter.clr_operator()
+
+        return res_filter
 
     @classmethod
     def dn(
@@ -512,7 +527,7 @@ class LDAPFilter:
             LDAPFilter: A new LDAPFilter instance based on the provided DNs
         """
 
-        return cls.format(LDAPFilterStrFormat.DN, values)
+        return cls.format(LDAPBuiltinFilter.DN, values)
 
     @classmethod
     def name(
@@ -531,7 +546,7 @@ class LDAPFilter:
             LDAPFilter: A new LDAPFilter instance based on the provided names
         """
 
-        return cls.format(LDAPFilterStrFormat.NAME, values)
+        return cls.format(LDAPBuiltinFilter.NAME, values)
 
     @classmethod
     def san(
@@ -550,7 +565,7 @@ class LDAPFilter:
             LDAPFilter: A new LDAPFilter instance based on the provided sam account names
         """
 
-        return cls.format(LDAPFilterStrFormat.SAN, values)
+        return cls.format(LDAPBuiltinFilter.SAN, values)
 
     # ****************************************************************
     # Static methods

@@ -23,7 +23,7 @@ from .exceptions import (
     LDAPSchemaError,
     LDAPUnreachableServerError,
 )
-from .ldap_filter import LDAPFilter, LDAPFilterStrFormat
+from .ldap_filter import LDAPFilter
 from .objects import (
     LDAPCapabilities,
     LDAPComputer,
@@ -538,7 +538,7 @@ class LDAPConnector(Connector):
         def _map_grp(entry: "LDAPEntry") -> "LDAPGroup":
             grp_instance = LDAPGroup(entry, self._CAPABILITIES)
             if recursive:
-                grp_instance.fetch_members(recursive)
+                grp_instance.fetch_members(recursive=recursive)
 
             return grp_instance
 
@@ -614,8 +614,43 @@ class LDAPConnector(Connector):
     # ****************************************************************
     # Methods - core
 
+    # TODO: Methods to retrieve GPOs from OU and OUs from GPO
+    # TODO: Method to retrieve group members with filters on members (type, name, etc.)
+
+    def _merge_filters(
+        self, base_filter: "LDAPFilter | str | None", **kwargs: "StrType | None"
+    ) -> "LDAPFilter":
+        """
+        Merge filter elements provided as kwargs in a single LDAP filter.
+
+        Args:
+            base_filter (LDAPFilter | str | None): The base filter that may be provided as argument
+            **kwargs (StrType | None)            : Filtering elements (dn, name, san, etc.) to merge
+
+        Returns:
+            LDAPFilter: Merged filter
+        """
+
+        if base_filter is None:
+            base_filter = LDAPFilter()
+
+        if not isinstance(base_filter, LDAPFilter):
+            base_filter = LDAPFilter(base_filter)
+
+        new_filter = LDAPFilter(operator="&")
+        for k, v in kwargs.items():
+            if v is not None:
+                new_filter += LDAPFilter.format(k.upper(), v)
+
+        if len(new_filter.nodes) < 2:
+            new_filter.clr_operator()
+
+        return new_filter
+
     def objects(
         self,
+        dn: "StrType | None" = None,
+        name: "StrType | None" = None,
         search_filter: "LDAPFilter | str | None" = None,
         attributes: "StrType | None" = None,
         search_base: str | None = None,
@@ -628,6 +663,8 @@ class LDAPConnector(Connector):
         First convert found entries into LDAPObject instances to compute some values.
 
         Args:
+            dn (str | list[str])           : Distinguished names to add to the filter
+            name (str | list[str])         : Names to add to the filter
             search_filter (str)            : LDAP Filter to reduce search results
             attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
@@ -636,6 +673,12 @@ class LDAPConnector(Connector):
         Returns:
             DataType: A list of entries based on the provided arguments and payload
         """
+
+        search_filter = self._merge_filters(
+            search_filter,
+            dn=dn,
+            name=name,
+        )
 
         entries = self.fetch(
             search_type=LDAPObjectType.DEFAULT,
@@ -658,6 +701,8 @@ class LDAPConnector(Connector):
 
     def computers(
         self,
+        dn: "StrType | None" = None,
+        name: "StrType | None" = None,
         search_filter: "LDAPFilter | str | None" = None,
         attributes: "StrType | None" = None,
         search_base: str | None = None,
@@ -669,6 +714,8 @@ class LDAPConnector(Connector):
         First convert found entries into LDAPComputer instances to compute some values.
 
         Args:
+            dn (str | list[str])           : Distinguished names to add to the filter
+            name (str | list[str])         : Names to add to the filter
             search_filter (str)            : LDAP Filter to reduce search results
             attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : where to base the search on in terms of directory location
@@ -677,6 +724,12 @@ class LDAPConnector(Connector):
         Returns:
             DataType: A list of entries based on the provided arguments and payload
         """
+
+        search_filter = self._merge_filters(
+            search_filter,
+            dn=dn,
+            name=name,
+        )
 
         entries = self.fetch(
             search_type=LDAPObjectType.COMPUTER,
@@ -702,6 +755,9 @@ class LDAPConnector(Connector):
 
     def users(
         self,
+        dn: "StrType | None" = None,
+        san: "StrType | None" = None,
+        name: "StrType | None" = None,
         search_filter: "LDAPFilter | str | None" = None,
         attributes: "StrType | None" = None,
         search_base: str | None = None,
@@ -714,6 +770,9 @@ class LDAPConnector(Connector):
         First convert the found entries into LDAPUser instances in order to compute some values.
 
         Args:
+            dn (str | list[str])           : Distinguished names to add to the filter
+            san (str | list[str])          : SAMAccountName to add to the filter
+            name (str | list[str])         : Names to add to the filter
             search_filter (str)            : LDAP Filter to reduce search results
             attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
@@ -723,6 +782,13 @@ class LDAPConnector(Connector):
         Returns:
             DataType: A list of entries based on the provided arguments and payload
         """
+
+        search_filter = self._merge_filters(
+            search_filter,
+            dn=dn,
+            san=san,
+            name=name,
+        )
 
         if extension_attr:
             if attributes is None:
@@ -759,6 +825,8 @@ class LDAPConnector(Connector):
     # TODO: Add more options to retrieve different levels of members.
     def groups(
         self,
+        dn: "StrType | None" = None,
+        name: "StrType | None" = None,
         search_filter: "LDAPFilter | str | None" = None,
         search_base: str | None = None,
         attributes: "StrType | None" = None,
@@ -770,6 +838,8 @@ class LDAPConnector(Connector):
         First convert found entries into LDAPGroup instances to compute some values.
 
         Args:
+            dn (str | list[str])           : Distinguished names to add to the filter
+            name (str | list[str])         : Names to add to the filter
             search_filter (str)            : LDAP Filter to reduce search results
             attributes (str | list[str])   : Additional attributes to include in result
             search_base (str)              : Where to base the search on in terms of directory location
@@ -778,6 +848,12 @@ class LDAPConnector(Connector):
         Returns:
             DataType: A list of entries based on the provided arguments and payload
         """
+
+        search_filter = self._merge_filters(
+            search_filter,
+            dn=dn,
+            name=name,
+        )
 
         entries = self.fetch(
             search_type=LDAPObjectType.GROUP,
@@ -800,7 +876,7 @@ class LDAPConnector(Connector):
 
     def gpos(
         self,
-        displayName: str = "*",
+        displayname: str = "*",
         name: "StrType" = "*",
         search_filter: "LDAPFilter | str | None" = None,
         search_base: str | None = None,
@@ -813,7 +889,7 @@ class LDAPConnector(Connector):
         First convert found entries into LDAPGroupPolicyObject instances to compute some values.
 
         Args:
-            displayName (str)                      : GPO display name
+            displayname (str)                      : GPO display name
             name (StrType)                         : GPO name (link)
             search_filter (str | LDAPFilter | None): LDAP Filter to reduce search results
             search_base (str)                      : Where to base the search on in terms of directory location
@@ -829,12 +905,12 @@ class LDAPConnector(Connector):
             name_filter.set_operator_from_str("|")
 
             for link in name:
-                name_filter.add_node(LDAPFilter(f"(name={link})"))
+                name_filter += LDAPFilter(f"(name={link})")
 
         else:
             name_filter = LDAPFilter(f"(name={name})")
 
-        entries_filter = LDAPFilter(f"(displayName={displayName})") & name_filter
+        entries_filter = LDAPFilter(f"(displayName={displayname})") & name_filter
 
         if search_filter:
             if not isinstance(search_filter, LDAPFilter):
@@ -863,6 +939,7 @@ class LDAPConnector(Connector):
 
     def ous(
         self,
+        name: "StrType | None" = None,
         search_filter: "LDAPFilter | str | None" = None,
         search_base: str | None = None,
         attributes: "StrType | None" = None,
@@ -874,7 +951,7 @@ class LDAPConnector(Connector):
         First convert found entries into LDAPOrganizationalUnit instances to compute some values.
 
         Args:
-            dn (str):                       : Optional distinguished name to search
+            name (str | list[str])          : Names to add to the filter
             search_filter (str | LDAPFilter): LDAP Filter to reduce search results
             attributes (str | list[str])    : Additional attributes to include in result
             search_base (str)               : Where to base the search on in terms of directory location
@@ -883,6 +960,8 @@ class LDAPConnector(Connector):
         Returns:
             DataType: A list of entries based on the provided arguments and payload
         """
+
+        search_filter = self._merge_filters(search_filter, name=name)
 
         entries = self.fetch(
             search_type=LDAPObjectType.OU,
@@ -960,7 +1039,7 @@ class LDAPConnector(Connector):
 
         return self.fetch(
             search_type=LDAPObjectType.from_object_cls(ldap_entry),
-            search_filter=LDAPFilterStrFormat.DN(ldap_entry.dn),
+            search_filter=LDAPFilter.dn(ldap_entry.dn),
         )[0]
 
     def domain_admins(self) -> "DataType":
