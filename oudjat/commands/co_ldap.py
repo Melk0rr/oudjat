@@ -224,12 +224,12 @@ class LDAPConnectorCommand(ConnectorCommand):
         # Usage backends
         self.__cmd_props__.backends(
             {
-                "computers": self.connector.computers,
-                "gpos": self.connector.gpos,
-                "groups": self.connector.groups,
-                "objects": self.connector.objects,
-                "ous": self.connector.ous,
-                "subnets": self.connector.subnets,
-                "users": self.connector.users,
+                "--computers": self.connector.computers,
+                "--gpos": self.connector.gpos,
+                "--groups": self.connector.groups,
+                "--objects": self.connector.objects,
+                "--ous": self.connector.ous,
+                "--subnets": self.connector.subnets,
+                "--users": self.connector.users,
             }
         )
