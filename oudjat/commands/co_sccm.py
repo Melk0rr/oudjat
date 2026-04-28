@@ -29,6 +29,16 @@ class SCCMConnectorCommand(ConnectorCommand):
         "A command to interact with an SCCM server through the oudjat SCCMConnector",
     )
     __cmd_props__.options = {
+        "--query": CmdOpt(
+            "Specify the SQL query file",
+            short="q",
+            arg="QUERY",
+        ),
+        "--target": CmdOpt(
+            "Specify the target server",
+            short="t",
+            arg="TARGET",
+        ),
         "--db": CmdOpt(
             "The name of the database to query",
             arg="DBNAME",
@@ -41,24 +51,14 @@ class SCCMConnectorCommand(ConnectorCommand):
             "A format JSON dictionary",
             arg="FORMAT",
         ),
-        "--query": CmdOpt(
-            "Specify the SQL query file",
-            short="q",
-            arg="QUERY",
-        ),
-        "--target": CmdOpt(
-            "Specify the target server",
-            short="t",
-            arg="TARGET",
-        ),
     }
 
     __cmd_props__.usages = {
         "--target": CmdUsage(
-            "",
+            "Query the specified target server",
             (
                 "(-t=TARGET | --target=TARGET)",
-                "(--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) (--db=DBNAME) (-q=QUERY | --query=QUERY) [--driver=DRIVER] [--format=FORMAT]",
+                "(--username=USER --password=PASS | --creds-service=SERVICE [--username=USER]) (--db=DBNAME) [--driver=DRIVER] (-q=QUERY | --query=QUERY) [--format=FORMAT]",
             ),
             {
                 "payload": CmdUsageOpt("--query"),
