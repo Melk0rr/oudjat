@@ -4,7 +4,7 @@ Below you can find details about Oudjat command line usage.
 For now, Oudjat includes two operating modes.
 
 1. 🐚Command Line (covered bellow)
-2. ⚙️Configuration File (covered in its [dedicated doc file](config_file)
+2. ⚙️Configuration File (covered in its [dedicated doc file](./config_file)
 
 ## 📖Table of Contents
 
@@ -76,7 +76,7 @@ The connectors commands **share some common operations** you can pass as options
 | --sort=SORTKEY         | A key to sort the result with                                                 |
 | --sort-reverse         | Reverse the sorting order                                                     |
 
-#### 📦JSON String
+#### 📦JSON String {#general-options-json}
 
 You will often see connectors with at least one option that expects a JSON string argument (e.g. `--payload`)
 
@@ -114,7 +114,7 @@ You may also come across several options that need a **list of elements**.
 oudjat connectors.<connector_ref> --usage --names Rick,Roy,Pris
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > Each element in the list must be separated by a comma, no space
 
 2. Provide the list as a file
@@ -123,13 +123,10 @@ oudjat connectors.<connector_ref> --usage --names Rick,Roy,Pris
 oudjat connectors.<connector_ref> --usage --names @./path/to/file.txt
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > To specify that the list is a file, you must include an at sign **@** at the beginning of the argument value.
 > Each line of the file will be considered a value. So one element (name, id, whatever) per line.
 > The provided file can have any extension, as long as its content is clear text
-
-> [!IMPORTANT]
-> Check option description to know if the option expects a list
 
 #### 🔑Credentials {#general-options-creds}
 
@@ -261,7 +258,7 @@ oudjat connectors.cert.certfr --feed
 ### 📝Examples {#certfr-examples}
 
 ```bash
-oudjat connectors.cert.certfr -t CERTFR-2021-ALE-022" --max-cve --limit 20
+oudjat connectors.cert.certfr -t "CERTFR-2021-ALE-022" --max-cve --limit 20
 oudjat connectors.cert.certfr --feed --date-filter "2025-12-01"
 ```
 
@@ -505,7 +502,7 @@ oudjat connectors.edr.sentinelone --sites-by-name
 | --verdict-filter=VERDICTFILTER          | a list of incident statuses for alert/threat selection                     |
 
 > [!IMPORTANT]
-> Some of the options listed above expect a [[commands#📦JSON String]] argument:
+> Some of the options listed above expect a [JSON string](#general-options-json) argument
 
 - `--payload`
   - The payload is basically what is sent in the request.
@@ -574,7 +571,7 @@ Endoflife.date is a website that documents end of life and support lifecycles fo
 
 - No API key, nor special access is required.
 - No credential are required either.
-- You just need an internet access.
+- You just need an 🌐internet access.
 
 ### 🚀Usage {#eol-usage}
 
@@ -739,7 +736,7 @@ oudjat connectors.ldap --users
 | --san=SAN                 | SAMAccountName(s) to narrow down elements research         |
 | --search-base=SEARCHBASE  | Where to base the search on in terms of directory location |
 
-#### Filter
+#### Filter {#ldap-options-filter}
 
 > [!TIP]
 > Options for this connector are mostly trivial (No JSON string or complex object).
@@ -765,9 +762,9 @@ You can combine filters using either:
 
 You will find more details and examples in the **cheatsheet** above
 
-#### Usage filter
+#### Usage filter {#ldap-options-usg-filter}
 
-The [[commands#🚀Usage {#ldap-usage}]] mentioned earlier have implicit filters.
+The [usages](#ldap-usage) mentioned earlier have implicit filters.
 
 | Usage     | Description                                  |
 | --------- | -------------------------------------------- |
@@ -812,45 +809,11 @@ oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --gpos --d
 oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --computers --name Skynet,Wintermute,R2D2
 ```
 
-## 🔌Connectors - MS.CVRF
-
-> [!IMPORTANT]
-
-- [x] Backend implementation
-- [ ] Command line implementation
-
-### 💡Description {#cvrf-description}
-
-A connector that can retrieve Microsoft KB data from [Microsoft CVRF API](https://api.msrc.microsoft.com/).
-Based on given CVEs, it can retrieve KB numbers that you can then check are deployed in your environment.
-
-### 📚Reference {#cvrf-ref}
-
-`connectors.ms.cvrf`
-
-### ☑️Prerequisites {#cvrf-prereq}
-
-### 🚀Usage {#cvrf-usage}
-
-| Usage | Description |
-| ----- | ----------- |
-
-```bash
-```
-
-### 🎛️Options {#cvrf-options}
-
-| Option | Description |
-| ------ | ----------- |
-
-### 📝Examples {#cvrf-examples}
-
-```bash
-```
-
-## 🔌Connectors - MS.SCCM
+## 🔌Connectors - SCCM
 
 ### 💡Description {#sccm-description}
+
+A connector that allows to query an SCCM server through [ODBC](https://en.wikipedia.org/wiki/Open_Database_Connectivity)
 
 ### 📚Reference {#sccm-ref}
 
@@ -860,16 +823,29 @@ Based on given CVEs, it can retrieve KB numbers that you can then check are depl
 
 ### 🚀Usage {#sccm-usage}
 
-| Usage | Description |
-| ----- | ----------- |
+| Usage  | Description                       |
+| ------ | --------------------------------- |
+| target | Query the specified target server |
 
 ```bash
+oudjat connectors.sccm (-t=TARGET | --target=TARGET)
+                       (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                       (--db=DBNAME)
+                       (-q=QUERY | --query=QUERY)
+                       [--driver=DRIVER]
+                       [--format=FORMAT]
+                       [options]
 ```
 
 ### 🎛️Options {#sccm-options}
 
-| Option | Description |
-| ------ | ----------- |
+| Option             | Description                       |
+| ------------------ | --------------------------------- |
+| -t --target=TARGET | Specify the target server         |
+| -q --query=QUERY   | Specify the SQL query file        |
+| --db=DBNAME        | The name of the database to query |
+| --driver=DRIVER    | The ODBC driver to use            |
+| --format=FORMAT    | A format JSON dictionary          |
 
 ### 📝Examples {#sccm-examples}
 
