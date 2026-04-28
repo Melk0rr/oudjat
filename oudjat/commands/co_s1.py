@@ -245,6 +245,7 @@ class S1ConnectorCommand(ConnectorCommand):
                 "name": CmdUsageOpt("--names"),
                 "vendor": CmdUsageOpt("--vendors"),
                 "site_ids": CmdUsageOpt("--sites-list"),
+                "auto": CmdUsageOpt("--auto"),
                 "payload": CmdUsageOpt("--payload"),
             },
         ),

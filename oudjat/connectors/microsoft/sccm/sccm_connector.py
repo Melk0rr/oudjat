@@ -201,7 +201,6 @@ class SCCMConnector(Connector):
                 if re.search(r'[\'";\-\+\*\/]', v, re.I):
                     raise ValueError(f"{context}::Suspicious parameter value for {k}: {v}")
 
-
             elif isinstance(v, (int, float)):
                 pass
 
