@@ -3,6 +3,7 @@ A module that handles SCCM server connection and interractions.
 """
 
 import logging
+import re
 from typing import Any, override
 
 import pyodbc
@@ -161,6 +162,7 @@ class SCCMConnector(Connector):
         with yaspin(text="Fetching data from server...") as spinner:
             try:
                 if payload_fmt is not None:
+                    self._check_query_format(payload_fmt)
                     payload = payload.format(**payload_fmt)
 
                 _ = self._cursor.execute(payload)
@@ -183,3 +185,26 @@ class SCCMConnector(Connector):
         self.logger.debug(f"{context}::Retrieved {len(res)} elements")
 
         return res
+
+    def _check_query_format(self, query_fmt: dict[str, Any]) -> None:
+        """
+        Do some basic security validation of the provided query format.
+
+        Args:
+            query_fmt (dict[str, Any]): Query dictionary format to validate
+        """
+
+        context = Context()
+
+        for k, v in query_fmt.items():
+            if isinstance(v, str):
+                if re.search(r'[\'";\-\+\*\/]', v, re.I):
+                    raise ValueError(f"{context}::Suspicious parameter value for {k}: {v}")
+
+
+            elif isinstance(v, (int, float)):
+                pass
+
+            else:
+                raise ValueError(f"{context}::Unsupported parameter type for {k}: {v} ({type(v)})")
+
