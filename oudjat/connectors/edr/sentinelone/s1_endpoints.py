@@ -84,7 +84,7 @@ class S1Endpoint(Enum):
     APPLICATIONS_INVENTORY_ENDPOINTS = S1EndpointsProps(
         "/web/api/v2.1/application-management/inventory/endpoints",
         ConnectorMethod.GET,
-        "Retrieve endpoints an application is installed on",
+        "Retrieve endpoints with certain application installed",
     )
     APPLICATIONS_CVES = S1EndpointsProps(
         "/web/api/v2.1/application-management/risks",
