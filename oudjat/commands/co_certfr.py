@@ -137,10 +137,16 @@ class CERTFRConnectorCommand(ConnectorCommand):
     def _max_cve_cb(self) -> None:
         balancer = CVELoadBalancer()
 
-        for page in self._data:
-            cves = page["cves"][: self.options["--limit"]]
-            page_cves = balancer.fetch(cves)
-            page_cves = CVE.from_db(page_cves)
+        cves = {}
 
-            max_cves = CVE.max_cve(page_cves)
+        def _cve_not_resolved(cve: str) -> bool:
+            return cve not in cves
+
+        for page in self._data:
+            initial_page_cves = page["cves"]
+            page_cves = balancer.fetch(list(filter(_cve_not_resolved, initial_page_cves)))
+
+            cves.update({cve.ref: cve for cve in CVE.from_db(page_cves)})
+
+            max_cves = CVE.max_cve([cves[cve] for cve in initial_page_cves])
             page["highestCVEs"] = [{"id": cve.ref, "score": cve.cvss_score} for cve in max_cves]
