@@ -23,6 +23,15 @@ For now, Oudjat includes two operating modes.
 ### 💡Description {#general-description}
 
 The connector commands allow you to interact and query implemented connectors.
+
+Basically:
+1. The user runs a command
+2. The command uses a certain backend
+3. The backend requests an API
+
+Some options / backends allow to do a bit more by combining other backends and API requests.
+This is to simplify / accelerate some operations
+
 Every implemented connector return data in the form of a list of dictionaries. Which you can
 
 - filter
@@ -131,6 +140,8 @@ oudjat connectors.<connector_ref> --usage --names @./path/to/file.txt
 #### 🔑Credentials {#general-options-creds}
 
 In a lot of cases, the connector will require that you provide 🔑**credentials** to perform some form of 👤**authentication**.
+
+Oudjat handles secrets through python keyring and the credential store available on your machine.
 You can provide 🔑 with these options
 
 | Option                  | Description                                                                                                         |
@@ -811,15 +822,36 @@ oudjat connectors.ldap -t ldap.mydomain.local --creds-service SvcLDAP --computer
 
 ## 🔌Connectors - SCCM
 
+> [!IMPORTANT]
+> 🔨 Please note that this connector is a work in progress
+
 ### 💡Description {#sccm-description}
 
-A connector that allows to query an SCCM server through [ODBC](https://en.wikipedia.org/wiki/Open_Database_Connectivity)
+A connector that allows to query an SCCM server through [ODBC](https://en.wikipedia.org/wiki/Open_Database_Connectivity).
+
+> [!WARNING]
+> Currently, this connector is considered semi-safe
+
+Because every SCCM SQL database is different, it is difficult to write a backend that would work for at least a majority.
+So currently the connector just provides a way to send an SQL query as plain text.
+
+> [!IMPORTANT]
+> For security purpose, the connector check for suspicious parameters. Especially when a format dictionary is provided
+> If no format dictionary is provided, the query is interpreted as pure text
 
 ### 📚Reference {#sccm-ref}
 
 `connectors.ms.sccm`
 
 ### ☑️Prerequisites {#sccm-prereq}
+
+You will need the following elements to use this connector:
+
+- A valid account that has access to the SCCM server you want to query
+- Permission given to this account to query and read data from the SCCM database
+
+> [!IMPORTANT]
+> 🔑Credentials are needed for this connector. See [general credentials](#general-options-creds) section.
 
 ### 🚀Usage {#sccm-usage}
 
@@ -850,6 +882,7 @@ oudjat connectors.sccm (-t=TARGET | --target=TARGET)
 ### 📝Examples {#sccm-examples}
 
 ```bash
+oudjat connectors.sccm -t sccm.mydomain.local --db MySCCMDB --creds-service SCCMODBC --query ./my_query.sql
 ```
 
 ## 🔌Connectors - Tenable.SC
