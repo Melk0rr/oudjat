@@ -25,12 +25,21 @@ For now, Oudjat includes two operating modes.
 The connector commands allow you to interact and query implemented connectors.
 
 Basically:
-1. The user runs a command
-2. The command uses a certain backend
-3. The backend requests an API
 
-Some options / backends allow to do a bit more by combining other backends and API requests.
-This is to simplify / accelerate some operations
+1. The user runs a command
+2. The command uses a certain connector backend function
+3. The backend requests the associated API
+
+![Command sequence diagram](../assets/command.jpg)
+
+> [!TIP]
+> Some options / backends allow to do a bit more by combining other backends and API requests.
+> This is to simplify / accelerate some operations that are not natively possible through native API operations.
+
+- Auto loops
+- Data consolidation
+- Research / query forging
+- Etc
 
 Every implemented connector return data in the form of a list of dictionaries. Which you can
 
