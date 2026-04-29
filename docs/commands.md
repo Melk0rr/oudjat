@@ -198,7 +198,7 @@ The next time you use the same service, Oudjat will automatically retrieve the r
 So the credentials options are usually handled with the following docopt logic:
 `(--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])`
 
-### 🆘Help {#general-help}
+#### 🆘Help {#general-options-help}
 
 Each connector command options can be retrieved by combining the connector ref with the `--help` option like this:
 
@@ -209,7 +209,7 @@ oudjat connectors.<ref> --help
 
 Using the `--help` option without any connector reference, will just print the general help message
 
-#### 📝Examples
+##### 📝Examples
 
 Print general help:
 
