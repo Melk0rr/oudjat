@@ -94,6 +94,17 @@ The connectors commands **share some common operations** you can pass as options
 | --sort=SORTKEY         | A key to sort the result with                                                 |
 | --sort-reverse         | Reverse the sorting order                                                     |
 
+#### Debug & Logs
+
+Oudjat handles logs through logging module.
+
+> [!TIP]
+> You can display more logs by using the `--verbose` option
+
+> [!TIP]
+> You can export logs into a file of your choosing using the `--output` option
+> The `--append` option allows you to, well... Append logs to an existing log file
+
 #### 📦JSON String {#general-options-json}
 
 You will often see connectors with at least one option that expects a JSON string argument (e.g. `--payload`)
