@@ -94,7 +94,7 @@ The connectors commands **share some common operations** you can pass as options
 | --sort=SORTKEY         | A key to sort the result with                                                 |
 | --sort-reverse         | Reverse the sorting order                                                     |
 
-#### Debug & Logs
+#### 🗄️Debug & Logs {#general-options-logs}
 
 Oudjat handles logs through logging module.
 
