@@ -9,14 +9,14 @@ For now, Oudjat includes two operating modes.
 ## 📖Table of Contents
 
 1. [Connectors](#connectors)
-    a. [Connectors.CERT.CERTFR](#connectors-cert-certfr)
-    b. [Connectors.EDR.Cybereason](#connectors-edr-cybereason)
-    c. [Connectors.EDR.SentinelOne](#connectors-edr-sentinelone)
-    d. [Connectors.Endoflife](#connectors-endoflife)
-    e. [Connectors.LDAP](#connectors-ldap)
-    f. [Connectors.MS.SCCM](#connectors-ms-sccm)
-    g. [Connectors.Tenable.SC](#connectors-tenable-sc)
-    h. [Connectors.Vulns](#connectors-vulns)
+    1. [Connectors.CERT.CERTFR](#connectors-cert-certfr)
+    2. [Connectors.EDR.Cybereason](#connectors-edr-cybereason)
+    3. [Connectors.EDR.SentinelOne](#connectors-edr-sentinelone)
+    4. [Connectors.Endoflife](#connectors-endoflife)
+    5. [Connectors.LDAP](#connectors-ldap)
+    6. [Connectors.MS.SCCM](#connectors-ms-sccm)
+    7. [Connectors.Tenable.SC](#connectors-tenable-sc)
+    8. [Connectors.Vulns](#connectors-vulns)
 2. [Utils](#utils)
 
 ## 🔌Connectors
