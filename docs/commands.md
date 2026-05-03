@@ -9,14 +9,15 @@ For now, Oudjat includes two operating modes.
 ## 📖Table of Contents
 
 1. [Connectors](#connectors)
-2. [Connectors.CERT.CERTFR](#connectors-cert-certfr)
-3. [Connectors.EDR.Cybereason](#connectors-edr-cybereason)
-4. [Connectors.EDR.SentinelOne](#connectors-edr-sentinelone)
-5. [Connectors.Endoflife](#connectors-endoflife)
-6. [Connectors.LDAP](#connectors-ldap)
-7. [Connectors.MS.SCCM](#connectors-ms-sccm)
-8. [Connectors.Tenable.SC](#connectors-tenable-sc)
-9. [Connectors.Vulns](#connectors-vulns)
+    a. [Connectors.CERT.CERTFR](#connectors-cert-certfr)
+    b. [Connectors.EDR.Cybereason](#connectors-edr-cybereason)
+    c. [Connectors.EDR.SentinelOne](#connectors-edr-sentinelone)
+    d. [Connectors.Endoflife](#connectors-endoflife)
+    e. [Connectors.LDAP](#connectors-ldap)
+    f. [Connectors.MS.SCCM](#connectors-ms-sccm)
+    g. [Connectors.Tenable.SC](#connectors-tenable-sc)
+    h. [Connectors.Vulns](#connectors-vulns)
+2. [Utils](#utils)
 
 ## 🔌Connectors
 
@@ -1095,12 +1096,12 @@ oudjat connectors.vulns --auto (--cves=CVES) [--payload=PAYLOAD] [options]
 
 ---
 
-## 🛠️Utils
+## 🛠️Utils {#utils}
 
 Utils commands provide some utility tools that can be used in a connector usage context or not.
 Utils commands work in a similar way than the connectors.
 
-## 🛠️Utils - Credentials
+## 🛠️Utils - Credentials {#utils-creds}
 
 ### 💡Description {#cred-description}
 
