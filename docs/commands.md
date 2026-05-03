@@ -905,17 +905,23 @@ oudjat connectors.sccm (-t=TARGET | --target=TARGET)
 oudjat connectors.sccm -t sccm.mydomain.local --db MySCCMDB --creds-service SCCMODBC --query ./my_query.sql
 ```
 
-## 🔌Connectors - Tenable.SC
+## 🔌Connectors - SecurityScoreCard
 
-### 💡Description {#tsc-description}
+> [!IMPORTANT]
+> This connector is a work in progress
 
-### 📚Reference {#tsc-ref}
+- [x] Backend implementation
+- [ ] Command line
 
-`connectors.tenable.sc`
+### 💡Description {#ssc-description}
 
-### ☑️Prerequisites {#tsc-prereq}
+### 📚Reference {#ssc-ref}
 
-### 🚀Usage {#tsc-usage}
+`connectors.ssc`
+
+### ☑️Prerequisites {#ssc-prereq}
+
+### 🚀Usage {#ssc-usage}
 
 | Usage | Description |
 | ----- | ----------- |
@@ -923,10 +929,122 @@ oudjat connectors.sccm -t sccm.mydomain.local --db MySCCMDB --creds-service SCCM
 ```bash
 ```
 
-### 🎛️Options {#tsc-options}
+### 🎛️Options {#ssc-options}
 
 | Option | Description |
 | ------ | ----------- |
+
+### 📝Examples {#ssc-examples}
+
+```bash
+```
+
+## 🔌Connectors - Tenable.SC
+
+### 💡Description {#tsc-description}
+
+A connector that allows to interact with [Tenable Security Center](https://www.tenable.com/products/security-center) API.
+
+This API and connector are focused on
+
+- Managing assets lists
+- Managing scans
+- Exploit scan results data
+
+### 📚Reference {#tsc-ref}
+
+`connectors.tenable.sc`
+
+### ☑️Prerequisites {#tsc-prereq}
+
+You will need the following elements to use this connector:
+
+1. An account on Tenable.sc console
+2. An API token
+
+> [!IMPORTANT]
+> 🔑Credentials are needed for this connector. See [general credentials](#general-options-creds) section.
+
+### 🚀Usage {#tsc-usage}
+
+> [!CAUTION]
+> Some commands (usages) bellow can have an impact on your scans or even your scanned assets
+> Among the possible impacts are : slowed down assets while scans are running, or even unexpected behaviors on sanned applications
+
+| Usage                                                     | Description                                                             |
+| --------------------------------------------------------- | ----------------------------------------------------------------------- |
+| --vulns                                                   | Retrieve vulnerabilities that match the provided severities and filters |
+| --asset-lists                                             | Retrieve a list of asset lists with minimal informations like list ids  |
+| --asset-lists-details                                     | Return the details of one or more asset lists                           |
+| --asset-lists-delete                                      | ❗Delete an asset list based on given id                                |
+| --scans                                                   | Retrieve a list of scans with minimal information like scan ids         |
+| --scans-details                                           | Return the details of one or more scans                                 |
+| --scans-delete                                            | ❗Delete one or multiple scans                                          |
+| ❗: Usage that can impact your environment. Use carefully |                                                                         |
+
+```bash
+oudjat connectors.tenable.sc --vulns
+                             (-t=TARGET | --target=TARGET)
+                             (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                             [--severities=SEVERITIES]
+                             [--tool=TOOL]
+                             [--product=PRODUCT]
+                             [--exploitable]
+                             [--filter=FILTER]
+                             ...
+                             [--payload=PAYLOAD]
+                             [options]
+oudjat connectors.tenable.sc --asset-lists
+                             (-t=TARGET | --target=TARGET)
+                             (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                             [--filter=FILTER]
+                             ...
+                             [--fields=FIELDS]
+                             [--payload=PAYLOAD]
+                             [options]
+oudjat connectors.tenable.sc --asset-lists-details
+                             (-t=TARGET | --target=TARGET)
+                             (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                             [--ids=IDS]
+                             [options]
+oudjat connectors.tenable.sc --asset-lists-delete
+                             (-t=TARGET | --target=TARGET)
+                             (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                             [--ids=IDS]
+                             [options]
+oudjat connectors.tenable.sc --scans
+                             (-t=TARGET | --target=TARGET)
+                             (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                             [--filter=FILTER]
+                             ...
+                             [--fields=FIELDS]
+                             [--payload=PAYLOAD]
+                             [options]
+oudjat connectors.tenable.sc --scans-details
+                             (-t=TARGET | --target=TARGET)
+                             (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                             [--ids=IDS]
+                             [options]
+oudjat connectors.tenable.sc --scans-delete
+                             (-t=TARGET | --target=TARGET)
+                             (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])
+                             [--ids=IDS]
+                             [options]
+```
+
+### 🎛️Options {#tsc-options}
+
+| Option                  | Description                                                                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| --exploitable           | Include only exploitable vulnerabilities in the results                                                                       |
+| --filter=FILTER         | Provide 3 values filter to narrow down vulnerability search (attribute,operator,value)                                        |
+| --fields=FIELDS         | A list of attributes to return for each scan / asset lists                                                                    |
+| --ids=IDS               | A list of IDs of scans or asset list                                                                                          |
+| --payload=PAYLOAD       | Additional parameters to pass                                                                                                 |
+| --product=PRODUCT       | Specify a product name to retrieve vulnerabilities for                                                                        |
+| --severities=SEVERITIES | Provide severity numbers, comma separated (1:MINOR,2:MODERATE,3:HIGH,4:CRITICAL) [default: 3,4]                               |
+| -t --target=TARGET      | Specify the SentinelOne URL to query                                                                                          |
+| --tool=TOOL             | Specify an analysis tool which provides a specific vulnerability view. See the list of available tools [default: vulndetails] |
 
 ### 📝Examples {#tsc-examples}
 
@@ -937,24 +1055,38 @@ oudjat connectors.sccm -t sccm.mydomain.local --db MySCCMDB --creds-service SCCM
 
 ### 💡Description {#vuln-description}
 
+A connector that allow to retrieve CVE data from various databases
+- [Nist.org](Nist.org)
+- [CVE.org](https://www.cve.org/)
+- [Circl.org](https://vulnerability.circl.lu/)
+
 ### 📚Reference {#vuln-ref}
 
-``
+`connectors.vulns`
 
 ### ☑️Prerequisites {#vuln-prereq}
 
+No prerequisites are required for this connector except the references of the CVEs you want to search
+
 ### 🚀Usage {#vuln-usage}
 
-| Usage | Description |
-| ----- | ----------- |
+| Usage | Description                                                                                 |
+| ----- | ------------------------------------------------------------------------------------------- |
+| db    | Use a specific database to retrieve CVE data. Keep in mind APIs are requests/min restricted |
+| auto  | Use load balancing to retrieve data dynamically from available CVE APIs                     |
 
 ```bash
+oudjat connectors.vulns --db (-t=TARGET | --target=TARGET) (--cves=CVES) [--payload=PAYLOAD] [options]
+oudjat connectors.vulns --auto (--cves=CVES) [--payload=PAYLOAD] [options]
 ```
 
 ### 🎛️Options {#vuln-options}
 
-| Option | Description |
-| ------ | ----------- |
+| Option             | Description                                                                |
+| ------------------ | -------------------------------------------------------------------------- |
+| -t --target=TARGET | Specify the name database to use (cveorg, nist or circl) [default: cveorg] |
+| --cves=CVES        | Specify cve references to retrieve data for                                |
+| --payload=PAYLOAD  | A JSON payload to pass additional query parameters                         |
 
 ### 📝Examples {#vuln-examples}
 
@@ -965,4 +1097,47 @@ oudjat connectors.sccm -t sccm.mydomain.local --db MySCCMDB --creds-service SCCM
 
 ## 🛠️Utils
 
+Utils commands provide some utility tools that can be used in a connector usage context or not.
+Utils commands work in a similar way than the connectors.
+
 ## 🛠️Utils - Credentials
+
+### 💡Description {#cred-description}
+
+An utility command that allows you to manage script [credentials](#general-options-creds) in a secure way.
+
+### 📚Reference {#cred-ref}
+
+`utils.credentials`
+
+### ☑️Prerequisites {#cred-prereq}
+
+No prerequisites are required for this command except for the credentials you want to register.
+
+### 🚀Usage {#cred-usage}
+
+| Usage  | Description                                                        |
+| ------ | ------------------------------------------------------------------ |
+| new    | Register a new set of credentials for a specified service and user |
+| edit   | Edit the password for the specified service and user               |
+| delete | Delete the password for the specified service and user             |
+| check  | Check the existence of credentials for the specified service       |
+
+```bash
+oudjat utils.credentials --new (--service=SERVICE) [-u=USERNAME | --username=USERNAME] [options]
+oudjat utils.credentials --edit (--service=SERVICE) (-u=USERNAME | --username=USERNAME) [options]
+oudjat utils.credentials --delete (--service=SERVICE) (-u=USERNAME | --username=USERNAME) [options]
+oudjat utils.credentials --check (--service=SERVICE) [-u=USERNAME | --username=USERNAME] [options]
+```
+
+### 🎛️Options {#cred-options}
+
+| Option                 | Description                                                        |
+| ---------------------- | ------------------------------------------------------------------ |
+| --service=SERVICE      | Specify the name of the service you want to handle credentials for |
+| -u --username=USERNAME | Specify the credentials username                                   |
+
+### 📝Examples {#cred-examples}
+
+```bash
+```

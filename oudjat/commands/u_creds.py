@@ -34,7 +34,6 @@ class CredentialUtilCmd(ConnectorCommand):
     __cmd_props__.options = {
         "--service": CmdOpt(
             "Specify the name of the service you want to handle credentials for",
-            short="s",
             arg="SERVICE",
         ),
         "--username": CmdOpt(
@@ -49,7 +48,7 @@ class CredentialUtilCmd(ConnectorCommand):
             "Register a new set of credentials for a specified service and user",
             (
                 "--new",
-                "(-s=SERVICE | --service=SERVICE) [-u=USERNAME | --username=USERNAME]",
+                "(--service=SERVICE) [-u=USERNAME | --username=USERNAME]",
             ),
             {
                 "service": CmdUsageOpt("--service"),
@@ -60,7 +59,7 @@ class CredentialUtilCmd(ConnectorCommand):
             "Edit the password for the specified service and user",
             (
                 "--edit",
-                "(-s=SERVICE | --service=SERVICE) (-u=USERNAME | --username=USERNAME)",
+                "(--service=SERVICE) (-u=USERNAME | --username=USERNAME)",
             ),
             {
                 "service": CmdUsageOpt("--service"),
@@ -71,7 +70,7 @@ class CredentialUtilCmd(ConnectorCommand):
             "Delete the password for the specified service and user",
             (
                 "--delete",
-                "(-s=SERVICE | --service=SERVICE) (-u=USERNAME | --username=USERNAME)",
+                "(--service=SERVICE) (-u=USERNAME | --username=USERNAME)",
             ),
             {
                 "service": CmdUsageOpt("--service"),
@@ -82,7 +81,7 @@ class CredentialUtilCmd(ConnectorCommand):
             "Check the existence of credentials for the specified service",
             (
                 "--check",
-                "(-s=SERVICE | --service=SERVICE) [-u=USERNAME | --username=USERNAME]",
+                "(--service=SERVICE) [-u=USERNAME | --username=USERNAME]",
             ),
             {
                 "service": CmdUsageOpt("--service"),
