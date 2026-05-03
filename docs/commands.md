@@ -18,6 +18,7 @@ For now, Oudjat includes two operating modes.
     7. [Connectors.Tenable.SC](#connectors-tenable-sc)
     8. [Connectors.Vulns](#connectors-vulns)
 2. [Utils](#utils)
+    1. [Utils.Credentials](#utils-creds)
 
 ## 🔌Connectors
 
