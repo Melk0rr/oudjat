@@ -69,6 +69,7 @@ class LDAPFilterObjectCtg(StrEnum):
     PERSON = "person"
     USER = "user"
 
+
 class LDAPFilterObjectCls(StrEnum):
     """
     A helper class to list valid LDAP filter 'objectClass' values.
@@ -120,7 +121,9 @@ class LDAPBuiltinFilter(Enum):
             str: Formated filter string
         """
 
-        formated_filter = self._value_.format(**{"cmp_operator": cmp_operator.value, "value": value})
+        formated_filter = self._value_.format(
+            **{"cmp_operator": cmp_operator.value, "value": value}
+        )
         return LDAPFilter(formated_filter)
 
 
@@ -460,11 +463,18 @@ class LDAPFilter:
         if self._value is not None:
             filter_str = "".join(self._value)
 
-        elif self._operator is not None and self._nodes:
+        elif len(self._nodes) > 0:
             nodes_str = "".join(map(str, self._nodes))
-            filter_str = f"{self._operator.value}{nodes_str}"
 
-        return f"({filter_str})" if len(filter_str) > 0 else ""
+            if len(self._nodes) > 1:
+                filter_str += self._operator or LDAPFilterOperator.OR
+
+            filter_str += nodes_str
+
+        if len(filter_str) > 0 and (len(self._nodes) > 1 or self._value is not None):
+            filter_str = f"({filter_str})"
+
+        return filter_str
 
     # ****************************************************************
     # Class methods
@@ -504,9 +514,6 @@ class LDAPFilter:
 
         for v in filter_values:
             res_filter += filter_fmt(v)
-
-        if len(res_filter.nodes) < 2:
-            res_filter.clr_operator()
 
         return res_filter
 

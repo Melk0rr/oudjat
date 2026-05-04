@@ -643,9 +643,6 @@ class LDAPConnector(Connector):
             if v is not None:
                 new_filter += LDAPFilter.format(k.upper(), v)
 
-        if len(new_filter.nodes) < 2:
-            new_filter.clr_operator()
-
         return new_filter
 
     def objects(
