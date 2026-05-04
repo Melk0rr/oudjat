@@ -1069,6 +1069,9 @@ A connector that allow to retrieve CVE data from various databases
 - [CVE.org](https://www.cve.org/)
 - [Circl.org](https://vulnerability.circl.lu/)
 
+> [!TIP]
+> Output data are homogenized across all implemented databases in order to simplify usage.
+
 ### 📚Reference {#vuln-ref}
 
 `connectors.vulns`
@@ -1089,6 +1092,10 @@ oudjat connectors.vulns --db (-t=TARGET | --target=TARGET) (--cves=CVES) [--payl
 oudjat connectors.vulns --auto (--cves=CVES) [--payload=PAYLOAD] [options]
 ```
 
+This connector has 2 main usages:
+1. `--db`: which gives you the ability to query a specific CVE database among the ones implemented
+2. `--auto`: which uses a load balancer to... Well... Balance queries across the available databases
+
 ### 🎛️Options {#vuln-options}
 
 | Option             | Description                                                                |
@@ -1096,6 +1103,9 @@ oudjat connectors.vulns --auto (--cves=CVES) [--payload=PAYLOAD] [options]
 | -t --target=TARGET | Specify the name database to use (cveorg, nist or circl) [default: cveorg] |
 | --cves=CVES        | Specify cve references to retrieve data for                                |
 | --payload=PAYLOAD  | A JSON payload to pass additional query parameters                         |
+
+// TODO: 
+- [ ] More options to tweak the load balancer
 
 ### 📝Examples {#vuln-examples}
 
@@ -1114,6 +1124,11 @@ Utils commands work in a similar way than the connectors.
 ### 💡Description {#cred-description}
 
 An utility command that allows you to manage script [credentials](#general-options-creds) in a secure way.
+
+> [!IMPORTANT]
+> This is just a command that specifically allow you to manage the credentials.
+> Every connector that needs credentials, actually integrates those credential management mechanics. 
+> Those connector use these mechanics when you specify a service to register credentials for
 
 ### 📚Reference {#cred-ref}
 
