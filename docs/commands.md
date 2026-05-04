@@ -4,21 +4,21 @@ Below you can find details about Oudjat command line usage.
 For now, Oudjat includes two operating modes.
 
 1. 🐚Command Line (covered bellow)
-2. ⚙️Configuration File (covered in its [dedicated doc file](./config_file)
+2. ⚙️Configuration File (covered in its [dedicated doc file](./config_file))
 
 ## 📖Table of Contents
 
 1. [Connectors](#connectors)
-    1. [Connectors.CERT.CERTFR](#connectors-cert-certfr)
-    2. [Connectors.EDR.Cybereason](#connectors-edr-cybereason)
-    3. [Connectors.EDR.SentinelOne](#connectors-edr-sentinelone)
-    4. [Connectors.Endoflife](#connectors-endoflife)
-    5. [Connectors.LDAP](#connectors-ldap)
-    6. [Connectors.MS.SCCM](#connectors-ms-sccm)
-    7. [Connectors.Tenable.SC](#connectors-tenable-sc)
-    8. [Connectors.Vulns](#connectors-vulns)
+   1. [Connectors.CERT.CERTFR](#connectors-cert-certfr)
+   2. [Connectors.EDR.Cybereason](#connectors-edr-cybereason)
+   3. [Connectors.EDR.SentinelOne](#connectors-edr-sentinelone)
+   4. [Connectors.Endoflife](#connectors-endoflife)
+   5. [Connectors.LDAP](#connectors-ldap)
+   6. [Connectors.MS.SCCM](#connectors-ms-sccm)
+   7. [Connectors.Tenable.SC](#connectors-tenable-sc)
+   8. [Connectors.Vulns](#connectors-vulns)
 2. [Utils](#utils)
-    1. [Utils.Credentials](#utils-creds)
+   1. [Utils.Credentials](#utils-creds)
 
 ## 🔌Connectors
 
@@ -55,6 +55,12 @@ To use one of oudjat connectors, you can reference it like this:
 
 ```bash
 oudjat connectors.<connector_path> [options]
+```
+
+Which you can schematize this way
+
+```bash
+oudjat <command> <usage_main_options> <minor_options>
 ```
 
 You will find every connector reference in their **dedicated command section**.
@@ -1058,6 +1064,7 @@ oudjat connectors.tenable.sc --scans-delete
 ### 💡Description {#vuln-description}
 
 A connector that allow to retrieve CVE data from various databases
+
 - [Nist.org](Nist.org)
 - [CVE.org](https://www.cve.org/)
 - [Circl.org](https://vulnerability.circl.lu/)
