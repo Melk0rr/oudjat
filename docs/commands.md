@@ -71,8 +71,8 @@ Oudjat uses [docotp](http://docopt.org/) to handle its usages and command option
 
 > [!IMPORTANT]
 > The most important rule of docopt you need to know is:
-> options wrapped with **parenthesis** () or not wrapped at all, are required.
-> options wrappped with **brackets** [] are optional.
+> options wrapped with **parenthesis** `(` `)` or not wrapped at all, are required.
+> options wrappped with **brackets** `[` `]` are optional.
 
 Each option is described under its **Options** section in help messages.
 While the usages under the **Usage** section each describe a way you can use the script.
