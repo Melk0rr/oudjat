@@ -77,7 +77,7 @@ Oudjat uses [docotp](http://docopt.org/) to handle its usages and command option
 Each option is described under its **Options** section in help messages.
 While the usages under the **Usage** section each describe a way you can use the script.
 
-> [!HINT]
+> [!TIP]
 > You may often see the `[options]` string in usage lines.
 > This is a shortcut to specify that you **can** use other options than the ones specified in the usage line.
 
