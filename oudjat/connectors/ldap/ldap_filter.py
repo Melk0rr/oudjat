@@ -462,10 +462,7 @@ class LDAPFilter:
 
         elif self._operator is not None and self._nodes:
             nodes_str = "".join(map(str, self._nodes))
-            if len(self._nodes) > 1:
-                filter_str += self._operator.value
-
-            filter_str += f"{nodes_str}"
+            filter_str = f"{self._operator.value}{nodes_str}"
 
         return f"({filter_str})" if len(filter_str) > 0 else ""
 
@@ -507,6 +504,9 @@ class LDAPFilter:
 
         for v in filter_values:
             res_filter += filter_fmt(v)
+
+        if len(res_filter.nodes) < 2:
+            res_filter.clr_operator()
 
         return res_filter
 
