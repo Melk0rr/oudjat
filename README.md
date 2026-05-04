@@ -23,7 +23,14 @@
 
 ## What is it ?
 
-Oudjat is a SOC toolbox and maybe more if I have the time
+Oudjat is a SOC toolbox and maybe more if I have the time.
+It provides an entry point to data sources. While also giving the means to consolidate data into common notions like:
+
+- Users
+- Computers
+- Softwares
+- Risks
+- etc.
 
 ## Getting Started
 
@@ -56,12 +63,14 @@ cd oudjat
 
 2. Install the package
 
-- Using *pip*
+- Using _pip_
+
 ```bash
 pip install .
 ```
 
-- Using *uv*
+- Using _uv_
+
 ```bash
 uv tool install .
 ```
@@ -100,6 +109,13 @@ uv tool install .
     Help:
     For help using this tool, please open an issue on the Codeberg repository:
     https://codeberg.org/me1k0r/oudjat
+
+### Advanced usage
+
+Oudjat currently has 2 operating modes:
+
+1. [Command line](./docs/commands.md)
+1. [Configuration file](./docs/config_file.md)
 
 ## License
 
