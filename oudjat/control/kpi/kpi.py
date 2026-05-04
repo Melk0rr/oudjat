@@ -4,10 +4,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, NamedTuple, TypedDict, override
 
-from oudjat.control.data import DataSet, DataSetType
-from oudjat.control.data.decision_tree import DecisionTree, DecisionTreeDictionaryProps
-from oudjat.utils import ColorPrint, DataType, TimeConverter
-from oudjat.utils.types import DateInputType, NumberType
+from oudjat.control.data import DataSet, DataSetType, DecisionTree, DecisionTreeDictionaryProps
+from oudjat.core.asset import Asset
+from oudjat.utils import ColorPrint, DateInputType, NumberType, TimeConverter
 
 
 class ConformityLevelProps(NamedTuple):
@@ -123,7 +122,6 @@ class KPI(DataSet):
 
         super().__init__(
             name=name,
-            perimeter=perimeter,
             initial_set=data_set,
             decision_tree=decision_tree,
             description=description,
@@ -213,7 +211,7 @@ class KPI(DataSet):
         return self._value
 
     @property
-    def conform_elements(self) -> "DataType":
+    def conform_elements(self) -> dict[str, "Asset"]:
         """
         Return the output elements.
 

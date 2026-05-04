@@ -8,11 +8,12 @@ from typing import Any, override
 from urllib.parse import ParseResult, urlparse
 
 import requests
+from yaspin import yaspin
 
 from oudjat.connectors.connector import Connector
 from oudjat.connectors.edr.cybereason.cr_endpoints import CybereasonEndpoint
-from oudjat.utils import Context
-from oudjat.utils.time_utils import TimeConverter
+from oudjat.utils.context import Context
+from oudjat.utils.time import TimeConverter
 from oudjat.utils.types import StrType
 
 from .cr_sensor_actions import CybereasonSensorAction
@@ -115,7 +116,6 @@ class CybereasonConnector(Connector):
         """
 
         context = Context()
-        self.logger.info(f"{context}::Connecting to {self._target.netloc}")
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         session = requests.session()
@@ -131,12 +131,14 @@ class CybereasonConnector(Connector):
                 f"{self._target.geturl()}/login.html", data=creds, headers=headers, verify=True
             )
 
+            self.logger.info(f"Connected to {self._target.netloc}")
+
         except CybereasonAPIConnectionError as e:
             raise CybereasonAPIConnectionError(
                 f"{context}::An error occured while trying to connect to Cybereason API at {self.target.netloc}: {e}"
             )
 
-        self.logger.info(f"{context}::Connected to {self._target.netloc}")
+        self.logger.info(f"Connected to {self._target.netloc}")
         self._connection = session
 
     def disconnect(self) -> None:
@@ -146,7 +148,7 @@ class CybereasonConnector(Connector):
 
         if self._connection is not None:
             self._connection.close()
-            self.logger.warning(f"{Context()}::Connection to {self._target.netloc} is now closed")
+            self.logger.warning(f"Connection to {self._target.netloc} is now closed")
 
     def _endpoint_url(self, endpoint: CybereasonEndpoint) -> str:
         """
@@ -195,42 +197,58 @@ class CybereasonConnector(Connector):
         if attributes is None:
             attributes = endpoint.attributes
 
-        self.logger.debug(f"{context}::Fetching {endpoint} data {payload}")
+
+        action_str = (
+            "Retrieving data for"
+            if endpoint.method.name == "GET"
+            else "Updating elements with"
+        )
+
+        self.logger.info(f"{action_str} {endpoint} Cybereason endpoint")
+        self.logger.debug(f"{context}::{endpoint} > {payload}")
 
         res: list["CybereasonEntry"] = []
-        try:
-            req = self._connection.request(
-                method=endpoint.method.name,
-                url=f"{self._endpoint_url(endpoint)}/{endpoint_arg}",
-                data=json.dumps(payload),
-                headers={"Content-Type": "application/json"},
-            )
+        with yaspin(text=f"{action_str} {endpoint}...") as spinner:
+            try:
+                req = self._connection.request(
+                    method=endpoint.method.name,
+                    url=f"{self._endpoint_url(endpoint)}/{endpoint_arg}",
+                    data=json.dumps(payload),
+                    headers={"Content-Type": "application/json"},
+                )
 
-            if req.status_code != 200:
-                raise CybereasonAPIRequestError(f"API responded with status code {req.status_code}")
+                if req.status_code != 200:
+                    raise CybereasonAPIRequestError(f"API responded with status code {req.status_code}")
 
-            req_json = req.json()
-            if not isinstance(req_json, list):
-                if "data" in req_json:
-                    req_json = req_json.get("data", [])
+                req_json = req.json()
+                if not isinstance(req_json, list):
+                    if "data" in req_json:
+                        req_json = req_json.get("data", [])
 
-                elif req_json.get(endpoint.name.lower(), None) is not None:
-                    req_json = req_json.get(endpoint.name.lower())
+                    elif req_json.get(endpoint.name.lower(), None) is not None:
+                        req_json = req_json.get(endpoint.name.lower())
 
-                else:
-                    req_json = [req_json]
+                    else:
+                        req_json = [req_json]
 
-            # Map to CybereasonEntry instances
-            def map_cr_entry(element: dict[str, Any]) -> "CybereasonEntry":
-                filtered_element = {k: v for k, v in element.items() if k in attributes}
-                return CybereasonEntry(**filtered_element)
+                # Map to CybereasonEntry instances
+                def map_cr_entry(element: dict[str, Any]) -> "CybereasonEntry":
+                    filtered_element = {k: v for k, v in element.items() if k in attributes}
+                    return CybereasonEntry(**filtered_element)
 
-            res.extend(list(map(map_cr_entry, req_json)))
+                res.extend(list(map(map_cr_entry, req_json)))
 
-        except CybereasonAPIRequestError as e:
-            raise CybereasonAPIRequestError(
-                f"{context}::An error occured while retriving data from {self._endpoint_url(endpoint)}\n{e}"
-            )
+            except CybereasonAPIRequestError as e:
+                raise CybereasonAPIRequestError(
+                    f"{context}::An error occured while retriving data from {self._endpoint_url(endpoint)}\n{e}"
+                )
+
+            if len(res) > 0:
+                spinner.text = f"{len(res)} elements were retrieved or updated"
+                spinner.ok("✅ ")
+
+            else:
+                spinner.fail("❌ ")
 
         return res
 
@@ -249,17 +267,20 @@ class CybereasonConnector(Connector):
             list[CybereasonEntry]: API query response
         """
 
-
         if not isinstance(sensor_ids, list):
             sensor_ids = [sensor_ids]
 
         payload = {"sensorsIds": sensor_ids, "keepManualOverrides": False}
-        return self.fetch(endpoint=CybereasonEndpoint.POLICIES, endpoint_arg=f"{policy_id}/assign", payload=payload)
+        return self.fetch(
+            endpoint=CybereasonEndpoint.POLICIES,
+            endpoint_arg=f"{policy_id}/assign",
+            payload=payload,
+        )
 
     # ****************************************************************
     # Methods: Sensors
 
-    def sensors(
+    def agents(
         self, payload: dict[str, Any] | None = None, limit: int | None = None
     ) -> list["CybereasonEntry"]:
         """
@@ -288,12 +309,11 @@ class CybereasonConnector(Connector):
             payload["offset"] = i
             res.extend(self.fetch(endpoint=endpoint, payload=payload))
 
-        print(f"{len(res)} {endpoint.name.lower()} found")
         return res
 
-    def _sensor_action(
+    def _agent_action(
         self,
-        action: CybereasonSensorAction,
+        action: "CybereasonSensorAction",
         sensor_ids: StrType | None = None,
         payload: dict[str, Any] | None = None,
     ) -> list["CybereasonEntry"]:
@@ -327,7 +347,7 @@ class CybereasonConnector(Connector):
             payload=payload,
         )
 
-    def sensor_remove_group(self, sensor_ids: StrType) -> list["CybereasonEntry"]:
+    def agent_remove_group(self, sensor_ids: "StrType") -> list["CybereasonEntry"]:
         """
         Remove given sensors from group optionally specified.
 
@@ -338,13 +358,13 @@ class CybereasonConnector(Connector):
             list[CybereasonEntry]: API query response
         """
 
-        return self._sensor_action(
+        return self._agent_action(
             action=CybereasonSensorAction.REMOVEFROMGROUP,
             sensor_ids=sensor_ids,
             payload=self._DEFAULT_PAYLOAD,
         )
 
-    def sensor_assign_group(
+    def agent_assign_group(
         self, sensor_ids: StrType, group_id: str, payload: dict[str, Any] | None = None
     ) -> list["CybereasonEntry"]:
         """
@@ -364,13 +384,13 @@ class CybereasonConnector(Connector):
 
         payload["argument"] = group_id
 
-        return self._sensor_action(
+        return self._agent_action(
             action=CybereasonSensorAction.ADDTOGROUP,
             sensor_ids=sensor_ids,
             payload=payload,
         )
 
-    def sensor_restart(
+    def agent_restart(
         self, sensor_ids: StrType | None = None, payload: dict[str, Any] | None = None
     ) -> list["CybereasonEntry"]:
         """
@@ -393,7 +413,7 @@ class CybereasonConnector(Connector):
         elif sensor_ids is not None:
             payload = {}
 
-        return self._sensor_action(
+        return self._agent_action(
             action=CybereasonSensorAction.RESTART,
             sensor_ids=sensor_ids,
             payload=payload,

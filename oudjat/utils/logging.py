@@ -4,7 +4,24 @@ A helper module to handle logging format.
 
 import logging
 import sys
-from typing import override
+from typing import Callable, override
+
+from yaspin.core import Yaspin
+
+
+def spinner_log(text: str, log_fn: Callable[..., None], spinner: "Yaspin") -> None:
+    """
+    Hide the provided spinner, log the provided text with the specified function, then show the spinner.
+
+    Args:
+        text (str)                  : The text to log
+        log_fn (Callable[..., None]): The log function to use
+        spinner (Yaspin)            : The spinner to toggle
+    """
+
+    spinner.hide()
+    log_fn(text)
+    spinner.show()
 
 
 class OudjatFormatter(logging.Formatter):
@@ -48,7 +65,6 @@ class OudjatFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-@staticmethod
 def oudjatLogger(
     level: int = logging.INFO,
     stdout: bool = True,

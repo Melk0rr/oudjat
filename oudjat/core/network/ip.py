@@ -176,7 +176,7 @@ class IP:
             self._ports[port.number] = port
 
         else:
-            self.logger.warning(f"{Context()}::{port} is already in the list of {str(self)} open ports")
+            self.logger.warning(f"{str(self)}:{port} is already open")
 
     def remove_port(self, port: int) -> None:
         """
@@ -333,7 +333,7 @@ class IP:
 
         elif ip_version == IPVersion.IPV6:
 
-            def expand_ipv6(addr: str) -> list[str]:
+            def _expand_ipv6(addr: str) -> list[str]:
                 if "::" in addr:
                     head, sep, tail = addr.partition("::")
                     head_parts = head.split(":") if head else []
@@ -346,7 +346,7 @@ class IP:
 
                 return [part.zfill(4) for part in new_parts]
 
-            ip_groups = expand_ipv6(ip.lower())
+            ip_groups = _expand_ipv6(ip.lower())
             ip_int = 0
             for g in ip_groups:
                 ip_int = (ip_int << 16) + int(g, 16)

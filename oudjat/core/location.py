@@ -2,10 +2,10 @@
 
 from typing import Any, override
 
+from oudjat.core.generic_identifiable import GenericIdentifiable
 from oudjat.utils import Context
 
 from ..core.network.subnet import Subnet
-from .generic_identifiable import GenericIdentifiable
 
 
 class Location(GenericIdentifiable):
@@ -38,7 +38,12 @@ class Location(GenericIdentifiable):
             subnet (Subnet | dict[int | str, Subnet] | None): The subnet or subnets associated with this location.
         """
 
-        super().__init__(gid=location_id, name=name, label=label, description=description)
+        super().__init__(
+            gid=location_id,
+            name=name,
+            label=label,
+            description=description,
+        )
 
         self._subnet: dict[int | str, Subnet] = {}
 

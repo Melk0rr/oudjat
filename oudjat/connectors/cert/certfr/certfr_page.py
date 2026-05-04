@@ -16,7 +16,7 @@ from ...connector_methods import ConnectorMethod
 from ..risk_types import RiskType
 from .certfr_page_types import CERTFRPageType
 from .definitions import CERTFR_LINK_REGEX, CERTFR_REF_REGEX, REF_TYPES
-from .exceptions import CERTFRInvalidLinkError, CERTFRReferenceError
+from .exceptions import CERTFRInvalidLinkError, CERTFRParsingError, CERTFRReferenceError
 
 
 def clean_str(str_to_clean: str) -> str:
@@ -78,8 +78,10 @@ class CERTFRPage:
             f"{self.BASE_LINK}/{CERTFRPageType[ref_type].value}/{self._ref}/"
         )
 
+        self._matches: set[str] = set()
+
     # ****************************************************************
-    # Methods
+    # Methods - getters/setters
 
     @property
     def ref(self) -> str:
@@ -191,6 +193,20 @@ class CERTFRPage:
 
         return self._content.cves if self._content else []
 
+    @property
+    def matches(self) -> set[str]:
+        """
+        Return the keywords that matched the current page.
+
+        Returns:
+            set[str]: A set of keywords that match the page
+        """
+
+        return self._matches
+
+    # ****************************************************************
+    # Methods - parsing
+
     def connect(self) -> None:
         """
         Connect to a CERTFR page based on the given reference (ref).
@@ -217,8 +233,6 @@ class CERTFRPage:
             if title:
                 self._title = title.text
 
-            self.logger.info(f"{context}::Connected to {self._link.netloc}")
-
         except ConnectionError:
             self.logger.error(
                 f"{context}::Error requesting {self._ref}. Make sure it is accessible"
@@ -229,7 +243,7 @@ class CERTFRPage:
         Reset the parsing state of the CERTFRPage instance by setting raw_content, meta, and content to None.
         """
 
-        self.logger.warning(f"{Context()}::Disconnected from {self._link.geturl()}")
+        self.logger.warning(f"Disconnected from {self._link.geturl()}")
 
         self._raw_content = None
         self._meta = None
@@ -265,8 +279,29 @@ class CERTFRPage:
                     self._content = CERTFRPageContent(ref=self._ref, content_section=sections[1])
                     self._content.parse()
 
-            except Exception as e:
+            except CERTFRParsingError as e:
                 self.logger.error(f"{context}::A parsing error occured for {self._ref}\n{e}")
+
+    def match(self, keywords: list[str]) -> None:
+        """
+        Check if any of the provided keywords match the page content.
+
+        Args:
+            keywords (list[str]): A list of keywords to search
+        """
+
+        if not self._content and not self._title:
+            return
+
+        products_str = ("".join(self._content.products) if self._content else "").lower()
+        title = (self._title or "").lower()
+
+        matches = {
+            kw for kw in keywords
+            if kw.lower() in title or kw.lower() in products_str
+        }
+
+        self._matches.update(matches)
 
     @override
     def __str__(self) -> str:
@@ -294,6 +329,7 @@ class CERTFRPage:
             "ref": self._ref,
             **meta_dict,
             **content_dict,
+            "matches": list(self._matches),
         }
 
         return page_dict

@@ -181,13 +181,13 @@ class CompareOperatorProps(NamedTuple):
 class CompareOperator(Operator):
     """An enumeration of possible operators."""
 
-    IN = OperatorProps({"symbol": "∈", "verbose": "in"}, CompareOperation.ope_in)
-    EQ = OperatorProps({"symbol": "=", "verbose": "eq"}, CompareOperation.ope_equals)
-    GT = OperatorProps({"symbol": ">", "verbose": "gt"}, CompareOperation.ope_greater_than)
-    GE = OperatorProps({"symbol": ">=", "verbose": "ge"}, CompareOperation.ope_greater_equal_than)
-    LT = OperatorProps({"symbol": "<", "verbose": "lt"}, CompareOperation.ope_lower_than)
-    LE = OperatorProps({"symbol": "<=", "verbose": "le"}, CompareOperation.ope_greater_equal_than)
-    IS = OperatorProps({"symbol": ":", "verbose": "is"}, CompareOperation.ope_is)
-    ISNT = OperatorProps({"symbol": "!:", "verbose": "isnt"}, CompareOperation.ope_is_not)
-    MATCH = OperatorProps({"symbol": "~", "verbose": "match"}, CompareOperation.ope_reg_match)
-    SEARCH = OperatorProps({"symbol": "?", "verbose": "search"}, CompareOperation.ope_reg_search)
+    IN     = CompareOperatorProps({"symbol": "∈", "verbose": "in"}, CompareOperation.ope_in)
+    EQ     = CompareOperatorProps({"symbol": "=", "verbose": "eq"}, CompareOperation.ope_equals)
+    GT     = CompareOperatorProps({"symbol": ">", "verbose": "gt"}, CompareOperation.ope_greater_than)
+    GE     = CompareOperatorProps({"symbol": ">=", "verbose": "ge"}, CompareOperation.ope_greater_equal_than)
+    LT     = CompareOperatorProps({"symbol": "<", "verbose": "lt"}, CompareOperation.ope_lower_than)
+    LE     = CompareOperatorProps({"symbol": "<=", "verbose": "le"}, CompareOperation.ope_greater_equal_than)
+    IS     = CompareOperatorProps({"symbol": ":", "verbose": "is"}, CompareOperation.ope_is)
+    ISNT   = CompareOperatorProps({"symbol": "!:", "verbose": "isnt"}, CompareOperation.ope_is_not)
+    MATCH  = CompareOperatorProps({"symbol": "~", "verbose": "match"}, CompareOperation.ope_reg_match)
+    SEARCH = CompareOperatorProps({"symbol": "?", "verbose": "search"}, CompareOperation.ope_reg_search)

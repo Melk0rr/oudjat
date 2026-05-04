@@ -4,15 +4,13 @@ Main module.
 
 __version__ = "0.8.1a1"
 
-# TODO: from_dict methods
 # TODO: Asset merge methods
 # TODO: Make DataSet inherit from dictionary or use dictionary
 # TODO: Make DataSet work arround Asset
 # TODO: Operator overload methods
-# TODO: Base AssetMapper class + implement it as a base for more specific asset mappers
-# TODO: Move away OS guessing from LDAPComputer -> Leave it for external check or Asset mapper ?
-# TODO: Make LDAPObject and child classes inherit from LDAPEntry ?
-# TODO: Move away Asset concepts from the whole LDAPObject logic and leave it for Asset mapper
+# TODO: Expose SoftwareRealease filter functions in an enum
+# TODO: Re-organize mapper and asset mapper files (renaming + relocate)
+# TODO: Condition yaspin and tqdm to interactive sessions (sys.stdin.isatty and sys.stdout.isatty)
 # TODO: Optimization:
 # - [x] Faster json
 # - [ ] Check dict.keys unnessessary convertions

@@ -6,10 +6,11 @@ from collections.abc import Iterator
 from datetime import datetime
 from typing import Any, Callable, Generic, TypeAlias, TypedDict, TypeVar, override
 
-from oudjat.core.generic_identifiable import GenericIdentifiable
+from oudjat.core import Asset
+from oudjat.core.asset_type import AssetType
 from oudjat.core.software.software_edition import SoftwareEdition
 from oudjat.utils import Context
-from oudjat.utils.time_utils import TimeConverter
+from oudjat.utils.time import TimeConverter
 
 from .software_release_version import SoftwareReleaseVersion
 from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportDict
@@ -36,7 +37,7 @@ class SoftwareReleaseDictProps(TypedDict):
     supportChannels: dict[str, "SoftwareReleaseSupportDict"]
 
 
-class SoftwareRelease(GenericIdentifiable):
+class SoftwareRelease(Asset):
     """A class to describe software releases."""
 
     # ****************************************************************
@@ -73,7 +74,7 @@ class SoftwareRelease(GenericIdentifiable):
         self._version: "SoftwareReleaseVersion" = SoftwareReleaseVersion(version)
         self._latest_version: "SoftwareReleaseVersion" = self._version
 
-        super().__init__(gid=release_id, name=name, label=release_label)
+        super().__init__(asset_id=release_id, name=name, label=release_label, asset_type=AssetType.SOFTWARE_RELEASE)
 
         try:
             if not isinstance(release_date, datetime):
@@ -662,7 +663,7 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
 
         else:
             self.logger.warning(
-                f"{Context()}::A release with same id ({release.id}) already exists for version {key}"
+                f"A release with id ({release.id}) already exists for version {key}"
             )
 
     def get(self, key: str, default_value: Any = None) -> "SoftwareReleaseList[ReleaseType] | None":
@@ -681,6 +682,20 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
         """
 
         return self._releases.get(key, default_value)
+
+    def find_unique_index(self, rel_version: str, rel_id: str) -> int | None:
+        """
+        Find a release in a release dictionary based on a provided version and id.
+
+        Args:
+            rel_version (str): The version of the sought release
+            rel_id (str)     : The id of the sought release
+
+        Returns:
+            int | None: The index of the release in the version list if it exists
+        """
+
+        return next((i for i, el in enumerate(self[rel_version]) if el.id == rel_id), None)
 
     def keys(self):
         """

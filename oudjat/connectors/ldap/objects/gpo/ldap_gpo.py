@@ -5,7 +5,6 @@ import re
 from enum import Enum, IntEnum
 from typing import TYPE_CHECKING, Any, override
 
-from oudjat.utils import Context
 from oudjat.utils.types import StrType
 
 from ...ldap_filter import LDAPFilter
@@ -139,18 +138,18 @@ class LDAPGroupPolicyObject(LDAPObject):
             list["LDAPObject"]: A list of LDAPOrganizationalUnit instances that are linked to the current GPO.
         """
 
-        self.logger.info(f"{Context()}::Retrieving linked object of {self.display_name}")
+        self.logger.info(f"Retrieving linked object of {self.display_name}")
 
         obj_opt = self.capabilities.ldap_obj_opt(LDAPObjectType.OU)
-        LDAPOUCls = obj_opt.cls
-
         obj_filter = LDAPFilter(f"(gPLink={f'*{self.name}*'})") & LDAPFilter.name(ou)
 
-        res = {}
-        for entry in obj_opt.fetch(search_filter=obj_filter, attributes=attributes):
-            res[entry.dn] = LDAPOUCls(entry, capabilities=self.capabilities)
+        obj_entries = self.capabilities.ldap_search(
+            search_type=LDAPObjectType.OU,
+            search_filter=obj_filter,
+            attributes=attributes,
+        )
 
-        return res
+        return obj_opt.fetch(entries=obj_entries)
 
     @override
     def to_dict(self) -> dict[str, Any]:
@@ -163,10 +162,10 @@ class LDAPGroupPolicyObject(LDAPObject):
             dict[str, Any]: A dictionary containing the GPO's display name, scope, state, and linked GUIDs.
         """
 
-        base_dict = super().to_dict()
+        base = super().to_dict()
 
         return {
-            **base_dict,
+            **base,
             "displayName": self.display_name,
             "scope": self.scope.name,
             "state": self.state.name,

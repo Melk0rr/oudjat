@@ -5,10 +5,10 @@ from typing import Any, Callable, TypeAlias, TypedDict, override
 from oudjat.control.data.exceptions import DataFilterInvalidOperatorError
 from oudjat.utils import Context, DataType
 from oudjat.utils.operators import CompareOperator
-from oudjat.utils.types import FilterTupleExtType, NumberType
+from oudjat.utils.types import FilterTupleExtType
 
 # TODO: Support Callable value
-DataFilterDictionaryValueType: TypeAlias = NumberType | bool | str | None
+DataFilterDictionaryValueType: TypeAlias = int | float | bool | str | None
 
 
 class DataFilterDictionaryProps(TypedDict):
@@ -23,7 +23,8 @@ class DataFilterDictionaryProps(TypedDict):
 
     fieldname: str
     operator: str | None
-    value: "DataFilterDictionaryValueType"
+    value: "DataFilterDictionaryValueType | Callable[..., DataFilterDictionaryValueType]"
+    negate: bool | None
 
 
 class DataFilter:
@@ -48,7 +49,7 @@ class DataFilter:
     # Attributes & Constructors
 
     def __init__(
-        self, fieldname: str, value: Any, operator: "str | CompareOperator" = "in", negate: bool = False
+        self, fieldname: str, value: Any, operator: "str | CompareOperator | None" = CompareOperator.EQ, negate: bool | None = False
     ) -> None:
         """
         Return a new instance of data filter.
@@ -60,11 +61,20 @@ class DataFilter:
             negate (bool)  : if you want to negate the filter result or not (True -> False; False -> True)
         """
 
+        if operator is None:
+            operator = CompareOperator.EQ
+
+        if negate is None:
+            negate = False
+
         if isinstance(operator, str):
             if operator not in CompareOperator.list_all_keys():
                 raise DataFilterInvalidOperatorError(f"{Context()}::Invalid operator provided: {operator}")
 
             operator = CompareOperator.find_by_key(operator)
+
+            if operator is None:
+                raise ValueError(f"{Context()}::Invalid operator key provided")
 
         self._fieldname: str = fieldname
         self._operator: "CompareOperator" = operator
@@ -220,8 +230,9 @@ class DataFilter:
 
         return cls(
             fieldname=filter_dict["fieldname"],
-            operator=filter_dict.get("operator", None) or "is",
+            operator=filter_dict.get("operator", "="),
             value=filter_dict.get("value", None),
+            negate=filter_dict.get("negate", False)
         )
 
     @classmethod

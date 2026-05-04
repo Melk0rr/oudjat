@@ -80,7 +80,6 @@ class CVRFConnector(Connector):
         """
 
         context = Context()
-        self.logger.info(f"{context}::Connecting to {cvrf_id}")
 
         self._connection = False
 
@@ -91,11 +90,11 @@ class CVRFConnector(Connector):
                 self.add_target(cvrf)
                 self._connection = True
 
-                self.logger.info(f"{context}::Connected to {cvrf_id}")
+                self.logger.info(f"Connected to {cvrf_id}")
 
             except ConnectionError as e:
                 self.logger.error(
-                    f"{context}.connect::Could not connect to the provided CVRF document {e}"
+                    f"{context}::Could not connect to the provided CVRF document {e}"
                 )
 
         else:

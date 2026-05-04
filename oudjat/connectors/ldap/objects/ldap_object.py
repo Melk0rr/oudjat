@@ -3,8 +3,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Generic, NamedTuple, TypeVar, override
 
-from oudjat.core.generic_identifiable import GenericIdentifiable
-from oudjat.utils.time_utils import DateFlag, DateFormat, TimeConverter
+from oudjat.utils.time import DateFlag, DateFormat, TimeConverter
 
 from ..ldap_utils import parse_dn
 
@@ -15,7 +14,7 @@ if TYPE_CHECKING:
 LDAPObjectBoundType = TypeVar("LDAPObjectBoundType", bound="LDAPObject")
 
 
-class LDAPObjectOptions(NamedTuple, Generic[LDAPObjectBoundType]):
+class LDAPObjectOption(NamedTuple, Generic[LDAPObjectBoundType]):
     """
     Helper class to handle passing of LDAPObject derivated and dedicated method to retrive this specific type of LDAPObject.
 
@@ -26,7 +25,7 @@ class LDAPObjectOptions(NamedTuple, Generic[LDAPObjectBoundType]):
     """
 
     cls: type[LDAPObjectBoundType]
-    fetch: Callable[..., list["LDAPEntry"]]
+    fetch: Callable[..., dict[str, "LDAPObjectBoundType"]]
 
 
 class LDAPCapabilities(NamedTuple):
@@ -39,10 +38,10 @@ class LDAPCapabilities(NamedTuple):
     """
 
     ldap_search: Callable[..., list["LDAPEntry"]]
-    ldap_obj_opt: Callable[["LDAPObjectType"], "LDAPObjectOptions"]
+    ldap_obj_opt: Callable[["LDAPObjectType"], "LDAPObjectOption"]
 
 
-class LDAPObject(GenericIdentifiable):
+class LDAPObject:
     """
     Defines common properties and behavior accross LDAP objects.
     """
@@ -65,17 +64,12 @@ class LDAPObject(GenericIdentifiable):
         """
 
         self._entry: "LDAPEntry" = ldap_entry
-        super().__init__(
-            gid=self.entry.id,
-            name=self.entry.name,
-            description=self.entry.description,
-        )
 
         self._ldap_obj_flags: set[str] = set()
         self._capabilities: "LDAPCapabilities" = capabilities
 
     # ****************************************************************
-    # Methods
+    # Methods - getters/setters
 
     @property
     def dn(self) -> str:
@@ -86,7 +80,45 @@ class LDAPObject(GenericIdentifiable):
             str: The distinguished name (DN) of the LDAP object.
         """
 
-        return self.entry.dn
+        return self._entry.get("distinguishedName", self._entry["dn"])
+
+    @property
+    def id(self) -> str:
+        """
+        Return the GUID of the current LDAP object.
+
+        Returns:
+            str: Object GUID string
+        """
+
+        return self._entry.get("objectGUID")
+
+    @property
+    def name(self) -> str:
+        """
+        Return the name of the current LDAP object.
+
+        Returns:
+            str: Object name
+        """
+
+        return self._entry.get("name")
+
+    @property
+    def description(self) -> str:
+        """
+        Return the description of the current LDAP entry.
+
+        Returns:
+            str: object description string
+        """
+
+        desc = self._entry.get("description", "")
+
+        if isinstance(desc, list):
+            desc = " - ".join(desc)
+
+        return desc
 
     @property
     def sid(self) -> str:
@@ -97,7 +129,7 @@ class LDAPObject(GenericIdentifiable):
             str: The security identifier (SID) of the LDAP object.
         """
 
-        return self.entry.get("objectSid")
+        return self._entry.get("objectSid")
 
     @property
     def entry(self) -> "LDAPEntry":
@@ -119,7 +151,7 @@ class LDAPObject(GenericIdentifiable):
             list of str: The 'objectClass' attribute values from the LDAP entry dictionary.
         """
 
-        return self.entry.object_cls
+        return self._entry.get("objectClass", [])
 
     @property
     def capabilities(self) -> "LDAPCapabilities":
@@ -163,7 +195,7 @@ class LDAPObject(GenericIdentifiable):
             list[str]: The groups this account is a member of, as specified in the 'memberOf' attribute.
         """
 
-        return self.entry.get("memberOf", [])
+        return self._entry.get("memberOf", [])
 
     @property
     def creation_date(self) -> datetime | None:
@@ -174,11 +206,15 @@ class LDAPObject(GenericIdentifiable):
             str: The timestamp of when the LDAP object was created.
         """
 
-        attr_value = self.entry.get("whenCreated")
+        attr_value = self._entry.get("whenCreated")
         if attr_value is None:
             return attr_value
 
-        return attr_value if isinstance(attr_value, datetime) else TimeConverter.str_to_date(attr_value)
+        return (
+            attr_value
+            if isinstance(attr_value, datetime)
+            else TimeConverter.str_to_date(attr_value)
+        )
 
     @property
     def change_date(self) -> datetime | None:
@@ -189,11 +225,29 @@ class LDAPObject(GenericIdentifiable):
             str: The timestamp of the last modification to the LDAP object.
         """
 
-        attr_value = self.entry.get("whenChanged")
+        attr_value = self._entry.get("whenChanged")
         if attr_value is None:
             return attr_value
 
-        return attr_value if isinstance(attr_value, datetime) else TimeConverter.str_to_date(attr_value)
+        return (
+            attr_value
+            if isinstance(attr_value, datetime)
+            else TimeConverter.str_to_date(attr_value)
+        )
+
+    @property
+    def flags(self) -> set[str]:
+        """
+        Return the object flags.
+
+        Returns:
+            set[str]: The object flags set
+        """
+
+        return self._ldap_obj_flags
+
+    # ****************************************************************
+    # Methods - checks
 
     def is_in_ou(self, ou_name: str, recursive: bool = True) -> bool:
         """
@@ -209,6 +263,9 @@ class LDAPObject(GenericIdentifiable):
 
         return ou_name in self.dn if recursive else f"{self.name}OU={ou_name}" in self.dn
 
+    # ****************************************************************
+    # Methods - convertion
+
     @override
     def __str__(self) -> str:
         """
@@ -220,7 +277,6 @@ class LDAPObject(GenericIdentifiable):
 
         return self.dn
 
-    @override
     def to_dict(self) -> dict[str, Any]:
         """
         Convert the current instance into a dictionary.
@@ -229,15 +285,33 @@ class LDAPObject(GenericIdentifiable):
             dict: A dictionary containing the attributes of the LDAP object in a structured format
         """
 
-        return {
-            **super().to_dict(),
+        base = self._entry.attr.copy()
+
+        formatted = {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
             "dn": self.dn,
             "sid": self.sid,
             "classes": self.classes,
             "domain": self.domain,
             "creationDate": LDAPObject._format_acc_date_str(self.creation_date),
             "changedDate": LDAPObject._format_acc_date_str(self.change_date),
-            "ldapObjFlags": list(self._ldap_obj_flags),
+            "flags": list(self._ldap_obj_flags),
+        }
+
+        base.pop("distinguishedName", None)
+        base.pop("objectGUID", None)
+        base.pop("name", None)
+        base.pop("description", None)
+        base.pop("objectSid", None)
+        base.pop("objectClass", None)
+        base.pop("whenCreated", None)
+        base.pop("whenChanged", None)
+
+        return {
+            **formatted,
+            **base,
         }
 
     # ****************************************************************

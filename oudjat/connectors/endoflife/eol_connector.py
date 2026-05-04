@@ -4,9 +4,12 @@ import logging
 from typing import Any, override
 from urllib.parse import ParseResult, urlparse
 
+from yaspin import yaspin
+
 from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.connectors.endoflife.eol_endpoints import EndOfLifeEndpoint
 from oudjat.utils import Context, DataType, UtilsList
+from oudjat.utils.logging import spinner_log
 from oudjat.utils.types import StrType
 
 from .definitions import EOL_API_URL
@@ -46,7 +49,6 @@ class EndOfLifeConnector(Connector):
         """
 
         context = Context()
-        self.logger.info(f"{context}::Connecting to {self._target.netloc}")
 
         self._connection = None
 
@@ -56,7 +58,7 @@ class EndOfLifeConnector(Connector):
 
             if req.status_code == 200:
                 self._connection = req.json()
-                self.logger.info(f"{context}::Connected to {self._target.netloc}")
+                self.logger.info(f"Connected to {self._target.netloc}")
 
         except EndOfLifeAPIConnectionError as e:
             raise EndOfLifeAPIConnectionError(
@@ -95,24 +97,36 @@ class EndOfLifeConnector(Connector):
         if payload is None:
             payload = {}
 
-        self.logger.debug(f"{context}::{endpoint.value}/{filter} > {payload}")
+        self.logger.info(f"Fetching end of life data for {endpoint}")
+        self.logger.debug(f"{context}::{endpoint}/{filter} > {payload}")
+
         res = []
-        try:
-            headers = {"Accept": "application/json"}
-            req = ConnectorMethod.GET(
-                f"{self._target.geturl()}{endpoint.value}/{filter}", headers=headers, **payload
-            )
+        with yaspin(text=f"Fetching {endpoint}...") as spinner:
+            try:
+                headers = {"Accept": "application/json"}
+                req = ConnectorMethod.GET(
+                    f"{self._target.geturl()}{endpoint}/{filter}", headers=headers, **payload
+                )
 
-            if req.status_code == 200:
-                req_json = req.json()
-                self.logger.debug(f"{context}::{endpoint.value}/{filter} > {req_json}")
+                if req.status_code == 200:
+                    req_json = req.json()
+                    spinner_log(
+                        f"{context}::{endpoint}/{filter} > {req_json}", self.logger.debug, spinner
+                    )
 
-                UtilsList.append_flat(res, req_json.get("result", []))
+                    UtilsList.append_flat(res, req_json.get("result", []))
 
-        except EndOfLifeAPIConnectionError as e:
-            raise EndOfLifeAPIConnectionError(
-                f"{context}::Could not retrieve {endpoint} infos:\n{e}"
-            )
+            except EndOfLifeAPIConnectionError as e:
+                raise EndOfLifeAPIConnectionError(
+                    f"{context}::Could not retrieve {endpoint} infos:\n{e}"
+                )
+
+            if len(res) > 0:
+                spinner.text = f"Retrieved {len(res)} {endpoint}"
+                spinner.ok("✅ ")
+
+            else:
+                spinner.fail("❌ ")
 
         return res
 

@@ -4,19 +4,25 @@ A module that handles SentinelOne API connection and interactions.
 
 import logging
 import re
-from typing import Any, override
+from typing import Any, TypeAlias, override
 from urllib.parse import ParseResult, urlparse
 
-import requests
+from yaspin import yaspin
 
-from oudjat.utils import FileUtils
-from oudjat.utils.context import Context
-from oudjat.utils.credentials import NoCredentialsError
-from oudjat.utils.types import DataType, StrType
+from oudjat.control.vulnerability.severity import Severity
+from oudjat.utils import Context, DataType, FileUtils, NoCredentialsError, StrType
+from oudjat.utils.logging import spinner_log
 
 from ... import Connector, ConnectorMethod
-from .exceptions import SentinelOneAPIConnectionError
+from .exceptions import SentinelOneAPIConnectionError, SentinelOneEndpointFormatError
+from .s1_analyst_verdicts import S1AnalystVerdict
 from .s1_endpoints import S1Endpoint
+from .s1_incident_statuses import S1IncidentStatus
+from .s1_incident_types import S1IncidentType
+from .s1_mitigation_modes import S1MitigationMode
+
+S1IncidentStatusType: TypeAlias = "str | S1IncidentStatus | list[str | S1IncidentStatus]"
+S1AnalystVerdictType: TypeAlias = "str | S1AnalystVerdict | list[str | S1AnalystVerdict]"
 
 
 class S1Connector(Connector):
@@ -26,6 +32,7 @@ class S1Connector(Connector):
 
     # ****************************************************************
     # Attributes & Constructors
+
     def __init__(
         self,
         target: str,
@@ -56,11 +63,11 @@ class S1Connector(Connector):
         self._target: "ParseResult"
         super().__init__(target=urlparse(target), username=username, password=api_token)
 
-        self._connection: "requests.Session | None" = None
+        self._connection: "str | None" = None
         self._DEFAULT_HEADERS: dict[str, str] = {"Content-Type": "application/json"}
 
     # ****************************************************************
-    # Methods
+    # Methods - helpers
 
     @property
     def _api_token(self) -> str | None:
@@ -86,7 +93,7 @@ class S1Connector(Connector):
 
         headers = self._DEFAULT_HEADERS
         if self._connection:
-            headers["Authorization"] = f"Token {self._connection}"
+            headers["Authorization"] = f"Bearer {self._connection}"
 
         return headers
 
@@ -105,38 +112,6 @@ class S1Connector(Connector):
         """
 
         return ",".join(str_list) if isinstance(str_list, list) else str_list
-
-    @override
-    def connect(self) -> None:
-        """
-        Connect to the target.
-        """
-
-        context = Context()
-
-        if self._credentials is None:
-            raise NoCredentialsError(f"{context}::No password provided")
-
-        if not self._connection:
-            self.logger.info(f"{context}::Connecting to {self._target.netloc} with user API token")
-
-            if self._api_token:
-                try:
-                    data = self.login_by_api_token()
-                    self._connection = data[0]["token"]
-
-                except SentinelOneAPIConnectionError as e:
-                    raise SentinelOneAPIConnectionError(f"{context}::{e}")
-
-            else:
-                raise NoCredentialsError(f"{context}::No API token provided")
-
-            self.logger.info(f"{context}::Connected to {self._target.netloc}")
-
-        else:
-            self.logger.warning(
-                f"{context}::Connection to {self._target.netloc} is already initialized."
-            )
 
     def _request_params(
         self, payload: dict[str, Any], method: "ConnectorMethod", endpoint_path: str
@@ -164,177 +139,112 @@ class S1Connector(Connector):
 
         return r_params
 
-    @override
-    def fetch(
-        self,
-        endpoint: "S1Endpoint",
-        payload: dict[str, Any],
-        attributes: list[str] | None = None,
-        path_fmt: dict[str, str] | None = None,
-    ) -> "DataType":
+    def _unify_status(self, s: "str | S1IncidentStatus") -> str:
         """
-        Perform a search query through the API to retrieve data based on provided endpoint and .
+        Unify incident status type into a valid string.
 
         Args:
-            endpoint (S1Endpoints)          : SentinelOne endpoint the query payload will be send to
-            attributes (list[str] | None)   : List of attributes to keep per elements
-            payload (dict[str, Any] | None) : Payload to send to the provided endpoint
-            path_fmt (dict[str, Any] | None): A dictionary of variable names that will be replaced in the endpoint path
+            s (str | S1IncidentStatus): Incident status to unify
 
         Returns:
-            DataType: list of retrieved elements
+            str: A valid S1 incident status string value
         """
 
-        context = Context()
+        return str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
 
-        res = []
-        next_cursor = None
+    def _unify_verdict(self, v: "str | S1AnalystVerdict") -> str:
+        """
+        Unify incident analyst verdict type into a valid string.
 
-        endpoint_path = endpoint.path
-        if path_fmt:
-            endpoint_path = endpoint_path.format(**path_fmt)
+        Args:
+            v (str | S1AnalystVerdict): Incident analyst verdict to unify
 
-        self.logger.debug(f"{context}::{endpoint} > {payload}")
-        while True:
-            if next_cursor:
-                payload["cursor"] = next_cursor
+        Returns:
+            str: A valid S1 incident analyst verdict string value
+        """
 
-            r_params = self._request_params(payload, endpoint.method, endpoint_path)
-            req = endpoint.method(**r_params)
-            req_json = req.json()
+        return str(v) if isinstance(v, S1AnalystVerdict) else str(S1AnalystVerdict[v.upper()])
 
-            if "data" in req_json:
-                if isinstance(req_json["data"], list):
-                    res.extend(req_json["data"])
+    def _update_filter_status(
+        self,
+        incident_filter: dict[str, Any],
+        statuses: "S1IncidentStatusType | None",
+        incident_type: "S1IncidentType",
+        exclude: bool = False,
+    ) -> None:
+        """
+        Unify an incident status value into a valid status string.
 
-                else:
-                    res.append(req_json["data"])
+        Args:
+            incident_filter (dict[str, Any])      : The incident filter to update if a status is provided
+            statuses (S1IncidentStatusType | None): Status to filter
+            incident_type (S1IncidentType)        : The type of incident
+            exclude (bool)                        : Whether to exclude the provided status
+        """
 
-            self.logger.debug(f"{context}::{endpoint} > {req_json}")
+        if statuses is not None:
+            filter_props = {
+                S1IncidentType.ALERT: {True: "incidentStatus", False: "incidentStatus"},
+                S1IncidentType.THREAT: {True: "incidentStatusesNin", False: "incidentStatuses"},
+            }
 
-            if req.status_code != 200:
-                raise SentinelOneAPIConnectionError(
-                    f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
+            if incident_type is S1IncidentType.ALERT:
+                exclude = False
+
+            if not isinstance(statuses, list):
+                statuses = [statuses]
+
+            unified_statuses = list(set(map(self._unify_status, statuses)))
+
+            if len(unified_statuses) > 0:
+                prop = filter_props[incident_type][exclude]
+                incident_filter[prop] = self._unify_str_list(
+                    unified_statuses
+                    if incident_type is S1IncidentType.THREAT
+                    else next(iter(unified_statuses))
                 )
 
-            next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
-            if not next_cursor:
-                break
+    def _update_filter_verdict(
+        self,
+        incident_filter: dict[str, Any],
+        verdicts: "S1AnalystVerdictType | None",
+        incident_type: "S1IncidentType",
+        exclude: bool = False,
+    ) -> None:
+        """
+        Unify an incident status value into a valid status string.
 
-        return res
+        Args:
+            incident_filter (dict[str, Any])                                       : The incident filter to update if a status is provided
+            verdicts (str | S1AnalystVerdict | list[str | S1AnalystVerdict] | None): Status to filter
+            incident_type (S1IncidentType)                                         : The type of incident
+            exclude (bool)                                                         : Whether to exclude the provided status
+        """
+
+        if verdicts is not None:
+            filter_props = {
+                S1IncidentType.ALERT: {True: "analystVerdict", False: "analystVerdict"},
+                S1IncidentType.THREAT: {True: "analystVerdictsNin", False: "analystVerdicts"},
+            }
+
+            if incident_type is S1IncidentType.ALERT:
+                exclude = False
+
+            if not isinstance(verdicts, list):
+                verdicts = [verdicts]
+
+            unified_verdicts: list[str] = list(set(map(self._unify_verdict, verdicts)))
+
+            if len(unified_verdicts) > 0:
+                prop = filter_props[incident_type][exclude]
+                incident_filter[prop] = self._unify_str_list(
+                    unified_verdicts
+                    if incident_type is S1IncidentType.THREAT
+                    else next(iter(unified_verdicts))
+                )
 
     # ****************************************************************
-    # Methods: Agents
-
-    def agents(
-        self,
-        site_ids: "StrType | None" = None,
-        payload: dict[str, Any] | None = None,
-        infected: bool = False,
-        net_statuses: "StrType | None" = None,
-    ) -> "DataType":
-        """
-        Return the agents based on the provided filter.
-
-        Possible response messages
-        200 - Success
-        400 - Invalid user input received. See error details for further information.
-        401 - Unauthorized access - please sign in and retry.
-
-        Args:
-            site_ids (str | list[str] | None)    : List of site ids to filter
-            payload (dict[str, Any])             : Payload to send to the endpoint
-            infected (bool)                      : Whether to only include agents with at least one active threat
-            net_statuses (str | list[str] | None): Network statuses to filter
-
-        Returns:
-            DataType: response data with agentID
-        """
-
-        if payload is None:
-            payload = {}
-
-        if site_ids is not None:
-            payload["siteIds"] = self._unify_str_list(site_ids)
-
-        if infected:
-            payload["infected"] = True
-
-        if net_statuses is not None:
-            payload["netStatuses"] = self._unify_str_list(net_statuses)
-
-        return self.fetch(endpoint=S1Endpoint.AGENTS, payload=payload)
-
-    def agents_export(
-        self,
-        site_ids: "StrType | None" = None,
-        payload: dict[str, Any] | None = None,
-        infected: bool = False,
-        net_statuses: "StrType | None" = None,
-    ) -> "DataType":
-        """
-        Return the agents based on the provided filter.
-
-        Possible response messages
-        200 - Success
-        400 - Invalid user input received. See error details for further information.
-        401 - Unauthorized access - please sign in and retry.
-
-        Args:
-            site_ids (str | list[str] | None)    : List of site ids to filter
-            payload (dict[str, Any])             : Payload to send to the endpoint
-            infected (bool)                      : Whether to only include agents with at least one active threat
-            net_statuses (str | list[str] | None): Network statuses to filter
-
-        Returns:
-            DataType: response data with agentID
-        """
-
-        if payload is None:
-            payload = {}
-
-        if site_ids is not None:
-            payload["siteIds"] = self._unify_str_list(site_ids)
-
-        if infected:
-            payload["infected"] = True
-
-        if net_statuses is not None:
-            payload["netStatuses"] = self._unify_str_list(net_statuses)
-
-        endpoint = S1Endpoint.AGENTS_EXPORT
-        req = endpoint.method(**self._request_params(payload, endpoint.method, endpoint.path))
-
-        if req.status_code != 200:
-            raise SentinelOneAPIConnectionError(
-                f"{Context()}::An error occured while fetching data from {endpoint}"
-            )
-
-        return FileUtils.parse_csv_str(req.content.decode().replace('"', ''), delimiter=",")
-
-    def move_agent_to_site(self, site_id: str, cpt_name: str) -> "DataType":
-        """
-        Move an agent that matches the filter to a specified site based on its ID.
-
-        Possible response messages
-        200 - Success
-        400 - Invalid user input received. See error details for further information
-        401 - Unauthorized access - please sign in and retry
-        403 - User has insufficient permissions to perform the requested action
-
-        Args:
-            site_id (str) : The site to move the agent on
-            cpt_name (str): The computer to move
-
-        Returns:
-            DataType: response data
-        """
-
-        payload = {"data": {"targetSiteId": site_id}, "filter": {"computerName__like": cpt_name}}
-        return self.fetch(endpoint=S1Endpoint.AGENTS_ACTIONS_MOVE_TO_SITE, payload=payload)
-
-    # ****************************************************************
-    # Methods: Users
+    # Methods - access
 
     def login_by_api_token(self) -> "DataType":
         """
@@ -349,8 +259,58 @@ class S1Connector(Connector):
             DataType: data with user token and user name
         """
 
-        payload = {"data": {"apiToken": self._api_token}}
+        if self._credentials is None:
+            raise NoCredentialsError(f"{Context()}::No credentials provided")
+
+        payload = {
+            "data": {"apiToken": self._api_token},
+        }
         return self.fetch(endpoint=S1Endpoint.USERS_LOGIN_BY_API_TOKEN, payload=payload)
+
+    def login_by_token(self) -> "DataType":
+        """
+        Log in a user with an authentication token.
+
+        Possible response messages
+        200 - user logged in
+        400 - Invalid user input received. See error details for further information.
+        401 - User authentication failed
+
+        Returns:
+            DataType: data with user token and user name
+        """
+
+        if self._credentials is None:
+            raise NoCredentialsError(f"{Context()}::No credentials provided")
+
+        payload = {
+            "data": {"token": self._api_token},
+        }
+
+        return self.fetch(endpoint=S1Endpoint.USERS_LOGIN_BY_TOKEN, payload=payload)
+
+    def login(self) -> "DataType":
+        """
+        Log in a user by username/password.
+
+        Possible response messages
+        200 - user logged in
+        400 - Invalid user input received. See error details for further information.
+        401 - User authentication failed
+
+        Returns:
+            DataType: data with user token and user name
+        """
+
+        if self._credentials is None:
+            raise NoCredentialsError(f"{Context()}::No credentials provided")
+
+        payload = {
+            "username": self._credentials.username,
+            "password": self._credentials.password,
+        }
+
+        return self.fetch(endpoint=S1Endpoint.USERS_LOGIN, payload=payload)
 
     def logout(self, payload: dict[str, Any] | None = None) -> "DataType":
         """
@@ -369,11 +329,561 @@ class S1Connector(Connector):
 
         return self.fetch(S1Endpoint.USERS_LOGOUT, payload or {})
 
+    @override
+    def connect(self) -> None:
+        """
+        Connect to the target.
+        """
+
+        context = Context()
+
+        if self._credentials is None:
+            raise NoCredentialsError(f"{context}::No credentials provided")
+
+        if not self._connection:
+            self.logger.info(f"Connecting to {self._target.netloc} with user API token")
+
+            try:
+                data = self.login_by_api_token()
+                self._connection = data[0]["token"]
+
+            except SentinelOneAPIConnectionError as e:
+                if "Invalid operation" in str(e):
+                    self.logger.warning(
+                        "Failed to log in with API token. Passing user's password as header authorization..."
+                    )
+                    self._connection = self._credentials.password
+
+                else:
+                    raise SentinelOneAPIConnectionError(f"{context}::{e}")
+
+            self.logger.info(f"Connected to {self._target.netloc}")
+
+        else:
+            self.logger.warning(f"Connection to {self._target.netloc} is already initialized.")
+
+    # ****************************************************************
+    # Methods - main
+
+    @override
+    def fetch(
+        self,
+        endpoint: "S1Endpoint",
+        payload: dict[str, Any],
+        path_fmt: dict[str, str] | None = None,
+    ) -> "DataType":
+        """
+        Perform a search query through the API to retrieve data based on provided endpoint and .
+
+        Args:
+            endpoint (S1Endpoints)          : SentinelOne endpoint the query payload will be send to
+            payload (dict[str, Any] | None) : Payload to send to the provided endpoint
+            path_fmt (dict[str, Any] | None): A dictionary of variable names that will be replaced in the endpoint path
+
+        Returns:
+            DataType: list of retrieved elements
+        """
+
+        context = Context()
+
+        next_cursor = None
+
+        endpoint_path = endpoint.path
+
+        if "{" and "}" in endpoint_path and path_fmt is None:
+            raise SentinelOneEndpointFormatError(
+                f"{context}::SentinelOne endpoint {endpoint} needs formatting"
+            )
+
+        if path_fmt:
+            endpoint_path = endpoint_path.format(**path_fmt)
+
+        self.logger.info(f"{endpoint} - {endpoint.description}")
+
+        if "LOGIN" not in endpoint.name:
+            self.logger.debug(f"{context}::{payload}")
+
+        res = []
+        with yaspin(text=f"{endpoint.description}...") as spinner:
+            try:
+                while True:
+                    if next_cursor:
+                        payload["cursor"] = next_cursor
+
+                    r_params = self._request_params(payload, endpoint.method, endpoint_path)
+                    req = endpoint.method(**r_params)
+                    req_json = req.json()
+
+                    spinner_log(f"{context}::{endpoint} > {req_json}", self.logger.debug, spinner)
+
+                    if "data" in req_json:
+                        if isinstance(req_json["data"], list):
+                            res.extend(req_json["data"])
+
+                        else:
+                            res.append(req_json["data"])
+
+                    if req.status_code != 200:
+                        raise SentinelOneAPIConnectionError(
+                            f"{context}::An error occured while fetching data from {endpoint}\n{req_json['errors']}"
+                        )
+
+                    next_cursor = req_json.get("pagination", {}).get("nextCursor", None)
+                    if not next_cursor:
+                        break
+
+                spinner.ok("✅ ")
+
+            except Exception as e:
+                spinner.fail("❌ ")
+                raise e
+
+        return res
+
+    # ****************************************************************
+    # Methods: Agents
+
+    def agents(
+        self,
+        site_ids: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
+        infected: bool = False,
+    ) -> "DataType":
+        """
+        Retrieve agents based on the provided filter.
+
+        Retrieve every agent details.
+
+        Possible response messages
+        200 - Success
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry.
+
+        Args:
+            site_ids (str | list[str] | None): List of site ids to filter
+            payload (dict[str, Any])         : Payload to send to the endpoint
+            infected (bool)                  : Whether to only include agents with at least one active threat
+
+        Returns:
+            DataType: response data with agentID
+        """
+
+        if payload is None:
+            payload = {}
+
+        payload.setdefault("limit", 1000)
+
+        if "skipCount" not in payload:
+            payload["skipCount"] = True
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
+
+        if infected:
+            payload["infected"] = True
+
+        return self.fetch(endpoint=S1Endpoint.AGENTS, payload=payload)
+
+    def agents_export(
+        self,
+        site_ids: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
+        infected: bool = False,
+    ) -> "DataType":
+        """
+        Return a flat agent export.
+
+        This endpoint is intended to do CSV exports.
+
+        Possible response messages
+        200 - Success
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry.
+
+        Args:
+            site_ids (str | list[str] | None)    : List of site ids to filter
+            payload (dict[str, Any])             : Payload to send to the endpoint
+            infected (bool)                      : Whether to only include agents with at least one active threat
+            net_statuses (str | list[str] | None): Network statuses to filter
+
+        Returns:
+            DataType: response data with agentID
+        """
+
+        if payload is None:
+            payload = {}
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
+
+        if infected:
+            payload["infected"] = True
+
+        endpoint = S1Endpoint.AGENTS_EXPORT
+
+        with yaspin(text=f"Exporting agents data using {endpoint}...") as spinner:
+            req = endpoint.method(**self._request_params(payload, endpoint.method, endpoint.path))
+
+            if req.status_code != 200:
+                spinner.fail("❌ ")
+                raise SentinelOneAPIConnectionError(
+                    f"{Context()}::An error occured while fetching data from {endpoint}"
+                )
+
+            spinner.ok("✅ ")
+
+        return FileUtils.parse_csv_str(req.content.decode().replace('"', ""), delimiter=",")
+
+    def move_agent_to_site(self, site_id: str, agent_name: "StrType") -> "DataType":
+        """
+        Move an agent that matches the filter to a specified site based on its ID.
+
+        Possible response messages
+        200 - Success
+        400 - Invalid user input received. See error details for further information
+        401 - Unauthorized access - please sign in and retry
+        403 - User has insufficient permissions to perform the requested action
+
+        Args:
+            site_id (str)   : The site to move the agent on
+            agent_name (str): The agents to move
+
+        Returns:
+            DataType: response data
+        """
+
+        if not isinstance(agent_name, list):
+            agent_name = [agent_name]
+
+        data = []
+        for name in agent_name:
+            payload = {
+                "data": {"targetSiteId": site_id},
+                "filter": {"computerName__like": name},
+            }
+
+            data.extend(
+                self.fetch(endpoint=S1Endpoint.AGENTS_ACTIONS_MOVE_TO_SITE, payload=payload)
+            )
+
+        return data
+
+    # ****************************************************************
+    # Methods: Alerts
+
+    def alert_verdict(
+        self,
+        verdict: "str | S1AnalystVerdict",
+        alert_ids: "StrType | None" = None,
+        site_ids: "StrType | None" = None,
+        status_filter: "S1IncidentStatusType | None" = None,
+        verdict_filter: "S1AnalystVerdictType | None" = None,
+        file_path: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Change the verdict of an alert.
+
+        Response Messages
+        200 - Threats incident successfully updated
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry
+
+        Args:
+            verdict (str | S1AnalystVerdict)            : The verdict to assign to the filtered alerts
+            alert_ids (str | list[str] | None)          : Ids of the alert to change verdict of
+            site_ids (str | list[str] | None)           : Site ids of the alerts
+            status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
+            file_path (str | list[str] | None)          : Path of the process file which triggered the alert
+            payload (dict[str, Any])                    : A dictionary of alert filters
+
+        Returns:
+            DataType: Response containing the number of affected verdicts and eventual errors
+        """
+
+        if payload is None:
+            payload = {}
+
+        if "filter" in payload:
+            p_filter = payload.pop("filter")
+            payload.update(p_filter)
+
+        if alert_ids is not None:
+            if not isinstance(alert_ids, list):
+                alert_ids = [alert_ids]
+
+            payload["ids"] = self._unify_str_list(alert_ids)
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
+
+        self._update_filter_status(payload, status_filter, S1IncidentType.ALERT)
+        self._update_filter_verdict(payload, verdict_filter, S1IncidentType.ALERT)
+
+        if file_path is not None:
+            payload["sourceProcessFilePath__contains"] = self._unify_str_list(file_path)
+
+        if not isinstance(verdict, S1AnalystVerdict):
+            verdict = S1AnalystVerdict[verdict.upper()]
+
+        data = {"analystVerdict": str(verdict)}
+        payload = {"filter": payload, "data": data}
+
+        return self.fetch(S1Endpoint.ALERTS_ANALYST_VERDICT, payload)
+
+    def alert_incident(
+        self,
+        status: "str | S1IncidentStatus",
+        alert_ids: "StrType | None" = None,
+        site_ids: "StrType | None" = None,
+        status_filter: "S1IncidentStatusType | None" = None,
+        verdict_filter: "S1AnalystVerdictType | None" = None,
+        file_path: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Change the verdict of an alert.
+
+        Response Messages
+        200 - Threats incident successfully updated
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry
+
+        Args:
+            status (str | S1IncidentStatus)             : The verdict to assign to the filtered alerts
+            alert_ids (str | list[str] | None)          : Ids of the alert to change verdict of
+            site_ids (str | list[str] | None)           : Site ids of the alerts
+            status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
+            file_path (str | list[str] | None)          : Path of the process file which triggered the alert
+            payload (dict[str, Any])                    : A dictionary of alert filters
+
+        Returns:
+            DataType: Response containing the number of affected verdicts and eventual errors
+        """
+
+        if payload is None:
+            payload = {}
+
+        if "filter" in payload:
+            p_filter = payload.pop("filter")
+            payload.update(p_filter)
+
+        if alert_ids is not None:
+            if not isinstance(alert_ids, list):
+                alert_ids = [alert_ids]
+
+            payload["ids"] = self._unify_str_list(alert_ids)
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
+
+        self._update_filter_status(payload, status_filter, S1IncidentType.ALERT)
+        self._update_filter_verdict(payload, verdict_filter, S1IncidentType.ALERT)
+
+        if file_path is not None:
+            payload["sourceProcessFilePath__contains"] = self._unify_str_list(file_path)
+
+        if not isinstance(status, S1IncidentStatus):
+            status = S1IncidentStatus[status.upper()]
+
+        data = {"incidentStatus": str(status)}
+        payload = {"filter": payload, "data": data}
+
+        return self.fetch(S1Endpoint.ALERTS_INCIDENT, payload)
+
+    # ****************************************************************
+    # Methods: Threats
+
+    def threats(
+        self,
+        status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Get data of threats that match the filter.
+
+        Possible response messages:
+        200 - Success
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry.
+
+        Args:
+            status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
+            loop (bool)                                 : If true, will loop until there is no results left
+            payload (dict[str, Any])                    : Payload to send to the endpoint
+
+        Returns:
+            DataType: Threats data based on the provided filters
+        """
+
+        if payload is None:
+            payload = {}
+
+        self._update_filter_status(payload, status_filter, S1IncidentType.THREAT)
+        self._update_filter_verdict(payload, verdict_filter, S1IncidentType.THREAT)
+
+        return self.fetch(S1Endpoint.THREATS, payload)
+
+    def threat_verdict(
+        self,
+        verdict: "str | S1AnalystVerdict",
+        threat_ids: "StrType | None" = None,
+        site_ids: "StrType | None" = None,
+        status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
+        file_path: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Change the verdict of a threat.
+
+        Response Messages
+        200 - Threats incident successfully updated
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry
+
+        Args:
+            verdict (str | S1AnalystVerdict)            : The verdict to assign to the filtered threats
+            threat_ids (str | list[str] | None)         : Ids of the threat to change verdict of
+            site_ids (str | list[str] | None)           : Site ids of the threats
+            status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
+            file_path (str | list[str] | None)          : Path of the process which triggered the threat
+            payload (dict[str, Any])                    : A dictionary of threat filters
+
+        Returns:
+            DataType: Response containing the number of affected verdicts and eventual errors
+        """
+
+        if payload is None:
+            payload = {}
+
+        if "filter" in payload:
+            p_filter = payload.pop("filter")
+            payload.update(p_filter)
+
+        if threat_ids is not None:
+            if not isinstance(threat_ids, list):
+                threat_ids = [threat_ids]
+
+            payload["ids"] = self._unify_str_list(threat_ids)
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
+
+        self._update_filter_status(payload, status_filter, S1IncidentType.THREAT)
+        self._update_filter_verdict(payload, verdict_filter, S1IncidentType.THREAT)
+
+        payload.setdefault("limit", 1000)
+
+        if file_path is not None:
+            payload["filePath__contains"] = self._unify_str_list(file_path)
+
+        if not isinstance(verdict, S1AnalystVerdict):
+            verdict = S1AnalystVerdict[verdict.upper()]
+
+        data = {"analystVerdict": str(verdict)}
+        payload = {"filter": payload, "data": data}
+
+        return self.fetch(S1Endpoint.THREATS_ANALYST_VERDICT, payload)
+
+    def threat_incident(
+        self,
+        status: "str | S1IncidentStatus",
+        verdict: "str | S1AnalystVerdict",
+        threat_ids: "StrType | None" = None,
+        site_ids: "StrType | None" = None,
+        status_filter: "S1IncidentStatusType | None" = S1IncidentStatus.UNRESOLVED,
+        verdict_filter: "S1AnalystVerdictType | None" = S1AnalystVerdict.UNDEFINED,
+        file_path: "StrType | None" = None,
+        auto: bool = False,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Change the verdict and status of a threat.
+
+        Response Messages
+        200 - Threats incident successfully updated
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry
+
+        Args:
+            status (str | S1IncidentStatus)             : The verdict to assign to the filtered threats
+            verdict (str | S1AnalystVerdict)            : The verdict to assign to the filtered threats
+            threat_ids (str | list[str] | None)         : Ids of the alert to change verdict of
+            site_ids (str | list[str] | None)           : Site ids of the alerts
+            status_filter (S1IncidentStatusType | None) : Treat only the alerts with the provided status. Default UNRESOLVED
+            verdict_filter (S1AnalystVerdictType | None): Treat only the alerts with the provided verdict. Default UNDEFINED
+            file_path (str | list[str] | None)          : Path of the process which triggered the alert
+            auto (bool)                                 : If true, loop until there is no threat to process
+            payload (dict[str, Any])                    : A dictionary of alert filters
+
+        Returns:
+            DataType: Response containing the number of affected verdicts and eventual errors
+        """
+
+        if payload is None:
+            payload = {}
+
+        if "filter" in payload:
+            p_filter = payload.pop("filter")
+            payload.update(p_filter)
+
+        if threat_ids is not None:
+            if not isinstance(threat_ids, list):
+                threat_ids = [threat_ids]
+
+            payload["ids"] = self._unify_str_list(threat_ids)
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
+
+        self._update_filter_status(
+            payload,
+            status_filter,
+            S1IncidentType.THREAT,
+        )
+        self._update_filter_verdict(payload, verdict_filter, S1IncidentType.THREAT)
+
+        payload.setdefault("limit", 1000)
+
+        if file_path is not None:
+            payload["filePath__contains"] = self._unify_str_list(file_path)
+
+        if not isinstance(status, S1IncidentStatus):
+            status = S1IncidentStatus[status.upper()]
+
+        if not isinstance(verdict, S1AnalystVerdict):
+            verdict = S1AnalystVerdict[verdict.upper()]
+
+        input_data = {"incidentStatus": str(status), "analystVerdict": str(verdict)}
+        payload = {"filter": payload, "data": input_data}
+
+        res = []
+        if auto:
+            while True:
+                q = self.fetch(S1Endpoint.THREATS_INCIDENT, payload)
+
+                if next(iter(q))["affected"] == 0:
+                    break
+
+                res.extend(q)
+
+        else:
+            res.extend(self.fetch(S1Endpoint.THREATS_INCIDENT, payload))
+
+        return res
+
     # ****************************************************************
     # Methods: Applications
 
     def applications(
         self,
+        names: "StrType | None" = None,
         vendors: "StrType | None" = None,
         site_ids: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
@@ -388,6 +898,7 @@ class S1Connector(Connector):
         403 - Insufficient permissions
 
         Args:
+            names (str | list[str] | None)   : A list of application names
             vendors (str | list[str] | None) : List of vendors to include. If None, all are included
             site_ids (str | list[str] | None): List of site ids to filter
             payload (dict[str, Any] | None)  : Payload to send to the endpoint
@@ -399,13 +910,84 @@ class S1Connector(Connector):
         if payload is None:
             payload = {}
 
+        if names is not None:
+            payload["name__contains"] = self._unify_str_list(names)
+
         if vendors is not None:
-            payload["vendors"] = self._unify_str_list(vendors)
+            payload["vendor__contains"] = self._unify_str_list(vendors)
 
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
 
+        if "skipCount" not in payload:
+            payload["skipCount"] = True
+
+        payload.setdefault("limit", 1000)
+
         return self.fetch(S1Endpoint.APPLICATIONS_INVENTORY, payload)
+
+    def applications_endpoints(
+        self,
+        name: "StrType | None" = None,
+        vendor: "StrType | None" = None,
+        site_ids: "StrType | None" = None,
+        auto: bool = False,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Retrieve endpoint data for a specific application.
+
+        Args:
+            name (str)                       : The name of the application
+            vendor (str)                     : The vendor of the application
+            site_ids (str | list[str] | None): List of site ids to filter
+            auto (bool)                      : Whether to automatically retrieve applications that match the provided name or vendor
+            payload (dict[str, Any] | None)  : Payload to send to the endpoint
+
+        Returns:
+            DataType: Endpoint data based on the provided filters
+        """
+
+        context = Context()
+
+        if payload is None:
+            payload = {}
+
+        if name is None and vendor is None:
+            raise ValueError(f"{context}::Please provide at least an application name or vendor")
+
+        if not auto and (not isinstance(name, str) or not isinstance(vendor, str)):
+            raise ValueError(
+                f"{context}::Invalid application name or vendor. Please use auto mode if you want to do a more dynamic search"
+            )
+
+        payload.setdefault("limit", 1000)
+
+        if site_ids is not None:
+            payload["siteIds"] = self._unify_str_list(site_ids)
+
+        if not auto:
+            payload["applicationName"] = name
+            payload["applicationVendor"] = vendor
+
+            return self.fetch(S1Endpoint.APPLICATIONS_INVENTORY_ENDPOINTS, payload)
+
+        res = []
+        self.logger.info("Automatically retrieving applications that match provided parameters")
+
+        app_search = self.applications(
+            names=name,
+            vendors=vendor,
+            site_ids=site_ids,
+        )
+
+        for app in app_search:
+            payload["applicationName"] = app["applicationName"]
+            payload["applicationVendor"] = app["applicationVendor"]
+
+            res.extend(self.fetch(S1Endpoint.APPLICATIONS_INVENTORY_ENDPOINTS, payload))
+
+        return res
 
     def applications_with_risks(
         self,
@@ -440,10 +1022,16 @@ class S1Connector(Connector):
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
 
+        payload.setdefault("limit", 1000)
+
         return self.fetch(S1Endpoint.APPLICATIONS_WITH_RISKS, payload)
 
     def cves(
-        self, site_ids: "StrType | None" = None, payload: dict[str, Any] | None = None
+        self,
+        ids: "StrType | None" = None,
+        severities: list[int] | None = None,
+        site_ids: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Get known CVEs for applications installed on endpoints with 'Application Risk-enabled Agents'.
@@ -455,6 +1043,8 @@ class S1Connector(Connector):
         403 - Insufficient permissions
 
         Args:
+            ids (str | list[str] | None)     : A list of CVE ids or partial ids to filter
+            severities (list[int] | None)    : A list of severity numbers
             site_ids (str | list[str] | None): List of site ids to filter
             payload (dict[str, Any])         : Payload to send to the endpoint
 
@@ -465,21 +1055,31 @@ class S1Connector(Connector):
         if payload is None:
             payload = {}
 
+        if ids is not None:
+            payload["cveId__contains"] = self._unify_str_list(ids)
+
+        if severities is not None:
+            payload["severities"] = self._unify_str_list(
+                [str(Severity.from_score(s)) for s in severities]
+            )
+
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
+
+        payload.setdefault("limit", 1000)
 
         return self.fetch(S1Endpoint.APPLICATIONS_CVES, payload)
 
     def application_cves(
         self,
-        application_ids: "StrType | None" = None,
-        application_name: str | None = None,
-        application_vendor: str | None = None,
+        ids: "StrType | None" = None,
+        name: str | None = None,
+        vendor: str | None = None,
         site_ids: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
-        Get CVEs for a specific appliation.
+        Retrieve CVEs for a specific appliation.
 
         Possible response messages
         200 - Success
@@ -488,11 +1088,11 @@ class S1Connector(Connector):
         403 - Insufficient permissions
 
         Args:
-            application_ids (str | list[str] | None): List of applications to include
-            application_name (str | None)           : Application name, if application ids are not specified
-            application_vendor (str | None)         : Application vendor, if application ids are not specified
-            site_ids (str | list[str] | None)       : List of site ids to filter
-            payload (dict[str, Any])                : Payload to send to the endpoint
+            ids (str | list[str] | None)     : List of applications to include
+            name (str | None)                : Application name, if application ids are not specified
+            vendor (str | None)              : Application vendor, if application ids are not specified
+            site_ids (str | list[str] | None): List of site ids to filter
+            payload (dict[str, Any])         : Payload to send to the endpoint
 
         Returns:
             DataType: CVEs data based on the provided filters
@@ -501,12 +1101,12 @@ class S1Connector(Connector):
         if payload is None:
             payload = {}
 
-        if application_ids is not None:
-            payload["applicationIds"] = self._unify_str_list(application_ids)
+        if ids is not None:
+            payload["applicationIds"] = self._unify_str_list(ids)
 
-        elif application_name is not None and application_vendor is not None:
-            payload["applicationName"] = application_name
-            payload["applicationVendor"] = application_vendor
+        elif name is not None and vendor is not None:
+            payload["applicationName"] = name
+            payload["applicationVendor"] = vendor
 
         else:
             raise ValueError(
@@ -521,7 +1121,12 @@ class S1Connector(Connector):
     # ****************************************************************
     # Methods: Groups
 
-    def groups(self, site_id: str | None, payload: dict[str, Any] | None = None) -> "DataType":
+    def groups(
+        self,
+        names: "StrType | None" = None,
+        site_ids: "StrType | None" = None,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
         """
         Get data of groups that match the filter.
 
@@ -531,7 +1136,8 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry
 
         Args:
-            site_id (str)           : The site to remove groups from
+            names (str | None)      : The name of the groups to retrieve
+            site_ids (str | None)   : List of site IDs to filter
             payload (dict[str, Any]): Payload to send to the endpoint
 
         Returns:
@@ -541,11 +1147,123 @@ class S1Connector(Connector):
         if payload is None:
             payload = {}
 
-        payload = {"filter": {"siteId": site_id}}
-        return self.fetch(S1Endpoint.GROUPS, payload)
+        if site_ids is not None:
+            if not isinstance(site_ids, list):
+                site_ids = [site_ids]
 
-    def move_agent_to_group(
-        self, group_id: str, cpt_name: str | None = None, cpt_ids: "StrType | None" = None
+            payload["siteIds"] = site_ids
+
+        if names is not None:
+            res = []
+            if not isinstance(names, list):
+                names = [names]
+
+            for name in names:
+                payload["name"] = name
+
+                req = self.fetch(S1Endpoint.GROUPS, payload)
+                res.extend(req)
+
+        else:
+            res = self.fetch(S1Endpoint.GROUPS, payload)
+
+        return res
+
+    def group_policy(
+        self,
+        group_id: str,
+    ) -> "DataType":
+        """
+        Retrieve the policy for the specified group.
+
+        Possible response messages:
+        200 - Success
+        401 - Unauthorized access - please sign in and retry
+        404 - Group not found
+
+        Args:
+            group_id (str): The id of the group which policy will be retrieved
+
+        Returns:
+            DataType: The policy of the specified group
+        """
+
+        return self.fetch(S1Endpoint.GROUPS_POLICY, {}, path_fmt={"groupId": group_id})
+
+    def group_policy_update(
+        self,
+        group_id: "StrType",
+        malicious_mitigation: "str | S1MitigationMode | None" = None,
+        suspicious_mitigation: "str | S1MitigationMode | None" = None,
+        auto_mitigation_action: str | None = None,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Update the provided groups (by id) policy.
+
+        Possible response messages:
+        200 - Success
+        400 - Invalid user input received. See error details for further information
+        401 - Unauthorized access - please sign in and retry
+        404 - Group not found
+
+        Args:
+            group_id (str | list[str])                     : Group to update the policy of
+            malicious_mitigation (S1MitigationMode | None) : Malicious policy to set
+            suspicious_mitigation (S1MitigationMode | None): Suspicious policy to set
+            auto_mitigation_action (str | None)            : The auto mitigation action to use
+            payload (dict[str, Any])                       : Payload to send
+
+        Returns:
+            DataType: Update result
+        """
+
+        if not isinstance(group_id, list):
+            group_id = [group_id]
+
+        if payload is None:
+            payload = {}
+
+        if "data" not in payload:
+            payload["data"] = {}
+
+        if malicious_mitigation is not None:
+            if not isinstance(malicious_mitigation, S1MitigationMode):
+                malicious_mitigation = S1MitigationMode[malicious_mitigation.upper()]
+
+            payload["data"]["mitigationMode"] = str(malicious_mitigation)
+
+            # Need to set an autoMitigationAction value or policy change fails
+            payload["data"]["autoMitigationAction"] = auto_mitigation_action or (
+                "mitigation.none"
+                if malicious_mitigation is S1MitigationMode.DETECT
+                else "mitigation.quarantineThreat"
+            )
+
+        if suspicious_mitigation is not None:
+            if not isinstance(suspicious_mitigation, S1MitigationMode):
+                suspicious_mitigation = S1MitigationMode[suspicious_mitigation.upper()]
+
+            payload["data"]["mitigationModeSuspicious"] = str(suspicious_mitigation)
+
+        res = []
+        for gid in group_id:
+            res.extend(
+                self.fetch(
+                    S1Endpoint.GROUPS_POLICY_UPDATE,
+                    payload=payload,
+                    path_fmt={"groupId": gid},
+                )
+            )
+
+        return res
+
+    def group_move_agent(
+        self,
+        group_id: str,
+        agent_name: str | None = None,
+        agent_ids: "StrType | None" = None,
+        agent_filter: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Move an Agent that matches the filter to a specified group in the same site.
@@ -560,31 +1278,56 @@ class S1Connector(Connector):
         409 - Conflict
 
         Args:
-            group_id (str)                  : The ID of th group the agent must be moved in
-            cpt_name (str | None)           : The name of the computer whose agent will be moved
-            cpt_ids (str | list[str] | None): A list of IDs of computer whose agent will be moved
+            group_id (str)                    : The ID of th group the agent must be moved in
+            agent_name (str | None)           : The name of the agent that will be moved
+            agent_ids (str | list[str] | None): A list of IDs of agents that will be moved
+            agent_filter (dict[str, Any])     : A dictionary of filters to select agents that will be moved
 
         Returns:
             DataType: Response data
         """
 
-        if cpt_ids is not None:
-            payload = {"filter": {"ids": self._unify_str_list(cpt_ids)}}
+        if agent_filter is None:
+            agent_filter = {}
 
-        elif cpt_name is not None:
-            payload = {"filter": {"computerName__like": cpt_name}}
+        if agent_ids is not None:
+            agent_filter["ids"] = self._unify_str_list(agent_ids)
 
-        else:
-            raise ValueError(
-                f"{Context()}.move_agent_to_group::Neither computer_name nor cpt_ids specified"
-            )
+        elif agent_name is not None:
+            agent_filter["computerName__contains"] = agent_name
+
+        elif len(agent_filter.keys()) == 0:
+            raise ValueError(f"{Context()}::No agent filter was specified")
 
         return self.fetch(
-            S1Endpoint.GROUPS_MOVE_AGENTS, payload=payload, path_fmt={"groupId": group_id}
+            S1Endpoint.GROUPS_MOVE_AGENTS,
+            payload={"filter": agent_filter},
+            path_fmt={"groupId": group_id},
         )
 
     # ****************************************************************
     # Methods: Sites
+
+    def sites(self, payload: dict[str, Any] | None = None) -> "DataType":
+        """
+        Retrieve the sites that match the provided filters.
+
+        The response includes the IDs of Sites, which you can use in other commands.
+
+        Possible response messages:
+        200 - Success
+        400 - Invalid user input received. See error details for further information.
+        401 - Unauthorized access - please sign in and retry.
+
+        Args:
+            payload (dict[str, Any]): Payload to send to the endpoint
+
+        Returns:
+            DataType: Data of the site matching the provided ID
+        """
+
+        req = self.fetch(S1Endpoint.SITES, payload=payload or {})
+        return next(iter(req))["sites"]
 
     def sites_by_id(self, site_id: str, payload: dict[str, Any] | None = None) -> "DataType":
         """
@@ -609,9 +1352,11 @@ class S1Connector(Connector):
             S1Endpoint.SITES_BY_ID, payload=payload or {}, path_fmt={"siteId": site_id}
         )
 
-    def sites(self, payload: dict[str, Any] | None = None) -> "DataType":
+    def sites_by_name(
+        self, site_name: "StrType", payload: dict[str, Any] | None = None
+    ) -> "DataType":
         """
-        Retrieve the sites that match the provided filters.
+        Retrieve sites based on the provided name list.
 
         The response includes the IDs of Sites, which you can use in other commands.
 
@@ -621,44 +1366,91 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry.
 
         Args:
+            site_name (list[str])   : A list of site names to retrieve
             payload (dict[str, Any]): Payload to send to the endpoint
 
         Returns:
             DataType: Data of the site matching the provided ID
         """
 
-        return self.fetch(S1Endpoint.SITES, payload=payload or {})
+        if not isinstance(site_name, list):
+            site_name = [site_name]
 
-    def threats(
+        def _filter_by_name(site: dict[str, Any]) -> bool:
+            return site["name"] in site_name
+
+        return list(filter(_filter_by_name, self.sites(payload)))
+
+    def sites_policy(
         self,
-        incident_statuses: "StrType | None" = None,
-        incident_statuses_nin: "StrType | None" = None,
-        payload: dict[str, Any] | None = None,
+        site_id: str,
     ) -> "DataType":
         """
-        Get data of threats that match the filter.
+        Retrieve the policy for the specified site.
 
         Possible response messages:
         200 - Success
-        400 - Invalid user input received. See error details for further information.
-        401 - Unauthorized access - please sign in and retry.
+        401 - Unauthorized access - please sign in and retry
+        404 - Group not found
 
         Args:
-            incident_statuses (str | list[str] | None)    : Filter threats with specific incident statuses
-            incident_statuses_nin (str | list[str] | None): Exclude threats with specific incident statuses
-            payload (dict[str, Any])                      : Payload to send to the endpoint
+            site_id (str): The id of the site which policy will be retrieved
 
         Returns:
-            DataType: Threats data based on the provided filters
+            DataType: The policy of the specified site
         """
+
+        return self.fetch(S1Endpoint.SITES_POLICY, {}, path_fmt={"siteId": site_id})
+
+    def site_policy_update(
+        self,
+        site_id: "StrType",
+        malicious_mitigation: "str | S1MitigationMode | None" = None,
+        suspicious_mitigation: "str | S1MitigationMode | None" = None,
+        payload: dict[str, Any] | None = None,
+    ) -> "DataType":
+        """
+        Update the provided groups (by id) policy.
+
+        Possible response messages:
+        200 - Success
+        400 - Invalid user input received. See error details for further information
+        401 - Unauthorized access - please sign in and retry
+        404 - Group not found
+
+        Args:
+            site_id (str | list[str])                      : Site to update the policy of
+            malicious_mitigation (S1MitigationMode | None) : Malicious policy to set
+            suspicious_mitigation (S1MitigationMode | None): Suspicious policy to set
+            payload (dict[str, Any])                       : Payload to send
+
+        Returns:
+            DataType: Update result
+        """
+
+        if not isinstance(site_id, list):
+            site_id = [site_id]
 
         if payload is None:
             payload = {}
+            payload["data"] = {}
 
-        if incident_statuses is not None:
-            payload["incidentStatuses"] = self._unify_str_list(incident_statuses)
+        if malicious_mitigation is not None:
+            if not isinstance(malicious_mitigation, S1MitigationMode):
+                malicious_mitigation = S1MitigationMode[malicious_mitigation.upper()]
 
-        if incident_statuses_nin is not None:
-            payload["incidentStatusesNin"] = self._unify_str_list(incident_statuses_nin)
+            payload["data"]["mitigationMode"] = str(malicious_mitigation)
 
-        return self.fetch(S1Endpoint.THREATS, payload)
+        if suspicious_mitigation is not None:
+            if not isinstance(suspicious_mitigation, S1MitigationMode):
+                suspicious_mitigation = S1MitigationMode[suspicious_mitigation.upper()]
+
+            payload["data"]["mitigationModeSuspicious"] = str(suspicious_mitigation)
+
+        res = []
+        for sid in site_id:
+            res.extend(
+                self.fetch(S1Endpoint.SITES_POLICY_UPDATE, payload, path_fmt={"siteId": sid})
+            )
+
+        return res

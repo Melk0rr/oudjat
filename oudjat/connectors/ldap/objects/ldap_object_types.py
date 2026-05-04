@@ -3,10 +3,9 @@
 from enum import Enum
 from typing import Any, NamedTuple, override
 
-from oudjat.connectors.ldap.objects.account.definitions import MS_ACCOUNT_CTL, MS_EXCH_RECIPIENT
 from oudjat.utils.types import StrType
 
-from ..ldap_filter import LDAPFilter, LDAPFilterObjectCls, LDAPFilterObjectCtg, LDAPFilterStrFormat
+from ..ldap_filter import LDAPBuiltinFilter, LDAPFilter, LDAPFilterObjectCls, LDAPFilterObjectCtg
 
 
 class LDAPObjectTypeProps(NamedTuple):
@@ -21,19 +20,23 @@ class LDAPObjectTypeProps(NamedTuple):
 
     object_cls: str
     filter: "LDAPFilter"
-    attributes: StrType
+    attributes: "StrType"
+    ad_attributes: "StrType | None"
 
 
 class LDAPObjectType(Enum):
     """These are the default LDAP search parameters per object type."""
 
     DEFAULT = LDAPObjectTypeProps(
-        object_cls="*", filter=LDAPFilter(LDAPFilterStrFormat.CLS("*")), attributes="*"
+        object_cls="*",
+        filter=LDAPBuiltinFilter.CLS("*"),
+        attributes="*",
+        ad_attributes=None,
     )
 
     COMPUTER = LDAPObjectTypeProps(
         object_cls="computer",
-        filter=LDAPFilter(LDAPFilterStrFormat.CTG(LDAPFilterObjectCtg.COMPUTER.value)),
+        filter=LDAPBuiltinFilter.CTG(LDAPFilterObjectCtg.COMPUTER),
         attributes=[
             "accountExpires",
             "cn",
@@ -51,15 +54,20 @@ class LDAPObjectType(Enum):
             "operatingSystemVersion",
             "pwdLastSet",
             "sAMAccountName",
+            "servicePrincipalName",
             "userAccountControl",
             "whenChanged",
             "whenCreated",
+        ],
+        ad_attributes=[
+            "msDS-KeyVersionNumber",
+            "msDS-SupportedEncryptionTypes",
         ],
     )
 
     GPO = LDAPObjectTypeProps(
         object_cls="groupPolicyContainer",
-        filter=LDAPFilter(LDAPFilterStrFormat.CLS(LDAPFilterObjectCls.GPO.value)),
+        filter=LDAPBuiltinFilter.CLS(LDAPFilterObjectCls.GPO),
         attributes=[
             "displayName",
             "gPCFileSysPath",
@@ -73,11 +81,12 @@ class LDAPObjectType(Enum):
             "whenChanged",
             "whenCreated",
         ],
+        ad_attributes=None,
     )
 
     GROUP = LDAPObjectTypeProps(
         object_cls="group",
-        filter=LDAPFilter(LDAPFilterStrFormat.CTG(LDAPFilterObjectCtg.GROUP.value)),
+        filter=LDAPBuiltinFilter.CTG(LDAPFilterObjectCtg.GROUP),
         attributes=[
             "cn",
             "description",
@@ -91,11 +100,12 @@ class LDAPObjectType(Enum):
             "whenChanged",
             "whenCreated",
         ],
+        ad_attributes=None,
     )
 
     OU = LDAPObjectTypeProps(
         object_cls="organizationalUnit",
-        filter=LDAPFilter(LDAPFilterStrFormat.CLS(LDAPFilterObjectCls.OU.value)),
+        filter=LDAPBuiltinFilter.CLS(LDAPFilterObjectCls.OU),
         attributes=[
             "description",
             "gpLink",
@@ -106,11 +116,12 @@ class LDAPObjectType(Enum):
             "whenChanged",
             "whenCreated",
         ],
+        ad_attributes=None,
     )
 
     SUBNET = LDAPObjectTypeProps(
         object_cls="subnet",
-        filter=LDAPFilter(LDAPFilterStrFormat.CLS(LDAPFilterObjectCls.SUBNET.value)),
+        filter=LDAPBuiltinFilter.CLS(LDAPFilterObjectCls.SUBNET),
         attributes=[
             "cn",
             "description",
@@ -121,13 +132,14 @@ class LDAPObjectType(Enum):
             "whenChanged",
             "whenCreated",
         ],
+        ad_attributes=None,
     )
 
     USER = LDAPObjectTypeProps(
         object_cls="user",
         filter=(
-            LDAPFilter(LDAPFilterStrFormat.CTG(LDAPFilterObjectCtg.PERSON.value))
-            & LDAPFilter(LDAPFilterStrFormat.CLS(LDAPFilterObjectCls.USER.value))
+            LDAPBuiltinFilter.CTG(LDAPFilterObjectCtg.PERSON)
+            & LDAPBuiltinFilter.CLS(LDAPFilterObjectCls.USER)
         ),
         attributes=[
             "accountExpires",
@@ -141,13 +153,12 @@ class LDAPObjectType(Enum):
             "mail",
             "manager",
             "memberOf",
-            f"{MS_ACCOUNT_CTL}",
-            f"{MS_EXCH_RECIPIENT}",
             "name",
             "objectClass",
             "objectGUID",
             "objectSid",
             "pwdLastSet",
+            "servicePrincipalName",
             "sn",
             "sAMAccountName",
             "title",
@@ -155,6 +166,13 @@ class LDAPObjectType(Enum):
             "userPrincipalName",
             "whenChanged",
             "whenCreated",
+        ],
+        ad_attributes=[
+            "msDS-User-Account-Control-Computed",
+            "msDS-SupportedEncryptionTypes",
+            "msDS-ResultantPSO",
+            "msDS-KeyVersionNumber",
+            "msExchRecipientTypeDetails",
         ],
     )
 
@@ -184,7 +202,7 @@ class LDAPObjectType(Enum):
         return self._value_.filter
 
     @property
-    def attributes(self) -> StrType:
+    def attributes(self) -> "StrType":
         """
         Return the attributes property of an LDAPObjectType.
 
@@ -193,6 +211,17 @@ class LDAPObjectType(Enum):
         """
 
         return self._value_.attributes
+
+    @property
+    def ad_attributes(self) -> "StrType | None":
+        """
+        Return the ad attributes property of an LDAPObjectType if any.
+
+        Returns:
+            list[str] | None: a list of ad specific attributes to include in the results when searching for this type
+        """
+
+        return self._value_.ad_attributes
 
     @override
     def __str__(self) -> str:

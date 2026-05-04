@@ -1,77 +1,45 @@
 """
-A SOC toolbox and maybe more if I have the time.
-
-Usage:
-    oudjat -h | --help
-    oudjat -l=LOGGING | --log=LOGLEVEL
-    oudjat -V | --version
-
-Commands
-
-Options:
-    -a --append                     append to the output file
-    -c --config=CONFIG              specify config file
-    -f --file                       set target (reads from file, one domain per line)
-    -h --help                       show this help message and exit
-    -l --log=LOGLEVEL               specify the log level
-    -o --output=FILENAME            save execution logs to the specified file
-    -S --silent                     simple output, one per line
-    -t --target                     set target (comma separated, no spaces, if multiple)
-    -v --verbose                    print debug info and full request output
-    -V --version                    show version and exit
-    -x --export-csv=CSV             save results as csv
-
-Cert-options:
-    --feed                          run cert mode from a feed
-    --filter=FILTER                 date filter to apply with feed option (e.g. 2023-03-10)
-    --keywords=KEYWORDS             set keywords to track (comma separated, no spaces, if multiple)
-    --keywordfile=KEYWORDFILE       set keywords to track (file, one keyword per line)
-
-Exemples:
-    oudjat cert -t https://cert.ssi.gouv.fr/alerte/feed/ --feed --filter "2023-03-13"
-    oudjat cert -f ./tests/certfr.txt --export-csv ./tests/certfr_20230315.csv --keywordfile ./tests/keywords.txt
-    oudjat vuln -f ./tests/cve.txt --export-csv ./tests/cve_20230313.csv
-
-Help:
-    For help using this tool, please open an issue on the Github repository:
-    https://github.com/Melk0rr/Oudjat
+Oudjat main entry point.
 """
 
 import logging
 import sys
-import time
+from datetime import datetime
 from typing import Any
 
 from docopt import docopt
 
-import oudjat.commands
 from oudjat.banner import banner
-from oudjat.utils import ColorPrint, StdOutHook, TimeConverter
+from oudjat.commands import (
+    CERTFRConnectorCommand,
+    CredentialUtilCmd,
+    EOLConnectorCommand,
+    LDAPConnectorCommand,
+    S1ConnectorCommand,
+    SCCMConnectorCommand,
+    TenableSCConnectorCommand,
+    VulnConnectorCommand,
+)
+from oudjat.commands.exceptions import UnknownCommand
+from oudjat.utils import ColorPrint, Context, StdOutHook, TimeConverter
+from oudjat.utils.doc_builder import DocBuilder
 from oudjat.utils.logging import oudjatLogger
 
 from . import __version__ as VERSION
 
-
-def config_logging(options: dict[str, str]) -> "logging.Logger":
-    """
-    Set the logging level.
-
-    Args:
-        options (dict[str, str]): CLI options
-    """
-
-    LOGGING_LEVELS = {
-        "INFO": logging.INFO,
-        "WARNING": logging.WARNING,
-        "ERROR": logging.ERROR,
-        "CRITICAL": logging.CRITICAL,
-        "DEBUG": logging.DEBUG,
-    }
-
-    return oudjatLogger(level=LOGGING_LEVELS.get(options["--log"], LOGGING_LEVELS["INFO"]))
+_COMMAND_OPTIONS = {
+    "connectors.edr.sentinelone": S1ConnectorCommand,
+    "connectors.endoflife": EOLConnectorCommand,
+    "connectors.cert.certfr": CERTFRConnectorCommand,
+    "connectors.ldap": LDAPConnectorCommand,
+    "connectors.sccm": SCCMConnectorCommand,
+    "connectors.tenable.sc": TenableSCConnectorCommand,
+    "connectors.vulns": VulnConnectorCommand,
+    "utils.credentials": CredentialUtilCmd,
+}
 
 
-def command_switch(options: dict[str, str]) -> Any:
+def _command_switch(options: dict[str, str]) -> Any:
     """
     Script command switch case.
 
@@ -79,10 +47,76 @@ def command_switch(options: dict[str, str]) -> Any:
         options (dict[str, str]): CLI options
     """
 
-    COMMAND_OPTIONS = {}
+    command_name = next(command for command in _COMMAND_OPTIONS.keys() if options.get(command))
+    return _COMMAND_OPTIONS[command_name](options)
 
-    command_name = next(command for command in COMMAND_OPTIONS.keys() if options[command])
-    return COMMAND_OPTIONS[command_name](options)
+
+def _base_doc() -> "DocBuilder":
+    """
+    Return the base doc builder.
+
+    Returns:
+        DocBuilder: A doc builder instance containing the base program options and usages
+    """
+
+    description = """
+Oudjat is a SOC toolbox that provides an entry point to various data sources.
+It also allows for complex data consolidation and mapping through a config file system.
+
+** The following doc string is dynamically generated based on the command you chose **"""
+
+    builder = DocBuilder("oudjat", description)
+
+    # builder.commands = {
+    #     cmd.__cmd_props__.name: DocCommand(cmd.__cmd_props__.name, cmd.__cmd_props__.description)
+    #     for cmd in _COMMAND_OPTIONS.values()
+    # }
+
+    builder.add_usage("--help", "-h | --help", "Prints a help message, then exit")
+    builder.add_usage("--version", "-V | --version", "Prints the program version, then exit")
+
+    for cmd_name, cmd in _COMMAND_OPTIONS.items():
+        builder.add_command(cmd_name, cmd.__cmd_props__.description)
+
+    builder.add_option("append", "Append to the output file", short="a")
+    builder.add_option("help", "Print the doc string", short="h")
+    builder.add_option("verbose", "Show more logs", short="v")
+    builder.add_option(
+        "output", "Specify a file to save the execution logs to", arg="LOGFILE", short="o"
+    )
+    builder.add_option("silent", "Simple output", short="S")
+    builder.add_option("version", "Show the program version and exit", short="V")
+    builder.add_option("csv", "Save results as a CSV file", arg="CSV")
+    builder.add_option("json", "Save results as a JSON file", arg="JSON")
+    builder.add_option("print", "Print the results in the terminal")
+    builder.add_option("key-filter", "Filter the final result keys", arg="KEYFILTER")
+    builder.add_option(
+        "sort", "Sort the final result based on the provided key", short="s", arg="SORTKEY"
+    )
+    builder.add_option("sort-reverse", "Reverse the sorting order")
+
+    builder.help_content = [
+        "For help using this tool, please open an issue on the Codeberg repository:",
+        "https://codeberg.org/me1k0r/oudjat",
+    ]
+
+    return builder
+
+
+def _build_doc(cmd_name: str) -> "DocBuilder":
+    """
+    Return the final doc builder to be converted as a string and passed to docopt.
+
+    Returns:
+        DocBuilder: Final doc builder based on base doc and merged with the chosen command builder
+    """
+
+    doc = _base_doc()
+    if _COMMAND_OPTIONS.get(cmd_name):
+        cmd_builder = _COMMAND_OPTIONS[cmd_name].__doc_builder__
+        doc.merge(cmd_builder)
+
+    return doc
 
 
 def main() -> None:
@@ -90,35 +124,47 @@ def main() -> None:
     Program entry point that runs each time the 'oudjat' command line is executed.
     """
 
-    try:
-        if sys.version_info < (3, 0):
-            sys.stdout.write("Sorry, requires Python 3.x\n")
-            sys.exit(1)
+    context = Context()
 
-        start_time = time.time()
-        options = docopt(__doc__, version=VERSION)
+    try:
+        start_time = datetime.now().timestamp()
+
+        if sys.argv[1] not in _COMMAND_OPTIONS and sys.argv[1] not in (
+            "-h",
+            "--help",
+            "-V",
+            "--version",
+        ):
+            raise UnknownCommand(f"{context}::Invalid command provided '{sys.argv[1]}'")
+
+        __doc__ = _build_doc(sys.argv[1])
+        options = docopt(str(__doc__), version=VERSION)
 
         original_stdout = sys.stdout
 
-        logger = config_logging(options)
+        if options["--output"] or options["--silent"]:
+            sys.stdout = StdOutHook(
+                options["--output"], options["--silent"], output=options["--output"]
+            )
 
-        if options["--output"] and options["--silent"]:
-            sys.stdout = StdOutHook(options["FILENAME"], options["--silent"], options["--output"])
-
-        if not options["--target"] and not options["--file"] and not options["--directory"]:
-            logger.error("Target required! Use -h to see usage. Either -f or -t")
-            return
-
-        if options["--target"] and options["--file"]:
-            logger.error("Please only supply one target method - either -f or -t.")
-            return
+        logger = oudjatLogger(level=logging.DEBUG if options["--verbose"] else logging.INFO)
 
         ColorPrint.blue(banner)
 
-        command = command_switch(options)
+        logger.info(
+            f"{context}::Oudjat starts -  {datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')} "
+        )
+
+        command = _command_switch(options)
         command.run()
 
-        logger.info(f"Oudjat runtime -  {TimeConverter.seconds_to_str(time.time() - start_time)}s")
+        logger.info(
+            f"Oudjat runtime -  {TimeConverter.seconds_to_str(datetime.now().timestamp() - start_time)}s"
+        )
+
+        if options["--output"]:
+            assert isinstance(sys.stdout, StdOutHook)
+            sys.stdout.write_out()
 
         sys.stdout = original_stdout
 

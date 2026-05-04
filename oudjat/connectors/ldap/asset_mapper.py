@@ -3,20 +3,18 @@ A module that handle LDAP entry mapping to asset elements.
 """
 
 import logging
+from typing import TYPE_CHECKING, Any
 
-from oudjat.utils import Context
+from oudjat.connectors.mapping_functions import MappingFunction
+from oudjat.core.computer.computer import Computer
+from oudjat.core.software.os.operating_system import OSReleaseListFilter
+from oudjat.core.user.user import User
+from oudjat.utils.types import DataType
 
-from ..asset_mapper import AssetMapper
-from .ldap_connector import LDAPConnector
-from .objects.account.group.ldap_group import LDAPGroup
-from .objects.account.ldap_computer import LDAPComputer
-from .objects.account.ldap_user import LDAPUser
-from .objects.gpo.ldap_gpo import LDAPGroupPolicyObject
-from .objects.ldap_entry import LDAPEntry
-from .objects.ldap_object import LDAPCapabilities, LDAPObject, LDAPObjectOptions
-from .objects.ldap_object_types import LDAPObjectType
-from .objects.ou.ldap_ou import LDAPOrganizationalUnit
-from .objects.subnet.ldap_subnet import LDAPSubnet
+from ..asset_mapper import AssetMapper, MappingOSTuple
+
+if TYPE_CHECKING:
+    from oudjat.core.mapper import MappingRegistry
 
 
 class LDAPAssetMapper(AssetMapper):
@@ -27,7 +25,7 @@ class LDAPAssetMapper(AssetMapper):
     # ****************************************************************
     # Attributes & Constructor
 
-    def __init__(self, ldapco: "LDAPConnector") -> None:
+    def __init__(self) -> None:
         """
         Create a new LDAPAssetMapper.
 
@@ -38,218 +36,116 @@ class LDAPAssetMapper(AssetMapper):
         super().__init__()
         self.logger: "logging.Logger" = logging.getLogger(__name__)
 
-        self._connector: "LDAPConnector" = ldapco
+    # ****************************************************************
+    # Methods - Asset mapping
 
-        self._MAP: dict[str, "LDAPObjectOptions"] = {
-            f"{LDAPObjectType.DEFAULT}": LDAPObjectOptions["LDAPObject"](
-                cls=LDAPObject, fetch=self._connector.objects
-            ),
-            f"{LDAPObjectType.COMPUTER}": LDAPObjectOptions["LDAPComputer"](
-                cls=LDAPComputer, fetch=self._connector.computers
-            ),
-            f"{LDAPObjectType.GPO}": LDAPObjectOptions["LDAPGroupPolicyObject"](
-                cls=LDAPGroupPolicyObject, fetch=self._connector.gpos
-            ),
-            f"{LDAPObjectType.GROUP}": LDAPObjectOptions["LDAPGroup"](
-                cls=LDAPGroup, fetch=self._connector.groups
-            ),
-            f"{LDAPObjectType.OU}": LDAPObjectOptions["LDAPOrganizationalUnit"](
-                cls=LDAPOrganizationalUnit, fetch=self._connector.ous
-            ),
-            f"{LDAPObjectType.SUBNET}": LDAPObjectOptions["LDAPSubnet"](
-                cls=LDAPSubnet, fetch=self._connector.subnets
-            ),
-            f"{LDAPObjectType.USER}": LDAPObjectOptions["LDAPUser"](
-                cls=LDAPUser, fetch=self._connector.users
-            ),
-        }
+    ### Computer mappping
+    def computers(
+        self, entries: "DataType", mapping_registry: "MappingRegistry | None" = None
+    ) -> dict[str, "Computer"]:
+        """
+        Map LDAP entries into Computer instances.
 
-        self._CAPABILITIES: "LDAPCapabilities" = LDAPCapabilities(
-            ldap_search=self._connector.fetch,
-            ldap_obj_opt=self._object_opt,
+        You can specify a custom mapping registry. By default, the mapping registry is:
+            "computer_id": "id"
+            "name": "name"
+            "description": "description"
+            "label": "hostname"
+
+        Args:
+            entries (list[LDAPEntry])                : Entries to map
+            mapping_registry (MappingRegistry | None): Optional mapping registry
+
+        Returns:
+            dict[str, Computer]: A dictionary of Computer instances
+        """
+
+        self.logger.info(f"Mapping {len(entries)} LDAP entries into Computer asset")
+
+        if mapping_registry is None:
+            mapping_registry = {
+                "computer_id": lambda c: c["id"],
+                "name": lambda c: c["name"],
+                "description": lambda c: c["description"],
+                "label": lambda c: c["hostname"],
+            }
+
+        def asset_cb(asset: "Computer", record: dict[str, Any], _: "MappingRegistry") -> None:
+            release_filters: list["OSReleaseListFilter"] = [
+                lambda rl: rl.filter_max_version(),
+                lambda rl: rl.filter_by_label(record["os"]["name"]),
+            ]
+
+            os: "MappingOSTuple" = MappingFunction.OS(
+                func="os_details_from_str",
+                os_str=record["os"]["name"],
+                os_ver=record["os"]["version"],
+                filters=release_filters,
+            )
+
+            os_instance, os_rel, os_edition = os
+            if os_instance is not None:
+                asset.computer_type = next(iter(os_instance.computer_type))
+
+            asset.os_release = os_rel
+            asset.os_edition = os_edition
+
+            asset.flags.update(record["flags"])
+            record.pop("flags", None)
+
+            asset.add_custom_attr("ldap", record)
+
+        return self.map_many(
+            records=entries,
+            map_cls=Computer,
+            mapping_registry=mapping_registry,
+            asset_cb=asset_cb,
+            key_cb=lambda r: r["dn"],
         )
 
-    # ****************************************************************
-    # Methods
-
-    def objects(
-        self,
-        entries: list["LDAPEntry"],
-        auto: bool = False,
-    ) -> dict[str, "LDAPObject"]:
+    ### User mappping
+    def users(
+        self, entries: "DataType", mapping_registry: "MappingRegistry | None" = None
+    ) -> dict[str, "User"]:
         """
-        Map the provided LDAP entries into a dictionary of LDAPObject instances.
+        Map LDAP entries into User instances.
+
+        You can specify a custom mapping registry. By default, the mapping registry is:
+            "user_id": "user_id"
+            "name": "name"
+            "login": "san"
+            "firstname": "givenname"
+            "lastname": "surname"
+            "email": "email"
 
         Args:
-            entries (list[LDAPEntry]): LDAP entries to map
-            auto (bool)              : Auto map the objects dynamically per type
+            entries (list[LDAPEntry])                : Entries to map
+            mapping_registry (MappingRegistry | None): Optional mapping registry that will replace the default one to map Computers
 
         Returns:
-            dict[str, LDAPComputer]: Mapped entries as a dictionary of LDAP objects
+            dict[str, Computer]: A dictionary of User instances
         """
 
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPObjects")
+        if mapping_registry is None:
+            mapping_registry = {
+                "user_id": lambda u: u["id"],
+                "name": lambda u: u["name"],
+                "login": lambda u: u["san"],
+                "firstname": lambda u: u["givenname"],
+                "lastname": lambda u: u["surname"],
+                "email": lambda u: u["email"],
+            }
 
-        def map_obj(entry: "LDAPEntry") -> "LDAPObject":
-            if auto:
-                obj_type = LDAPObjectType.from_object_cls(entry)
-                LDAPDynamicObjectType = self._MAP[obj_type.name].cls
+        def asset_cb(asset: "User", record: dict[str, Any], _: "MappingRegistry") -> None:
+            asset.flags.update(record["flags"])
+            record.pop("flags", None)
 
-                return LDAPDynamicObjectType(
-                    self._connector.complete_partial_entry(entry), self._CAPABILITIES
-                )
+            asset.add_custom_attr("ldap", record)
 
-            return LDAPObject(entry, capabilities=self._CAPABILITIES)
-
-        objects = {obj.dn: obj for obj in list(map(map_obj, entries))}
-
-        return objects
-
-    def computers(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPComputer"]:
-        """
-        Map the provided LDAP entries into a dictionary of LDAPComputer instances.
-
-        Args:
-            entries (list[LDAPEntry]): LDAP entries to map
-
-        Returns:
-            dict[str, LDAPComputer]: Mapped entries as a dictionary of LDAP computers
-        """
-
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPComputers")
-
-        def map_cpt(entry: "LDAPEntry") -> "LDAPComputer":
-            return LDAPComputer(entry, capabilities=self._CAPABILITIES)
-
-        computers = {cpt.dn: cpt for cpt in list(map(map_cpt, entries))}
-
-        return computers
-
-    def users(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPUser"]:
-        """
-        Map the provided LDAP entries into a dictionary of User instances.
-
-        Args:
-            entries (list[LDAPEntry]): LDAP entries to map
-
-        Returns:
-            dict[str, LDAPUser]: Mapped entries as a dictionary of LDAP computers
-        """
-
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPUsers")
-
-        def map_usr(entry: "LDAPEntry") -> "LDAPUser":
-            return LDAPUser(entry, capabilities=self._CAPABILITIES)
-
-        users = {usr.dn: usr for usr in list(map(map_usr, entries))}
-
-        return users
-
-    def groups(
-        self,
-        entries: list["LDAPEntry"],
-        recursive: bool = False,
-    ) -> dict[str, "LDAPGroup"]:
-        """
-        Map the provided LDAP entries into a dictionary of LDAPGroup instances.
-
-        Args:
-            entries (list[LDAPEntry]): LDAP entries to map
-            recursive (bool)         : Whether to retrieve group members recursively or not
-
-        Returns:
-            dict[str, LDAPGroup]: Mapped entries as a dictionary of LDAP computers
-        """
-
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPGroups")
-
-        def map_grp(entry: "LDAPEntry") -> "LDAPGroup":
-            grp_instance = LDAPGroup(entry, self._CAPABILITIES)
-            if recursive:
-                grp_instance.fetch_members(recursive)
-
-            return grp_instance
-
-        groups = {grp.dn: grp for grp in list(map(map_grp, entries))}
-
-        return groups
-
-    def gpos(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPGroupPolicyObject"]:
-        """
-        Map the provided LDAP entries into a dictionary of LDAPGroupPolicyObject instances.
-
-        Args:
-            entries (list[LDAPEntry]): LDAP entries to map
-
-        Returns:
-            dict[str, LDAPGroup]: Mapped entries as a dictionary of LDAP gpos
-        """
-
-        def map_gpo(entry: "LDAPEntry") -> "LDAPGroupPolicyObject":
-            return LDAPGroupPolicyObject(entry, self._CAPABILITIES)
-
-        gpos = {gpo.dn: gpo for gpo in list(map(map_gpo, entries))}
-
-        return gpos
-
-    def ous(
-        self,
-        entries: list["LDAPEntry"],
-        recursive: bool = False,
-    ) -> dict[str, "LDAPOrganizationalUnit"]:
-        """
-        Map the provided LDAP entries into a dictionary of LDAPOrganizationalUnit instances.
-
-        Args:
-            entries (list[LDAPEntry]): LDAP entries to map
-            recursive (bool)         : Retrieve OUs recursively if set to True
-
-        Returns:
-            dict[str, LDAPOrganizationalUnit]: Mapped entries as a dictionary of LDAP ous
-        """
-
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPOrganizationalUnits")
-
-        def map_ou(entry: "LDAPEntry") -> "LDAPOrganizationalUnit":
-            ou_instance = LDAPOrganizationalUnit(entry, self._CAPABILITIES)
-            if recursive:
-                ou_instance.fetch_objects(recursive)
-
-            return ou_instance
-
-        ous = {ou.dn: ou for ou in list(map(map_ou, entries))}
-
-        return ous
-
-    def subnets(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPSubnet"]:
-        """
-        Map the provided LDAP entries into a dictionary of LDAPSubnet instances.
-
-        Args:
-            entries (list[LDAPEntry]): LDAP entries to map
-
-        Returns:
-            dict[str, LDAPSubnet]: Mapped entries as a dictionary of LDAP ous
-        """
-
-        self.logger.info(f"{Context()}::Mapping {len(entries)} entries into LDAPSubnets")
-
-        def map_net(entry: "LDAPEntry") -> "LDAPSubnet":
-            return LDAPSubnet(entry, self._CAPABILITIES)
-
-        subnets = {net.dn: net for net in list(map(map_net, entries))}
-
-        return subnets
-
-    def _object_opt(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOptions[LDAPObject]":
-        """
-        Return an LDAP object based on a given type.
-
-        Args:
-            ldap_obj_type (LDAPObjectType): The LDAPObjectType element that will determine the output object
-
-        Returns:
-            LDAPObjTypeAlias: The python class matching the provided entry
-        """
-
-        return self._MAP[f"{ldap_obj_type}"]
+        return self.map_many(
+            records=entries,
+            map_cls=User,
+            mapping_registry=mapping_registry,
+            asset_cb=asset_cb,
+            key_cb=lambda r: r["id"],
+        )

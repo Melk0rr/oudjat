@@ -166,6 +166,12 @@ class Software(Asset, Generic[ReleaseType]):
         candidates = self._releases.get(key)
 
         if candidates is None:
+            # Try to find the provided version key
+            search_key = self._releases.filter_by_str(key)
+            first = next(iter(search_key), None)
+            if first:
+                return self.release(first)
+
             raise UnknownSoftwareReleaseVersionError(
                 f"{Context()}::{self.name} does not have any release matching the provided key {key}"
             )

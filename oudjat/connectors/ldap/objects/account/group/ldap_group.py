@@ -3,11 +3,8 @@
 import logging
 from typing import TYPE_CHECKING, Any, override
 
-from ldap3.utils.conv import escape_filter_chars
-
 from oudjat.connectors.ldap.ldap_filter import LDAPFilter
 from oudjat.connectors.ldap.objects.ldap_object_types import LDAPObjectType
-from oudjat.core.group import Group
 from oudjat.utils.context import Context
 
 from ...ldap_object import LDAPObject
@@ -41,13 +38,7 @@ class LDAPGroup(LDAPObject):
 
         super().__init__(ldap_entry, capabilities)
         self.logger: "logging.Logger" = logging.getLogger(__name__)
-
-        self._group: "Group[LDAPObject]" = Group[LDAPObject](
-            group_id=self.entry.get("objectGUID"),
-            name=self.entry.get("name"),
-            label=self.entry.dn,
-            description=self.entry.get("description"),
-        )
+        self._members: dict[str, "LDAPObject"] = {}
 
     # ****************************************************************
     # Methods
@@ -61,7 +52,7 @@ class LDAPGroup(LDAPObject):
             dict[str, LDAPObject]: members as a dictionary of LDAPObject instances
         """
 
-        return self._group.members
+        return self._members
 
     def _group_type_raw(self) -> int:
         """
@@ -84,19 +75,7 @@ class LDAPGroup(LDAPObject):
 
         return LDAPGroupType(self._group_type_raw())
 
-    def to_group(self) -> "Group":
-        """
-        Return a group instance based on the current LDAPGroup.
-
-        Returns:
-            Group: The group asset instance bound to this LDAPGroup
-        """
-
-        grp = self._group
-        grp.add_custom_attr("ldap", {**super().to_dict(), "groupType": str(self.group_type)})
-
-        return grp
-
+    @property
     def member_refs(self) -> list[str]:
         """
         Return member refs.
@@ -115,46 +94,45 @@ class LDAPGroup(LDAPObject):
             member (LDAPObject): member to add
         """
 
-        self._group.add_member(key=member.dn, member=member)
+        self._members[member.dn] = member
 
     def fetch_members(
         self,
+        member_filter: "str | LDAPFilter | None" = None,
         recursive: bool = False,
     ) -> None:
         """
         Retrieve the group members.
 
         Args:
-            recursive (bool): Either to retrieve the members recursively or not
+            member_filter (str | LDAPFilter | None): Additional filter to narrow down group member search
+            recursive (bool)                       : Either to retrieve the members recursively or not
         """
 
         context = Context()
-        self.logger.info(f"{context}::Fetching members of {self.dn}{recursive and ' recursively'}")
 
-        for ref in self.member_refs():
-            self.logger.info(f"{context}::Fetching member data for {ref}")
+        if member_filter is not None and not isinstance(member_filter, LDAPFilter):
+            member_filter = LDAPFilter(member_filter)
 
-            # INFO: Search for the ref in LDAP server
-            escaped_ref = escape_filter_chars(ref)
-            ref_search: list["LDAPEntry"] = self.capabilities.ldap_search(
-                search_filter=LDAPFilter.dn(escaped_ref)
-            )
+        gpmember_filter = LDAPFilter(f"(memberOf={self.dn})")
 
-            if len(ref_search) > 0:
-                search_entry = ref_search[0]
-                entry_obj_type = LDAPObjectType.from_object_cls(search_entry)
-                LDAPObjectCls = self.capabilities.ldap_obj_opt(entry_obj_type).cls
+        if member_filter is not None:
+            gpmember_filter = gpmember_filter & member_filter
 
-                new_member = LDAPObjectCls(search_entry, capabilities=self.capabilities)
-                if isinstance(new_member, LDAPGroup) and recursive:
-                    self.logger.debug(f"{context}::Fetching members of sub group {ref}")
-                    new_member.fetch_members(recursive=recursive)
+        self.logger.info(f"Fetching members of {self.dn}{recursive and ' recursively'}")
+        members_search = self.capabilities.ldap_search(search_filter=gpmember_filter)
 
-                self.logger.debug(f"{context}::Adding new member {ref}")
-                self.add_member(new_member)
+        for member in members_search:
+            entry_obj_type = LDAPObjectType.from_object_cls(member)
+            LDAPObjectCls = self.capabilities.ldap_obj_opt(entry_obj_type).cls
 
-            else:
-                self.logger.warning(f"{context}::Could not find data for {ref}")
+            new_member = LDAPObjectCls(member, capabilities=self.capabilities)
+            if isinstance(new_member, LDAPGroup) and recursive:
+                self.logger.debug(f"{context}::Fetching members of sub group {member}")
+                new_member.fetch_members(recursive=recursive)
+
+            self.logger.debug(f"{context}::Adding {member} to {self.dn} members")
+            self.add_member(new_member)
 
     def sub_groups(self, recursive: bool = False) -> dict[str, "LDAPGroup"]:
         """
@@ -224,7 +202,7 @@ class LDAPGroup(LDAPObject):
         if len(self.members.keys()) == 0:
             self.fetch_members(recursive=True)
 
-        self.logger.info(f"{Context()}::Flattening members of {self.dn}")
+        self.logger.info(f"Flattening members of {self.dn}")
 
         members = {}
         for member in self.members.values():
@@ -241,8 +219,8 @@ class LDAPGroup(LDAPObject):
         Check if the provided object is a member of the current group.
 
         Args:
-            ldap_object (LDAPObject)      : Object to search
-            extended (bool)               : Either to check if the object is a member of sub groups
+            ldap_object (LDAPObject): Object to search
+            extended (bool)         : Either to check if the object is a member of sub groups
 
         Returns:
             bool: True if the group contains the given object. False otherwise
@@ -260,4 +238,12 @@ class LDAPGroup(LDAPObject):
             dict[str, Any]: The current instance converted into a dictionary
         """
 
-        return self._group.to_dict()
+        base = super().to_dict()
+        _ = base.pop("member", None)
+
+        return {
+            **base,
+            "type": str(self.group_type),
+            "subgroups": list(self.sub_groups()),
+            "members": self.member_refs,
+        }

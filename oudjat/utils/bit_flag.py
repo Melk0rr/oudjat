@@ -1,13 +1,25 @@
 """A simple module to overload IntEnum and provide flag check function."""
 
 from enum import IntEnum
+from typing import override
 
 
 class BitFlag(IntEnum):
     """An IntEnum inherited enum class to provide flag checks."""
 
+    @override
+    def __str__(self) -> str:
+        """
+        Convert the flag into a string.
+
+        Returns:
+            str: A string representation of the bitflag
+        """
+
+        return self._name_
+
     @staticmethod
-    def check_flag(value: int, flag: "BitFlag") -> int:
+    def check_flag(value: int, flag: int) -> int:
         """
         Compare given value to the chosen flag.
 
@@ -33,5 +45,6 @@ class BitFlag(IntEnum):
             list[str]: A list of flag names
         """
 
-        return [flag.name for flag in cls if BitFlag.check_flag(value, flag) ]
+        return [str(flag) for flag in cls if BitFlag.check_flag(value, flag) ]
+
 

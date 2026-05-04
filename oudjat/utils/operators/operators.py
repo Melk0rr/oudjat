@@ -97,7 +97,7 @@ class Operator(Enum):
         return [x for op in cls for x in (op.symbol, op.verbose)]
 
     @classmethod
-    def find_by_key(cls: type["OperatorType"], key: str) -> "OperatorType":
+    def find_by_key(cls: type["OperatorType"], key: str) -> "OperatorType | None":
         """
         Return a single Operator which one of the keys matches the provided string.
 
@@ -111,4 +111,4 @@ class Operator(Enum):
         def operator_matches_key(operator: "Operator") -> bool:
             return key in [operator.symbol, operator.verbose]
 
-        return next(filter(operator_matches_key, cls))
+        return next(filter(operator_matches_key, cls), None)

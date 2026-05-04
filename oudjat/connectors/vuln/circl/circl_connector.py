@@ -1,10 +1,14 @@
 """A module that handles the connection to circl.lu API."""
 
 import re
+from time import sleep, time
 from typing import Any, override
 from urllib.parse import ParseResult, urlparse
 
+from yaspin import yaspin
+
 from oudjat.utils.context import Context
+from oudjat.utils.logging import spinner_log
 from oudjat.utils.types import DataType, StrType
 
 from ..cve_connector import CVEConnector
@@ -24,10 +28,20 @@ class CirclConnector(CVEConnector):
     # Methods
 
     @override
+    def vuln_from_connection(self) -> dict[str, Any] | None:
+        """
+        Extract base vulnerability from the connection object.
+
+        Returns:
+            dict[str, Any]: The base vulnerability dictionary
+        """
+
+        return self._connection
+
+    @override
     def fetch(
         self,
         cves: "StrType",
-        attributes: "StrType | None" = None,
         raw: bool = False,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
@@ -41,7 +55,6 @@ class CirclConnector(CVEConnector):
 
         Args:
             cves (str | list[str])             : A single CVE ID or a list of CVE IDs to be searched.
-            attributes (str | list[str] | None): A single attribute name or a list of attribute names to filter the retrieved vulnerability data by. Defaults to None.
             raw (bool)                         : Weither to return the raw result or the unified one
             payload (dict[str, Any] | None)    : Payload to send to the target CVE API url
 
@@ -53,26 +66,58 @@ class CirclConnector(CVEConnector):
         if not isinstance(cves, list):
             cves = [cves]
 
-        if attributes is not None and not isinstance(attributes, list):
-            attributes = [attributes]
-
         if payload is None:
             payload = {}
 
+        self.logger.info(f"Fetching data for {len(cves)} CVEs from {self.URL}")
+
         res = []
-        for cve in cves:
-            if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
-                continue
+        spinner_txt = f"Fetching CVE data from {self.URL.netloc}"
+        with yaspin(text=f"{spinner_txt}...") as spinner:
+            for i, cve in enumerate(cves):
+                spinner.text = f"{spinner_txt} ({i+1}/{len(cves)})..."
 
-            cve_target = CirclConnector.cve_api_url(cve)
+                if not re.match(r"CVE-\d{4}-\d{4,7}", cve):
+                    continue
 
-            self.logger.debug(f"{context}::{cve_target} > {payload}")
-            self.connect(cve_target, **payload)
+                while True:
+                    if not self.token():
+                        wait_time = max(
+                            self.rate - ((time() - self.last_token_time) * self.rate), 0.1
+                        )
 
-            vuln = self._connection
-            if vuln is not None:
-                self.logger.debug(f"{context}::{cve_target} > {vuln}")
-                res.append(self.unify_cve_data(vuln) if not raw else vuln)
+                        spinner_log(
+                            f"API not available, waiting {wait_time}...",
+                            self.logger.warning,
+                            spinner,
+                        )
+
+                        sleep(wait_time)
+                        continue
+
+                    cve_target = CirclConnector.cve_api_url(cve)
+
+                    spinner_log(f"{context}::{cve_target} > {payload}", self.logger.debug, spinner)
+                    self.connect(cve_target, **payload)
+
+                    vuln = self.vuln_from_connection()
+                    if vuln:
+                        spinner_log(f"{context}::{cve_target} > {vuln}", self.logger.debug, spinner)
+                        res.append(self.unify_cve_data(vuln) if not raw else vuln)
+
+                    else:
+                        spinner_log(
+                            f"No data for vulnerability {cve}", self.logger.warning, spinner
+                        )
+
+                    break
+
+            if len(res) > 0:
+                spinner.text = f"Retrieved data for {len(res)} CVEs"
+                spinner.ok("✅ ")
+
+            else:
+                spinner.fail("❌ ")
 
         return res
 
@@ -97,8 +142,11 @@ class CirclConnector(CVEConnector):
                 f"{Context()}::Invalid CVE provided {cve} missing mandatory informations"
             )
 
-        containers = cve.get("containers", {}).get("cna", {})
-        metrics: "DataType" = containers.get("metrics", [])
+        containers = cve.get("containers", {})
+        adp_container = containers.get("adp", [])
+        cna_container = containers.get("cna", {})
+
+        metrics: "DataType" = next(iter(adp_container), {}).get("metrics", [])
         metrics_data: dict[str, Any] = {}
         if len(metrics) > 0:
             valid_keys = self._cvss_metrics_keys(list(metrics[0].keys()))
@@ -106,7 +154,7 @@ class CirclConnector(CVEConnector):
             if len(valid_keys) > 0:
                 metrics_data = metrics[0].get(valid_keys[0], {})
 
-        raw_description = containers.get("descriptions", [])
+        raw_description = cna_container.get("descriptions", [])
 
         unified_fmt: "CVEDataFormat" = {
             "id": cve_id,
@@ -118,7 +166,7 @@ class CirclConnector(CVEConnector):
                 ),
             },
             "description": raw_description[0].get("value", "") if len(raw_description) > 0 else "",
-            "sources": [r["url"] for r in containers.get("references", [])],
+            "sources": [r["url"] for r in cna_container.get("references", [])],
             "vectors": {
                 "vectorStr": metrics_data.get("vectorString", ""),
                 "attackVector": metrics_data.get("attackVector", ""),
@@ -168,4 +216,3 @@ class CirclConnector(CVEConnector):
         """
 
         return f"{CirclConnector.API_URL.geturl()}{cve}"
-

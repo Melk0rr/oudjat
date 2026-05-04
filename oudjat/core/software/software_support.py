@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import IntEnum
 from typing import TypedDict, override
 
-from oudjat.utils.time_utils import TimeConverter
+from oudjat.utils.time import TimeConverter
 
 
 class SoftwareReleaseSupportDetailsDict(TypedDict):
@@ -20,6 +20,7 @@ class SoftwareReleaseSupportDetailsDict(TypedDict):
     start: str
     end: str
     duration: int
+
 
 class SoftwareReleaseSupportDict(TypedDict):
     """
@@ -123,6 +124,17 @@ class SoftwareReleaseSupport:
     # Methods
 
     @property
+    def channel(self) -> str:
+        """
+        Return the support channel name.
+
+        Returns:
+            str: The name of the channel associated with the current support
+        """
+
+        return self._channel
+
+    @property
     def status(self) -> "SoftwareReleaseSupportStatus":
         """
         Return a string representing the current support status.
@@ -178,11 +190,7 @@ class SoftwareReleaseSupport:
         end = f"{abs(support_days)} days"
         end = f"Ends in {end}" if support_days > 0 else f"Ended {end} ago"
 
-        return {
-            "start": start,
-            "end": end,
-            "duration": self.duration
-        }
+        return {"start": start, "end": end, "duration": self.duration}
 
     @property
     def lts(self) -> bool:

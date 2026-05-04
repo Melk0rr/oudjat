@@ -3,14 +3,15 @@ A module that handles SCCM server connection and interractions.
 """
 
 import logging
-from typing import override
+import re
+from typing import Any, override
 
 import pyodbc
+from yaspin import yaspin
 
 from oudjat.connectors.microsoft.sccm.exceptions import SCCMQueryError, SCCMServerConnectionError
 from oudjat.utils import Context, DataType
 from oudjat.utils.credentials import NoCredentialsError
-from oudjat.utils.types import StrType
 
 from ...connector import Connector
 from .odbc_drivers import ODBCDriver
@@ -30,7 +31,7 @@ class SCCMConnector(Connector):
         db_name: str,
         username: str | None = None,
         password: str | None = None,
-        driver: "ODBCDriver" = ODBCDriver.SQL_SERVER,
+        driver: "str | ODBCDriver" = ODBCDriver.SQL_SERVER,
         port: int = 1433,
         trusted_connection: bool = False,
     ) -> None:
@@ -48,18 +49,25 @@ class SCCMConnector(Connector):
             service_name (str)       : Service name used to register credentials if trusted_connection is false
         """
 
+        context = Context()
         self.logger: "logging.Logger" = logging.getLogger(__name__)
 
         super().__init__(target=server, username=username, password=password)
 
         self._trusted_connection: bool = trusted_connection
 
+        if not isinstance(driver, ODBCDriver):
+            if driver not in ODBCDriver._member_names_:
+                raise ValueError(f"{context}::Invalid ODBC driver provided")
+
+            driver = ODBCDriver[driver]
+
         self._driver: "ODBCDriver" = driver
         self._port: int = port
         self._database: str = db_name
 
-        self._connection: pyodbc.Connection
-        self._cursor: pyodbc.Cursor
+        self._connection: "pyodbc.Connection"
+        self._cursor: "pyodbc.Cursor"
 
     # ****************************************************************
     # Methods
@@ -93,7 +101,6 @@ class SCCMConnector(Connector):
         """
 
         context = Context()
-        self.logger.info(f"{context}::Connecting to {self._target}::{self._database}({self._port})")
 
         if not self._trusted_connection and self._credentials is None:
             raise NoCredentialsError(
@@ -109,7 +116,7 @@ class SCCMConnector(Connector):
                 }
 
             self._connection = pyodbc.connect(
-                driver=self._driver.value,
+                driver=str(self._driver),
                 server=self._target,
                 port=self._port,
                 database=self._database,
@@ -120,7 +127,7 @@ class SCCMConnector(Connector):
             self._connection.setencoding("utf-8")
             self._cursor = self._connection.cursor()
 
-            self.logger.info(f"{context}::Connected to {self._target}::{self._database}({self._port})")
+            self.logger.info(f"Connected to {self._target}::{self._database}({self._port})")
 
         except SCCMServerConnectionError as e:
             raise SCCMServerConnectionError(
@@ -131,7 +138,7 @@ class SCCMConnector(Connector):
     def fetch(
         self,
         payload: str,
-        attributes: "StrType | None" = None,
+        payload_fmt: dict[str, Any] | None = None,
     ) -> "DataType":
         """
         Perform a request to the SQL server.
@@ -139,25 +146,64 @@ class SCCMConnector(Connector):
         Detailed description.
 
         Args:
-            payload (str)              : A way to narrow search scope or search results. It may be a string, a tuple, or even a callback function
-            attributes (StrType | None): A list of attributes to keep in the search results
+            payload (str)                      : SQL request to send to the server
+            payload_fmt (dict[str, Any] | None): An optional dictionary to format the provided payload
 
         Returns:
             list[Any]: list of found element based on provided search filter
         """
 
         context = Context()
-        try:
-            _ = self._cursor.execute(payload)
 
-        except SCCMQueryError as e:
-            raise SCCMQueryError(
-                f"{context}::An error occured while searching in {self._target}::{self._database}: \n{e}"
-            )
+        self.logger.info(f"Fetching elements from {self._target}")
+        self.logger.debug(f"{context}::{payload}")
 
-        res_columns: list[str] = [column[0] for column in self._cursor.description]
-        res = [dict(zip(res_columns, row)) for row in self._cursor.fetchall()]
+        res = []
+        with yaspin(text="Fetching data from server...") as spinner:
+            try:
+                if payload_fmt is not None:
+                    self._check_query_format(payload_fmt)
+                    payload = payload.format(**payload_fmt)
 
-        self.logger.debug(f"{context}::{res}")
+                _ = self._cursor.execute(payload)
+
+            except SCCMQueryError as e:
+                raise SCCMQueryError(
+                    f"{context}::An error occured while searching in {self._target}::{self._database}: \n{e}"
+                )
+
+            res_columns: list[str] = [column[0] for column in self._cursor.description]
+            res = [dict(zip(res_columns, row)) for row in self._cursor.fetchall()]
+
+            if len(res) > 0:
+                spinner.text = f"Fetched {len(res)} elements"
+                spinner.ok("✅ ")
+
+            else:
+                spinner.fail("❌ ")
+
+        self.logger.debug(f"{context}::Retrieved {len(res)} elements")
 
         return res
+
+    def _check_query_format(self, query_fmt: dict[str, Any]) -> None:
+        """
+        Do some basic security validation of the provided query format.
+
+        Args:
+            query_fmt (dict[str, Any]): Query dictionary format to validate
+        """
+
+        context = Context()
+
+        for k, v in query_fmt.items():
+            if isinstance(v, str):
+                if re.search(r'[\'";\-\+\*\/]', v, re.I):
+                    raise ValueError(f"{context}::Suspicious parameter value for {k}: {v}")
+
+            elif isinstance(v, (int, float)):
+                pass
+
+            else:
+                raise ValueError(f"{context}::Unsupported parameter type for {k}: {v} ({type(v)})")
+

@@ -1,0 +1,236 @@
+"""
+A command module to handle interactions with an LDAP server.
+"""
+
+from typing import Any
+
+from oudjat.connectors.ldap import LDAPConnector
+from oudjat.utils.doc_builder import DocBuilder
+
+from .base import (
+    CmdOpt,
+    CmdProps,
+    CmdUsage,
+    CmdUsageOpt,
+)
+from .connector_command import ConnectorCommand
+
+
+class LDAPConnectorCommand(ConnectorCommand):
+    """
+    A class to provide an access to the LDAPConnector.
+    """
+
+    # ****************************************************************
+    # Constructor & Attributes
+
+    __cmd_props__: "CmdProps" = CmdProps(
+        "connectors.ldap",
+        "A command to interact with an LDAP server through the oudjat LDAPConnector",
+    )
+    __cmd_props__.options = {
+        "--creds-service": CmdOpt(
+            "A credential service name to retrieve username and password from",
+            short="c",
+            arg="SERVICE",
+        ),
+        "--username": CmdOpt(
+            "The username used for authentication",
+            short="u",
+            arg="USER",
+        ),
+        "--password": CmdOpt(
+            "The password used for authentication",
+            short="p",
+            arg="PASS",
+        ),
+        "--target": CmdOpt(
+            "Specify the SentinelOne URL to query",
+            short="t",
+            arg="TARGET",
+        ),
+        "--attributes": CmdOpt(
+            "Provide additional attributes to retrieve from server",
+            arg="ATTRIBUTES",
+        ),
+        "--displayname": CmdOpt(
+            "The GPO display name",
+            arg="DISPLAYNAME",
+        ),
+        "--dn": CmdOpt(
+            "DistinguishedName(s) to narrow down elements research",
+            arg="DN",
+        ),
+        "--filter": CmdOpt(
+            "Provide an LDAP filter string to narrow down results",
+            arg="FILTER",
+        ),
+        "--name": CmdOpt(
+            "Name(s) to narrow down elements research",
+            arg="NAME",
+        ),
+        "--san": CmdOpt(
+            "SAMAccountName(s) to narrow down elements research",
+            arg="SAN",
+        ),
+        "--search-base": CmdOpt(
+            "Where to base the search on in terms of directory location",
+            arg="SEARCHBASE",
+        ),
+    }
+
+    __cmd_props__.usages = {
+        "--computers": CmdUsage(
+            "Retrieve computer accounts",
+            (
+                "--computers",
+                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--dn=DN] [--name=NAME] [--filter=FILTER]",
+            ),
+            {
+                "search_filter": CmdUsageOpt("--filter"),
+                "dn": CmdUsageOpt("--dn"),
+                "name": CmdUsageOpt("--name"),
+                "attributes": CmdUsageOpt("--atributes"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
+        "--gpos": CmdUsage(
+            "Retrieve Group Policy Objects",
+            (
+                "--gpos",
+                "[--displayname=DISPLAYNAME] [--name=NAME] [--search-base=SEARCHBASE] [--filter=FILTER] [--attributes=ATTRIBUTES]",
+            ),
+            {
+                "attributes": CmdUsageOpt("--atributes"),
+                "displayName": CmdUsageOpt("--displayname"),
+                "name": CmdUsageOpt("--name"),
+                "search_filter": CmdUsageOpt("--filter"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
+        "--groups": CmdUsage(
+            "Retrieve group objects",
+            (
+                "--groups",
+                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--dn=DN] [--name=NAME] [--filter=FILTER]",
+            ),
+            {
+                "search_filter": CmdUsageOpt("--filter"),
+                "dn": CmdUsageOpt("--dn"),
+                "name": CmdUsageOpt("--name"),
+                "attributes": CmdUsageOpt("--atributes"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
+        "--objects": CmdUsage(
+            "Retrieve any type of LDAP objects. Result depends heavily on the provided filter",
+            (
+                "--objects",
+                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--dn=DN] [--name=NAME] [--filter=FILTER]",
+            ),
+            {
+                "search_filter": CmdUsageOpt("--filter"),
+                "dn": CmdUsageOpt("--dn"),
+                "name": CmdUsageOpt("--name"),
+                "attributes": CmdUsageOpt("--atributes"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
+        "--ous": CmdUsage(
+            "Retrieve Organizational Unit objects",
+            (
+                "--ous",
+                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--name=NAME] [--filter=FILTER]",
+            ),
+            {
+                "search_filter": CmdUsageOpt("--filter"),
+                "name": CmdUsageOpt("--name"),
+                "attributes": CmdUsageOpt("--atributes"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
+        "--subnets": CmdUsage(
+            "Retrieve subnet objects",
+            (
+                "--subnets",
+                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--filter=FILTER]",
+            ),
+            {
+                "search_filter": CmdUsageOpt("--filter"),
+                "attributes": CmdUsageOpt("--atributes"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
+        "--users": CmdUsage(
+            "Retrieve user accounts",
+            (
+                "--users",
+                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--dn=DN] [--san=SAN] [--name=NAME] [--filter=FILTER]",
+            ),
+            {
+                "search_filter": CmdUsageOpt("--filter"),
+                "dn": CmdUsageOpt("--dn"),
+                "name": CmdUsageOpt("--name"),
+                "san" : CmdUsageOpt("--san"),
+                "attributes": CmdUsageOpt("--atributes"),
+                "search_base": CmdUsageOpt("--search-base"),
+            },
+        ),
+    }
+
+    __cmd_props__.prepend_usages(
+        "(-t=TARGET | --target=TARGET) (--username=USER --password=PASS | --creds-service=SERVICE [--username=USER])"
+    )
+
+    __cmd_props__.append_usages("[options]")
+
+    __doc_builder__: "DocBuilder" = ConnectorCommand._gen_doc("oudjat", __cmd_props__, "")
+
+    def __init__(self, options: dict[str, Any]) -> None:
+        """
+        Create a new EOLConnectorCommand.
+
+        Args:
+            options (dict[str, Any]): Provided options
+        """
+
+        super().__init__(options, False)
+
+        con_args = {"target": self.options["--target"]}
+        if self.options["--username"] and self.options["--password"]:
+            con_args.update(
+                {
+                    "username": self.options["--username"],
+                    "password": self.options["--password"],
+                }
+            )
+
+        self.connector: "LDAPConnector" = LDAPConnector(**con_args)
+
+        # Retrieve credentials from credential service if provided
+        if self._is_opt_present("--creds-service"):
+            self.connector.set_creds_from_service(
+                self.options["--creds-service"], self.options["--username"]
+            )
+
+        self.connector.connect()
+
+        # Options transform based on instance
+        self.__cmd_props__.opts_transform(
+            {
+                "--name": lambda opt, _: self._unify_str_opt(opt),
+            }
+        )
+
+        # Usage backends
+        self.__cmd_props__.backends(
+            {
+                "--computers": self.connector.computers,
+                "--gpos": self.connector.gpos,
+                "--groups": self.connector.groups,
+                "--objects": self.connector.objects,
+                "--ous": self.connector.ous,
+                "--subnets": self.connector.subnets,
+                "--users": self.connector.users,
+            }
+        )
