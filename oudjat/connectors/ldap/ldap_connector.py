@@ -637,7 +637,8 @@ class LDAPConnector(Connector):
         if not isinstance(base_filter, LDAPFilter):
             base_filter = LDAPFilter(base_filter)
 
-        new_filter = LDAPFilter(operator="&")
+        new_filter = base_filter
+        new_filter.set_operator_from_str("&")
         for k, v in kwargs.items():
             if v is not None:
                 new_filter += LDAPFilter.format(k.upper(), v)
