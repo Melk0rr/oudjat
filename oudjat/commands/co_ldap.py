@@ -165,12 +165,13 @@ class LDAPConnectorCommand(ConnectorCommand):
             "Retrieve user accounts",
             (
                 "--users",
-                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--dn=DN] [--name=NAME] [--filter=FILTER]",
+                "[--attributes=ATTRIBUTES] [--search-base=SEARCHBASE] [--dn=DN] [--san=SAN] [--name=NAME] [--filter=FILTER]",
             ),
             {
                 "search_filter": CmdUsageOpt("--filter"),
                 "dn": CmdUsageOpt("--dn"),
                 "name": CmdUsageOpt("--name"),
+                "san" : CmdUsageOpt("--san"),
                 "attributes": CmdUsageOpt("--atributes"),
                 "search_base": CmdUsageOpt("--search-base"),
             },
