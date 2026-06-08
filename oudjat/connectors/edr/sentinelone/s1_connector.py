@@ -1308,7 +1308,7 @@ class S1Connector(Connector):
     # ****************************************************************
     # Methods: Sites
 
-    def sites(self, payload: dict[str, Any] | None = None) -> "DataType":
+    def sites(self, name: "StrType | None" = None, payload: dict[str, Any] | None = None) -> "DataType":
         """
         Retrieve the sites that match the provided filters.
 
@@ -1320,14 +1320,32 @@ class S1Connector(Connector):
         401 - Unauthorized access - please sign in and retry.
 
         Args:
+            name (str | list[str])  : List of site names
             payload (dict[str, Any]): Payload to send to the endpoint
 
         Returns:
             DataType: Data of the site matching the provided ID
         """
 
-        req = self.fetch(S1Endpoint.SITES, payload=payload or {})
-        return next(iter(req))["sites"]
+        if payload is None:
+            payload = {}
+
+        if name is not None:
+            if not isinstance(name, list):
+                name = [name]
+
+            res = []
+            for n in name:
+                payload["name"] = n
+                req = self.fetch(S1Endpoint.SITES, payload=payload)
+                res.append(next(iter(req))["sites"])
+
+        else:
+            req = self.fetch(S1Endpoint.SITES, payload=payload or {})
+            res = next(iter(req))["sites"]
+
+
+        return res
 
     def sites_by_id(self, site_id: str, payload: dict[str, Any] | None = None) -> "DataType":
         """
@@ -1379,7 +1397,7 @@ class S1Connector(Connector):
         def _filter_by_name(site: dict[str, Any]) -> bool:
             return site["name"] in site_name
 
-        return list(filter(_filter_by_name, self.sites(payload)))
+        return list(filter(_filter_by_name, self.sites(payload=payload)))
 
     def sites_policy(
         self,
