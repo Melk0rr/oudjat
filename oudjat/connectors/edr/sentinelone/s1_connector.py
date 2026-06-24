@@ -916,15 +916,24 @@ class S1Connector(Connector):
         if vendors is not None:
             payload["vendor__contains"] = self._unify_str_list(vendors)
 
-        if site_ids is not None:
-            payload["siteIds"] = self._unify_str_list(site_ids)
-
         if "skipCount" not in payload:
             payload["skipCount"] = True
 
         payload.setdefault("limit", 1000)
 
-        return self.fetch(S1Endpoint.APPLICATIONS_INVENTORY, payload)
+        if site_ids is not None:
+            if not isinstance(site_ids, list):
+                site_ids = [site_ids]
+
+            res = []
+            for sid in site_ids:
+                payload["siteIds"] = sid
+                res.extend(self.fetch(S1Endpoint.APPLICATIONS_INVENTORY, payload))
+
+        else:
+            res = self.fetch(S1Endpoint.APPLICATIONS_INVENTORY, payload)
+
+        return res
 
     def applications_endpoints(
         self,
