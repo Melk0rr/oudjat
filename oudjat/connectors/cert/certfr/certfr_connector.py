@@ -130,7 +130,7 @@ class CERTFRConnector(Connector):
                     continue
 
             if len(res) == len(search_filter):
-                spinner.text = f"Parsed of {len(res)} CERTFR pages"
+                spinner.text = f"Parsed {len(res)} CERTFR pages"
                 spinner.ok("✅ ")
 
             else:
