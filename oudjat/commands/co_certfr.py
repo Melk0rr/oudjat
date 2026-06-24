@@ -101,7 +101,7 @@ class CERTFRConnectorCommand(ConnectorCommand):
         # Usage backends
         self.__cmd_props__.backends(
             {
-                "--default": self.connector.fetch,
+                "--target": self.connector.fetch,
                 "--feed": self.connector.feed,
             }
         )
