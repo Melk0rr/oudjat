@@ -74,6 +74,7 @@ class OSFamily(Enum):
     LINUX = OSFamilyProps(
         options=[
             OSFamilyOptProps(pattern=r"[Aa]lma(?: )?[Ll]inux", name="ALMALINUX"),
+            OSFamilyOptProps(pattern=r"[Aa]lpine(?: )?[Ll]inux", name="ALPINELINUX"),
             OSFamilyOptProps(pattern=r"[Cc]ent[Oo][Ss]", name="CENTOS"),
             OSFamilyOptProps(pattern=r"[Dd]ebian(?: Linux)?", name="DEBIAN"),
             OSFamilyOptProps(pattern=r"[Ff]edora(?: Linux)?", name="FEDORA"),
