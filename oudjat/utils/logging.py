@@ -4,10 +4,15 @@ A helper module to handle logging format.
 
 import logging
 import sys
-from typing import Callable, override
+from typing import Any, Callable, override
 
 from yaspin.core import Yaspin
 
+VERBOSE_LEVEL = 15
+TRACE_LEVEL = 5
+
+logging.addLevelName(VERBOSE_LEVEL, "VERBOSE")
+logging.addLevelName(TRACE_LEVEL, "TRACE")
 
 def spinner_log(text: str, log_fn: Callable[..., None], spinner: "Yaspin") -> None:
     """
@@ -64,8 +69,38 @@ class OudjatFormatter(logging.Formatter):
 
         return formatter.format(record)
 
+def verbose(self: "logging.Logger", message: str, *args: Any, **kwargs: Any) -> None:
+    """
+    Add a verbose logging method which is a bit finer than INFO.
 
-def oudjatLogger(
+    Args:
+        self (Logger) : The logger that will call the method
+        message (str) : The logging message to write.
+        *args (Any)   : Additional positional arguments
+        **kwargs (Any): Additional named arguments
+    """
+
+    if self.isEnabledFor(15):
+        self._log(15, message, args, **kwargs)
+
+def trace(self: "logging.Logger", message: str, *args: Any, **kwargs: Any) -> None:
+    """
+    Add a verbose logging method which is a finer than DEBUG.
+
+    Args:
+        self (Logger) : The logger that will call the method
+        message (str) : The logging message to write.
+        *args (Any)   : Additional positional arguments
+        **kwargs (Any): Additional named arguments
+    """
+
+    if self.isEnabledFor(5):
+        self._log(5, message, args, **kwargs)
+
+logging.Logger.verbose = verbose
+logging.Logger.trace = trace
+
+def setup_logger(
     level: int = logging.INFO,
     stdout: bool = True,
     filename: str | None = None,
@@ -74,7 +109,6 @@ def oudjatLogger(
     Create a new custom Logger.
 
     Args:
-        name (str)           : Logger name
         level (int)          : Log level
         stdout (bool)        : Whether to add stream to stdout
         filename (str | None): Optional filename for file handler
