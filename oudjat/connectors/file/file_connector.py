@@ -1,6 +1,7 @@
 """A module to perform connection to various types of file."""
 
 import logging
+from pathlib import Path
 from typing import Any, Callable, override
 
 from oudjat.connectors.connector import Connector
@@ -17,7 +18,7 @@ class FileConnector(Connector):
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, file: str, source: str) -> None:
+    def __init__(self, filepath: "str | Path", source: str) -> None:
         """
         Create a new instance of FileConnector.
 
@@ -29,10 +30,13 @@ class FileConnector(Connector):
         context = Context()
         self.logger: "logging.Logger" = logging.getLogger(__name__)
 
-        if not FileUtils.check_path(file):
-            raise FileExistsError(f"{context}::Invalid file path provided: {file}")
+        if not isinstance(filepath, Path):
+            filepath = Path(filepath)
 
-        file_ext: str = file.split(".")[-1]
+        if not filepath.exists():
+            raise FileExistsError(f"{context}::Invalid file path provided: {filepath}")
+
+        file_ext: str = filepath.suffix.lstrip(".")
 
         self._source: str = source
         try:
@@ -46,7 +50,7 @@ class FileConnector(Connector):
         self._connection: bool = False
         self._data: list[Any] | None = None
 
-        super().__init__(file)
+        super().__init__(filepath)
 
     # ****************************************************************
     # Methods
@@ -86,7 +90,7 @@ class FileConnector(Connector):
 
     @Connector.target.setter
     @override
-    def target(self, new_target: Any) -> None:
+    def target(self, new_target: "str | Path") -> None:
         """
         Setter for connector path.
 
@@ -95,10 +99,11 @@ class FileConnector(Connector):
         """
 
         context = Context()
-        if not isinstance(new_target, str):
-            raise ValueError(f"{context}::Please provide a string")
 
-        if not FileUtils.check_path(new_target):
+        if not isinstance(new_target, Path):
+            new_target = Path(new_target)
+
+        if not new_target.exists():
             raise FileExistsError(
                 f"{context}::Invalid file path provided: {new_target}"
             )
