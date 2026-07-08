@@ -149,4 +149,4 @@ class CERTFRConnectorCommand(ConnectorCommand):
             cves.update({cve.ref: cve for cve in CVE.from_db(page_cves)})
 
             max_cves = CVE.max_cve([cves[cve] for cve in initial_page_cves if cve in cves])
-            page["highestCVEs"] = [{"id": cve.ref, "score": cve.cvss_score} for cve in max_cves]
+            page["highestCVEs"] = [{"id": cve.ref, "score": cve.cvss_score, "link": cve.link} for cve in max_cves]
