@@ -101,7 +101,6 @@ class FileUtils:
         """
 
         filepath = cls._check_path(filepath)
-        json_data = None
 
         try:
             full_path = filepath.absolute()
@@ -183,7 +182,8 @@ class FileUtils:
 
                 cls.logger.warning(f"No delimiter specified, guessed '{delimiter}' as a delimiter")
 
-                csv_data = pl.read_csv(filepath.absolute(), separator=delimiter)
+                df = pl.read_csv(filepath.absolute(), separator=delimiter)
+                csv_data = df.to_dicts()
 
                 if callback is not None:
                     csv_data = callback(csv_data)
@@ -264,7 +264,6 @@ class FileUtils:
         cls.logger.info(f"Importing TXT file {filepath}")
 
         filepath = cls._check_path(filepath)
-        data = None
 
         try:
             full_path = filepath.absolute()
@@ -362,8 +361,6 @@ class FileUtils:
         Returns:
             str: the delimiter used (?) in the CSV file based on the provided line. Or ',' if no delimiter are found
         """
-
-        delimiter = ","
 
         if not isinstance(filepath, Path):
             filepath = Path(filepath)
