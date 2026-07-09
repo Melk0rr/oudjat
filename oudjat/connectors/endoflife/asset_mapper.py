@@ -22,7 +22,7 @@ class EOLAssetMapper(AssetMapper):
     # ****************************************************************
     # Attributes & Constructor
 
-    def __init__(self, eolco: "EndOfLifeConnector") -> None:
+    def __init__(self) -> None:
         """
         Create a new EOL asset mapper.
 
@@ -32,7 +32,8 @@ class EOLAssetMapper(AssetMapper):
 
         super().__init__()
 
-        self._connector: "EndOfLifeConnector" = eolco
+        self._connector: "EndOfLifeConnector" = EndOfLifeConnector()
+        self._connector.connect()
 
     # ****************************************************************
     # Methods
@@ -181,6 +182,52 @@ class EOLAssetMapper(AssetMapper):
             mapping_registry=mapping_registry,
             callback=rel_cb,
             support_channels=support_channels_value,
+        )
+
+    def linux(self, distro: str) -> "SoftwareRelVersionDict[OSRelease]":
+        """
+        Return a dictionary of MSOSRelease instances.
+
+        Args:
+            distro (str): The name of the distribution you want to retrieve
+
+        Returns:
+            dict[str, list[OSRelease]]: A dictionary of OSRelease for each windows instance retrieved from EOL API
+        """
+
+        linux_eol = self._connector.products(distro)[0]
+        software_name = linux_eol["label"]
+
+        mapping_registry: "MappingRegistry" = {
+            "release_id": lambda rel: f"{linux_eol['name']}-{rel['name']}",
+            "name": lambda rel: f"{software_name} {rel['name']}",
+            "software_name": software_name,
+            "version": lambda rel: str(SoftwareReleaseVersion(int(rel["name"]))),
+            "release_date": lambda rel: rel["releaseDate"],
+            "release_label": lambda rel: rel["name"],
+        }
+
+        def rel_cb(rel: "OSRelease", record: dict[str, Any], _: "MappingRegistry") -> None:
+            rel.latest_version = SoftwareReleaseVersion(record["latest"]["name"])
+            rel.add_custom_attr("link", record["latest"]["link"])
+
+        def support_registry_f(ch: str, rel: dict[str, Any]) -> "MappingRegistry":
+            return {
+                "channel": ch,
+                "support_from": rel["releaseDate"] if ch == "Standard" else rel["eolFrom"],
+                "active_support": rel["eoasFrom"] if ch == "Standard" else rel["eoesFrom"],
+                "security_support": rel["eolFrom"] if ch == "Standard" else rel["eoesFrom"],
+                "extended_security_support": rel["eoesFrom"] if ch == "ELS" else None,
+                "long_term_support": rel["isLts"],
+            }
+
+        return self._releases(
+            releases=list(linux_eol.values()),
+            rel_type=OSRelease,
+            mapping_registry=mapping_registry,
+            callback=rel_cb,
+            support_channels=["Standard", "ELS"],
+            support_mapping_registry=support_registry_f,
         )
 
     def rhel(self) -> "SoftwareRelVersionDict[OSRelease]":
