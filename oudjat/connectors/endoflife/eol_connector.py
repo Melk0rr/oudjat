@@ -158,7 +158,7 @@ class EndOfLifeConnector(Connector):
         elif product is not None:
             payload["filter"] = product
 
-        res = self.fetch(endpoint=EndOfLifeEndpoint.PRODUCTS, **payload)
+        res = self.fetch(endpoint=EndOfLifeEndpoint.PRODUCTS, payload=payload)
         if (product is None) and (tags is not None):
             if not isinstance(tags, list):
                 tags = [tags]
@@ -240,7 +240,7 @@ class EndOfLifeConnector(Connector):
         if category:
             payload["filter"] = category
 
-        return self.fetch(endpoint=EndOfLifeEndpoint.CATEGORIES, **payload)
+        return self.fetch(endpoint=EndOfLifeEndpoint.CATEGORIES, payload=payload)
 
     def apps(self) -> "DataType":
         """
@@ -283,4 +283,4 @@ class EndOfLifeConnector(Connector):
         if tag:
             payload["filter"] = tag
 
-        return self.fetch(endpoint=EndOfLifeEndpoint.TAGS, **payload)
+        return self.fetch(endpoint=EndOfLifeEndpoint.TAGS, payload=payload)
