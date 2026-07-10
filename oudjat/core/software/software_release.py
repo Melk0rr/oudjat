@@ -695,6 +695,9 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
             int | None: The index of the release in the version list if it exists
         """
 
+        if rel_version not in self:
+            return None
+
         return next((i for i, el in enumerate(self[rel_version]) if el.id == rel_id), None)
 
     def keys(self):
