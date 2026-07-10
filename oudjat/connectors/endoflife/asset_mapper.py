@@ -195,11 +195,12 @@ class EOLAssetMapper(AssetMapper):
             dict[str, list[OSRelease]]: A dictionary of OSRelease for each windows instance retrieved from EOL API
         """
 
-        linux_eol = self._connector.products(distro)[0]
-        software_name = linux_eol["label"]
+        distro_eol = self._connector.products(distro)[0]
+        distro_releases = distro_eol.get("releases", [])
+        software_name = distro_eol["label"]
 
         mapping_registry: "MappingRegistry" = {
-            "release_id": lambda rel: f"{linux_eol['name']}-{rel['name']}",
+            "release_id": lambda rel: f"{distro_eol['name']}-{rel['name']}",
             "name": lambda rel: f"{software_name} {rel['name']}",
             "software_name": software_name,
             "version": lambda rel: str(SoftwareReleaseVersion(int(rel["name"]))),
@@ -222,7 +223,7 @@ class EOLAssetMapper(AssetMapper):
             }
 
         return self._releases(
-            releases=list(linux_eol.values()),
+            releases=distro_releases,
             rel_type=OSRelease,
             mapping_registry=mapping_registry,
             callback=rel_cb,
