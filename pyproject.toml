@@ -10,28 +10,29 @@ readme = "README.md"
 requires-python = ">=3.13"
 
 authors = [
-  { name = "me1k0r", email = "runner-me1k0r@proton.me" }
+	{ name = "me1k0r", email = "runner-me1k0r@proton.me" },
 ]
 
 maintainers = [
-  { name = "me1k0r", email = "runner-me1k0r@proton.me" }
+	{ name = "me1k0r", email = "runner-me1k0r@proton.me" },
 ]
 
-license = { file = "LICENSE" }
+license-files = ["LICENSE"]
 
 dependencies = [
-  "beautifulsoup4",
-  "docopt",
-  "keyring",
-  "ldap3",
-  "lxml",
-  "orjson",
-  "pycryptodome",
-  "pyodbc",
-  "pytenable",
-  "requests",
-  "tqdm",
-  "yaspin",
+	"beautifulsoup4",
+	"docopt",
+	"keyring",
+	"ldap3",
+	"lxml",
+	"orjson",
+	"polars",
+	"pycryptodome",
+	"pyodbc",
+	"pytenable",
+	"requests",
+	"tqdm",
+	"yaspin",
 ]
 
 [project.urls]

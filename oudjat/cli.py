@@ -23,7 +23,7 @@ from oudjat.commands import (
 from oudjat.commands.exceptions import UnknownCommand
 from oudjat.utils import ColorPrint, Context, StdOutHook, TimeConverter
 from oudjat.utils.doc_builder import DocBuilder
-from oudjat.utils.logging import oudjatLogger
+from oudjat.utils.logging import setup_logger
 
 from . import __version__ as VERSION
 
@@ -80,7 +80,9 @@ It also allows for complex data consolidation and mapping through a config file 
 
     builder.add_option("append", "Append to the output file", short="a")
     builder.add_option("help", "Print the doc string", short="h")
-    builder.add_option("verbose", "Show more logs", short="v")
+    builder.add_option("v", "Set log level to verbose", short="v")
+    builder.add_option("vv", "Set log level to debug")
+    builder.add_option("vvv", "Set log level to trace")
     builder.add_option(
         "output", "Specify a file to save the execution logs to", arg="LOGFILE", short="o"
     )
@@ -147,7 +149,16 @@ def main() -> None:
                 options["--output"], options["--silent"], output=options["--output"]
             )
 
-        logger = oudjatLogger(level=logging.DEBUG if options["--verbose"] else logging.INFO)
+        logger = setup_logger(logging.INFO)
+
+        if options["--v"]:
+            logger.setLevel(logging.VERBOSE)
+
+        elif options["--vv"]:
+            logger.setLevel(logging.DEBUG)
+
+        elif options["--vvv"]:
+            logger.setLevel(logging.TRACE)
 
         ColorPrint.blue(banner)
 

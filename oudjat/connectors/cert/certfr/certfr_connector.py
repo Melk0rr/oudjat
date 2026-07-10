@@ -9,11 +9,11 @@ from urllib.parse import ParseResult, urlparse
 from bs4 import BeautifulSoup
 from yaspin import yaspin
 
-from oudjat.connectors import Connector, ConnectorMethod
 from oudjat.utils.context import Context
 from oudjat.utils.logging import spinner_log
 from oudjat.utils.types import DataType, StrType
 
+from ... import Connector, ConnectorMethod
 from .certfr_page import CERTFRPage
 from .exceptions import CERTFRInvalidLinkError, CERTFRParsingError
 
@@ -130,7 +130,7 @@ class CERTFRConnector(Connector):
                     continue
 
             if len(res) == len(search_filter):
-                spinner.text = f"Parsed of {len(res)} CERTFR pages"
+                spinner.text = f"Parsed {len(res)} CERTFR pages"
                 spinner.ok("✅ ")
 
             else:

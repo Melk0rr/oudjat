@@ -1,6 +1,7 @@
 """A module that defines common command behaviors."""
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Callable, TypeAlias
 
 import orjson
@@ -281,9 +282,9 @@ class Base:
         values = []
 
         if self.options[str_opt].startswith("@"):
-            path = self.options[str_opt][1:]
+            path = Path(self.options[str_opt][1:])
 
-            if not FileUtils.check_path(path):
+            if not path.exists():
                 raise FileNotFoundError(f"{Context()}::Could not find {path}")
 
             values = [v.strip() for v in FileUtils.import_txt(path)]

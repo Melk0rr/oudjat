@@ -4,11 +4,11 @@ A helper module to handle mail sending.
 
 import logging
 import mimetypes
-import os
 import re
 import smtplib
 from email.message import EmailMessage
 from enum import Enum
+from pathlib import Path
 
 from oudjat.utils.context import Context
 
@@ -181,7 +181,7 @@ class Mail:
 
         self._message.set_content(content, subtype=content_type.value)
 
-    def add_attachment(self, filepath: str) -> None:
+    def add_attachment(self, filepath: "str | Path") -> None:
         """
         Add a file as email attachment.
 
@@ -189,10 +189,11 @@ class Mail:
             filepath (str): The path of the file attachement
         """
 
-        full_path = os.path.join(os.getcwd(), filepath)
-        with open(full_path, "rb") as file:
-            file_data = file.read()
-            file_name = filepath.split("/")[-1]
+        filepath = Path(filepath)
+
+        full_path = filepath.absolute()
+        file_data = full_path.read_bytes()
+        filename = full_path.name
 
         # Guess the content type based on file extension
         content_type, _ = mimetypes.guess_type(filepath)
@@ -201,7 +202,7 @@ class Mail:
 
         maintype, subtype = content_type.split("/", 1)
         self._message.add_attachment(
-            file_data, maintype=maintype, subtype=subtype, filename=file_name
+            file_data, maintype=maintype, subtype=subtype, filename=filename
         )
 
     def send(self, username: str, password: str) -> bool:

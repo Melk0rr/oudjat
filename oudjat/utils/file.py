@@ -2,13 +2,13 @@
 
 import csv
 import logging
-import os
-import re
 from enum import Enum
 from io import StringIO
+from pathlib import Path
 from typing import Any, Callable, NamedTuple
 
 import orjson
+import polars as pl
 
 from oudjat.utils.context import Context
 from oudjat.utils.types import DataType
@@ -57,29 +57,56 @@ class FileUtils:
     logger: "logging.Logger" = logging.getLogger(__name__)
 
     # ****************************************************************
+    # Helper functions
+
+    @classmethod
+    def _check_path(cls, filepath: "str | Path") -> "Path":
+        """
+        Unify a file path into a Path instance.
+
+        Takes an input file path wich is either a string or a Path instance.
+        And return only a Path instance.
+
+        Args:
+            filepath (str | Path): The file path to unify
+
+        Returns:
+            Path: The Path instance
+        """
+
+        filepath = Path(filepath)
+
+        if not filepath.exists():
+            raise FileNotFoundError(f"Provided path {filepath} does not exist")
+
+        return filepath
+
+    # ****************************************************************
     # Class methods
 
     # NOTE: JSON
     @classmethod
-    def import_json(cls, filepath: str, callback: Callable[..., Any] | None = None) -> list[Any]:
+    def import_json(
+        cls, filepath: "str | Path", callback: Callable[..., Any] | None = None
+    ) -> list[Any]:
         """
         Import json data from a specified file.
 
         Args:
-            filepath (str)     : the path to the JSON file.
-            callback (Callable): optional function to run to change final result.
+            filepath (str | Path): the path to the JSON file.
+            callback (Callable)  : optional function to run to change final result.
 
         Returns:
             dict or list: The content of the imported JSON file.
         """
 
-        json_data = None
+        filepath = cls._check_path(filepath)
+
         try:
-            full_path = os.path.join(os.getcwd(), filepath)
+            full_path = filepath.absolute()
             cls.logger.info(f"Importing JSON data from {full_path}")
 
-            with open(full_path, "r", encoding="utf-8") as json_file:
-                json_data = orjson.loads(json_file.read())
+            json_data = orjson.loads(filepath.read_bytes())
 
             if callback is not None:
                 json_data = callback(json_data)
@@ -96,7 +123,9 @@ class FileUtils:
         return json_data
 
     @classmethod
-    def export_json(cls, data: list[dict[str, Any]] | dict[str, Any], filepath: str) -> None:
+    def export_json(
+        cls, data: list[dict[str, Any]] | dict[str, Any], filepath: "str | Path"
+    ) -> None:
         """
         Export data to a JSON file.
 
@@ -111,12 +140,13 @@ class FileUtils:
             cls.logger.error(f"{context}::No data to export as JSON!")
             return
 
+        filepath = Path(filepath)
+        full_path = filepath.absolute()
+
         try:
-            full_path = os.path.join(os.getcwd(), filepath)
             cls.logger.info(f"Exporting JSON data to {full_path}")
 
-            with open(full_path, "wb") as f:
-                _ = f.write(orjson.dumps(data, option=orjson.OPT_INDENT_2))
+            _ = filepath.write_bytes(orjson.dumps(data, option=orjson.OPT_INDENT_2))
 
             cls.logger.info(f"Successfully exported JSON data to {full_path}")
 
@@ -126,7 +156,7 @@ class FileUtils:
     # INFO: CSV
     @classmethod
     def import_csv(
-        cls, filepath: str, callback: Callable | None = None, delimiter: str | None = None
+        cls, filepath: "str | Path", callback: Callable | None = None, delimiter: str | None = None
     ) -> list[Any]:
         """
         Import CSV content into a list of dictionaries.
@@ -142,46 +172,37 @@ class FileUtils:
 
         cls.logger.info(f"Importing CSV file {filepath}")
 
-        data: list[Any] = []
+        filepath = cls._check_path(filepath)
+        csv_data: list[Any] = []
+
         try:
-            full_path = os.path.join(os.getcwd(), filepath)
-            with open(full_path, "r", encoding="utf-8", newline="") as f:
-                # WARN: Try to guess the delimiter if none was specified
-                if delimiter is None:
-                    first_line = f.readline().strip("\n")
-                    _ = f.seek(0)
+            # WARN: Try to guess the delimiter if none was specified
+            if delimiter is None:
+                delimiter = FileUtils.guess_csv_delimiter(filepath)
 
-                    if delimiter is None:
-                        delimiter = FileUtils.guess_csv_delimiter(first_line)
+                cls.logger.warning(f"No delimiter specified, guessed '{delimiter}' as a delimiter")
 
-                    cls.logger.warning(
-                        f"No delimiter specified, guessed '{delimiter}' as a delimiter"
-                    )
+                df = pl.read_csv(filepath.absolute(), separator=delimiter)
+                csv_data = df.to_dicts()
 
-                reader = csv.DictReader(f, delimiter=delimiter, skipinitialspace=True)
-
-                raw_data = list(reader)
                 if callback is not None:
-                    raw_data: list[Any] = callback(raw_data)
-
-                data = raw_data
+                    csv_data = callback(csv_data)
 
             cls.logger.info(f"Successfully imported data from {filepath}")
-            cls.logger.debug(f"{data}")
+            cls.logger.debug(f"{csv_data}")
 
         except FileImportError as e:
             raise FileImportError(f"{e}")
 
-        return data
+        return csv_data
 
     @classmethod
     def export_csv(
         cls,
         data: list[Any],
-        filepath: str,
+        filepath: "str | Path",
         delimiter: str = ",",
-        append: bool = False,
-        fieldnames: list[str] | None = None,
+        include_header: bool = True,
     ) -> None:
         """
         Export data into a CSV file.
@@ -190,14 +211,15 @@ class FileUtils:
         You can specify a list of fieldnames to set the CSV headers.
 
         Args:
-            data (list of dicts)         : The data to be exported.
-            filepath (str)               : The path where the CSV file will be saved.
-            delimiter (str | None)       : The character used as a delimiter in the CSV file. Defaults to ",".
-            append (bool | None)         : Whether to append to an existing file or overwrite it.
-            fieldnames (list[str] | None): A list of fieldnames to set CSV headers
+            data (list of dicts)  : The data to be exported.
+            filepath (str)        : The path where the CSV file will be saved.
+            delimiter (str | None): The character used as a delimiter in the CSV file. Defaults to ",".
+            include_header (boo)  : Wheither to include the csv headers or not
         """
 
         context = Context()
+
+        filepath = Path(filepath)
 
         cls.logger.info(f"Exporting CSV data to {filepath}")
         cls.logger.debug(f"{len(data)} elements to export")
@@ -207,21 +229,10 @@ class FileUtils:
             return
 
         try:
-            full_path = os.path.join(os.getcwd(), filepath)
+            full_path = filepath.absolute()
 
-            mode = "a" if append else "w"
-            with open(full_path, mode, encoding="utf-8", newline="") as f:
-                writer = csv.DictWriter(
-                    f,
-                    fieldnames=data[0].keys() if fieldnames is None else fieldnames,
-                    delimiter=delimiter,
-                )
-
-                # Write csv headers if not in append mode
-                if mode != "a":
-                    writer.writeheader()
-
-                writer.writerows(data)
+            df = pl.DataFrame(data)
+            df.write_csv(full_path, separator=delimiter, include_header=include_header)
 
             cls.logger.info(f"Successfully exported CSV data to {filepath}")
 
@@ -232,7 +243,7 @@ class FileUtils:
     @classmethod
     def import_txt(
         cls,
-        filepath: str,
+        filepath: "str | Path",
         raw: bool = False,
         delete_duplicates: bool = False,
         callback: Callable[..., Any] | None = None,
@@ -252,17 +263,18 @@ class FileUtils:
 
         cls.logger.info(f"Importing TXT file {filepath}")
 
-        data = None
-        try:
-            full_path = os.path.join(os.getcwd(), filepath)
-            with open(full_path, encoding="utf-8") as f:
-                if raw:
-                    data = f.read()
+        filepath = cls._check_path(filepath)
 
-                else:
-                    data = list(filter(None, f.read().split("\n")))
-                    if delete_duplicates:
-                        data = list(set(data))
+        try:
+            full_path = filepath.absolute()
+
+            data = full_path.read_text()
+
+            if not raw:
+                data = list(filter(None, data.split("\n")))
+
+                if delete_duplicates:
+                    data = list(set(data))
 
             if callback is not None:
                 data = callback(data)
@@ -276,7 +288,7 @@ class FileUtils:
         return data if isinstance(data, list) else [data]
 
     @classmethod
-    def export_txt(cls, data: Any, filepath: str, raw: bool = False, append: bool = False) -> None:
+    def export_txt(cls, data: Any, filepath: "str | Path", raw: bool = False) -> None:
         """
         Export data into a text file.
 
@@ -284,7 +296,6 @@ class FileUtils:
             data (list)         : The data to be exported as strings
             filepath (str)      : The path where the text file will be saved
             raw (bool)          : Whether to export the data as a raw string
-            append (bool | None): Whether to append to an existing file or overwrite it
         """
 
         context = Context()
@@ -293,17 +304,16 @@ class FileUtils:
             cls.logger.error(f"{context}::No data to export !")
             return
 
+        filepath = Path(filepath)
+        full_path = filepath.absolute()
+
         try:
-            full_path = os.path.join(os.getcwd(), filepath)
+            if raw:
+                _ = full_path.write_text(data)
 
-            mode = "a" if append else "w"
-            with open(full_path, mode, encoding="utf-8", newline="") as f:
-                if raw:
-                    _ = f.write(data)
-
-                else:
-                    for line in data:
-                        _ = f.write(f"{line}" + "\n")
+            else:
+                lines = "\n".join(data)
+                _ = full_path.write_text(lines)
 
             cls.logger.info(f"Successfully exported{raw and ' raw'} TXT data to {filepath}")
 
@@ -337,50 +347,34 @@ class FileUtils:
         return list(csv.DictReader(f, delimiter=delimiter, skipinitialspace=True))
 
     @staticmethod
-    def check_path(path: str) -> bool:
+    def guess_csv_delimiter(filepath: "str | Path", sample_size: int = 2048) -> str:
         """
-        Check if the provided path is valid.
-
-        Args:
-            path (str): The file path to be checked.
-
-        Raises:
-            FileNotFoundError: If the provided path does not point to a valid file.
-        """
-
-        return os.path.isfile(path)
-
-    @staticmethod
-    def guess_csv_delimiter(csv_first_line: str) -> str:
-        """
-        Guess the CSV delimiter based on the provided first line.
+        Guess the CSV delimiter based on a sample of the target file.
 
         Helper function that tries to determine the delimiter used in a CSV file.
         It does so by parsing special characters in the header line and returning the character with the highest count
 
         Args:
-            csv_first_line (str): the CSV header line (in theory). The user can provide any other line if he whishes
+            filepath (str | Path): The CSV header line (in theory). The user can provide any other line if he whishes
+            sample_size (int)    : The size of the sample that will be used to guess the delimiter
 
         Returns:
             str: the delimiter used (?) in the CSV file based on the provided line. Or ',' if no delimiter are found
         """
 
-        delimiter = ","
-        delimiter_list: list[str] = re.findall(r"\W", csv_first_line)
+        if not isinstance(filepath, Path):
+            filepath = Path(filepath)
 
-        if len(delimiter_list) > 0:
-            delimiter_counts: dict[str, int] = {}
-            for c in delimiter_list:
-                if c not in delimiter_counts:
-                    delimiter_counts[c] = 1
+        if not filepath.exists():
+            raise FileNotFoundError(f"Provided path {filepath} does not exist")
 
-                delimiter_counts[c] += 1
+        with filepath.open("r", encoding="utf-8") as f:
+            sample = f.read(sample_size)
 
-            # Remove quotes from list of delimiters
-            if '"' in delimiter_counts.keys():
-                del delimiter_counts['"']
+            sniffer = csv.Sniffer()
+            sniffed_sample = sniffer.sniff(sample)
 
-            delimiter: str = max(delimiter_counts, key=lambda d: delimiter_counts[d])
+            delimiter = sniffed_sample.delimiter
 
         return delimiter
 

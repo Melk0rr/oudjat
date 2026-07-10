@@ -32,7 +32,7 @@ Basically:
 2. The command uses a certain connector backend function
 3. The backend requests the associated API
 
-![Command sequence diagram](../assets/command.jpg)
+![Command sequence diagram](./assets/command.jpg)
 
 > [!TIP]
 > Some options / backends allow to do a bit more by combining other backends and API requests.
