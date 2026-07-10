@@ -69,7 +69,7 @@ class EndOfLifeConnector(Connector):
     def fetch(
         self,
         endpoint: "EndOfLifeEndpoint" = EndOfLifeEndpoint.PRODUCTS,
-        filter: str = "",
+        filter: str | None = "",
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
@@ -134,7 +134,7 @@ class EndOfLifeConnector(Connector):
     # Methods: Products
 
     def products(
-        self, product: str | None = None, tags: "StrType | None" = None, full: bool = False
+        self, product: str | None = None, tags: "StrType | None" = None
     ) -> "DataType":
         """
         Return all the products or a specific one.
@@ -151,14 +151,9 @@ class EndOfLifeConnector(Connector):
             DataType: Data of the products
         """
 
-        payload = {}
-        if full and product is None:
-            payload["filter"] = "full"
+        product_filter = product if product is not None else "full"
+        res = self.fetch(endpoint=EndOfLifeEndpoint.PRODUCTS, filter=product_filter)
 
-        elif product is not None:
-            payload["filter"] = product
-
-        res = self.fetch(endpoint=EndOfLifeEndpoint.PRODUCTS, payload=payload)
         if (product is None) and (tags is not None):
             if not isinstance(tags, list):
                 tags = [tags]
@@ -186,7 +181,7 @@ class EndOfLifeConnector(Connector):
             endpoint=EndOfLifeEndpoint.PRODUCTS, filter=f"{product}/releases/{release}"
         )
 
-    def linux(self, full: bool = False) -> "DataType":
+    def linux(self) -> "DataType":
         """
         Return all the Linux distributions and kernel products.
 
@@ -197,7 +192,7 @@ class EndOfLifeConnector(Connector):
             DataType: Data containing the products details matching the Linux-distribution and Linux-foundation tags
         """
 
-        return self.products(tags=["linux-distribution", "linux-foundation"], full=full)
+        return self.products(tags=["linux-distribution", "linux-foundation"])
 
     def windows(self) -> "DataType":
         """
@@ -235,12 +230,7 @@ class EndOfLifeConnector(Connector):
             DataType: Data containing categories details
         """
 
-        payload = {}
-
-        if category:
-            payload["filter"] = category
-
-        return self.fetch(endpoint=EndOfLifeEndpoint.CATEGORIES, payload=payload)
+        return self.fetch(endpoint=EndOfLifeEndpoint.CATEGORIES, filter=category)
 
     def apps(self) -> "DataType":
         """
@@ -278,9 +268,4 @@ class EndOfLifeConnector(Connector):
             DataType: Data containing tags details
         """
 
-        payload = {}
-
-        if tag:
-            payload["filter"] = tag
-
-        return self.fetch(endpoint=EndOfLifeEndpoint.TAGS, payload=payload)
+        return self.fetch(endpoint=EndOfLifeEndpoint.TAGS, filter=tag)
