@@ -19,6 +19,7 @@ ReleaseType = TypeVar("ReleaseType", bound="SoftwareRelease")
 
 SoftwareReleaseImportDict: TypeAlias = dict[str, list["SoftwareReleaseDictProps"]]
 
+
 class SoftwareReleaseDictProps(TypedDict):
     """
     A helper class to handle software release dictionaries attribute types.
@@ -47,7 +48,7 @@ class SoftwareRelease(Asset):
         self,
         release_id: str,
         name: str,
-        software_name: str,
+        software: str,
         version: int | str,
         release_date: str | datetime,
         release_label: str | None = None,
@@ -68,20 +69,27 @@ class SoftwareRelease(Asset):
             ValueError: If `release_date` is provided as a string and does not match the expected date format.
         """
 
-        self._software: str = software_name
+        self._software: str = software
 
         # Version attributes
         self._version: "SoftwareReleaseVersion" = SoftwareReleaseVersion(version)
         self._latest_version: "SoftwareReleaseVersion" = self._version
 
-        super().__init__(asset_id=release_id, name=name, label=release_label, asset_type=AssetType.SOFTWARE_RELEASE)
+        super().__init__(
+            asset_id=release_id,
+            name=name,
+            label=release_label,
+            asset_type=AssetType.SOFTWARE_RELEASE,
+        )
 
         try:
             if not isinstance(release_date, datetime):
                 release_date = TimeConverter.str_to_date(release_date)
 
         except ValueError as e:
-            raise ValueError(f"{Context()}::Please provide dates with %Y-%m-%d format\n{e}")
+            raise ValueError(
+                f"{Context()}::Please provide dates with %Y-%m-%d format\n{e}"
+            )
 
         self._release_date: datetime = release_date
         self._support_channels: dict[str, "SoftwareReleaseSupport"] = {}
@@ -200,16 +208,18 @@ class SoftwareRelease(Asset):
             list[SoftwareReleaseSupport]: A list of support details that are no longer ongoing.
         """
 
-        return {ch_k: s for ch_k, s in self._support_channels.items() if not s.is_ongoing}
+        return {
+            ch_k: s for ch_k, s in self._support_channels.items() if not s.is_ongoing
+        }
 
-    def is_supported(self, edition: "SoftwareEdition | None" = None) -> bool:
+    def is_supported(self, channel: "str | None" = None) -> bool:
         """
         Check if the current release has an ongoing support for the provided edition.
 
         If no edition is provided, it will simply check if there is any ongoing support.
 
         Args:
-            edition (str | list[str] | None): The specific edition to check for support. Defaults to None.
+            channel (str | None): The specific channel to check for support. Defaults to None.
 
         Returns:
             bool: True if the release is supported, otherwise False.
@@ -217,8 +227,8 @@ class SoftwareRelease(Asset):
 
         return any(
             [
-                s.is_ongoing and (edition is None or channel == edition.channel)
-                for channel, s in self._support_channels.items()
+                s.is_ongoing and (channel is None or ch == channel)
+                for ch, s in self._support_channels.items()
             ]
         )
 
@@ -369,14 +379,18 @@ class SoftwareRelease(Asset):
             **base,
             "releaseDate": TimeConverter.date_to_str(self._release_date),
             **self._software_dict(),
-            "supportChannels": {ch_k: s.to_dict() for ch_k, s in self._support_channels.items()},
+            "supportChannels": {
+                ch_k: s.to_dict() for ch_k, s in self._support_channels.items()
+            },
         }
 
     # ****************************************************************
     # Class methods
 
     @classmethod
-    def from_dict(cls: type["ReleaseType"], rel_dict: "SoftwareReleaseDictProps") -> "ReleaseType":
+    def from_dict(
+        cls: type["ReleaseType"], rel_dict: "SoftwareReleaseDictProps"
+    ) -> "ReleaseType":
         """
         Return a new software release based on the provided dictionary.
 
@@ -390,16 +404,20 @@ class SoftwareRelease(Asset):
         new_release = cls(
             release_id=rel_dict["id"],
             name=rel_dict["name"],
-            software_name=rel_dict["software"],
+            software=rel_dict["software"],
             version=rel_dict["version"]["initial"],
             release_date=rel_dict["releaseDate"],
             release_label=rel_dict["label"],
         )
 
-        new_release.latest_version = SoftwareReleaseVersion(rel_dict["version"]["latest"])
+        new_release.latest_version = SoftwareReleaseVersion(
+            rel_dict["version"]["latest"]
+        )
 
         for channel, support_dict in rel_dict["supportChannels"].items():
-            new_release.add_support(channel, SoftwareReleaseSupport.from_dict(support_dict))
+            new_release.add_support(
+                channel, SoftwareReleaseSupport.from_dict(support_dict)
+            )
 
         return new_release
 
@@ -509,7 +527,9 @@ class SoftwareReleaseList(list, Generic[ReleaseType]):
 
             cb = label_filter_cb
 
-        filtered_rels: "SoftwareReleaseList[ReleaseType]" = SoftwareReleaseList(filter(cb, self))
+        filtered_rels: "SoftwareReleaseList[ReleaseType]" = SoftwareReleaseList(
+            filter(cb, self)
+        )
         if fallback and len(filtered_rels) == 0:
             filtered_rels = self
 
@@ -666,7 +686,9 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
                 f"A release with id ({release.id}) already exists for version {key}"
             )
 
-    def get(self, key: str, default_value: Any = None) -> "SoftwareReleaseList[ReleaseType] | None":
+    def get(
+        self, key: str, default_value: Any = None
+    ) -> "SoftwareReleaseList[ReleaseType] | None":
         """
         Return a SoftwareRelEditionDict element based on its key.
 
@@ -698,7 +720,9 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
         if rel_version not in self:
             return None
 
-        return next((i for i, el in enumerate(self[rel_version]) if el.id == rel_id), None)
+        return next(
+            (i for i, el in enumerate(self[rel_version]) if el.id == rel_id), None
+        )
 
     def keys(self):
         """

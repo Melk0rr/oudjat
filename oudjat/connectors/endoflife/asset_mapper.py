@@ -58,11 +58,10 @@ class EOLAssetMapper(AssetMapper):
         ) -> "MappingRegistry":
             return {
                 "channel": ch,
-                "support_from": rel["releaseDate"],
-                "active_support": rel["eoasFrom"],
-                "security_support": rel["eolFrom"],
-                "extended_security_support": rel["eoesFrom"],
-                "long_term_support": rel["isLts"],
+                "start": rel["releaseDate"],
+                "eoas": rel["eoasFrom"],
+                "eol": rel["eolFrom"],
+                "eoes": rel["eoesFrom"],
             }
 
         final_releases = SoftwareRelVersionDict()
@@ -234,17 +233,10 @@ class EOLAssetMapper(AssetMapper):
         def support_registry_f(ch: str, rel: dict[str, Any]) -> "MappingRegistry":
             return {
                 "channel": ch,
-                "support_from": rel["releaseDate"]
-                if ch == "Standard"
-                else rel["eolFrom"],
-                "active_support": rel["eoasFrom"]
-                if ch == "Standard"
-                else rel["eoesFrom"],
-                "security_support": rel["eolFrom"]
-                if ch == "Standard"
-                else rel["eoesFrom"],
-                "extended_security_support": rel["eoesFrom"] if ch == "ELS" else None,
-                "long_term_support": rel["isLts"],
+                "start": rel["releaseDate"] if ch == "Standard" else rel["eolFrom"],
+                "eoas": rel["eoasFrom"] if ch == "Standard" else rel["eoesFrom"],
+                "eol": rel["eolFrom"] if ch == "Standard" else rel["eoesFrom"],
+                "eoes": rel["eoesFrom"] if ch == "ELS" else None,
             }
 
         return self._releases(
@@ -285,17 +277,10 @@ class EOLAssetMapper(AssetMapper):
         def support_registry_f(ch: str, rel: dict[str, Any]) -> "MappingRegistry":
             return {
                 "channel": ch,
-                "support_from": rel["releaseDate"]
-                if ch == "Standard"
-                else rel["eolFrom"],
-                "active_support": rel["eoasFrom"]
-                if ch == "Standard"
-                else rel["eoesFrom"],
-                "security_support": rel["eolFrom"]
-                if ch == "Standard"
-                else rel["eoesFrom"],
-                "extended_security_support": rel["eoesFrom"] if ch == "ELS" else None,
-                "long_term_support": rel["isLts"],
+                "start": rel["releaseDate"] if ch == "Standard" else rel["eolFrom"], 
+                "eoas": rel["eoasFrom"] if ch == "Standard" else rel["eoesFrom"],
+                "eol": rel["eolFrom"] if ch == "Standard" else rel["eoesFrom"],
+                "eoes": rel["eoesFrom"] if ch == "ELS" else None,
             }
 
         return self._releases(

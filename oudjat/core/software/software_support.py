@@ -27,23 +27,21 @@ class SoftwareReleaseSupportDict(TypedDict):
     A helper class to properly handle support dictionary types.
 
     Attributes:
-        channel (str)                       : The support channel of the support
-        supportFrom (str)                   : The start date of the support
-        activeSupport (str)                 : The activeSupport date as a string
-        securitySupport (str)               : The securitySupport date as a string
-        extendedSecuritySupport (str | None): The extendedSecuritySupport date as a string
-        status (str)                        : The support status (SoftwareReleaseSupportStatus) as a string
-        lts (bool)                          : Whether the support is LTS or not
-        details (str)                       : Support details string
+        channel (str)       : The support channel of the support
+        start   (str)       : The start date of the support
+        eoas    (str)       : The activeSupport date as a string
+        eol     (str)       : The securitySupport date as a string
+        eoes    (str | None): The extendedSecuritySupport date as a string
+        status  (str)       : The support status (SoftwareReleaseSupportStatus) as a string
+        details (str)       : Support details string
     """
 
     channel: str
-    supportFrom: str
-    activeSupport: str
-    securitySupport: str
-    extendedSecuritySupport: str | None
+    start: str
+    eoas: str
+    eol: str
+    eoes: str | None
     status: str
-    lts: bool
     details: "SoftwareReleaseSupportDetailsDict"
 
 
@@ -81,44 +79,34 @@ class SoftwareReleaseSupport:
     def __init__(
         self,
         channel: str,
-        support_from: str | datetime,
-        active_support: str | datetime,
-        security_support: str | datetime | None = None,
-        extended_security_support: str | datetime | None = None,
-        long_term_support: bool = False,
+        start: str | datetime,
+        eoas: str | datetime,
+        eol: str | datetime | None = None,
+        eoes: str | datetime | None = None,
     ) -> None:
         """
         Create a new instance SoftwareReleaseSupport.
 
         Args:
-            channel (str)                                    : The support channel name
-            support_from (str | datetime)                    : The start date of the support
-            active_support (str | datetime | None)           : The date when regular support ends. Can be a string with 'YYYY-MM-DD' format.
-            security_support (str | datetime | None)         : The date when security support ends. Can be a string with 'YYYY-MM-DD' format.
-            extended_security_support (str | datetime | None): The date when extended security support ends. Can be a string with 'YYYY-MM-DD' format.
-            edition (list[str] | None)                       : A list of software editions supported by the release.
-            long_term_support (bool | None)                  : Whether the release has long term support.
+            channel (str)                  : The support channel name
+            start   (str | datetime)       : The start date of the support
+            eoas    (str | datetime | None): The date when regular support ends. Can be a string with 'YYYY-MM-DD' format.
+            eol     (str | datetime | None): The date when security support ends. Can be a string with 'YYYY-MM-DD' format.
+            eoes    (str | datetime | None): The date when extended security support ends. Can be a string with 'YYYY-MM-DD' format.
         """
 
         self._channel: str = channel
-        self._support_from: datetime = SoftwareReleaseSupport._support_date_fmt(support_from)
+        self._start: datetime = SoftwareReleaseSupport._support_date_fmt(start)
 
-        if security_support is None:
-            security_support = active_support
+        if eol is None:
+            eol = eoas
 
-        # Handling none support values
-        self._active_support: datetime = SoftwareReleaseSupport._support_date_fmt(active_support)
-        self._security_support: datetime = SoftwareReleaseSupport._support_date_fmt(
-            security_support
-        )
+        self._eoas: datetime = SoftwareReleaseSupport._support_date_fmt(eoas)
+        self._eol: datetime = SoftwareReleaseSupport._support_date_fmt(eol)
 
-        self._extended_security_support: datetime | None = None
-        if extended_security_support is not None:
-            self._extended_security_support = SoftwareReleaseSupport._support_date_fmt(
-                extended_security_support
-            )
-
-        self._lts: bool = long_term_support
+        self._eoes: datetime | None = None
+        if eoes is not None:
+            self._eoes = SoftwareReleaseSupport._support_date_fmt(eoes)
 
     # ****************************************************************
     # Methods
@@ -137,16 +125,29 @@ class SoftwareReleaseSupport:
     @property
     def status(self) -> "SoftwareReleaseSupportStatus":
         """
-        Return a string representing the current support status.
+        Return the current support status
+
+        - UPCOMING: the support has not started yet
+        - ONGOING : the support is still ongoing
+        - RETIRED : the support has ended
 
         Returns:
-            str: "Ongoing" if support is ongoing, otherwise "Retired".
+            SoftwareReleaseSupportStatus: The current status of the support as a SoftwareReleaseSupportStatus enum element
         """
 
-        if TimeConverter.days_diff(self._support_from) < 0:
+        if TimeConverter.days_diff(self._start) < 0:
             return SoftwareReleaseSupportStatus.UPCOMING
 
-        return SoftwareReleaseSupportStatus(int(self.is_ongoing))
+        status = SoftwareReleaseSupportStatus.RETIRED
+
+        if (
+            TimeConverter.days_diff(self._eol) < 0
+            or self._eoes is not None
+            and TimeConverter.days_diff(self._eoes) < 0
+        ):
+            status = SoftwareReleaseSupportStatus.ONGOING
+
+        return status
 
     @property
     def is_ongoing(self) -> bool:
@@ -157,21 +158,18 @@ class SoftwareReleaseSupport:
             bool: True if the support period is ongoing, False otherwise.
         """
 
-        return (
-            TimeConverter.days_diff(self._support_from) > 0
-            and TimeConverter.days_diff(self._security_support, reverse=True) > 0
-        )
+        return self.status is SoftwareReleaseSupportStatus.ONGOING
 
     @property
     def duration(self) -> int:
         """
-        Return how long the support is ongoing.
+        Return for how long the support is ongoing.
 
         Returns:
             int: The number of support days
         """
 
-        return (self._security_support - self._support_from).days
+        return (self._eol - self._start).days
 
     @property
     def support_details(self) -> "SoftwareReleaseSupportDetailsDict":
@@ -182,18 +180,18 @@ class SoftwareReleaseSupport:
             dict[str, str]: A dictionary with start and end details
         """
 
-        from_days = TimeConverter.days_diff(self._support_from)
+        from_days = TimeConverter.days_diff(self._start)
         start = f"{abs(from_days)} days"
         start = f"Started {start} ago" if from_days > 0 else f"Starts in {start}"
 
-        support_days = TimeConverter.days_diff(self._security_support, reverse=True)
+        support_days = TimeConverter.days_diff(self._eol, reverse=True)
         end = f"{abs(support_days)} days"
         end = f"Ends in {end}" if support_days > 0 else f"Ended {end} ago"
 
         return {"start": start, "end": end, "duration": self.duration}
 
     @property
-    def lts(self) -> bool:
+    def is_lts(self) -> bool:
         """
         Check if the release has long term support.
 
@@ -201,7 +199,7 @@ class SoftwareReleaseSupport:
             bool: True if the release has long term support, False otherwise.
         """
 
-        return self._lts
+        return self._eoes is not None and TimeConverter.days_diff(self._eoes) > 0
 
     @override
     def __str__(self) -> str:
@@ -212,30 +210,25 @@ class SoftwareReleaseSupport:
             str: a string representing the software support
         """
 
-        return f"{self.status}{' - LTS' if self._lts else ''}"
+        return str(self.status)
 
     def to_dict(self) -> "SoftwareReleaseSupportDict":
         """
         Convert the current support instance into a dict.
 
         Returns:
-            dict : dictionary containing software support key attributes
+            SoftwareReleaseSupportDict: dictionary containing software support key attributes
         """
 
-        esu = (
-            TimeConverter.date_to_str(self._security_support)
-            if self._extended_security_support
-            else None
-        )
+        esu = TimeConverter.date_to_str(self._eol) if self._eoes else None
 
         return {
             "channel": self._channel,
-            "supportFrom": TimeConverter.date_to_str(self._support_from),
-            "activeSupport": TimeConverter.date_to_str(self._active_support),
-            "securitySupport": TimeConverter.date_to_str(self._security_support),
-            "extendedSecuritySupport": esu,
+            "start": TimeConverter.date_to_str(self._start),
+            "eoas": TimeConverter.date_to_str(self._eoas),
+            "eol": TimeConverter.date_to_str(self._eol),
+            "eoes": esu,
             "status": str(self.status),
-            "lts": self._lts,
             "details": self.support_details,
         }
 
@@ -243,7 +236,9 @@ class SoftwareReleaseSupport:
     # Class methods
 
     @classmethod
-    def from_dict(cls, support_dict: "SoftwareReleaseSupportDict") -> "SoftwareReleaseSupport":
+    def from_dict(
+        cls, support_dict: "SoftwareReleaseSupportDict"
+    ) -> "SoftwareReleaseSupport":
         """
         Create a new instance of SoftwareReleaseSupport from a dictionary.
 
@@ -258,11 +253,10 @@ class SoftwareReleaseSupport:
 
         return cls(
             channel=support_dict["channel"],
-            support_from=support_dict["supportFrom"],
-            active_support=support_dict["activeSupport"],
-            security_support=support_dict["securitySupport"],
-            extended_security_support=support_dict["extendedSecuritySupport"],
-            long_term_support=support_dict["lts"],
+            start=support_dict["start"],
+            eoas=support_dict["eoas"],
+            eol=support_dict["eol"],
+            eoes=support_dict["eoes"],
         )
 
     # ****************************************************************
