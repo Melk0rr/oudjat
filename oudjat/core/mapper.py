@@ -44,23 +44,26 @@ class Mapper:
         return registry
 
     @classmethod
-    def map_value(cls, map_val: "MappingValue", *args: Any) -> Any:
+    def decapsulate_value(cls, initial: "MappingValue", *args: Any) -> Any:
         """
-        Map a single kwarg value into its final value.
+        Map an initial callback value into its transformed final value.
+
+        Basically, decapsulates a callback value:
+            - Takes an initial value that can be callable (or not) and optional arguments
+            - Calls the callable value with optional arguments until the resulting value is not callable
 
         Args:
-            record (dict[str, Any]): Base record to pass to the value mapping function
-            map_val (MappingValue) : Final value or function to obtain it
-            *args (Any)            : Optional arguments to pass to the value function
+            initial (MappingValue): Final value or function to obtain it
+            *args   (Any)         : Optional arguments to pass to the value function
 
         Returns:
             type and description of the returned object.
         """
 
-        while callable(map_val):
-            map_val = map_val(*args)
+        while callable(initial):
+            initial = initial(*args)
 
-        return map_val
+        return initial
 
     @classmethod
     def _build_kwargs(
@@ -97,7 +100,7 @@ class Mapper:
                 )
                 continue
 
-            kwargs[target_key] = cls.map_value(map_val, record)
+            kwargs[target_key] = cls.decapsulate_value(map_val, record)
 
             if target_key in required_params:
                 required_params.remove(target_key)

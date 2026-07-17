@@ -68,8 +68,8 @@ class EOLAssetMapper(AssetMapper):
             final_releases[rel_ver][index or 0].add_support(s.channel, s)
 
         for rel in releases:
-            rel_ver = Mapper.map_value(mapping_registry["version"], rel)
-            rel_id = Mapper.map_value(mapping_registry["release_id"], rel)
+            rel_ver = Mapper.decapsulate_value(mapping_registry["version"], rel)
+            rel_id = Mapper.decapsulate_value(mapping_registry["release_id"], rel)
 
             # Map the releases
             index = final_releases.find_unique_index(rel_ver, rel_id)
@@ -84,14 +84,14 @@ class EOLAssetMapper(AssetMapper):
                 final_releases.add(rel_ver, rel_instance)
 
             # Add support to the releases
-            mapped_channels = Mapper.map_value(support_channels, rel)
+            mapped_channels = Mapper.decapsulate_value(support_channels, rel)
             for ch in mapped_channels or ["Standard"]:
 
                 _ = Mapper.map_one(
                     record=rel,
                     map_cls=SoftwareReleaseSupport,
                     mapping_registry=(
-                        Mapper.map_value(support_mapping_registry, ch, rel) or default_support_registry_f(ch, rel)
+                        Mapper.decapsulate_value(support_mapping_registry, ch, rel) or default_support_registry_f(ch, rel)
                     ),
                     callback=(lambda s, _, __: support_assign_cb(s, rel_ver, index)),
                 )

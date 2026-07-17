@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from enum import IntEnum
-from typing import TypedDict, override
+from typing import Any, TypedDict, override
 
 from oudjat.utils.time import TimeConverter
 
@@ -125,7 +125,7 @@ class SoftwareReleaseSupport:
     @property
     def status(self) -> "SoftwareReleaseSupportStatus":
         """
-        Return the current support status
+        Return the current support status.
 
         - UPCOMING: the support has not started yet
         - ONGOING : the support is still ongoing
@@ -212,7 +212,7 @@ class SoftwareReleaseSupport:
 
         return str(self.status)
 
-    def to_dict(self) -> "SoftwareReleaseSupportDict":
+    def to_dict(self) -> "dict[str, Any]":
         """
         Convert the current support instance into a dict.
 
@@ -220,14 +220,23 @@ class SoftwareReleaseSupport:
             SoftwareReleaseSupportDict: dictionary containing software support key attributes
         """
 
-        esu = TimeConverter.date_to_str(self._eol) if self._eoes else None
-
         return {
             "channel": self._channel,
-            "start": TimeConverter.date_to_str(self._start),
-            "eoas": TimeConverter.date_to_str(self._eoas),
-            "eol": TimeConverter.date_to_str(self._eol),
-            "eoes": esu,
+            "activeSupport": {
+                "start": TimeConverter.date_to_str(self._start),
+                "end": TimeConverter.date_to_str(self._eoas),
+                "duration": (self._eoas - self._start).days
+            },
+            "securitySupport": {
+                "start": TimeConverter.date_to_str(self._start),
+                "eol": TimeConverter.date_to_str(self._eol),
+                "duration": (self._eol - self._start).days
+            },
+            "extendedSupport": {
+                "start": TimeConverter.date_to_str(self._eol) if self._eoes else None,
+                "end": TimeConverter.date_to_str(self._eoes) if self._eoes else None,
+                "duration": (self._eoes - self._eol).days if self._eoes else 0
+            },
             "status": str(self.status),
             "details": self.support_details,
         }
@@ -236,9 +245,7 @@ class SoftwareReleaseSupport:
     # Class methods
 
     @classmethod
-    def from_dict(
-        cls, support_dict: "SoftwareReleaseSupportDict"
-    ) -> "SoftwareReleaseSupport":
+    def from_dict(cls, support_dict: "SoftwareReleaseSupportDict") -> "SoftwareReleaseSupport":
         """
         Create a new instance of SoftwareReleaseSupport from a dictionary.
 
