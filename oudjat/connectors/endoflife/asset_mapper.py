@@ -53,9 +53,7 @@ class EOLAssetMapper(AssetMapper):
         support_mapping_registry: "MappingRegistry | MappingRegistryFunc | None" = None,
     ) -> "SoftwareRelVersionDict[ReleaseType]":
 
-        def default_support_registry_f(
-            ch: str, rel: dict[str, Any]
-        ) -> "MappingRegistry":
+        def default_support_registry_f(ch: str, rel: dict[str, Any]) -> "MappingRegistry":
             return {
                 "channel": ch,
                 "start": rel["releaseDate"],
@@ -66,9 +64,7 @@ class EOLAssetMapper(AssetMapper):
 
         final_releases = SoftwareRelVersionDict()
 
-        def support_assign_cb(
-            s: "SoftwareReleaseSupport", rel_ver: str, index: int | None
-        ) -> None:
+        def support_assign_cb(s: "SoftwareReleaseSupport", rel_ver: str, index: int | None) -> None:
             final_releases[rel_ver][index or 0].add_support(s.channel, s)
 
         for rel in releases:
@@ -88,15 +84,14 @@ class EOLAssetMapper(AssetMapper):
                 final_releases.add(rel_ver, rel_instance)
 
             # Add support to the releases
-            for ch in Mapper.map_value(rel, support_channels) or ["Standard"]:
-                if callable(support_mapping_registry):
-                    support_mapping_registry = support_mapping_registry(ch, rel)
+            mapped_channels = Mapper.map_value(support_channels, rel)
+            for ch in mapped_channels or ["Standard"]:
 
                 _ = Mapper.map_one(
                     record=rel,
                     map_cls=SoftwareReleaseSupport,
                     mapping_registry=(
-                        support_mapping_registry or default_support_registry_f(ch, rel)
+                        Mapper.map_value(support_mapping_registry, ch, rel) or default_support_registry_f(ch, rel)
                     ),
                     callback=(lambda s, _, __: support_assign_cb(s, rel_ver, index)),
                 )
@@ -121,15 +116,13 @@ class EOLAssetMapper(AssetMapper):
         mapping_registry: "MappingRegistry" = {
             "release_id": lambda rel: f"{windows_eol['name']}{rel['latest']['name']}",
             "name": lambda rel: f"{software_name} {rel['label'].split(' ')[0]}",
-            "software_name": software_name,
+            "software": software_name,
             "version": lambda rel: rel["latest"]["name"],
             "release_date": lambda rel: rel["releaseDate"],
             "release_label": rel_label,
         }
 
-        def rel_cb(
-            rel: "OSRelease", record: dict[str, Any], _: "MappingRegistry"
-        ) -> None:
+        def rel_cb(rel: "OSRelease", record: dict[str, Any], _: "MappingRegistry") -> None:
             rel.add_custom_attr("link", record["latest"]["link"])
 
         def support_channels_value(rel: dict[str, Any]) -> list[str]:
@@ -177,15 +170,13 @@ class EOLAssetMapper(AssetMapper):
                 f"{windows_eol['name']}-{rel_label(rel).replace(' ', '-')}-{rel_ver(rel)}"
             ),
             "name": lambda rel: f"{software_name} {rel['name'].split('-')[0]}",
-            "software_name": software_name,
+            "software": software_name,
             "version": rel_ver,
             "release_date": lambda rel: rel["releaseDate"],
             "release_label": rel_label,
         }
 
-        def rel_cb(
-            rel: "OSRelease", record: dict[str, Any], _: "MappingRegistry"
-        ) -> None:
+        def rel_cb(rel: "OSRelease", record: dict[str, Any], _: "MappingRegistry") -> None:
             rel.add_custom_attr("link", record["latest"]["link"])
 
         def support_channels_value(rel: dict[str, Any]) -> list[str]:
@@ -218,25 +209,23 @@ class EOLAssetMapper(AssetMapper):
         mapping_registry: "MappingRegistry" = {
             "release_id": lambda rel: f"{distro_eol['name']}-{rel['name']}",
             "name": lambda rel: f"{software_name} {rel['name']}",
-            "software_name": software_name,
+            "software": software_name,
             "version": lambda rel: str(SoftwareReleaseVersion(int(rel["name"]))),
             "release_date": lambda rel: rel["releaseDate"],
             "release_label": lambda rel: rel["name"],
         }
 
-        def rel_cb(
-            rel: "OSRelease", record: dict[str, Any], _: "MappingRegistry"
-        ) -> None:
+        def rel_cb(rel: "OSRelease", record: dict[str, Any], _: "MappingRegistry") -> None:
             rel.latest_version = SoftwareReleaseVersion(record["latest"]["name"])
             rel.add_custom_attr("link", record["latest"]["link"])
 
         def support_registry_f(ch: str, rel: dict[str, Any]) -> "MappingRegistry":
             return {
                 "channel": ch,
-                "start": rel["releaseDate"] if ch == "Standard" else rel["eolFrom"],
-                "eoas": rel["eoasFrom"] if ch == "Standard" else rel["eoesFrom"],
-                "eol": rel["eolFrom"] if ch == "Standard" else rel["eoesFrom"],
-                "eoes": rel["eoesFrom"] if ch == "ELS" else None,
+                "start": rel["releaseDate"],
+                "eoas": rel.get("eoasFrom", None),
+                "eol": rel.get("eolFrom", None),
+                "eoes": rel.get("eoesFrom", None),
             }
 
         return self._releases(
@@ -244,7 +233,7 @@ class EOLAssetMapper(AssetMapper):
             rel_type=OSRelease,
             mapping_registry=mapping_registry,
             callback=rel_cb,
-            support_channels=["Standard", "ELS"],
+            support_channels=["Standard"],
             support_mapping_registry=support_registry_f,
         )
 
@@ -262,25 +251,23 @@ class EOLAssetMapper(AssetMapper):
         mapping_registry: "MappingRegistry" = {
             "release_id": lambda rel: f"{rhel_eol['name']}-{rel['name']}",
             "name": lambda rel: f"{software_name} {rel['name']}",
-            "software_name": software_name,
+            "software": software_name,
             "version": lambda rel: str(SoftwareReleaseVersion(int(rel["name"]))),
             "release_date": lambda rel: rel["releaseDate"],
             "release_label": lambda rel: rel["name"],
         }
 
-        def rel_cb(
-            rel: "OSRelease", record: dict[str, Any], _: "MappingRegistry"
-        ) -> None:
+        def rel_cb(rel: "OSRelease", record: dict[str, Any], _: "MappingRegistry") -> None:
             rel.latest_version = SoftwareReleaseVersion(record["latest"]["name"])
             rel.add_custom_attr("link", record["latest"]["link"])
 
         def support_registry_f(ch: str, rel: dict[str, Any]) -> "MappingRegistry":
             return {
                 "channel": ch,
-                "start": rel["releaseDate"] if ch == "Standard" else rel["eolFrom"], 
-                "eoas": rel["eoasFrom"] if ch == "Standard" else rel["eoesFrom"],
-                "eol": rel["eolFrom"] if ch == "Standard" else rel["eoesFrom"],
-                "eoes": rel["eoesFrom"] if ch == "ELS" else None,
+                "start": rel["releaseDate"],
+                "eoas": rel.get("eoasFrom", None),
+                "eol": rel.get("eolFrom", None),
+                "eoes": rel.get("eoesFrom", None),
             }
 
         return self._releases(
