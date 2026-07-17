@@ -231,7 +231,7 @@ class FileUtils:
         try:
             full_path = filepath.absolute()
 
-            df = pl.DataFrame(data)
+            df = pl.DataFrame(data, infer_schema_length=None)
             df.write_csv(full_path, separator=delimiter, include_header=include_header)
 
             cls.logger.info(f"Successfully exported CSV data to {filepath}")
