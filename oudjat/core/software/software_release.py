@@ -13,7 +13,7 @@ from oudjat.utils import Context
 from oudjat.utils.time import TimeConverter
 
 from .software_release_version import SoftwareReleaseVersion
-from .software_support import SoftwareReleaseSupport, SoftwareReleaseSupportDict
+from .software_support import SoftwareReleaseSupport, SupportDict
 
 ReleaseType = TypeVar("ReleaseType", bound="SoftwareRelease")
 
@@ -35,7 +35,7 @@ class SoftwareReleaseDictProps(TypedDict):
     version: dict[str, str]
     fullname: str
     isSupported: bool
-    supportChannels: dict[str, "SoftwareReleaseSupportDict"]
+    supportChannels: dict[str, "SupportDict"]
 
 
 class SoftwareRelease(Asset):

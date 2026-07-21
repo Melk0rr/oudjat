@@ -1,13 +1,13 @@
 """A module that describes the notion of software support."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import IntEnum
 from typing import Any, TypedDict, override
 
 from oudjat.utils.time import TimeConverter
 
 
-class SoftwareReleaseSupportDetailsDict(TypedDict):
+class SupportDetailsDict(TypedDict):
     """
     A helper class to properly handle SoftwareReleaseSupport details dictionary types.
 
@@ -22,7 +22,7 @@ class SoftwareReleaseSupportDetailsDict(TypedDict):
     duration: int
 
 
-class SoftwareReleaseSupportDict(TypedDict):
+class SupportDict(TypedDict):
     """
     A helper class to properly handle support dictionary types.
 
@@ -42,10 +42,26 @@ class SoftwareReleaseSupportDict(TypedDict):
     eol: str
     eoes: str | None
     status: str
-    details: "SoftwareReleaseSupportDetailsDict"
+    details: "SupportDetailsDict"
 
 
-class SoftwareReleaseSupportStatus(IntEnum):
+class SupportPhaseType(IntEnum):
+    ACTIVE_SUPPORT = 0
+    SECURITY_SUPPORT = 1
+    EXTENDED_SUPPORT = 2
+
+    def __str__(self) -> str:
+        """
+        Convert a PhaseType element into a string.
+
+        Returns:
+            str: A string representation of the PhaseType
+        """
+
+        return self._name_
+
+
+class SupportStatus(IntEnum):
     """
     A simple enumeration to handle software release support status.
 
@@ -70,60 +86,149 @@ class SoftwareReleaseSupportStatus(IntEnum):
         return self._name_
 
 
-class SoftwareReleaseSupport:
-    """A class to handle software release support concept."""
+class SupportPhase:
+    """A class that describes a phase of the support of a software release."""
 
     # ****************************************************************
     # Attributes & Constructors
 
     def __init__(
         self,
-        channel: str,
+        phase_type: "SupportPhaseType",
         start: str | datetime,
-        eoas: str | datetime,
-        eol: str | datetime | None = None,
-        eoes: str | datetime | None = None,
+        end: str | datetime,
+        name: str = "",
     ) -> None:
         """
-        Create a new instance SoftwareReleaseSupport.
+        Create a new instance of SupportPhase.
 
         Args:
-            channel (str)                  : The support channel name
-            start   (str | datetime)       : The start date of the support
-            eoas    (str | datetime | None): The date when regular support ends. Can be a string with 'YYYY-MM-DD' format.
-            eol     (str | datetime | None): The date when security support ends. Can be a string with 'YYYY-MM-DD' format.
-            eoes    (str | datetime | None): The date when extended security support ends. Can be a string with 'YYYY-MM-DD' format.
+            phase_type (SupportPhaseType): The type of the phase
+            start      (str | datetime)  : The start of the phase
+            end        (str | datetime)  : The end of the phase
+            name       (str)             : The name of the phase
         """
 
-        self._channel: str = channel
+        self._type = phase_type
+        self._name = name
+
         self._start: datetime = SoftwareReleaseSupport._support_date_fmt(start)
-
-        if eol is None:
-            eol = eoas
-
-        self._eoas: datetime = SoftwareReleaseSupport._support_date_fmt(eoas)
-        self._eol: datetime = SoftwareReleaseSupport._support_date_fmt(eol)
-
-        self._eoes: datetime | None = None
-        if eoes is not None:
-            self._eoes = SoftwareReleaseSupport._support_date_fmt(eoes)
+        self._end: datetime = SoftwareReleaseSupport._support_date_fmt(end)
 
     # ****************************************************************
     # Methods
 
     @property
-    def channel(self) -> str:
+    def duration(self) -> int:
         """
-        Return the support channel name.
+        Return the duration in days of the current support phase.
 
         Returns:
-            str: The name of the channel associated with the current support
+            int: The number of days the phase lasts
         """
 
-        return self._channel
+        return (self._end - self._start).days
 
     @property
-    def status(self) -> "SoftwareReleaseSupportStatus":
+    def status(self) -> "SupportStatus":
+        """
+        Return the status of the current support phase.
+
+        Returns:
+            SupportStatus: UPCOMING if the support phase has not started yet. RETIRED if it ended. Otherwise, ONGOING
+        """
+
+        today = datetime.now(timezone.utc)
+
+        if today < self._start:
+            status = SupportStatus.UPCOMING
+
+        elif today > self._end:
+            status = SupportStatus.RETIRED
+
+        else:
+            status = SupportStatus.ONGOING
+
+        return status
+
+    @property
+    def is_ongoing(self) -> bool:
+        """
+        Check if the current support phase is ongoing.
+
+        Returns:
+            bool: True if the support phase is ongoing, False otherwise.
+        """
+
+        return self.status is SupportStatus.ONGOING
+
+    @property
+    def description(self) -> str:
+        """
+        Return a brief description of the phase.
+
+        Returns:
+            str: A string that describes the status of the phase.
+        """
+
+        today = datetime.now(timezone.utc)
+
+        if today <= self._start:
+            delta = TimeConverter.days_diff(self._start)
+            description = f"Starts in {abs(delta)} days"
+
+        else:
+            delta = TimeConverter.days_diff(self._end, reverse=True)
+            delta_str = f"{abs(delta)} days"
+            description = (
+                f"Ends in {delta_str}" if delta > 0 else f"Ended {delta_str} ago"
+            )
+
+        return description
+
+    @override
+    def __str__(self) -> str:
+        """
+        Convert the current support phase instance into a string.
+
+        Returns:
+            str: a string representing the software support
+        """
+
+        return str(self.status)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": str(self._type),
+            "name": self._name,
+            "start": TimeConverter.date_to_str(self._start),
+            "end": TimeConverter.date_to_str(self._end),
+            "status": str(self),
+            "description": self.description,
+        }
+
+
+class SupportPhaseDict:
+    """A class to handle software release support concept."""
+
+    # ****************************************************************
+    # Attributes & Constructors
+
+    def __init__(self, name: str) -> None:
+        """
+        Create a new instance SoftwareReleaseSupport.
+
+        Args:
+            name (str): The name of the channel
+        """
+
+        self._phases: dict[str, "SupportPhase"] = {}
+
+    # ****************************************************************
+    # Methods
+
+    @property
+    def status(self, hasExtendedSupport: bool = False) -> "SupportStatus":
         """
         Return the current support status.
 
@@ -135,20 +240,6 @@ class SoftwareReleaseSupport:
             SoftwareReleaseSupportStatus: The current status of the support as a SoftwareReleaseSupportStatus enum element
         """
 
-        if TimeConverter.days_diff(self._start) < 0:
-            return SoftwareReleaseSupportStatus.UPCOMING
-
-        status = SoftwareReleaseSupportStatus.RETIRED
-
-        if (
-            TimeConverter.days_diff(self._eol) < 0
-            or self._eoes is not None
-            and TimeConverter.days_diff(self._eoes) < 0
-        ):
-            status = SoftwareReleaseSupportStatus.ONGOING
-
-        return status
-
     @property
     def is_ongoing(self) -> bool:
         """
@@ -158,7 +249,7 @@ class SoftwareReleaseSupport:
             bool: True if the support period is ongoing, False otherwise.
         """
 
-        return self.status is SoftwareReleaseSupportStatus.ONGOING
+        return self.status is SupportStatus.ONGOING
 
     @property
     def duration(self) -> int:
@@ -172,23 +263,21 @@ class SoftwareReleaseSupport:
         return (self._eol - self._start).days
 
     @property
-    def support_details(self) -> "SoftwareReleaseSupportDetailsDict":
+    def has_extended_support(self) -> bool:
         """
-        Return some details about the start and end of the support.
+        Return wheither the current support has an extended period available.
+
+        The extended support is usually a period of the support that comes at a cost.
+        During this period some critical security updates and bugfixes are distributed by the editor (depending on the software).
+
+        Args:
+            argument_name: type and description.
 
         Returns:
-            dict[str, str]: A dictionary with start and end details
+            bool: True, the support include an extended period. False otherwise
         """
 
-        from_days = TimeConverter.days_diff(self._start)
-        start = f"{abs(from_days)} days"
-        start = f"Started {start} ago" if from_days > 0 else f"Starts in {start}"
-
-        support_days = TimeConverter.days_diff(self._eol, reverse=True)
-        end = f"{abs(support_days)} days"
-        end = f"Ends in {end}" if support_days > 0 else f"Ended {end} ago"
-
-        return {"start": start, "end": end, "duration": self.duration}
+        return str(SupportPhaseType.EXTENDED) in self._phases
 
     @property
     def is_lts(self) -> bool:
@@ -199,7 +288,10 @@ class SoftwareReleaseSupport:
             bool: True if the release has long term support, False otherwise.
         """
 
-        return self._eoes is not None and TimeConverter.days_diff(self._eoes) > 0
+        return (
+            self.has_extended_support
+            and self._phases[str(SupportPhaseType.EXTENDED)].is_ongoing
+        )
 
     @override
     def __str__(self) -> str:
@@ -220,32 +312,19 @@ class SoftwareReleaseSupport:
             SoftwareReleaseSupportDict: dictionary containing software support key attributes
         """
 
+        phase_dicts = {k: v.to_dict() for k, v in self._phases.items()}
+
         return {
-            "channel": self._channel,
-            "activeSupport": {
-                "start": TimeConverter.date_to_str(self._start),
-                "end": TimeConverter.date_to_str(self._eoas),
-                "duration": (self._eoas - self._start).days
-            },
-            "securitySupport": {
-                "start": TimeConverter.date_to_str(self._start),
-                "eol": TimeConverter.date_to_str(self._eol),
-                "duration": (self._eol - self._start).days
-            },
-            "extendedSupport": {
-                "start": TimeConverter.date_to_str(self._eol) if self._eoes else None,
-                "end": TimeConverter.date_to_str(self._eoes) if self._eoes else None,
-                "duration": (self._eoes - self._eol).days if self._eoes else 0
-            },
+            "phases": phase_dicts,
             "status": str(self.status),
-            "details": self.support_details,
+            "details": self.details,
         }
 
     # ****************************************************************
     # Class methods
 
     @classmethod
-    def from_dict(cls, support_dict: "SoftwareReleaseSupportDict") -> "SoftwareReleaseSupport":
+    def from_dict(cls, support_dict: "SupportDict") -> "SoftwareReleaseSupport":
         """
         Create a new instance of SoftwareReleaseSupport from a dictionary.
 
