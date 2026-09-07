@@ -98,3 +98,35 @@ class AmbiguousReleaseException(Exception):
 
         self.message: str = message
         super().__init__(self.message)
+
+class EmptySupportPhasesError(ValueError):
+    """
+    A helper class to handle empty support phases.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of EmptySupportPhasesError.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
+
+class InvalidSupportPhasesError(ValueError):
+    """
+    A helper class to handle invalid support phases.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of InvalidSupportPhasesError.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)

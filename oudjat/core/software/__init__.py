@@ -5,7 +5,7 @@ from .software import Software, SoftwareType
 from .software_edition import SoftwareEdition, SoftwareEditionDict
 from .software_release import SoftwareRelease, SoftwareRelVersionDict
 from .software_release_version import SoftwareReleaseStage, SoftwareReleaseVersion
-from .software_support import SoftwareReleaseSupport
+from .software_support import SupportDict, SupportPhase, SupportPhaseType, SupportStatus
 
 __all__ = [
     "STAGE_REG",
@@ -18,5 +18,8 @@ __all__ = [
     "SoftwareRelVersionDict",
     "SoftwareReleaseStage",
     "SoftwareReleaseVersion",
-    "SoftwareReleaseSupport",
+    "SupportDict",
+    "SupportPhase",
+    "SupportPhaseType",
+    "SupportStatus",
 ]

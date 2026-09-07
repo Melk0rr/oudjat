@@ -1,9 +1,16 @@
 """A module that describes the notion of software support."""
 
+import logging
+from collections.abc import Iterator
 from datetime import datetime, timezone
 from enum import IntEnum
 from typing import Any, TypedDict, override
 
+from oudjat.core.software.exceptions import (
+    EmptySupportPhasesError,
+    InvalidSupportPhasesError,
+)
+from oudjat.utils import Context
 from oudjat.utils.time import TimeConverter
 
 
@@ -112,11 +119,33 @@ class SupportPhase:
         self._type = phase_type
         self._name = name
 
-        self._start: datetime = SoftwareReleaseSupport._support_date_fmt(start)
-        self._end: datetime = SoftwareReleaseSupport._support_date_fmt(end)
+        self._start: datetime = self._date_fmt(start)
+        self._end: datetime = self._date_fmt(end)
 
     # ****************************************************************
     # Methods
+
+    @property
+    def type(self) -> "SupportPhaseType":
+        """
+        Return the type of the current phase.
+
+        Returns:
+            SupportPhaseType: The type of the current phase
+        """
+
+        return self._type
+
+    @property
+    def name(self) -> "str":
+        """
+        Return the name of the current support phase.
+
+        Returns:
+            str: The name of the current phase
+        """
+
+        return self._name
 
     @property
     def duration(self) -> int:
@@ -207,6 +236,27 @@ class SupportPhase:
             "description": self.description,
         }
 
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def _date_fmt(date_to_fmt: str | datetime) -> datetime:
+        """
+        Format the provided date as a datetime if needed.
+
+        Args:
+            date_to_fmt (str | datetime): The date to format if needed
+
+        Returns:
+            datetime: Formated datetime
+        """
+
+        return (
+            TimeConverter.str_to_date(date_to_fmt)
+            if not isinstance(date_to_fmt, datetime)
+            else date_to_fmt
+        )
+
 
 class SupportPhaseDict:
     """A class to handle software release support concept."""
@@ -214,21 +264,97 @@ class SupportPhaseDict:
     # ****************************************************************
     # Attributes & Constructors
 
-    def __init__(self, name: str) -> None:
+    def __init__(self) -> None:
         """
-        Create a new instance SoftwareReleaseSupport.
+        Create a new instance of SupportPhaseDict.
 
         Args:
             name (str): The name of the channel
         """
 
+        self.logger: "logging.Logger" = logging.getLogger(__name__)
         self._phases: dict[str, "SupportPhase"] = {}
 
     # ****************************************************************
     # Methods
 
+    def __getitem__(self, key: str) -> "SupportPhase":
+        """
+        Return a SupportPhase based on its key.
+
+        Args:
+            key (str): A phase type name
+
+        Returns:
+            SupportPhase: The support phase based on the provided phase type name
+        """
+
+        return self._phases[key]
+
+    def __setitem__(self, key: str, value: "SupportPhase") -> None:
+        """
+        Set a new support phase based on a key
+
+        Args:
+            key (str)          : The support phase type
+            value (ReleaseType): Value of the new element
+        """
+
+        if key in SupportPhaseType._member_names_:
+            self._phases[key] = value
+
+    def __iter__(self) -> Iterator[str]:
+        """
+        Return an iterator to go through the SoftwareRelEditionDict instances.
+
+        Returns:
+            Iterator[str]: iterator object
+        """
+
+        return iter(self._phases)
+
+    def add(self, phase: "SupportPhase", force: bool = False) -> None:
+        """
+        Add a new release for the provided version key.
+
+        The method checks if a similar release (based on ID) already exists for the provided version key.
+        If force argument is set to True, the new release will be added regardless.
+
+        Args:
+            key (str)            : The key of the new release
+            release (ReleaseType): The new release to add
+            force (bool)         : Whether to force the addition of the new release
+        """
+
+        key = str(phase.type)
+
+        if force or key not in self._phases:
+            self._phases[key] = phase
+
+        else:
+            self.logger.warning(
+                f"A support phase with type ({phase.type}) already exists"
+            )
+
+    def get(self, key: str, default_value: Any = None) -> "SupportPhase | Any":
+        """
+        Return a SoftwareRelEditionDict element based on its key.
+
+        If the element cannot be found, return the default value.
+
+        Args:
+            key (str)          : Key of the element to return
+            default_value (Any): Default value in case the element cannot be found
+
+        Returns:
+            list[ReleaseType] | None: Element associated with provided key or default value
+
+        """
+
+        return self._phases.get(key, default_value)
+
     @property
-    def status(self, hasExtendedSupport: bool = False) -> "SupportStatus":
+    def status(self, include_extended_support: bool = False) -> "SupportStatus":
         """
         Return the current support status.
 
@@ -239,6 +365,10 @@ class SupportPhaseDict:
         Returns:
             SoftwareReleaseSupportStatus: The current status of the support as a SoftwareReleaseSupportStatus enum element
         """
+
+        self._validate_phases()
+
+
 
     @property
     def is_ongoing(self) -> bool:
@@ -260,8 +390,6 @@ class SupportPhaseDict:
             int: The number of support days
         """
 
-        return (self._eol - self._start).days
-
     @property
     def has_extended_support(self) -> bool:
         """
@@ -277,7 +405,7 @@ class SupportPhaseDict:
             bool: True, the support include an extended period. False otherwise
         """
 
-        return str(SupportPhaseType.EXTENDED) in self._phases
+        return str(SupportPhaseType.EXTENDED_SUPPORT) in self._phases
 
     @property
     def is_lts(self) -> bool:
@@ -290,8 +418,30 @@ class SupportPhaseDict:
 
         return (
             self.has_extended_support
-            and self._phases[str(SupportPhaseType.EXTENDED)].is_ongoing
+            and self._phases[str(SupportPhaseType.EXTENDED_SUPPORT)].is_ongoing
         )
+
+    def _validate_phases(self) -> None:
+        """
+        Perform some checks on current support phases.
+
+        Ensures that:
+            - Phases are not empty.
+            - If there is only one phase, that it is not extended support.
+        """
+
+        context = Context()
+
+        if len(self._phases) == 0:
+            raise EmptySupportPhasesError(f"{context}::No support phases set")
+
+        if (
+            str(SupportPhaseType.EXTENDED_SUPPORT) in self._phases
+            and len(self._phases) == 1
+        ):
+            raise InvalidSupportPhasesError(
+                f"{context}::Can't have only an extended support phase"
+            )
 
     @override
     def __str__(self) -> str:
@@ -315,9 +465,8 @@ class SupportPhaseDict:
         phase_dicts = {k: v.to_dict() for k, v in self._phases.items()}
 
         return {
-            "phases": phase_dicts,
             "status": str(self.status),
-            "details": self.details,
+            "phases": phase_dicts,
         }
 
     # ****************************************************************
@@ -344,4 +493,3 @@ class SupportPhaseDict:
             eol=support_dict["eol"],
             eoes=support_dict["eoes"],
         )
-

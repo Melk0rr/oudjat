@@ -8,12 +8,11 @@ from typing import Any, Callable, Generic, TypeAlias, TypedDict, TypeVar, overri
 
 from oudjat.core import Asset
 from oudjat.core.asset_type import AssetType
-from oudjat.core.software.software_edition import SoftwareEdition
 from oudjat.utils import Context
 from oudjat.utils.time import TimeConverter
 
 from .software_release_version import SoftwareReleaseVersion
-from .software_support import SoftwareReleaseSupport, SupportDict
+from .software_support import SupportDict
 
 ReleaseType = TypeVar("ReleaseType", bound="SoftwareRelease")
 
@@ -92,7 +91,7 @@ class SoftwareRelease(Asset):
             )
 
         self._release_date: datetime = release_date
-        self._support_channels: dict[str, "SoftwareReleaseSupport"] = {}
+        self._support_channels: dict[str, ] = {}
 
         # NOTE: maybe convert vulnerabilities into a dictionary (CVE instances ?) if needed
         self._vulnerabilities: set[str] = set()
