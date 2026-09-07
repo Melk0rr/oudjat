@@ -345,23 +345,3 @@ class SupportPhaseDict:
             eoes=support_dict["eoes"],
         )
 
-    # ****************************************************************
-    # Static methods
-
-    @staticmethod
-    def _support_date_fmt(date_to_fmt: str | datetime) -> datetime:
-        """
-        Format the provided date as a datetime if needed.
-
-        Args:
-            date_to_fmt (str | datetime): The date to format if needed
-
-        Returns:
-            datetime: Formated datetime
-        """
-
-        return (
-            TimeConverter.str_to_date(date_to_fmt)
-            if not isinstance(date_to_fmt, datetime)
-            else date_to_fmt
-        )

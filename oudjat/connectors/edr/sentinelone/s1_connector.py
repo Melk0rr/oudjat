@@ -21,8 +21,12 @@ from .s1_incident_statuses import S1IncidentStatus
 from .s1_incident_types import S1IncidentType
 from .s1_mitigation_modes import S1MitigationMode
 
-S1IncidentStatusType: TypeAlias = "str | S1IncidentStatus | list[str | S1IncidentStatus]"
-S1AnalystVerdictType: TypeAlias = "str | S1AnalystVerdict | list[str | S1AnalystVerdict]"
+S1IncidentStatusType: TypeAlias = (
+    "str | S1IncidentStatus | list[str | S1IncidentStatus]"
+)
+S1AnalystVerdictType: TypeAlias = (
+    "str | S1AnalystVerdict | list[str | S1AnalystVerdict]"
+)
 
 
 class S1Connector(Connector):
@@ -150,7 +154,11 @@ class S1Connector(Connector):
             str: A valid S1 incident status string value
         """
 
-        return str(s) if isinstance(s, S1IncidentStatus) else str(S1IncidentStatus[s.upper()])
+        return (
+            str(s)
+            if isinstance(s, S1IncidentStatus)
+            else str(S1IncidentStatus[s.upper()])
+        )
 
     def _unify_verdict(self, v: "str | S1AnalystVerdict") -> str:
         """
@@ -163,7 +171,11 @@ class S1Connector(Connector):
             str: A valid S1 incident analyst verdict string value
         """
 
-        return str(v) if isinstance(v, S1AnalystVerdict) else str(S1AnalystVerdict[v.upper()])
+        return (
+            str(v)
+            if isinstance(v, S1AnalystVerdict)
+            else str(S1AnalystVerdict[v.upper()])
+        )
 
     def _update_filter_status(
         self,
@@ -185,7 +197,10 @@ class S1Connector(Connector):
         if statuses is not None:
             filter_props = {
                 S1IncidentType.ALERT: {True: "incidentStatus", False: "incidentStatus"},
-                S1IncidentType.THREAT: {True: "incidentStatusesNin", False: "incidentStatuses"},
+                S1IncidentType.THREAT: {
+                    True: "incidentStatusesNin",
+                    False: "incidentStatuses",
+                },
             }
 
             if incident_type is S1IncidentType.ALERT:
@@ -224,7 +239,10 @@ class S1Connector(Connector):
         if verdicts is not None:
             filter_props = {
                 S1IncidentType.ALERT: {True: "analystVerdict", False: "analystVerdict"},
-                S1IncidentType.THREAT: {True: "analystVerdictsNin", False: "analystVerdicts"},
+                S1IncidentType.THREAT: {
+                    True: "analystVerdictsNin",
+                    False: "analystVerdicts",
+                },
             }
 
             if incident_type is S1IncidentType.ALERT:
@@ -360,7 +378,9 @@ class S1Connector(Connector):
             self.logger.info(f"Connected to {self._target.netloc}")
 
         else:
-            self.logger.warning(f"Connection to {self._target.netloc} is already initialized.")
+            self.logger.warning(
+                f"Connection to {self._target.netloc} is already initialized."
+            )
 
     # ****************************************************************
     # Methods - main
@@ -403,18 +423,24 @@ class S1Connector(Connector):
         if "LOGIN" not in endpoint.name:
             self.logger.debug(f"{context}::{payload}")
 
-        res = []
+        res: list[dict[str, Any]] = []
         with yaspin(text=f"{endpoint.description}...") as spinner:
             try:
                 while True:
                     if next_cursor:
                         payload["cursor"] = next_cursor
 
-                    r_params = self._request_params(payload, endpoint.method, endpoint_path)
+                    r_params = self._request_params(
+                        payload, endpoint.method, endpoint_path
+                    )
                     req = endpoint.method(**r_params)
                     req_json = req.json()
 
-                    spinner_log(f"{context}::{endpoint} > {req_json}", self.logger.debug, spinner)
+                    spinner_log(
+                        f"{context}::{endpoint} > {req_json}",
+                        self.logger.debug,
+                        spinner,
+                    )
 
                     if "data" in req_json:
                         if isinstance(req_json["data"], list):
@@ -522,7 +548,9 @@ class S1Connector(Connector):
         endpoint = S1Endpoint.AGENTS_EXPORT
 
         with yaspin(text=f"Exporting agents data using {endpoint}...") as spinner:
-            req = endpoint.method(**self._request_params(payload, endpoint.method, endpoint.path))
+            req = endpoint.method(
+                **self._request_params(payload, endpoint.method, endpoint.path)
+            )
 
             if req.status_code != 200:
                 spinner.fail("❌ ")
@@ -532,7 +560,9 @@ class S1Connector(Connector):
 
             spinner.ok("✅ ")
 
-        return FileUtils.parse_csv_str(req.content.decode().replace('"', ""), delimiter=",")
+        return FileUtils.parse_csv_str(
+            req.content.decode().replace('"', ""), delimiter=","
+        )
 
     def move_agent_to_site(self, site_id: str, agent_name: "StrType") -> "DataType":
         """
@@ -563,7 +593,9 @@ class S1Connector(Connector):
             }
 
             data.extend(
-                self.fetch(endpoint=S1Endpoint.AGENTS_ACTIONS_MOVE_TO_SITE, payload=payload)
+                self.fetch(
+                    endpoint=S1Endpoint.AGENTS_ACTIONS_MOVE_TO_SITE, payload=payload
+                )
             )
 
         return data
@@ -963,7 +995,9 @@ class S1Connector(Connector):
             payload = {}
 
         if name is None and vendor is None:
-            raise ValueError(f"{context}::Please provide at least an application name or vendor")
+            raise ValueError(
+                f"{context}::Please provide at least an application name or vendor"
+            )
 
         if not auto and (not isinstance(name, str) or not isinstance(vendor, str)):
             raise ValueError(
@@ -982,7 +1016,9 @@ class S1Connector(Connector):
             return self.fetch(S1Endpoint.APPLICATIONS_INVENTORY_ENDPOINTS, payload)
 
         res = []
-        self.logger.info("Automatically retrieving applications that match provided parameters")
+        self.logger.info(
+            "Automatically retrieving applications that match provided parameters"
+        )
 
         app_search = self.applications(
             names=name,
@@ -994,7 +1030,9 @@ class S1Connector(Connector):
             payload["applicationName"] = app["applicationName"]
             payload["applicationVendor"] = app["applicationVendor"]
 
-            res.extend(self.fetch(S1Endpoint.APPLICATIONS_INVENTORY_ENDPOINTS, payload))
+            app_data = self.fetch(S1Endpoint.APPLICATIONS_INVENTORY_ENDPOINTS, payload)
+
+            res.extend(app_data)
 
         return res
 
@@ -1085,6 +1123,7 @@ class S1Connector(Connector):
         name: str | None = None,
         vendor: str | None = None,
         site_ids: "StrType | None" = None,
+        severities: "StrType | None" = None,
         payload: dict[str, Any] | None = None,
     ) -> "DataType":
         """
@@ -1107,6 +1146,8 @@ class S1Connector(Connector):
             DataType: CVEs data based on the provided filters
         """
 
+        context = Context()
+
         if payload is None:
             payload = {}
 
@@ -1119,8 +1160,14 @@ class S1Connector(Connector):
 
         else:
             raise ValueError(
-                f"{Context()}::You must provide either application IDs or specify an application name and vendor"
+                f"{context}::You must provide either application IDs or specify an application name and vendor"
             )
+
+        if severities is not None:
+            if not Severity.validate_severity_str(severities):
+                raise ValueError(f"{context}::Invalid severity provided")
+
+            payload["severities"] = self._unify_str_list(severities)
 
         if site_ids is not None:
             payload["siteIds"] = self._unify_str_list(site_ids)
@@ -1338,7 +1385,9 @@ class S1Connector(Connector):
         req = self.fetch(S1Endpoint.SITES, payload=payload or {})
         return next(iter(req))["sites"]
 
-    def sites_by_id(self, site_id: str, payload: dict[str, Any] | None = None) -> "DataType":
+    def sites_by_id(
+        self, site_id: str, payload: dict[str, Any] | None = None
+    ) -> "DataType":
         """
         Get the data of the Site matchin the provided ID. To get the ID, run "sites".
 
@@ -1459,7 +1508,9 @@ class S1Connector(Connector):
         res = []
         for sid in site_id:
             res.extend(
-                self.fetch(S1Endpoint.SITES_POLICY_UPDATE, payload, path_fmt={"siteId": sid})
+                self.fetch(
+                    S1Endpoint.SITES_POLICY_UPDATE, payload, path_fmt={"siteId": sid}
+                )
             )
 
         return res
