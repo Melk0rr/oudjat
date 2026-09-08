@@ -1,6 +1,6 @@
 """A module to gather time related utilities."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from enum import Enum
 
 from .bit_flag import BitFlag
@@ -36,8 +36,8 @@ class DateFormat(Enum):
         Map date formats to a list of strings based on the given flag.
 
         Args:
-            formats (list[DateFormat]): A list of date formats
-            flag (int | DateStrFlag)  : bit flag used to select desired formats
+            formats (list[DateFormat]) : A list of date formats
+            flag    (int | DateStrFlag): bit flag used to select desired formats
 
         Returns:
             list[str]: A list of strings where each string corresponds to a date format in `chars` that matches the given `flag`.
@@ -55,10 +55,10 @@ class DateFormat(Enum):
         The flags determine which parts of the date and time are included, and the separators for these parts can be customized using `date_sep`, `time_sep`, and `main_sep`.
 
         Args:
-            date_flags (int)     : An integer representing a set of flags that specify which components to include in the date string.
-            date_sep (str | None): The separator used between date components. Defaults to "-".
-            time_sep (str | None): The separator used between time components. Defaults to ":".
-            main_sep (str | None): The separator used between the date and time parts in the final string. Defaults to " ".
+            date_flags (int)       : An integer representing a set of flags that specify which components to include in the date string.
+            date_sep   (str | None): The separator used between date components. Defaults to "-".
+            time_sep   (str | None): The separator used between time components. Defaults to ":".
+            main_sep   (str | None): The separator used between the date and time parts in the final string. Defaults to " ".
 
         Returns:
             str: A concatenated string representing the formatted date and time based on the flags provided.
@@ -104,7 +104,7 @@ class TimeConverter:
 
         Args:
             unix_time (int | str): The Unix timestamp either as an integer or string.
-            delta (int)          : Optional. The timezone offset in hours to adjust the datetime object by. Default is 1 hour.
+            delta     (int)      : Optional. The timezone offset in hours to adjust the datetime object by. Default is 1 hour.
             date_flag (int)      : DateFlag int that indicates the output format.
 
         Returns:
@@ -114,7 +114,7 @@ class TimeConverter:
         if not isinstance(unix_time, int):
             unix_time = int(unix_time)
 
-        date_utc = datetime.fromtimestamp(unix_time / 1000, tz=timezone.utc)
+        date_utc = datetime.fromtimestamp(unix_time / 1000, tz=UTC)
         target_tz = timezone(timedelta(hours=delta))
         target_date = date_utc.astimezone(target_tz)
 
@@ -126,16 +126,16 @@ class TimeConverter:
         Calculate the difference in days between today and a given past date.
 
         Args:
-            date (datetime): A datetime object representing a past date.
-            reverse (bool) : Optional. Determines whether to count from today towards the past or vice versa. Default is False.
+            date    (datetime): A datetime object representing a past date.
+            reverse (bool)    : Optional. Determines whether to count from today towards the past or vice versa. Default is False.
 
         Returns:
             int: The absolute difference in days between today and the given past date, or -1 if an error occurs.
         """
 
-        date = date.replace(tzinfo=timezone.utc)
+        date = date.replace(tzinfo=UTC)
 
-        today = datetime.now(timezone.utc)
+        today = datetime.now(UTC)
         diff = reverse and (date - today) or (today - date)
 
         return diff.days
@@ -146,8 +146,8 @@ class TimeConverter:
         Convert the given date string into a proper datetime.
 
         Args:
-            date_str (str)   : the date represented as a string
-            date_format (str): the format to use to parse the date string
+            date_str    (str): The date represented as a string
+            date_format (str): The format to use to parse the date string
 
         Returns:
             datetime: datetime object based on provided date string and format
@@ -156,7 +156,7 @@ class TimeConverter:
         if date_format is None:
             date_format = DateFormat.from_flag(DateFlag.YMD)
 
-        return datetime.strptime(date_str, date_format)
+        return datetime.strptime(date_str, date_format).astimezone()
 
     @staticmethod
     def date_to_str(date: datetime, date_format: str | None = None) -> str:
@@ -164,8 +164,8 @@ class TimeConverter:
         Convert the given datetime object into a string.
 
         Args:
-            date (datetime)  : the datetime object to convert
-            date_format (str): the format to use to convert the date
+            date        (datetime): The datetime object to convert
+            date_format (str)     : The format to use to convert the date
 
         Returns:
             str: the provided date as a string based on the given format
