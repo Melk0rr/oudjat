@@ -2,54 +2,34 @@
 
 import logging
 from collections.abc import Iterator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import IntEnum
 from typing import Any, TypedDict, override
 
-from oudjat.core.software.exceptions import (
-    EmptySupportPhasesError,
-    InvalidSupportPhasesError,
-)
 from oudjat.utils import Context
 from oudjat.utils.time import TimeConverter
 
+from .exceptions import (
+    EmptySupportPhasesError,
+    InvalidSupportPhasesError,
+)
 
-class SupportDetailsDict(TypedDict):
+
+class SupportPhaseProps(TypedDict):
     """
     A helper class to properly handle SoftwareReleaseSupport details dictionary types.
 
     Attributes:
-        start (str)   : Details about the start of the support
-        end (str)     : Details about the end of the support
-        duration (int): Duration of the support
+        type  (str): The type of the phase. Must match a SupportPhaseType.
+        start (str): Details about the start of the support.
+        end   (str): Details about the end of the support.
+        name  (str): The name of the phase
     """
 
+    type: "str | SupportPhaseType"
     start: str
     end: str
-    duration: int
-
-
-class SupportDict(TypedDict):
-    """
-    A helper class to properly handle support dictionary types.
-
-    Attributes:
-        channel (str)       : The support channel of the support
-        start   (str)       : The start date of the support
-        eoas    (str)       : The activeSupport date as a string
-        eol     (str)       : The securitySupport date as a string
-        eoes    (str | None): The extendedSecuritySupport date as a string
-        status  (str)       : The support status (SoftwareReleaseSupportStatus) as a string
-        details (str)       : Support details string
-    """
-
-    channel: str
-    start: str
-    eoas: str
-    eol: str
-    eoes: str | None
-    status: str
-    details: "SupportDetailsDict"
+    name: str
 
 
 class SupportPhaseType(IntEnum):
@@ -148,6 +128,28 @@ class SupportPhase:
         return self._name
 
     @property
+    def start(self) -> datetime:
+        """
+        Return the start date of the current phase.
+
+        Returns:
+            datetime: A datetime object that corresponds to the phase start date.
+        """
+
+        return self._start
+
+    @property
+    def end(self) -> datetime:
+        """
+        Return the end date of the current phase.
+
+        Returns:
+            datetime: A datetime object that corresponds to the phase end date.
+        """
+
+        return self._end
+
+    @property
     def duration(self) -> int:
         """
         Return the duration in days of the current support phase.
@@ -167,7 +169,7 @@ class SupportPhase:
             SupportStatus: UPCOMING if the support phase has not started yet. RETIRED if it ended. Otherwise, ONGOING
         """
 
-        today = datetime.now(timezone.utc)
+        today = datetime.now(UTC)
 
         if today < self._start:
             status = SupportStatus.UPCOMING
@@ -192,6 +194,28 @@ class SupportPhase:
         return self.status is SupportStatus.ONGOING
 
     @property
+    def starts_in(self) -> int:
+        """
+        Return the number of days between the current date and the start of the support.
+
+        Returns:
+            int: The number of days in which the support starts.
+        """
+
+        return TimeConverter.days_diff(self._start, reverse=True)
+
+    @property
+    def ends_in(self) -> int:
+        """
+        Return the number of days between the current date and the end of the support.
+
+        Returns:
+            int: The number of days in which the support ends.
+        """
+
+        return TimeConverter.days_diff(self._end, reverse=True)
+
+    @property
     def description(self) -> str:
         """
         Return a brief description of the phase.
@@ -200,7 +224,7 @@ class SupportPhase:
             str: A string that describes the status of the phase.
         """
 
-        today = datetime.now(timezone.utc)
+        today = datetime.now(UTC)
 
         if today <= self._start:
             delta = TimeConverter.days_diff(self._start)
@@ -233,8 +257,43 @@ class SupportPhase:
             "start": TimeConverter.date_to_str(self._start),
             "end": TimeConverter.date_to_str(self._end),
             "status": str(self),
+            "startsIn": self.starts_in,
+            "endsIn": self.ends_in,
             "description": self.description,
         }
+
+    # ****************************************************************
+    # Static methods
+
+    @classmethod
+    def from_dict(cls, phase_dict: "SupportPhaseProps") -> "SupportPhase":
+        """
+        Create a new instance of SoftwareReleaseSupport from a dictionary.
+
+        The provided dictionary must follow the SoftwareReleaseSupportDict model
+
+        Args:
+            support_dict (SoftwareReleaseSupportDict): The dictionary the new instance will be based on
+
+        Returns:
+            SoftwareReleaseSupport: A new instance of SoftwareReleaseSupport based on the provided dictionary
+        """
+
+        p_type = phase_dict["type"]
+        if isinstance(p_type, str):
+            if p_type not in SupportPhaseType._member_names_:
+                raise ValueError(
+                    f"{Context()}::Invalid phase type provided {phase_dict['type']}"
+                )
+
+            p_type = SupportPhaseType[p_type]
+
+        return cls(
+            phase_type=p_type,
+            start=phase_dict["start"],
+            end=phase_dict["end"],
+            name=phase_dict["name"],
+        )
 
     # ****************************************************************
     # Static methods
@@ -258,7 +317,7 @@ class SupportPhase:
         )
 
 
-class SupportPhaseDict:
+class SupportDict:
     """A class to handle software release support concept."""
 
     # ****************************************************************
@@ -272,8 +331,101 @@ class SupportPhaseDict:
             name (str): The name of the channel
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__name__)
-        self._phases: dict[str, "SupportPhase"] = {}
+        self.logger: logging.Logger = logging.getLogger(__name__)
+        self._phases: dict[str, SupportPhase] = {}
+
+    # ****************************************************************
+    # Helper methods
+
+    def _relevent_phases(
+        self, include_extended_support: bool = False
+    ) -> list["SupportPhase"]:
+        """
+        Return a list of current phases inluding or not the extended support phase based on parameter.
+
+        Args:
+            include_extended_support (bool): Whether or not to include the extended support phase in the list
+
+        Returns:
+            list[SupportPhase]: A list of SupportPhase instances based on the current phases and parameter.
+        """
+
+        base = self._phases.copy()
+
+        if (
+            not include_extended_support
+            and f"{SupportPhaseType.EXTENDED_SUPPORT}" in base
+        ):
+            _ = base.pop(f"{SupportPhaseType.EXTENDED_SUPPORT}")
+
+        return list(base.values())
+
+    def _validate_phases(self) -> None:
+        """
+        Perform some checks on current support phases.
+
+        Ensures that:
+            - Phases are not empty.
+            - If there is only one phase, that it is not extended support.
+        """
+
+        context = Context()
+
+        if len(self._phases) == 0:
+            raise EmptySupportPhasesError(f"{context}::No support phases set")
+
+        if (
+            str(SupportPhaseType.EXTENDED_SUPPORT) in self._phases
+            and len(self._phases) == 1
+        ):
+            raise InvalidSupportPhasesError(
+                f"{context}::Can't have only an extended support phase"
+            )
+
+    # ****************************************************************
+    # Properties
+
+    @property
+    def is_ongoing(self) -> bool:
+        """
+        Check if the current support period is ongoing.
+
+        Returns:
+            bool: True if the support period is ongoing, False otherwise.
+        """
+
+        return self.status is SupportStatus.ONGOING
+
+    @property
+    def has_extended_support(self) -> bool:
+        """
+        Return wheither the current support has an extended period available.
+
+        The extended support is usually a period of the support that comes at a cost.
+        During this period some critical security updates and bugfixes are distributed by the editor (depending on the software).
+
+        Args:
+            argument_name: type and description.
+
+        Returns:
+            bool: True, the support include an extended period. False otherwise
+        """
+
+        return str(SupportPhaseType.EXTENDED_SUPPORT) in self._phases
+
+    @property
+    def is_lts(self) -> bool:
+        """
+        Check if the release has long term support.
+
+        Returns:
+            bool: True if the release has long term support, False otherwise.
+        """
+
+        return (
+            self.has_extended_support
+            and self._phases[str(SupportPhaseType.EXTENDED_SUPPORT)].is_ongoing
+        )
 
     # ****************************************************************
     # Methods
@@ -353,7 +505,34 @@ class SupportPhaseDict:
 
         return self._phases.get(key, default_value)
 
-    @property
+    def current_phase(self, include_extended_support: bool = False) -> "SupportPhase":
+        """
+        Return the current support phase based on today's date.
+
+        If no support phase has started yet, the function will return the first phase available.
+        If all phases have ended, the function will return the last phase available.
+
+        Args:
+            include_extended_support (bool): Whether to include extended support phase.
+
+        Returns:
+            SupportPhase: The support phase instance that is currently ongoing.
+        """
+
+        self._validate_phases()
+
+        phases = self._relevent_phases(include_extended_support)
+
+        for i, p in enumerate(phases):
+            if (
+                (i == 0 and p.status is SupportStatus.UPCOMING)
+                or p.status is SupportStatus.ONGOING
+                or (i == (len(phases) - 1) and p.status is SupportStatus.RETIRED)
+            ):
+                return p
+
+        return phases[-1]
+
     def status(self, include_extended_support: bool = False) -> "SupportStatus":
         """
         Return the current support status.
@@ -368,21 +547,21 @@ class SupportPhaseDict:
 
         self._validate_phases()
 
+        phases = self._relevent_phases(include_extended_support)
 
+        today = datetime.now(UTC)
+        start = phases[0].start
+        end = phases[-1].end
 
-    @property
-    def is_ongoing(self) -> bool:
-        """
-        Check if the current support period is ongoing.
+        return (
+            SupportStatus.UPCOMING
+            if today < start
+            else SupportStatus.RETIRED
+            if today > end
+            else SupportStatus.ONGOING
+        )
 
-        Returns:
-            bool: True if the support period is ongoing, False otherwise.
-        """
-
-        return self.status is SupportStatus.ONGOING
-
-    @property
-    def duration(self) -> int:
+    def duration(self, include_extended_support: bool = False) -> int:
         """
         Return for how long the support is ongoing.
 
@@ -390,58 +569,11 @@ class SupportPhaseDict:
             int: The number of support days
         """
 
-    @property
-    def has_extended_support(self) -> bool:
-        """
-        Return wheither the current support has an extended period available.
+        self._validate_phases()
 
-        The extended support is usually a period of the support that comes at a cost.
-        During this period some critical security updates and bugfixes are distributed by the editor (depending on the software).
-
-        Args:
-            argument_name: type and description.
-
-        Returns:
-            bool: True, the support include an extended period. False otherwise
-        """
-
-        return str(SupportPhaseType.EXTENDED_SUPPORT) in self._phases
-
-    @property
-    def is_lts(self) -> bool:
-        """
-        Check if the release has long term support.
-
-        Returns:
-            bool: True if the release has long term support, False otherwise.
-        """
-
-        return (
-            self.has_extended_support
-            and self._phases[str(SupportPhaseType.EXTENDED_SUPPORT)].is_ongoing
+        return sum(
+            [p.duration for p in self._relevent_phases(include_extended_support)]
         )
-
-    def _validate_phases(self) -> None:
-        """
-        Perform some checks on current support phases.
-
-        Ensures that:
-            - Phases are not empty.
-            - If there is only one phase, that it is not extended support.
-        """
-
-        context = Context()
-
-        if len(self._phases) == 0:
-            raise EmptySupportPhasesError(f"{context}::No support phases set")
-
-        if (
-            str(SupportPhaseType.EXTENDED_SUPPORT) in self._phases
-            and len(self._phases) == 1
-        ):
-            raise InvalidSupportPhasesError(
-                f"{context}::Can't have only an extended support phase"
-            )
 
     @override
     def __str__(self) -> str:
@@ -459,13 +591,17 @@ class SupportPhaseDict:
         Convert the current support instance into a dict.
 
         Returns:
-            SoftwareReleaseSupportDict: dictionary containing software support key attributes
+            dict[str, Any]: Dictionary containing software support key attributes
         """
 
         phase_dicts = {k: v.to_dict() for k, v in self._phases.items()}
 
         return {
-            "status": str(self.status),
+            "status": str(self.status()),
+            "hasLTS": self.has_extended_support,
+            "duration": self.duration(),
+            "durationExtended": self.duration(True),
+            "currentPhase": str(self.current_phase().type),
             "phases": phase_dicts,
         }
 
@@ -473,23 +609,10 @@ class SupportPhaseDict:
     # Class methods
 
     @classmethod
-    def from_dict(cls, support_dict: "SupportDict") -> "SoftwareReleaseSupport":
-        """
-        Create a new instance of SoftwareReleaseSupport from a dictionary.
+    def from_dict(cls, support_dict: dict[str, "SupportPhaseProps"]) -> "SupportDict":
+        sd = cls()
 
-        The provided dictionary must follow the SoftwareReleaseSupportDict model
+        for phase_d in support_dict.values():
+            sd.add(SupportPhase.from_dict(phase_d))
 
-        Args:
-            support_dict (SoftwareReleaseSupportDict): The dictionary the new instance will be based on
-
-        Returns:
-            SoftwareReleaseSupport: A new instance of SoftwareReleaseSupport based on the provided dictionary
-        """
-
-        return cls(
-            channel=support_dict["channel"],
-            start=support_dict["start"],
-            eoas=support_dict["eoas"],
-            eol=support_dict["eol"],
-            eoes=support_dict["eoes"],
-        )
+        return sd
