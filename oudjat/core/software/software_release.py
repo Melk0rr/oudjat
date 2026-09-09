@@ -2,9 +2,9 @@
 
 import logging
 import re
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from datetime import datetime
-from typing import Any, Callable, Generic, TypeAlias, TypedDict, TypeVar, override
+from typing import Any, TypedDict, TypeVar, override
 
 from oudjat.core import Asset
 from oudjat.core.asset_type import AssetType
@@ -12,11 +12,11 @@ from oudjat.utils import Context
 from oudjat.utils.time import TimeConverter
 
 from .software_release_version import SoftwareReleaseVersion
-from .software_support import SupportDict
+from .software_support import Support, SupportDictProps
 
 ReleaseType = TypeVar("ReleaseType", bound="SoftwareRelease")
 
-SoftwareReleaseImportDict: TypeAlias = dict[str, list["SoftwareReleaseDictProps"]]
+type SoftwareReleaseImportDict = dict[str, list["SoftwareReleaseDictProps"]]
 
 
 class SoftwareReleaseDictProps(TypedDict):
@@ -34,7 +34,7 @@ class SoftwareReleaseDictProps(TypedDict):
     version: dict[str, str]
     fullname: str
     isSupported: bool
-    supportChannels: dict[str, "SupportDict"]
+    supportChannels: dict[str, "SupportDictProps"]
 
 
 class SoftwareRelease(Asset):
@@ -56,13 +56,12 @@ class SoftwareRelease(Asset):
         Create a new instance of SoftwareRelease.
 
         Args:
-            release_id (str)             : The ID of the release
-            name (str)                   : The name of the release
-            software_name (str)          : The software name which this release belongs to.
-            version (int | str)          : The version of the software, can be either an integer or a string representation of a number.
-            release_date (str | datetime): The date when the software was released. Can be provided as a string formatted like: `%Y-%m-%d`
-                                                or as a datetime object. If provided as a string, it will be parsed using the format specified by DateStrFlag.YMD.
-            release_label (str)          : A label describing the nature of this release, such as "stable" or "beta".
+            release_id    (str)           : The ID of the release
+            name          (str)           : The name of the release
+            software_name (str)           : The software name which this release belongs to.
+            version       (int | str)     : The version of the software, can be either an integer or a string representation of a number.
+            release_date  (str | datetime): The date the software was released. Can be a string formatted like: `%Y-%m-%d` or as a datetime object. 
+            release_label (str)           : A label describing the nature of this release, such as "stable" or "beta".
 
         Raises:
             ValueError: If `release_date` is provided as a string and does not match the expected date format.
@@ -71,8 +70,8 @@ class SoftwareRelease(Asset):
         self._software: str = software
 
         # Version attributes
-        self._version: "SoftwareReleaseVersion" = SoftwareReleaseVersion(version)
-        self._latest_version: "SoftwareReleaseVersion" = self._version
+        self._version: SoftwareReleaseVersion = SoftwareReleaseVersion(version)
+        self._latest_version: SoftwareReleaseVersion = self._version
 
         super().__init__(
             asset_id=release_id,
@@ -91,7 +90,7 @@ class SoftwareRelease(Asset):
             )
 
         self._release_date: datetime = release_date
-        self._support_channels: dict[str, ] = {}
+        self._support_channels: dict[str, Support] = {}
 
         # NOTE: maybe convert vulnerabilities into a dictionary (CVE instances ?) if needed
         self._vulnerabilities: set[str] = set()
@@ -144,7 +143,7 @@ class SoftwareRelease(Asset):
         self._latest_version = new_latest_version
 
     @property
-    def support_channels(self) -> dict[str, "SoftwareReleaseSupport"]:
+    def support_channels(self) -> dict[str, "Support"]:
         """
         Return support list.
 
@@ -187,33 +186,27 @@ class SoftwareRelease(Asset):
 
         return self._vulnerabilities
 
-    @property
-    def ongoing_support(self) -> dict[str, "SoftwareReleaseSupport"]:
+    def ongoing_support(
+        self, include_extended_support: bool = False
+    ) -> dict[str, "Support"]:
         """
         Return ongoing support instances.
 
         Returns:
-            list[SoftwareReleaseSupport]: A list of support details that are currently ongoing.
-        """
-
-        return {ch_k: s for ch_k, s in self._support_channels.items() if s.is_ongoing}
-
-    @property
-    def retired_support(self) -> dict[str, "SoftwareReleaseSupport"]:
-        """
-        Return retired support instances.
-
-        Returns:
-            list[SoftwareReleaseSupport]: A list of support details that are no longer ongoing.
+            dict[SupportDict]: A list of support details that are currently ongoing.
         """
 
         return {
-            ch_k: s for ch_k, s in self._support_channels.items() if not s.is_ongoing
+            ch: s
+            for ch, s in self._support_channels.items()
+            if s.is_ongoing(include_extended_support)
         }
 
-    def is_supported(self, channel: "str | None" = None) -> bool:
+    def is_supported(
+        self, channel: "str | None" = None, include_extended_support: bool = False
+    ) -> bool:
         """
-        Check if the current release has an ongoing support for the provided edition.
+        Check if the current release has an ongoing support for the provided channel.
 
         If no edition is provided, it will simply check if there is any ongoing support.
 
@@ -225,13 +218,12 @@ class SoftwareRelease(Asset):
         """
 
         return any(
-            [
-                s.is_ongoing and (channel is None or ch == channel)
-                for ch, s in self._support_channels.items()
-            ]
+            s.is_ongoing(include_extended_support)
+            and (channel is None or ch == channel)
+            for ch, s in self._support_channels.items()
         )
 
-    def add_support(self, channel: str, support: "SoftwareReleaseSupport") -> None:
+    def add_support(self, channel: str, support: "Support") -> None:
         """
         Add a support instance to the current release.
 
@@ -414,9 +406,7 @@ class SoftwareRelease(Asset):
         )
 
         for channel, support_dict in rel_dict["supportChannels"].items():
-            new_release.add_support(
-                channel, SoftwareReleaseSupport.from_dict(support_dict)
-            )
+            new_release.add_support(channel, Support.from_dict(support_dict))
 
         return new_release
 
@@ -435,7 +425,7 @@ class SoftwareRelease(Asset):
             SoftwareRelVersionDict[ReleaseType]: A software release version dictionary
         """
 
-        releases: "SoftwareRelVersionDict[ReleaseType]" = SoftwareRelVersionDict()
+        releases: SoftwareRelVersionDict[ReleaseType] = SoftwareRelVersionDict()
         for rel_k, rels in releases_dict.items():
             for rel in rels:
                 releases.add(rel_k, cls.from_dict(rel))
@@ -443,7 +433,7 @@ class SoftwareRelease(Asset):
         return releases
 
 
-class SoftwareReleaseList(list, Generic[ReleaseType]):
+class SoftwareReleaseList[ReleaseType: "SoftwareRelease"](list):
     """
     A class to provide useful methods to narrow down / filter a list of SoftwareRelease.
     """
@@ -505,13 +495,13 @@ class SoftwareReleaseList(list, Generic[ReleaseType]):
         Args:
             label_str (str)                                      : The string to compare to the release labels
             filter_cb (Callable[[ReleaseType, str], bool] | None): Custom label comparison callback
-            fallback (bool)                                      : If True, falls back to the default list. Else, returns the filtered list
+            fallback  (bool)                                     : If True, falls back to the default list. Else, returns the filtered list
 
         Returns:
             SoftwareReleaseList: Filtered SoftwareRelease list
         """
 
-        cb: Callable[["ReleaseType"], bool]
+        cb: Callable[[ReleaseType], bool]
         if filter_cb is not None:
 
             def arg_filter_cb(rel: "ReleaseType") -> bool:
@@ -526,7 +516,7 @@ class SoftwareReleaseList(list, Generic[ReleaseType]):
 
             cb = label_filter_cb
 
-        filtered_rels: "SoftwareReleaseList[ReleaseType]" = SoftwareReleaseList(
+        filtered_rels: SoftwareReleaseList[ReleaseType] = SoftwareReleaseList(
             filter(cb, self)
         )
         if fallback and len(filtered_rels) == 0:
@@ -542,7 +532,7 @@ class SoftwareReleaseList(list, Generic[ReleaseType]):
 
         Args:
             supported (bool): Whether to filter releases if they are supported or out of support
-            fallback (bool) : If True, falls back to the default list. Else, returns the filtered list
+            fallback  (bool): If True, falls back to the default list. Else, returns the filtered list
 
         Returns:
             SoftwareReleaseList: Filtered SoftwareRelease list
@@ -551,7 +541,7 @@ class SoftwareReleaseList(list, Generic[ReleaseType]):
         def status_filter_cb(rel: "ReleaseType") -> bool:
             return rel.is_supported() == supported
 
-        filtered_rels: "SoftwareReleaseList[ReleaseType]" = SoftwareReleaseList(
+        filtered_rels: SoftwareReleaseList[ReleaseType] = SoftwareReleaseList(
             filter(status_filter_cb, self)
         )
 
@@ -567,7 +557,7 @@ class SoftwareReleaseList(list, Generic[ReleaseType]):
         Filter the list of SoftwareRelease by comparing the releases id with the provided string.
 
         Args:
-            id_str (str)   : The string to compare to the release id
+            id_str   (str) : The string to compare to the release id
             fallback (bool): If True, falls back to the default list. Else, returns the filtered list
 
         Returns:
@@ -577,7 +567,7 @@ class SoftwareReleaseList(list, Generic[ReleaseType]):
         def id_filter_cb(rel: "ReleaseType") -> bool:
             return rel.id == id_str
 
-        filtered_rels: "SoftwareReleaseList[ReleaseType]" = SoftwareReleaseList(
+        filtered_rels: SoftwareReleaseList[ReleaseType] = SoftwareReleaseList(
             filter(id_filter_cb, self)
         )
         if fallback and len(filtered_rels) == 0:
@@ -611,8 +601,15 @@ class SoftwareReleaseList(list, Generic[ReleaseType]):
         return [rel.to_dict() for rel in self]
 
 
-class SoftwareRelVersionDict(Generic[ReleaseType]):
-    """Software release version dictionary."""
+class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
+    """
+    A class that handles to store releases per version number.
+
+    It uses the release version number as key. Then stores a list of releases that match this particular version.
+    It stores those versions as a SoftwareReleaseList which handles some search and filtering operations.
+
+    The main goal is to allow a fast prefilter per version number when looking up for a release.
+    """
 
     # ****************************************************************
     # Constructor & Attributes
@@ -622,8 +619,8 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
         Create a new instance of SoftwareReleaseDict.
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__name__)
-        self._releases: dict[str, "SoftwareReleaseList[ReleaseType]"] = {}
+        self.logger: logging.Logger = logging.getLogger(__name__)
+        self._releases: dict[str, SoftwareReleaseList[ReleaseType]] = {}
 
     # ****************************************************************
     # Methods
@@ -646,7 +643,7 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
         Set the Software release in the dictionary for the provided key.
 
         Args:
-            key (str)          : The version of the release to retrieve
+            key   (str)        : The version of the release to retrieve
             value (ReleaseType): Value of the new element
         """
 
@@ -670,9 +667,9 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
         If force argument is set to True, the new release will be added regardless.
 
         Args:
-            key (str)            : The key of the new release
+            key     (str)        : The key of the new release
             release (ReleaseType): The new release to add
-            force (bool)         : Whether to force the addition of the new release
+            force   (bool)       : Whether to force the addition of the new release
         """
 
         _ = self._releases.setdefault(key, SoftwareReleaseList())
@@ -694,7 +691,7 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
         If the element cannot be found, return the default value.
 
         Args:
-            key (str)          : Key of the element to return
+            key           (str): Key of the element to return
             default_value (Any): Default value in case the element cannot be found
 
         Returns:
@@ -710,7 +707,7 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
 
         Args:
             rel_version (str): The version of the sought release
-            rel_id (str)     : The id of the sought release
+            rel_id      (str): The id of the sought release
 
         Returns:
             int | None: The index of the release in the version list if it exists
@@ -781,6 +778,6 @@ class SoftwareRelVersionDict(Generic[ReleaseType]):
         """
 
         return {
-            version: [ver.to_dict() for ver in versions]
-            for version, versions in self._releases.items()
+            vnumber: [r.to_dict() for r in releases]
+            for vnumber, releases in self._releases.items()
         }
