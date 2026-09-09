@@ -4,15 +4,15 @@ A generic module to handle data mapping.
 
 import inspect
 import logging
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from ctypes import ArgumentError
 from decimal import Context
-from typing import Any, Callable, TypeAlias
+from typing import Any
 
-MappingValue: TypeAlias = Any | Callable[[dict[str, Any]], Any]
-MappingRegistry: TypeAlias = dict[str, "MappingValue"]
-MappingRegistryFunc: TypeAlias = Callable[..., "MappingRegistry"]
-MappingCallback: TypeAlias = Callable[[Any, dict[str, Any], "MappingRegistry"], None]
+type MappingValue = Any | Callable[[dict[str, Any]], Any]
+type MappingRegistry = dict[str, "MappingValue"]
+type MappingRegistryFunc = Callable[..., "MappingRegistry"]
+type MappingCallback = Callable[[Any, dict[str, Any], "MappingRegistry"], None]
 
 
 class Mapper:
@@ -37,7 +37,7 @@ class Mapper:
             dict[str, MappingValue]: Merged mapping registry
         """
 
-        registry: "MappingRegistry" = {}
+        registry: MappingRegistry = {}
         for md in registries:
             registry.update(md)
 
