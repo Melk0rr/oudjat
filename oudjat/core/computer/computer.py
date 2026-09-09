@@ -9,7 +9,7 @@ from oudjat.core.network.net_interface import NetInterfaceIP
 from oudjat.core.software import (
     SoftwareEdition,
     SoftwareRelease,
-    SoftwareReleaseSupport,
+    Support,
 )
 from oudjat.utils import UtilsDict
 
@@ -124,15 +124,15 @@ class Computer(Asset):
             **kwargs,
         )
 
-        self._os: "ComputerOSProps" = ComputerOSProps(os_release, os_edition)
+        self._os: ComputerOSProps = ComputerOSProps(os_release, os_edition)
 
-        self._computer_type: "ComputerType" = self._standardize_computer_type(computer_type)
-        self._machine_type: "MachineType" = self._standardize_machine_type(machine_type)
-        self._status: "ComputerStatus" = ComputerStatus.UNKNOWN
+        self._computer_type: ComputerType = self._standardize_computer_type(computer_type)
+        self._machine_type: MachineType = self._standardize_machine_type(machine_type)
+        self._status: ComputerStatus = ComputerStatus.UNKNOWN
 
         self._softwares: dict[str, SoftwareRelease] = {}
 
-        self._interfaces: dict[str, "NetInterface"] = {}
+        self._interfaces: dict[str, NetInterface] = {}
 
     # ****************************************************************
     # Methods
@@ -274,18 +274,17 @@ class Computer(Asset):
         self._os = new_os
 
     @property
-    def os_support(self) -> "SoftwareReleaseSupport | None":
+    def os_support(self) -> "Support | None":
         """
         Get support for current computer os release and edition.
 
         Returns:
-            list[SoftwareReleaseSupport]: A list of SoftwareReleaseSupport instances representing the support for the current OS release and edition.
+            SupportDict: A list of SoftwareReleaseSupport instances representing the support for the current OS release and edition.
         """
 
         support = None
-        if self._os.release is not None:
-            if self._os.edition is not None:
-                support = self._os.release.support_channels.get(self._os.edition.channel)
+        if self._os.release is not None and self._os.edition is not None:
+            support = self._os.release.support_channels.get(self._os.edition.channel)
 
         return support
 
@@ -399,10 +398,10 @@ class Computer(Asset):
             bool: True if the OS is supported, False otherwise.
         """
 
-        if self._os.release is None:
+        if self._os.release is None or self._os.edition is None:
             return False
 
-        return self._os.release.is_supported(self._os.edition)
+        return self._os.release.is_supported(self._os.edition.channel)
 
     @override
     def merge(self, other: "Computer") -> None:
@@ -460,7 +459,7 @@ class Computer(Asset):
         # OS support information
         os_support_dict = self.os_support.to_dict() if self.os_support is not None else {}
 
-        base_dict: "ComputerBaseDict" = {
+        base_dict: ComputerBaseDict = {
             "computerType": str(self._computer_type),
             "machineType": str(self._machine_type),
             "computerStatus": str(self._status),
