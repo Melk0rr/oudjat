@@ -91,7 +91,7 @@ class SoftwareReleaseVersion:
 
     def __init__(
         self,
-        version: int | str,
+        version: float | str,
         stage: tuple["SoftwareReleaseStage", int] = (SoftwareReleaseStage.RELEASE, 1),
     ) -> None:
         """
@@ -102,40 +102,40 @@ class SoftwareReleaseVersion:
             stage (tuple[SoftwareReleaseStage, int]): a tuple representing stage and stage version
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__name__)
+        self.logger: logging.Logger = logging.getLogger(__name__)
         context = Context()
 
         self._major: int = 0
         self._minor: int = 0
         self._build: int = 0
 
-        self._stage: "SoftwareReleaseStage" = stage[0]
+        self._stage: SoftwareReleaseStage = stage[0]
         self._stage_version: int = stage[1]
-        self._raw: int | str = version
 
-        if isinstance(version, int):
-            self._major = version
+        if not isinstance(version, str):
+            version = str(version)
 
-        else:
-            match = re.match(VERSION_REG, version)
+        self._raw: str = version
 
-            if match is None:
-                raise InvalidSoftwareVersionError(f"{context}::Invalid version provided {version}")
+        match = re.match(VERSION_REG, version)
 
-            self._major = int(match.group(1))
-            self._minor = int(match.group(2)) if match.group(2) is not None else 0
-            self._build = int(match.group(3)) if match.group(3) is not None else 0
+        if match is None:
+            raise InvalidSoftwareVersionError(f"{context}::Invalid version provided {version}")
 
-            self.logger.debug(
-                f"{context}::New release version - {self._major}.{match.group(2)}.{match.group(3)} > {self._major}.{self._minor}.{self._build}"
-            )
+        self._major = int(match.group(1))
+        self._minor = int(match.group(2)) if match.group(2) is not None else 0
+        self._build = int(match.group(3)) if match.group(3) is not None else 0
 
-            if match.group(4) is not None:
-                stage_match = re.match(STAGE_REG, match.group(4))
+        self.logger.debug(
+            f"{context}::New release version - {self._major}.{match.group(2)}.{match.group(3)} > {self._major}.{self._minor}.{self._build}"
+        )
 
-                if stage_match:
-                    self._stage = SoftwareReleaseStage.from_qualifier(stage_match.group(1))
-                    self._stage_version = int(stage_match.group(2))
+        if match.group(4) is not None:
+            stage_match = re.match(STAGE_REG, match.group(4))
+
+            if stage_match:
+                self._stage = SoftwareReleaseStage.from_qualifier(stage_match.group(1))
+                self._stage_version = int(stage_match.group(2))
 
     # ****************************************************************
     # Methods
@@ -337,7 +337,7 @@ class SoftwareReleaseVersion:
         """
 
         if not isinstance(other, SoftwareReleaseVersion):
-            raise ValueError(
+            raise TypeError(
                 f"{Context()}::You are trying to compare a SoftwareReleaseVersion with {type(object)}"
             )
 
@@ -356,7 +356,7 @@ class SoftwareReleaseVersion:
         """
 
         if not isinstance(other, SoftwareReleaseVersion):
-            raise ValueError(
+            raise TypeError(
                 f"{Context()}::You are trying to compare a SoftwareReleaseVersion with {type(object)}"
             )
 
