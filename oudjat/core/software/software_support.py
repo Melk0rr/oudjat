@@ -14,6 +14,8 @@ from .exceptions import (
     InvalidSupportPhasesError,
 )
 
+type SupportDictProps = dict[str, "SupportPhaseProps"]
+
 
 class SupportPhaseProps(TypedDict):
     """
@@ -29,7 +31,7 @@ class SupportPhaseProps(TypedDict):
     type: "str | SupportPhaseType"
     start: str
     end: str
-    name: str
+    label: str
 
 
 class SupportPhaseType(IntEnum):
@@ -84,7 +86,7 @@ class SupportPhase:
         phase_type: "SupportPhaseType",
         start: str | datetime,
         end: str | datetime,
-        name: str = "",
+        label: str = "",
     ) -> None:
         """
         Create a new instance of SupportPhase.
@@ -97,13 +99,13 @@ class SupportPhase:
         """
 
         self._type = phase_type
-        self._name = name
+        self._label = label
 
         self._start: datetime = self._date_fmt(start)
         self._end: datetime = self._date_fmt(end)
 
     # ****************************************************************
-    # Methods
+    # Properties
 
     @property
     def type(self) -> "SupportPhaseType":
@@ -117,7 +119,7 @@ class SupportPhase:
         return self._type
 
     @property
-    def name(self) -> "str":
+    def label(self) -> "str":
         """
         Return the name of the current support phase.
 
@@ -125,7 +127,7 @@ class SupportPhase:
             str: The name of the current phase
         """
 
-        return self._name
+        return self._label
 
     @property
     def start(self) -> datetime:
@@ -194,6 +196,17 @@ class SupportPhase:
         return self.status is SupportStatus.ONGOING
 
     @property
+    def is_retired(self) -> bool:
+        """
+        Check if the current support phase is retired.
+
+        Returns:
+            bool: True if the support phase is retired, False otherwise.
+        """
+
+        return self.status is SupportStatus.RETIRED
+
+    @property
     def starts_in(self) -> int:
         """
         Return the number of days between the current date and the start of the support.
@@ -250,10 +263,43 @@ class SupportPhase:
 
         return str(self.status)
 
+    # ****************************************************************
+    # Methods
+
+    def __gt__(self, other: "SupportPhase") -> bool:
+        """
+        Check if the current phase is greater than another.
+
+        The comparison relies on the phase type.
+
+        Args:
+            other (SupportPhase): The other phase to compare to the current one.
+
+        Returns:
+            bool: True if the current phase is greater than the other one. False otherwise.
+        """
+
+        return self.type > other.type
+
+    def __lt__(self, other: "SupportPhase") -> bool:
+        """
+        Check if the current phase is lower than another.
+
+        The comparison relies on the phase type.
+
+        Args:
+            other (SupportPhase): The other phase to compare to the current one.
+
+        Returns:
+            bool: True if the current phase is lower than the other one. False otherwise.
+        """
+
+        return self.type < other.type
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "type": str(self._type),
-            "name": self._name,
+            "label": self._label,
             "start": TimeConverter.date_to_str(self._start),
             "end": TimeConverter.date_to_str(self._end),
             "status": str(self),
@@ -292,7 +338,7 @@ class SupportPhase:
             phase_type=p_type,
             start=phase_dict["start"],
             end=phase_dict["end"],
-            name=phase_dict["name"],
+            label=phase_dict["label"],
         )
 
     # ****************************************************************
@@ -317,7 +363,7 @@ class SupportPhase:
         )
 
 
-class SupportDict:
+class Support:
     """A class to handle software release support concept."""
 
     # ****************************************************************
@@ -358,7 +404,9 @@ class SupportDict:
         ):
             _ = base.pop(f"{SupportPhaseType.EXTENDED_SUPPORT}")
 
-        return list(base.values())
+        relevent = sorted(base.values())
+
+        return relevent
 
     def _validate_phases(self) -> None:
         """
@@ -382,19 +430,21 @@ class SupportDict:
                 f"{context}::Can't have only an extended support phase"
             )
 
-    # ****************************************************************
-    # Properties
-
-    @property
-    def is_ongoing(self) -> bool:
+    def _check_phase(self, phase_type: SupportPhaseType) -> bool:
         """
-        Check if the current support period is ongoing.
+        Return whether support includes a phase of the provided type.
+
+        Args:
+            phase_type (SupportPhaseType): SupportPhaseType to check in current support phases.
 
         Returns:
-            bool: True if the support period is ongoing, False otherwise.
+            bool: True if the support has a phase of the provided type. False otherwise.
         """
 
-        return self.status is SupportStatus.ONGOING
+        return str(phase_type) in self._phases
+
+    # ****************************************************************
+    # Properties
 
     @property
     def has_extended_support(self) -> bool:
@@ -411,20 +461,62 @@ class SupportDict:
             bool: True, the support include an extended period. False otherwise
         """
 
-        return str(SupportPhaseType.EXTENDED_SUPPORT) in self._phases
+        return self._check_phase(SupportPhaseType.EXTENDED_SUPPORT)
 
     @property
     def is_lts(self) -> bool:
         """
-        Check if the release has long term support.
+        Check if the support is currently in a phase of extended support.
 
         Returns:
-            bool: True if the release has long term support, False otherwise.
+            bool: True if support is in extended support. False otherwise.
         """
 
         return (
             self.has_extended_support
             and self._phases[str(SupportPhaseType.EXTENDED_SUPPORT)].is_ongoing
+        )
+
+    @property
+    def is_eoas(self) -> bool:
+        """
+        Checks if the support has ended its active support phase.
+
+        Returns:
+            bool: True if the active support phase is over. False otherwise.
+        """
+
+        return (
+            self._check_phase(SupportPhaseType.ACTIVE_SUPPORT)
+            and self._phases[str(SupportPhaseType.ACTIVE_SUPPORT)].is_retired
+        )
+
+    @property
+    def is_eol(self) -> bool:
+        """
+        Checks if the support has ended its security support phase.
+
+        Returns:
+            bool: True if the security support phase is over. False otherwise.
+        """
+
+        return (
+            self._check_phase(SupportPhaseType.SECURITY_SUPPORT)
+            and self._phases[str(SupportPhaseType.SECURITY_SUPPORT)].is_retired
+        )
+
+    @property
+    def is_eoes(self) -> bool:
+        """
+        Checks if the support has ended its extended support phase.
+
+        Returns:
+            bool: True if the extended support phase is over. False otherwise.
+        """
+
+        return (
+            self._check_phase(SupportPhaseType.EXTENDED_SUPPORT)
+            and self._phases[str(SupportPhaseType.EXTENDED_SUPPORT)].is_retired
         )
 
     # ****************************************************************
@@ -575,6 +667,16 @@ class SupportDict:
             [p.duration for p in self._relevent_phases(include_extended_support)]
         )
 
+    def is_ongoing(self, include_extended_support: bool = False) -> bool:
+        """
+        Check if the current support period is ongoing.
+
+        Returns:
+            bool: True if the support period is ongoing, False otherwise.
+        """
+
+        return self.status(include_extended_support) is SupportStatus.ONGOING
+
     @override
     def __str__(self) -> str:
         """
@@ -594,22 +696,23 @@ class SupportDict:
             dict[str, Any]: Dictionary containing software support key attributes
         """
 
-        phase_dicts = {k: v.to_dict() for k, v in self._phases.items()}
-
         return {
             "status": str(self.status()),
             "hasLTS": self.has_extended_support,
+            "isEoas": self.is_eoas,
+            "isEol": self.is_eol,
+            "isEoes": self.is_eoes,
             "duration": self.duration(),
             "durationExtended": self.duration(True),
-            "currentPhase": str(self.current_phase().type),
-            "phases": phase_dicts,
+            "currentPhase": str(self.current_phase(True).type),
+            "phases": [ p.to_dict() for p in self._phases.values() ],
         }
 
     # ****************************************************************
     # Class methods
 
     @classmethod
-    def from_dict(cls, support_dict: dict[str, "SupportPhaseProps"]) -> "SupportDict":
+    def from_dict(cls, support_dict: dict[str, "SupportPhaseProps"]) -> "Support":
         sd = cls()
 
         for phase_d in support_dict.values():
