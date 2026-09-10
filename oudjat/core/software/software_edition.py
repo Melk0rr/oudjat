@@ -105,3 +105,8 @@ class SoftwareEditionDict(dict):
         return SoftwareEditionDict(
             **{edi_k: edi for edi_k, edi in self.items() if edi.category in channel}
         )
+
+
+DEFAULT_SOFTWARE_EDITION = SoftwareEditionDict(
+    {"Standard": SoftwareEdition(label="*", channel="*", pattern="")}
+)
