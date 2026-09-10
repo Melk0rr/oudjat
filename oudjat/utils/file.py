@@ -2,10 +2,11 @@
 
 import csv
 import logging
+from collections.abc import Callable
 from enum import Enum
 from io import StringIO
 from pathlib import Path
-from typing import Any, Callable, NamedTuple
+from typing import Any, NamedTuple
 
 import orjson
 import polars as pl
@@ -58,6 +59,18 @@ class FileUtils:
 
     # ****************************************************************
     # Helper functions
+
+    @staticmethod
+    def project_root() -> Path:
+        """
+        A simple method that returns the project root Path.
+
+        Returns:
+            Path: A Path instance for the project root.
+        """
+
+        file_dir = Path(__file__).resolve().parent
+        return file_dir.parent
 
     @classmethod
     def _check_path(cls, filepath: "str | Path") -> "Path":
