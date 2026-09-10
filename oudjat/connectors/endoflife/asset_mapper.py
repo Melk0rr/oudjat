@@ -58,9 +58,20 @@ class EOLAssetMapper(AssetMapper):
     # ****************************************************************
     # Methods
 
-    def _map_support_dict(
+    def _map_support(
         self, release: dict[str, Any], labels: "SupportPhaseLabelsProps"
     ) -> Support:
+        """
+        Map a Support instance based on provided release data and phase labels.
+
+        Args:
+            release (dict[str, Any])         : The release data from endoflife.date API.
+            labels  (SupportPhaseLabelsProps): The support phase labels provided by endoflife.date API.
+
+        Returns:
+            Support: A support instance built based on the release data.
+        """
+
         label_sphase_map = {
             "eoas": "ACTIVE_SUPPORT",
             "eol": "SECURITY_SUPPORT",
@@ -70,12 +81,11 @@ class EOLAssetMapper(AssetMapper):
         sd = Support()
         start = release["releaseDate"]
         for lk, l in labels.items():
-            end_key = f"{lk}From"
-            if lk == "discontinued" or l is None or release.get(end_key, None) is None:
+            end = release.get(f"{lk}From")
+            if lk == "discontinued" or l is None or end is None:
                 continue
 
             phase_type: str = label_sphase_map[lk]
-            end: str = release[end_key]
 
             sd.add(
                 SupportPhase(
@@ -102,17 +112,14 @@ class EOLAssetMapper(AssetMapper):
         releases = product.get("releases", [])
         final_releases = SoftwareRelVersionDict()
 
-        def _support_assign_cb(
-            ch: str, s: "Support", rel_ver: str, index: int | None
-        ) -> None:
-            final_releases[rel_ver][index or 0].add_support(ch, s)
-
         for rel in releases:
+            # Extract release identifiers
             rel_ver = Mapper.decapsulate_value(mapping_registry["version"], rel)
             rel_id = Mapper.decapsulate_value(mapping_registry["release_id"], rel)
 
-            # Map the releases
+            # Retrieve existing release instance, or map one
             index = final_releases.find_unique_index(rel_ver, rel_id)
+
             if index is None:
                 rel_instance = self.map_one(
                     record=rel,
@@ -123,10 +130,18 @@ class EOLAssetMapper(AssetMapper):
 
                 final_releases.add(rel_ver, rel_instance)
 
+                # Update the release index
+                index = final_releases.find_unique_index(rel_ver, rel_id)
+
+            support_info = self._map_support(rel, product["labels"])
+            channels = Mapper.decapsulate_value(support_channels, rel)
+
             # Add support to the releases
-            mapped_channels = Mapper.decapsulate_value(support_channels, rel)
-            for ch in mapped_channels or ["Standard"]:
-                _support_assign_cb(ch, self._map_support_dict(rel, product["labels"]),rel_ver, index)
+            if index is not None:
+                target_release = final_releases[rel_ver][index]
+
+                for ch in channels or ["*"]:
+                    target_release.add_support(ch, support_info)
 
         return final_releases
 
@@ -159,11 +174,12 @@ class EOLAssetMapper(AssetMapper):
         ) -> None:
             rel.add_custom_attr("link", record["latest"]["link"])
 
+        # If the channel can not be retrieved from release name, apply same support for E and W channels
         def support_channels_value(rel: dict[str, Any]) -> list[str]:
             rel_name_split = str(rel["name"]).split("-")
             rel_channel = "-".join(rel_name_split[2:]).upper()
 
-            return ["E", "W"] if rel_channel == "" else [rel_channel]
+            return ["*"] if rel_channel == "" else [rel_channel]
 
         return self._releases(
             product=windows_eol,
@@ -262,5 +278,4 @@ class EOLAssetMapper(AssetMapper):
             rel_type=OSRelease,
             mapping_registry=mapping_registry,
             callback=rel_cb,
-            support_channels=["Standard"],
         )
