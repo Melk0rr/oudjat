@@ -14,8 +14,10 @@ from .exceptions import (
     InvalidSupportPhasesError,
 )
 
-type SupportDictProps = dict[str, "SupportPhaseProps"]
 
+class SupportDictProps(TypedDict):
+
+    phases: list["SupportPhaseProps"] 
 
 class SupportPhaseProps(TypedDict):
     """
@@ -712,10 +714,10 @@ class Support:
     # Class methods
 
     @classmethod
-    def from_dict(cls, support_dict: dict[str, "SupportPhaseProps"]) -> "Support":
+    def from_dict(cls, support_dict: SupportDictProps) -> "Support":
         sd = cls()
 
-        for phase_d in support_dict.values():
-            sd.add(SupportPhase.from_dict(phase_d))
+        for phase in support_dict["phases"]:
+            sd.add(SupportPhase.from_dict(phase))
 
         return sd
