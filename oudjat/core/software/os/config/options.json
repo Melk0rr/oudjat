@@ -1,0 +1,38 @@
+{
+	"RHEL": {
+		"attributes": {
+			"os_id": "rhel",
+			"name": "Red Hat Enterprise Linux",
+			"label": "red-hat-enterprise-linux",
+			"editor": "Red Hat",
+			"os_family": "LINUX",
+			"computer_type": "SERVER",
+			"description": "Red Hat Enterprise Linux is a Linux distribution developed by Red Hat for the commercial market",
+			"tags": ["linux-distribution", "red-hat"]
+		}
+	},
+	"WINDOWS": {
+		"attributes": {
+			"os_id": "windows",
+			"name": "Windows",
+			"label": "windows",
+			"editor": "Microsoft Corporation",
+			"os_family": "WINDOWS",
+			"computer_type": "WORKSTATION",
+			"description": "Microsoft Windows is the operating system developed by Microsoft to run on workstations",
+			"tags": ["microsoft", "windows"]
+		}
+	},
+	"WINDOWSSERVER": {
+		"attributes": {
+			"os_id": "windowsserver",
+			"name": "Windows Server",
+			"label": "windows-server",
+			"editor": "Microsoft Corporation",
+			"os_family": "WINDOWS",
+			"computer_type": "SERVER",
+			"description": "Microsoft Windows is the operating system developed by Microsoft to run on servers",
+			"tags": ["microsoft", "windows"]
+		}
+	}
+}
