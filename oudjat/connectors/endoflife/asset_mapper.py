@@ -243,7 +243,7 @@ class EOLAssetMapper(AssetMapper):
             support_channels=support_channels_value,
         )
 
-    def linux(self, distro: str) -> "SoftwareRelVersionDict[OSRelease]":
+    def unix(self, distro: str) -> "SoftwareRelVersionDict[OSRelease]":
         """
         Return a dictionary of MSOSRelease instances.
 
@@ -279,3 +279,5 @@ class EOLAssetMapper(AssetMapper):
             mapping_registry=mapping_registry,
             callback=rel_cb,
         )
+
+
