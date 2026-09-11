@@ -1,18 +1,17 @@
 """A module defining operating system behavior."""
-
-from typing import TYPE_CHECKING, Any, Callable, TypeAlias, override
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, override
 
 from ..software import Software, SoftwareType
-from ..software_release import SoftwareRelease
+from ..software_release import SoftwareRelease, SoftwareReleaseList
 from .os_families import OSFamily
 
 if TYPE_CHECKING:
     from oudjat.core.computer.computer_type import ComputerType
 
-    from ..software_release import SoftwareReleaseList
 
-OSReleaseList: TypeAlias = "SoftwareReleaseList[OSRelease]"
-OSReleaseListFilter: TypeAlias = Callable[["OSReleaseList"], "OSReleaseList"]
+type OSReleaseList = "SoftwareReleaseList[OSRelease]"
+type OSReleaseListFilter = Callable[["OSReleaseList"], "OSReleaseList"]
 
 class OSRelease(SoftwareRelease):
     """Specific software release for OperatingSystem."""
@@ -79,8 +78,8 @@ class OperatingSystem(Software[OSRelease]):
         if not isinstance(computer_type, list):
             computer_type = [computer_type]
 
-        self._computer_type: list["ComputerType"] = computer_type
-        self._os_family: "OSFamily" = os_family
+        self._computer_type: list[ComputerType] = computer_type
+        self._os_family: OSFamily = os_family
 
     # ****************************************************************
     # Methods
@@ -131,3 +130,4 @@ class OperatingSystem(Software[OSRelease]):
         """
 
         return OSFamily(os_family_name.upper())
+
