@@ -4,9 +4,9 @@ A simple module that lists OS families.
 
 import re
 from enum import Enum
-from typing import NamedTuple, TypeAlias, override
+from typing import NamedTuple, override
 
-OSFamilyOptMatch: TypeAlias = tuple["OSFamilyOptProps", str]
+type OSFamilyOptMatch = tuple["OSFamilyOptProps", str]
 
 class OSFamilyOptProps(NamedTuple):
     """

@@ -3,10 +3,12 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
+from oudjat.connectors.endoflife.asset_mapper import EOLAssetMapper
 from oudjat.connectors.endoflife.definitions import EOL_CACHE_PATH
 from oudjat.core.computer.computer_type import ComputerType
+from oudjat.core.software import SoftwareEditionDict
 from oudjat.utils import Context, FileUtils
 
 from ..exceptions import AmbiguousReleaseException
@@ -21,6 +23,35 @@ from .windows import WindowsEdition
 type MappingOSTuple = tuple[
     "OperatingSystem | None", "OSRelease | None", "SoftwareEdition | None"
 ]
+
+
+class OSOptAttributes(TypedDict):
+    """
+    A simple class to specify OSOption attributes properties.
+
+    Attributes:
+        os_id         (str)                : A short string to identify the os. Preferably matching endoflife.date product
+        name          (str)                : The name of the OS
+        label         (str)                : A string (without spaces) comparable to an id but more explicit
+        editor        (str)                : The name of the editor that maintains the OS
+        os_family     (str | OSFamily)     : The family of operating system the OS belongs to
+        computer_type (str | ComputerType) : The type of computer the operating system is dedicated to
+        description   (str)                : A string that describes the OS
+        editions      (SoftwareEditionDict): A dictionary of editions available for that os. Default will resolve to a default standard edition
+        tags          (list[str])          : A list of tags that describe the OS
+
+    """
+
+    os_id: str
+    name: str
+    label: str
+    editor: str
+    os_family: str | OSFamily
+    computer_type: str | ComputerType
+    description: str
+    editions: SoftwareEditionDict
+    tags: list[str]
+
 
 @dataclass
 class OSOptionProps:
@@ -107,18 +138,43 @@ class OSOption(Enum):
 
         return self._value_.attributes
 
-    def _opt_cache_path(self, id: int | str) -> Path:
+    def _opt_cache_path(self) -> Path:
         """
-        Return the cache path based on a provided OSOption id
-
-        Args:
-            id (int | str): The id of the OS option.
+        Return the cache path of the current OS option based on its id
 
         Returns:
             Path: The cache path for the OS option matching the provided id
         """
 
-        return Path(EOL_CACHE_PATH) / f"{id}.json"
+        return Path(EOL_CACHE_PATH) / f"{self.attributes['os_id']}.json"
+
+    def gen_opt_cache(self) -> bool:
+        """
+        Generate cache for an OS option.
+
+        Returns:
+            bool: True if the cache could be generated. False otherwise
+        """
+
+        path = self._opt_cache_path()
+        mapper = EOLAssetMapper()
+
+        # Delete the cache if it exists
+        if path.exists():
+            path.unlink()
+
+        if self.attributes["os_id"] == "windows":
+            data = mapper.windows()
+
+        elif self.attributes["os_id"] == "windowsserver":
+            data = mapper.windows_server()
+
+        else:
+            data = mapper.unix(self.attributes["os_id"])
+
+        FileUtils.export_json(data.to_dict(), path)
+
+        return path.exists()
 
     def __call__(self) -> "OperatingSystem":
         """
@@ -131,10 +187,10 @@ class OSOption(Enum):
         if self._value_.instance is None:
             self._value_.instance = self._value_.cls(**self.attributes)
 
-            release_data_path = self._opt_cache_path(self._value_.instance.id)
+            release_data_path = self._opt_cache_path()
 
             if not release_data_path.exists():
-                raise FileNotFoundError(f"{Context()}::Cache could not be retrieved. Make sure you generated it using endoflife asset mapper.")
+                self.gen_opt_cache()
 
             release_data = FileUtils.import_json(release_data_path)[0]
 
@@ -293,7 +349,9 @@ class OSOption(Enum):
             os = OSOption.guess_os(os_str)
 
             if os is not None:
-                os_rel = OSOption.guess_os_release(os, os_ver or os_str, filters=filters)
+                os_rel = OSOption.guess_os_release(
+                    os, os_ver or os_str, filters=filters
+                )
                 os_edition = OSOption.guess_os_edition(os, os_str)
 
                 res = os, os_rel, os_edition
