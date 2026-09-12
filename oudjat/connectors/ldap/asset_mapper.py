@@ -1,17 +1,17 @@
 """
 A module that handle LDAP entry mapping to asset elements.
 """
-
 import logging
 from typing import TYPE_CHECKING, Any
 
 from oudjat.connectors.mapping_functions import MappingFunction
 from oudjat.core.computer.computer import Computer
 from oudjat.core.software.os.operating_system import OSReleaseListFilter
+from oudjat.core.software.os.os_options import MappingOSTuple
 from oudjat.core.user.user import User
 from oudjat.utils.types import DataType
 
-from ..asset_mapper import AssetMapper, MappingOSTuple
+from ..asset_mapper import AssetMapper
 
 if TYPE_CHECKING:
     from oudjat.core.mapper import MappingRegistry
@@ -34,7 +34,7 @@ class LDAPAssetMapper(AssetMapper):
         """
 
         super().__init__()
-        self.logger: "logging.Logger" = logging.getLogger(__name__)
+        self.logger: logging.Logger = logging.getLogger(__name__)
 
     # ****************************************************************
     # Methods - Asset mapping
@@ -71,12 +71,12 @@ class LDAPAssetMapper(AssetMapper):
             }
 
         def asset_cb(asset: "Computer", record: dict[str, Any], _: "MappingRegistry") -> None:
-            release_filters: list["OSReleaseListFilter"] = [
+            release_filters: list[OSReleaseListFilter] = [
                 lambda rl: rl.filter_max_version(),
                 lambda rl: rl.filter_by_label(record["os"]["name"]),
             ]
 
-            os: "MappingOSTuple" = MappingFunction.OS(
+            os: MappingOSTuple = MappingFunction.OS(
                 func="os_details_from_str",
                 os_str=record["os"]["name"],
                 os_ver=record["os"]["version"],
