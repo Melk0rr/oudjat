@@ -29,7 +29,7 @@ class LDAPComputer(LDAPAccount):
             **kwargs (Any)        : Any further argument to pass to parent class
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__name__)
+        self.logger: logging.Logger = logging.getLogger(__name__)
         super().__init__(ldap_entry=ldap_entry, **kwargs)
 
     # ****************************************************************
