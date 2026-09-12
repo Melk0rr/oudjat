@@ -69,13 +69,13 @@ class Asset(GenericIdentifiable[AssetBoundType], ABC):
             gid=asset_id, name=name, label=label or "", description=description, **kwargs
         )
 
-        self._asset_type: "AssetType" = asset_type
-        self._location: dict[str, "Location"] = {}
+        self._asset_type: AssetType = asset_type
+        self._location: dict[str, Location] = {}
 
         if location is not None:
             self._set_location_from_instances(location)
 
-        self.risks: dict[str, "Risk"] = {}
+        self.risks: dict[str, Risk] = {}
 
     # ****************************************************************
     # Methods
@@ -156,7 +156,7 @@ class Asset(GenericIdentifiable[AssetBoundType], ABC):
         """
 
         base = super().to_dict()
-        formatted: "AssetBaseDict" = {
+        formatted: AssetBaseDict = {
             "assetType": str(self._asset_type),
             "location": {loc_k: loc.to_dict() for loc_k, loc in self._location.items()},
         }
