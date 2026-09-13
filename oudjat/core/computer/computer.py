@@ -269,8 +269,6 @@ class Computer(Asset):
             new_os (ComputerOSProps): new os informations represented as a ComputerOSProps instance
         """
 
-        # Reset computer type. It must be set again afterwards
-        self.computer_type = ComputerType.UNKNOWN
         self._os = new_os
 
     @property

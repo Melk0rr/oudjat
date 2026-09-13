@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 type OSReleaseList = "SoftwareReleaseList[OSRelease]"
 type OSReleaseListFilter = Callable[["OSReleaseList"], "OSReleaseList"]
+type OSComputerTypeParam = "str | list[str] | ComputerType | list[ComputerType]"
 
 class OSRelease(SoftwareRelease):
     """Specific software release for OperatingSystem."""
@@ -46,7 +47,6 @@ class OperatingSystem(Software[OSRelease]):
         name: str,
         label: str,
         os_family: "OSFamily",
-        computer_type: "ComputerType | list[ComputerType]",
         editor: str | list[str] | None = None,
         description: str | None = None,
         **kwargs: Any,
@@ -55,14 +55,14 @@ class OperatingSystem(Software[OSRelease]):
         Return a new instance of OperatingSystem.
 
         Args:
-            os_id (int | str)                                : OS unique ID
-            name (str)                                       : The name of the operating system
-            label (str)                                      : A short string to labelize the os
-            os_family (OSFamily)                             : Family of operating system, usually (Linux, MAC, Windows)
-            computer_type (ComputerType | list[ComputerType]): The type(s) of computer the OS is tide to
-            editor (str | list[str])                         : The editor in charge of the OS maintenance and/or development
-            description (str)                                : A string to describe the OS
-            **kwargs (Any)                                   : Any additional arguments that will be passed to parent class
+            os_id         (int | str)          : OS unique ID
+            name          (str)                : The name of the operating system
+            label         (str)                : A short string to labelize the os
+            os_family     (OSFamily)           : Family of operating system, usually (Linux, MAC, Windows)
+            computer_type (OSComputerTypeParam): The type(s) of computer the OS is tide to
+            editor        (str | list[str])    : The editor in charge of the OS maintenance and/or development
+            description   (str)                : A string to describe the OS
+            **kwargs      (Any)                : Any additional arguments that will be passed to parent class
         """
 
         super().__init__(
@@ -75,25 +75,10 @@ class OperatingSystem(Software[OSRelease]):
             **kwargs,
         )
 
-        if not isinstance(computer_type, list):
-            computer_type = [computer_type]
-
-        self._computer_type: list[ComputerType] = computer_type
         self._os_family: OSFamily = os_family
 
     # ****************************************************************
     # Methods
-
-    @property
-    def computer_type(self) -> list["ComputerType"]:
-        """
-        Return the computer types related to the current OS.
-
-        Returns:
-            list[ComputerType]: the list of computer types as ComputerType enumeration elements
-        """
-
-        return self._computer_type
 
     @property
     def os_family(self) -> "OSFamily":
@@ -111,7 +96,6 @@ class OperatingSystem(Software[OSRelease]):
         return {
             **super().to_dict(),
             "osFamily": self._os_family,
-            "computerTypes": self._computer_type,
         }
 
     # ****************************************************************

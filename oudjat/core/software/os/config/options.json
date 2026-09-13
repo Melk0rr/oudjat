@@ -6,7 +6,6 @@
 			"label": "red-hat-enterprise-linux",
 			"editor": "Red Hat",
 			"os_family": "LINUX",
-			"computer_type": "SERVER",
 			"description": "Red Hat Enterprise Linux is a Linux distribution developed by Red Hat for the commercial market",
 			"tags": ["linux-distribution", "red-hat"]
 		}
@@ -18,7 +17,6 @@
 			"label": "windows",
 			"editor": "Microsoft Corporation",
 			"os_family": "WINDOWS",
-			"computer_type": "WORKSTATION",
 			"description": "Microsoft Windows is the operating system developed by Microsoft to run on workstations",
 			"tags": ["microsoft", "windows"]
 		}
@@ -30,7 +28,6 @@
 			"label": "windows-server",
 			"editor": "Microsoft Corporation",
 			"os_family": "WINDOWS",
-			"computer_type": "SERVER",
 			"description": "Microsoft Windows is the operating system developed by Microsoft to run on servers",
 			"tags": ["microsoft", "windows"]
 		}

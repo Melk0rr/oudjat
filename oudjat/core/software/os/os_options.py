@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import TypedDict
 
 from oudjat.connectors.endoflife.asset_mapper import EOLAssetMapper
 from oudjat.connectors.endoflife.definitions import EOL_CACHE_PATH
@@ -35,7 +35,6 @@ class OSOptAttributes(TypedDict):
         label         (str)                : A string (without spaces) comparable to an id but more explicit
         editor        (str)                : The name of the editor that maintains the OS
         os_family     (str | OSFamily)     : The family of operating system the OS belongs to
-        computer_type (str | ComputerType) : The type of computer the operating system is dedicated to
         description   (str)                : A string that describes the OS
         editions      (SoftwareEditionDict): A dictionary of editions available for that os. Default will resolve to a default standard edition
         tags          (list[str])          : A list of tags that describe the OS
@@ -47,7 +46,6 @@ class OSOptAttributes(TypedDict):
     label: str
     editor: str
     os_family: str | OSFamily
-    computer_type: str | ComputerType
     description: str
     editions: SoftwareEditionDict
     tags: list[str]
@@ -64,7 +62,7 @@ class OSOptionProps:
     """
 
     cls: type["OperatingSystem"]
-    attributes: dict[str, Any]
+    attributes: OSOptAttributes
     instance: "OperatingSystem | None" = None
 
 
@@ -79,7 +77,6 @@ class OSOption(Enum):
             "label": "red-hat-enterprise-linux",
             "editor": "Red Hat",
             "os_family": OSFamily.LINUX,
-            "computer_type": ComputerType.SERVER,
             "description": "Red Hat Enterprise Linux is a Linux distribution developed by Red Hat for the commercial market",
             "editions": DEFAULT_SOFTWARE_EDITION,
             "tags": ["linux-distribution", "red-hat"],
@@ -94,7 +91,6 @@ class OSOption(Enum):
             "label": "windows",
             "editor": "Microsoft Corporation",
             "os_family": OSFamily.WINDOWS,
-            "computer_type": ComputerType.WORKSTATION,
             "description": "Microsoft Windows is the operating system developed by Microsoft to run on workstations",
             "editions": WindowsEdition.WINDOWS.value,
             "tags": ["microsoft", "windows"],
@@ -109,7 +105,6 @@ class OSOption(Enum):
             "label": "windows-server",
             "editor": "Microsoft Corporation",
             "os_family": OSFamily.WINDOWS,
-            "computer_type": ComputerType.SERVER,
             "description": "Microsoft Windows is the operating system developed by Microsoft to run on servers",
             "editions": WindowsEdition.WINDOWSSERVER.value,
             "tags": ["microsoft", "windows"],
@@ -128,7 +123,7 @@ class OSOption(Enum):
         return self._value_.instance
 
     @property
-    def attributes(self) -> dict[str, Any]:
+    def attributes(self) -> OSOptAttributes:
         """
         Return the attributes associated with the option.
 
