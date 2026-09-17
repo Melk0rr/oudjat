@@ -60,7 +60,7 @@ class SoftwareRelease(Asset):
             name          (str)           : The name of the release
             software_name (str)           : The software name which this release belongs to.
             version       (int | str)     : The version of the software, can be either an integer or a string representation of a number.
-            release_date  (str | datetime): The date the software was released. Can be a string formatted like: `%Y-%m-%d` or as a datetime object. 
+            release_date  (str | datetime): The date the software was released. Can be a string formatted like: `%Y-%m-%d` or as a datetime object.
             release_label (str)           : A label describing the nature of this release, such as "stable" or "beta".
 
         Raises:
@@ -682,6 +682,22 @@ class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
                 f"A release with id ({release.id}) already exists for version {key}"
             )
 
+    def is_version_within_release(
+        self, rl: "SoftwareReleaseList", version: "SoftwareReleaseVersion"
+    ) -> bool:
+        """
+        Return if the provided version is within the version range of a given release.
+
+        Args:
+            release (ReleaseType)           : The release to get version range from
+            version (SoftwareReleaseVersion): The version to check
+
+        Returns:
+            bool: True if it is within the versions range. False otherwise.
+        """
+
+        return any(r.version <= version <= r.latest_version for r in rl)
+
     def get(
         self, key: str, default_value: Any = None
     ) -> "SoftwareReleaseList[ReleaseType] | None":
@@ -699,7 +715,19 @@ class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
 
         """
 
-        return self._releases.get(key, default_value)
+        rel = self._releases.get(key, default_value)
+
+        if rel is None:
+            key_version = SoftwareReleaseVersion(key)
+
+            rel_search = filter(
+                lambda rl: self.is_version_within_release(rl, key_version),
+                self._releases.values(),
+            )
+
+            rel = next(rel_search, None)
+
+        return rel
 
     def find_unique_index(self, rel_version: str, rel_id: str) -> int | None:
         """
