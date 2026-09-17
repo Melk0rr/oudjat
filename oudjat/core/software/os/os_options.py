@@ -68,6 +68,34 @@ class OSOptionProps:
 class OSOption(Enum):
     """An enumeration of OSes."""
 
+    CENTOS = OSOptionProps(
+        cls=OperatingSystem,
+        attributes={
+            "os_id": "centos",
+            "name": "CentOS",
+            "label": "community-enterprise-operating-system",
+            "editor": "Lance Davis",
+            "os_family": OSFamily.LINUX,
+            "description": "CentOS was a Linux distribution that provided a free, enterprise-class, community-supported computing platform functionally compatible with RHEL",
+            "editions": DEFAULT_SOFTWARE_EDITION,
+            "tags": ["linux-distribution", "red-hat"],
+        },
+    )
+
+    DEBIAN = OSOptionProps(
+        cls=OperatingSystem,
+        attributes={
+            "os_id": "debian",
+            "name": "Debian",
+            "label": "Debian",
+            "editor": "",
+            "os_family": OSFamily.LINUX,
+            "description": "Debian is a free operating system for your computer. The Debian stable branch is the most popular edition for personal computers and network servers, and is used as the basis for many other Linux distributions",
+            "editions": DEFAULT_SOFTWARE_EDITION,
+            "tags": ["linux-distribution"],
+        },
+    )
+
     RHEL = OSOptionProps(
         cls=OperatingSystem,
         attributes={
@@ -79,6 +107,20 @@ class OSOption(Enum):
             "description": "Red Hat Enterprise Linux is a Linux distribution developed by Red Hat for the commercial market",
             "editions": DEFAULT_SOFTWARE_EDITION,
             "tags": ["linux-distribution", "red-hat"],
+        },
+    )
+
+    UBUNTU = OSOptionProps(
+        cls=OperatingSystem,
+        attributes={
+            "os_id": "ubuntu",
+            "name": "Ubuntu",
+            "label": "Ubuntu",
+            "editor": "Canonical",
+            "os_family": OSFamily.LINUX,
+            "description": "Ubuntu is a free and open-source Linux distribution based on Debian. Ubuntu is officially released in three editions: Desktop, Server, and Core",
+            "editions": DEFAULT_SOFTWARE_EDITION,
+            "tags": ["linux-distribution", "canonical"],
         },
     )
 
