@@ -8,6 +8,7 @@ from typing import NamedTuple, override
 
 type OSFamilyOptMatch = tuple["OSFamilyOptProps", str]
 
+
 class OSFamilyOptProps(NamedTuple):
     """
     A helper class to properly handle OSFamily props types.
@@ -37,10 +38,7 @@ class OSFamilyOptProps(NamedTuple):
             dict[str, str]: A dictionary representation of the current family option
         """
 
-        return {
-            "pattern": self.pattern,
-            "name": self.name
-        }
+        return {"pattern": self.pattern, "name": self.name}
 
 
 class OSFamilyProps(NamedTuple):
@@ -53,55 +51,61 @@ class OSFamilyProps(NamedTuple):
 
     options: list["OSFamilyOptProps"]
 
+
 class OSFamily(Enum):
     """OS family enumeration."""
 
     ANDROID = OSFamilyProps(
         options=[
-            OSFamilyOptProps(pattern=r"[Aa]ndroid(?: [Oo][Ss])?", name="ANDROIDOS"),
-            OSFamilyOptProps(pattern=r"[Gg]raphene[Oo][Ss]", name="GRAPHENEOS"),
-            OSFamilyOptProps(pattern=r"[Ll]ineage[Oo][Ss]|\/e\/[Oo][Ss]", name="LINEAGEOS"),
+            OSFamilyOptProps(pattern=r"(?i)android(?: os)?", name="ANDROIDOS"),
+            OSFamilyOptProps(pattern=r"(?i)grapheneos", name="GRAPHENEOS"),
+            OSFamilyOptProps(pattern=r"(?i)lineageos", name="LINEAGEOS"),
         ]
     )
 
     BSD = OSFamilyProps(
         options=[
-            OSFamilyOptProps(pattern=r"OpenBSD", name="OPENBSD"),
-            OSFamilyOptProps(pattern=r"FreeBSD", name="FREEBSD"),
+            OSFamilyOptProps(pattern=r"(?i)openbsd", name="OPENBSD"),
+            OSFamilyOptProps(pattern=r"(?i)freebsd", name="FREEBSD"),
         ]
     )
 
     LINUX = OSFamilyProps(
         options=[
-            OSFamilyOptProps(pattern=r"[Aa]lma(?: )?[Ll]inux", name="ALMALINUX"),
-            OSFamilyOptProps(pattern=r"[Aa]lpine(?: )?[Ll]inux", name="ALPINELINUX"),
-            OSFamilyOptProps(pattern=r"[Cc]ent[Oo][Ss]", name="CENTOS"),
-            OSFamilyOptProps(pattern=r"[Dd]ebian(?: Linux)?", name="DEBIAN"),
-            OSFamilyOptProps(pattern=r"[Ff]edora(?: Linux)?", name="FEDORA"),
-            OSFamilyOptProps(pattern=r"Linux Mint(?: Debian Edition|\s*LMDE)?", name="MINT"),
-            OSFamilyOptProps(pattern=r"[Nn]ix[Oo][Ss]", name="NIXOS"),
-            OSFamilyOptProps(pattern=r"(?:[Oo]pen)?[Ss][Uu][Ss][Ee](?: Linux)?", name="OPENSUSE"),
-            OSFamilyOptProps(pattern=r"[Oo]racle(?: Linux)?", name="ORACLELINUX"),
+            OSFamilyOptProps(pattern=r"(?i)alma(?: linux)?", name="ALMALINUX"),
+            OSFamilyOptProps(pattern=r"(?i)alpine(?: linux)?", name="ALPINELINUX"),
+            OSFamilyOptProps(pattern=r"(?i)centos", name="CENTOS"),
             OSFamilyOptProps(
-                pattern=r"[Rr](?:ed )?[Hh](?:at )?[Ee](?:nterprise )?[Ll](?:inux)?", name="RHEL"
+                pattern=r"(?i)debian(?: linux)?(?: GNU\/?)?", name="DEBIAN"
             ),
-            OSFamilyOptProps(pattern=r"[Rr]ocky(?: Linux)?", name="ROCKYLINUX"),
-            OSFamilyOptProps(pattern=r"[Ss][Uu][Ss][Ee](?: Linux)?", name="SUSELINUX"),
-            OSFamilyOptProps(pattern=r"[Uu]buntu(?: Linux)?", name="UBUNTU"),
+            OSFamilyOptProps(pattern=r"(?i)fedora(?: linux)?", name="FEDORA"),
+            OSFamilyOptProps(
+                pattern=r"(?i)linux mint(?: debian edition|\s*lmde)?", name="MINT"
+            ),
+            OSFamilyOptProps(pattern=r"(?i)nixos", name="NIXOS"),
+            OSFamilyOptProps(pattern=r"(?i)opensuse(?: linux)?", name="OPENSUSE"),
+            OSFamilyOptProps(pattern=r"(?i)oracle(?: Linux)?", name="ORACLELINUX"),
+            OSFamilyOptProps(
+                pattern=r"(?i)red\s+hat\s+enterprise(?:\s+(?:linux|server))?",
+                name="RHEL",
+            ),
+            OSFamilyOptProps(pattern=r"(?i)rocky(?: linux)?", name="ROCKYLINUX"),
+            OSFamilyOptProps(pattern=r"(?i)suse(?: linux)?", name="SUSELINUX"),
+            OSFamilyOptProps(pattern=r"(?i)ubuntu(?: linux)?", name="UBUNTU"),
         ]
     )
 
     APPLE = OSFamilyProps(
         options=[
-            OSFamilyOptProps(pattern=r"[Mm][Aa][Cc]\s*OS\s*X|OS\s*X|Mac\s*OS", name="MACOS"),
-            OSFamilyOptProps(pattern=r"(?:Apple )?[Ii][Oo][Ss]", name="IOS"),
+            OSFamilyOptProps(pattern=r"(?i)mac\s*OS\s*X|OS\s*X|Mac\s*OS", name="MACOS"),
+            OSFamilyOptProps(pattern=r"(?i)(?:apple )?ios", name="IOS"),
         ]
     )
 
     WINDOWS = OSFamilyProps(
         options=[
-            OSFamilyOptProps(pattern=r"[Ww]indows(?!\s+[Ss]erver)", name="WINDOWS"),
-            OSFamilyOptProps(pattern=r"[Ww]indows\s+[Ss]erver", name="WINDOWSSERVER"),
+            OSFamilyOptProps(pattern=r"(?i)windows(?!\s+server)", name="WINDOWS"),
+            OSFamilyOptProps(pattern=r"(?i)windows\s+server", name="WINDOWSSERVER"),
         ]
     )
 
