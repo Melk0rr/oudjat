@@ -504,7 +504,20 @@ class S1Connector(Connector):
         if infected:
             payload["infected"] = True
 
-        return self.fetch(endpoint=S1Endpoint.AGENTS, payload=payload)
+        agents_data = self.fetch(endpoint=S1Endpoint.AGENTS, payload=payload)
+
+        def _agent_fmt(agent: dict[str, Any]) -> dict[str, Any]:
+            
+            if agent["osType"] == "linux":
+                base_revision: str = agent["osRevision"]
+                rel_cln_revision = base_revision.replace(" release ", " ")
+                parenthesis_cln_revision = re.sub(r"\s*\(.*?\)\s*", " ", rel_cln_revision)
+
+                agent["osRevision"] = parenthesis_cln_revision
+
+            return agent
+
+        return list(map(_agent_fmt, agents_data))
 
     def agents_export(
         self,
