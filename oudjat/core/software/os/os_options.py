@@ -65,6 +65,7 @@ class OSOptionProps:
     instance: "OperatingSystem | None" = None
 
 
+# TODO: Use a JSON based logic + generate Enum elements from it if possible or change Enum to regular class
 class OSOption(Enum):
     """An enumeration of OSes."""
 
