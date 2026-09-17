@@ -4,4 +4,4 @@ from .operating_system import OperatingSystem, OSRelease
 from .os_families import OSFamily
 from .os_options import OSOption
 
-__all__ = ["OperatingSystem", "OSFamily", "OSRelease", "OSOption"]
+__all__ = ["OSFamily", "OSOption", "OSRelease", "OperatingSystem"]

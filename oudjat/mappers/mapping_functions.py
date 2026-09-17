@@ -5,10 +5,8 @@ A module that list asset mapping functions.
 from enum import Enum
 from typing import Any
 
-from oudjat.core.software.os import OSFamily
+from oudjat.core.software.os import OSFamily, OSOption
 from oudjat.utils.context import Context
-
-from .asset_mapper import AssetMapper
 
 
 class OSMappingFunction(Enum):
@@ -16,13 +14,13 @@ class OSMappingFunction(Enum):
     An enumeration of OS specific mapping functions.
     """
 
-    OS_FROM_STR = AssetMapper.guess_os
+    OS_FROM_STR = OSOption.guess_os
     OS_FAMILY_FROM_STR = OSFamily.search_os_family_opt
-    OS_EDITION_FROM_STR = AssetMapper.guess_os_edition
-    OS_RELEASE_FROM_STR = AssetMapper.guess_os_release
-    OS_DETAILS_FROM_STR = AssetMapper.map_os
+    OS_EDITION_FROM_STR = OSOption.guess_os_edition
+    OS_RELEASE_FROM_STR = OSOption.guess_os_release
+    OS_DETAILS_FROM_STR = OSOption.map_os
 
-    def __call__(self, function_name: str, **kwargs: Any) -> Any:
+    def __call__(self, **kwargs: Any) -> Any:
         """
         Call a mapping function based on its name.
 
@@ -58,6 +56,8 @@ class MappingFunction(Enum):
 
         mapping_func = getattr(self._value_, func.upper(), None)
         if mapping_func is None:
-            raise KeyError(f"{Context()}::{func} is not a valid {self._name_} mapping function")
+            raise KeyError(
+                f"{Context()}::{func} is not a valid {self._name_} mapping function"
+            )
 
         return mapping_func(**kwargs)

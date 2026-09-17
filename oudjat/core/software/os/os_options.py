@@ -5,9 +5,9 @@ from enum import Enum
 from pathlib import Path
 from typing import TypedDict
 
-from oudjat.connectors.endoflife.asset_mapper import EOLAssetMapper
 from oudjat.connectors.endoflife.definitions import EOL_CACHE_PATH
 from oudjat.core.software import SoftwareEditionDict
+from oudjat.mappers.endoflife.asset_mapper import EOLAssetMapper
 from oudjat.utils import Context, FileUtils
 
 from ..exceptions import AmbiguousReleaseException

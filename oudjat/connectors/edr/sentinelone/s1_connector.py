@@ -4,7 +4,7 @@ A module that handles SentinelOne API connection and interactions.
 
 import logging
 import re
-from typing import Any, TypeAlias, override
+from typing import Any, override
 from urllib.parse import ParseResult, urlparse
 
 from yaspin import yaspin
@@ -21,12 +21,8 @@ from .s1_incident_statuses import S1IncidentStatus
 from .s1_incident_types import S1IncidentType
 from .s1_mitigation_modes import S1MitigationMode
 
-S1IncidentStatusType: TypeAlias = (
-    "str | S1IncidentStatus | list[str | S1IncidentStatus]"
-)
-S1AnalystVerdictType: TypeAlias = (
-    "str | S1AnalystVerdict | list[str | S1AnalystVerdict]"
-)
+type S1IncidentStatusType = "str | S1IncidentStatus | list[str | S1IncidentStatus]"
+type S1AnalystVerdictType = "str | S1AnalystVerdict | list[str | S1AnalystVerdict]"
 
 
 class S1Connector(Connector):
@@ -54,7 +50,7 @@ class S1Connector(Connector):
             port (int)     : Port number used for the connection
         """
 
-        self.logger: "logging.Logger" = logging.getLogger(__name__)
+        self.logger: logging.Logger = logging.getLogger(__name__)
 
         scheme = "http"
         if port == 443:
@@ -64,10 +60,10 @@ class S1Connector(Connector):
         if not re.match(r"http(s?):", target):
             target = f"{scheme}://{target}"
 
-        self._target: "ParseResult"
+        self._target: ParseResult
         super().__init__(target=urlparse(target), username=username, password=api_token)
 
-        self._connection: "str | None" = None
+        self._connection: str | None = None
         self._DEFAULT_HEADERS: dict[str, str] = {"Content-Type": "application/json"}
 
     # ****************************************************************
@@ -460,9 +456,9 @@ class S1Connector(Connector):
 
                 spinner.ok("✅ ")
 
-            except Exception as e:
+            except Exception:
                 spinner.fail("❌ ")
-                raise e
+                raise
 
         return res
 

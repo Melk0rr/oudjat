@@ -5,7 +5,7 @@ A module to map EndOfLife.date results into actual assets.
 import re
 from typing import Any, TypedDict
 
-from oudjat.connectors.asset_mapper import AssetMapper, AssetMappingCallback
+from oudjat.connectors.endoflife.eol_connector import EndOfLifeConnector
 from oudjat.core.mapper import (
     Mapper,
     MappingRegistry,
@@ -20,7 +20,7 @@ from oudjat.core.software import (
 from oudjat.core.software.os.operating_system import OSRelease
 from oudjat.core.software.software_release import ReleaseType, SoftwareRelVersionDict
 
-from .eol_connector import EndOfLifeConnector
+from ..asset_mapper import AssetMapper, AssetMappingCallback
 
 
 class SupportPhaseLabelsProps(TypedDict):

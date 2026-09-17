@@ -4,7 +4,6 @@ A module that handle LDAP entry mapping to asset elements.
 import logging
 from typing import TYPE_CHECKING, Any
 
-from oudjat.connectors.mapping_functions import MappingFunction
 from oudjat.core.computer.computer import Computer
 from oudjat.core.software.os.operating_system import OSReleaseListFilter
 from oudjat.core.software.os.os_options import MappingOSTuple
@@ -12,6 +11,7 @@ from oudjat.core.user.user import User
 from oudjat.utils.types import DataType
 
 from ..asset_mapper import AssetMapper
+from ..mapping_functions import MappingFunction
 
 if TYPE_CHECKING:
     from oudjat.core.mapper import MappingRegistry

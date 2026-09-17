@@ -1,7 +1,5 @@
 """A package that gather LDAP manipulations related modules."""
-# TODO: Move ldap object stuff back to LDAPConnector but in a transparent way
 
-from .asset_mapper import LDAPAssetMapper
 from .ldap_connector import LDAPConnector
 from .ldap_filter import (
     LDAPBuiltinFilter,
@@ -23,16 +21,15 @@ from .objects import (
 )
 
 __all__ = [
-    "LDAPAssetMapper",
+    "LDAPBuiltinFilter",
+    "LDAPComputer",
     "LDAPConnector",
     "LDAPFilter",
-    "LDAPFilterParser",
-    "LDAPFilterOperator",
     "LDAPFilterComparisonOperator",
-    "LDAPBuiltinFilter",
     "LDAPFilterObjectCls",
     "LDAPFilterObjectCtg",
-    "LDAPComputer",
+    "LDAPFilterOperator",
+    "LDAPFilterParser",
     "LDAPGroup",
     "LDAPGroupPolicyObject",
     "LDAPObjectType",
