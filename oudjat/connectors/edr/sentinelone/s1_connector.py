@@ -513,7 +513,13 @@ class S1Connector(Connector):
                 rel_cln_revision = base_revision.replace(" release ", " ")
                 parenthesis_cln_revision = re.sub(r"\s*\(.*?\)\s*", " ", rel_cln_revision)
 
-                agent["osRevision"] = parenthesis_cln_revision
+                cln_split = parenthesis_cln_revision.split(" ")
+
+                agent["osRevision"] = " ".join(cln_split[:-1])
+                agent["osKernel"] = cln_split[-1]
+
+            else:
+                agent["osKernel"] = None
 
             return agent
 
