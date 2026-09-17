@@ -5,7 +5,6 @@ from enum import Enum
 from pathlib import Path
 from typing import TypedDict
 
-from oudjat.connectors.endoflife.definitions import EOL_CACHE_PATH
 from oudjat.core.software import SoftwareEditionDict
 from oudjat.mappers.endoflife.asset_mapper import EOLAssetMapper
 from oudjat.utils import Context, FileUtils
@@ -18,6 +17,9 @@ from .exceptions import NotImplementedOSOption
 from .operating_system import OperatingSystem, OSRelease, OSReleaseListFilter
 from .os_families import OSFamily
 from .windows import WindowsEdition
+
+CACHE_PATH  = FileUtils.project_root() / ".cache"
+SOFTWARE_CACHE_PATH  = CACHE_PATH / "software"
 
 type MappingOSTuple = tuple[
     "OperatingSystem | None", "OSRelease | None", "SoftwareEdition | None"
@@ -183,7 +185,7 @@ class OSOption(Enum):
             Path: The cache path for the OS option matching the provided id
         """
 
-        return Path(EOL_CACHE_PATH) / f"{self.attributes['os_id']}.json"
+        return Path(SOFTWARE_CACHE_PATH) / f"{self.attributes['os_id']}.json"
 
     def gen_opt_cache(self) -> bool:
         """
@@ -225,6 +227,9 @@ class OSOption(Enum):
             self._value_.instance = self._value_.cls(**self.attributes)
 
             release_data_path = self._opt_cache_path()
+
+            # Ensures cache dir exists
+            SOFTWARE_CACHE_PATH.mkdir(parents=True, exist_ok=True)
 
             if not release_data_path.exists():
                 self.gen_opt_cache()
