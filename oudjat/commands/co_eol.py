@@ -4,7 +4,7 @@ A command module to handle interactions with endoflife.date API.
 
 from typing import Any
 
-from oudjat.connectors.endoflife import EndOfLifeConnector
+from oudjat.connectors.endoflife.eol_connector import EndOfLifeConnector
 from oudjat.utils.doc_builder import DocBuilder
 
 from .base import (
@@ -146,7 +146,7 @@ class EOLConnectorCommand(ConnectorCommand):
 
         super().__init__(options, False)
 
-        self.connector: "EndOfLifeConnector" = EndOfLifeConnector()
+        self.connector: EndOfLifeConnector = EndOfLifeConnector()
         self.connector.connect()
 
         # Usage backends

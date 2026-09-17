@@ -1,8 +1,9 @@
 """A module that defines common command behaviors."""
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, TypeAlias
+from typing import Any
 
 import orjson
 
@@ -43,7 +44,7 @@ class CmdUsage:
 
     description: str
     usage_str: tuple[str, str]
-    mapping_opts: "CmdOptUsageRegistry" = field(default_factory=lambda: {})
+    mapping_opts: "CmdOptUsageRegistry" = field(default_factory=dict)
     backend: Callable[..., "DataType"] | None = None
 
 
@@ -82,8 +83,8 @@ class CmdProps:
 
     name: str
     description: str
-    options: "CmdOptRegistry" = field(default_factory=lambda: {})
-    usages: "CmdUsageRegistry" = field(default_factory=lambda: {})
+    options: "CmdOptRegistry" = field(default_factory=dict)
+    usages: "CmdUsageRegistry" = field(default_factory=dict)
 
     def backends(self, registry: dict[str, Callable[..., "DataType"] | None]) -> None:
         """
@@ -170,10 +171,10 @@ class CmdProps:
             usg.usage_str = (main, f"{prepend_str} {opts}")
 
 
-CmdMappingCallback: TypeAlias = Callable[[str, Any], Any]
-CmdOptRegistry: TypeAlias = dict[str, "CmdOpt"]
-CmdOptUsageRegistry: TypeAlias = dict[str, "CmdUsageOpt"]
-CmdUsageRegistry: TypeAlias = dict[str, "CmdUsage"]
+type CmdMappingCallback = Callable[[str, Any], Any]
+type CmdOptRegistry = dict[str, "CmdOpt"]
+type CmdOptUsageRegistry = dict[str, "CmdUsageOpt"]
+type CmdUsageRegistry = dict[str, "CmdUsage"]
 
 
 class Base:
@@ -278,8 +279,6 @@ class Base:
         Returns:
             list[str]: A cleaned list of strings
         """
-
-        values = []
 
         if self.options[str_opt].startswith("@"):
             path = Path(self.options[str_opt][1:])

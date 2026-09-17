@@ -46,7 +46,7 @@ class OperatingSystem(Software[OSRelease]):
         os_id: int | str,
         name: str,
         label: str,
-        os_family: "OSFamily",
+        os_family: "str | OSFamily",
         editor: str | list[str] | None = None,
         description: str | None = None,
         **kwargs: Any,
@@ -74,6 +74,9 @@ class OperatingSystem(Software[OSRelease]):
             description=description,
             **kwargs,
         )
+
+        if isinstance(os_family, str):
+            os_family = OSFamily[os_family]
 
         self._os_family: OSFamily = os_family
 

@@ -7,7 +7,6 @@ from typing import TypedDict
 
 from oudjat.connectors.endoflife.asset_mapper import EOLAssetMapper
 from oudjat.connectors.endoflife.definitions import EOL_CACHE_PATH
-from oudjat.core.computer.computer_type import ComputerType
 from oudjat.core.software import SoftwareEditionDict
 from oudjat.utils import Context, FileUtils
 

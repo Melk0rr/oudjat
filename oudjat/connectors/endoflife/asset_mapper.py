@@ -17,7 +17,7 @@ from oudjat.core.software import (
     SupportPhase,
     SupportPhaseType,
 )
-from oudjat.core.software.os import OSRelease
+from oudjat.core.software.os.operating_system import OSRelease
 from oudjat.core.software.software_release import ReleaseType, SoftwareRelVersionDict
 
 from .eol_connector import EndOfLifeConnector
@@ -279,5 +279,4 @@ class EOLAssetMapper(AssetMapper):
             mapping_registry=mapping_registry,
             callback=rel_cb,
         )
-
 
