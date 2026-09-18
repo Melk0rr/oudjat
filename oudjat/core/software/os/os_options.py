@@ -127,6 +127,21 @@ class OSOption(Enum):
         },
     )
 
+    
+    SLES = OSOptionProps(
+        cls=OperatingSystem,
+        attributes={
+            "os_id": "sles",
+            "name": "SUSE Linux Enterprise Server",
+            "label": "suse-linux-enterprise-server",
+            "editor": "SUSE",
+            "os_family": OSFamily.LINUX,
+            "description": "SUSE Linux Enterprise Server is a modular linux distribution for both multimodal and traditional IT",
+            "editions": DEFAULT_SOFTWARE_EDITION,
+            "tags": ["linux-distribution", "suse"],
+        },
+    )
+
     UBUNTU = OSOptionProps(
         cls=OperatingSystem,
         attributes={

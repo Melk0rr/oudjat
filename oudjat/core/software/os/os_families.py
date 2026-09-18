@@ -90,7 +90,7 @@ class OSFamily(Enum):
                 name="RHEL",
             ),
             OSFamilyOptProps(pattern=r"(?i)rocky(?: linux)?", name="ROCKYLINUX"),
-            OSFamilyOptProps(pattern=r"(?i)suse(?: linux)?", name="SUSELINUX"),
+            OSFamilyOptProps(pattern=r"(?i)suse(?: linux)?(?: enterprise)?", name="SLES"),
             OSFamilyOptProps(pattern=r"(?i)ubuntu(?: linux)?", name="UBUNTU"),
         ]
     )
