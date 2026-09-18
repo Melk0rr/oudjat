@@ -154,6 +154,28 @@ class SupportPhase:
         return self._end
 
     @property
+    def start_str(self) -> str:
+        """
+        Return the start date of the current phase as a string.
+
+        Returns:
+            str: A string formatted as YYYY-MM-DD that represent the start date of the phase.
+        """
+
+        return TimeConverter.date_to_str(self._start)
+
+    @property
+    def end_str(self) -> str:
+        """
+        Return the end date of the current phase as a string.
+
+        Returns:
+            str: A string formatted as YYYY-MM-DD that represent the end date of the phase.
+        """
+
+        return TimeConverter.date_to_str(self._end)
+
+    @property
     def duration(self) -> int:
         """
         Return the duration in days of the current support phase.
@@ -302,8 +324,8 @@ class SupportPhase:
         return {
             "type": str(self._type),
             "label": self._label,
-            "start": TimeConverter.date_to_str(self._start),
-            "end": TimeConverter.date_to_str(self._end),
+            "start": self.start_str,
+            "end": self.end_str,
             "status": str(self),
             "startsIn": self.starts_in,
             "endsIn": self.ends_in,
