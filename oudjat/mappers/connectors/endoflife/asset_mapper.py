@@ -20,7 +20,7 @@ from oudjat.core.software import (
 from oudjat.core.software.os.operating_system import OSRelease
 from oudjat.core.software.software_release import ReleaseType, SoftwareRelVersionDict
 
-from ..asset_mapper import AssetMapper, AssetMappingCallback
+from ...asset_mapper import AssetMapper, AssetMappingCallback
 
 
 class SupportPhaseLabelsProps(TypedDict):
@@ -98,6 +98,16 @@ class EOLAssetMapper(AssetMapper):
 
             start = end
 
+        if len(sd.phases) == 0 and release["isMaintained"]:
+            sd.add(
+                SupportPhase(
+                    SupportPhaseType.ACTIVE_SUPPORT,
+                    start,
+                    "2999-12-31",
+                    labels["eoas"] or "Active Support",
+                )
+            )
+
         return sd
 
     def _clean_unix_label(self, label: str) -> str:
@@ -115,7 +125,6 @@ class EOLAssetMapper(AssetMapper):
         special_cleaned = re.sub(r"[^\w.]+", "-", par_cleaned)
 
         return special_cleaned.strip("-").lower()
-
 
     def _releases(
         self,
@@ -296,4 +305,3 @@ class EOLAssetMapper(AssetMapper):
             mapping_registry=mapping_registry,
             callback=rel_cb,
         )
-

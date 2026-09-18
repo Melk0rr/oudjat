@@ -1,10 +1,10 @@
 """A module defining operating system behavior."""
+
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, override
 
 from ..software import Software, SoftwareType
 from ..software_release import SoftwareRelease, SoftwareReleaseList
-from .os_families import OSFamily
 
 if TYPE_CHECKING:
     from oudjat.core.computer.computer_type import ComputerType
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 type OSReleaseList = "SoftwareReleaseList[OSRelease]"
 type OSReleaseListFilter = Callable[["OSReleaseList"], "OSReleaseList"]
 type OSComputerTypeParam = "str | list[str] | ComputerType | list[ComputerType]"
+
 
 class OSRelease(SoftwareRelease):
     """Specific software release for OperatingSystem."""
@@ -46,7 +47,7 @@ class OperatingSystem(Software[OSRelease]):
         os_id: int | str,
         name: str,
         label: str,
-        os_family: "str | OSFamily",
+        os_family: "str",
         editor: str | list[str] | None = None,
         description: str | None = None,
         **kwargs: Any,
@@ -58,7 +59,7 @@ class OperatingSystem(Software[OSRelease]):
             os_id         (int | str)          : OS unique ID
             name          (str)                : The name of the operating system
             label         (str)                : A short string to labelize the os
-            os_family     (OSFamily)           : Family of operating system, usually (Linux, MAC, Windows)
+            os_family     (str)                : Family of operating system, usually (Linux, MAC, Windows)
             computer_type (OSComputerTypeParam): The type(s) of computer the OS is tide to
             editor        (str | list[str])    : The editor in charge of the OS maintenance and/or development
             description   (str)                : A string to describe the OS
@@ -75,21 +76,18 @@ class OperatingSystem(Software[OSRelease]):
             **kwargs,
         )
 
-        if isinstance(os_family, str):
-            os_family = OSFamily[os_family]
-
-        self._os_family: OSFamily = os_family
+        self._os_family: str = os_family
 
     # ****************************************************************
     # Methods
 
     @property
-    def os_family(self) -> "OSFamily":
+    def os_family(self) -> "str":
         """
         Return the OS family of the current OS.
 
         Returns:
-            OSFamily: the OS family represented by an OSFamily enumeration element
+            str: the OS family represented by a string
         """
 
         return self._os_family
@@ -103,18 +101,4 @@ class OperatingSystem(Software[OSRelease]):
 
     # ****************************************************************
     # Static methods
-
-    @staticmethod
-    def os_family_by_name(os_family_name: str) -> "OSFamily":
-        """
-        Return an OSFamily based on its name.
-
-        Args:
-            os_family_name (str): The name of the supposed OSFamily
-
-        Returns:
-            OSFamily: The OSFamily enum element based on the provided name
-        """
-
-        return OSFamily(os_family_name.upper())
 

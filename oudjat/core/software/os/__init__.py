@@ -1,7 +1,5 @@
 """A software sub package that specifically focuses on operating systems."""
 
 from .operating_system import OperatingSystem, OSRelease
-from .os_families import OSFamily
-from .os_options import OSOption
 
-__all__ = ["OSFamily", "OSOption", "OSRelease", "OperatingSystem"]
+__all__ = ["OSRelease", "OperatingSystem"]

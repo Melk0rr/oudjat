@@ -6,20 +6,60 @@ from pathlib import Path
 from typing import TypedDict
 
 from oudjat.core.software import SoftwareEditionDict
-from oudjat.mappers.endoflife.asset_mapper import EOLAssetMapper
+from oudjat.core.software.os.operating_system import (
+    OperatingSystem,
+    OSRelease,
+    OSReleaseListFilter,
+)
+from oudjat.core.software.os.windows import WindowsEdition
+from oudjat.core.software.software_edition import (
+    DEFAULT_SOFTWARE_EDITION,
+    SoftwareEdition,
+)
+from oudjat.core.software.software_release import SoftwareReleaseList
+from oudjat.core.software.software_release_version import SoftwareReleaseVersion
+from oudjat.mappers.connectors.endoflife.asset_mapper import EOLAssetMapper
 from oudjat.utils import Context, FileUtils
 
-from ..exceptions import AmbiguousReleaseException
-from ..software_edition import DEFAULT_SOFTWARE_EDITION, SoftwareEdition
-from ..software_release import SoftwareReleaseList
-from ..software_release_version import SoftwareReleaseVersion
-from .exceptions import NotImplementedOSOption
-from .operating_system import OperatingSystem, OSRelease, OSReleaseListFilter
 from .os_families import OSFamily
-from .windows import WindowsEdition
 
 CACHE_PATH = FileUtils.project_root() / ".cache"
 SOFTWARE_CACHE_PATH = CACHE_PATH / "software"
+
+
+class NotImplementedOSOption(KeyError):
+    """
+    A helper class to handle not implemented os option.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of NotImplementedOSOption.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
+
+
+class AmbiguousReleaseException(Exception):
+    """
+    A helper class to handle ambiguous SoftwareRelease resolution.
+    """
+
+    def __init__(self, message: str) -> None:
+        """
+        Create a new instance of AmbiguousReleaseException.
+
+        Args:
+            message (str): Error message
+        """
+
+        self.message: str = message
+        super().__init__(self.message)
+
 
 type MappingOSTuple = tuple[
     "OperatingSystem | None", "OSRelease | None", "SoftwareEdition | None"
@@ -120,7 +160,7 @@ class OSOption(Enum):
             "name": "FreeBSD",
             "label": "freebsd",
             "editor": "FreeBSD Project",
-            "os_family": OSFamily.BSD,
+            "os_family": OSFamily.UNIX,
             "description": "FreeBSD is an operating system used to power modern servers, desktops, and embedded platforms",
             "editions": DEFAULT_SOFTWARE_EDITION,
             "tags": ["unix-distribution", "bsd-distribution"],
@@ -138,6 +178,20 @@ class OSOption(Enum):
             "description": "Oracle Linux is an Open Source, free RHEL derivative developed by Oracle to be a 100% application binary compatible alternative to Red Hat Enterprise Linux",
             "editions": DEFAULT_SOFTWARE_EDITION,
             "tags": ["linux-distribution", "oracle"],
+        },
+    )
+
+    ORACLESOLARIS = OSOptionProps(
+        cls=OperatingSystem,
+        attributes={
+            "os_id": "solaris",
+            "name": "Oracle Solaris",
+            "label": "oracle-solaris",
+            "editor": "Oracle",
+            "os_family": OSFamily.UNIX,
+            "description": "Oracle Solaris is a proprietary Unix operating system originally developed by Sun Microsystems. After the Sun acquisition by Oracle in 2010, it was renamed Oracle Solaris. It supports SPARC and x86-64 workstations and servers. It is known for its stability, performance, scalability and innovative features such as DTrace or ZFS",
+            "editions": DEFAULT_SOFTWARE_EDITION,
+            "tags": ["unix-distribution", "oracle"],
         },
     )
 

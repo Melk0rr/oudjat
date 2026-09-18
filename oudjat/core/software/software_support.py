@@ -471,6 +471,17 @@ class Support:
     # Properties
 
     @property
+    def phases(self) -> dict[str, SupportPhase]:
+        """
+        Return the support phases dictionary.
+
+        Returns:
+            dict[str, SupportPhase]: Support phases dictionary
+        """
+
+        return self._phases
+
+    @property
     def has_extended_support(self) -> bool:
         """
         Return wheither the current support has an extended period available.

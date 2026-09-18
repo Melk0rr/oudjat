@@ -5,8 +5,9 @@ A module that list asset mapping functions.
 from enum import Enum
 from typing import Any
 
-from oudjat.core.software.os import OSFamily, OSOption
 from oudjat.utils.context import Context
+
+from .general.software.os import OSFamily, OSOption
 
 
 class OSMappingFunction(Enum):

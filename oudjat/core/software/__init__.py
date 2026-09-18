@@ -25,6 +25,7 @@ __all__ = [
     "SoftwareReleaseStage",
     "SoftwareReleaseVersion",
     "SoftwareType",
+    "Support",
     "SupportDict",
     "SupportDictProps",
     "SupportPhase",

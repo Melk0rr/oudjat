@@ -63,10 +63,10 @@ class OSFamily(Enum):
         ]
     )
 
-    BSD = OSFamilyProps(
+    APPLE = OSFamilyProps(
         options=[
-            OSFamilyOptProps(pattern=r"(?i)openbsd", name="OPENBSD"),
-            OSFamilyOptProps(pattern=r"(?i)freebsd", name="FREEBSD"),
+            OSFamilyOptProps(pattern=r"(?i)mac\s*OS\s*X|OS\s*X|Mac\s*OS", name="MACOS"),
+            OSFamilyOptProps(pattern=r"(?i)(?:apple )?ios", name="IOS"),
         ]
     )
 
@@ -84,21 +84,26 @@ class OSFamily(Enum):
             ),
             OSFamilyOptProps(pattern=r"(?i)nixos", name="NIXOS"),
             OSFamilyOptProps(pattern=r"(?i)opensuse(?: linux)?", name="OPENSUSE"),
-            OSFamilyOptProps(pattern=r"(?i)oracle(?: linux)?(?: server)?", name="ORACLELINUX"),
+            OSFamilyOptProps(
+                pattern=r"(?i)oracle(?: linux|server)?", name="ORACLELINUX"
+            ),
             OSFamilyOptProps(
                 pattern=r"(?i)red\s+hat\s+enterprise(?:\s+(?:linux|server))?",
                 name="RHEL",
             ),
             OSFamilyOptProps(pattern=r"(?i)rocky(?: linux)?", name="ROCKYLINUX"),
-            OSFamilyOptProps(pattern=r"(?i)suse(?: linux)?(?: enterprise)?", name="SLES"),
+            OSFamilyOptProps(
+                pattern=r"(?i)suse(?: linux)?(?: enterprise)?", name="SLES"
+            ),
             OSFamilyOptProps(pattern=r"(?i)ubuntu(?: linux)?", name="UBUNTU"),
         ]
     )
 
-    APPLE = OSFamilyProps(
+    UNIX = OSFamilyProps(
         options=[
-            OSFamilyOptProps(pattern=r"(?i)mac\s*OS\s*X|OS\s*X|Mac\s*OS", name="MACOS"),
-            OSFamilyOptProps(pattern=r"(?i)(?:apple )?ios", name="IOS"),
+            OSFamilyOptProps(pattern=r"(?i)freebsd", name="FREEBSD"),
+            OSFamilyOptProps(pattern=r"(?i)openbsd", name="OPENBSD"),
+            OSFamilyOptProps(pattern=r"(?i)oracle solaris", name="ORACLESOLARIS"),
         ]
     )
 
