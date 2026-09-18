@@ -688,7 +688,7 @@ class Support:
             str: a string representing the software support
         """
 
-        return str(self.status)
+        return str(self.status())
 
     def to_dict(self) -> "dict[str, Any]":
         """
