@@ -84,7 +84,7 @@ class OSFamily(Enum):
             ),
             OSFamilyOptProps(pattern=r"(?i)nixos", name="NIXOS"),
             OSFamilyOptProps(pattern=r"(?i)opensuse(?: linux)?", name="OPENSUSE"),
-            OSFamilyOptProps(pattern=r"(?i)oracle linux", name="ORACLELINUX"),
+            OSFamilyOptProps(pattern=r"(?i)oracle(?: linux)?(?: server)?", name="ORACLELINUX"),
             OSFamilyOptProps(
                 pattern=r"(?i)red\s+hat\s+enterprise(?:\s+(?:linux|server))?",
                 name="RHEL",
