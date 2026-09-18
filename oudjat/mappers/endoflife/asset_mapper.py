@@ -100,6 +100,23 @@ class EOLAssetMapper(AssetMapper):
 
         return sd
 
+    def _clean_unix_label(self, label: str) -> str:
+        """
+        Clean the label or a unix release.
+
+        Args:
+            label (str): The label to clean.
+
+        Returns:
+            str: The cleaned label
+        """
+
+        par_cleaned = re.sub(r"\s*\(.*?\)\s*", "", label)
+        special_cleaned = re.sub(r"[^\w.]+", "-", par_cleaned)
+
+        return special_cleaned.strip("-").lower()
+
+
     def _releases(
         self,
         product: dict[str, Any],
@@ -263,7 +280,7 @@ class EOLAssetMapper(AssetMapper):
             "software": software_name,
             "version": lambda rel: str(SoftwareReleaseVersion(float(rel["name"]))),
             "release_date": lambda rel: rel["releaseDate"],
-            "release_label": lambda rel: rel["name"],
+            "release_label": lambda rel: self._clean_unix_label(rel["label"]),
         }
 
         def rel_cb(
