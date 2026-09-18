@@ -11,6 +11,7 @@ from oudjat.core.asset_type import AssetType
 from oudjat.utils import Context
 from oudjat.utils.time import TimeConverter
 
+from .exceptions import InvalidSoftwareVersionError
 from .software_release_version import SoftwareReleaseVersion
 from .software_support import Support, SupportDictProps
 
@@ -731,14 +732,19 @@ class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
         rel = self._releases.get(key, default_value)
 
         if rel is None:
-            key_version = SoftwareReleaseVersion(key)
+            try:
+                key_version = SoftwareReleaseVersion(key)
 
-            rel_search = filter(
-                lambda rl: self.is_version_within_release(rl, key_version),
-                self._releases.values(),
-            )
+                rel_search = filter(
+                    lambda rl: self.is_version_within_release(rl, key_version),
+                    self._releases.values(),
+                )
 
-            rel = next(rel_search, None)
+                rel = next(rel_search, None)
+
+            except InvalidSoftwareVersionError as e:
+                self.logger.error(e)
+                return None
 
         return rel
 
