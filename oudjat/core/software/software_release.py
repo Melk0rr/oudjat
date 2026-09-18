@@ -234,6 +234,19 @@ class SoftwareRelease(Asset):
 
         _ = self._support_channels.setdefault(channel, support)
 
+    def support(self, channel: str = "*") -> Support | None:
+        """
+        Return a support instance based on the provided channel.
+
+        Args:
+            channel (str): The channel you want to retrieve the support of.
+
+        Returns:
+            Support | None: A support instance that matches the provided channel. If no channel matches, returns None.
+        """
+
+        return self._support_channels.get(channel, None)
+
     def has_vulnerability(self, vuln: str | list[str] | None = None) -> list[str]:
         """
         Check if the release is concerned by any or specific vulnerability.
