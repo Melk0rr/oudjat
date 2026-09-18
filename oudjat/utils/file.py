@@ -186,20 +186,19 @@ class FileUtils:
         cls.logger.info(f"Importing CSV file {filepath}")
 
         filepath = cls._check_path(filepath)
-        csv_data: list[Any] = []
 
         try:
             # WARN: Try to guess the delimiter if none was specified
             if delimiter is None:
                 delimiter = FileUtils.guess_csv_delimiter(filepath)
 
-                cls.logger.warning(f"No delimiter specified, guessed '{delimiter}' as a delimiter")
+            cls.logger.warning(f"No delimiter specified, guessed '{delimiter}' as a delimiter")
 
-                df = pl.read_csv(filepath.absolute(), separator=delimiter)
-                csv_data = df.to_dicts()
+            df = pl.read_csv(filepath.absolute(), separator=delimiter)
+            csv_data = df.to_dicts()
 
-                if callback is not None:
-                    csv_data = callback(csv_data)
+            if callback is not None:
+                csv_data = callback(csv_data)
 
             cls.logger.info(f"Successfully imported data from {filepath}")
             cls.logger.debug(f"{csv_data}")
