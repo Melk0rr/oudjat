@@ -18,8 +18,8 @@ from .operating_system import OperatingSystem, OSRelease, OSReleaseListFilter
 from .os_families import OSFamily
 from .windows import WindowsEdition
 
-CACHE_PATH  = FileUtils.project_root() / ".cache"
-SOFTWARE_CACHE_PATH  = CACHE_PATH / "software"
+CACHE_PATH = FileUtils.project_root() / ".cache"
+SOFTWARE_CACHE_PATH = CACHE_PATH / "software"
 
 type MappingOSTuple = tuple[
     "OperatingSystem | None", "OSRelease | None", "SoftwareEdition | None"
@@ -110,6 +110,20 @@ class OSOption(Enum):
             "description": "Red Hat Enterprise Linux is a Linux distribution developed by Red Hat for the commercial market",
             "editions": DEFAULT_SOFTWARE_EDITION,
             "tags": ["linux-distribution", "red-hat"],
+        },
+    )
+
+    ROCKYLINUX = OSOptionProps(
+        cls=OperatingSystem,
+        attributes={
+            "os_id": "rockylinux",
+            "name": "Rocky Linux",
+            "label": "rocky-linux",
+            "editor": "The Rocky Enterprise Software Foundation",
+            "os_family": OSFamily.LINUX,
+            "description": " Rocky Linux is a Linux distribution intended to be a downstream, complete binary-compatible release using the Red Hat Enterprise Linux (RHEL) operating system source code. The project is led by Gregory Kurtzer, founder of the CentOS project",
+            "editions": DEFAULT_SOFTWARE_EDITION,
+            "tags": ["linux-distribution"],
         },
     )
 
