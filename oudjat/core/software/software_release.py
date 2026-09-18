@@ -715,6 +715,15 @@ class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
     def find_closest_version(
         self, initial_version: SoftwareReleaseVersion
     ) -> SoftwareReleaseVersion | None:
+        """
+        Search for the closest version key in the current releases based on a provided version.
+
+        Args:
+            initial_version (SoftwareReleaseVersion): The initial version to search for.
+
+        Returns:
+            SoftwareReleaseVersion | None: The closest matching version if any
+        """
 
         versions = list(map(SoftwareReleaseVersion, self._releases.keys()))
 
@@ -734,8 +743,9 @@ class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
         If the element cannot be found, return the default value.
 
         Args:
-            key           (str): Key of the element to return
-            default_value (Any): Default value in case the element cannot be found
+            key           (str) : Key of the element to return
+            default_value (Any) : Default value in case the element cannot be found
+            find_closest  (bool): Whether or not to search for the closest matching version (default:True)
 
         Returns:
             list[ReleaseType] | None: Element associated with provided key or default value
