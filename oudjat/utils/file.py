@@ -169,15 +169,16 @@ class FileUtils:
     # INFO: CSV
     @classmethod
     def import_csv(
-        cls, filepath: "str | Path", callback: Callable | None = None, delimiter: str | None = None
+            cls, filepath: "str | Path", callback: Callable | None = None, delimiter: str | None = None, infer_schema_length: int = 1000
     ) -> list[Any]:
         """
         Import CSV content into a list of dictionaries.
 
         Args:
-            filepath (str)            : The path to the CSV file.
-            callback (callable | None): A callable function to process the data after reading.
-            delimiter (str | None)    : The character used as a delimiter in the CSV file.
+            filepath            (str)            : The path to the CSV file.
+            callback            (callable | None): A callable function to process the data after reading.
+            delimiter           (str | None)     : The character used as a delimiter in the CSV file.
+            infer_schema_length (int)            : The schema length used to determine data types        (default:1000)
 
         Returns:
             list of dicts: The content of the CSV file parsed into a list of dictionaries.
@@ -193,7 +194,7 @@ class FileUtils:
                 delimiter = FileUtils.guess_csv_delimiter(filepath)
                 cls.logger.warning(f"No delimiter specified, guessed '{delimiter}' as a delimiter")
 
-            df = pl.read_csv(filepath.absolute(), separator=delimiter)
+            df = pl.read_csv(filepath.absolute(), separator=delimiter, infer_schema_length=infer_schema_length)
             csv_data = df.to_dicts()
 
             if callback is not None:
