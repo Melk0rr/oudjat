@@ -726,7 +726,7 @@ class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
         return max(matching_versions)
 
     def get(
-        self, key: str, default_value: Any = None, find_closest: bool = False
+        self, key: str, default_value: Any = None, find_closest: bool = True
     ) -> "SoftwareReleaseList[ReleaseType] | None":
         """
         Return a SoftwareRelEditionDict element based on its key.
@@ -761,7 +761,7 @@ class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
                     closest = self.find_closest_version(key_version)
 
                     if closest:
-                        rel = self.get(str(closest), default_value)
+                        rel = self.get(str(closest), default_value, False)
 
             except InvalidSoftwareVersionError as e:
                 self.logger.error(str(e))
