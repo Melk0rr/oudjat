@@ -743,7 +743,7 @@ class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
                 rel = next(rel_search, None)
 
             except InvalidSoftwareVersionError as e:
-                self.logger.error(e)
+                self.logger.error(str(e))
                 return None
 
         return rel
