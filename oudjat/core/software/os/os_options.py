@@ -90,12 +90,26 @@ class OSOption(Enum):
         attributes={
             "os_id": "debian",
             "name": "Debian",
-            "label": "Debian",
+            "label": "debian",
             "editor": "",
             "os_family": OSFamily.LINUX,
             "description": "Debian is a free operating system for your computer. The Debian stable branch is the most popular edition for personal computers and network servers, and is used as the basis for many other Linux distributions",
             "editions": DEFAULT_SOFTWARE_EDITION,
             "tags": ["linux-distribution"],
+        },
+    )
+
+    FREEBSD = OSOptionProps(
+        cls=OperatingSystem,
+        attributes={
+            "os_id": "freebsd",
+            "name": "FreeBSD",
+            "label": "freebsd",
+            "editor": "FreeBSD Project",
+            "os_family": OSFamily.BSD,
+            "description": "FreeBSD is an operating system used to power modern servers, desktops, and embedded platforms",
+            "editions": DEFAULT_SOFTWARE_EDITION,
+            "tags": ["unix-distribution", "bsd-distribution"],
         },
     )
 
@@ -147,7 +161,7 @@ class OSOption(Enum):
         attributes={
             "os_id": "ubuntu",
             "name": "Ubuntu",
-            "label": "Ubuntu",
+            "label": "ubuntu",
             "editor": "Canonical",
             "os_family": OSFamily.LINUX,
             "description": "Ubuntu is a free and open-source Linux distribution based on Debian. Ubuntu is officially released in three editions: Desktop, Server, and Core",
