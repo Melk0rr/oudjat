@@ -71,6 +71,20 @@ class OSOptionProps:
 class OSOption(Enum):
     """An enumeration of OSes."""
 
+    ALMALINUX = OSOptionProps(
+        cls=OperatingSystem,
+        attributes={
+            "os_id": "almalinux",
+            "name": "Alma Linux",
+            "label": "alma-linux",
+            "editor": "Andrew Lukoshko",
+            "os_family": OSFamily.LINUX,
+            "description": "Alma Linux is an open source, community-owned and governed, forever-free enterprise Linux distribution. It is focused on long-term stability, providing a robust production-grade platform. AlmaLinux OS is binary-compatible with RHEL. It is owned and controlled by the non-profit AlmaLinux OS Foundation, and managed by a community-elected board of directors and the self-managed AlmaLinux Engineering Steering Committee",
+            "editions": DEFAULT_SOFTWARE_EDITION,
+            "tags": ["linux-distribution"],
+        },
+    )
+
     CENTOS = OSOptionProps(
         cls=OperatingSystem,
         attributes={
