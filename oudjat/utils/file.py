@@ -191,8 +191,7 @@ class FileUtils:
             # WARN: Try to guess the delimiter if none was specified
             if delimiter is None:
                 delimiter = FileUtils.guess_csv_delimiter(filepath)
-
-            cls.logger.warning(f"No delimiter specified, guessed '{delimiter}' as a delimiter")
+                cls.logger.warning(f"No delimiter specified, guessed '{delimiter}' as a delimiter")
 
             df = pl.read_csv(filepath.absolute(), separator=delimiter)
             csv_data = df.to_dicts()
