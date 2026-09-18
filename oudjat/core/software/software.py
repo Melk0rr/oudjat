@@ -73,12 +73,12 @@ class Software(Asset, Generic[ReleaseType]):
             editor = [editor]
 
         self._editor: list[str] | None = editor
-        self._type: "SoftwareType" = software_type
-        self._releases: "SoftwareRelVersionDict[ReleaseType]" = SoftwareRelVersionDict[
+        self._type: SoftwareType = software_type
+        self._releases: SoftwareRelVersionDict[ReleaseType] = SoftwareRelVersionDict[
             ReleaseType
         ]()
 
-        self._editions: "SoftwareEditionDict" = SoftwareEditionDict()
+        self._editions: SoftwareEditionDict = SoftwareEditionDict()
 
         if editions is not None:
             self._editions = editions
@@ -190,7 +190,7 @@ class Software(Asset, Generic[ReleaseType]):
             bool: True if a matching release is found, otherwise False.
         """
 
-        return rel_ver in self.releases.keys()
+        return rel_ver in self.releases
 
     def add_release(self, new_release: "ReleaseType", force: bool = False) -> None:
         """
@@ -211,7 +211,7 @@ class Software(Asset, Generic[ReleaseType]):
             list[SoftwareRelease]: A list of SoftwareRelease objects that are not supported.
         """
 
-        res: "SoftwareReleaseList[ReleaseType]" = SoftwareReleaseList()
+        res: SoftwareReleaseList[ReleaseType] = SoftwareReleaseList()
         for r in self._releases.values():
             res.extend(r.filter_by_status(False))
 
@@ -225,7 +225,7 @@ class Software(Asset, Generic[ReleaseType]):
             list[SoftwareRelease]: A list of SoftwareRelease objects that are supported.
         """
 
-        res: "SoftwareReleaseList[ReleaseType]" = SoftwareReleaseList()
+        res: SoftwareReleaseList[ReleaseType] = SoftwareReleaseList()
         for r in self._releases.values():
             res.extend(r.filter_by_status())
 
