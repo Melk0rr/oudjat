@@ -83,9 +83,10 @@ class LDAPAssetMapper(AssetMapper):
                 filters=release_filters,
             )
 
-            os_instance, os_rel, os_edition = os
-            if os_instance is not None:
-                asset.computer_type = next(iter(os_instance.computer_type))
+            # TODO: Review this part to handle computer type another way
+            _, os_rel, os_edition = os
+            # if os_instance is not None:
+            #     asset.computer_type = next(iter(os_instance.computer_type))
 
             asset.os_release = os_rel
             asset.os_edition = os_edition
