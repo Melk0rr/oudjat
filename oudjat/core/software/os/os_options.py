@@ -113,6 +113,20 @@ class OSOption(Enum):
         },
     )
 
+    ORACLELINUX = OSOptionProps(
+        cls=OperatingSystem,
+        attributes={
+            "os_id": "oraclelinux",
+            "name": "Oracle Linux",
+            "label": "oracle-linux",
+            "editor": "Oracle",
+            "os_family": OSFamily.LINUX,
+            "description": "Oracle Linux is an Open Source, free RHEL derivative developed by Oracle to be a 100% application binary compatible alternative to Red Hat Enterprise Linux",
+            "editions": DEFAULT_SOFTWARE_EDITION,
+            "tags": ["linux-distribution", "oracle"],
+        },
+    )
+
     RHEL = OSOptionProps(
         cls=OperatingSystem,
         attributes={
@@ -141,7 +155,6 @@ class OSOption(Enum):
         },
     )
 
-    
     SLES = OSOptionProps(
         cls=OperatingSystem,
         attributes={
