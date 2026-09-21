@@ -268,7 +268,10 @@ class UtilsDict(dict):
             str | None: The dictionary key that matches the provided key string. If Any.
         """
 
-        return next(filter(lambda k: k in key or key in k, list(d.keys())))
+        def _compare_keys(k: str) -> bool:
+            return k in key or key in k
+
+        return next(filter(_compare_keys, list(d.keys())), None)
 
     @staticmethod
     def flatten(
