@@ -1,7 +1,8 @@
 """A module that gather dictionary utilities."""
 
 import re
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 
 class UtilsDict(dict):
@@ -140,10 +141,15 @@ class UtilsDict(dict):
             {1: {'id': 1, 'name': 'Alice'}, 2: {'id': 2, 'name': 'Bob'}}
         """
 
-        return {(key_callback(el[key]) if key_callback else el[key]): el for el in list_to_map}
+        return {
+            (key_callback(el[key]) if key_callback else el[key]): el
+            for el in list_to_map
+        }
 
     @staticmethod
-    def edit_keys(base_dict: dict[str, Any], transform: Callable[[str], str]) -> dict[str, Any]:
+    def edit_keys(
+        base_dict: dict[str, Any], transform: Callable[[str], str]
+    ) -> dict[str, Any]:
         """
         Transform the keys of the given dictionary based on the provided function.
 
@@ -208,7 +214,9 @@ class UtilsDict(dict):
         return d1
 
     @staticmethod
-    def filter(d: dict[str, Any], keys: list[str], exclude: bool = False) -> dict[str, Any]:
+    def filter(
+        d: dict[str, Any], keys: list[str], exclude: bool = False
+    ) -> dict[str, Any]:
         """
         Filter the keys of a dictionary.
 
@@ -221,17 +229,21 @@ class UtilsDict(dict):
             dict[str, Any]: Filtered dictionary
         """
 
-        return {k: v for k, v in d.items() if UtilsDict._check_exclude(k in keys, exclude)}
+        return {
+            k: v for k, v in d.items() if UtilsDict._check_exclude(k in keys, exclude)
+        }
 
     @staticmethod
-    def filter_by_pattern(d: dict[str, Any], pattern: str, exclude: bool = False) -> dict[str, Any]:
+    def filter_by_pattern(
+        d: dict[str, Any], pattern: str, exclude: bool = False
+    ) -> dict[str, Any]:
         """
         Filter the keys of a dictionary based on a provided pattern.
 
         Args:
-            d (dict[str, Any]): The dictionary, which keys will be filtered
-            pattern (str)     : The pattern to filter dictionary keys
-            exclude (bool)    : If true, matching keys will be excluded from the final dictionary instead of included
+            d       (dict[str, Any]): The dictionary, which keys will be filtered
+            pattern (str)           : The pattern to filter dictionary keys
+            exclude (bool)          : If true, matching keys will be excluded from the final dictionary instead of included
 
         Returns:
             dict[str, Any]: Filtered dictionary
@@ -244,7 +256,24 @@ class UtilsDict(dict):
         }
 
     @staticmethod
-    def flatten(d: dict[str, Any], parent_key: str = "", sep: str = ".") -> dict[str, Any]:
+    def find_key(d: dict[str, Any], key: str) -> str | None:
+        """
+        Find the dictionary key that matches the provided key string.
+
+        Args:
+            d   (dict[str, Any]): The dictionary to search key in.
+            key (str)           : The key to search for
+
+        Returns:
+            str | None: The dictionary key that matches the provided key string. If Any.
+        """
+
+        return next(filter(lambda k: k in key or key in k, list(d.keys())))
+
+    @staticmethod
+    def flatten(
+        d: dict[str, Any], parent_key: str = "", sep: str = "."
+    ) -> dict[str, Any]:
         """
         Flatten a given dictionary based on the provided separator.
 
@@ -255,9 +284,9 @@ class UtilsDict(dict):
         <parent_key><separator><index>
 
         Args:
-            d (dict[str, Any]): The dictionary to flatten
-            parent_key (str)  : The parent key to prepend to the new key
-            sep (str)         : The separator to join the parent key and the current key
+            d          (dict[str, Any]): The dictionary to flatten
+            parent_key (str)           : The parent key to prepend to the new key
+            sep        (str)           : The separator to join the parent key and the current key
 
         Returns:
             dict[str, Any]: Flattened dictionary
