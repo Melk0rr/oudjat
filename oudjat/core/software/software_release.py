@@ -753,9 +753,15 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             SoftwareReleaseVersion | None: The closest matching version if any
         """
 
-        versions = list(map(SoftwareReleaseVersion, self._releases.keys()))
+        versions = sorted(map(SoftwareReleaseVersion, self._releases.keys()))
 
-        matching_versions = [v for v in versions if v <= initial_version]
+        matching_versions = [
+            v
+            for v in versions
+            if v <= initial_version
+            and max(versions).major >= initial_version.major
+            and min(versions).major <= initial_version.major
+        ]
 
         if len(matching_versions) == 0:
             return None
@@ -764,7 +770,7 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
 
     def find_by_name(self, name: str) -> "SoftwareReleaseList[ReleaseType]":
         """
-        Find releases by name
+        Find releases by name.
 
         Args:
             name (str): The name to search for.
