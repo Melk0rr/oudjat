@@ -18,7 +18,7 @@ from oudjat.core.software import (
     SupportPhaseType,
 )
 from oudjat.core.software.os.operating_system import OSRelease
-from oudjat.core.software.software_release import ReleaseType, SoftwareRelVersionDict
+from oudjat.core.software.software_release import ReleaseType, SoftwareReleaseDict
 
 from ...asset_mapper import AssetMapper, AssetMappingCallback
 
@@ -133,10 +133,10 @@ class EOLAssetMapper(AssetMapper):
         mapping_registry: "MappingRegistry",
         callback: "AssetMappingCallback | None" = None,
         support_channels: "MappingValue | None" = None,
-    ) -> "SoftwareRelVersionDict[ReleaseType]":
+    ) -> "SoftwareReleaseDict[ReleaseType]":
 
         releases = product.get("releases", [])
-        final_releases = SoftwareRelVersionDict()
+        final_releases = SoftwareReleaseDict()
 
         for rel in releases:
             # Extract release identifiers
@@ -171,7 +171,7 @@ class EOLAssetMapper(AssetMapper):
 
         return final_releases
 
-    def windows(self) -> "SoftwareRelVersionDict[OSRelease]":
+    def windows(self) -> "SoftwareReleaseDict[OSRelease]":
         """
         Return a dictionary of MSOSRelease instances.
 
@@ -215,7 +215,7 @@ class EOLAssetMapper(AssetMapper):
             support_channels=support_channels_value,
         )
 
-    def windows_server(self) -> "SoftwareRelVersionDict[OSRelease]":
+    def windows_server(self) -> "SoftwareReleaseDict[OSRelease]":
         """
         Return a dictionary of MSOSRelease instances.
 
@@ -269,7 +269,7 @@ class EOLAssetMapper(AssetMapper):
             support_channels=support_channels_value,
         )
 
-    def unix(self, distro: str) -> "SoftwareRelVersionDict[OSRelease]":
+    def unix(self, distro: str) -> "SoftwareReleaseDict[OSRelease]":
         """
         Return a dictionary of MSOSRelease instances.
 

@@ -267,6 +267,12 @@ class SoftwareRelease(Asset):
 
         return [v for v in vuln if v in self.vulnerabilities]
 
+    def compare_names(self, name: str) -> bool:
+        return (
+            re.search(name, self._name) is not None
+            or re.search(self._name, name) is not None
+        )
+
     def add_vuln(self, vuln: str) -> None:
         """
         Add a vulnerability to the current release.
@@ -538,6 +544,28 @@ class SoftwareReleaseList[ReleaseType: "SoftwareRelease"](list):
 
         return filtered_rels
 
+    def filter_by_name(
+        self, name: str, fallback: bool = False
+    ) -> "SoftwareReleaseList[ReleaseType]":
+        """
+        Filter the list of SoftwareRelease by comparing the releases name with the provided string.
+
+        Args:
+            name (str): The name to look for in the filtering process.
+
+        Returns:
+            SoftwareReleaseList: The filtered list of releases.
+        """
+
+        filtered_rels = SoftwareReleaseList(
+            filter(lambda r: r.compare_names(name), self)
+        )
+
+        if fallback and len(filtered_rels) == 0:
+            filtered_rels = self
+
+        return filtered_rels
+
     def filter_by_status(
         self, supported: bool = True, fallback: bool = False
     ) -> "SoftwareReleaseList[ReleaseType]":
@@ -747,7 +775,7 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
 
         findings = SoftwareReleaseList()
         for rl in self._releases.values():
-            findings.extend([r for r in rl if name == r.name])
+            findings.extend(rl.filter_by_name(name))
 
         return findings
 
