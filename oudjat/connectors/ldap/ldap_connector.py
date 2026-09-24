@@ -110,11 +110,11 @@ class LDAPConnector(Connector):
         """
 
         self._use_tls: bool = use_tls
-        self._port: "LDAPPort" = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
+        self._port: LDAPPort = LDAPPort.TLS if use_tls else LDAPPort.DEFAULT
 
         super().__init__(target=target, username=username, password=password)
 
-        self.logger: "logging.Logger" = logging.getLogger(__name__)
+        self.logger: logging.Logger = logging.getLogger(__name__)
 
         self._domain: str = ""
         self._default_search_base: str = ""
@@ -128,7 +128,7 @@ class LDAPConnector(Connector):
 
         self._is_active_directory: bool = is_active_directory
 
-        self._CAPABILITIES: "LDAPCapabilities" = LDAPCapabilities(
+        self._CAPABILITIES: LDAPCapabilities = LDAPCapabilities(
             ldap_search=self.fetch,
             ldap_obj_opt=self._object_opt,
         )
@@ -422,7 +422,7 @@ class LDAPConnector(Connector):
             LDAPObjTypeAlias: The python class matching the provided entry
         """
 
-        obj_map: dict[str, "LDAPObjectOption"] = {
+        obj_map: dict[str, LDAPObjectOption] = {
             f"{LDAPObjectType.DEFAULT}": LDAPObjectOption["LDAPObject"](
                 cls=LDAPObject, fetch=self.ldap_objects
             ),
