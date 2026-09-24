@@ -14,7 +14,7 @@ from .software_edition import SoftwareEdition, SoftwareEditionDict
 from .software_release import (
     ReleaseType,
     SoftwareReleaseList,
-    SoftwareRelVersionDict,
+    SoftwareReleaseDict,
 )
 
 
@@ -74,7 +74,7 @@ class Software(Asset, Generic[ReleaseType]):
 
         self._editor: list[str] | None = editor
         self._type: SoftwareType = software_type
-        self._releases: SoftwareRelVersionDict[ReleaseType] = SoftwareRelVersionDict[
+        self._releases: SSoftwareReleaseDictReleaseType] = SoSoftwareReleaseDict
             ReleaseType
         ]()
 
@@ -109,7 +109,7 @@ class Software(Asset, Generic[ReleaseType]):
         self._editor = editor
 
     @property
-    def releases(self) -> "SoftwareRelVersionDict[ReleaseType]":
+    def releases(self) -> "SoftwareReleaseDict[ReleaseType]":
         """
         Return the releases of this software.
 
@@ -120,7 +120,7 @@ class Software(Asset, Generic[ReleaseType]):
         return self._releases
 
     @releases.setter
-    def releases(self, new_releases: "SoftwareRelVersionDict[ReleaseType]") -> None:
+    def releases(self, new_releases: "SoftwareReleaseDict[ReleaseType]") -> None:
         """
         Set the releases for this software.
 

@@ -3,7 +3,7 @@
 from .definitions import STAGE_REG, VERSION_REG
 from .software import Software, SoftwareType
 from .software_edition import SoftwareEdition, SoftwareEditionDict
-from .software_release import SoftwareRelease, SoftwareRelVersionDict
+from .software_release import SoftwareRelease, SoftwareReleaseDict
 from .software_release_version import SoftwareReleaseStage, SoftwareReleaseVersion
 from .software_support import (
     Support,
@@ -20,8 +20,8 @@ __all__ = [
     "Software",
     "SoftwareEdition",
     "SoftwareEditionDict",
-    "SoftwareRelVersionDict",
     "SoftwareRelease",
+    "SoftwareReleaseDict",
     "SoftwareReleaseStage",
     "SoftwareReleaseVersion",
     "SoftwareType",

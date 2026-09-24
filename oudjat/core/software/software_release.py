@@ -17,10 +17,10 @@ from .software_support import Support, SupportDictProps
 
 ReleaseType = TypeVar("ReleaseType", bound="SoftwareRelease")
 
-type SoftwareReleaseImportDict = dict[str, list["SoftwareReleaseDictProps"]]
+type SoftwareReleaseImportDict = dict[str, list["SoftwareReleaseProps"]]
 
 
-class SoftwareReleaseDictProps(TypedDict):
+class SoftwareReleaseProps(TypedDict):
     """
     A helper class to handle software release dictionaries attribute types.
     """
@@ -394,7 +394,7 @@ class SoftwareRelease(Asset):
 
     @classmethod
     def from_dict(
-        cls: type["ReleaseType"], rel_dict: "SoftwareReleaseDictProps"
+        cls: type["ReleaseType"], rel_dict: "SoftwareReleaseProps"
     ) -> "ReleaseType":
         """
         Return a new software release based on the provided dictionary.
@@ -427,8 +427,8 @@ class SoftwareRelease(Asset):
     @classmethod
     def gen_releases(
         cls: type["ReleaseType"],
-        releases_dict: dict[str, list["SoftwareReleaseDictProps"]],
-    ) -> "SoftwareRelVersionDict[ReleaseType]":
+        releases_dict: dict[str, list["SoftwareReleaseProps"]],
+    ) -> "SoftwareReleaseDict[ReleaseType]":
         """
         Generate software releases based on the provided.
 
@@ -439,7 +439,7 @@ class SoftwareRelease(Asset):
             SoftwareRelVersionDict[ReleaseType]: A software release version dictionary
         """
 
-        releases: SoftwareRelVersionDict[ReleaseType] = SoftwareRelVersionDict()
+        releases: SoftwareReleaseDict[ReleaseType] = SoftwareReleaseDict()
         for rel_k, rels in releases_dict.items():
             for rel in rels:
                 releases.add(rel_k, cls.from_dict(rel))
@@ -615,7 +615,7 @@ class SoftwareReleaseList[ReleaseType: "SoftwareRelease"](list):
         return [rel.to_dict() for rel in self]
 
 
-class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
+class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
     """
     A class that handles to store releases per version number.
 
@@ -734,6 +734,23 @@ class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
 
         return max(matching_versions)
 
+    def find_by_name(self, name: str) -> "SoftwareReleaseList[ReleaseType]":
+        """
+        Find releases by name
+
+        Args:
+            name (str): The name to search for.
+
+        Returns:
+            SoftwareReleaseList: A SoftwareReleaseList instance which contains releases with the provided name
+        """
+
+        findings = SoftwareReleaseList()
+        for rl in self._releases.values():
+            findings.extend([r for r in rl if name == r.name])
+
+        return findings
+
     def get(
         self, key: str, default_value: Any = None, find_closest: bool = True
     ) -> "SoftwareReleaseList[ReleaseType] | None":
@@ -828,7 +845,7 @@ class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
 
         return self._releases.items()
 
-    def filter_by_str(self, search_str: str) -> "SoftwareRelVersionDict[ReleaseType]":
+    def filter_by_str(self, search_str: str) -> "SoftwareReleaseDict[ReleaseType]":
         """
         Search for elements with a key matching the provided search string.
 
@@ -839,7 +856,7 @@ class SoftwareRelVersionDict[ReleaseType: "SoftwareRelease"]:
             SoftwareRelVersionDict[ReleaseType]: A filtered SoftwareRelVersionDict
         """
 
-        return SoftwareRelVersionDict[ReleaseType](
+        return SoftwareReleaseDict[ReleaseType](
             **{
                 version: version_dict
                 for version, version_dict in self.items()
