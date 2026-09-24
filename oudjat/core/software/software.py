@@ -13,8 +13,8 @@ from ..asset_type import AssetType
 from .software_edition import SoftwareEdition, SoftwareEditionDict
 from .software_release import (
     ReleaseType,
-    SoftwareReleaseList,
     SoftwareReleaseDict,
+    SoftwareReleaseList,
 )
 
 
@@ -49,15 +49,14 @@ class Software(Asset, Generic[ReleaseType]):
         editor(s), and optional description. The software type defaults to an application unless specified otherwise.
 
         Args:
-            software_id (int | str)                               : A unique identifier for the software, which can be either an integer or a string.
-            name (str)                                            : The name of the software.
-            label (str)                                           : A brief label that describes the software.
-            software_type (SoftwareType | None)                   : Specifies the type of the software. Defaults to SoftwareType.APPLICATION.
-            editor (str | list[str] | None)                       : The editor(s) responsible for the development or maintenance of the software
-            description (str | None)                              : A detailed description of the software. Defaults to None.
-            releases (dict[str, list[GenericSoftwareReleaseDict]]): A dictionary of software releases dictionaries used to generate the software releases
-            editions (SoftwareEditionDict | None)                 : A dictionary of the software editions
-            **kwargs (Any)                                        : Any additional arguments that will be passed to parent class
+            software_id   (int | str)                  : A unique software identifier
+            name          (str)                        : The name of the software.
+            label         (str)                        : A brief label that describes the software.
+            software_type (SoftwareType | None)        : The type of the software. (default:SoftwareType.APPLICATION).
+            editor        (str | list[str] | None)     : The editor(s) that maintain the software
+            description   (str | None)                 : A detailed description of the software. Defaults to None.
+            editions      (SoftwareEditionDict | None) : A dictionary of the software editions
+            **kwargs      (Any)                        : Any additional arguments that will be passed to parent class
         """
 
         super().__init__(
@@ -74,7 +73,7 @@ class Software(Asset, Generic[ReleaseType]):
 
         self._editor: list[str] | None = editor
         self._type: SoftwareType = software_type
-        self._releases: SSoftwareReleaseDictReleaseType] = SoSoftwareReleaseDict
+        self._releases: SoftwareReleaseDict[ReleaseType] = SoftwareReleaseDict[
             ReleaseType
         ]()
 
