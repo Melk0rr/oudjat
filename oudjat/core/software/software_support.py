@@ -10,14 +10,13 @@ from oudjat.utils import Context
 from oudjat.utils.time import TimeConverter
 
 from .exceptions import (
-    EmptySupportPhasesError,
     InvalidSupportPhasesError,
 )
 
 
 class SupportDictProps(TypedDict):
+    phases: list["SupportPhaseProps"]
 
-    phases: list["SupportPhaseProps"] 
 
 class SupportPhaseProps(TypedDict):
     """
@@ -57,10 +56,13 @@ class SupportStatus(IntEnum):
     A simple enumeration to handle software release support status.
 
     Attributes:
-        RETIRED: The release support is retired
-        ONGOING: The release support is still ongoing
+        UNKNOWN : The support status is unknown
+        UPCOMING: The support has not yet started
+        RETIRED : The release support is retired
+        ONGOING : The release support is still ongoing
     """
 
+    UNKNOWN = -2
     UPCOMING = -1
     RETIRED = 0
     ONGOING = 1
@@ -443,9 +445,6 @@ class Support:
 
         context = Context()
 
-        if len(self._phases) == 0:
-            raise EmptySupportPhasesError(f"{context}::No support phases set")
-
         if (
             str(SupportPhaseType.EXTENDED_SUPPORT) in self._phases
             and len(self._phases) == 1
@@ -515,7 +514,7 @@ class Support:
     @property
     def is_eoas(self) -> bool:
         """
-        Checks if the support has ended its active support phase.
+        Check if the support has ended its active support phase.
 
         Returns:
             bool: True if the active support phase is over. False otherwise.
@@ -529,7 +528,7 @@ class Support:
     @property
     def is_eol(self) -> bool:
         """
-        Checks if the support has ended its security support phase.
+        Check if the support has ended its security support phase.
 
         Returns:
             bool: True if the security support phase is over. False otherwise.
@@ -543,7 +542,7 @@ class Support:
     @property
     def is_eoes(self) -> bool:
         """
-        Checks if the support has ended its extended support phase.
+        Check if the support has ended its extended support phase.
 
         Returns:
             bool: True if the extended support phase is over. False otherwise.
@@ -553,6 +552,17 @@ class Support:
             self._check_phase(SupportPhaseType.EXTENDED_SUPPORT)
             and self._phases[str(SupportPhaseType.EXTENDED_SUPPORT)].is_retired
         )
+
+    @property
+    def _is_empty(self) -> bool:
+        """
+        Return wheither or not the support has no phases specified.
+
+        Returns:
+            bool: True if the support does not have any phases. False otherwise.
+        """
+
+        return len(self._phases) == 0
 
     # ****************************************************************
     # Methods
@@ -632,7 +642,7 @@ class Support:
 
         return self._phases.get(key, default_value)
 
-    def current_phase(self, include_extended_support: bool = False) -> "SupportPhase":
+    def current_phase(self, include_extended_support: bool = False) -> "SupportPhase | None":
         """
         Return the current support phase based on today's date.
 
@@ -647,6 +657,9 @@ class Support:
         """
 
         self._validate_phases()
+
+        if self._is_empty:
+            return None
 
         phases = self._relevent_phases(include_extended_support)
 
@@ -664,15 +677,16 @@ class Support:
         """
         Return the current support status.
 
-        - UPCOMING: the support has not started yet
-        - ONGOING : the support is still ongoing
-        - RETIRED : the support has ended
+        See support status possible values for more details.
 
         Returns:
-            SoftwareReleaseSupportStatus: The current status of the support as a SoftwareReleaseSupportStatus enum element
+            SupportStatus: The current status of the support as a SoftwareReleaseSupportStatus enum element
         """
 
         self._validate_phases()
+
+        if self._is_empty:
+            return SupportStatus.UNKNOWN
 
         phases = self._relevent_phases(include_extended_support)
 
@@ -731,6 +745,8 @@ class Support:
             dict[str, Any]: Dictionary containing software support key attributes
         """
 
+        current_phase = self.current_phase(True)
+
         return {
             "status": str(self.status()),
             "hasLTS": self.has_extended_support,
@@ -739,8 +755,8 @@ class Support:
             "isEoes": self.is_eoes,
             "duration": self.duration(),
             "durationExtended": self.duration(True),
-            "currentPhase": str(self.current_phase(True).type),
-            "phases": [ p.to_dict() for p in self._phases.values() ],
+            "currentPhase": str(current_phase.type) if current_phase else None,
+            "phases": [p.to_dict() for p in self._phases.values()],
         }
 
     # ****************************************************************
