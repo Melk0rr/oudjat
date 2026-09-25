@@ -1,4 +1,5 @@
 """A module that describe the concept of software release."""
+from oudjat.core.software import STAGE_REG
 
 import logging
 import re
@@ -902,6 +903,27 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             }
         )
 
+    def compile_versions_reg(self) -> str:
+        versions = self._releases.keys()
+
+        major_count = []
+        minor_count = []
+        build_count = []
+
+        for v in versions:
+            major, minor, build = v.split(".")
+
+            stage = re.sub(STAGE_REG, "", build)
+
+            if len(major) not in major_count:
+                major_count.append(len(major))
+
+            if len(minor) not in minor_count:
+                minor_count.append(len(minor))
+
+
+
+
     def to_dict(self) -> dict[str, Any]:
         """
         Convert the SoftwareRelVersionDict into a regular dictionary.
@@ -914,3 +936,9 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             vnumber: [r.to_dict() for r in releases]
             for vnumber, releases in self._releases.items()
         }
+    
+    # ****************************************************************
+    # Static methods
+
+    @staticmethod
+    def _
