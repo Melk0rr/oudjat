@@ -486,8 +486,8 @@ class OSOption(Enum):
         Return an OS release instance based on the computer operatingSystemVersion attribute.
 
         Args:
-            os (str)                           : Either a string from which guess OS infos or an OperatingSystem instance
-            os_ver (str)                       : A string that contain specifically the release version
+            os      (str)                      : Either a string from which guess OS infos or an OperatingSystem instance
+            os_ver  (str)                      : A string that contain specifically the release version
             filters (list[OSReleaseListFilter]): A list of filters to retrieve a unique release
 
         Returns:
@@ -507,16 +507,15 @@ class OSOption(Enum):
 
             os = os_guess
 
+        if os_ver is None and os_str is not None:
+            os_ver = SoftwareReleaseVersion.search_release_version(os_str)
+
         # 1: Try to guess release from the provided version if possible
-        candidates = None
-        if os_ver is not None:
-            version = SoftwareReleaseVersion.search_release_version(os_ver)
+        if os_ver is None:
+            OSOption.guess_os_release(os, os_str, None, filters)
 
-            if version is None:
-                OSOption.guess_os_release(os, os_str, None, filters)
-
-            assert version is not None
-            candidates = OSOption._guess_os_candidates_by_version(os, version)
+        assert os_ver is not None
+        candidates = OSOption._guess_os_candidates_by_version(os, os_ver)
 
         # 2: If no candidates could be retrieved, try to guess release based on the name
         if candidates is None and os_str is not None:
@@ -544,8 +543,8 @@ class OSOption(Enum):
         3 - A SoftwareEdition instance, or None if it can't be guessed from the provided argument
 
         Args:
-            os_str (str | None)                : A string that may contain operating system, edition and optionaly release details
-            os_ver (str | None)                : A software release version string
+            os_str  (str | None)               : A string that may contain operating system, edition and optionaly release details
+            os_ver  (str | None)               : A software release version string
             filters (list[OSReleaseListFilter]): A list of filter function to apply on a SoftwareReleaseList to narrow it down to a unique release
 
         Returns:
