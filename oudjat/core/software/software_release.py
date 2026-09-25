@@ -11,7 +11,6 @@ from oudjat.core.asset_type import AssetType
 from oudjat.utils import Context
 from oudjat.utils.time import TimeConverter
 
-from .exceptions import InvalidSoftwareVersionError
 from .software_release_version import SoftwareReleaseVersion
 from .software_support import Support, SupportDictProps
 
@@ -461,6 +460,7 @@ class SoftwareReleaseList[ReleaseType: "SoftwareRelease"](list):
     # ****************************************************************
     # Methods
 
+    @property
     def is_empty(self) -> bool:
         """
         Check if the list is empty.
@@ -490,9 +490,13 @@ class SoftwareReleaseList[ReleaseType: "SoftwareRelease"](list):
         """
 
         candidates = self
+
+        if len(candidates) == 1:
+            return candidates[0]
+
         for f in filters:
             candidates = f(candidates)
-            if candidates.is_empty():
+            if candidates.is_empty:
                 return None
 
             if len(candidates) == 1:
@@ -665,7 +669,7 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
         self._releases: dict[str, SoftwareReleaseList[ReleaseType]] = {}
 
     # ****************************************************************
-    # Methods
+    # Dictionary methods
 
     def __getitem__(self, key: str) -> "SoftwareReleaseList[ReleaseType]":
         """
@@ -724,6 +728,58 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
                 f"A release with id ({release.id}) already exists for version {key}"
             )
 
+    def keys(self):
+        """
+        Return the keys of the data dict.
+
+        Returns:
+            dict_keys[str, ReleaseType]: The keys of the current dictionary
+        """
+
+        return self._releases.keys()
+
+    def values(self):
+        """
+        Return the values of the data dict.
+
+        Returns:
+            dict_values[str, ReleaseType]: The values of the current dictionary
+        """
+
+        return self._releases.values()
+
+    def items(self):
+        """
+        Return the items of the data dict.
+
+        Returns:
+            dict_items[str, ReleaseType]: The items of the current dictionary
+        """
+
+        return self._releases.items()
+
+    def get(
+        self, key: str, default_value: Any = None
+    ) -> "SoftwareReleaseList[ReleaseType] | None":
+        """
+        Return a SoftwareRelEditionDict element based on its key.
+
+        If the element cannot be found, return the default value.
+
+        Args:
+            key           (str) : Key of the element to return
+            default_value (Any) : Default value in case the element cannot be found
+
+        Returns:
+            SoftwareReleaseList | None: The SoftwareReleaseList instance associated with the provided key, if any.
+
+        """
+
+        return self._releases.get(key, default_value)
+
+    # ****************************************************************
+    # Filtering methods
+
     def is_version_within_release(
         self, rl: "SoftwareReleaseList", version: "SoftwareReleaseVersion"
     ) -> bool:
@@ -740,11 +796,33 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
 
         return any(r.version <= version <= r.latest_version for r in rl)
 
+    def find_version_in_range(
+        self, version: "SoftwareReleaseVersion"
+    ) -> SoftwareReleaseList[ReleaseType] | None:
+        """
+        Go through each SoftwareReleaseList element in the dictionary and check if any of its release contains the provided version.
+
+        Args:
+            version (SoftwareReleaseVersion): The version to look for
+
+        Returns:
+            SoftwareReleaseList:
+        """
+
+        matching_ranges = filter(
+            lambda rl: self.is_version_within_release(rl, version),
+            self._releases.values(),
+        )
+
+        return next(matching_ranges, None)
+
     def find_closest_version(
         self, initial_version: SoftwareReleaseVersion
     ) -> SoftwareReleaseVersion | None:
         """
         Search for the closest version key in the current releases based on a provided version.
+
+        Lookup each release key and
 
         Args:
             initial_version (SoftwareReleaseVersion): The initial version to search for.
@@ -785,51 +863,6 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
 
         return findings
 
-    def get(
-        self, key: str, default_value: Any = None, find_closest: bool = True
-    ) -> "SoftwareReleaseList[ReleaseType] | None":
-        """
-        Return a SoftwareRelEditionDict element based on its key.
-
-        If the element cannot be found, return the default value.
-
-        Args:
-            key           (str) : Key of the element to return
-            default_value (Any) : Default value in case the element cannot be found
-            find_closest  (bool): Whether or not to search for the closest matching version (default:True)
-
-        Returns:
-            list[ReleaseType] | None: Element associated with provided key or default value
-
-        """
-
-        rel = self._releases.get(key, default_value)
-
-        # If the provided version is not in releases, try to find it based on initial and latest release version
-        if rel is None:
-            try:
-                key_version = SoftwareReleaseVersion(key)
-
-                rel_search = filter(
-                    lambda rl: self.is_version_within_release(rl, key_version),
-                    self._releases.values(),
-                )
-
-                rel = next(rel_search, None)
-
-                # If no element can still be found, then try to retrieve the closest version
-                if rel is None and find_closest:
-                    closest = self.find_closest_version(key_version)
-
-                    if closest:
-                        rel = self.get(str(closest), default_value, False)
-
-            except InvalidSoftwareVersionError as e:
-                self.logger.error(str(e))
-                return None
-
-        return rel
-
     def find_unique_index(self, rel_version: str, rel_id: str) -> int | None:
         """
         Find a release in a release dictionary based on a provided version and id.
@@ -849,36 +882,6 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             (i for i, el in enumerate(self[rel_version]) if el.id == rel_id), None
         )
 
-    def keys(self):
-        """
-        Return the keys of the data dict.
-
-        Returns:
-            dict_keys[str, ReleaseType]: The keys of the current dictionary
-        """
-
-        return self._releases.keys()
-
-    def values(self):
-        """
-        Return the values of the data dict.
-
-        Returns:
-            dict_values[str, ReleaseType]: The values of the current dictionary
-        """
-
-        return self._releases.values()
-
-    def items(self):
-        """
-        Return the items of the data dict.
-
-        Returns:
-            dict_items[str, ReleaseType]: The items of the current dictionary
-        """
-
-        return self._releases.items()
-
     def filter_by_str(self, search_str: str) -> "SoftwareReleaseDict[ReleaseType]":
         """
         Search for elements with a key matching the provided search string.
@@ -894,7 +897,8 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             **{
                 version: version_dict
                 for version, version_dict in self.items()
-                if search_str in version
+                if re.search(search_str, version) is not None
+                or re.search(version, search_str) is not None
             }
         )
 

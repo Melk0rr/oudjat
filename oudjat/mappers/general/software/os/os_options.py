@@ -5,7 +5,7 @@ from enum import Enum
 from pathlib import Path
 from typing import TypedDict
 
-from oudjat.core.software import SoftwareEditionDict
+from oudjat.core.software import SoftwareEditionDict, SoftwareReleaseVersion
 from oudjat.core.software.os.operating_system import (
     OperatingSystem,
     OSRelease,
@@ -17,7 +17,6 @@ from oudjat.core.software.software_edition import (
     SoftwareEdition,
 )
 from oudjat.core.software.software_release import SoftwareReleaseList
-from oudjat.core.software.software_release_version import SoftwareReleaseVersion
 from oudjat.mappers.connectors.endoflife.asset_mapper import EOLAssetMapper
 from oudjat.utils import Context, FileUtils
 
@@ -440,8 +439,48 @@ class OSOption(Enum):
         return OSOption[os_family_opt.name]()
 
     @staticmethod
+    def _guess_os_candidates_by_version(
+        os: "OperatingSystem", os_ver: str
+    ) -> SoftwareReleaseList[OSRelease] | None:
+        """
+        Try to guess OS release candidates based on a provided version.
+
+        1. Simply try to retrieve a SoftwareReleaseList based on the exact provided version.
+        2. If no candidates could be retrieved, try to find some by comparing version ranges.
+        3. If no candidates could be retrieved, try to search the closest matching version.
+
+        Args:
+            os     (OperatingSystem): The OperatingSystem instance which stores the releases to lookup.
+            os_ver (str)            : The version to look for.
+
+        Returns:
+            SoftwareReleaseList: A list of release candidates, if any could be retrieved.
+        """
+
+        version = SoftwareReleaseVersion(os_ver)
+
+        # 1: Try to retrieve the exact provided version
+        candidates = os.releases.get(str(version))
+
+        # 2: Try to find a matching version by comparing the provided one with each release initial and last versions
+        if candidates is None:
+            candidates = os.releases.find_version_in_range(version)
+
+        # 3: Try to find the closest matching version and retrieve it
+        if candidates is None:
+            closest_version = os.releases.find_closest_version(version)
+
+            if closest_version is not None:
+                candidates = os.releases.get(str(closest_version))
+
+        return candidates
+
+    @staticmethod
     def guess_os_release(
-        os: "str | OperatingSystem", os_ver: str, filters: list[OSReleaseListFilter]
+        os: "str | OperatingSystem",
+        os_str: str | None = None,
+        os_ver: str | None = None,
+        filters: list[OSReleaseListFilter] | None = None,
     ) -> "OSRelease | None":
         """
         Return an OS release instance based on the computer operatingSystemVersion attribute.
@@ -455,7 +494,12 @@ class OSOption(Enum):
             OSRelease | None: The OS release that matches the provided strings
         """
 
-        context = Context()
+        if filters is None:
+            filters = []
+
+        if os_str is None and os_ver is None:
+            return None
+
         if not isinstance(os, OperatingSystem):
             os_guess = OSOption.guess_os(os)
             if os_guess is None:
@@ -463,18 +507,25 @@ class OSOption(Enum):
 
             os = os_guess
 
-        candidates = os.release(os_ver)
-        if not isinstance(candidates, SoftwareReleaseList):
-            return candidates
+        # 1: Try to guess release from the provided version if possible
+        candidates = None
+        if os_ver is not None:
+            version = SoftwareReleaseVersion.search_release_version(os_ver)
 
-        if candidates.is_empty():
-            return None
+            if version is None:
+                OSOption.guess_os_release(os, os_str, None, filters)
 
-        res = candidates.unique(*filters)
-        if res is None:
-            raise AmbiguousReleaseException(
-                f"{context}::Unable to resolve a unique release for {os_ver}"
-            )
+            assert version is not None
+            candidates = OSOption._guess_os_candidates_by_version(os, version)
+
+        # 2: If no candidates could be retrieved, try to guess release based on the name
+        if candidates is None and os_str is not None:
+            candidates = os.releases.find_by_name(os_str)
+
+        # 3: Filter candidates until there is only one element remaining, if possible
+        res = None
+        if candidates is not None and not candidates.is_empty:
+            res = candidates.unique(*filters)
 
         return res
 
@@ -509,9 +560,6 @@ class OSOption(Enum):
 
         res = (None, None, None)
         if os_str is not None:
-            if os_ver is None:
-                os_ver = SoftwareReleaseVersion.search_release_version(os_str)
-
             os = OSOption.guess_os(os_str)
 
             if os is not None:

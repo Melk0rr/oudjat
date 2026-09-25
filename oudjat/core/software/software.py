@@ -151,32 +151,6 @@ class Software(Asset, Generic[ReleaseType]):
 
         return self._editions
 
-    def release(self, key: str) -> "ReleaseType | SoftwareReleaseList[ReleaseType]":
-        """
-        Return the releases matching the provided key.
-
-        Args:
-            key (str): The key of the sought release
-
-        Returns:
-            SoftwareReleaseList: A custom list of SoftwareRelease that can be narrowed down using its custom methods
-        """
-
-        candidates = self._releases.get(key)
-
-        if candidates is None:
-            # Try to find the provided version key
-            search_key = self._releases.filter_by_str(key)
-            first = next(iter(search_key), None)
-            if first:
-                return self.release(first)
-
-            raise UnknownSoftwareReleaseVersionError(
-                f"{Context()}::{self.name} does not have any release matching the provided key {key}"
-            )
-
-        return candidates[0] if len(candidates) == 1 else candidates
-
     def has_release(self, rel_ver: str) -> bool:
         """
         Check if the current software has a release with the given version and label.
