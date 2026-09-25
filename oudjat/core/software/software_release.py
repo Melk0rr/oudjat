@@ -1,5 +1,4 @@
 """A module that describe the concept of software release."""
-from oudjat.core.software import STAGE_REG
 
 import logging
 import re
@@ -12,6 +11,7 @@ from oudjat.core.asset_type import AssetType
 from oudjat.utils import Context
 from oudjat.utils.time import TimeConverter
 
+from .definitions import STAGE_REG
 from .software_release_version import SoftwareReleaseVersion
 from .software_support import Support, SupportDictProps
 
@@ -910,10 +910,14 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
         minor_count = []
         build_count = []
 
+        shouldAppendStage = False
         for v in versions:
             major, minor, build = v.split(".")
 
             stage = re.sub(STAGE_REG, "", build)
+
+            if stage:
+                shouldAppendStage = True
 
             if len(major) not in major_count:
                 major_count.append(len(major))
@@ -921,7 +925,24 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             if len(minor) not in minor_count:
                 minor_count.append(len(minor))
 
+            if len(build) not in build_count:
+                build_count.append(len(build))
 
+            
+        major_range = [min(major_count), max(major_count)] if len(major_count) > 1 else major_count
+        minor_range = [min(minor_count), max(minor_count)] if len(minor_count) > 1 else minor_count
+        build_range = [min(build_count), max(build_count)] if len(build_count) > 1 else build_count
+
+        major_range_str = ",".join(str(c) for c in major_range)
+        minor_range_str = ",".join(str(c) for c in minor_range)
+        build_range_str = ",".join(str(c) for c in build_range)
+
+        reg = rf"(\d){{{major_range_str}}}\.(\d){{{minor_range_str}}}\.(\d){{{build_range_str}}}"
+
+        if shouldAppendStage:
+            reg += STAGE_REG
+
+        return rf"^{reg}$"
 
 
     def to_dict(self) -> dict[str, Any]:
@@ -940,5 +961,3 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
     # ****************************************************************
     # Static methods
 
-    @staticmethod
-    def _
