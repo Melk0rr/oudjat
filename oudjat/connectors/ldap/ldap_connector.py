@@ -243,7 +243,9 @@ class LDAPConnector(Connector):
 
         target_ip = socket.gethostbyname(str(self._target))
         if not target_ip:
-            raise LDAPUnreachableServerError(f"{context}::The target {self.target} is unreachable")
+            raise LDAPUnreachableServerError(
+                f"{context}::The target {self.target} is unreachable"
+            )
 
         TLSOption = TypedDict("TLSOption", {"use_ssl": bool, "tls": ldap3.Tls | None})
         tls_option: TLSOption = {"use_ssl": self._use_tls, "tls": None}
@@ -253,7 +255,9 @@ class LDAPConnector(Connector):
                 validate=ssl.CERT_NONE, version=version, ciphers="ALL:@SECLEVEL=0"
             )
 
-        ldap_server = ldap3.Server(target_ip, get_info=ldap3.ALL, port=self._port, **tls_option)
+        ldap_server = ldap3.Server(
+            target_ip, get_info=ldap3.ALL, port=self._port, **tls_option
+        )
         ldap_connection = ldap3.Connection(
             ldap_server,
             user=self._credentials.username,
@@ -269,8 +273,13 @@ class LDAPConnector(Connector):
             if not bind_result:
                 result = ldap_connection.result
 
-                if result["result"] == "RESULT_STRONGER_AUTH_REQUIRED" and self._use_tls:
-                    self.logger.debug(f"{context}::Stronger LDAP authentication is required.")
+                if (
+                    result["result"] == "RESULT_STRONGER_AUTH_REQUIRED"
+                    and self._use_tls
+                ):
+                    self.logger.debug(
+                        f"{context}::Stronger LDAP authentication is required."
+                    )
 
                     self.set_tls_usage(use_tls=True)
                     return self.connect()
@@ -290,11 +299,13 @@ class LDAPConnector(Connector):
         if ldap_server.schema is None:
             ldap_server.get_info_from_server(ldap_connection)
 
-            if ldap_connection.result["result"] != 0:
-                if ldap_connection.result["message"].split(":")[0] == "000004DC":
-                    raise LDAPConnectionError(
-                        f"{context}::Failed to bind to LDAP. Most likely due to an invalid username"
-                    )
+            if (
+                ldap_connection.result["result"] != 0
+                and ldap_connection.result["message"].split(":")[0] == "000004DC"
+            ):
+                raise LDAPConnectionError(
+                    f"{context}::Failed to bind to LDAP. Most likely due to an invalid username"
+                )
 
             if ldap_server.schema is None:
                 raise LDAPSchemaError(f"{context}::Failed to get LDAP schema")
@@ -304,7 +315,9 @@ class LDAPConnector(Connector):
         self._ldap_server = ldap_server
         self._connection = ldap_connection
 
-        self._default_search_base = self._ldap_server.info.other["defaultNamingContext"][0]
+        self._default_search_base = self._ldap_server.info.other[
+            "defaultNamingContext"
+        ][0]
         self._domain = self._ldap_server.info.other["ldapServiceName"][0].split("@")[-1]
 
         self.logger.debug(
@@ -411,7 +424,9 @@ class LDAPConnector(Connector):
     # ****************************************************************
     # Methods - ldap objects
 
-    def _object_opt(self, ldap_obj_type: "LDAPObjectType") -> "LDAPObjectOption[LDAPObject]":
+    def _object_opt(
+        self, ldap_obj_type: "LDAPObjectType"
+    ) -> "LDAPObjectOption[LDAPObject]":
         """
         Return an LDAP object based on a given type.
 
@@ -469,7 +484,9 @@ class LDAPConnector(Connector):
                 obj_type = LDAPObjectType.from_object_cls(entry)
                 LDAPDynamicObjectType = self._object_opt(obj_type).cls
 
-                return LDAPDynamicObjectType(self.complete_partial_entry(entry), self._CAPABILITIES)
+                return LDAPDynamicObjectType(
+                    self.complete_partial_entry(entry), self._CAPABILITIES
+                )
 
             return LDAPObject(entry, capabilities=self._CAPABILITIES)
 
@@ -546,7 +563,9 @@ class LDAPConnector(Connector):
 
         return groups
 
-    def ldap_gpos(self, entries: list["LDAPEntry"]) -> dict[str, "LDAPGroupPolicyObject"]:
+    def ldap_gpos(
+        self, entries: list["LDAPEntry"]
+    ) -> dict[str, "LDAPGroupPolicyObject"]:
         """
         Map the provided LDAP entries into a dictionary of LDAPGroupPolicyObject instances.
 
