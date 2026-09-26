@@ -2,6 +2,6 @@
 A module to define package wide utilities.
 """
 
-VERSION_REG: str = r"(\d+)(?:\.(\d+))?(?:\.(\d+))?(a\d*|b\d*|rc\d*|sp\d*)?"
-STAGE_REG: str = r"(a|b|rc|sp)(\d*)?"
+STAGE_REG: str = r"((?:a|b|r|rc|sp)(?:\d*)?)"
+VERSION_REG: str = rf"(\d+)(?:\.(\d+))?(?:\.(\d+))?{STAGE_REG}?"
 
