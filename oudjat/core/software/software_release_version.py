@@ -120,7 +120,9 @@ class SoftwareReleaseVersion:
         match = re.match(VERSION_REG, version)
 
         if match is None:
-            raise InvalidSoftwareVersionError(f"{context}::Invalid version provided {version}")
+            raise InvalidSoftwareVersionError(
+                f"{context}::Invalid version provided {version}"
+            )
 
         self._major = int(match.group(1))
         self._minor = int(match.group(2)) if match.group(2) is not None else 0
@@ -270,7 +272,13 @@ class SoftwareReleaseVersion:
             tuple[int, int, int, int, int]: A tuple containing the values of the version that are used for comparison
         """
 
-        return (self._major, self._minor, self._build, self._stage.factor, self._stage_version)
+        return (
+            self._major,
+            self._minor,
+            self._build,
+            self._stage.factor,
+            self._stage_version,
+        )
 
     def __gt__(self, other: "SoftwareReleaseVersion") -> bool:
         """
@@ -371,7 +379,15 @@ class SoftwareReleaseVersion:
             int: Hash based on the version numbers
         """
 
-        return hash((self._major, self._minor, self._build, str(self._stage), self._stage_version))
+        return hash(
+            (
+                self._major,
+                self._minor,
+                self._build,
+                str(self._stage),
+                self._stage_version,
+            )
+        )
 
     @override
     def __str__(self) -> str:
@@ -384,7 +400,9 @@ class SoftwareReleaseVersion:
 
         base = f"{self._major}.{self._minor}.{self._build}"
 
-        if not (self._stage == SoftwareReleaseStage.RELEASE and self._stage_version == 1):
+        if not (
+            self._stage == SoftwareReleaseStage.RELEASE and self._stage_version == 1
+        ):
             base += f"{self._stage}{self._stage_version}"
 
         return base
@@ -413,7 +431,9 @@ class SoftwareReleaseVersion:
     # Class Methods
 
     @classmethod
-    def search_release_version(cls, version_str: str, pattern: str | None = None) -> str | None:
+    def search_release_version(
+        cls, version_str: str, pattern: str | None = None
+    ) -> list[str] | None:
         """
         Search and extract a valid Software release version from the provided string based on a provided pattern.
 
@@ -430,8 +450,26 @@ class SoftwareReleaseVersion:
         if pattern is None:
             pattern = VERSION_REG
 
-        search = re.search(pattern, version_str)
+        search = re.findall(pattern, version_str)
         if search:
-            return str(cls(search.group(0)))
+            return [str(SoftwareReleaseVersion.from_tuple(t)) for t in search]
 
         return None
+
+    @classmethod
+    def from_tuple(
+        cls, ver_tuple: tuple[str, str, str, str]
+    ) -> "SoftwareReleaseVersion":
+        """
+        Return a SoftwareReleaseVersion instance based on a tuple you usually obtain by using re.findall
+
+        Args:
+            ver_tuple (tuple[str, str, str, str]): The tuple to generate the SoftwareReleaseVersion instance from.
+
+        Returns:
+            SoftwareReleaseVersion: The resulting SoftwareReleaseVersion instance based on the provided tuple.
+        """
+
+        return SoftwareReleaseVersion(
+            ".".join(tuple(str(item) for item in ver_tuple if item != ""))
+        )
