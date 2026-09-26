@@ -10,7 +10,7 @@ from oudjat.core.software.exceptions import (
 )
 from oudjat.utils import Context
 
-from .definitions import STAGE_REG, VERSION_REG
+from .definitions import STAGE_REG, VERSION_REG, STAGE_GRP_REG
 
 
 class SoftwareReleaseStageProps(NamedTuple):
@@ -73,10 +73,10 @@ class SoftwareReleaseStage(Enum):
             SoftwareReleaseStage: The new stage based on the provided qualifier
         """
 
-        def qualifier_cmp(stage: "SoftwareReleaseStage") -> bool:
-            return str(stage) == qualifier
+        def _qualifier_cmp(stage: "SoftwareReleaseStage") -> bool:
+            return str(stage) in qualifier
 
-        return next(filter(qualifier_cmp, SoftwareReleaseStage))
+        return next(filter(_qualifier_cmp, SoftwareReleaseStage))
 
 
 class SoftwareReleaseVersion:
@@ -133,7 +133,7 @@ class SoftwareReleaseVersion:
         )
 
         if match.group(4) is not None:
-            stage_match = re.match(STAGE_REG, match.group(4))
+            stage_match = re.match(STAGE_GRP_REG, match.group(4))
 
             if stage_match:
                 self._stage = SoftwareReleaseStage.from_qualifier(stage_match.group(1))
