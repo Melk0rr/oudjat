@@ -904,46 +904,54 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
         )
 
     def compile_versions_reg(self) -> str:
+        """
+        Compile a regex out of the dictionary release keys.
+
+        Returns:
+            str: The compiled regex
+        """
+
         versions = self._releases.keys()
 
-        major_count = []
-        minor_count = []
-        build_count = []
+        parts_list = [v.split(".", 2) for v in versions]
 
-        shouldAppendStage = False
-        for v in versions:
-            major, minor, build = v.split(".")
+        major_count = {len(p[0]) for p in parts_list}
+        minor_count = {len(p[1]) for p in parts_list if len(p) > 1}
+        build_count = {len(re.sub(STAGE_REG, "", p[2])) for p in parts_list if len(p) > 2}
 
-            stage = re.sub(STAGE_REG, "", build)
+        shouldAppendStage = any(
+            not all(c.isdigit() or c == "." for c in v) for v in versions
+        )
 
-            if stage:
-                shouldAppendStage = True
+        def _range_str(counts: set[int]) -> str:
+            range = sorted(counts)
 
-            if len(major) not in major_count:
-                major_count.append(len(major))
+            return f"{range[0]},{range[-1]}" if len(range) > 1 else f"{range[0]}"
 
-            if len(minor) not in minor_count:
-                minor_count.append(len(minor))
-
-            if len(build) not in build_count:
-                build_count.append(len(build))
-
-            
-        major_range = [min(major_count), max(major_count)] if len(major_count) > 1 else major_count
-        minor_range = [min(minor_count), max(minor_count)] if len(minor_count) > 1 else minor_count
-        build_range = [min(build_count), max(build_count)] if len(build_count) > 1 else build_count
-
-        major_range_str = ",".join(str(c) for c in major_range)
-        minor_range_str = ",".join(str(c) for c in minor_range)
-        build_range_str = ",".join(str(c) for c in build_range)
-
-        reg = rf"(\d){{{major_range_str}}}\.(\d){{{minor_range_str}}}\.(\d){{{build_range_str}}}"
+        reg = rf"(\d){{{_range_str(major_count)}}}\.(\d){{{_range_str(minor_count)}}}\.(\d){{{_range_str(build_count)}}}"
 
         if shouldAppendStage:
-            reg += STAGE_REG
+            reg += rf"({STAGE_REG})?"
 
         return rf"^{reg}$"
 
+    def validate_version(self, version: str | SoftwareReleaseVersion) -> bool:
+        """
+        Check if the provided version match the current dict compiled versions regex.
+
+        Args:
+            version (str | SoftwareReleaseVersion): The version to validate
+
+        Returns:
+            bool: True if the version is validated. False otherwise.
+        """
+
+        if not isinstance(version, SoftwareReleaseVersion):
+            version = SoftwareReleaseVersion(version)
+
+        reg = self.compile_versions_reg()
+
+        return re.match(reg, str(version)) is not None
 
     def to_dict(self) -> dict[str, Any]:
         """
@@ -957,7 +965,6 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             vnumber: [r.to_dict() for r in releases]
             for vnumber, releases in self._releases.items()
         }
-    
+
     # ****************************************************************
     # Static methods
-
