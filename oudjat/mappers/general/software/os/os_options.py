@@ -508,7 +508,10 @@ class OSOption(Enum):
             os = os_guess
 
         if os_ver is None and os_str is not None:
-            os_ver = SoftwareReleaseVersion.search_release_version(os_str)
+            os_ver_search = SoftwareReleaseVersion.search_release_version(os_str)
+
+            if os_ver_search:
+                os_ver = next(filter(os.releases.validate_version, os_ver_search), None)
 
         # 1: Try to guess release from the provided version if possible
         if os_ver is None:
