@@ -2,7 +2,6 @@
 
 import logging
 from dataclasses import dataclass
-from enum import Enum
 from pathlib import Path
 from typing import TypedDict
 
@@ -12,7 +11,6 @@ from oudjat.core.software.os.operating_system import (
     OSRelease,
     OSReleaseListFilter,
 )
-from oudjat.core.software.os.windows import WindowsEdition
 from oudjat.core.software.software_edition import (
     DEFAULT_SOFTWARE_EDITION,
     SoftwareEdition,
@@ -25,6 +23,7 @@ from .os_families import OSFamily
 
 CACHE_PATH = FileUtils.project_root() / ".cache"
 SOFTWARE_CACHE_PATH = CACHE_PATH / "software"
+OPT_PATH = Path.cwd() / "config/options.json"
 
 
 class NotImplementedOSOption(KeyError):
@@ -71,14 +70,14 @@ class OSOptAttributes(TypedDict):
     A simple class to specify OSOption attributes properties.
 
     Attributes:
-        os_id         (str)                : A short string to identify the os. Preferably matching endoflife.date product
-        name          (str)                : The name of the OS
-        label         (str)                : A string (without spaces) comparable to an id but more explicit
-        editor        (str)                : The name of the editor that maintains the OS
-        os_family     (str | OSFamily)     : The family of operating system the OS belongs to
-        description   (str)                : A string that describes the OS
-        editions      (SoftwareEditionDict): A dictionary of editions available for that os. Default will resolve to a default standard edition
-        tags          (list[str])          : A list of tags that describe the OS
+        os_id       (str)                : A short string to identify the os. Preferably matching endoflife.date product
+        name        (str)                : The name of the OS
+        label       (str)                : A string (without spaces) comparable to an id but more explicit
+        editor      (str)                : The name of the editor that maintains the OS
+        os_family   (str | OSFamily)     : The family of operating system the OS belongs to
+        description (str)                : A string that describes the OS
+        editions    (SoftwareEditionDict): A dictionary of editions available for that os. (default:default edition)
+        tags        (list[str])          : A list of tags that describe the OS
 
     """
 
@@ -108,198 +107,35 @@ class OSOptionProps:
 
 
 # TODO: Use a JSON based logic + generate Enum elements from it if possible or change Enum to regular class
-class OSOption(Enum):
+class OSOption:
     """An enumeration of OSes."""
 
-    ALMALINUX = OSOptionProps(
-        cls=OperatingSystem,
-        attributes={
-            "os_id": "almalinux",
-            "name": "Alma Linux",
-            "label": "alma-linux",
-            "editor": "Andrew Lukoshko",
-            "os_family": OSFamily.LINUX,
-            "description": "Alma Linux is an open source, community-owned and governed, forever-free enterprise Linux distribution. It is focused on long-term stability, providing a robust production-grade platform. AlmaLinux OS is binary-compatible with RHEL. It is owned and controlled by the non-profit AlmaLinux OS Foundation, and managed by a community-elected board of directors and the self-managed AlmaLinux Engineering Steering Committee",
-            "editions": DEFAULT_SOFTWARE_EDITION,
-            "tags": ["linux-distribution"],
-        },
-    )
+    def __init__(self) -> None:
 
-    CENTOS = OSOptionProps(
-        cls=OperatingSystem,
-        attributes={
-            "os_id": "centos",
-            "name": "CentOS",
-            "label": "community-enterprise-operating-system",
-            "editor": "Lance Davis",
-            "os_family": OSFamily.LINUX,
-            "description": "CentOS was a Linux distribution that provided a free, enterprise-class, community-supported computing platform functionally compatible with RHEL",
-            "editions": DEFAULT_SOFTWARE_EDITION,
-            "tags": ["linux-distribution", "red-hat"],
-        },
-    )
+        self._options = {}
 
-    DEBIAN = OSOptionProps(
-        cls=OperatingSystem,
-        attributes={
-            "os_id": "debian",
-            "name": "Debian",
-            "label": "debian",
-            "editor": "",
-            "os_family": OSFamily.LINUX,
-            "description": "Debian is a free operating system for your computer. The Debian stable branch is the most popular edition for personal computers and network servers, and is used as the basis for many other Linux distributions",
-            "editions": DEFAULT_SOFTWARE_EDITION,
-            "tags": ["linux-distribution"],
-        },
-    )
+        opt_data = FileUtils.import_json(OPT_PATH)
 
-    FREEBSD = OSOptionProps(
-        cls=OperatingSystem,
-        attributes={
-            "os_id": "freebsd",
-            "name": "FreeBSD",
-            "label": "freebsd",
-            "editor": "FreeBSD Project",
-            "os_family": OSFamily.UNIX,
-            "description": "FreeBSD is an operating system used to power modern servers, desktops, and embedded platforms",
-            "editions": DEFAULT_SOFTWARE_EDITION,
-            "tags": ["unix-distribution", "bsd-distribution"],
-        },
-    )
+        for opt_k, opt in opt_data[0].items():
+            editions = DEFAULT_SOFTWARE_EDITION
 
-    ORACLELINUX = OSOptionProps(
-        cls=OperatingSystem,
-        attributes={
-            "os_id": "oraclelinux",
-            "name": "Oracle Linux",
-            "label": "oracle-linux",
-            "editor": "Oracle",
-            "os_family": OSFamily.LINUX,
-            "description": "Oracle Linux is an Open Source, free RHEL derivative developed by Oracle to be a 100% application binary compatible alternative to Red Hat Enterprise Linux",
-            "editions": DEFAULT_SOFTWARE_EDITION,
-            "tags": ["linux-distribution", "oracle"],
-        },
-    )
+            if opt["editions"] is not None:
+                editions = SoftwareEditionDict(
+                    {k: SoftwareEdition(label=k, **v) for k, v in opt["editions"]}
+                )
 
-    ORACLESOLARIS = OSOptionProps(
-        cls=OperatingSystem,
-        attributes={
-            "os_id": "solaris",
-            "name": "Oracle Solaris",
-            "label": "oracle-solaris",
-            "editor": "Oracle",
-            "os_family": OSFamily.UNIX,
-            "description": "Oracle Solaris is a proprietary Unix operating system originally developed by Sun Microsystems. After the Sun acquisition by Oracle in 2010, it was renamed Oracle Solaris. It supports SPARC and x86-64 workstations and servers. It is known for its stability, performance, scalability and innovative features such as DTrace or ZFS",
-            "editions": DEFAULT_SOFTWARE_EDITION,
-            "tags": ["unix-distribution", "oracle"],
-        },
-    )
+            new_opt = OperatingSystem(
+                os_id=opt["id"],
+                name=opt["name"],
+                label=opt["label"],
+                editor=opt["editor"],
+                description=opt["description"],
+                os_family=opt["osFamily"],
+                editions=editions,
+                tags=opt["tags"],
+            )
 
-    RHEL = OSOptionProps(
-        cls=OperatingSystem,
-        attributes={
-            "os_id": "rhel",
-            "name": "Red Hat Enterprise Linux",
-            "label": "red-hat-enterprise-linux",
-            "editor": "Red Hat",
-            "os_family": OSFamily.LINUX,
-            "description": "Red Hat Enterprise Linux is a Linux distribution developed by Red Hat for the commercial market",
-            "editions": DEFAULT_SOFTWARE_EDITION,
-            "tags": ["linux-distribution", "red-hat"],
-        },
-    )
-
-    ROCKYLINUX = OSOptionProps(
-        cls=OperatingSystem,
-        attributes={
-            "os_id": "rockylinux",
-            "name": "Rocky Linux",
-            "label": "rocky-linux",
-            "editor": "The Rocky Enterprise Software Foundation",
-            "os_family": OSFamily.LINUX,
-            "description": " Rocky Linux is a Linux distribution intended to be a downstream, complete binary-compatible release using the Red Hat Enterprise Linux (RHEL) operating system source code. The project is led by Gregory Kurtzer, founder of the CentOS project",
-            "editions": DEFAULT_SOFTWARE_EDITION,
-            "tags": ["linux-distribution"],
-        },
-    )
-
-    SLES = OSOptionProps(
-        cls=OperatingSystem,
-        attributes={
-            "os_id": "sles",
-            "name": "SUSE Linux Enterprise Server",
-            "label": "suse-linux-enterprise-server",
-            "editor": "SUSE",
-            "os_family": OSFamily.LINUX,
-            "description": "SUSE Linux Enterprise Server is a modular linux distribution for both multimodal and traditional IT",
-            "editions": DEFAULT_SOFTWARE_EDITION,
-            "tags": ["linux-distribution", "suse"],
-        },
-    )
-
-    UBUNTU = OSOptionProps(
-        cls=OperatingSystem,
-        attributes={
-            "os_id": "ubuntu",
-            "name": "Ubuntu",
-            "label": "ubuntu",
-            "editor": "Canonical",
-            "os_family": OSFamily.LINUX,
-            "description": "Ubuntu is a free and open-source Linux distribution based on Debian. Ubuntu is officially released in three editions: Desktop, Server, and Core",
-            "editions": DEFAULT_SOFTWARE_EDITION,
-            "tags": ["linux-distribution", "canonical"],
-        },
-    )
-
-    WINDOWS = OSOptionProps(
-        cls=OperatingSystem,
-        attributes={
-            "os_id": "windows",
-            "name": "Windows",
-            "label": "windows",
-            "editor": "Microsoft Corporation",
-            "os_family": OSFamily.WINDOWS,
-            "description": "Microsoft Windows is the operating system developed by Microsoft to run on workstations",
-            "editions": WindowsEdition.WINDOWS.value,
-            "tags": ["microsoft", "windows"],
-        },
-    )
-
-    WINDOWSSERVER = OSOptionProps(
-        cls=OperatingSystem,
-        attributes={
-            "os_id": "windowsserver",
-            "name": "Windows Server",
-            "label": "windows-server",
-            "editor": "Microsoft Corporation",
-            "os_family": OSFamily.WINDOWS,
-            "description": "Microsoft Windows is the operating system developed by Microsoft to run on servers",
-            "editions": WindowsEdition.WINDOWSSERVER.value,
-            "tags": ["microsoft", "windows"],
-        },
-    )
-
-    @property
-    def instance(self) -> "OperatingSystem | None":
-        """
-        Return the instance of this option.
-
-        Returns:
-            OperatingSystem | None: OSOption instance
-        """
-
-        return self._value_.instance
-
-    @property
-    def attributes(self) -> OSOptAttributes:
-        """
-        Return the attributes associated with the option.
-
-        Returns:
-            dict[str, Any]: The dictionary of attributes to pass to the option class
-        """
-
-        return self._value_.attributes
+            self._options[opt_k] = new_opt
 
     def _opt_cache_path(self) -> Path:
         """
@@ -360,8 +196,9 @@ class OSOption(Enum):
 
                 if not is_cache_generated:
                     logger = logging.getLogger(__name__)
-                    logger.error(f"{Context()}::Cache for {self._name_} releases could not be generated")
-
+                    logger.error(
+                        f"{Context()}::Cache for {self._name_} releases could not be generated"
+                    )
 
             release_data = FileUtils.import_json(release_data_path)[0]
 

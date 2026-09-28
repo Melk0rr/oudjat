@@ -1,35 +1,221 @@
 {
-	"RHEL": {
-		"attributes": {
-			"os_id": "rhel",
-			"name": "Red Hat Enterprise Linux",
-			"label": "red-hat-enterprise-linux",
-			"editor": "Red Hat",
-			"os_family": "LINUX",
-			"description": "Red Hat Enterprise Linux is a Linux distribution developed by Red Hat for the commercial market",
-			"tags": ["linux-distribution", "red-hat"]
-		}
-	},
-	"WINDOWS": {
-		"attributes": {
-			"os_id": "windows",
-			"name": "Windows",
-			"label": "windows",
-			"editor": "Microsoft Corporation",
-			"os_family": "WINDOWS",
-			"description": "Microsoft Windows is the operating system developed by Microsoft to run on workstations",
-			"tags": ["microsoft", "windows"]
-		}
-	},
-	"WINDOWSSERVER": {
-		"attributes": {
-			"os_id": "windowsserver",
-			"name": "Windows Server",
-			"label": "windows-server",
-			"editor": "Microsoft Corporation",
-			"os_family": "WINDOWS",
-			"description": "Microsoft Windows is the operating system developed by Microsoft to run on servers",
-			"tags": ["microsoft", "windows"]
-		}
-	}
+  "ALMALINUX": {
+    "attributes": {
+      "id": "almalinux",
+      "name": "Alma Linux",
+      "label": "alma-linux",
+      "editor": "Andrew Lukoshko",
+      "osFamily": "LINUX",
+      "description": "Alma Linux is an open source, community-owned and governed, forever-free enterprise Linux distribution. It is focused on long-term stability, providing a robust production-grade platform. AlmaLinux OS is binary-compatible with RHEL. It is owned and controlled by the non-profit AlmaLinux OS Foundation, and managed by a community-elected board of directors and the self-managed AlmaLinux Engineering Steering Committee",
+      "editions": null,
+      "tags": [
+        "linux-distribution"
+      ]
+    }
+  },
+  "CENTOS": {
+    "attributes": {
+      "id": "centos",
+      "name": "CentOS",
+      "label": "community-enterprise-operating-system",
+      "editor": "Lance Davis",
+      "osFamily": "LINUX",
+      "description": "CentOS was a Linux distribution that provided a free, enterprise-class, community-supported computing platform functionally compatible with RHEL",
+      "editions": null,
+      "tags": [
+        "linux-distribution",
+        "red-hat"
+      ]
+    }
+  },
+  "DEBIAN": {
+    "attributes": {
+      "id": "debian",
+      "name": "Debian",
+      "label": "debian",
+      "editor": "",
+      "osFamily": "LINUX",
+      "description": "Debian is a free operating system for your computer. The Debian stable branch is the most popular edition for personal computers and network servers, and is used as the basis for many other Linux distributions",
+      "editions": null,
+      "tags": [
+        "linux-distribution"
+      ]
+    }
+  },
+  "FREEBSD": {
+    "attributes": {
+      "id": "freebsd",
+      "name": "FreeBSD",
+      "label": "freebsd",
+      "editor": "FreeBSD Project",
+      "osFamily": "UNIX",
+      "description": "FreeBSD is an operating system used to power modern servers, desktops, and embedded platforms",
+      "editions": null,
+      "tags": [
+        "unix-distribution",
+        "bsd-distribution"
+      ]
+    }
+  },
+  "ORACLELINUX": {
+    "attributes": {
+      "id": "oraclelinux",
+      "name": "Oracle Linux",
+      "label": "oracle-linux",
+      "editor": "Oracle",
+      "osFamily": "LINUX",
+      "description": "Oracle Linux is an Open Source, free RHEL derivative developed by Oracle to be a 100% application binary compatible alternative to Red Hat Enterprise Linux",
+      "editions": null,
+      "tags": [
+        "linux-distribution",
+        "oracle"
+      ]
+    }
+  },
+  "ORACLESOLARIS": {
+    "attributes": {
+      "id": "solaris",
+      "name": "Oracle Solaris",
+      "label": "oracle-solaris",
+      "editor": "Oracle",
+      "osFamily": "UNIX",
+      "description": "Oracle Solaris is a proprietary Unix operating system originally developed by Sun Microsystems. After the Sun acquisition by Oracle in 2010, it was renamed Oracle Solaris. It supports SPARC and x86-64 workstations and servers. It is known for its stability, performance, scalability and innovative features such as DTrace or ZFS",
+      "editions": null,
+      "tags": [
+        "unix-distribution",
+        "oracle"
+      ]
+    }
+  },
+  "RHEL": {
+    "attributes": {
+      "id": "rhel",
+      "name": "Red Hat Enterprise Linux",
+      "label": "red-hat-enterprise-linux",
+      "editor": "Red Hat",
+      "osFamily": "LINUX",
+      "description": "Red Hat Enterprise Linux is a Linux distribution developed by Red Hat for the commercial market",
+      "editions": null,
+      "tags": [
+        "linux-distribution",
+        "red-hat"
+      ]
+    }
+  },
+  "ROCKYLINUX": {
+    "attributes": {
+      "id": "rockylinux",
+      "name": "Rocky Linux",
+      "label": "rocky-linux",
+      "editor": "The Rocky Enterprise Software Foundation",
+      "osFamily": "LINUX",
+      "description": " Rocky Linux is a Linux distribution intended to be a downstream, complete binary-compatible release using the Red Hat Enterprise Linux (RHEL) operating system source code. The project is led by Gregory Kurtzer, founder of the CentOS project",
+      "editions": null,
+      "tags": [
+        "linux-distribution"
+      ]
+    }
+  },
+  "SLES": {
+    "attributes": {
+      "id": "sles",
+      "name": "SUSE Linux Enterprise Server",
+      "label": "suse-linux-enterprise-server",
+      "editor": "SUSE",
+      "osFamily": "LINUX",
+      "description": "SUSE Linux Enterprise Server is a modular linux distribution for both multimodal and traditional IT",
+      "editions": null,
+      "tags": [
+        "linux-distribution",
+        "suse"
+      ]
+    }
+  },
+  "UBUNTU": {
+    "attributes": {
+      "id": "ubuntu",
+      "name": "Ubuntu",
+      "label": "ubuntu",
+      "editor": "Canonical",
+      "osFamily": "LINUX",
+      "description": "Ubuntu is a free and open-source Linux distribution based on Debian. Ubuntu is officially released in three editions: Desktop, Server, and Core",
+      "editions": null,
+      "tags": [
+        "linux-distribution",
+        "canonical"
+      ]
+    }
+  },
+  "WINDOWS": {
+    "attributes": {
+      "id": "windows",
+      "name": "Windows",
+      "label": "windows",
+      "editor": "Microsoft Corporation",
+      "osFamily": "WINDOWS",
+      "description": "Microsoft Windows is the operating system developed by Microsoft to run on workstations",
+      "editions": {
+        "Enterprise": {
+          "channel": "E",
+          "pattern": "Ent[er]{2}prise"
+        },
+        "Education": {
+          "channel": "E",
+          "pattern": "[EÉeé]ducation"
+        },
+        "IoT Enterprise": {
+          "channel": "E",
+          "pattern": "[Ii][Oo][Tt] Ent[er]{2}prise"
+        },
+        "Home": {
+          "channel": "W",
+          "pattern": "[Hh]ome"
+        },
+        "Pro": {
+          "channel": "W",
+          "pattern": "Pro(?:fession[n]?[ae]l)?"
+        },
+        "Pro Education": {
+          "channel": "W",
+          "pattern": "Pro(?:fession[n]?[ae]l)? [EÉeé]ducation"
+        },
+        "IOT": {
+          "channel": "IOT",
+          "pattern": "[Ii][Oo][Tt]"
+        }
+      }
+    },
+    "tags": [
+      "microsoft",
+      "windows"
+    ]
+  },
+  "WINDOWSSERVER": {
+    "attributes": {
+      "id": "windowsserver",
+      "name": "Windows Server",
+      "label": "windows-server",
+      "editor": "Microsoft Corporation",
+      "osFamily": "WINDOWS",
+      "description": "Microsoft Windows is the operating system developed by Microsoft to run on servers",
+      "editions": {
+        "Enterprise": {
+          "channel": "LTSC",
+          "pattern": "Ent[er]{2}prise"
+        },
+        "Standard": {
+          "channel": "LTSC",
+          "pattern": "[Ss]tandard"
+        },
+        "Datacenter": {
+          "channel": "LTSC",
+          "pattern": "[Dd]atacenter"
+        }
+      },
+      "tags": [
+        "microsoft",
+        "windows"
+      ]
+    }
+  }
 }
