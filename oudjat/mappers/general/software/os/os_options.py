@@ -1,5 +1,6 @@
 """A simple module that lists operating system options."""
 
+import logging
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -355,7 +356,12 @@ class OSOption(Enum):
             SOFTWARE_CACHE_PATH.mkdir(parents=True, exist_ok=True)
 
             if not release_data_path.exists():
-                self.gen_opt_cache()
+                is_cache_generated = self.gen_opt_cache()
+
+                if not is_cache_generated:
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"{Context()}::Cache for {self._name_} releases could not be generated")
+
 
             release_data = FileUtils.import_json(release_data_path)[0]
 
