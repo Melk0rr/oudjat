@@ -360,8 +360,9 @@ class OSOption(Enum):
 
                 if not is_cache_generated:
                     logger = logging.getLogger(__name__)
-                    logger.error(f"{Context()}::Cache for {self._name_} releases could not be generated")
-
+                    logger.error(
+                        f"{Context()}::Cache for {self._name_} releases could not be generated"
+                    )
 
             release_data = FileUtils.import_json(release_data_path)[0]
 
@@ -487,14 +488,17 @@ class OSOption(Enum):
         os_str: str | None = None,
         os_ver: str | None = None,
         filters: list[OSReleaseListFilter] | None = None,
+        include_version_guessing: bool = True,
     ) -> "OSRelease | None":
         """
         Return an OS release instance based on the computer operatingSystemVersion attribute.
 
         Args:
-            os      (str)                      : Either a string from which guess OS infos or an OperatingSystem instance
-            os_ver  (str)                      : A string that contain specifically the release version
-            filters (list[OSReleaseListFilter]): A list of filters to retrieve a unique release
+            os                       (str | OperatingSystem)    : A string from which guess OS infos or an OperatingSystem instance
+            os_str                   (str | None)               : A string that contain any os information
+            os_ver                   (str | None)               : A string that contain specifically the release version
+            filters                  (list[OSReleaseListFilter]): A list of filters to retrieve a unique release
+            include_version_guessing (bool)                     : Wheither to resolve the version or not
 
         Returns:
             OSRelease | None: The OS release that matches the provided strings
@@ -516,7 +520,7 @@ class OSOption(Enum):
         candidates = None
 
         # 1: Try to guess release from the provided version if possible
-        if os_ver is None and os_str is not None:
+        if os_ver is None and os_str is not None and include_version_guessing:
             os_ver_search = SoftwareReleaseVersion.search_release_version(os_str)
 
             if os_ver_search:
@@ -541,6 +545,7 @@ class OSOption(Enum):
         os_str: str | None = None,
         os_ver: str | None = None,
         filters: list["OSReleaseListFilter"] | None = None,
+        include_version_guessing: bool = True,
     ) -> MappingOSTuple:
         """
         Return a tuple with 3 OS elements guessed from an OS string, and a release version.
@@ -571,7 +576,10 @@ class OSOption(Enum):
 
             if os is not None:
                 os_rel = OSOption.guess_os_release(
-                    os, os_ver or os_str, filters=filters
+                    os,
+                    os_ver or os_str,
+                    filters=filters,
+                    include_version_guessing=include_version_guessing,
                 )
                 os_edition = OSOption.guess_os_edition(os, os_str)
 
