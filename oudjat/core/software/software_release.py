@@ -473,7 +473,7 @@ class SoftwareReleaseList[ReleaseType: "SoftwareRelease"](list):
         return len(self) == 0
 
     @property
-    def versions(self) -> list[str]:
+    def versions(self) -> list[SoftwareReleaseVersion]:
         """
         List all versions amongst releases in the current instance.
 
@@ -483,7 +483,7 @@ class SoftwareReleaseList[ReleaseType: "SoftwareRelease"](list):
 
         versions = []
         for rel in self:
-            versions.extend([str(rel.version), str(rel.latest_version)])
+            versions.extend([rel.version, rel.latest_version])
 
         return sorted(versions)
 
@@ -688,7 +688,7 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
     # Properties
 
     @property
-    def versions(self) -> list[str]:
+    def versions(self) -> list[SoftwareReleaseVersion]:
         """
         List all the initial and latest versions in all the releases in the current dictionary.
 
@@ -944,7 +944,7 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             str: The compiled regex
         """
 
-        versions = self.versions
+        versions = list(map(str, self.versions))
 
         parts_list = [v.split(".", 2) for v in versions]
 
