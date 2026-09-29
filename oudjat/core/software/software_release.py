@@ -235,7 +235,7 @@ class SoftwareRelease(Asset):
 
         _ = self._support_channels.setdefault(channel, support)
 
-    def support(self, channel: str = "*") -> Support | None:
+    def support(self, channel: str | None = None) -> Support | None:
         """
         Return a support instance based on the provided channel.
 
@@ -245,6 +245,13 @@ class SoftwareRelease(Asset):
         Returns:
             Support | None: A support instance that matches the provided channel. If no channel matches, returns None.
         """
+
+        if channel is None:
+            return (
+                self._support_channels.get("*")
+                if "*" in self._support_channels
+                else next(iter(self._support_channels.values()))
+            )
 
         return self._support_channels.get(channel, None)
 
