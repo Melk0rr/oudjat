@@ -483,7 +483,7 @@ class SoftwareReleaseList[ReleaseType: "SoftwareRelease"](list):
 
         versions = []
         for rel in self:
-            versions.extend([rel.version, rel.latest_version])
+            versions.extend([str(rel.version), str(rel.latest_version)])
 
         return sorted(versions)
 
