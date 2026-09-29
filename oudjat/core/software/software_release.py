@@ -268,6 +268,16 @@ class SoftwareRelease(Asset):
         return [v for v in vuln if v in self.vulnerabilities]
 
     def compare_names(self, name: str) -> bool:
+        """
+        Return wheither the provided name matches the current release name.
+
+        Args:
+            name (str): The name to compare to the one of the release.
+
+        Returns:
+            bool: True if the name matches. False otherwise
+        """
+
         return (
             re.search(name, self._name) is not None
             or re.search(self._name, name) is not None
