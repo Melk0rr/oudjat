@@ -109,8 +109,8 @@ class OSFamily(Enum):
 
     WINDOWS = OSFamilyProps(
         options=[
-            OSFamilyOptProps(pattern=r"(?i)windows(?!\s+server)", name="WINDOWS"),
-            OSFamilyOptProps(pattern=r"(?i)windows\s+server", name="WINDOWSSERVER"),
+            OSFamilyOptProps(pattern=r"(?i)(?:microsoft\s+)?windows(?!\s+server)", name="WINDOWS"),
+            OSFamilyOptProps(pattern=r"(?i)(?:microsoft\s+)?windows\s+server", name="WINDOWSSERVER"),
         ]
     )
 
