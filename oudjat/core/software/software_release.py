@@ -472,6 +472,21 @@ class SoftwareReleaseList[ReleaseType: "SoftwareRelease"](list):
 
         return len(self) == 0
 
+    @property
+    def versions(self) -> list[str]:
+        """
+        List all versions amongst releases in the current instance.
+
+        Returns:
+            list[str]: A list of version strings amongst initial and latest versions of the releases
+        """
+
+        versions = []
+        for rel in self:
+            versions.extend([rel.version, rel.latest_version])
+
+        return sorted(versions)
+
     def unique(
         self,
         *filters: Callable[
@@ -668,6 +683,24 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
 
         self.logger: logging.Logger = logging.getLogger(__name__)
         self._releases: dict[str, SoftwareReleaseList[ReleaseType]] = {}
+
+    # ****************************************************************
+    # Properties
+
+    @property
+    def versions(self) -> list[str]:
+        """
+        List all the initial and latest versions in all the releases in the current dictionary.
+
+        Returns:
+            list[str]: A list of versions strings.
+        """
+
+        versions = []
+        for rl in self._releases.values():
+            versions.extend(rl.versions)
+
+        return sorted(versions)
 
     # ****************************************************************
     # Dictionary methods
@@ -911,13 +944,15 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             str: The compiled regex
         """
 
-        versions = self._releases.keys()
+        versions = self.versions
 
         parts_list = [v.split(".", 2) for v in versions]
 
         major_count = {len(p[0]) for p in parts_list}
         minor_count = {len(p[1]) for p in parts_list if len(p) > 1}
-        build_count = {len(re.sub(STAGE_REG, "", p[2])) for p in parts_list if len(p) > 2}
+        build_count = {
+            len(re.sub(STAGE_REG, "", p[2])) for p in parts_list if len(p) > 2
+        }
 
         shouldAppendStage = any(
             not all(c.isdigit() or c == "." for c in v) for v in versions
