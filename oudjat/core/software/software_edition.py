@@ -108,5 +108,5 @@ class SoftwareEditionDict(dict):
 
 
 DEFAULT_SOFTWARE_EDITION = SoftwareEditionDict(
-    {"Standard": SoftwareEdition(label="*", channel="*", pattern="")}
+    {"Standard": SoftwareEdition(label="Standard", channel="*", pattern="")}
 )
