@@ -470,7 +470,7 @@ class OSOption(Enum):
         candidates = os.releases.get(str(version))
 
         if candidates is None and not os.releases.validate_version(os_ver):
-            candidates_base_filter = os.releases.filter_by_str(os_ver)
+            candidates_base_filter = os.releases.filter_by_version(os_ver)
             candidates = next(iter(candidates_base_filter.values()))
 
         # 2: Try to find a matching version by comparing the provided one with each release initial and last versions
