@@ -933,7 +933,7 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             (i for i, el in enumerate(self[rel_version]) if el.id == rel_id), None
         )
 
-    def filter_by_str(self, search_str: str) -> "SoftwareReleaseDict[ReleaseType]":
+    def filter_by_version(self, search_str: str) -> "SoftwareReleaseDict[ReleaseType]":
         """
         Search for elements with a key matching the provided search string.
 
@@ -944,14 +944,14 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             SoftwareRelVersionDict[ReleaseType]: A filtered SoftwareRelVersionDict
         """
 
-        return SoftwareReleaseDict[ReleaseType](
-            **{
-                version: version_dict
-                for version, version_dict in self.items()
-                if re.search(search_str, version) is not None
-                or re.search(version, search_str) is not None
-            }
-        )
+        filtered_dict: SoftwareReleaseDict[ReleaseType] = SoftwareReleaseDict[ReleaseType]()
+        for version, version_list in self.items():
+            if (re.search(search_str, version) is not None
+                or re.search(version, search_str) is not None):
+
+                filtered_dict.add(version, version_list)
+
+        return filtered_dict
 
     def compile_versions_reg(self) -> str:
         """
