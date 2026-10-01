@@ -809,6 +809,16 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
 
         return self._releases.items()
 
+    def __len__(self) -> int:
+        """
+        Return the number of releases in the dictionary.
+
+        Returns:
+            int: The number of SoftwareReleaseList instances in the dictionary.
+        """
+
+        return len(self._releases)
+
     def get(
         self, key: str, default_value: Any = None
     ) -> "SoftwareReleaseList[ReleaseType] | None":
