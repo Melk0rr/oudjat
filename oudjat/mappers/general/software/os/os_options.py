@@ -6,7 +6,11 @@ from enum import Enum
 from pathlib import Path
 from typing import TypedDict
 
-from oudjat.core.software import SoftwareEditionDict, SoftwareReleaseVersion
+from oudjat.core.software import (
+    SoftwareEditionDict,
+    SoftwareReleaseDict,
+    SoftwareReleaseVersion,
+)
 from oudjat.core.software.os.operating_system import (
     OperatingSystem,
     OSRelease,
@@ -447,7 +451,7 @@ class OSOption(Enum):
 
     @staticmethod
     def _guess_os_candidates_by_version(
-        os: "OperatingSystem", os_ver: str
+        releases: SoftwareReleaseDict[OSRelease], os_ver: str
     ) -> SoftwareReleaseList[OSRelease] | None:
         """
         Try to guess OS release candidates based on a provided version.
@@ -467,18 +471,18 @@ class OSOption(Enum):
         version = SoftwareReleaseVersion(os_ver)
 
         # 1: Try to retrieve the exact provided version
-        candidates = os.releases.get(str(version))
+        candidates = releases.get(str(version))
 
         # 2: Try to find a matching version by comparing the provided one with each release initial and last versions
         if candidates is None:
-            candidates = os.releases.find_version_in_range(version)
+            candidates = releases.find_version_in_range(version)
 
         # 3: Try to find the closest matching version and retrieve it
         if candidates is None:
-            closest_version = os.releases.find_closest_version(version)
+            closest_version = releases.find_closest_version(version)
 
             if closest_version is not None:
-                candidates = os.releases.get(str(closest_version))
+                candidates = releases.get(str(closest_version))
 
         return candidates
 
@@ -518,20 +522,28 @@ class OSOption(Enum):
             os = os_guess
 
         candidates = None
+        releases = os.releases
 
         # 1: Try to guess release from the provided version if possible
         if os_ver is None and os_str is not None and include_version_guessing:
+            # Search for a possible version in the string
             os_ver_search = SoftwareReleaseVersion.search_release_version(os_str)
 
             if os_ver_search:
-                os_ver = next(filter(os.releases.validate_version, os_ver_search), None)
+                os_ver = next(filter(releases.validate_version, os_ver_search), None)
 
         if os_ver:
-            candidates = OSOption._guess_os_candidates_by_version(os, os_ver)
+            if not releases.validate_version(os_ver):
+                releases_filter = releases.filter_by_version(os_ver)
+
+                if len(releases_filter) > 0:
+                    releases = releases_filter
+
+            candidates = OSOption._guess_os_candidates_by_version(releases, os_ver)
 
         # 2: If no candidates could be retrieved, try to guess release based on the name
         if candidates is None and os_str is not None:
-            candidates = os.releases.find_by_name(os_str)
+            candidates = releases.find_by_name(os_str)
 
         # 3: Filter candidates until there is only one element remaining, if possible
         res = None
