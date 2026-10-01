@@ -589,7 +589,8 @@ class OSOption(Enum):
             if os is not None:
                 os_rel = OSOption.guess_os_release(
                     os,
-                    os_ver or os_str,
+                    os_str=os_str,
+                    os_ver=os_ver,
                     filters=filters,
                     include_version_guessing=include_version_guessing,
                 )
