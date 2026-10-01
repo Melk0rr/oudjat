@@ -116,7 +116,7 @@ class SoftwareRelease(Asset):
         Return the release version.
 
         Returns:
-            int | str: The version number or identifier of the software release.
+            SoftwareReleaseVersion: The version instance of the software release.
         """
 
         return self._version
@@ -848,7 +848,7 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
         Return if the provided version is within the version range of a given release.
 
         Args:
-            release (ReleaseType)           : The release to get version range from
+            rl      (SoftwareReleaseList)   : The release to get version range from
             version (SoftwareReleaseVersion): The version to check
 
         Returns:
