@@ -954,11 +954,14 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             SoftwareRelVersionDict[ReleaseType]: A filtered SoftwareRelVersionDict
         """
 
-        filtered_dict: SoftwareReleaseDict[ReleaseType] = SoftwareReleaseDict[ReleaseType]()
+        filtered_dict: SoftwareReleaseDict[ReleaseType] = SoftwareReleaseDict[
+            ReleaseType
+        ]()
         for version, version_list in self.items():
-            if (re.search(search_str, version) is not None
-                or re.search(version, search_str) is not None):
-
+            if (
+                re.search(search_str, version) is not None
+                or re.search(version, search_str) is not None
+            ):
                 filtered_dict.add(version, version_list)
 
         return filtered_dict
@@ -1023,10 +1026,7 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
             dict[str, SoftwareRelEditionDict]: A regular dictionary representation of the current instance
         """
 
-        return {
-            vnumber: [r.to_dict() for r in releases]
-            for vnumber, releases in self._releases.items()
-        }
+        return {vnumber: rl.to_dict() for vnumber, rl in self._releases.items()}
 
     # ****************************************************************
     # Static methods
