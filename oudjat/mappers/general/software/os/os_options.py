@@ -550,6 +550,10 @@ class OSOption(Enum):
         if candidates is not None and not candidates.is_empty:
             res = candidates.unique(*filters)
 
+            if res is None and len(candidates) > 0 and os_str is not None:
+                filters.append(lambda rl: rl.filter_by_name(os_str))
+                res = candidates.unique(*filters)
+
         return res
 
     @staticmethod
