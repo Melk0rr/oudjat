@@ -779,6 +779,17 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
                 f"A release with id ({release.id}) already exists for version {key}"
             )
 
+    def add_release_list(self, key: str, rl: "SoftwareReleaseList") -> None:
+        """
+        Adds a whole SoftwareReleaseList instance to the dictionary.
+
+        Args:
+            key (str)                : The key to add the list to.
+            rl  (SoftwareReleaseList): The SoftwareReleaseList instance to add.
+        """
+
+        _ = self._releases.setdefault(key, rl)
+
     def keys(self):
         """
         Return the keys of the data dict.
@@ -804,7 +815,7 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
         Return the items of the data dict.
 
         Returns:
-            dict_items[str, ReleaseType]: The items of the current dictionary
+            dict_items[str, SoftwareReleaseList]: The items of the current dictionary
         """
 
         return self._releases.items()
@@ -957,12 +968,13 @@ class SoftwareReleaseDict[ReleaseType: "SoftwareRelease"]:
         filtered_dict: SoftwareReleaseDict[ReleaseType] = SoftwareReleaseDict[
             ReleaseType
         ]()
-        for version, version_list in self.items():
+
+        for version, version_list in self._releases.items():
             if (
                 re.search(search_str, version) is not None
                 or re.search(version, search_str) is not None
             ):
-                filtered_dict.add(version, version_list)
+                filtered_dict.add_release_list(version, version_list)
 
         return filtered_dict
 
