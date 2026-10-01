@@ -2,7 +2,7 @@
 
 import re
 from abc import ABC
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any, TypeVar, override
 
@@ -64,14 +64,16 @@ class LDAPAccount(LDAPObject, ABC):
 
         super().__init__(ldap_entry=ldap_entry, capabilities=capabilities, **kwargs)
 
-        self._status: "LDAPAccountStatus" = LDAPAccountStatus.UNKNOWN
+        self._status: LDAPAccountStatus = LDAPAccountStatus.UNKNOWN
         self._pwd_expires: bool = True
         self._pwd_expired: bool = False
         self._pwd_required: bool = True
         self._is_locked: bool = False
 
         if self.account_ctl is not None:
-            self._status = LDAPAccountStatus(not LDAPAccountCtlFlag.is_disabled(self.account_ctl))
+            self._status = LDAPAccountStatus(
+                not LDAPAccountCtlFlag.is_disabled(self.account_ctl)
+            )
             self._pwd_expires = LDAPAccountCtlFlag.pwd_expires(self.account_ctl)
             self._pwd_expired = LDAPAccountCtlFlag.pwd_expired(self.account_ctl)
             self._pwd_required = LDAPAccountCtlFlag.pwd_required(self.account_ctl)
@@ -131,7 +133,7 @@ class LDAPAccount(LDAPObject, ABC):
         """
 
         default_acc_exp = self.entry.get("accountExpires")
-        unified_acc_exp = default_acc_exp or datetime.max
+        unified_acc_exp = default_acc_exp or datetime.max.replace(tzinfo=UTC)
 
         if isinstance(default_acc_exp, list):
             if len(default_acc_exp) > 0:
@@ -206,8 +208,8 @@ class LDAPAccount(LDAPObject, ABC):
             bool: True if the account does not expire (not year 9999), False otherwise.
         """
 
-        return (not self.account_expiration == datetime.max) and (
-            not self.account_expiration == datetime(1601, 1, 1, tzinfo=timezone.utc)
+        return (self.account_expiration != datetime.max.replace(tzinfo=UTC)) and (
+            self.account_expiration != datetime(1601, 1, 1, tzinfo=UTC)
         )
 
     @property
@@ -314,7 +316,7 @@ class LDAPAccount(LDAPObject, ABC):
             r"(pass(word)?|pwd|secret|token|api[_-]?key|cred|mdp)",
         ]
 
-        return any([re.search(p, self.description) for p in PWD_PATTERNS])
+        return any(re.search(p, self.description) for p in PWD_PATTERNS)
 
     # ****************************************************************
     # Methods - converters
@@ -340,7 +342,9 @@ class LDAPAccount(LDAPObject, ABC):
             "account": {
                 "status": str(self._status),
                 "expires": self.account_expires,
-                "expirationDate": LDAPObject._format_acc_date_str(self.account_expiration),
+                "expirationDate": LDAPObject._format_acc_date_str(
+                    self.account_expiration
+                ),
                 "ctl": self.account_ctl,
             },
             "pwd": {
